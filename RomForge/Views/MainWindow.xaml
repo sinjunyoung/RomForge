@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:RomForge.ViewModels"
         xmlns:helpers="clr-namespace:RomForge.Helpers"
-        xmlns:converters="clr-namespace:RomForge.Converters"
         Title="{Binding AppVersion}"
         Height="640" Width="900"
         MinHeight="480" MinWidth="900"
@@ -12,250 +11,6 @@
         WindowStartupLocation="CenterScreen"
         FontFamily="Segoe UI">
 
-    <Window.Resources>
-        <converters:InverseBoolConverter x:Key="InverseBool"/>
-        <converters:LogLevelToColorConverter x:Key="LogColor"/>
-
-        <!-- ── 공통 버튼 ── -->
-        <Style x:Key="BaseButton" TargetType="Button">
-            <Setter Property="Height" Value="32"/>
-            <Setter Property="Padding" Value="18,0"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <Style x:Key="RunButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
-            <Setter Property="Background" Value="#007ACC"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#1C97EA"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#2D2D30"/>
-                                <Setter Property="Foreground" Value="#666"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="GrayButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
-            <Setter Property="Background" Value="#2D2D30"/>
-            <Setter Property="Foreground" Value="#DCDCDC"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#3E3E42"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#1A1A1A"/>
-                                <Setter Property="Foreground" Value="#555"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── 탭 스타일 ── -->
-        <Style TargetType="TabControl">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-        </Style>
-
-        <Style x:Key="MainTabItem" TargetType="TabItem">
-            <Setter Property="Foreground" Value="#888888"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="20,12"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TabItem">
-                        <Border x:Name="Bd" Background="Transparent"
-                                BorderThickness="0,0,0,2"
-                                BorderBrush="Transparent"
-                                Padding="{TemplateBinding Padding}">
-                            <ContentPresenter ContentSource="Header"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="#007ACC"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="#CCCCCC"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── ProgressBar ── -->
-        <Style x:Key="ProgressBarStyle" TargetType="ProgressBar">
-            <Setter Property="Height" Value="18"/>
-            <Setter Property="Background" Value="#2D2D30"/>
-            <Setter Property="Foreground" Value="#007ACC"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ProgressBar">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="True">
-                            <Grid x:Name="PART_Track" ClipToBounds="True">
-                                <Border x:Name="PART_Indicator"
-                                        Background="{TemplateBinding Foreground}"
-                                        CornerRadius="3"
-                                        HorizontalAlignment="Left"/>
-                            </Grid>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- ── 씬 ProgressBar (패치탭 드롭존 하단) ── -->
-        <Style x:Key="SlimProgress" TargetType="ProgressBar">
-            <Setter Property="Height" Value="3"/>
-            <Setter Property="Background" Value="#2D2D30"/>
-            <Setter Property="Foreground" Value="#007ACC"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
-
-        <!-- ── DropZone ── -->
-        <Style x:Key="DropZone" TargetType="Border">
-            <Setter Property="Background" Value="#252526"/>
-            <Setter Property="BorderBrush" Value="#3F3F46"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Height" Value="72"/>
-            <Setter Property="Cursor" Value="Hand"/>
-        </Style>
-
-        <!-- ── ListView ── -->
-        <Style TargetType="ListView">
-            <Setter Property="Background" Value="#1E1E1E"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListView">
-                        <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
-                            <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
-                                <ItemsPresenter />
-                            </ScrollViewer>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <Style TargetType="GridViewColumnHeader">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="GridViewColumnHeader">
-                        <Grid>
-                            <Border x:Name="HeaderBorder"
-                                    Background="#252526"
-                                    BorderBrush="#2D2D30"
-                                    BorderThickness="0,0,1,1"
-                                    Padding="10,8">
-                                <ContentPresenter x:Name="HeaderContent"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  TextBlock.Foreground="#BBBBBB"
-                                                  TextBlock.FontSize="12"
-                                                  TextBlock.FontWeight="Bold"/>
-                            </Border>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="HeaderBorder" Property="Background" Value="#2D2D30"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="HeaderBorder" Property="Background" Value="#1B1B1C"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="ListViewItem">
-            <Setter Property="Foreground" Value="#E0E0E0"/>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Padding" Value="0,5"/>
-            <Setter Property="Margin" Value="0,1"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="ListItemBorder"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="3"
-                        Padding="{TemplateBinding Padding}">
-                            <GridViewRowPresenter VerticalAlignment="Center"/>
-                        </Border>
-
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ListItemBorder" Property="Background" Value="#252526"/>
-                                <Setter TargetName="ListItemBorder" Property="BorderBrush" Value="#3F3F46"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ListItemBorder" Property="Background" Value="#073655"/>
-                                <Setter TargetName="ListItemBorder" Property="BorderBrush" Value="#1C97EA"/>
-                                <Setter Property="Foreground" Value="#FFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-
-        <!-- ── LogBox ── -->
-        <Style x:Key="LogBox" TargetType="RichTextBox">
-            <Setter Property="Background" Value="#1A1A1A"/>
-            <Setter Property="Foreground" Value="#A0A0A0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontFamily" Value="Consolas"/>
-            <Setter Property="FontSize" Value="12"/>
-            <Setter Property="IsReadOnly" Value="True"/>
-            <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
-            <Setter Property="Padding" Value="10"/>
-        </Style>
-
-    </Window.Resources>
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="340"/>
@@ -263,23 +18,22 @@
             <RowDefinition Height="130" MinHeight="60"/>
         </Grid.RowDefinitions>
 
-        <!-- ══════════════ 탭 컨트롤 ══════════════ -->
         <TabControl Grid.Row="0"
                     SelectedIndex="{Binding SelectedTabIndex}">
             <TabControl.Resources>
                 <Style TargetType="TabPanel">
                     <Setter Property="Background" Value="#252526"/>
-                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Margin" Value="0"/>                    
+                    <Setter Property="HorizontalAlignment" Value="Right"/>
                 </Style>
             </TabControl.Resources>
 
-            <!-- ───────── 패치 탭 ───────── -->
-            <TabItem Style="{StaticResource MainTabItem}">
+            <TabItem>
                 <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Patch.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="패치" VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <Grid Width="120">
+                        <Image Source="/Assets/Images/Patch.png" Width="24" Height="24" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <TextBlock Text="패치" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
                 </TabItem.Header>
 
                 <Grid>
@@ -354,27 +108,58 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="원본 파일" Width="260">
+                                <GridViewColumn Width="260">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="SourceFileName"/>
+                                    </GridViewColumn.Header>
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="원본 파일" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding SourceFileName}" Padding="6,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding SourcePath}"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="패치 파일" Width="260">
+                                <GridViewColumn Width="260">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="PatchFileName"/>
+                                    </GridViewColumn.Header>
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="패치 파일" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding PatchFileName}" Padding="6,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchPath}"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="상태" Width="90">
+                                <GridViewColumn Width="90">
+                                    <GridViewColumn.Header>
+                                        <GridViewColumnHeader Tag="StatusLabel"/>
+                                    </GridViewColumn.Header>
+                                    <GridViewColumn.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="상태" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.HeaderTemplate>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="{Binding StatusLabelColor}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Left" Margin="2,0">
-                                                <TextBlock Text="{Binding StatusLabel}"
-                                                           Foreground="{Binding StatusLabelColor}"
-                                                           FontWeight="Bold" FontSize="11"/>
+                                                <TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusLabelColor}" FontWeight="Bold" FontSize="11"/>
                                             </Border>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
@@ -472,14 +257,15 @@
                     </Border>
                 </Grid>
             </TabItem>
-
-            <!-- ───────── 압축 탭 ───────── -->
-            <TabItem Style="{StaticResource MainTabItem}">
+            
+            <TabItem>
                 <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Compress.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="압축" VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <Grid Width="120">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image Source="/Assets/Images/Compress.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="압축" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
                 </TabItem.Header>
                 <Grid>
                     <Grid.RowDefinitions>
