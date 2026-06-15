@@ -8,7 +8,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                         <TextBlock Text="패치" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -51,7 +51,7 @@
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Compress.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Compress.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                         <TextBlock Text="압축" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -59,7 +59,7 @@
                     <TabItem>
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Image Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Switch(nsz,xcz)" VerticalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
@@ -121,7 +121,7 @@
                     <TabItem>
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="/Assets/Images/Azahar.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Image Source="/Assets/Images/Azahar.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Azahar(zcci)" VerticalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>
@@ -152,7 +152,7 @@
                     <TabItem>
                         <TabItem.Header>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Image Source="/Assets/Images/Dolphin.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <Image Source="/Assets/Images/Dolphin.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                                 <TextBlock Text="Dolphin(rvz)" VerticalAlignment="Center"/>
                             </StackPanel>
                         </TabItem.Header>

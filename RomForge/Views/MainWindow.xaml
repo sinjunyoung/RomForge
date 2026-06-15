@@ -44,6 +44,16 @@
 
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Setup.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="설치" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <controls:CompressTab/>
+            </TabItem>
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/Settings.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                     <TextBlock Text="설정" HorizontalAlignment="Center" VerticalAlignment="Center"/>

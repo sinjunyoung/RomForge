@@ -19,6 +19,10 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Images\FBNeo.png" />
+    <None Remove="Assets\Images\Info.png" />
+    <None Remove="Assets\Images\Setup.png" />
+    <None Remove="Assets\Images\ZipFile.png" />
+    <None Remove="Assets\Images\ZipFolder.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.ico" />
@@ -55,6 +59,7 @@
     <Resource Include="Assets\Images\Extension.png" />
     <Resource Include="Assets\Images\FBNeo.png" />
     <Resource Include="Assets\Images\FileSizeBytes.png" />
+    <Resource Include="Assets\Images\Info.png" />
     <Resource Include="Assets\Images\Level.png" />
     <Resource Include="Assets\Images\List.png" />
     <Resource Include="Assets\Images\Mame.png" />
@@ -62,8 +67,11 @@
     <Resource Include="Assets\Images\Progress.png" />
     <Resource Include="Assets\Images\Run.png" />
     <Resource Include="Assets\Images\Settings.png" />
+    <Resource Include="Assets\Images\Setup.png" />
     <Resource Include="Assets\Images\Switch.png" />
     <Resource Include="Assets\Images\Unchecked.png" />
+    <Resource Include="Assets\Images\ZipFile.png" />
+    <Resource Include="Assets\Images\ZipFolder.png" />
     <Resource Include="Assets\Sounds\complete.mp3" />
   </ItemGroup>
 </Project>

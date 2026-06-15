@@ -29,7 +29,9 @@ public class PatchViewModel : ToolTabViewModel
     public ObservableCollection<LogEntry> LogEntries { get; } = [];    
 
     public ICommand RunCommand { get; }
+
     public ICommand CancelCommand { get; }
+
     public ICommand ClearCommand { get; }
 
     private CancellationTokenSource? _cts;
