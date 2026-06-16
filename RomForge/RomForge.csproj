@@ -26,6 +26,7 @@
     <None Remove="Assets\Images\Install.png" />
     <None Remove="Assets\Images\Installer.png" />
     <None Remove="Assets\Images\Loading.png" />
+    <None Remove="Assets\Images\Merge.png" />
     <None Remove="Assets\Images\SdCard.png" />
     <None Remove="Assets\Images\Seed.png" />
     <None Remove="Assets\Images\Setup.png" />
@@ -83,6 +84,7 @@
     <Resource Include="Assets\Images\List.png" />
     <Resource Include="Assets\Images\Loading.png" />
     <Resource Include="Assets\Images\Mame.png" />
+    <Resource Include="Assets\Images\Merge.png" />
     <Resource Include="Assets\Images\Patch.png" />
     <Resource Include="Assets\Images\Progress.png" />
     <Resource Include="Assets\Images\Run.png" />
@@ -95,5 +97,8 @@
     <Resource Include="Assets\Images\ZipFile.png" />
     <Resource Include="Assets\Images\ZipFolder.png" />
     <Resource Include="Assets\Sounds\complete.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\Switch\" />
   </ItemGroup>
 </Project>

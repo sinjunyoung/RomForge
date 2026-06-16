@@ -4,11 +4,12 @@
         xmlns:views="clr-namespace:RomForge.Views"
         xmlns:controls="clr-namespace:RomForge.Controls"
         xmlns:_3ds="clr-namespace:RomForge.Controls._3DS"
+        xmlns:switch="clr-namespace:RomForge.Controls.Switch"
         xmlns:util="clr-namespace:RomForge.Controls.Util"
         xmlns:vm="clr-namespace:RomForge.ViewModels"
         xmlns:helpers="clr-namespace:RomForge.Helpers"
         Title="{Binding AppVersion}"
-        Height="640" Width="900"
+        Height="700" Width="900"
         MinHeight="480" MinWidth="900"
         Background="#1E1E1E"
         AllowDrop="True"
@@ -42,6 +43,16 @@
                     </StackPanel>
                 </TabItem.Header>
                 <controls:CompressTab/>
+            </TabItem>
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Switch" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <switch:MainTab DataContext="{Binding Main3DsVM}"/>
             </TabItem>
 
             <TabItem IsEnabled="{Binding IsIdle}">

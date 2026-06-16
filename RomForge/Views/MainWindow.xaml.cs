@@ -1,8 +1,13 @@
-﻿using PBP.Core;
+﻿using DiscUtils.Iso9660;
+using PBP.Core;
+using PBP.Core.Cue;
 using PBP.Core.Models;
+using PBP.Core.Readers;
 using RomForge.Helpers;
 using RomForge.ViewModels;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -18,7 +23,6 @@ public partial class MainWindow : Window
         DataContext = ViewModel;
         InitializeComponent();
         Closing += MainWindow_Closing;
-
 
         var converter = new PbpConverter(new PbpPackOptions { CompressionLevel = 9 });
 

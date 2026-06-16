@@ -1,0 +1,26 @@
+﻿<UserControl x:Class="RomForge.Controls.Switch.MainTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.expression/blend/2008" 
+             xmlns:local="clr-namespace:RomForge.Controls.Switch"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <Grid>
+        <TabControl x:Name="MasterTabControl" 
+                    SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}"
+                    Background="Transparent" 
+                    BorderThickness="0">
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Merge.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="병합" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:MergeTab DataContext="{Binding InstallerVM}"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</UserControl>

@@ -1,5 +1,4 @@
 ﻿using DiscUtils.Iso9660;
-using DiscUtils.Streams;
 using PBP.Core.Models;
 using PBP.Core.Readers;
 using System.Text.RegularExpressions;
@@ -8,74 +7,147 @@ namespace PBP.Core.Cue;
 
 public static class GameIdReader
 {
-    private static readonly Regex BootRegex = new(
-        @"BOOT\s*=\s*(.*)",
-        RegexOptions.IgnoreCase);
-
-    private static readonly Regex SerialRegex = new(
-        @"([A-Z]+)_?(\d+)\.(\d+)",
-        RegexOptions.IgnoreCase);
+    private static readonly Regex BootRegex = new(@"BOOT\s*=\s*(.*)", RegexOptions.IgnoreCase);
+    private static readonly Regex SerialRegex = new(@"([A-Z]+)_?(\d+)\.(\d+)", RegexOptions.IgnoreCase);
 
     public static string ReadFromDisk(DiskSource source)
     {
-        string isoPath = source.FilePath;
-        string? tempPath = null;
-
-        if (source.Type == DiskSourceType.Chd)
-        {
-            tempPath = ExtractChdToTemp(source);
-            isoPath = tempPath;
-        }
-
         try
         {
-            return FindGameId(isoPath) ?? "SLUS00000";
-        }
-        finally
-        {
-            if (tempPath != null && File.Exists(tempPath))
-                File.Delete(tempPath);
-        }
-    }
+            Stream baseStream;
 
-    private static string? FindGameId(string isoPath)
-    {
-        var fileStream = new FileStream(isoPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        Stream stream = (new FileInfo(isoPath).Length % 2352 == 0) ? new RawToCookedStream(fileStream) : fileStream;
+            if (source.Type == DiskSourceType.Chd)
+                baseStream = new ChdWrapperStream(source.FilePath);
+            else
+                baseStream = new FileStream(source.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-        using (stream)
-        using (var cdReader = new CDReader(stream, false))
-        {
-            foreach (var file in cdReader.Root.GetFiles())
+            using (baseStream)
             {
-                if (!file.Name.Contains("SYSTEM.CNF", StringComparison.OrdinalIgnoreCase)) continue;
-                using var reader = new StreamReader(file.OpenRead());
-                var match = BootRegex.Match(reader.ReadToEnd());
-                if (match.Success)
-                {
-                    var s = SerialRegex.Match(match.Groups[1].Value);
-                    if (s.Success) return $"{s.Groups[1].Value}{s.Groups[2].Value}{s.Groups[3].Value}".ToUpper();
-                }
+                Stream isoStream = baseStream;
+
+                if (source.Type != DiskSourceType.Chd)
+                    if (baseStream.Length >= 2352 && (baseStream.Length % 2352) == 0)
+                        isoStream = new RawToCookedStream(baseStream);
+
+                using var cdReader = new CDReader(isoStream, false);
+                var systemCnf = cdReader.Root.GetFiles()
+                    .FirstOrDefault(f => f.Name.StartsWith("SYSTEM.CNF", StringComparison.OrdinalIgnoreCase));
+
+                if (systemCnf == null)
+                    return "SLUS00000";
+
+                using var reader = new StreamReader(systemCnf.OpenRead());
+                string text = reader.ReadToEnd();
+                var bootMatch = BootRegex.Match(text);
+
+                if (!bootMatch.Success)
+                    return "SLUS00000";
+
+                var serialMatch = SerialRegex.Match(bootMatch.Groups[1].Value);
+
+                if (!serialMatch.Success)
+                    return "SLUS00000";
+
+                return string.Concat(serialMatch.Groups[1].Value, serialMatch.Groups[2].Value, serialMatch.Groups[3].Value).ToUpperInvariant();
             }
         }
-        return null;
+        catch(Exception e)
+        {
+            return "SLUS00000";
+        }
     }
 
-    private static string ExtractChdToTemp(DiskSource source)
+    public sealed class ChdWrapperStream : Stream
     {
-        var tempPath = Path.Combine(Path.GetTempPath(), $"pbp_tmp_{Guid.NewGuid():N}.bin");
-        using var reader = DiskReaderFactory.Create(source);
+        private readonly ChdReader _chd;
+        private readonly byte[] _sectorBuffer;
+        private long _position;
 
-        using var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write);
-        const int batch = 64;
-        for (long s = 0; s < reader.TotalSectors; s += batch)
+        public ChdWrapperStream(string path)
         {
-            int count = (int)Math.Min(batch, reader.TotalSectors - s);
-            var data = reader.ReadSectors(s, count);
-            fs.Write(data, 0, data.Length);
+            _chd = new ChdReader(path);
+
+            var test = _chd.ReadSectors(0, 1);
+
+            if (test.Length == 2048)
+            {
+                SectorSize = 2048;
+                DataOffset = 0;
+            }
+            else if (test.Length == 2352)
+            {
+                SectorSize = 2352;
+                DataOffset = 24;
+            }
+            else
+            {
+                throw new InvalidDataException(
+                    $"Unsupported CHD sector size: {test.Length}");
+            }
+
+            _sectorBuffer = new byte[SectorSize];
         }
 
-        return tempPath;
+        private int SectorSize { get; }
+        private int DataOffset { get; }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => true;
+        public override bool CanWrite => false;
+
+        public override long Length => _chd.TotalSectors * 2048;
+
+        public override long Position
+        {
+            get => _position;
+            set => _position = value;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            int total = 0;
+
+            while (count > 0 && _position < Length)
+            {
+                long sector = _position / 2048;
+                int sectorOffset = (int)(_position % 2048);
+                byte[] raw = _chd.ReadSectors(sector, 1);
+                int available = 2048 - sectorOffset;
+                int copy = Math.Min(count, available);
+
+                Buffer.BlockCopy(raw, DataOffset + sectorOffset, buffer, offset, copy);
+
+                offset += copy;
+                count -= copy;
+                total += copy;
+                _position += copy;
+            }
+
+            return total;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            _position = origin switch
+            {
+                SeekOrigin.Begin => offset,
+                SeekOrigin.Current => _position + offset,
+                SeekOrigin.End => Length + offset,
+                _ => _position
+            };
+
+            return _position;
+        }
+
+        public override void Flush() { }
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            _chd.Dispose();
+            base.Dispose(disposing);
+        }
     }
 
     private class RawToCookedStream : Stream
@@ -104,6 +176,7 @@ public static class GameIdReader
         public override int Read(byte[] buffer, int offset, int count)
         {
             int totalRead = 0;
+
             while (totalRead < count)
             {
                 long currentSector = (_position + totalRead) / 2048;
@@ -113,12 +186,16 @@ public static class GameIdReader
 
                 int canReadInSector = 2048 - offsetInSector;
                 int toRead = Math.Min(count - totalRead, canReadInSector);
-
                 int read = _baseStream.Read(buffer, offset + totalRead, toRead);
-                if (read == 0) break;
+
+                if (read == 0) 
+                    break;
+
                 totalRead += read;
             }
+
             _position += totalRead;
+
             return totalRead;
         }
 
@@ -132,10 +209,12 @@ public static class GameIdReader
                 _ => _position
             };
             _position = Math.Clamp(target, 0, _length);
+
             return _position;
         }
 
         public override void Flush() => _baseStream.Flush();
+
         public override void SetLength(long value) => throw new NotSupportedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
     }

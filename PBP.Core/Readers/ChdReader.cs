@@ -3,19 +3,13 @@ using CHD.Core.Interop.Enums;
 
 namespace PBP.Core.Readers;
 
-/// <summary>
-/// CHD 리더 - 기존 LibChdrWrapper 래핑
-/// 헝크 단위 읽기를 섹터 단위로 변환
-/// </summary>
 public class ChdReader : IDiskReader, IDisposable
 {
     private readonly LibChdrWrapper _chd;
     private bool _disposed;
 
-    // CD-ROM 섹터 크기 (RAW)
     public int SectorSize => 2352;
 
-    // CHD 헝크당 섹터 수
     private readonly int _sectorsPerHunk;
     private readonly uint _totalHunks;
 
@@ -25,17 +19,18 @@ public class ChdReader : IDiskReader, IDisposable
     {
         _chd = new LibChdrWrapper();
         var err = _chd.Open(chdPath);
+
         if (err != ChdrError.CHDERR_NONE)
             throw new IOException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)} ({chdPath})");
 
         var header = _chd.Header!.Value;
-        _totalHunks = header.totalhunks;
 
-        // 헝크 크기 / 섹터 크기 = 헝크당 섹터 수
+        _totalHunks = header.totalhunks;
         _sectorsPerHunk = (int)(header.hunkbytes / SectorSize);
+
         if (_sectorsPerHunk == 0) _sectorsPerHunk = 1;
 
-        TotalSectors = (long)_totalHunks * _sectorsPerHunk;
+        TotalSectors = _totalHunks * _sectorsPerHunk;
     }
 
     public byte[] ReadSectors(long startSector, int count)
@@ -50,7 +45,8 @@ public class ChdReader : IDiskReader, IDisposable
             uint hunkIndex = (uint)(currentSector / _sectorsPerHunk);
             int offsetInHunk = (int)(currentSector % _sectorsPerHunk);
 
-            if (hunkIndex >= _totalHunks) break;
+            if (hunkIndex >= _totalHunks) 
+                break;
 
             var hunkData = _chd.ReadHunk(hunkIndex);
 
