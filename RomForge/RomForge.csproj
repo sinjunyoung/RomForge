@@ -20,8 +20,10 @@
   <ItemGroup>
     <None Remove="Assets\Images\3DS.png" />
     <None Remove="Assets\Images\Cartridge.png" />
+    <None Remove="Assets\Images\Convert.png" />
     <None Remove="Assets\Images\DLC.png" />
     <None Remove="Assets\Images\FBNeo.png" />
+    <None Remove="Assets\Images\Gift.png" />
     <None Remove="Assets\Images\Info.png" />
     <None Remove="Assets\Images\Install.png" />
     <None Remove="Assets\Images\Installer.png" />
@@ -40,7 +42,9 @@
   <ItemGroup>
     <Resource Include="Assets\Images\3DS.png" />
     <Resource Include="Assets\Images\Cartridge.png" />
+    <Resource Include="Assets\Images\Convert.png" />
     <Resource Include="Assets\Images\DLC.png" />
+    <Resource Include="Assets\Images\Gift.png" />
     <Resource Include="Assets\Images\Install.png" />
     <Resource Include="Assets\Images\Installer.png" />
   </ItemGroup>

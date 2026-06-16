@@ -15,7 +15,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Installer.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Gift.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="설치" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -25,7 +25,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Extension.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Convert.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="변환" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>

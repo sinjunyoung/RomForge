@@ -7,4 +7,86 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Assets\Images\american.png" />
+    <None Remove="Assets\Images\arabic.png" />
+    <None Remove="Assets\Images\australia.png" />
+    <None Remove="Assets\Images\brazilian.png" />
+    <None Remove="Assets\Images\british.png" />
+    <None Remove="Assets\Images\canadian.png" />
+    <None Remove="Assets\Images\chinese.png" />
+    <None Remove="Assets\Images\czech.png" />
+    <None Remove="Assets\Images\danish.png" />
+    <None Remove="Assets\Images\dutch.png" />
+    <None Remove="Assets\Images\european.png" />
+    <None Remove="Assets\Images\finnish.png" />
+    <None Remove="Assets\Images\french.png" />
+    <None Remove="Assets\Images\german.png" />
+    <None Remove="Assets\Images\greek.png" />
+    <None Remove="Assets\Images\hungarian.png" />
+    <None Remove="Assets\Images\indonesian.png" />
+    <None Remove="Assets\Images\italian.png" />
+    <None Remove="Assets\Images\japanese.png" />
+    <None Remove="Assets\Images\korean.png" />
+    <None Remove="Assets\Images\Lock.png" />
+    <None Remove="Assets\Images\mexican.png" />
+    <None Remove="Assets\Images\netherlands.png" />
+    <None Remove="Assets\Images\norwegian.png" />
+    <None Remove="Assets\Images\polish.png" />
+    <None Remove="Assets\Images\portuguese.png" />
+    <None Remove="Assets\Images\romanian.png" />
+    <None Remove="Assets\Images\russian.png" />
+    <None Remove="Assets\Images\slovak.png" />
+    <None Remove="Assets\Images\spanish.png" />
+    <None Remove="Assets\Images\swedish.png" />
+    <None Remove="Assets\Images\taiwanese.png" />
+    <None Remove="Assets\Images\thai.png" />
+    <None Remove="Assets\Images\ukrainian.png" />
+    <None Remove="Assets\Images\unknown.png" />
+    <None Remove="Assets\Images\Unlock.png" />
+    <None Remove="Assets\Images\vietnamese.png" />
+    <None Remove="Assets\Images\world.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Images\american.png" />
+    <Resource Include="Assets\Images\arabic.png" />
+    <Resource Include="Assets\Images\australia.png" />
+    <Resource Include="Assets\Images\brazilian.png" />
+    <Resource Include="Assets\Images\british.png" />
+    <Resource Include="Assets\Images\canadian.png" />
+    <Resource Include="Assets\Images\chinese.png" />
+    <Resource Include="Assets\Images\czech.png" />
+    <Resource Include="Assets\Images\danish.png" />
+    <Resource Include="Assets\Images\dutch.png" />
+    <Resource Include="Assets\Images\european.png" />
+    <Resource Include="Assets\Images\finnish.png" />
+    <Resource Include="Assets\Images\french.png" />
+    <Resource Include="Assets\Images\german.png" />
+    <Resource Include="Assets\Images\greek.png" />
+    <Resource Include="Assets\Images\hungarian.png" />
+    <Resource Include="Assets\Images\indonesian.png" />
+    <Resource Include="Assets\Images\italian.png" />
+    <Resource Include="Assets\Images\japanese.png" />
+    <Resource Include="Assets\Images\korean.png" />
+    <Resource Include="Assets\Images\Lock.png" />
+    <Resource Include="Assets\Images\mexican.png" />
+    <Resource Include="Assets\Images\netherlands.png" />
+    <Resource Include="Assets\Images\norwegian.png" />
+    <Resource Include="Assets\Images\polish.png" />
+    <Resource Include="Assets\Images\portuguese.png" />
+    <Resource Include="Assets\Images\romanian.png" />
+    <Resource Include="Assets\Images\russian.png" />
+    <Resource Include="Assets\Images\slovak.png" />
+    <Resource Include="Assets\Images\spanish.png" />
+    <Resource Include="Assets\Images\swedish.png" />
+    <Resource Include="Assets\Images\taiwanese.png" />
+    <Resource Include="Assets\Images\thai.png" />
+    <Resource Include="Assets\Images\ukrainian.png" />
+    <Resource Include="Assets\Images\unknown.png" />
+    <Resource Include="Assets\Images\Unlock.png" />
+    <Resource Include="Assets\Images\vietnamese.png" />
+    <Resource Include="Assets\Images\world.png" />
+  </ItemGroup>
+
 </Project>

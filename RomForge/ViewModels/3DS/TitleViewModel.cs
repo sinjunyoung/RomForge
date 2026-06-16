@@ -152,7 +152,7 @@ public class TitleViewModel : System.ComponentModel.INotifyPropertyChanged
             'N' => "북미",
             'X' => "세계",
             'Z' => "세계",
-            _ => string.Empty
+            _ => "알 수 없음"
         };
     }
 
