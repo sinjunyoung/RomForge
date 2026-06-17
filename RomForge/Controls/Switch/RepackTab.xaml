@@ -1,0 +1,81 @@
+﻿<UserControl x:Class="RomForge.Controls.Switch.RepackTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"   
+             mc:Ignorable="d" 
+             d:DesignHeight="580" d:DesignWidth="800">
+    <Grid>
+        <Grid Grid.Row="0" Margin="15,5,15,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="280"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TabControl Grid.Row="0" Margin="0,0,0,16" SelectedIndex="0">
+                <TabItem Header="파일">
+                    <core:FileManagerControl x:Name="fileMgr"/>
+                </TabItem>
+                <TabItem Header="메타데이터">
+                    <core:LanguageTabControl x:Name="langTab"/>
+                </TabItem>
+            </TabControl>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="[한글패치] or [xdelta 폴더]" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+            </StackPanel>
+
+            <Grid Grid.Row="2" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Margin="0,0,8,0">
+                    <TextBox x:Name="txtPatch" Text="{Binding PatchPath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" Padding="10,8"/>
+                </Border>
+                <Button Grid.Column="1" Width="36" Height="36" Command="{Binding BrowsePatchCommand}" Content="📁"/>
+            </Grid>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+                <TextBlock Text="작업 폴더" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+            </StackPanel>
+
+            <Grid Grid.Row="4" Margin="0,0,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Margin="0,0,8,0">
+                    <TextBox x:Name="txtOutput" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" Padding="10,8"/>
+                </Border>
+                <Button Grid.Column="1" Width="36" Height="36" Command="{Binding BrowseOutputCommand}" Content="📁"/>
+            </Grid>
+
+            <Grid Grid.Row="5" Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="언팩" Click="BtnUnpack_Click" Margin="0,0,5,0"/>
+                <Button Grid.Column="1" Content="리팩" Click="BtnRebuild_Click" Margin="5,0,5,0"/>
+                <Button Grid.Column="2" Content="언팩 + 리팩 (Full)" Click="BtnStart_Click" Margin="5,0,0,0"/>
+            </Grid>
+
+            <Grid Grid.Row="6" Margin="0,0,0,10" Visibility="{Binding IsWorking, Converter={StaticResource BoolToVisibility}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11"/>
+                <ProgressBar Grid.Row="1" Value="{Binding ProgressPct}" Height="4" Margin="0,4,0,0"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

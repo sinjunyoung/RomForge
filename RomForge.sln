@@ -25,6 +25,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PickPack.Disk", "..\기타\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PBP.Core", "PBP.Core\PBP.Core.csproj", "{40680222-3FC7-4C80-B801-D1E87D4C0D15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSW.M1.Core", "..\NSW.Tools\NSW.M1.Core\NSW.M1.Core.csproj", "{AD56B267-C4C8-A368-7772-C1932D7B21E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NSW.WPF", "..\NSW.Tools\NSW.WPF\NSW.WPF.csproj", "{18490958-EDB6-C456-8C8B-7D3F97CC4FA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +79,14 @@ Global
 		{40680222-3FC7-4C80-B801-D1E87D4C0D15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40680222-3FC7-4C80-B801-D1E87D4C0D15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40680222-3FC7-4C80-B801-D1E87D4C0D15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD56B267-C4C8-A368-7772-C1932D7B21E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD56B267-C4C8-A368-7772-C1932D7B21E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD56B267-C4C8-A368-7772-C1932D7B21E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD56B267-C4C8-A368-7772-C1932D7B21E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18490958-EDB6-C456-8C8B-7D3F97CC4FA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18490958-EDB6-C456-8C8B-7D3F97CC4FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18490958-EDB6-C456-8C8B-7D3F97CC4FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18490958-EDB6-C456-8C8B-7D3F97CC4FA0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,7 +9,7 @@
         xmlns:vm="clr-namespace:RomForge.ViewModels"
         xmlns:helpers="clr-namespace:RomForge.Helpers"
         Title="{Binding AppVersion}"
-        Height="700" Width="900"
+        Height="770" Width="900"
         MinHeight="480" MinWidth="900"
         Background="#1E1E1E"
         AllowDrop="True"
@@ -52,7 +52,7 @@
                         <TextBlock Text="Switch" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
-                <switch:MainTab DataContext="{Binding Main3DsVM}"/>
+                <switch:MainTab DataContext="{Binding SwitchMainVM}"/>
             </TabItem>
 
             <TabItem IsEnabled="{Binding IsIdle}">

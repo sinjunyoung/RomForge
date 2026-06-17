@@ -29,6 +29,7 @@
     <None Remove="Assets\Images\Installer.png" />
     <None Remove="Assets\Images\Loading.png" />
     <None Remove="Assets\Images\Merge.png" />
+    <None Remove="Assets\Images\Package.png" />
     <None Remove="Assets\Images\SdCard.png" />
     <None Remove="Assets\Images\Seed.png" />
     <None Remove="Assets\Images\Setup.png" />
@@ -57,6 +58,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\3DS.Installer\3DS.Core\3DS.Core.csproj" />
+    <ProjectReference Include="..\..\NSW.Tools\NSW.M1.Core\NSW.M1.Core.csproj" />
+    <ProjectReference Include="..\..\NSW.Tools\NSW.WPF\NSW.WPF.csproj" />
     <ProjectReference Include="..\..\RomZip\CHD.Core\CHD.Core.csproj" />
     <ProjectReference Include="..\..\RomZip\Common\Common.csproj" />
     <ProjectReference Include="..\..\RomZip\DolphinTool.Core\DolphinTool.Core.csproj" />
@@ -89,6 +92,7 @@
     <Resource Include="Assets\Images\Loading.png" />
     <Resource Include="Assets\Images\Mame.png" />
     <Resource Include="Assets\Images\Merge.png" />
+    <Resource Include="Assets\Images\Package.png" />
     <Resource Include="Assets\Images\Patch.png" />
     <Resource Include="Assets\Images\Progress.png" />
     <Resource Include="Assets\Images\Run.png" />
@@ -101,8 +105,5 @@
     <Resource Include="Assets\Images\ZipFile.png" />
     <Resource Include="Assets\Images\ZipFolder.png" />
     <Resource Include="Assets\Sounds\complete.mp3" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\Switch\" />
   </ItemGroup>
 </Project>
