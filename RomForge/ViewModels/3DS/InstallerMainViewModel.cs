@@ -263,7 +263,7 @@ public class InstallerMainViewModel : ToolTabViewModel
                 var result = MessageBoxHelper.ShowQuestion(
                     $"{selected.ShortDescription} 이(가) 이미 설치되어 있습니다.\n재설치하시겠습니까?");
 
-                if (result)
+                if (!result)
                 {
                     AppendLog("사용자가 재설치를 거부하여 작업을 중단합니다.", LogLevel.Info);
                     return;
@@ -281,7 +281,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             {
                 var installer = new TitleInstaller(_keyStore!, _sdCrypto!, _scanner!);
 
-                installer.OnLog += msg => AppendLog($"[Installer] {msg}", LogLevel.Info);
+                installer.OnLog += msg => AppendLog($"{msg}", LogLevel.Info);
 
                 installer.OnProgress += (pct, cur, total) => Application.Current.Dispatcher.Invoke(() =>
                 {

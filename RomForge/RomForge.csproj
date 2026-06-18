@@ -12,10 +12,10 @@
     <RootNamespace>RomForge</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8601;CS8604;CS8618;CA1416;SYSLIB1045</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8601;CS8604;CS8618;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8601;CS8604;CS8618;CA1416;SYSLIB1045</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8601;CS8604;CS8618;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Images\OpenFolder.png" />

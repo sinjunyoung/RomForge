@@ -3,6 +3,8 @@ using Common.WPF.ViewModels;
 using RomForge.Core;
 using RomForge.Models;
 using RomForge.ViewModels._3DS;
+using RomForge.ViewModels.Patch;
+using RomForge.ViewModels.Settings;
 using RomForge.ViewModels.Switch;
 using RomForge.ViewModels.Util;
 using System.Collections.ObjectModel;
@@ -14,13 +16,13 @@ public class MainViewModel : ToolTabViewModel
     private int _selectedTabIndex;
     private readonly AppConfig _config = new AppConfig().Load();
 
-    public PatchViewModel PatchVM { get; }
+    public PatchMainViewModel PatchVM { get; }
     public CompressViewModel CompressVM { get; }
     public _3DSMainViewModel Main3DsVM { get; }
     public SwitchMainViewModel SwitchMainVM { get; }
     public UtilMainViewModel UtilMainVM { get; }
 
-    public SettingsViewModel Settings { get; }
+    public SettingsMainViewModel Settings { get; }
 
     public int SelectedTabIndex
     {
@@ -47,12 +49,12 @@ public class MainViewModel : ToolTabViewModel
 
     public MainViewModel()
     {
-        PatchVM = new PatchViewModel(_config);
+        PatchVM = new PatchMainViewModel(_config);
         CompressVM = new CompressViewModel(_config);
         SwitchMainVM = new SwitchMainViewModel(_config);
         Main3DsVM = new _3DSMainViewModel();
         UtilMainVM = new UtilMainViewModel();
-        Settings = new SettingsViewModel(_config);
+        Settings = new SettingsMainViewModel(_config);
 
         RegisterChild(PatchVM);
         RegisterChild(CompressVM);

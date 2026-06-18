@@ -1,13 +1,13 @@
 ﻿using Common.WPF.ViewModels;
 using RomForge.Core.Models.Patch;
+using RomForge.Core.Services.Patch;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
 
-namespace RomForge.ViewModels;
+namespace RomForge.ViewModels.Patch;
 
 public class ArcadePatchViewModel : ToolTabViewModel
 {
@@ -21,6 +21,9 @@ public class ArcadePatchViewModel : ToolTabViewModel
 
     public bool HasPatchPackages => AvailablePatchPackages.Count > 0;
 
+    private CancellationTokenSource? _analyzeCts;
+    private CancellationTokenSource? _matchCts;
+
     private PatchPackage? _selectedPatchPackage;
 
     public PatchPackage? SelectedPatchPackage
@@ -30,7 +33,7 @@ public class ArcadePatchViewModel : ToolTabViewModel
         {
             _selectedPatchPackage = value;
             OnPropertyChanged();
-            MatchItems_Rebuild();
+            _ = MatchItemsRebuildAsync();
         }
     }
 
@@ -44,8 +47,8 @@ public class ArcadePatchViewModel : ToolTabViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(SourceLabel));
 
-            if (value is not null) 
-                Analyze();
+            if (value is not null)
+                _ = AnalyzeAsync();
         }
     }
 
@@ -60,7 +63,7 @@ public class ArcadePatchViewModel : ToolTabViewModel
             OnPropertyChanged(nameof(PatchLabel));
 
             if (value is not null)
-                Analyze();
+                _ = AnalyzeAsync();
         }
     }
 
@@ -145,6 +148,9 @@ public class ArcadePatchViewModel : ToolTabViewModel
 
     public void Clear()
     {
+        _analyzeCts?.Cancel();
+        _matchCts?.Cancel();
+
         SourcePath = null;
         PatchPath = null;
         MatchItems.Clear();
@@ -158,41 +164,171 @@ public class ArcadePatchViewModel : ToolTabViewModel
         OnPropertyChanged(nameof(HasPatchPackages));
     }
 
-    private void Analyze()
+    private async Task AnalyzeAsync()
     {
-        if (SourcePath is null || PatchPath is null) 
+        if (SourcePath is null || PatchPath is null)
             return;
 
-        AvailablePatchPackages.Clear();
+        var cts = new CancellationTokenSource();
+        var previous = Interlocked.Exchange(ref _analyzeCts, cts);
 
-        foreach (var (fileName, content) in GetDatFiles(PatchPath).OrderBy(d => d.FileName))
-            AvailablePatchPackages.Add(ParseDatFile(fileName, content));
+        previous?.Cancel();
+        previous?.Dispose();
 
-        OnPropertyChanged(nameof(HasPatchPackages));
+        var token = cts.Token;
+        var patchPath = PatchPath;
 
-        SelectedPatchPackage = AvailablePatchPackages.FirstOrDefault();
+        try
+        {
+            List<PatchPackage> packages;
+
+            try
+            {
+                packages = await Task.Run(() => BuildPatchPackages(patchPath, token), token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested)
+                return;
+
+            AvailablePatchPackages.Clear();
+
+            foreach (var package in packages)
+                AvailablePatchPackages.Add(package);
+
+            OnPropertyChanged(nameof(HasPatchPackages));
+
+            SelectedPatchPackage = AvailablePatchPackages.FirstOrDefault();
+        }
+        finally
+        {
+            if (ReferenceEquals(_analyzeCts, cts))
+            {
+                _analyzeCts = null;
+                cts.Dispose();
+            }
+        }
     }
 
-    private void MatchItems_Rebuild()
+    private async Task MatchItemsRebuildAsync()
     {
-        if (SourcePath is null || PatchPath is null) 
+        if (SourcePath is null || PatchPath is null)
             return;
 
-        MatchItems.Clear();
+        var cts = new CancellationTokenSource();
+        var previous = Interlocked.Exchange(ref _matchCts, cts);
 
-        var sourceEntries = GetSourceEntries(SourcePath);
-        var patchEntries = GetPatchEntries(PatchPath);
-        var usedPatches = new HashSet<PatchEntry>();
+        previous?.Cancel();
+        previous?.Dispose();
+
+        var token = cts.Token;
+        var sourcePath = SourcePath;
+        var patchPath = PatchPath;
         var package = SelectedPatchPackage;
 
-        AllPatchEntries.Clear();
+        try
+        {
+            MatchPlan plan;
 
-        foreach (var p in patchEntries) AllPatchEntries.Add(p);
+            try
+            {
+                plan = await Task.Run(() => BuildMatchPlan(sourcePath, patchPath, package, token), token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+
+            if (token.IsCancellationRequested)
+                return;
+
+            AllPatchEntries.Clear();
+
+            foreach (var p in plan.PatchEntries)
+                AllPatchEntries.Add(p);
+
+            MatchItems.Clear();
+
+            foreach (var r in plan.Results)
+            {
+                MatchItems.Add(new ArcadeMatchItem
+                {
+                    SourceFileName = r.SourceFileName,
+                    SourcePath = r.FullPath,
+                    PatchEntry = r.PatchEntry,
+                    PatchFileName = r.PatchFileName,
+                    MismatchReason = r.MismatchReason
+                });
+            }
+
+            RefreshUnmatchedPatches();
+            UpdateSummary();
+            OnPropertyChanged(nameof(HintVisibility));
+        }
+        finally
+        {
+            if (ReferenceEquals(_matchCts, cts))
+            {
+                _matchCts = null;
+                cts.Dispose();
+            }
+        }
+    }
+
+    private void RefreshUnmatchedPatches()
+    {
+        UnmatchedPatches.Clear();
+
+        var used = MatchItems
+            .Select(m => m.PatchEntry)
+            .Where(p => p is not null)
+            .Select(p => p!)
+            .ToHashSet();
+
+        foreach (var p in AllPatchEntries.Where(p => !used.Contains(p)))
+            UnmatchedPatches.Add(p);
+    }
+
+    private sealed record PatchMatchResult(
+        string SourceFileName,
+        string FullPath,
+        PatchEntry? PatchEntry,
+        string? PatchFileName,
+        string? MismatchReason);
+
+    private sealed record MatchPlan(List<PatchEntry> PatchEntries, List<PatchMatchResult> Results);
+
+    private static List<PatchPackage> BuildPatchPackages(string patchPath, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+
+        return [.. GetDatFiles(patchPath)
+            .OrderBy(d => d.FileName)
+            .Select(d =>
+            {
+                token.ThrowIfCancellationRequested();
+                return PatchPackageService.ParseDatFile(d.FileName, d.Content);
+            })];
+    }
+
+    private static MatchPlan BuildMatchPlan(string sourcePath, string patchPath, PatchPackage? package, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+
+        var sourceEntries = GetSourceEntries(sourcePath);
+        var patchEntries = GetPatchEntries(patchPath);
+        var usedPatches = new HashSet<PatchEntry>();
+        var results = new List<PatchMatchResult>(sourceEntries.Count);
 
         var allowedPatchNames = package?.Entries.Select(e => e.PatchBaseName).ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
         foreach (var (fileName, fullPath, crc) in sourceEntries)
         {
+            token.ThrowIfCancellationRequested();
+
             PatchEntry? matched = null;
             string? mismatchReason = null;
 
@@ -209,67 +345,34 @@ public class ArcadePatchViewModel : ToolTabViewModel
                         .OrderBy(p => p.DisplayName)
                         .FirstOrDefault();
 
-                    if (matched is null)
-                        mismatchReason = $"마스터 데이터에 등록된 패치({datEntry.PatchBaseName}.ips)를 찾을 수 없습니다.";
-                    else
-                        mismatchReason = $"CRC 일치";
+                    mismatchReason = matched is null
+                        ? $"마스터 데이터에 등록된 패치({datEntry.PatchBaseName}.ips)를 찾을 수 없습니다."
+                        : "CRC 일치";
                 }
                 else
-                    mismatchReason = $"CRC 불일치";
+                {
+                    mismatchReason = "CRC 불일치";
+                }
             }
             else
             {
                 var ext = Path.GetExtension(fileName).TrimStart('.').ToLower();
 
-                if (package == null || allowedPatchNames.Count == 0)
-                {
-                    matched = patchEntries
-                        .Where(p => !usedPatches.Contains(p) &&
-                        p.FileNameWithoutExtension.Contains(ext, StringComparison.OrdinalIgnoreCase))
-                        .OrderBy(p => p.DisplayName)
-                        .FirstOrDefault();                    
-                }
-                else
-                {
-                    matched = patchEntries
-                        .Where(p => !usedPatches.Contains(p) &&
-                            (package == null || !allowedPatchNames.Contains(p.FileNameWithoutExtension, StringComparer.OrdinalIgnoreCase)) &&
-                            p.FileNameWithoutExtension.Equals(ext, StringComparison.OrdinalIgnoreCase))
-                        .OrderBy(p => p.DisplayName)
-                        .FirstOrDefault();
-                }
+                matched = patchEntries
+                    .Where(p => !usedPatches.Contains(p) &&
+                        (package == null || !allowedPatchNames.Contains(p.FileNameWithoutExtension, StringComparer.OrdinalIgnoreCase)) &&
+                        p.FileNameWithoutExtension.Equals(ext, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(p => p.DisplayName)
+                    .FirstOrDefault();
             }
 
             if (matched is not null)
                 usedPatches.Add(matched);
 
-            MatchItems.Add(new ArcadeMatchItem
-            {
-                SourceFileName = fileName,
-                SourcePath = fullPath,
-                PatchEntry = matched,
-                PatchFileName = matched?.DisplayName,
-                MismatchReason = mismatchReason
-            });
+            results.Add(new PatchMatchResult(fileName, fullPath, matched, matched?.DisplayName, mismatchReason));
         }
 
-        RefreshUnmatchedPatches();
-        UpdateSummary();
-        OnPropertyChanged(nameof(HintVisibility));
-    }
-
-    private void RefreshUnmatchedPatches()
-    {
-        UnmatchedPatches.Clear();
-
-        var used = MatchItems
-            .Select(m => m.PatchEntry)
-            .Where(p => p is not null)
-            .Select(p => p!)
-            .ToHashSet();
-
-        foreach (var p in AllPatchEntries.Where(p => !used.Contains(p)))
-            UnmatchedPatches.Add(p);
+        return new MatchPlan(patchEntries, results);
     }
 
     private static List<(string FileName, string FullPath, string Crc)> GetSourceEntries(string zipPath)
@@ -330,83 +433,5 @@ public class ArcadePatchViewModel : ToolTabViewModel
                 .Select(f => (Path.GetFileName(f), File.ReadAllText(f, Encoding.UTF8)))];
 
         return [];
-    }
-
-    private static PatchPackage ParseDatFile(string fileName, string content)
-    {
-        var lines = content.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
-
-        if (lines.Length > 0 && lines[0].Length > 0 && lines[0][0] == '\uFEFF')
-            lines[0] = lines[0][1..];
-
-        var entries = new List<PatchPackageEntry>();
-        int i = 0;
-
-        for (; i < lines.Length; i++)
-        {
-            var line = lines[i];
-
-            if (string.IsNullOrWhiteSpace(line)) 
-                break;
-
-            var parts = line.Split('\t');
-
-            if (parts.Length < 3) 
-                break;
-
-            var crcMatch = Regex.Match(parts[2], @"CRC\(([0-9a-fA-F]+)\)");
-
-            if (!crcMatch.Success)
-                break;
-
-            entries.Add(new PatchPackageEntry
-            {
-                SourceFileName = parts[0].Trim(),
-                PatchBaseName = parts[1].Trim(),
-                Crc = crcMatch.Groups[1].Value.ToLowerInvariant()
-            });
-        }
-
-        string? koTitle = null;
-        string? firstTitle = null;
-
-        for (; i < lines.Length; i++)
-        {
-            var line = lines[i].Trim();
-
-            if (!line.StartsWith('[') || !line.EndsWith(']')) 
-                continue;
-
-            var locale = line[1..^1];
-            string? title = null;
-
-            for (int j = i + 1; j < lines.Length; j++)
-            {
-                if (string.IsNullOrWhiteSpace(lines[j])) 
-                    continue;
-
-                if (lines[j].Trim().StartsWith('['))
-                    break;
-
-                title = lines[j].Trim();
-
-                break;
-            }
-
-            firstTitle ??= title;
-
-            if (string.Equals(locale, "ko_KR", StringComparison.OrdinalIgnoreCase))
-            {
-                koTitle = title;
-                break;
-            }
-        }
-
-        return new PatchPackage
-        {
-            DisplayName = koTitle ?? firstTitle ?? Path.GetFileNameWithoutExtension(fileName),
-            DatFileName = fileName,
-            Entries = entries
-        };
     }
 }

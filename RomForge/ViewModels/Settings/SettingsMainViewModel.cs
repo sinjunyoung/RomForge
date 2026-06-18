@@ -1,10 +1,9 @@
 ﻿using Common.WPF.ViewModels;
 using RomForge.Core;
-using RomForge.ViewModels.Settings;
 
-namespace RomForge.ViewModels;
+namespace RomForge.ViewModels.Settings;
 
-public class SettingsViewModel(AppConfig config) : ToolTabViewModel
+public class SettingsMainViewModel(AppConfig config) : ToolTabViewModel
 {
     public PatchSettingsViewModel Patch { get; } = new PatchSettingsViewModel(config);
 

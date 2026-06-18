@@ -253,8 +253,19 @@
                                                     </TextBlock>
                                                 </Border>
 
-                                                <TextBlock Grid.Column="5" Text="{Binding MismatchReason}" Visibility="{Binding MismatchVisibility}" Foreground="#FFAAAA" FontSize="10" VerticalAlignment="Center" Margin="5,0,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding MismatchReason}"/>
-
+                                                <TextBlock Grid.Column="5" Text="{Binding MismatchReason}" Visibility="{Binding MismatchVisibility}" FontSize="10" VerticalAlignment="Center" Margin="5,0,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding MismatchReason}">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="#FFAAAA"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding MismatchReason}" Value="CRC 일치">
+                                                                    <Setter Property="Foreground" Value="Green"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                
                                                 <Grid Grid.Column="6" Margin="6,0,0,0">
                                                     <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="20"/>
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">

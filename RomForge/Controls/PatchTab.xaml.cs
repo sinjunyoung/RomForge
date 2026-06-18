@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
 using RomForge.ViewModels;
+using RomForge.ViewModels.Patch;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;

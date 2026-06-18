@@ -3,9 +3,8 @@ using Common;
 using Common.WPF.ViewModels;
 using DolphinTool.Core.Services;
 using Patch.Core;
-using RomForge.Core.Models;
 using RomForge.Core.Models.Patch;
-using RomForge.Core.Services;
+using RomForge.Core.Services.Patch;
 using RomForge.Helpers;
 using RomForge.Models;
 using RomZip.Core.Enums;
@@ -15,9 +14,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;
 
-namespace RomForge.ViewModels;
+namespace RomForge.ViewModels.Patch;
 
-public class PatchViewModel : ToolTabViewModel
+public class PatchMainViewModel : ToolTabViewModel
 {
     private readonly Core.AppConfig _config;
 
@@ -42,7 +41,7 @@ public class PatchViewModel : ToolTabViewModel
 
     private CancellationTokenSource? _cts;
 
-    public PatchViewModel(Core.AppConfig config)
+    public PatchMainViewModel(Core.AppConfig config)
     {
         _config = config;
         NormalVM = new NormalPatchViewModel(_config);
@@ -219,6 +218,12 @@ public class PatchViewModel : ToolTabViewModel
 
         if (matched.Count == 0 || ArcadeVM.SourcePath is null)
             return;
+
+        if (ArcadeVM.MatchItems.Any(x => x.MismatchReason == "CRC 불일치"))
+        {
+            Log("CRC 불일치 항목이 있어 패치를 진행할 수 없습니다.", LogLevel.Error);
+            return;
+        }
 
         string outputDir = Path.Combine(Path.GetDirectoryName(ArcadeVM.SourcePath)!, "output");
         string outputZipPath = Path.Combine(outputDir, Path.GetFileName(ArcadeVM.SourcePath));

@@ -1,7 +1,7 @@
 ﻿using Common.WPF.ViewModels;
 using RomForge.Core.Models.Patch;
 
-namespace RomForge.ViewModels;
+namespace RomForge.ViewModels.Patch;
 
 public class ArcadeMatchItem : ViewModelBase
 {

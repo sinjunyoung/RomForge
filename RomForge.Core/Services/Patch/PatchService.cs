@@ -4,7 +4,7 @@ using RomForge.Core.Models.Patch;
 using System.IO;
 using System.IO.Compression;
 
-namespace RomForge.Core.Services;
+namespace RomForge.Core.Services.Patch;
 
 public static class PatchService
 {

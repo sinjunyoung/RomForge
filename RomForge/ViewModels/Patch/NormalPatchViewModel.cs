@@ -1,7 +1,7 @@
 ﻿using Common.WPF.ViewModels;
 using System.IO;
 
-namespace RomForge.ViewModels;
+namespace RomForge.ViewModels.Patch;
 
 public class NormalPatchViewModel : ToolTabViewModel
 {
