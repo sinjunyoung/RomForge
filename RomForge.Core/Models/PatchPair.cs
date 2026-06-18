@@ -1,4 +1,4 @@
-namespace Patch.Core.Models;
+namespace RomForge.Core.Models;
 
 public enum PatchSourceKind { File, Zip }
 public enum PatchFileKind   { File, Folder, Zip }

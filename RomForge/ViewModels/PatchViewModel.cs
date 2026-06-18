@@ -1,10 +1,12 @@
-﻿using Common;
+﻿using CHD.Core.Services;
+using Common;
 using Common.WPF.ViewModels;
+using DolphinTool.Core.Services;
 using Patch.Core;
-using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Helpers;
 using RomForge.Models;
+using RomZip.Core.Enums;
 using RomZip.Core.Services;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -65,8 +67,7 @@ public class PatchViewModel : ToolTabViewModel
         if (NormalVM.SourcePath is null || NormalVM.PatchPath is null) return;
 
         NormalVM.Progress = 0;
-        NormalVM.StatusText = "패치 준비 중...";
-        NormalVM.StatusColor = "#888888";
+        Log("패치 준비 중...", LogLevel.Info);
 
         try
         {
@@ -74,58 +75,115 @@ public class PatchViewModel : ToolTabViewModel
             var patchBytes = await File.ReadAllBytesAsync(NormalVM.PatchPath, ct);
             var result = await Task.Run(() => UniversalPatcher.ApplyPatch(sourceBytes, patchBytes, p => NormalVM.Progress = (int)(p * 100)), ct);
 
-            // 1. 결과물을 저장할 임시 경로
-            string tempOutputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".tmp");
-
-            // 2. 압축 여부에 따른 최종 파일 경로 설정
-            string finalPath = NormalVM.SourcePath;
-            string backupPath = Path.ChangeExtension(NormalVM.SourcePath, ".bak");
+            string outputDir = Path.Combine(Path.GetDirectoryName(NormalVM.SourcePath)!, "output");
+            Directory.CreateDirectory(outputDir);
 
             if (NormalVM.AutoCompress)
             {
-                NormalVM.StatusText = "압축 중...";
+                Log("압축 중...", LogLevel.Info);
                 var detected = FormatDetector.Detect(NormalVM.SourcePath);
 
-                // 미지원 포맷이거나 포맷을 알 수 없는 경우 무조건 ZIP
-                if (detected.Format == RomZip.Core.Enums.RomFormat.Unknown)
+                switch (detected.Format)
                 {
-                    finalPath = Path.ChangeExtension(NormalVM.SourcePath, ".zip");
-                    await Task.Run(() =>
-                    {
-                        using var zipStream = new FileStream(tempOutputPath, FileMode.Create);
-                        using var archive = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create);
-                        var entry = archive.CreateEntry(Path.GetFileNameWithoutExtension(NormalVM.SourcePath) + ".patched" + Path.GetExtension(NormalVM.SourcePath));
-                        using var entryStream = entry.Open();
-                        entryStream.Write(result, 0, result.Length);
-                    }, ct);
-                }
-                else
-                {
-                    // 지원 포맷일 경우: 여기서는 그대로 저장하거나, 
-                    // 원하신다면 해당 포맷에 맞는 압축 로직을 추가하시면 됩니다.
-                    await File.WriteAllBytesAsync(tempOutputPath, result, ct);
+                    case RomFormat.Bin:
+                        {
+                            string outputBinPath = Path.Combine(outputDir, Path.GetFileName(NormalVM.SourcePath));
+                            await File.WriteAllBytesAsync(outputBinPath, result, ct);
+
+                            string? cuePath = Directory.GetFiles(Path.GetDirectoryName(NormalVM.SourcePath)!, "*.cue")
+                                .FirstOrDefault(c => ConversionSource.ParseBinsFromCue(c)
+                                    .Any(b => string.Equals(Path.GetFileName(b), Path.GetFileName(NormalVM.SourcePath), StringComparison.OrdinalIgnoreCase)));
+
+                            if (cuePath is null)
+                            {
+                                Log("CUE 파일을 찾을 수 없습니다.", LogLevel.Error);
+                                return;
+                            }
+
+                            string outputCuePath = Path.Combine(outputDir, Path.GetFileName(cuePath));
+                            File.Copy(cuePath, outputCuePath, true);
+
+                            FileConverter converter = new();
+                            converter.LogMessage += (_, e) => Log(e.Message, e.Level);
+                            converter.ProgressChanged += (_, e) => NormalVM.Progress = e.Progress;
+                            var chdResult = await converter.ConvertFileAsync(outputCuePath, ct);
+
+                            if (!chdResult.Success)
+                            {
+                                Log($"CHD 변환 실패: {chdResult.Message}", LogLevel.Error);
+                                return;
+                            }
+
+                            File.Delete(outputBinPath);
+                            File.Delete(outputCuePath);
+                            break;
+                        }
+                    case RomFormat.Iso:
+                        {
+                            string outputFilePath = Path.Combine(outputDir, Path.GetFileName(NormalVM.SourcePath));
+                            await File.WriteAllBytesAsync(outputFilePath, result, ct);
+
+                            FileConverter converter = new();
+                            converter.LogMessage += (_, e) => Log(e.Message, e.Level);
+                            converter.ProgressChanged += (_, e) => NormalVM.Progress = e.Progress;
+                            var chdResult = await converter.ConvertFileAsync(outputFilePath, ct);
+
+                            if (!chdResult.Success)
+                            {
+                                Log($"CHD 변환 실패: {chdResult.Message}", LogLevel.Error);
+                                return;
+                            }
+
+                            File.Delete(outputFilePath);
+                            break;
+                        }
+                    case RomFormat.Gcm:
+                    case RomFormat.Wii:
+                    case RomFormat.Wbfs:
+                        {
+                            string outputFilePath = Path.Combine(outputDir, Path.GetFileName(NormalVM.SourcePath));
+                            await File.WriteAllBytesAsync(outputFilePath, result, ct);
+
+                            DolphinService dolphin = new();
+                            dolphin.LogMessage += (_, e) => Log(e.Message, e.Level);
+                            dolphin.ProgressChanged += (_, e) => NormalVM.Progress = e.Progress;
+                            await dolphin.ConvertFileAsync(outputFilePath, detected.Format.ToString(), detected.OutputExtension, _config.Dolphin.CompressLevel, ct);
+
+                            File.Delete(outputFilePath);
+                            break;
+                        }
+                    case RomFormat.Unknown:
+                        {
+                            string zipPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(NormalVM.SourcePath) + ".zip");
+                            await Task.Run(() =>
+                            {
+                                using var zipStream = new FileStream(zipPath, FileMode.Create);
+                                using var archive = new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create);
+                                var entry = archive.CreateEntry(Path.GetFileName(NormalVM.SourcePath));
+                                using var entryStream = entry.Open();
+                                entryStream.Write(result, 0, result.Length);
+                            }, ct);
+                            break;
+                        }
                 }
             }
             else
             {
-                await File.WriteAllBytesAsync(tempOutputPath, result, ct);
+                string outputPath = Path.Combine(outputDir, Path.GetFileName(NormalVM.SourcePath));
+                await File.WriteAllBytesAsync(outputPath, result, ct);
             }
 
-            // 3. 기존 백업 파일이 있다면 삭제 (File.Replace 오류 방지)
-            if (File.Exists(backupPath)) File.Delete(backupPath);
-
-            // 4. 안전한 교체 (임시 파일 -> 원본 경로, 원본 -> 백업)
-            File.Replace(tempOutputPath, NormalVM.SourcePath, backupPath);
-
             NormalVM.Progress = 100;
-            NormalVM.StatusText = "완료";
-            NormalVM.StatusColor = "#4CAF50";
-            Log($"패치 완료: {Path.GetFileName(finalPath)}", LogLevel.Ok);
+            Log($"패치 완료: {Path.GetFileName(NormalVM.SourcePath)}", LogLevel.Ok);
+        }
+        catch (OperationCanceledException)
+        {
+            NormalVM.Progress = 0;
+            Log($"패치 취소: {Path.GetFileName(NormalVM.SourcePath)}", LogLevel.Error);
         }
         catch (Exception ex)
         {
-            NormalVM.StatusText = $"실패: {ex.Message}";
-            NormalVM.StatusColor = "#F44336";
+            NormalVM.Progress = 0;
             Log($"패치 실패: {ex.Message}", LogLevel.Error);
         }
     }
@@ -133,13 +191,14 @@ public class PatchViewModel : ToolTabViewModel
     private async Task RunArcadeAsync(CancellationToken ct)
     {
         var matched = ArcadeVM.MatchItems.Where(x => x.IsMatched).ToList();
-        if (matched.Count == 0) return;
+
+        if (matched.Count == 0) 
+            return;
+
+        Log("아케이드 패치 준비 중...", LogLevel.Info);
 
         foreach (var item in matched)
-        {
             item.Progress = 0;
-            item.Status = string.Empty;
-        }
 
         await Parallel.ForEachAsync(matched,
             new ParallelOptions { MaxDegreeOfParallelism = 4, CancellationToken = ct },
@@ -157,18 +216,15 @@ public class PatchViewModel : ToolTabViewModel
                         null, token);
 
                     item.Progress = 100;
-                    item.Status = "완료";
-                    item.StatusColor = "#4CAF50";
+                    Log($"패치 완료: {Path.GetFileName(item.SourcePath)}", LogLevel.Ok);
                 }
                 catch (OperationCanceledException)
                 {
-                    item.Status = "취소";
-                    item.StatusColor = "#888888";
+                    Log($"패치 취소: {Path.GetFileName(item.SourcePath)}", LogLevel.Error);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    item.Status = "실패";
-                    item.StatusColor = "#F44336";
+                    Log($"패치 실패: {Path.GetFileName(item.SourcePath)} - {ex.Message}", LogLevel.Error);
                 }
                 finally
                 {

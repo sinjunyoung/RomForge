@@ -20,7 +20,7 @@
                                           IsChecked="{Binding Settings.Patch.AutoCompress}">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="18" Margin="0,0,10,0" Source="{Binding Settings.Patch.AutoCompress, Converter={StaticResource BoolToImageConverter}}"/>
-                            <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" FontSize="12"/>
+                            <TextBlock Text="패치 후 자동 압축 ( BIN/ISO→CHD, GCM/Wii/WBFS→RVZ, 이외 기타→ZIP )" VerticalAlignment="Center" FontSize="12"/>
                         </StackPanel>
                     </ToggleButton>
                 </Grid>

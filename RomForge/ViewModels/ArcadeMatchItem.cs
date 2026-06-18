@@ -1,4 +1,5 @@
 ﻿using Common.WPF.ViewModels;
+using RomForge.Core.Models;
 
 namespace RomForge.ViewModels;
 
@@ -19,11 +20,11 @@ public class ArcadeMatchItem : ViewModelBase
         }
     }
 
-    private string? _patchPath;
-    public string? PatchPath
+    private PatchEntry? _patchEntry;
+    public PatchEntry? PatchEntry
     {
-        get => _patchPath;
-        set { _patchPath = value; OnPropertyChanged(); }
+        get => _patchEntry;
+        set { _patchEntry = value; OnPropertyChanged(); }
     }
 
     private int _progress;
@@ -31,20 +32,6 @@ public class ArcadeMatchItem : ViewModelBase
     {
         get => _progress;
         set { _progress = value; OnPropertyChanged(); }
-    }
-
-    private string _status = string.Empty;
-    public string Status
-    {
-        get => _status;
-        set { _status = value; OnPropertyChanged(); }
-    }
-
-    private string _statusColor = "#888888";
-    public string StatusColor
-    {
-        get => _statusColor;
-        set { _statusColor = value; OnPropertyChanged(); }
     }
 
     public bool IsMatched => PatchFileName is not null;

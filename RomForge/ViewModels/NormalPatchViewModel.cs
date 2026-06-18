@@ -51,20 +51,6 @@ public class NormalPatchViewModel : ToolTabViewModel
         set { _progress = value; OnPropertyChanged(); }
     }
 
-    private string _statusText = string.Empty;
-    public string StatusText
-    {
-        get => _statusText;
-        set { _statusText = value; OnPropertyChanged(); }
-    }
-
-    private string _statusColor = "#888888";
-    public string StatusColor
-    {
-        get => _statusColor;
-        set { _statusColor = value; OnPropertyChanged(); }
-    }
-
     public NormalPatchViewModel(Core.AppConfig config)
     {
         _config = config;
@@ -87,7 +73,6 @@ public class NormalPatchViewModel : ToolTabViewModel
         SourcePath = null;
         PatchPath = null;
         Progress = 0;
-        StatusText = string.Empty;
         AutoCompress = false;
     }
 }

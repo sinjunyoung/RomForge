@@ -36,32 +36,46 @@
 
                         <Border Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalSourceDrop_Drop" MouseLeftButtonDown="NormalSourceDrop_Click">
                             <Grid Margin="14,0">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Image Source="/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding PatchVM.NormalVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0"/>
-                                </StackPanel>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourceLabel}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourceLabel}"/>
+                                </Grid>
                                 <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
                             </Grid>
                         </Border>
 
                         <Border Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
                             <Grid Margin="14,0">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <Image Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding PatchVM.NormalVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0"/>
-                                </StackPanel>
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchLabel}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchLabel}"/>
+                                </Grid>
                                 <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
                             </Grid>
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="2"> 
-                        <ProgressBar Value="{Binding PatchVM.NormalVM.Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="24"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding PatchVM.NormalVM.Progress}" Foreground="White" FontSize="11" FontWeight="Bold"/>
-                            <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
-                        </StackPanel>
-                        <TextBlock Text="{Binding PatchVM.NormalVM.StatusText}" Foreground="{Binding PatchVM.NormalVM.StatusColor}" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,15,0"/>
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="24"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <ProgressBar Value="{Binding PatchVM.NormalVM.Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="24"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding PatchVM.NormalVM.Progress}" Foreground="White" FontSize="11" FontWeight="Bold"/>
+                                <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
+                            </StackPanel>
+                        </Grid>
                     </Grid>
                     <Border Grid.Row="4" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="10,8" Margin="0,0,0,2">   
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -76,7 +90,7 @@
                     <ToggleButton Grid.Row="5" Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,0,0,2">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}"/>
-                            <TextBlock Text="패치 후 자동 압축 ( iso->chd, 다른 포멧은 zip )" VerticalAlignment="Center" FontSize="12"/>
+                            <TextBlock Text="패치 후 자동 압축 ( BIN/ISO→CHD, GCM/Wii/WBFS→RVZ, 이외 기타→ZIP )" VerticalAlignment="Center" FontSize="12"/>
                         </StackPanel>
                     </ToggleButton>
                     
