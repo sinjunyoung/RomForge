@@ -5,19 +5,14 @@ namespace PBP.Core.Services;
 
 public static class PbpPackager
 {
-    public static Task<string> WriteSingleDiscAsync(string inputPath, string gameTitle, int compressionLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> WriteSingleDiscAsync(string inputPath, string gameId, string gameTitle, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         return Task.Run(() =>
         {
-            var ext = Path.GetExtension(inputPath).ToLowerInvariant();
-            var isoPath = ext == ".cue" ? CueFileResolver.GetBinPath(inputPath) : inputPath;
             var outputPath = Path.ChangeExtension(inputPath, ".pbp");
-            var disc = ext == ".cue" ? DiskSource.FromBinCue(isoPath, inputPath) : DiskSource.FromIso(isoPath);
-            var gameId = GameIdReader.ReadFromDisk(disc);
 
-            log($"[{gameId}] GameID 인식됨", LogLevel.Info, gameId);
+            assets ??= new PbpAssets();
 
-            var assets = new PbpAssets();
             var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();
 
             PbpHeaderBuilder.EnsureRequiredAssets(assets, basePbpBytes);
@@ -25,16 +20,14 @@ public static class PbpPackager
             var sfo = BuildDefaultSfo(gameId, gameTitle);
             var header = PbpHeaderBuilder.BuildHeader(assets, sfo.Size);
             var psarOffset = header[9];
+
             using var outputStream = new FileStream(outputPath, FileMode.Create);
 
             WriteCommonSections(outputStream, header, sfo, assets, psarOffset);
 
-            var isoSize = (uint)new FileInfo(isoPath).Length;
-            var tocData = TocBuilder.BuildSingleTrackToc(isoSize);
+            using var disc = CuePreprocessor.Resolve(inputPath);
 
-            using var isoStream = new FileStream(isoPath, FileMode.Open, FileAccess.Read);
-
-            SingleDiscPsarWriter.WritePsar(outputStream, new DiscWriteInfo(isoStream, isoSize, gameId, gameTitle, tocData), psarOffset, compressionLevel, ct, (cur, total) => progress.Report(new ProgressInfo { Percent = (int)(cur * 100.0 / total) }));
+            SingleDiscPsarWriter.WritePsar(outputStream, new DiscWriteInfo(disc.IsoStream, disc.IsoLength, gameId, gameTitle, disc.TocData), psarOffset, compressionLevel, ct, (cur, total) => progress.Report(new ProgressInfo { Percent = (int)(cur * 100.0 / total) }));
             StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng);
 
             log($"완료: {Path.GetFileName(outputPath)}", LogLevel.Ok, gameId);
@@ -43,15 +36,12 @@ public static class PbpPackager
         }, ct);
     }
 
-    public static Task<string> WriteMultiDiscAsync(IReadOnlyList<(string IsoPath, string GameTitle)> discs, string mainGameTitle, string outputPath, int compressionLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> WriteMultiDiscAsync(IReadOnlyList<(string InputPath, string GameTitle)> discs, string mainGameId, string mainGameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         return Task.Run(() =>
         {
-            var mainGameId = GameIdReader.ReadFromDisk(DiskSource.FromIso(discs[0].IsoPath));
+            assets ??= new PbpAssets();
 
-            log($"[{mainGameId}] GameID 인식됨 ({discs.Count}개 디스크)", LogLevel.Info, mainGameId);
-
-            var assets = new PbpAssets();
             var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();
 
             PbpHeaderBuilder.EnsureRequiredAssets(assets, basePbpBytes);
@@ -63,28 +53,25 @@ public static class PbpPackager
 
             WriteCommonSections(outputStream, header, sfo, assets, psarOffset);
 
-            var isoStreams = new List<FileStream>();
+            var resolvedDiscs = new List<ResolvedDisc>();
 
             try
             {
                 var discInfos = new List<DiscWriteInfo>();
 
-                foreach (var (IsoPath, GameTitle) in discs)
+                foreach (var (InputPath, GameTitle) in discs)
                 {
-                    var isoSize = (uint)new FileInfo(IsoPath).Length;
-                    var tocData = TocBuilder.BuildSingleTrackToc(isoSize);
-                    var isoStream = new FileStream(IsoPath, FileMode.Open, FileAccess.Read);
-
-                    isoStreams.Add(isoStream);
-                    discInfos.Add(new DiscWriteInfo(isoStream, isoSize, mainGameId, GameTitle, tocData));
+                    var resolved = CuePreprocessor.Resolve(InputPath);
+                    resolvedDiscs.Add(resolved);
+                    discInfos.Add(new DiscWriteInfo(resolved.IsoStream, resolved.IsoLength, mainGameId, GameTitle, resolved.TocData));
                 }
 
                 MultiDiscPsarWriter.WritePsar(outputStream, mainGameTitle, mainGameId, discInfos, psarOffset, compressionLevel, ct, (cur, total) => progress.Report(new ProgressInfo { Percent = (int)(cur * 100.0 / total) }));
             }
             finally
             {
-                foreach (var s in isoStreams) 
-                    s.Dispose();
+                foreach (var d in resolvedDiscs) 
+                    d.Dispose();
             }
 
             StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng);
@@ -107,34 +94,9 @@ public static class PbpPackager
         sfoBuilder.AddEntry(SFOKeys.PARENTAL_LEVEL, SFOValues.ParentalLevel);
         sfoBuilder.AddEntry(SFOKeys.PSP_SYSTEM_VER, SFOValues.PSPSystemVersion);
         sfoBuilder.AddEntry(SFOKeys.REGION, 0x8000);
-
-        string safeTitle = LimitStringToUtf8Bytes(gameTitle, 63);
-
-        sfoBuilder.AddEntry(SFOKeys.TITLE, safeTitle);
+        sfoBuilder.AddEntry(SFOKeys.TITLE, gameTitle);
 
         return sfoBuilder.Build();
-    }
-
-    private static string LimitStringToUtf8Bytes(string input, int maxBytes)
-    {
-        if (string.IsNullOrEmpty(input)) return "PSP GAME";
-
-        var encoding = System.Text.Encoding.UTF8;
-        int validLength = 0;
-        int currentBytes = 0;
-
-        foreach (char c in input)
-        {
-            int charBytes = encoding.GetByteCount([c]);
-
-            if (currentBytes + charBytes > maxBytes)
-                break;
-
-            currentBytes += charBytes;
-            validLength++;
-        }
-
-        return input[..validLength];
     }
 
     private static void WriteCommonSections(Stream outputStream, uint[] header, SFOData sfo, PbpAssets assets, uint psarOffset)

@@ -163,7 +163,7 @@ public class InstallerMainViewModel : ToolTabViewModel
         SetLoading(true);
         StatusMessage = "초기화 중...";
         ClearLog();
-        AppendLog("3DS 타이틀 스캔을 시작합니다.", LogLevel.Info);
+        AppendLog("3DS 타이틀 스캔을 시작합니다.", LogLevel.Highlight);
         AppendLog($"SD 경로: {SdPath}, Movable 경로: {MovablePath}", LogLevel.Info);
 
         using (InstalledTitles.BeginWork())
@@ -273,7 +273,7 @@ public class InstallerMainViewModel : ToolTabViewModel
 
             SetLoading(true);
             StatusMessage = $"설치 시작: {selected.ShortDescription}";
-            AppendLog($"설치 시작: {selected.FilePath}", LogLevel.Info);
+            AppendLog($"설치 시작: {selected.FilePath}", LogLevel.Highlight);
 
             try
             {

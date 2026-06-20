@@ -25,6 +25,13 @@ public class DiscFileItem(string filePath) : ViewModelBase
         set { _fileSizeBytes = value; OnPropertyChanged(); OnPropertyChanged(nameof(FileSize)); }
     }
 
+    private int _progress;
+    public int Progress
+    {
+        get => _progress;
+        set { _progress = value; OnPropertyChanged(); }
+    }
+
     public string FileSize => FileSizeBytes <= 0 ? "..." : FileSizeBytes >= 1024L * 1024 * 1024
         ? $"{FileSizeBytes / (1024.0 * 1024 * 1024):F2} GB"
         : $"{FileSizeBytes / (1024.0 * 1024):F1} MB";

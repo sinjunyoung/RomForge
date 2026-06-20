@@ -77,7 +77,7 @@ public class PatchMainViewModel : ToolTabViewModel
         string outputPath = Path.Combine(outputDir, Path.GetFileName(NormalVM.SourcePath));
         string? outputCuePath = null;
 
-        Log($"패치 시작: {Path.GetFileName(NormalVM.SourcePath)}", LogLevel.Info);
+        Log($"패치 시작: {Path.GetFileName(NormalVM.SourcePath)}", LogLevel.Highlight);
 
         try
         {
@@ -148,7 +148,7 @@ public class PatchMainViewModel : ToolTabViewModel
                         }
                     case RomFormat.Unknown:
                         {
-                            Log($"압축 시작: {Path.GetFileName(outputPath)}", LogLevel.Info);
+                            Log($"압축 시작: {Path.GetFileName(outputPath)}", LogLevel.Highlight);
 
                             string zipPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(NormalVM.SourcePath) + ".zip");
                             await Task.Run(() =>
@@ -211,7 +211,7 @@ public class PatchMainViewModel : ToolTabViewModel
         string outputDir = Path.Combine(Path.GetDirectoryName(ArcadeVM.SourcePath)!, "output");
         string outputZipPath = Path.Combine(outputDir, Path.GetFileName(ArcadeVM.SourcePath));
 
-        Log($"패치 시작: {Path.GetFileName(ArcadeVM.SourcePath)}", LogLevel.Info);
+        Log($"패치 시작: {Path.GetFileName(ArcadeVM.SourcePath)}", LogLevel.Highlight);
 
         var itemsByEntryName = new Dictionary<string, ArcadeMatchItem>();
         var patchesByEntryName = new Dictionary<string, PatchEntry>();

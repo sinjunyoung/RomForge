@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
+using NSW.WPF.Services;
 using PBP.Core.Models;
 using PBP.Core.Services;
 using RomForge.Core.Services.PS1;
@@ -15,7 +16,7 @@ namespace RomForge.ViewModels.PS1;
 
 public class ConverterMainViewModel : ToolTabViewModel
 {
-    private const int MaxItems = 8;
+    private const int MaxItems = 5;
 
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -33,14 +34,14 @@ public class ConverterMainViewModel : ToolTabViewModel
         set { _isConverting = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanAdd)); CommandManager.InvalidateRequerySuggested(); }
     }
 
-    public bool CanAdd => !IsConverting && FileItems.Count < MaxItems;
-
     private string _gameTitle;
     public string GameTitle
     {
         get => _gameTitle;
         set { _gameTitle = value; OnPropertyChanged(); }
     }
+
+    public bool CanAdd => !IsConverting && FileItems.Count < MaxItems;
 
     private BitmapImage? _icon0Image;
     public BitmapImage? Icon0Image { get => _icon0Image; set { _icon0Image = value; OnPropertyChanged(); } }
@@ -56,6 +57,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     private byte[] _pic1Bytes = PbpResources.PIC1;
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
+
     public ObservableCollection<DiscFileItem> FileItems { get; } = [];
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -68,9 +70,9 @@ public class ConverterMainViewModel : ToolTabViewModel
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsConverting && FileItems.Count > 0);
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsConverting);
 
-        Icon0Image = BytesToImage(_icon0Bytes);
-        Pic0Image = BytesToImage(_pic0Bytes);
-        Pic1Image = BytesToImage(_pic1Bytes);
+        Icon0Image = _icon0Bytes.ToBitmapImage();
+        Pic0Image = _pic0Bytes.ToBitmapImage();
+        Pic1Image = _pic1Bytes.ToBitmapImage();
 
         FileItems.CollectionChanged += (s, e) => OnPropertyChanged(nameof(CanAdd));
     }
@@ -139,17 +141,9 @@ public class ConverterMainViewModel : ToolTabViewModel
         foreach (var line in lines)
         {
             var fullPath = Path.IsPathRooted(line) ? line : Path.Combine(dir, line);
-
-            if (Path.GetExtension(fullPath).Equals(".cue", StringComparison.OrdinalIgnoreCase))
-            {
-                paths.Add(fullPath);
-                try { paths.Add(CueFileResolver.GetBinPath(fullPath)); } catch { }
-            }
-            else
-            {
-                paths.Add(fullPath);
-            }
+            paths.Add(fullPath);
         }
+
         return paths;
     }
 
@@ -167,14 +161,14 @@ public class ConverterMainViewModel : ToolTabViewModel
         FileItems.Clear();
         OnPropertyChanged(nameof(HintVisibility));
         _lastIconGameId = null;
-        Icon0Image = BytesToImage(PbpResources.ICON0);
-        Pic0Image = BytesToImage(PbpResources.PIC0);
-        Pic1Image = BytesToImage(PbpResources.PIC1);
+        Icon0Image = PbpResources.ICON0.ToBitmapImage();
+        Pic0Image = PbpResources.PIC0.ToBitmapImage();
+        Pic1Image = PbpResources.PIC1.ToBitmapImage();
     }
 
-    public void SetIcon0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _icon0Bytes = bytes; Icon0Image = BytesToImage(bytes); });
-    public void SetPic0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic0Bytes = bytes; Pic0Image = BytesToImage(bytes); });
-    public void SetPic1FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic1Bytes = bytes; Pic1Image = BytesToImage(bytes); });
+    public void SetIcon0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _icon0Bytes = bytes; Icon0Image = bytes.ToBitmapImage(); });
+    public void SetPic0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic0Bytes = bytes; Pic0Image = bytes.ToBitmapImage(); });
+    public void SetPic1FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic1Bytes = bytes; Pic1Image = bytes.ToBitmapImage(); });
 
     private static void SetImage(byte[] rawBytes, Action<byte[]> apply)
     {
@@ -191,15 +185,11 @@ public class ConverterMainViewModel : ToolTabViewModel
                 var ext = Path.GetExtension(item.FilePath).ToLowerInvariant();
                 var size = DiscSizeResolver.GetTotalSize(item.FilePath);
 
-                DiskSource source = ext switch
-                {
-                    ".cue" => DiskSource.FromBinCue(CueFileResolver.GetBinPath(item.FilePath), item.FilePath),
-                    ".chd" => DiskSource.FromChd(item.FilePath),
-                    ".m3u" => DiskSource.FromIso(ResolveM3uFirstDisc(item.FilePath)),
-                    _ => DiskSource.FromIso(item.FilePath)
-                };
+                if (ext == ".chd")
+                    return (GameIdReader.ReadFromDisk(DiskSource.FromChd(item.FilePath)), size);
 
-                var gameId = GameIdReader.ReadFromDisk(source);
+                using var disc = CuePreprocessor.Resolve(item.FilePath);
+                var gameId = GameIdReader.ReadFromStream(disc.IsoStream, disc.IsoLength);
 
                 return (gameId, size);
             });
@@ -216,20 +206,6 @@ public class ConverterMainViewModel : ToolTabViewModel
         ResortAndRenumber();
     }
 
-    private static string ResolveM3uFirstDisc(string m3uPath)
-    {
-        var dir = Path.GetDirectoryName(m3uPath)!;
-        var firstLine = File.ReadAllLines(m3uPath)
-            .Select(l => l.Trim())
-            .First(l => l.Length > 0 && !l.StartsWith('#'));
-
-        var fullPath = Path.IsPathRooted(firstLine) ? firstLine : Path.Combine(dir, firstLine);
-
-        return Path.GetExtension(fullPath).Equals(".cue", StringComparison.OrdinalIgnoreCase)
-            ? CueFileResolver.GetBinPath(fullPath)
-            : fullPath;
-    }
-
     private void ResortAndRenumber()
     {
         var sorted = FileItems.OrderBy(i => i.GameId, StringComparer.OrdinalIgnoreCase).ToList();
@@ -238,7 +214,9 @@ public class ConverterMainViewModel : ToolTabViewModel
         {
             sorted[i].No = i + 1;
             var oldIndex = FileItems.IndexOf(sorted[i]);
-            if (oldIndex != i) FileItems.Move(oldIndex, i);
+
+            if (oldIndex != i)
+                FileItems.Move(oldIndex, i);
         }
 
         _ = UpdateImageAsync();
@@ -262,7 +240,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             return;
 
         _icon0Bytes = icon0Png ?? PbpResources.ICON0;
-        Icon0Image = BytesToImage(_icon0Bytes);
+        Icon0Image = _icon0Bytes.ToBitmapImage();
 
         var meta = GameMetadataLookup.Find(primary.GameId);
 
@@ -272,7 +250,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             return;
 
         _pic0Bytes = pic0Png ?? PbpResources.PIC0;
-        Pic0Image = BytesToImage(_pic0Bytes);
+        Pic0Image = _pic0Bytes.ToBitmapImage();
 
         var pic1Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic1, ct) : null;
 
@@ -280,24 +258,10 @@ public class ConverterMainViewModel : ToolTabViewModel
             return;
 
         _pic1Bytes = pic1Png ?? PbpResources.PIC1;
-        Pic1Image = BytesToImage(_pic1Bytes);
+        Pic1Image = _pic1Bytes.ToBitmapImage();
 
         if (meta != null && !string.IsNullOrWhiteSpace(meta.Title))
             GameTitle = meta.Title;
-    }
-
-    private static BitmapImage BytesToImage(byte[] bytes)
-    {
-        var image = new BitmapImage();
-        using var ms = new MemoryStream(bytes);
-
-        image.BeginInit();
-        image.CacheOption = BitmapCacheOption.OnLoad;
-        image.StreamSource = ms;
-        image.EndInit();
-        image.Freeze();
-
-        return image;
     }
 
     private async Task RunAsync()
@@ -305,7 +269,86 @@ public class ConverterMainViewModel : ToolTabViewModel
         _cts.Dispose();
         _cts = new CancellationTokenSource();
         IsConverting = true;
+
+        try
+        {
+            if (FileItems.Count == 0)
+            {
+                AppendLog("추가된 파일이 없습니다.", LogLevel.Error);
+                return;
+            }
+
+            if (FileItems.Any(i => i.GameId is "인식중..." or "인식실패"))
+            {
+                AppendLog("GameID 인식 오류", LogLevel.Error);
+                return;
+            }
+
+            var orderedItems = FileItems.OrderBy(i => i.No).ToList();
+            var gameTitle = string.IsNullOrWhiteSpace(GameTitle) ? GuessTitle(orderedItems[0]) : GameTitle;
+            var mainGameId = orderedItems[0].GameId;
+
+            var assets = new PbpAssets
+            {
+                Icon0Png = _icon0Bytes,
+                Pic0Png = _pic0Bytes,
+                Pic1Png = _pic1Bytes
+            };
+
+            try
+            {
+                AppendLog($"작업 시작", LogLevel.Highlight);
+
+                if (orderedItems.Count == 1)
+                {
+                    var item = orderedItems[0];
+                    var progress = new Progress<ProgressInfo>(p => item.Progress = p.Percent);
+
+                    await PbpPackager.WriteSingleDiscAsync(item.FilePath, mainGameId, gameTitle, 9, assets,
+                        progress, (msg, lvl, id) => AppendLog(msg, lvl), _cts.Token);
+                }
+                else
+                {
+                    var discs = orderedItems
+                        .Select(i => (InputPath: i.FilePath, GameTitle: $"{gameTitle} - Disc {i.No}"))
+                        .ToList();
+
+                    var outputPath = Path.Combine(Path.GetDirectoryName(orderedItems[0].FilePath)!, $"{gameTitle}.pbp");
+                    var progress = new Progress<ProgressInfo>(p =>
+                    {
+                        foreach (var i in orderedItems) i.Progress = p.Percent;
+                    });
+
+                    await PbpPackager.WriteMultiDiscAsync(discs, mainGameId, gameTitle, outputPath, 9, assets,
+                        progress, (msg, lvl, id) => AppendLog(msg, lvl), _cts.Token);
+                }
+
+                foreach (var i in orderedItems) i.Progress = 100;
+                AppendLog($"완료: {gameTitle} ({orderedItems.Count}개 디스크)", LogLevel.Ok);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"오류: [{gameTitle}]{ex.Message}", LogLevel.Error);                
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+        }
+        finally
+        {
+            IsConverting = false;
+        }
     }
+
+    private static string GuessTitle(DiscFileItem item)
+        => System.Text.RegularExpressions.Regex.Replace(
+            Path.GetFileNameWithoutExtension(item.FilePath), @"\s*\(Disc\s*\d+\)", "",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
 
     private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
     {
@@ -319,7 +362,8 @@ public class ConverterMainViewModel : ToolTabViewModel
         foreach (var path in paths)
         {
             if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts)) yield return f;
+                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts)) 
+                    yield return f;
             else if (File.Exists(path))
                 yield return path;
         }
@@ -327,13 +371,16 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     private void AppendLog(string msg, LogLevel level = LogLevel.Info)
     {
-        if (Application.Current?.Dispatcher == null) return;
+        if (Application.Current?.Dispatcher == null) 
+            return;
+
         Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
     }
 
     public static string GetFileDialogFilter()
     {
         var wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
+
         return $"지원 파일|{wildcards}|모든 파일|*.*";
     }
 }

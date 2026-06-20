@@ -133,7 +133,7 @@ public class CompressMainViewModel : ToolTabViewModel
             try
             {
                 int totalCount = FileItems.Count;
-                AppendLog($"총 {totalCount}개의 작업을 시작합니다.", LogLevel.Info);
+                AppendLog($"총 {totalCount}개의 작업을 시작합니다.", LogLevel.Highlight);
 
                 int cnt = 0;
                 foreach (var item in FileItems)

@@ -13,7 +13,9 @@ public static class GameIdReader
     {
         try
         {
-            return source.Type == DiskSourceType.Chd ? ReadFromChd(source.FilePath) : ReadFromStream(source.FilePath);
+            return source.Type == DiskSourceType.Chd
+                ? ReadFromChd(source.FilePath)
+                : ReadFromFilePath(source.FilePath);
         }
         catch
         {
@@ -21,6 +23,33 @@ public static class GameIdReader
         }
     }
 
+    public static string ReadFromStream(Stream stream, long length)
+    {
+        try
+        {
+            var isRaw = length >= 2352 && length % 2352 == 0;
+
+            byte[] SectorReader(uint lba)
+            {
+                var sector = new byte[2048];
+                stream.Seek(isRaw ? lba * 2352 + 24 : lba * 2048, SeekOrigin.Begin);
+                stream.Read(sector, 0, 2048);
+                return sector;
+            }
+
+            return Iso9660GameIdExtractor.Extract(SectorReader) ?? Fallback;
+        }
+        catch
+        {
+            return Fallback;
+        }
+    }
+
+    private static string ReadFromFilePath(string filePath)
+    {
+        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return ReadFromStream(stream, stream.Length);
+    }
     private static string ReadFromChd(string filePath)
     {
         using var wrapper = new LibChdrWrapper();
@@ -39,22 +68,6 @@ public static class GameIdReader
 
             Buffer.BlockCopy(hunk, (int)hunkOffset + 24, sector, 0, 2048);
 
-            return sector;
-        }
-
-        return Iso9660GameIdExtractor.Extract(SectorReader) ?? Fallback;
-    }
-
-    private static string ReadFromStream(string filePath)
-    {
-        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var isRaw = stream.Length >= 2352 && stream.Length % 2352 == 0;
-
-        byte[] SectorReader(uint lba)
-        {
-            var sector = new byte[2048];
-            stream.Seek(isRaw ? lba * 2352 + 24 : lba * 2048, SeekOrigin.Begin);
-            stream.Read(sector, 0, 2048);
             return sector;
         }
 
