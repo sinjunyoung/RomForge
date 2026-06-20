@@ -20,6 +20,7 @@
     <None Remove="DATA1.bin" />
     <None Remove="DATA2.bin" />
     <None Remove="DATA3.bin" />
+    <None Remove="GamesDB.zip" />
     <None Remove="ICON0.png" />
     <None Remove="PIC0.png" />
     <None Remove="PIC1.png" />

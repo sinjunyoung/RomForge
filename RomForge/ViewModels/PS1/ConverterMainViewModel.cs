@@ -22,28 +22,25 @@ public class ConverterMainViewModel : ToolTabViewModel
         ".cue", ".m3u", ".iso", ".chd"
     };
 
+    private CancellationTokenSource _cts = new();
+    private string? _lastIconGameId;
+    private CancellationTokenSource? _iconCts;
+
     private bool _isConverting;
     public bool IsConverting
     {
         get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
+        set { _isConverting = value; OnPropertyChanged(); OnPropertyChanged(nameof(CanAdd)); CommandManager.InvalidateRequerySuggested(); }
     }
+
+    public bool CanAdd => !IsConverting && FileItems.Count < MaxItems;
 
     private string _gameTitle;
     public string GameTitle
     {
         get => _gameTitle;
         set { _gameTitle = value; OnPropertyChanged(); }
-    }    
-
-    private CancellationTokenSource _cts = new();
-    private string? _lastIconGameId;
-    private CancellationTokenSource? _iconCts;
-
-    public ObservableCollection<LogEntry> LogEntries { get; } = [];
-    public ObservableCollection<DiscFileItem> FileItems { get; } = [];
-
-    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
 
     private BitmapImage? _icon0Image;
     public BitmapImage? Icon0Image { get => _icon0Image; set { _icon0Image = value; OnPropertyChanged(); } }
@@ -58,6 +55,11 @@ public class ConverterMainViewModel : ToolTabViewModel
     private byte[] _pic0Bytes = PbpResources.PIC0;
     private byte[] _pic1Bytes = PbpResources.PIC1;
 
+    public ObservableCollection<LogEntry> LogEntries { get; } = [];
+    public ObservableCollection<DiscFileItem> FileItems { get; } = [];
+
+    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
     public ICommand RunCommand { get; }
     public ICommand CancelCommand { get; }
 
@@ -69,19 +71,42 @@ public class ConverterMainViewModel : ToolTabViewModel
         Icon0Image = BytesToImage(_icon0Bytes);
         Pic0Image = BytesToImage(_pic0Bytes);
         Pic1Image = BytesToImage(_pic1Bytes);
+
+        FileItems.CollectionChanged += (s, e) => OnPropertyChanged(nameof(CanAdd));
     }
 
     public void AddPaths(IEnumerable<string> paths)
     {
+        var inputPaths = paths.ToList();
+
+        if (inputPaths.Count == 0) 
+            return;
+
+        var rawFiles = ExpandPaths(inputPaths).ToList();
+        var explodedPaths = new List<string>();
+
+        foreach (var file in rawFiles)
+        {
+            if (Path.GetExtension(file).Equals(".m3u", StringComparison.OrdinalIgnoreCase))
+                explodedPaths.AddRange(ResolveM3uAllDiscs(file));
+            else
+                explodedPaths.Add(file);
+        }
+
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var candidates = ExpandPaths(paths)
-            .Where(p => SupportedExtensions.Contains(Path.GetExtension(p)))
-            .Where(p => existing.Add(p))
-            .ToList();
+        var newCandidates = new List<string>();
+
+        foreach (var p in explodedPaths)
+        {
+            if (!SupportedExtensions.Contains(Path.GetExtension(p))) 
+                continue;
+
+            if (existing.Add(p))
+                newCandidates.Add(p);
+        }
 
         var room = MaxItems - FileItems.Count;
-        var toAdd = candidates.Take(Math.Max(room, 0)).ToList();
-        var rejected = candidates.Count - toAdd.Count;
+        var toAdd = newCandidates.Take(Math.Max(room, 0)).ToList();
 
         foreach (var path in toAdd)
         {
@@ -90,14 +115,42 @@ public class ConverterMainViewModel : ToolTabViewModel
             _ = LoadItemInfoAsync(item);
         }
 
-        if (rejected > 0)
-        {
-            MessageBox.Show($"최대 {MaxItems}개까지만 추가할 수 있어요. {rejected}개 파일은 추가되지 않았어요.",
-                "추가 제한", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
+        int userRejectedCount = newCandidates.Count - toAdd.Count;
+
+        if (userRejectedCount > 0)
+            AppendLog($"최대 {MaxItems}개까지만 등록할 수 있습니다. {userRejectedCount}개 파일이 제외되었습니다.", LogLevel.Error);
 
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();
+    }
+
+    private static List<string> ResolveM3uAllDiscs(string m3uPath)
+    {
+        var dir = Path.GetDirectoryName(m3uPath)!;
+        var paths = new List<string>();
+
+        if (!File.Exists(m3uPath)) 
+            return paths;
+
+        var lines = File.ReadAllLines(m3uPath)
+            .Select(l => l.Trim())
+            .Where(l => l.Length > 0 && !l.StartsWith('#'));
+
+        foreach (var line in lines)
+        {
+            var fullPath = Path.IsPathRooted(line) ? line : Path.Combine(dir, line);
+
+            if (Path.GetExtension(fullPath).Equals(".cue", StringComparison.OrdinalIgnoreCase))
+            {
+                paths.Add(fullPath);
+                try { paths.Add(CueFileResolver.GetBinPath(fullPath)); } catch { }
+            }
+            else
+            {
+                paths.Add(fullPath);
+            }
+        }
+        return paths;
     }
 
     public void RemoveItems(IEnumerable<DiscFileItem> items)
@@ -115,6 +168,8 @@ public class ConverterMainViewModel : ToolTabViewModel
         OnPropertyChanged(nameof(HintVisibility));
         _lastIconGameId = null;
         Icon0Image = BytesToImage(PbpResources.ICON0);
+        Pic0Image = BytesToImage(PbpResources.PIC0);
+        Pic1Image = BytesToImage(PbpResources.PIC1);
     }
 
     public void SetIcon0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _icon0Bytes = bytes; Icon0Image = BytesToImage(bytes); });

@@ -12,12 +12,12 @@
                 <ResourceDictionary Source="Styles/ScrollBar.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:InverseBoolConverter x:Key="InverseBool"/>
             <converters:LogLevelToColorConverter x:Key="LogColor"/>
             <converters:LevelToColorConverter x:Key="LevelToColorConverter"/>
-            <converters:CompressLevelTextConverter x:Key="CompressLevelTextConverter"/>
-            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-            <converters:BoolToImageConverter x:Key="BoolToImageConverter"/>
+            <converters:CompressLevelTextConverter x:Key="CompressLevelTextConverter"/>            
+            <converters:BoolToImageConverter x:Key="BoolToImageConverter"/>      
 
             <Style TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>
