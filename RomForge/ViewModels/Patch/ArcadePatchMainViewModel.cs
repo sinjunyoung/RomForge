@@ -1,5 +1,8 @@
-﻿using Common.WPF.ViewModels;
+﻿using Common;
+using Common.WPF.ViewModels;
 using RomForge.Core.Models.Patch;
+using RomForge.Core.Services.Patch;
+using RomForge.Models;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
@@ -10,19 +13,18 @@ namespace RomForge.ViewModels.Patch;
 
 public class ArcadePatchMainViewModel : ToolTabViewModel
 {
+    public ObservableCollection<LogEntry> LogEntries { get; } = [];
+
     public ObservableCollection<ArcadeMatchItem> MatchItems { get; } = [];
-
     public ObservableCollection<PatchEntry> AllPatchEntries { get; } = [];
-
     public ObservableCollection<PatchEntry> UnmatchedPatches { get; } = [];
-
     public ObservableCollection<PatchPackage> AvailablePatchPackages { get; } = [];
 
     public bool HasPatchPackages => AvailablePatchPackages.Count > 0;
 
     private CancellationTokenSource? _analyzeCts;
     private CancellationTokenSource? _matchCts;
-
+    private CancellationTokenSource? _runCts;
     private PatchPackage? _selectedPatchPackage;
 
     public PatchPackage? SelectedPatchPackage
@@ -93,12 +95,93 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
     }
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 ZIP을 드래그하거나 클릭하세요";
-
     public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치(IPS/폴더/ZIP)를 드래그하거나 클릭하세요";
-
     public Visibility HintVisibility => MatchItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
     public Visibility MismatchVisibility => MismatchReason is not null ? Visibility.Visible : Visibility.Collapsed;
+
+    public void Log(string message, LogLevel level)
+    {
+        Application.Current?.Dispatcher?.Invoke(() =>
+            LogEntries.Add(new LogEntry { Message = message, Level = level }));
+    }
+
+    public async Task RunAsync()
+    {
+        var matched = MatchItems.Where(x => x.IsMatched).ToList();
+
+        if (matched.Count == 0 || SourcePath is null)
+            return;
+
+        if (MatchItems.Any(x => x.MismatchReason == "CRC 불일치"))
+        {
+            Log("CRC 불일치 항목이 있어 패치를 진행할 수 없습니다.", LogLevel.Error);
+            return;
+        }
+
+        _runCts = new CancellationTokenSource();
+        var ct = _runCts.Token;
+
+        string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
+        string outputZipPath = Path.Combine(outputDir, Path.GetFileName(SourcePath));
+
+        Log($"패치 시작: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
+
+        var itemsByEntryName = new Dictionary<string, ArcadeMatchItem>();
+        var patchesByEntryName = new Dictionary<string, PatchEntry>();
+
+        foreach (var item in matched)
+        {
+            var entryName = item.SourcePath.Split('|', 2)[1];
+            itemsByEntryName[entryName] = item;
+            patchesByEntryName[entryName] = item.PatchEntry!;
+            item.Progress = 0;
+        }
+
+        var progressReporter = new Progress<EntryPatchProgress>(p =>
+        {
+            if (itemsByEntryName.TryGetValue(p.EntryName, out var item))
+            {
+                item.Progress = p.Percent;
+                UpdateSummary();
+                UpdateTotalProgress();
+            }
+        });
+
+        try
+        {
+            await PatchService.ApplyPatchedZipAsync(SourcePath, outputZipPath, patchesByEntryName, progressReporter, Log, ct);
+
+            Log($"패치 완료: {SourcePath}", LogLevel.Ok);
+        }
+        catch (OperationCanceledException)
+        {
+            TryDeleteIncompleteOutput(outputZipPath);
+            Log($"패치 취소: {Path.GetFileName(SourcePath)}", LogLevel.Error);
+        }
+        catch (Exception ex)
+        {
+            TryDeleteIncompleteOutput(outputZipPath);
+            Log($"패치 실패: {ex.Message}", LogLevel.Error);
+        }
+    }
+
+    public void Cancel()
+    {
+        _runCts?.Cancel();
+    }
+
+    private void TryDeleteIncompleteOutput(string outputZipPath)
+    {
+        try
+        {
+            if (File.Exists(outputZipPath))
+                File.Delete(outputZipPath);
+        }
+        catch (Exception ex)
+        {
+            Log($"중단된 결과 파일 삭제 실패: {ex.Message} (수동으로 확인해주세요: {outputZipPath})", LogLevel.Error);
+        }
+    }
 
     public void ManualMatch(ArcadeMatchItem item, PatchEntry? patch)
     {
@@ -149,6 +232,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
     {
         _analyzeCts?.Cancel();
         _matchCts?.Cancel();
+        _runCts?.Cancel();
 
         SourcePath = null;
         PatchPath = null;
@@ -156,6 +240,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
         AllPatchEntries.Clear();
         UnmatchedPatches.Clear();
         AvailablePatchPackages.Clear();
+        LogEntries.Clear();
         SelectedPatchPackage = null;
         TotalProgress = 0;
         ProgressSummary = string.Empty;
@@ -180,7 +265,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
         try
         {
             List<PatchPackage> packages;
-
             try
             {
                 packages = await Task.Run(() => BuildPatchPackages(patchPath, token), token);
@@ -191,14 +275,12 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
             }
 
             token.ThrowIfCancellationRequested();
-
             AvailablePatchPackages.Clear();
 
             foreach (var package in packages)
                 AvailablePatchPackages.Add(package);
 
             OnPropertyChanged(nameof(HasPatchPackages));
-
             SelectedPatchPackage = AvailablePatchPackages.FirstOrDefault();
         }
         finally
@@ -230,7 +312,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
         try
         {
             MatchPlan plan;
-
             try
             {
                 plan = await Task.Run(() => BuildMatchPlan(sourcePath, patchPath, package, token), token);
@@ -241,7 +322,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
             }
 
             token.ThrowIfCancellationRequested();
-
             AllPatchEntries.Clear();
 
             foreach (var p in plan.PatchEntries)
@@ -289,9 +369,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
             UnmatchedPatches.Add(p);
     }
 
-
     private sealed record PatchMatchResult(string SourceFileName, string FullPath, PatchEntry? PatchEntry, string? PatchFileName, string? MismatchReason);
-
     private sealed record MatchPlan(List<PatchEntry> PatchEntries, List<PatchMatchResult> Results);
 
     private static List<PatchPackage> BuildPatchPackages(string patchPath, CancellationToken token)
@@ -303,7 +381,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
             .Select(d =>
             {
                 token.ThrowIfCancellationRequested();
-                return Core.Services.Patch.PatchPackageService.ParseDatFile(d.FileName, d.Content);
+                return PatchPackageService.ParseDatFile(d.FileName, d.Content);
             })];
     }
 
@@ -360,7 +438,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
             else
             {
                 var ext = Path.GetExtension(fileName).TrimStart('.').ToLower();
-
                 matched = DequeueUnused(extensionBuckets, ext, usedPatches);
             }
 

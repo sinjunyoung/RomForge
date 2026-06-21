@@ -66,17 +66,29 @@
             <StackPanel Grid.Column="1" IsEnabled="{Binding IsUnlocked}">
                 <TextBlock Text="{Binding GameTitle}" ToolTip="{Binding GameTitle}" TextTrimming="CharacterEllipsis" MaxWidth="380" FontSize="15" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Viewbox Stretch="Uniform">
-                    <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1">
+                    <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" AllowDrop="True" Drop="Pic1_Drop">
                         <Border.Background>
                             <ImageBrush ImageSource="{Binding Pic1Image}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality"/>
                         </Border.Background>
-                        <Grid>
-                            <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Width="80" Height="80" BorderBrush="#80FFFFFF" BorderThickness="1.5" CornerRadius="10" Opacity="0.8">
-                                <Border.Background>
-                                    <ImageBrush ImageSource="{Binding Icon0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                </Border.Background>
-                            </Border>
-                            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15" MaxWidth="270" MaxHeight="150" BorderBrush="#80FFFFFF" BorderThickness="1.5" CornerRadius="12" Opacity="0.9">
+                    <Grid>
+
+                            <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Background="Transparent" AllowDrop="True" Drop="Icon0_Drop">
+                                <Border Width="80" Height="80" BorderBrush="#80FFFFFF" BorderThickness="1.5" CornerRadius="10" Opacity="0.8">
+                                    <Border.Background>
+                                        <ImageBrush x:Name="Icon0" ImageSource="{Binding Icon0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+
+                            <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15" MaxWidth="270" MaxHeight="150" BorderBrush="#80FFFFFF" BorderThickness="1.5" CornerRadius="12" Opacity="0.9" AllowDrop="True" Drop="Pic0_Drop">
+                                <Border.OpacityMask>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Border Background="Black" CornerRadius="12" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Border.OpacityMask>
+
                                 <Image Source="{Binding Pic0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
                             </Border>
                         </Grid>

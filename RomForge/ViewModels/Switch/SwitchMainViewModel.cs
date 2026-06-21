@@ -1,15 +1,9 @@
-﻿using Common.WPF.ViewModels;
-using RomForge.Core;
-using RomForge.Models;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Windows;
+﻿using RomForge.Core;
 
 namespace RomForge.ViewModels.Switch;
 
-public class SwitchMainViewModel : ToolTabViewModel
+public class SwitchMainViewModel : MultiToolTabViewModel
 {
-    private int _subTabIndex;
 
     public RepackMainViewModel RepackVM { get; }
 
@@ -17,98 +11,16 @@ public class SwitchMainViewModel : ToolTabViewModel
 
     public KeygenMainViewModel KeygenVM { get; }
 
-    public int SubTabIndex
-    {
-        get => _subTabIndex;
-        set
-        {
-            _subTabIndex = value;
-            OnPropertyChanged();
-            SyncLogEntries();
-        }
-    }
-
-    public ObservableCollection<LogEntry> LogEntries { get; } = [];
-
     public SwitchMainViewModel(AppConfig config)
     {
         RepackVM = new RepackMainViewModel();
         MergeVM = new MergeMainViewModel(config);
         KeygenVM = new KeygenMainViewModel();
 
-        RegisterChild(RepackVM);
-        RegisterChild(MergeVM);
-        RegisterChild(KeygenVM);
+        Tools.Add(RepackVM);
+        Tools.Add(MergeVM);
+        Tools.Add(KeygenVM);
 
-        RepackVM.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
-        MergeVM.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
-        KeygenVM.LogEntries.CollectionChanged += LogEntries_CollectionChanged;
-
-        SyncLogEntries();
-    }
-
-    private void LogEntries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        var targetCollection = _subTabIndex switch
-        {
-            0 => RepackVM.LogEntries,
-            1 => MergeVM.LogEntries,
-            2 => KeygenVM.LogEntries,
-            _ => RepackVM.LogEntries
-        };
-
-        if (sender != targetCollection)
-            return;
-
-        if (Application.Current?.Dispatcher != null)
-            Application.Current.Dispatcher.Invoke(() => HandleCollectionChanged(e));
-        else
-            HandleCollectionChanged(e);
-    }
-
-    private void HandleCollectionChanged(NotifyCollectionChangedEventArgs e)
-    {
-        switch (e.Action)
-        {
-            case NotifyCollectionChangedAction.Add:
-                if (e.NewItems != null)
-                {
-                    foreach (LogEntry item in e.NewItems)
-                        LogEntries.Add(item);
-                }
-                break;
-            case NotifyCollectionChangedAction.Remove:
-                if (e.OldItems != null)
-                {
-                    foreach (LogEntry item in e.OldItems)
-                        LogEntries.Remove(item);
-                }
-                break;
-            case NotifyCollectionChangedAction.Reset:
-                LogEntries.Clear();
-                break;
-        }
-    }
-
-    private void SyncLogEntries()
-    {
-        if (Application.Current?.Dispatcher != null)
-            Application.Current.Dispatcher.Invoke(() => DoSync());
-        else
-            DoSync();
-    }
-
-    private void DoSync()
-    {
-        var currentSource = _subTabIndex switch
-        {
-            0 => RepackVM.LogEntries,
-            1 => MergeVM.LogEntries,
-            2 => KeygenVM.LogEntries,
-            _ => RepackVM.LogEntries
-        };
-
-        foreach (var item in currentSource)
-            LogEntries.Add(item);
+        InitializeMultiTools();
     }
 }

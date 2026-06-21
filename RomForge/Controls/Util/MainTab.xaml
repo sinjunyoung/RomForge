@@ -15,12 +15,23 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/SD.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="ZipImageTool" VerticalAlignment="Center"/>
+                        <TextBlock Text="SD 굽기" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <Grid>
                     <TextBlock Text="관리자 권한이 필요합니다." Visibility="{Binding IsNotAdmin, Converter={StaticResource BooleanToVisibilityConverter}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     <local:ZipImageToolTab DataContext="{Binding ZipImageToolVM}" Visibility="{Binding DataContext.IsAdmin, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </Grid>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/CUE.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Cue 생성" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <Grid>
+                    <local:CueTab DataContext="{Binding CueVM}"/>
                 </Grid>
             </TabItem>
 

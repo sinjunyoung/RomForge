@@ -8,7 +8,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0" SelectedIndex="{Binding PatchVM.SelectedTabIndex}">
+        <TabControl Grid.Row="0" SelectedIndex="{Binding PatchVM.SubTabIndex}">
 
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
@@ -72,8 +72,14 @@
                         <Grid Grid.Row="0">
                             <ProgressBar Value="{Binding PatchVM.NormalVM.Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="24"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding PatchVM.NormalVM.Progress}" Foreground="White" FontSize="11" FontWeight="Bold"/>
-                                <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
+                                <TextBlock Foreground="White" FontSize="11" FontWeight="Bold">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} ({1}%)">
+                                            <Binding Path="PatchVM.NormalVM.ProgressStatus"/>
+                                            <Binding Path="PatchVM.NormalVM.Progress"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </StackPanel>
                         </Grid>
                     </Grid>

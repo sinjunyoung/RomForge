@@ -1,11 +1,7 @@
 ﻿using NSW.WPF.UI;
-using PBP.Core.Models;
-using PBP.Core.Services;
 using RomForge.Helpers;
 using RomForge.ViewModels;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -21,16 +17,6 @@ public partial class MainWindow : Window
         DataContext = ViewModel;
         InitializeComponent();
         Closing += MainWindow_Closing;
-
-        //PbpPackager.WriteMultiDiscAsync(
-        //    outputPath: @"D:\download\발키리 프로파일\output\test_multi.pbp",
-        //    discs:
-        //    [
-        //        (DiskSource.FromBinCue(@"D:\download\발키리 프로파일\output\Valkyrie Profile (Japan) (Disc 1).bin", @"D:\download\발키리 프로파일\output\Valkyrie Profile (Japan) (Disc 1).cue"), "Valkyrie Profile - Disc 1"),
-        //        (DiskSource.FromBinCue(@"D:\download\발키리 프로파일\output\Valkyrie Profile (Japan) (Disc 2) (v1.1).bin", @"D:\download\발키리 프로파일\output\Valkyrie Profile (Japan) (Disc 2) (v1.1).cue"), "Valkyrie Profile - Disc 2"),
-        //    ],
-
-        //    mainGameTitle: "Valkyrie Profile");
     }
 
     protected override void OnSourceInitialized(EventArgs e)

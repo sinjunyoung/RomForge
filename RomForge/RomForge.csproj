@@ -18,6 +18,7 @@
     <NoWarn>1701;1702;CA1401;CS8601;CS8604;CS8618;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Images\CUE.png" />
     <None Remove="Assets\Images\Keygen.png" />
     <None Remove="Assets\Images\OpenFolder.png" />
     <None Remove="Assets\Images\Repack.png" />
@@ -32,6 +33,7 @@
     <Resource Include="Assets\Images\3DS.png" />
     <Resource Include="Assets\Images\Cartridge.png" />
     <Resource Include="Assets\Images\Convert.png" />
+    <Resource Include="Assets\Images\CUE.png" />
     <Resource Include="Assets\Images\HDD.png" />
     <Resource Include="Assets\Images\Keygen.png" />
     <Resource Include="Assets\Images\OpenFolder.png" />

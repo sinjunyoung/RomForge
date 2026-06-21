@@ -6,10 +6,9 @@ using PBP.Core.Services;
 using RomForge.Core.Services.PS1;
 using RomForge.Helpers;
 using RomForge.Models;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -208,10 +207,43 @@ public class ConverterMainViewModel : ToolTabViewModel
     public void SetPic0FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic0Bytes = bytes; Pic0Image = bytes.ToBitmapImage(); });
     public void SetPic1FromFile(string path) => SetImage(File.ReadAllBytes(path), bytes => { _pic1Bytes = bytes; Pic1Image = bytes.ToBitmapImage(); });
 
+    public void SetIcon0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { _icon0Bytes = bytes; Icon0Image = img; }, 80, 80);
+    public void SetPic0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { _pic0Bytes = bytes; Pic0Image = img; }, 270, 150);
+    public void SetPic1FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { _pic1Bytes = bytes; Pic1Image = img; }, 480, 272);
+
     private static void SetImage(byte[] rawBytes, Action<byte[]> apply)
     {
         try { apply(ImageConversion.ToPng(rawBytes)); }
         catch {  }
+    }
+
+    private static void SetImage(byte[] rawBytes, Action<byte[], BitmapImage> apply, int targetWidth, int targetHeight)
+    {
+        try
+        {
+            using var image = Image.Load<SixLabors.ImageSharp.PixelFormats.Bgra32>(rawBytes);
+            image.Mutate(x => x.Resize(targetWidth, targetHeight));
+
+            using var ms = new MemoryStream();
+            image.SaveAsPng(ms, new SixLabors.ImageSharp.Formats.Png.PngEncoder
+            {
+                CompressionLevel = SixLabors.ImageSharp.Formats.Png.PngCompressionLevel.BestCompression
+            });
+            byte[] finalBytes = ms.ToArray();
+
+            ms.Position = 0;
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.StreamSource = ms;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
+
+            apply(finalBytes, bitmapImage);
+        }
+        catch
+        {
+        }
     }
 
     private async Task LoadItemInfoAsync(DiscFileItem item)

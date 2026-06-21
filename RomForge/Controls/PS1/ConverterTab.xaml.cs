@@ -1,4 +1,5 @@
 ﻿using RomForge.ViewModels.PS1;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,8 +8,9 @@ namespace RomForge.Controls.PS1;
 
 public partial class ConverterTab : UserControl
 {
-    private ConverterMainViewModel? ViewModel => DataContext as ConverterMainViewModel;
+    private readonly string[] _imgExts = [".jpg", ".jpeg", ".png", ".bmp", ".webp"];
 
+    private ConverterMainViewModel? ViewModel => DataContext as ConverterMainViewModel;
 
     public ConverterTab()
     {
@@ -28,26 +30,62 @@ public partial class ConverterTab : UserControl
         if (e.Key != Key.Delete)
             return;
 
-        if (ViewModel == null)
-            return;
-
         var selected = lvFiles.SelectedItems.Cast<DiscFileItem>().ToList();
-        ViewModel.RemoveItems(selected);
+        ViewModel?.RemoveItems(selected);
     }
 
     private void Icon0_Drop(object sender, DragEventArgs e)
     {
+        e.Handled = true;
 
+        var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+
+        if (files is not { Length: > 0 })
+            return;
+
+        string ext = Path.GetExtension(files[0]).ToLowerInvariant();
+
+        if (!_imgExts.Contains(ext))
+            return;
+
+        byte[] rawBytes = File.ReadAllBytes(files[0]);
+        ViewModel?.SetIcon0FromBytes(rawBytes);
     }
 
     private void Pic0_Drop(object sender, DragEventArgs e)
     {
+        e.Handled = true;
 
+        var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+
+        if (files is not { Length: > 0 })
+            return;
+
+        string ext = Path.GetExtension(files[0]).ToLowerInvariant();
+
+        if (!_imgExts.Contains(ext))
+            return;
+
+        byte[] rawBytes = File.ReadAllBytes(files[0]);
+        ViewModel?.SetPic0FromBytes(rawBytes);
     }
 
     private void Pic1_Drop(object sender, DragEventArgs e)
     {
+        e.Handled = true;
 
+        var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+
+        if (files is not { Length: > 0 })
+            return;
+
+        string ext = Path.GetExtension(files[0]).ToLowerInvariant();
+
+        if (!_imgExts.Contains(ext))
+            return;
+
+        byte[] rawBytes = File.ReadAllBytes(files[0]);
+        ViewModel?.SetPic1FromBytes(rawBytes);
     }
 
     private void BtnAddFiles_Click(object sender, RoutedEventArgs e)
@@ -76,11 +114,8 @@ public partial class ConverterTab : UserControl
 
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel == null)
-            return;
-
         var selected = lvFiles.SelectedItems.Cast<DiscFileItem>().ToList();
-        ViewModel.RemoveItems(selected);
+        ViewModel?.RemoveItems(selected);
     }
 
     private void BtnClear_Click(object sender, RoutedEventArgs e)

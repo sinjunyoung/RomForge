@@ -25,41 +25,16 @@ public class CompressMainViewModel : ToolTabViewModel
         ".3ds", ".cci", ".cia", ".zcci"
     };
 
-    public static string GetFileDialogFilter()
-    {
-        string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
-
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
-    }
-
-    #region Fields
-
     private CancellationTokenSource _cts = new();
     private readonly Core.AppConfig _config;
 
-    #endregion
-
-    #region Collections
-
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
-
     public ObservableCollection<CompressFileItem> FileItems { get; } = [];
-
-    #endregion
-
-    #region Properties
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-    #endregion
-
-    #region Commands
-
     public ICommand RunCommand { get; }
-
     public ICommand CancelCommand { get; }
-
-    #endregion
 
     public event Action<CompressFileItem>? ScrollToItemRequested;
 
@@ -70,7 +45,12 @@ public class CompressMainViewModel : ToolTabViewModel
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsLocked);
     }
 
-    #region Public Methods
+    public static string GetFileDialogFilter()
+    {
+        string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
+
+        return $"지원 파일|{wildcards}|모든 파일|*.*";
+    }
 
     public void AddPaths(IEnumerable<string> paths)
     {
@@ -78,10 +58,10 @@ public class CompressMainViewModel : ToolTabViewModel
 
         foreach (var path in ExpandPaths(paths))
         {
-            if (!SupportedExtensions.Contains(Path.GetExtension(path))) 
+            if (!SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
 
-            if (!existing.Add(path)) 
+            if (!existing.Add(path))
                 continue;
 
             var item = new CompressFileItem(path) { No = FileItems.Count + 1 };
@@ -94,7 +74,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
     public void RemoveItems(IEnumerable<CompressFileItem> items)
     {
-        foreach (var item in items.ToList()) 
+        foreach (var item in items.ToList())
             FileItems.Remove(item);
 
         OnPropertyChanged(nameof(HintVisibility));
@@ -108,7 +88,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
     public static void OpenFolder(List<CompressFileItem> selected)
     {
-        if (selected.Count == 0) 
+        if (selected.Count == 0)
             return;
 
         string path = Path.GetDirectoryName(selected[0].FilePath) ?? string.Empty;
@@ -116,10 +96,6 @@ public class CompressMainViewModel : ToolTabViewModel
         if (Directory.Exists(path))
             Process.Start("explorer.exe", $"\"{path}\"");
     }
-
-    #endregion
-
-    #region Private Methods
 
     private async Task RunAsync()
     {
@@ -136,7 +112,11 @@ public class CompressMainViewModel : ToolTabViewModel
 
             foreach (var item in FileItems)
             {
-                _cts.Token.ThrowIfCancellationRequested();
+                if (_cts.Token.IsCancellationRequested)
+                {
+                    CancelRemainingItems();
+                    break;
+                }
 
                 if (item.Status == "완료" || item.Status == "미지원")
                     continue;
@@ -149,7 +129,6 @@ public class CompressMainViewModel : ToolTabViewModel
                     var detected = FormatDetector.Detect(item.FilePath);
 
                     item.Status = "변환중";
-                    item.Progress = 0;
                     ScrollToItemRequested?.Invoke(item);
 
                     var progressHandler = new Progress<ProgressInfo>(p =>
@@ -190,8 +169,10 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Chd:
                             {
                                 FileConverter chdConverter = new();
+
                                 chdConverter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
-                                chdConverter.ProgressChanged += (s, e) => Application.Current.Dispatcher.BeginInvoke(() => item.Progress = e.Progress);
+                                chdConverter.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
+
                                 var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, _cts.Token);
 
                                 if (!chdResult.Success)
@@ -206,8 +187,10 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Wia:
                             {
                                 DolphinService dolphin = new();
+
                                 dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
-                                dolphin.ProgressChanged += (s, e) => Application.Current.Dispatcher.BeginInvoke(() => item.Progress = e.Progress);
+                                dolphin.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
+
                                 await dolphin.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, _config.Dolphin.CompressLevel, _cts.Token);
                             }
                             break;
@@ -215,6 +198,7 @@ public class CompressMainViewModel : ToolTabViewModel
                         default:
                             item.Status = "미지원";
                             AppendLog($"[{item.FileName}] 지원하지 않는 포맷", LogLevel.Error);
+
                             continue;
                     }
 
@@ -225,8 +209,8 @@ public class CompressMainViewModel : ToolTabViewModel
                 catch (OperationCanceledException)
                 {
                     AppendLog("작업이 취소되었습니다.", LogLevel.Error);
-                    foreach (var remainingItem in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
-                        remainingItem.Status = "취소";
+                    CancelRemainingItems();
+
                     break;
                 }
                 catch (Exception ex)
@@ -243,6 +227,15 @@ public class CompressMainViewModel : ToolTabViewModel
         }
     }
 
+    private void CancelRemainingItems()
+    {
+        foreach (var remainingItem in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
+        {
+            remainingItem.Status = "취소";
+            remainingItem.Progress = 0;
+        }
+    }
+
     private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
     {
         var opts = new EnumerationOptions
@@ -255,7 +248,7 @@ public class CompressMainViewModel : ToolTabViewModel
         foreach (var path in paths)
         {
             if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts)) 
+                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
                     yield return f;
             else if (File.Exists(path))
                 yield return path;
@@ -265,6 +258,4 @@ public class CompressMainViewModel : ToolTabViewModel
     private void AppendLog(string msg, LogLevel level = LogLevel.Info, string titleId = "") => Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
 
     private void ClearLog() => Application.Current.Dispatcher.Invoke(() => LogEntries.Clear());
-
-    #endregion
 }
