@@ -22,6 +22,7 @@
     <None Remove="DATA3.bin" />
     <None Remove="GamesDB.zip" />
     <None Remove="ICON0.png" />
+    <None Remove="KEYS.bin" />
     <None Remove="PIC0.png" />
     <None Remove="PIC1.png" />
   </ItemGroup>

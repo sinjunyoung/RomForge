@@ -7,6 +7,9 @@ using RomForge.Core.Services.PS1;
 using RomForge.Helpers;
 using RomForge.Models;
 using System.Collections.ObjectModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -278,7 +281,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
         ct.ThrowIfCancellationRequested();
 
-        _icon0Bytes = icon0Png ?? PbpResources.ICON0;
+        _icon0Bytes = icon0Png ?? PbpResources.ICON0;        
         Icon0Image = _icon0Bytes.ToBitmapImage();
 
         var pic0Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic0, ct) : null;
@@ -321,9 +324,9 @@ public class ConverterMainViewModel : ToolTabViewModel
 
             var assets = new PbpAssets
             {
-                Icon0Png = _icon0Bytes,
-                Pic0Png = _pic0Bytes,
-                Pic1Png = _pic1Bytes
+                Icon0Png = _icon0Bytes.ResizePng(80, 80),
+                Pic0Png = _pic0Bytes.ResizePng(480, 272),
+                Pic1Png = _pic1Bytes.ResizePng(480, 272)
             };
 
             string baseDirectory = Path.GetDirectoryName(orderedItems[0].FilePath)!;
@@ -371,6 +374,8 @@ public class ConverterMainViewModel : ToolTabViewModel
             }
         }
     }
+
+    
 
     private Progress<ProgressInfo> BuildProgressReporter() =>
     new(info =>

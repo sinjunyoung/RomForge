@@ -50,8 +50,11 @@ public static class PsarDiscWriter
         var data2 = (byte[])PbpTemplates.Data2.Clone();
         var titleBytes = System.Text.Encoding.ASCII.GetBytes(gameTitle);
 
+        Array.Clear(data2, 8, 128);
         Array.Copy(titleBytes, 0, data2, 8, gameTitle.Length);
-        outputStream.Write(data2, 0, data2.Length);
+        data2[8 + titleBytes.Length] = 0;
+
+        outputStream.Write(data2, 0, data2.Length);        
 
         var indexOffset = (uint)outputStream.Position;
         uint offset = 0;
