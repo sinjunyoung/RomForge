@@ -84,31 +84,41 @@ public static class CueFileReader
 
     public static CueFile BuildCueFromChdInfo(ChdInfo info)
     {
-        return new CueFile
+        var entry = new CueFileEntry { FileType = "BINARY", Tracks = [] };
+        long currentFrame = 0;
+
+        foreach (var track in info.Tracks)
         {
-            FileEntries = [.. info.Tracks.Select(track => new CueFileEntry
+            var indexes = new List<CueIndex>();
+
+            if (track.PreGap > 0)
             {
-                FileType = "BINARY",
-                Tracks =
-                [
-                    new CueTrack
+                indexes.Add(new CueIndex
                 {
-                    Number = track.TrackNumber,
-                    DataType = track.TrackType?.ToUpperInvariant().Contains("AUDIO", StringComparison.InvariantCultureIgnoreCase) == true
-                        ? CueDataTypes.Audio
-                        : CueDataTypes.Data,
-                    Indexes =
-                    [
-                        new CueIndex
-                        {
-                            Number = 1,
-                            Position = TocBuilder.PositionFromFrames(track.PreGap)
-                        }
-                    ]
-                }
-                ]
-            })]
-        };
+                    Number = 0,
+                    Position = TocBuilder.PositionFromFrames(currentFrame)
+                });
+            }
+
+            indexes.Add(new CueIndex
+            {
+                Number = 1,
+                Position = TocBuilder.PositionFromFrames(currentFrame + track.PreGap)
+            });
+
+            entry.Tracks.Add(new CueTrack
+            {
+                Number = track.TrackNumber,
+                DataType = track.TrackType?.ToUpperInvariant().Contains("AUDIO") == true
+                    ? CueDataTypes.Audio
+                    : CueDataTypes.Data,
+                Indexes = indexes
+            });
+
+            currentFrame += track.Frames;
+        }
+
+        return new CueFile { FileEntries = [entry] };
     }
 
     public static CueFile Parse(string content)

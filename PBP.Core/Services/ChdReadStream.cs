@@ -11,7 +11,7 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo inf
     private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / 2448u;
     private readonly TrackRegion[] _tracks = BuildTrackRegions(info);
 
-    private record TrackRegion(long Start, long PreGapEnd, long End);
+    private record TrackRegion(long StartSector, long EndSector, bool IsAudio);
 
     private static TrackRegion[] BuildTrackRegions(ChdInfo info)
     {
@@ -21,37 +21,22 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo inf
         for (int i = 0; i < info.Tracks.Length; i++)
         {
             var track = info.Tracks[i];
-            long start = current;
-            long pregapEnd = start + (long)track.PreGap * 2352;
-            long end = pregapEnd + (long)track.Frames * 2352;
-
-            regions[i] = new TrackRegion(start, pregapEnd, end);
-            current = end;
+            bool isAudio = track.TrackType?.ToUpperInvariant().Contains("AUDIO") == true;
+            regions[i] = new TrackRegion(current, current + track.Frames, isAudio);
+            current += track.Frames;
         }
 
         return regions;
     }
 
-    // 현재 position이 프리갭 구간인지, 아니면 데이터 구간인지 판별
-    // 데이터 구간이면 CHD에서의 실제 섹터 인덱스 반환
-    private (bool isPreGap, long chdSectorIdx) GetSectorInfo(long position)
+    private bool IsAudioSector(long sectorIdx)
     {
-        long chdSectors = 0;
-
-        for (int i = 0; i < _tracks.Length; i++)
+        foreach (var t in _tracks)
         {
-            var t = _tracks[i];
-
-            if (position < t.PreGapEnd)
-                return (true, 0);
-
-            if (position < t.End)
-                return (false, chdSectors + (position - t.PreGapEnd) / 2352);
-
-            chdSectors += (t.End - t.PreGapEnd) / 2352;
+            if (sectorIdx < t.EndSector)
+                return t.IsAudio;
         }
-
-        return (true, 0);
+        return false;
     }
 
     public override int Read(byte[] buffer, int offset, int count)
@@ -60,33 +45,31 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo inf
 
         while (bytesRead < count && _position < totalLength)
         {
-            var (isPreGap, chdSectorIdx) = GetSectorInfo(_position);
+            uint sectorIdx = (uint)(_position / 2352);
             int posInSector = (int)(_position % 2352);
+
+            uint hunkIdx = (uint)(sectorIdx / _sectorsPerHunk);
+            int hunkOffset = (int)(sectorIdx % _sectorsPerHunk) * 2448;
+
+            if (_cachedHunkIndex != hunkIdx)
+            {
+                _currentHunk = wrapper.ReadHunk(hunkIdx);
+                _cachedHunkIndex = hunkIdx;
+            }
+
+            if (_currentHunk == null)
+                throw new NullReferenceException(nameof(_currentHunk));
+
+            if (IsAudioSector(sectorIdx) && posInSector == 0)
+            {
+                for (int i = hunkOffset; i < hunkOffset + 2352; i += 2)
+                    (_currentHunk[i], _currentHunk[i + 1]) = (_currentHunk[i + 1], _currentHunk[i]);
+            }
+
             int toRead = (int)Math.Min(count - bytesRead, 2352 - posInSector);
             toRead = (int)Math.Min(toRead, totalLength - _position);
 
-            if (isPreGap)
-            {
-                // 프리갭 구간은 0으로 채움
-                Array.Clear(buffer, offset + bytesRead, toRead);
-            }
-            else
-            {
-                uint hunkIdx = (uint)(chdSectorIdx / _sectorsPerHunk);
-                int hunkOffset = (int)(chdSectorIdx % _sectorsPerHunk) * 2448;
-
-                if (_cachedHunkIndex != hunkIdx)
-                {
-                    _currentHunk = wrapper.ReadHunk(hunkIdx);
-                    _cachedHunkIndex = hunkIdx;
-                }
-
-                if (_currentHunk == null)
-                    throw new NullReferenceException(nameof(_currentHunk));
-
-                Array.Copy(_currentHunk, hunkOffset + posInSector, buffer, offset + bytesRead, toRead);
-            }
-
+            Array.Copy(_currentHunk, hunkOffset + posInSector, buffer, offset + bytesRead, toRead);
             bytesRead += toRead;
             _position += toRead;
         }

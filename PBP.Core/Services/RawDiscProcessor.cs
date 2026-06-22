@@ -20,6 +20,7 @@ public static class RawDiscProcessor
                 throw new Exception($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(error)}");
 
             var info = ChdInfoReader.ReadChdInfo(filePath);
+
             long totalSize = ChdmanService.CalculateOriginalSize(info);
             var stream = new ChdReadStream(wrapper, totalSize, info);
             var cueFile = CueFileReader.BuildCueFromChdInfo(info);
