@@ -445,9 +445,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     }
 
     private static string GuessTitle(DiscFileItem item)
-        => System.Text.RegularExpressions.Regex.Replace(
-            Path.GetFileNameWithoutExtension(item.FilePath), @"\s*\(Disc\s*\d+\)", "",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
+        => System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(item.FilePath), @"\s*\(Disc\s*\d+\)", string.Empty, System.Text.RegularExpressions.RegexOptions.IgnoreCase).Trim();
 
     private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
     {

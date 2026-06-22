@@ -9,17 +9,18 @@ public static class CueMerger
         var mergedEntry = new CueFileEntry { FileType = "BINARY", Tracks = [] };
         var merged = new CueFile { FileEntries = [mergedEntry] };
         long currentFrame = 0;
-        var basePath = Path.GetDirectoryName(unmergedCue.Path) ?? "";
+        var basePath = Path.GetDirectoryName(unmergedCue.Path) ?? string.Empty;
 
         foreach (var entry in unmergedCue.FileEntries)
         {
             var binPath = entry.FileName;
-            var binDirectory = Path.GetDirectoryName(binPath) ?? "";
+            var binDirectory = Path.GetDirectoryName(binPath) ?? string.Empty;
 
-            if (binDirectory == "" || binDirectory.StartsWith("..") || binDirectory.StartsWith('.'))
+            if (binDirectory == string.Empty || binDirectory.StartsWith("..") || binDirectory.StartsWith('.'))
                 binPath = Path.Combine(basePath, entry.FileName);
 
             using var srcStream = new FileStream(binPath, FileMode.Open, FileAccess.Read);
+
             srcStream.CopyTo(outputStream);
 
             foreach (var track in entry.Tracks)

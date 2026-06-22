@@ -6,7 +6,7 @@ namespace PickPack.Disk
     {
         public async Task<(Stream stream, long length)> OpenStreamAsync(string imageUrl, CancellationToken cancellationToken)
         {
-            progressCallback(0, "이미지 다운로드 시작...", "");
+            progressCallback(0, "이미지 다운로드 시작...", string.Empty);
 
             var response = await httpClient.GetAsync(imageUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
 

@@ -36,7 +36,7 @@ namespace PickPack.Disk
     {
         public async Task<(Stream stream, long length)> OpenStreamAsync(string imagePath, CancellationToken cancellationToken)
         {
-            progressCallback(0, "파일 크기 계산 중...", "");
+            progressCallback(0, "파일 크기 계산 중...", string.Empty);
 
             long sourceLength = await GetGzUncompressedSizeAsync(imagePath, cancellationToken);
             var compressedStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read, FileShare.Read, Optimal.BufferSize * 2, FileOptions.SequentialScan);
@@ -56,7 +56,7 @@ namespace PickPack.Disk
             byte[] buffer = Optimal.ArrayPool.Rent(Optimal.BufferSize * 2);
             long compressedFileSize = new FileInfo(imagePath).Length;
 
-            progressCallback(0, "이미지 크기 확인 중...", "");
+            progressCallback(0, "이미지 크기 확인 중...", string.Empty);
 
             try
             {

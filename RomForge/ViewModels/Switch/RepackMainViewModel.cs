@@ -245,7 +245,7 @@ namespace RomForge.ViewModels.Switch
             }
 
             var baseFile = gameFiles.First(f => f.FileType.Contains('B')).FilePath;
-            var updateFile = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'))?.FilePath ?? "";
+            var updateFile = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'))?.FilePath ?? string.Empty;
             var dlcFiles = gameFiles.Where(f => f.FileType.Contains('D')).Select(f => f.FilePath).ToList();
 
             req = new BuildRequest(baseFile, updateFile, dlcFiles, PatchPath.Trim(), OutputPath);

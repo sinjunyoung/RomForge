@@ -10,7 +10,9 @@ public static class PsarPackager
         byte[] zeroBuffer = new byte[0x8000];
 
         outputStream.Write("PSTITLEIMG000000", 0, 16);
+
         var p1Offset = (uint)outputStream.Position;
+
         outputStream.WriteInt32(0, 2);
         outputStream.WriteInt32(0x2CC9C5BC, 1);
         outputStream.WriteInt32(0x33B5A90F, 1);
@@ -19,6 +21,7 @@ public static class PsarPackager
         outputStream.WriteInt32(0, 0x76);
 
         var mOffset = (uint)outputStream.Position;
+
         outputStream.Write(isoPositions, 1, sizeof(uint) * 5);
 
         outputStream.WriteRandom(12);
@@ -45,9 +48,10 @@ public static class PsarPackager
         for (var discNo = 0; discNo < discs.Count; discNo++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var disc = discs[discNo];
 
+            var disc = discs[discNo];
             var offset = (uint)outputStream.Position;
+
             if (offset % 0x8000 > 0)
             {
                 uint pad = 0x8000 - (offset % 0x8000);
@@ -69,8 +73,8 @@ public static class PsarPackager
             outputStream.Write([.. new byte[padCount].Select(_ => (byte)'0')], 0, padCount);
 
         uint finalOffset = (uint)outputStream.Position;
-        endOffset -= psarOffset;
 
+        endOffset -= psarOffset;
         outputStream.Seek(p1Offset, SeekOrigin.Begin);
         outputStream.WriteUInt32(endOffset, 1);
         outputStream.Seek(p2Offset, SeekOrigin.Begin);

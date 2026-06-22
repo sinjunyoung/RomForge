@@ -11,13 +11,14 @@ public static class PbpPackager
         return Task.Run(() =>
         {
             assets ??= new PbpAssets();
+
             var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();
+
             PbpHeaderBuilder.EnsureRequiredAssets(assets, basePbpBytes);
 
             var sfo = BuildDefaultSfo(gameId, gameTitle);
             var header = PbpHeaderBuilder.BuildHeader(assets, sfo.Size);
             var psarOffset = header[9];
-
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4 * 1024 * 1024, FileOptions.SequentialScan);
 
             WriteCommonSections(outputStream, header, sfo, assets, psarOffset);
@@ -29,30 +30,6 @@ public static class PbpPackager
 
             return outputPath;
         }, ct);
-    }
-
-    public static Task<string> WriteSingleDiscAsync(string inputPath, string gameId, string gameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
-    {
-        using var disc = CuePreprocessor.Resolve(inputPath);
-        var info = new DiscWriteInfo(disc.IsoStream, disc.IsoLength, gameId, gameTitle, disc.TocData);
-
-        return WritePbpAsync([info], gameId, gameTitle, outputPath, compressionLevel, assets, progress, ct);
-    }
-
-    public static Task<string> WriteMultiDiscAsync(IReadOnlyList<(string InputPath, string GameTitle)> discs, string mainGameId, string mainGameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
-    {
-        var resolvedDiscs = discs.Select(d => CuePreprocessor.Resolve(d.InputPath)).ToList();
-
-        try
-        {
-            var discInfos = resolvedDiscs.Zip(discs, (res, input) => new DiscWriteInfo(res.IsoStream, res.IsoLength, mainGameId, input.GameTitle, res.TocData)).ToList();
-
-            return WritePbpAsync(discInfos, mainGameId, mainGameTitle, outputPath, compressionLevel, assets, progress, ct);
-        }
-        finally
-        {
-            foreach (var d in resolvedDiscs) d.Dispose();
-        }
     }
 
     private static SFOData BuildDefaultSfo(string gameId, string gameTitle)
@@ -98,10 +75,13 @@ public static class PbpPackager
         {
             lock (reportLock)
             {
-                if (cur < total && reportSw.ElapsedMilliseconds < 100) return;
+                if (cur < total && reportSw.ElapsedMilliseconds < 100)
+                    return;
 
                 long now = Stopwatch.GetTimestamp();
+
                 window.Enqueue((now, cur));
+
                 double freq = Stopwatch.Frequency;
 
                 while (window.Count > 1 && (now - window.Peek().ts) / freq > windowSec)
@@ -128,9 +108,12 @@ public static class PbpPackager
                 var elapsed = TimeSpan.FromSeconds(elapsedSec);
                 var totalEta = TimeSpan.FromSeconds(elapsedSec + Math.Max(0, etaSec));
                 int pct = total > 0 ? (int)(cur * 100 / total) : 0;
-                if (pct > 100) pct = 100;
+
+                if (pct > 100) 
+                    pct = 100;
 
                 var r = Utils.CalculateProgress(cur, total, gameTitle);
+
                 progress?.Report(new ProgressInfo(pct, r.label, gameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}"));
                 reportSw.Restart();
             }
