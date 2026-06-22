@@ -358,12 +358,15 @@ public class ConverterMainViewModel : ToolTabViewModel
             {
                 Icon0Png = _icon0Bytes.ResizePng(80, 80),
                 Pic0Png = _pic0Bytes.ResizePng(480, 272),
-                Pic1Png = _pic1Bytes.ResizePng(480, 272)
+                Pic1Png = _pic1Bytes.ResizePng(480, 272),
+                DataPsp = PbpResources.DATA
             };
 
             string baseDirectory = Path.GetDirectoryName(orderedItems[0].FilePath)!;
             string gameDirectory = Path.Combine(baseDirectory, mainGameId);
             string targetOutputPath = Path.Combine(gameDirectory, "eboot.pbp");
+
+            var resolvedDiscs = new List<ResolvedDisc>();
 
             try
             {
@@ -372,22 +375,16 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                 AppendLog($"작업 시작: {gameTitle} [{mainGameId}] ({orderedItems.Count}개 디스크)", LogLevel.Highlight);
 
-                var progress = BuildProgressReporter();
-
-                if (orderedItems.Count == 1)
+                var discInfos = orderedItems.Select(i =>
                 {
-                    var item = orderedItems[0];
+                    var resolved = RawDiscProcessor.Resolve(i.FilePath);
 
-                    await PbpPackager.WriteSingleDiscAsync(item.FilePath, mainGameId, gameTitle, targetOutputPath, 9, assets, progress, _cts.Token);
-                }
-                else
-                {
-                    var discs = orderedItems
-                        .Select(i => (InputPath: i.FilePath, GameTitle: $"{gameTitle} - Disc {i.No}"))
-                        .ToList();
+                    resolvedDiscs.Add(resolved);
 
-                    await PbpPackager.WriteMultiDiscAsync(discs, mainGameId, gameTitle, targetOutputPath, 9, assets, progress, _cts.Token);
-                }
+                    return new DiscWriteInfo(resolved.IsoStream, resolved.IsoLength, mainGameId, orderedItems.Count > 1 ? $"{gameTitle} - Disc {i.No}" : gameTitle, resolved.TocData);
+                }).ToList();
+
+                await PbpPackager.WritePbpAsync(discInfos, mainGameId, gameTitle, targetOutputPath, 9, assets, BuildProgressReporter(), _cts.Token);
 
                 ProgressPct = 100;
                 AppendLog($"작업 완료: {targetOutputPath}", LogLevel.Ok);
@@ -404,10 +401,13 @@ public class ConverterMainViewModel : ToolTabViewModel
                 CleanupTask();
                 TryDeleteFileAndFolder(targetOutputPath, gameDirectory);
             }
+            finally
+            {
+                foreach (var d in resolvedDiscs) 
+                    d.Dispose();
+            }
         }
     }
-
-    
 
     private Progress<ProgressInfo> BuildProgressReporter() =>
     new(info =>

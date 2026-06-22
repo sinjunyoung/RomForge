@@ -1,180 +1,58 @@
-﻿using System.Diagnostics;
-using Common;
+﻿using Common;
 using PBP.Core.Models;
+using System.Diagnostics;
 
 namespace PBP.Core.Services;
 
 public static class PbpPackager
 {
-    public static Task<string> WriteSingleDiscAsync(string inputPath, string gameId, string gameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
+    public static Task<string> WritePbpAsync(IReadOnlyList<DiscWriteInfo> discInfos, string gameId, string gameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
     {
         return Task.Run(() =>
         {
             assets ??= new PbpAssets();
-
             var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();
-
             PbpHeaderBuilder.EnsureRequiredAssets(assets, basePbpBytes);
 
             var sfo = BuildDefaultSfo(gameId, gameTitle);
             var header = PbpHeaderBuilder.BuildHeader(assets, sfo.Size);
             var psarOffset = header[9];
+
             using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4 * 1024 * 1024, FileOptions.SequentialScan);
 
             WriteCommonSections(outputStream, header, sfo, assets, psarOffset);
 
-            using var disc = CuePreprocessor.Resolve(inputPath);
+            var reporter = CreateProgressReporter(gameTitle, gameId, progress, Stopwatch.GetTimestamp());
 
-            var reportLock = new object();
-            var reportSw = Stopwatch.StartNew();
-            long startTime = Stopwatch.GetTimestamp();
-            var window = new Queue<(long ts, long written)>();
-            double windowSec = 2.0;
-
-            SingleDiscPsarWriter.WritePsar(outputStream, new DiscWriteInfo(disc.IsoStream, disc.IsoLength, gameId, gameTitle, disc.TocData), psarOffset, compressionLevel, ct, (cur, total) =>
-            {
-                lock (reportLock)
-                {
-                    if (cur < total && reportSw.ElapsedMilliseconds < 100)
-                        return;
-
-                    long now = Stopwatch.GetTimestamp();
-                    window.Enqueue((now, cur));
-                    double freq = Stopwatch.Frequency;
-
-                    while (window.Count > 1 && (now - window.Peek().ts) / freq > windowSec)
-                        window.Dequeue();
-
-                    double mibPerSec = 0;
-                    double etaSec = 0;
-
-                    if (window.Count >= 2)
-                    {
-                        var (ts, written) = window.Peek();
-                        double secSpan = (now - ts) / freq;
-                        long bytesSpan = cur - written;
-                        double avgSpeed = cur / ((now - startTime) / freq);
-                        double windowSpeed = secSpan > 0 ? bytesSpan / secSpan : 0;
-                        double progressRatio = total > 0 ? (double)cur / total : 0;
-                        double blendedSpeed = avgSpeed * (1 - progressRatio) + windowSpeed * progressRatio;
-
-                        mibPerSec = blendedSpeed / (1024.0 * 1024.0);
-                        etaSec = blendedSpeed > 0 ? (total - cur) / blendedSpeed : 0;
-                    }
-
-                    double elapsedSec = (now - startTime) / freq;
-                    var elapsed = TimeSpan.FromSeconds(elapsedSec);
-                    var totalEta = TimeSpan.FromSeconds(elapsedSec + Math.Max(0, etaSec));
-                    int pct = total > 0 ? (int)(cur * 100 / total) : 0;
-
-                    if (pct > 100)
-                        pct = 100;
-
-                    var r = Utils.CalculateProgress(cur, total, gameTitle);
-
-                    progress?.Report(new ProgressInfo(pct, r.label, gameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}"));
-                    reportSw.Restart();
-                }
-            });
-
+            PsarPackager.WritePsar(outputStream, gameTitle, gameId, discInfos, psarOffset, compressionLevel, ct, reporter);
             StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng);
 
             return outputPath;
         }, ct);
     }
 
+    public static Task<string> WriteSingleDiscAsync(string inputPath, string gameId, string gameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
+    {
+        using var disc = CuePreprocessor.Resolve(inputPath);
+        var info = new DiscWriteInfo(disc.IsoStream, disc.IsoLength, gameId, gameTitle, disc.TocData);
+
+        return WritePbpAsync([info], gameId, gameTitle, outputPath, compressionLevel, assets, progress, ct);
+    }
+
     public static Task<string> WriteMultiDiscAsync(IReadOnlyList<(string InputPath, string GameTitle)> discs, string mainGameId, string mainGameTitle, string outputPath, int compressionLevel, PbpAssets? assets, IProgress<ProgressInfo> progress, CancellationToken ct = default)
     {
-        return Task.Run(() =>
+        var resolvedDiscs = discs.Select(d => CuePreprocessor.Resolve(d.InputPath)).ToList();
+
+        try
         {
-            assets ??= new PbpAssets();
+            var discInfos = resolvedDiscs.Zip(discs, (res, input) => new DiscWriteInfo(res.IsoStream, res.IsoLength, mainGameId, input.GameTitle, res.TocData)).ToList();
 
-            var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();
-
-            PbpHeaderBuilder.EnsureRequiredAssets(assets, basePbpBytes);
-
-            var sfo = BuildDefaultSfo(mainGameId, mainGameTitle);
-            var header = PbpHeaderBuilder.BuildHeader(assets, sfo.Size);
-            var psarOffset = header[9];
-            using var outputStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 4 * 1024 * 1024, FileOptions.SequentialScan);
-
-            WriteCommonSections(outputStream, header, sfo, assets, psarOffset);
-
-            var resolvedDiscs = new List<ResolvedDisc>();
-
-            try
-            {
-                var discInfos = new List<DiscWriteInfo>();
-
-                foreach (var (InputPath, GameTitle) in discs)
-                {
-                    var resolved = CuePreprocessor.Resolve(InputPath);
-                    resolvedDiscs.Add(resolved);
-                    discInfos.Add(new DiscWriteInfo(resolved.IsoStream, resolved.IsoLength, mainGameId, GameTitle, resolved.TocData));
-                }
-
-                var reportLock = new object();
-                var reportSw = Stopwatch.StartNew();
-                long startTime = Stopwatch.GetTimestamp();
-                var window = new Queue<(long ts, long written)>();
-                double windowSec = 2.0;
-
-                MultiDiscPsarWriter.WritePsar(outputStream, mainGameTitle, mainGameId, discInfos, psarOffset, compressionLevel, ct, (cur, total) =>
-                {
-                    lock (reportLock)
-                    {
-                        if (cur < total && reportSw.ElapsedMilliseconds < 100)
-                            return;
-
-                        long now = Stopwatch.GetTimestamp();
-                        window.Enqueue((now, cur));
-                        double freq = Stopwatch.Frequency;
-
-                        while (window.Count > 1 && (now - window.Peek().ts) / freq > windowSec)
-                            window.Dequeue();
-
-                        double mibPerSec = 0;
-                        double etaSec = 0;
-
-                        if (window.Count >= 2)
-                        {
-                            var (ts, written) = window.Peek();
-                            double secSpan = (now - ts) / freq;
-                            long bytesSpan = cur - written;
-                            double avgSpeed = cur / ((now - startTime) / freq);
-                            double windowSpeed = secSpan > 0 ? bytesSpan / secSpan : 0;
-                            double progressRatio = total > 0 ? (double)cur / total : 0;
-                            double blendedSpeed = avgSpeed * (1 - progressRatio) + windowSpeed * progressRatio;
-
-                            mibPerSec = blendedSpeed / (1024.0 * 1024.0);
-                            etaSec = blendedSpeed > 0 ? (total - cur) / blendedSpeed : 0;
-                        }
-
-                        double elapsedSec = (now - startTime) / freq;
-                        var elapsed = TimeSpan.FromSeconds(elapsedSec);
-                        var totalEta = TimeSpan.FromSeconds(elapsedSec + Math.Max(0, etaSec));
-                        int pct = total > 0 ? (int)(cur * 100 / total) : 0;
-
-                        if (pct > 100)
-                            pct = 100;
-
-                        var r = Utils.CalculateProgress(cur, total, mainGameTitle);
-
-                        progress?.Report(new ProgressInfo(pct, r.label, mainGameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}"));
-                        reportSw.Restart();
-                    }
-                });
-            }
-            finally
-            {
-                foreach (var d in resolvedDiscs)
-                    d.Dispose();
-            }
-
-            StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng);
-
-            return outputPath;
-        }, ct);
+            return WritePbpAsync(discInfos, mainGameId, mainGameTitle, outputPath, compressionLevel, assets, progress, ct);
+        }
+        finally
+        {
+            foreach (var d in resolvedDiscs) d.Dispose();
+        }
     }
 
     private static SFOData BuildDefaultSfo(string gameId, string gameTitle)
@@ -207,5 +85,55 @@ public static class PbpPackager
 
         for (var i = 0; i < psarOffset - pos; i++)
             outputStream.WriteByte(0);
+    }
+
+    private static Action<long, long> CreateProgressReporter(string gameTitle, string gameId, IProgress<ProgressInfo> progress, long startTime)
+    {
+        var reportLock = new object();
+        var reportSw = Stopwatch.StartNew();
+        var window = new Queue<(long ts, long written)>();
+        double windowSec = 2.0;
+
+        return (cur, total) =>
+        {
+            lock (reportLock)
+            {
+                if (cur < total && reportSw.ElapsedMilliseconds < 100) return;
+
+                long now = Stopwatch.GetTimestamp();
+                window.Enqueue((now, cur));
+                double freq = Stopwatch.Frequency;
+
+                while (window.Count > 1 && (now - window.Peek().ts) / freq > windowSec)
+                    window.Dequeue();
+
+                double mibPerSec = 0;
+                double etaSec = 0;
+
+                if (window.Count >= 2)
+                {
+                    var (ts, written) = window.Peek();
+                    double secSpan = (now - ts) / freq;
+                    long bytesSpan = cur - written;
+                    double avgSpeed = cur / ((now - startTime) / freq);
+                    double windowSpeed = secSpan > 0 ? bytesSpan / secSpan : 0;
+                    double progressRatio = total > 0 ? (double)cur / total : 0;
+                    double blendedSpeed = avgSpeed * (1 - progressRatio) + windowSpeed * progressRatio;
+
+                    mibPerSec = blendedSpeed / (1024.0 * 1024.0);
+                    etaSec = blendedSpeed > 0 ? (total - cur) / blendedSpeed : 0;
+                }
+
+                double elapsedSec = (now - startTime) / freq;
+                var elapsed = TimeSpan.FromSeconds(elapsedSec);
+                var totalEta = TimeSpan.FromSeconds(elapsedSec + Math.Max(0, etaSec));
+                int pct = total > 0 ? (int)(cur * 100 / total) : 0;
+                if (pct > 100) pct = 100;
+
+                var r = Utils.CalculateProgress(cur, total, gameTitle);
+                progress?.Report(new ProgressInfo(pct, r.label, gameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}"));
+                reportSw.Restart();
+            }
+        };
     }
 }

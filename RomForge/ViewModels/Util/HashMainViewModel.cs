@@ -2,25 +2,35 @@
 using Common.WPF.ViewModels;
 using RomForge.Helpers;
 using RomForge.Models;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace RomForge.ViewModels.Util;
 
-public class CueMainViewModel : ToolTabViewModel
+public enum HashAlgorithmType
 {
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".bin"
-    };
+    CRC32,
+    MD5,
+    SHA1,
+    SHA256,
+    BLAKE3
+}
 
+public class HashMainViewModel : ToolTabViewModel
+{
     #region Fields
 
     private bool _isConverting;
+    private HashAlgorithmType _selectedAlgorithm = HashAlgorithmType.CRC32;
     private CancellationTokenSource _cts = new();
 
     #endregion
@@ -28,7 +38,7 @@ public class CueMainViewModel : ToolTabViewModel
     #region Collections
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
-    public ObservableCollection<CueFileItem> FileItems { get; } = [];
+    public ObservableCollection<HashFileItem> FileItems { get; } = [];
 
     #endregion
 
@@ -38,6 +48,12 @@ public class CueMainViewModel : ToolTabViewModel
     {
         get => _isConverting;
         set { _isConverting = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
+    }
+
+    public HashAlgorithmType SelectedAlgorithm
+    {
+        get => _selectedAlgorithm;
+        set { _selectedAlgorithm = value; OnPropertyChanged(); }
     }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -51,11 +67,11 @@ public class CueMainViewModel : ToolTabViewModel
 
     #endregion
 
-    public event Action<CueFileItem>? ScrollToItemRequested;
+    public event Action<HashFileItem>? ScrollToItemRequested;
 
     #region Constructor
 
-    public CueMainViewModel()
+    public HashMainViewModel()
     {
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsConverting && FileItems.Count > 0);
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsConverting);
@@ -71,13 +87,10 @@ public class CueMainViewModel : ToolTabViewModel
 
         foreach (var path in ExpandPaths(paths))
         {
-            if (!SupportedExtensions.Contains(Path.GetExtension(path)))
-                continue;
-
             if (!existing.Add(path))
                 continue;
 
-            var vm = new CueFileItem(path)
+            var vm = new HashFileItem(path)
             {
                 No = FileItems.Count + 1
             };
@@ -89,7 +102,7 @@ public class CueMainViewModel : ToolTabViewModel
         CommandManager.InvalidateRequerySuggested();
     }
 
-    public void RemoveItems(IEnumerable<CueFileItem> items)
+    public void RemoveItems(IEnumerable<HashFileItem> items)
     {
         foreach (var item in items.ToList())
             FileItems.Remove(item);
@@ -109,8 +122,7 @@ public class CueMainViewModel : ToolTabViewModel
 
     public static string GetFileDialogFilter()
     {
-        string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
+        return "모든 파일|*.*";
     }
 
     #endregion
@@ -124,46 +136,47 @@ public class CueMainViewModel : ToolTabViewModel
         _cts = new CancellationTokenSource();
         ClearLog();
 
+        var algoType = SelectedAlgorithm;
+        AppendLog($"총 {FileItems.Count}개의 파일 해시 계산을 시작합니다. (알고리즘: {algoType})", LogLevel.Highlight);
+
         using (BeginWork())
         {
             try
             {
-                int totalCount = FileItems.Count;
                 int successCount = 0;
-
-                AppendLog($"총 {totalCount}개의 CUE 파일 검증 및 생성 작업을 시작합니다.", LogLevel.Highlight);
 
                 foreach (var item in FileItems)
                 {
                     _cts.Token.ThrowIfCancellationRequested();
 
-                    if (item.Status == "완료")
-                        continue;
+                    //if (item.Status == "완료")
+                    //    continue;
 
                     item.Status = "대기중";
                     item.Progress = 0;
+                    item.HashResult = string.Empty;
                     item.Status = "변환중";
                     ScrollToItemRequested?.Invoke(item);
 
-                    bool success = await Task.Run(() => ProcessSingleFile(item, _cts.Token));
+                    string result = await Task.Run(() => ComputeHash(item, algoType, _cts.Token));
 
-                    if (success)
+                    if (!string.IsNullOrEmpty(result))
                     {
+                        item.HashResult = result;
                         item.Progress = 100;
                         item.Status = "완료";
                         successCount++;
+                        AppendLog($"[완료] {item.FileName} -> {result}");
                     }
                     else
                     {
                         item.Progress = 0;
-                        if (item.Status == "변환중")
-                        {
-                            item.Status = "실패";
-                        }
+                        item.Status = "실패";
+                        AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
                     }
                 }
 
-                AppendLog($"작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Highlight);
+                AppendLog($"작업 완료 (성공: {successCount} / 전체: {FileItems.Count})", LogLevel.Highlight);
             }
             catch (OperationCanceledException)
             {
@@ -188,71 +201,106 @@ public class CueMainViewModel : ToolTabViewModel
         }
     }
 
-    private bool ProcessSingleFile(CueFileItem item, CancellationToken token)
+    private static string ComputeHash(HashFileItem item, HashAlgorithmType algoType, CancellationToken token)
     {
         try
         {
-            token.ThrowIfCancellationRequested();
+            if (!File.Exists(item.FilePath)) 
+                return string.Empty;
 
-            string targetCuePath = Path.Combine(item.Directory, item.TargetName);
+            using var fs = new FileStream(item.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            long totalBytes = fs.Length;
 
-            if (File.Exists(targetCuePath))
+            if (algoType == HashAlgorithmType.CRC32)
             {
-                item.Status = "미지원";
-                AppendLog($"[패스] 이미 {item.TargetName} 파일이 존재하므로 생성을 건너뜁니다. (덮어쓰기 방지)", LogLevel.Error);
-                return false;
+                var crc = new System.IO.Hashing.Crc32();
+                return ProcessNonCryptoStream(fs, totalBytes, item, (buf, len) => crc.Append(new ReadOnlySpan<byte>(buf, 0, len)), () =>
+                {
+                    byte[] hashBytes = crc.GetHashAndReset();
+                    return BitConverter.ToUInt32([.. hashBytes.Reverse()], 0).ToString("X8");
+                }, token);
             }
 
-            string trackMode = DetectBinTrackMode(item.FilePath);
-            AppendLog($"[{item.FileName}] 분석 완료 -> 포맷: {trackMode}");
-
-            string binFileNameWithExt = Path.GetFileName(item.FilePath);
-
-            var sb = new StringBuilder();
-            sb.AppendLine($"FILE \"{binFileNameWithExt}\" BINARY");
-            sb.AppendLine($"  TRACK 01 {trackMode}");
-            sb.AppendLine("    INDEX 01 00:00:00");
-
-            token.ThrowIfCancellationRequested();
-
-            File.WriteAllText(targetCuePath, sb.ToString(), Encoding.UTF8);
-            AppendLog($"[성공] CUE 파일 생성 완료: {item.TargetName}");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            AppendLog($"[실패] {item.FileName} 처리 중 에러: {ex.Message}", LogLevel.Error);
-            return false;
-        }
-    }
-
-    private static string DetectBinTrackMode(string filePath)
-    {
-        try
-        {
-            using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-            if (fs.Length < 16)
-                return "MODE1/2352";
-
-            byte[] header = new byte[16];
-            int read = fs.Read(header, 0, 16);
-            if (read < 16)
-                return "MODE1/2352";
-
-            byte modeByte = header[15];
-
-            return modeByte switch
+            if (algoType == HashAlgorithmType.BLAKE3)
             {
-                1 => "MODE1/2352",
-                2 => "MODE2/2352",
-                _ => "MODE1/2352"
-            };
+                using var hasher = Blake3.Hasher.New();
+                return ProcessNonCryptoStream(fs, totalBytes, item, (buf, len) => hasher.Update(new ReadOnlySpan<byte>(buf, 0, len)), () =>
+                {
+                    return hasher.Finalize().ToString().ToUpperInvariant();
+                }, token);
+            }
+
+            using var algorithm = CreateHashAlgorithm(algoType);
+            if (algorithm == null) return string.Empty;
+
+            byte[] buffer = new byte[1024 * 64];
+            long totalRead = 0;
+            int read;
+
+            while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                token.ThrowIfCancellationRequested();
+                totalRead += read;
+
+                if (totalRead == totalBytes)
+                    algorithm.TransformFinalBlock(buffer, 0, read);
+                else
+                    algorithm.TransformBlock(buffer, 0, read, buffer, 0);
+
+                if (totalBytes > 0)
+                    item.Progress = (int)((totalRead * 100) / totalBytes);
+            }
+
+            byte[]? cryptoBytes = algorithm.Hash;
+            if (cryptoBytes == null) return string.Empty;
+
+            return ConvertToHexString(cryptoBytes);
         }
         catch
         {
-            return "MODE1/2352";
+            return string.Empty;
         }
+    }
+
+    private static string ProcessNonCryptoStream(FileStream fs, long totalBytes, HashFileItem item, Action<byte[], int> appendAction, Func<string> finalizeAction, CancellationToken token)
+    {
+        byte[] buffer = new byte[1024 * 64];
+        long totalRead = 0;
+        int read;
+
+        while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
+        {
+            token.ThrowIfCancellationRequested();
+            totalRead += read;
+
+            appendAction(buffer, read);
+
+            if (totalBytes > 0)
+                item.Progress = (int)((totalRead * 100) / totalBytes);
+        }
+
+        return finalizeAction();
+    }
+
+    private static HashAlgorithm? CreateHashAlgorithm(HashAlgorithmType type)
+    {
+        return type switch
+        {
+            HashAlgorithmType.MD5 => MD5.Create(),
+            HashAlgorithmType.SHA1 => SHA1.Create(),
+            HashAlgorithmType.SHA256 => SHA256.Create(),
+            _ => null
+        };
+    }
+
+    private static string ConvertToHexString(byte[] bytes)
+    {
+        var sb = new StringBuilder(bytes.Length * 2);
+        foreach (byte b in bytes)
+        {
+            sb.Append(b.ToString("x2"));
+        }
+        return sb.ToString().ToUpperInvariant();
     }
 
     private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)

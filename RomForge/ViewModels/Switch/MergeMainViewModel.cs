@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
+using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
 using RomForge.Core;
 using RomForge.Core.Services.Switch;
@@ -324,17 +325,7 @@ public class MergeMainViewModel : ToolTabViewModel
         if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) 
             return;
 
-        OpenFolderPlatformSpecific(path);
-    }
-
-    private static void OpenFolderPlatformSpecific(string path)
-    {
-        if (OperatingSystem.IsWindows()) 
-            Process.Start("explorer.exe", path);
-        else if (OperatingSystem.IsLinux())
-            Process.Start(new ProcessStartInfo("xdg-open", path) { UseShellExecute = false });
-        else if (OperatingSystem.IsMacOS()) 
-            Process.Start("open", path);
+        path?.OpenFolder();
     }
 
     public void Log(string msg, LogLevel level = LogLevel.Info, string titleId = "") => Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));

@@ -10,6 +10,8 @@ public class UtilMainViewModel : MultiToolTabViewModel
 
     public CueMainViewModel CueVM { get; }
 
+    public HashMainViewModel HashVM { get; }
+
     public bool IsAdmin
     {
         get => _isAdmin;
@@ -32,9 +34,11 @@ public class UtilMainViewModel : MultiToolTabViewModel
 
         ZipImageToolVM = new ZipImageToolMainViewModel();
         CueVM = new CueMainViewModel();
+        HashVM = new HashMainViewModel();
 
         Tools.Add(ZipImageToolVM);
         Tools.Add(CueVM);
+        Tools.Add(HashVM);
 
         foreach (var tool in Tools)
             tool.PropertyChanged += Child_PropertyChanged;

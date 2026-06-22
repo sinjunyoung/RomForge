@@ -1,6 +1,9 @@
 ﻿using Microsoft.Win32;
+using NSW.WPF.Services;
 using RomForge.ViewModels;
+using RomForge.ViewModels.Util;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -106,7 +109,12 @@ public partial class CompressTab : UserControl
     {
         var selected = lvFiles.SelectedItems.Cast<CompressFileItem>().ToList();
 
-        CompressMainViewModel.OpenFolder(selected);
+        if (selected.Count == 0)
+            return;
+
+        string? dir = Path.GetDirectoryName(selected[0].FilePath);
+
+        dir?.OpenFolder();
     }
 
     private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)

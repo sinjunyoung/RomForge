@@ -24,8 +24,16 @@ public static class PsarDiscWriter
 
         outputStream.Write("PSISOIMG0000", 0, 12);
         p1Offset = (uint)outputStream.Position;
-        outputStream.WriteUInt32(isoSize + 0x100000, 1);
-        outputStream.WriteInt32(0, 0xFC);
+
+        if (isMultiDisc)
+        {
+            outputStream.WriteInt32(0, 0xFD);
+        }
+        else
+        {
+            outputStream.WriteUInt32(isoSize + 0x100000, 1);
+            outputStream.WriteInt32(0, 0xFC);
+        }
 
         var data1 = (byte[])PbpTemplates.Data1.Clone();
         var idBytes = System.Text.Encoding.ASCII.GetBytes(gameId);
@@ -33,10 +41,13 @@ public static class PsarDiscWriter
         Array.Copy(idBytes, 0, data1, 1, 4);
         Array.Copy(idBytes, 4, data1, 6, 5);
 
-        if (tocData == null || tocData.Length == 0)
-            throw new Exception("Invalid TOC");
+        if (!isMultiDisc)
+        { 
+            if (tocData == null || tocData.Length == 0)
+                throw new Exception("Invalid TOC");
+            Array.Copy(tocData, 0, data1, 1024, tocData.Length);
+        }
 
-        Array.Copy(tocData, 0, data1, 1024, tocData.Length);
         outputStream.Write(data1, 0, data1.Length);
 
         if (isMultiDisc)

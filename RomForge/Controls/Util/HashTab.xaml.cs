@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using NSW.WPF.Services;
-using RomForge.ViewModels;
 using RomForge.ViewModels.Util;
 using System.IO;
 using System.Windows;
@@ -10,20 +9,17 @@ using System.Windows.Threading;
 
 namespace RomForge.Controls.Util;
 
-public partial class CueTab : UserControl
+public partial class HashTab : UserControl
 {
-    private CueMainViewModel ViewModel => (CueMainViewModel)DataContext;
+    private HashMainViewModel ViewModel => (HashMainViewModel)DataContext;
 
-
-    public CueTab()
+    public HashTab()
     {
         InitializeComponent();
-
-        DataContextChanged += CompressTab_DataContextChanged;
-
+        DataContextChanged += HashTab_DataContextChanged;
     }
 
-    private void CompressTab_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    private void HashTab_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         if (ViewModel != null)
         {
@@ -32,13 +28,24 @@ public partial class CueTab : UserControl
         }
     }
 
-    private void OnScrollToItemRequested(object item)
+    private void OnScrollToItemRequested(HashFileItem item)
     {
         Dispatcher.InvokeAsync(() =>
         {
             if (item != null)
                 lvFiles.ScrollIntoView(item);
         }, DispatcherPriority.Background);
+    }
+
+    private void RadioButton_Checked(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is RadioButton rb && rb.Tag is string tag && ViewModel != null)
+        {
+            if (Enum.TryParse<HashAlgorithmType>(tag, out var algo))
+            {
+                ViewModel.SelectedAlgorithm = algo;
+            }
+        }
     }
 
     private void LvFiles_DragOver(object sender, DragEventArgs e)
@@ -55,12 +62,17 @@ public partial class CueTab : UserControl
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Delete)
-            return;
+        if (e.Key == Key.Delete)
+        {
+            var selected = lvFiles.SelectedItems.Cast<HashFileItem>().ToList();
+            ViewModel.RemoveItems(selected);
+        }
 
-        var selected = lvFiles.SelectedItems.Cast<CueFileItem>().ToList();
-
-        ViewModel.RemoveItems(selected);
+        if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+        {
+            CopySelectedHashes();
+            e.Handled = true;
+        }
     }
 
     private async void BtnAddFiles_Click(object sender, RoutedEventArgs e)
@@ -68,7 +80,7 @@ public partial class CueTab : UserControl
         var dlg = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = CueMainViewModel.GetFileDialogFilter()
+            Filter = HashMainViewModel.GetFileDialogFilter()
         };
 
         if (dlg.ShowDialog() == true)
@@ -89,8 +101,7 @@ public partial class CueTab : UserControl
 
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
-        var selected = lvFiles.SelectedItems.Cast<CueFileItem>().ToList();
-
+        var selected = lvFiles.SelectedItems.Cast<HashFileItem>().ToList();
         ViewModel.RemoveItems(selected);
     }
 
@@ -102,11 +113,30 @@ public partial class CueTab : UserControl
             e.Handled = true;
     }
 
-    private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
+    private void MenuItem_CopyHash_Click(object sender, RoutedEventArgs e)
     {
-        var selected = lvFiles.SelectedItems.Cast<CueFileItem>().ToList();
+        CopySelectedHashes();
+    }
+
+    private void CopySelectedHashes()
+    {
+        var selected = lvFiles.SelectedItems.Cast<HashFileItem>()
+            .Where(item => !string.IsNullOrEmpty(item.HashResult))
+            .Select(item => item.HashResult)
+            .ToList();
 
         if (selected.Count == 0)
+            return;
+
+        string textToCopy = string.Join(Environment.NewLine, selected);
+        Clipboard.SetText(textToCopy);
+    }
+
+    private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var selected = lvFiles.SelectedItems.Cast<HashFileItem>().ToList();
+
+        if (selected.Count == 0) 
             return;
 
         string? dir = Path.GetDirectoryName(selected[0].FilePath);

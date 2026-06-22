@@ -46,7 +46,7 @@ public static class TocBuilder
             buf[5] = ToBcd(pos.Frames);
             buf[6] = 0x00;
 
-            pos += 150; // 2초 리드인 (75프레임 * 2초)
+            pos += 150;
             buf[7] = ToBcd(pos.Minutes);
             buf[8] = ToBcd(pos.Seconds);
             buf[9] = ToBcd(pos.Frames);
@@ -64,7 +64,7 @@ public static class TocBuilder
     {
         CueDataTypes.Data => 0x41,
         CueDataTypes.Audio => 0x01,
-        _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, "MODE2/2352 또는 AUDIO만 지원해요")
+        _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, "MODE2/2352 또는 AUDIO만 지원 가능합니다.")
     };
 
     public static byte ToBcd(int value) => (byte)((value / 10) * 0x10 + (value % 10));

@@ -1,10 +1,5 @@
 ﻿using PBP.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace PBP.Core.Services;
 
@@ -83,6 +78,59 @@ public static class CueFileReader
             }
         }
 
+        return cueFile;
+    }
+
+    public static CueFile Parse(string content)
+    {
+        var cueFile = new CueFile();
+        CueFileEntry? cueFileEntry = null;
+        CueTrack? cueTrack = null;
+
+        var lines = content.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
+        {
+            var fileMatch = FileRegex.Match(line);
+            var trackMatch = TrackRegex.Match(line);
+            var indexMatch = IndexRegex.Match(line);
+
+            if (fileMatch.Success)
+            {
+                cueFileEntry = new CueFileEntry 
+                {
+                    FileName = fileMatch.Groups[1].Value, 
+                    FileType = fileMatch.Groups[2].Value, 
+                    Tracks = [] 
+                };
+                cueFile.FileEntries.Add(cueFileEntry);
+            }
+            else if (trackMatch.Success)
+            {
+                cueTrack = new CueTrack
+                { 
+                    Number = int.Parse(trackMatch.Groups[1].Value), 
+                    DataType = trackMatch.Groups[2].Value, 
+                    Indexes = [] 
+                };
+                cueFileEntry!.Tracks.Add(cueTrack);
+            }
+            else if (indexMatch.Success)
+            {
+                var pos = indexMatch.Groups[2].Value.Split(':');
+
+                cueTrack!.Indexes.Add(new CueIndex
+                {
+                    Number = int.Parse(indexMatch.Groups[1].Value),
+                    Position = new IndexPosition 
+                    { 
+                        Minutes = int.Parse(pos[0]), 
+                        Seconds = int.Parse(pos[1]), 
+                        Frames = int.Parse(pos[2])
+                    }
+                });
+            }
+        }
         return cueFile;
     }
 }

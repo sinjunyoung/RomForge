@@ -9,4 +9,6 @@ public static class PbpResources
     public static byte[] PIC1 => Properties.Resources.PIC1;
 
     public static byte[] GamesDB => Properties.Resources.GamesDB;
+
+    public static byte[] DATA => Properties.Resources.DATA;
 }

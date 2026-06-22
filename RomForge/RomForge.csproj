@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>0.0.0.5</VersionPrefix>
+    <VersionPrefix>0.0.0.6</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -19,6 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Images\CUE.png" />
+    <None Remove="Assets\Images\Hash.png" />
     <None Remove="Assets\Images\Keygen.png" />
     <None Remove="Assets\Images\OpenFolder.png" />
     <None Remove="Assets\Images\Repack.png" />
@@ -34,6 +35,7 @@
     <Resource Include="Assets\Images\Cartridge.png" />
     <Resource Include="Assets\Images\Convert.png" />
     <Resource Include="Assets\Images\CUE.png" />
+    <Resource Include="Assets\Images\Hash.png" />
     <Resource Include="Assets\Images\HDD.png" />
     <Resource Include="Assets\Images\Keygen.png" />
     <Resource Include="Assets\Images\OpenFolder.png" />
@@ -54,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.9" />
     <PackageReference Include="System.Management" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>

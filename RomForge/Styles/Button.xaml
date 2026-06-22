@@ -198,9 +198,45 @@
 
 
     <Style TargetType="RadioButton">
-        <Setter Property="Foreground" Value="#DCDCDC"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Foreground" Value="#E1E1E1"/>
+        <Setter Property="Background" Value="#2D2D30"/>
+        <Setter Property="BorderBrush" Value="#434346"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <BulletDecorator Background="Transparent" Cursor="Hand">
+                        <BulletDecorator.Bullet>
+                            <Grid Width="16" Height="16" VerticalAlignment="Center">
+                                <Ellipse x:Name="BorderCircle" 
+                                             Fill="{TemplateBinding Background}" 
+                                             Stroke="{TemplateBinding BorderBrush}" 
+                                             StrokeThickness="{TemplateBinding BorderThickness}"/>
+                                <Ellipse x:Name="CheckDot" 
+                                             Fill="#007ACC" 
+                                             Margin="4" 
+                                             Visibility="Collapsed"/>
+                            </Grid>
+                        </BulletDecorator.Bullet>
+                        <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
+                    </BulletDecorator>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckDot" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="BorderCircle" Property="Stroke" Value="#007ACC"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="BorderCircle" Property="Stroke" Value="#007ACC"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

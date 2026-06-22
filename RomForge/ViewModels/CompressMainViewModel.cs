@@ -86,17 +86,6 @@ public class CompressMainViewModel : ToolTabViewModel
         OnPropertyChanged(nameof(HintVisibility));
     }
 
-    public static void OpenFolder(List<CompressFileItem> selected)
-    {
-        if (selected.Count == 0)
-            return;
-
-        string path = Path.GetDirectoryName(selected[0].FilePath) ?? string.Empty;
-
-        if (Directory.Exists(path))
-            Process.Start("explorer.exe", $"\"{path}\"");
-    }
-
     private async Task RunAsync()
     {
         _cts.Dispose();

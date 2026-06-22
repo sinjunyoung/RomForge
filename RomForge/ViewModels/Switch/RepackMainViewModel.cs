@@ -5,6 +5,7 @@ using NSW.Core.Enums;
 using NSW.Core.Exceptions;
 using NSW.HacPack.Models;
 using NSW.M1.Core.Services;
+using NSW.WPF.Services;
 using NSW.WPF.UI;
 using NSW.WPF.ViewModels;
 using RomForge.Helpers;
@@ -176,8 +177,7 @@ namespace RomForge.ViewModels.Switch
                     string finalResult = NspBuildService.Run(req, mode, progress, (msg, lvl) => Log(msg, lvl), token);
                     Log($"완료! 총 소요: {_totalSw.Elapsed:mm\\:ss}", LogLevel.Ok);
 
-                    if (Directory.Exists(req.OutputDir)) 
-                        Process.Start("explorer.exe", $"\"{req.OutputDir}\"");
+                    req.OutputDir?.OpenFolder();
                 }
                 catch (OperationCanceledException)
                 {
