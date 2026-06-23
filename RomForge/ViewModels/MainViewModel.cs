@@ -9,6 +9,7 @@ using RomForge.ViewModels.Settings;
 using RomForge.ViewModels.Switch;
 using RomForge.ViewModels.Util;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace RomForge.ViewModels;
 
@@ -57,7 +58,7 @@ public class MainViewModel : ToolTabViewModel
 
     public MainViewModel()
     {
-        PatchVM = new PatchMainViewModel(_config);
+        PatchVM = new PatchMainViewModel(_config, async (file) => await MapsToHashAndProcess(file));
         CompressVM = new CompressMainViewModel(_config);
         SwitchMainVM = new SwitchMainViewModel(_config);
         Main3DsVM = new _3DSMainViewModel();
@@ -72,6 +73,24 @@ public class MainViewModel : ToolTabViewModel
         RegisterChild(PS1MainVM);
         RegisterChild(UtilMainVM);
         RegisterChild(Settings);
+    }
+
+    public async Task MapsToHashAndProcess(string fileName)
+    {
+        var utilIndex = Children.IndexOf(UtilMainVM);
+
+        if (utilIndex != -1)
+            SelectedTabIndex = utilIndex;
+
+        var hashIndex = UtilMainVM.Tools.IndexOf(UtilMainVM.HashVM);
+
+        if (hashIndex != -1)
+            UtilMainVM.SubTabIndex = hashIndex;
+
+        await UtilMainVM.HashVM.AddPaths([fileName]);
+
+        if (UtilMainVM.HashVM.RunCommand.CanExecute(null))
+            UtilMainVM.HashVM.RunCommand.Execute(null);
     }
 
     public void SaveConfig() => _config.Save();

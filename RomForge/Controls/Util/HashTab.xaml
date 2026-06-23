@@ -20,8 +20,8 @@
                         IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
                         RadioButton.Checked="RadioButton_Checked">
                 <TextBlock Text="알고리즘 :" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,15,0"/>
-                <RadioButton Content="CRC32" Tag="CRC32" IsChecked="True" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
-                <RadioButton Content="MD5" Tag="MD5" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                <RadioButton Content="CRC32" Tag="CRC32" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
+                <RadioButton Content="MD5" Tag="MD5" IsChecked="True" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
                 <RadioButton Content="SHA-1" Tag="SHA1" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
                 <RadioButton Content="SHA-256" Tag="SHA256" GroupName="HashAlgoGroup" Margin="0,0,20,0" VerticalAlignment="Center"/>
                 <RadioButton Content="BLAKE3" Tag="BLAKE3" GroupName="HashAlgoGroup" VerticalAlignment="Center"/>

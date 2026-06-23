@@ -331,7 +331,13 @@
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding PatchVM.IsLocked, Converter={StaticResource InverseBool}}" Command="{Binding PatchVM.ClearCommand}" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="초기화" VerticalAlignment="Center"/>
+                            <TextBlock Text="초기화" VerticalAlignment="Center"/>                            
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource GrayButton}" Command="{Binding PatchVM.CalculateHashCommand}" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Assets/Images/Hash.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="해시 계산" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

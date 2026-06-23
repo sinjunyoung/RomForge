@@ -10,6 +10,7 @@ using RomZip.Core.Services;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
+using System.Windows.Input;
 
 namespace RomForge.ViewModels.Patch;
 
@@ -31,6 +32,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel
             _sourcePath = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(SourceLabel));
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 
@@ -42,7 +44,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel
         {
             _patchPath = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchLabel));
+            OnPropertyChanged(nameof(PatchLabel));            
         }
     }
 

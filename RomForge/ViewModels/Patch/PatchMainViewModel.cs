@@ -6,6 +6,7 @@ namespace RomForge.ViewModels.Patch;
 public class PatchMainViewModel : MultiToolTabViewModel
 {
     private readonly Core.AppConfig _config;
+    private readonly Action<string> _navigateToHashAction;
 
     public NormalPatchMainViewModel NormalVM { get; }
     public ArcadePatchMainViewModel ArcadeVM { get; }
@@ -13,16 +14,22 @@ public class PatchMainViewModel : MultiToolTabViewModel
     public ICommand RunCommand { get; }
     public ICommand CancelCommand { get; }
     public ICommand ClearCommand { get; }
-
-    public PatchMainViewModel(Core.AppConfig config)
+    public ICommand CalculateHashCommand { get; }
+    public PatchMainViewModel(Core.AppConfig config, Action<string> navigateToHashAction)
     {
         _config = config;
+        _navigateToHashAction = navigateToHashAction;
         NormalVM = new NormalPatchMainViewModel(_config);
-        ArcadeVM = new ArcadePatchMainViewModel();
+
+        ArcadeVM = new ArcadePatchMainViewModel();        
 
         RunCommand = new RelayCommand(async _ => await RunAsync());
         CancelCommand = new RelayCommand(_ => Cancel());
         ClearCommand = new RelayCommand(_ => Clear());
+        CalculateHashCommand = new RelayCommand(
+            execute: _ => _navigateToHashAction?.Invoke(NormalVM.SourcePath),
+            canExecute: _ => !string.IsNullOrEmpty(NormalVM.SourcePath) && _navigateToHashAction != null
+        );
 
         Tools.Add(NormalVM);
         Tools.Add(ArcadeVM);

@@ -3,6 +3,7 @@ using System.Security.AccessControl;
 
 namespace PBP.Core.Services;
 
+/*
 public class PbpReader
 {
     private const int HEADER_SFO_OFFSET = 0x08;
@@ -119,4 +120,4 @@ public class PbpReader
         outputStream = null;
         return false;
     }
-}
+}*/

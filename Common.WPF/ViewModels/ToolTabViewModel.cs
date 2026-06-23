@@ -9,11 +9,13 @@ public abstract class ToolTabViewModel : ViewModelBase
 
     public bool IsLocked => _lockCount > 0;
     public bool IsUnlocked => _lockCount == 0;
-    public bool IsIdle => !IsLocked && _children.All(c => c.IsIdle);
+    public bool IsIdle => !IsLocked && Children.All(c => c.IsIdle);
+
+    public List<ToolTabViewModel> Children => _children;
 
     protected void RegisterChild(ToolTabViewModel child)
     {
-        _children.Add(child);
+        Children.Add(child);
         child.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(IsLocked) or nameof(IsIdle))

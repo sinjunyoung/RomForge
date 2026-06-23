@@ -2,35 +2,21 @@
 using Common.WPF.ViewModels;
 using RomForge.Helpers;
 using RomForge.Models;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace RomForge.ViewModels.Util;
-
-public enum HashAlgorithmType
-{
-    CRC32,
-    MD5,
-    SHA1,
-    SHA256,
-    BLAKE3
-}
 
 public class HashMainViewModel : ToolTabViewModel
 {
     #region Fields
 
     private bool _isConverting;
-    private HashAlgorithmType _selectedAlgorithm = HashAlgorithmType.CRC32;
+    private HashAlgorithmType _selectedAlgorithm = HashAlgorithmType.MD5;
     private CancellationTokenSource _cts = new();
 
     #endregion

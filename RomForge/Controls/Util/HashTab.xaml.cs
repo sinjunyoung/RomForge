@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using NSW.WPF.Services;
+using RomForge.Models;
 using RomForge.ViewModels.Util;
 using System.IO;
 using System.Windows;
@@ -42,9 +43,7 @@ public partial class HashTab : UserControl
         if (e.OriginalSource is RadioButton rb && rb.Tag is string tag && ViewModel != null)
         {
             if (Enum.TryParse<HashAlgorithmType>(tag, out var algo))
-            {
                 ViewModel.SelectedAlgorithm = algo;
-            }
         }
     }
 
