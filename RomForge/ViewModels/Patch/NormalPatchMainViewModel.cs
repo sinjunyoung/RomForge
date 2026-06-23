@@ -149,14 +149,14 @@ public class NormalPatchMainViewModel : ToolTabViewModel
 
         if (AutoCompress && isZipTarget && useBytes)
         {
-            var patched = await Task.Run(() => UniversalPatcher.ApplyPatch(SourcePath!, PatchPath!, p => Progress = (int)(p * 100), ct), ct);
+            var patched = await UniversalPatcher.ApplyPatchAsync(SourcePath!, PatchPath!, p => Progress = (int)(p * 100), ct);
             Progress = 100;
             Log($"패치 완료", LogLevel.Ok);
             await CompressToZipFromBytesAsync(patched, outputDir, ct);
             return;
         }
 
-        await Task.Run(() => UniversalPatcher.ApplyPatch(SourcePath!, PatchPath!, outputPath, p => Progress = (int)(p * 100), ct), ct);
+        await UniversalPatcher.ApplyPatchAsync(SourcePath!, PatchPath!, outputPath, p => Progress = (int)(p * 100), ct);
         Progress = 100;
         Log($"패치 완료: {outputPath}", LogLevel.Ok);
 

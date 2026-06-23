@@ -8,7 +8,7 @@ namespace RomForge.Core.Services.Patch;
 
 public static class PatchService
 {
-    public static async Task ApplyPatchedZipAsync(string sourceZipPath, string outputZipPath, IReadOnlyDictionary<string, PatchEntry> patchesByEntryName, IProgress<EntryPatchProgress>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+    public static async Task ApplyPatchedZipAsync(string sourceZipPath, string outputZipPath, IReadOnlyDictionary<string, PatchEntry> patchesByEntryName, IProgress<EntryPatchProgress>? progress = null, CancellationToken ct = default)
     {
         var outputDir = Path.GetDirectoryName(outputZipPath);
 
@@ -34,7 +34,7 @@ public static class PatchService
                 }
 
                 if (patchesByEntryName.TryGetValue(sourceEntry.FullName, out var patchEntry))
-                    await WritePatchedEntryAsync(sourceEntry, patchEntry, outputZip, openPatchZips, progress, log, ct);
+                    await WritePatchedEntryAsync(sourceEntry, patchEntry, outputZip, openPatchZips, progress, ct);
                 else
                     await CopyEntryAsync(sourceEntry, outputZip, ct);
             }
@@ -46,7 +46,7 @@ public static class PatchService
         }
     }
 
-    private static async Task WritePatchedEntryAsync(ZipArchiveEntry sourceEntry, PatchEntry patchEntry, ZipArchive outputZip, Dictionary<string, ZipArchive> openPatchZips, IProgress<EntryPatchProgress>? progress, Action<string, LogLevel>? log, CancellationToken ct)
+    private static async Task WritePatchedEntryAsync(ZipArchiveEntry sourceEntry, PatchEntry patchEntry, ZipArchive outputZip, Dictionary<string, ZipArchive> openPatchZips, IProgress<EntryPatchProgress>? progress, CancellationToken ct = default)
     {
         byte[] sourceBytes;
 
@@ -61,10 +61,9 @@ public static class PatchService
 
         ct.ThrowIfCancellationRequested();
 
-        var resultBytes = await Task.Run(() =>
-            UniversalPatcher.ApplyPatch(sourceBytes, patchBytes, p =>
-                progress?.Report(new EntryPatchProgress { EntryName = sourceEntry.FullName, Percent = (int)(p * 100) })),
-            ct);
+        var resultBytes = await
+            UniversalPatcher.ApplyPatchAsync(sourceBytes, patchBytes, p =>
+                progress?.Report(new EntryPatchProgress { EntryName = sourceEntry.FullName, Percent = (int)(p * 100) }), ct);
 
         var newEntry = outputZip.CreateEntry(sourceEntry.FullName, CompressionLevel.Optimal);
 

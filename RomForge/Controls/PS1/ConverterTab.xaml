@@ -18,6 +18,7 @@
                 <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
+            <Grid>
             <ListView x:Name="lvFiles" Grid.Column="0" ItemsSource="{Binding FileItems}" AllowDrop="True" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" IsEnabled="{Binding IsUnlocked}" ContextMenuOpening="LvFiles_ContextMenuOpening">                
                 <ListView.ContextMenu>
                     <ContextMenu>
@@ -82,6 +83,15 @@
                     </GridView>
                 </ListView.View>
             </ListView>
+                <Border IsHitTestVisible="False" Visibility="{Binding HintVisibility}" BorderBrush="#333337" BorderThickness="1"  Margin="15,55,15,15" CornerRadius="6" Background="#E6181818">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
+                        <Image Source="/Assets/Images/drag.png" Width="32" Height="32" Margin="0,0,0,12"/>
+                        <TextBlock Text="파일 또는 폴더를 여기에 드래그하세요" Foreground="White" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="최대 5개 파일 패키징 가능" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                        <TextBlock Text="지원 확장자: m3u, cue, chd" Foreground="#A0A0A0" FontSize="12" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
 
             <StackPanel Grid.Column="1" IsEnabled="{Binding IsUnlocked}">
                 <TextBlock Text="{Binding GameTitle}" ToolTip="{Binding GameTitle}" TextTrimming="CharacterEllipsis" MaxWidth="380" FontSize="15" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>

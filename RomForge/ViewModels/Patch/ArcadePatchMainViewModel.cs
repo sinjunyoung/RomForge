@@ -150,7 +150,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel
 
         try
         {
-            await PatchService.ApplyPatchedZipAsync(SourcePath, outputZipPath, patchesByEntryName, progressReporter, Log, ct);
+            await PatchService.ApplyPatchedZipAsync(SourcePath, outputZipPath, patchesByEntryName, progressReporter, ct);
 
             outputDir.OpenFolder();
 
