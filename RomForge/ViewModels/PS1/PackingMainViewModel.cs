@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 
 namespace RomForge.ViewModels.PS1;
 
-public class ConverterMainViewModel : ToolTabViewModel
+public class PackingMainViewModel : ToolTabViewModel
 {
     private const int MaxItems = 5;
 
@@ -101,7 +101,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     public byte[] Pic0Bytes { get => _pic0Bytes; set => _pic0Bytes = value; }
     public byte[] Pic1Bytes { get => _pic1Bytes; set => _pic1Bytes = value; }
 
-    public ConverterMainViewModel(AppConfig config)
+    public PackingMainViewModel(AppConfig config)
     {
         _config = config;
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsLocked && FileItems.Count > 0);
@@ -372,7 +372,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             if (_config.PS1.UseGameIdMode)
             {
                 gameDirectory = Path.Combine(baseDirectory, mainGameId);
-                targetOutputPath = Path.Combine(gameDirectory, "EBOOT.PBP");
+                targetOutputPath = Path.Combine(gameDirectory, "eboot.pbp");
             }
             else
             {

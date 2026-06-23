@@ -56,11 +56,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Grid.Column="0" Source="/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0"/>
-                        <TextBlock Grid.Column="1" Text="출력 파일" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="출력 옵션" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,8"/>
                         <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="8,4">
-                            <RadioButton Content="일반 ( 원본파일명.pbp )" GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" Margin="0,0,0,5"/>
-                            <RadioButton Content="실기 ( 타이틀ID / EBOOT.PBP )" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
+                            <RadioButton Content="일반 ( 타이틀명.pbp )" GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" Margin="0,0,0,5"/>
+                            <RadioButton Content="실기 ( 타이틀ID / eboot.pbp)" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Border>

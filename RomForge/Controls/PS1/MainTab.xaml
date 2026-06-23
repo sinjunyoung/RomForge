@@ -20,7 +20,7 @@
                         <TextBlock Text="PBP 패킹" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
-                <local:ConverterTab DataContext="{Binding ConverterVM}"/>
+                <local:PackingTab DataContext="{Binding PackingVM}"/>
             </TabItem>
 
         </TabControl>

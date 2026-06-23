@@ -8,7 +8,6 @@ using RomForge.Models;
 using RomZip.Core.Enums;
 using RomZip.Core.Services;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;

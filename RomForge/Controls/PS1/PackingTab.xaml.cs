@@ -1,6 +1,4 @@
-﻿using Microsoft.Win32;
-using NSW.WPF.Services;
-using RomForge.ViewModels;
+﻿using NSW.WPF.Services;
 using RomForge.ViewModels.PS1;
 using System.IO;
 using System.Windows;
@@ -10,13 +8,13 @@ using System.Windows.Media.Imaging;
 
 namespace RomForge.Controls.PS1;
 
-public partial class ConverterTab : UserControl
+public partial class PackingTab : UserControl
 {
     private readonly string[] _imgExts = [".jpg", ".jpeg", ".png", ".bmp", ".webp"];
 
-    private ConverterMainViewModel? ViewModel => DataContext as ConverterMainViewModel;
+    private PackingMainViewModel? ViewModel => DataContext as PackingMainViewModel;
 
-    public ConverterTab()
+    public PackingTab()
     {
         InitializeComponent();
     }
@@ -140,7 +138,7 @@ public partial class ConverterTab : UserControl
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
             Multiselect = true,
-            Filter = ConverterMainViewModel.GetFileDialogFilter()
+            Filter = PackingMainViewModel.GetFileDialogFilter()
         };
 
         if (dialog.ShowDialog() == true)

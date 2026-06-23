@@ -4,7 +4,6 @@ namespace RomForge.ViewModels.Switch;
 
 public class SwitchMainViewModel : MultiToolTabViewModel
 {
-
     public RepackMainViewModel RepackVM { get; }
 
     public MergeMainViewModel MergeVM { get; }

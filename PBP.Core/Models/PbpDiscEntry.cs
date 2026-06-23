@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PBP.Core.Models
+namespace PBP.Core.Models;
+
+public class PbpDiscEntry
 {
-    internal class PbpDiscEntry
-    {
-    }
 }
