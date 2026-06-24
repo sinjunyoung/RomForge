@@ -23,7 +23,7 @@ public partial class MainWindow : Window
         _ = TestExeFsAsync();
     }
 
-    private async Task TestExeFsAsync()
+    private static async Task TestExeFsAsync()
     {
         var keyStore = new _3DS.Core.Crypto.KeyStore();
         await using var cciSource = await CciSource.OpenAsync(@"D:\3ds\Super Mario 3D Land.cci", keyStore);
@@ -31,11 +31,8 @@ public partial class MainWindow : Window
         var (ncchStream, _) = cciSource.OpenContentDecrypted(0);
         await using (ncchStream)
         {
-            var result = await ExeFsUnpacker.UnpackAsync(ncchStream, cciSource.MainHeader, CancellationToken.None);
-            await ExeFsUnpacker.SaveToDirectoryAsync(result, @"D:\exefs_out_mine");
-
-            foreach (var f in result.Files)
-                Debug.WriteLine($"{f.Name}: {f.Data.Length:X} bytes | {(f.HashValid ? "OK" : "FAIL")}");
+            var result = await NcchUnpacker.UnpackAsync(ncchStream, cciSource.MainHeader, CancellationToken.None);
+            await NcchUnpacker.SaveToDirectoryAsync(ncchStream, result, @"D:\ncch_out", CancellationToken.None);
         }
     }
 
