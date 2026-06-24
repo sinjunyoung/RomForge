@@ -1,6 +1,6 @@
 ﻿namespace PBP.Core.Models;
 
-public class IsoIndexLite
+public class IsoBlock
 {
     public uint Offset { get; set; }
 

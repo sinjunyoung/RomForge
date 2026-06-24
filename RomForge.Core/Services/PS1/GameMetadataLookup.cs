@@ -1,4 +1,4 @@
-﻿using PBP.Core.Models;
+﻿using PBP.Core.Services;
 using RomForge.Core.Models.PS1;
 using System.IO;
 using System.IO.Compression;
@@ -43,7 +43,7 @@ public static class GameMetadataLookup
     private static Dictionary<string, GameItem> Load()
     {
         var gameDict = new Dictionary<string, GameItem>();        
-        var zipBytes = PbpResources.GamesDB;
+        var zipBytes = EmbeddedAssetProvider.GetGamesDatabase();
         using var memoryStream = new MemoryStream(zipBytes);
         using var archive = new ZipArchive(memoryStream, ZipArchiveMode.Read);
         var jsonEntry = archive.Entries[0];

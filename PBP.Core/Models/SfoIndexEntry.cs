@@ -1,6 +1,6 @@
 ﻿namespace PBP.Core.Models;
 
-public class SFODir
+public class SfoIndexEntry
 {
     public ushort KeyOffset { get; set; }
 

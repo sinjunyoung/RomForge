@@ -17,9 +17,9 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
     private readonly Stream _stream;
     private readonly int _psarOffset;
 
-    public List<IsoIndexLite> IsoIndex { get; }
+    public List<IsoBlock> IsoIndex { get; }
 
-    public List<TOCEntry> TOC { get; }
+    public List<TocEntry> TOC { get; }
 
     public uint IsoSize { get; }
 
@@ -54,9 +54,9 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
         return System.Text.Encoding.ASCII.GetString(buffer, 0, 9);
     }
 
-    private List<TOCEntry> ReadTOC()
+    private List<TocEntry> ReadTOC()
     {
-        var entries = new List<TOCEntry>();
+        var entries = new List<TocEntry>();
 
         try
         {
@@ -91,7 +91,7 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
                 if (trackNo != c) 
                     throw new Exception("Invalid TOC!");
 
-                entries.Add(new TOCEntry
+                entries.Add(new TocEntry
                 {
                     TrackType = (TrackType)buffer[0],
                     TrackNo = trackNo,
@@ -109,9 +109,9 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
         return entries;
     }
 
-    private List<IsoIndexLite> ReadIsoIndexes()
+    private List<IsoBlock> ReadIsoIndexes()
     {
-        var isoIndex = new List<IsoIndexLite>();
+        var isoIndex = new List<IsoBlock>();
         var dummy = new int[6];
 
         _stream.Seek(_psarOffset + PSAR_INDEX_OFFSET, SeekOrigin.Begin);
@@ -130,7 +130,7 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
 
             if (offset != 0 || length != 0)
             {
-                isoIndex.Add(new IsoIndexLite { Offset = offset, Length = length });
+                isoIndex.Add(new IsoBlock { Offset = offset, Length = length });
 
                 if (++count >= MAX_INDEXES)
                     throw new Exception("Number of indexes exceeds maximum allowed");

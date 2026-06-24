@@ -1,6 +1,4 @@
-﻿using PBP.Core.Models;
-
-namespace PBP.Core.Services;
+﻿namespace PBP.Core.Services;
 
 public static class PsarPackager
 {
@@ -35,7 +33,7 @@ public static class PsarPackager
         var p2Offset = (uint)outputStream.Position;
 
         outputStream.WriteInt32(0, 2);
-        outputStream.Write(PbpTemplates.Data3, 0, PbpTemplates.Data3.Length);
+        outputStream.Write(PbpTemplateProvider.GetSystemConfigTemplate(), 0, PbpTemplateProvider.GetSystemConfigTemplate().Length);
         outputStream.Write(mainGameTitle, 0, mainGameTitle.Length);
         outputStream.WriteChar(0, 0x80 - mainGameTitle.Length);
         outputStream.WriteInt32(7, 1);

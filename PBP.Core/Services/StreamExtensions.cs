@@ -49,9 +49,9 @@ public static class StreamExtensions
         return BitConverter.ToUInt32(buf, 0);    
     }
 
-    public static SFOData ReadSFO(this Stream stream, long sfoOffset)
+    public static SfoFile ReadSFO(this Stream stream, long sfoOffset)
     {
-        var sfo = new SFOData
+        var sfo = new SfoFile
         {
             Magic = stream.ReadUInteger(),
             Version = stream.ReadUInteger(),
@@ -63,7 +63,7 @@ public static class StreamExtensions
 
         for (var i = 0; i < entryCount; i++)
         {
-            sfo.Entries.Add(new SFODir
+            sfo.Entries.Add(new SfoIndexEntry
             {
                 KeyOffset = stream.ReadUInt16(),
                 Format = stream.ReadUInt16(),
@@ -121,7 +121,7 @@ public static class StreamExtensions
         }
     }
 
-    public static void Write(this Stream stream, IsoIndex[] isoIndices, int offset, int size)
+    public static void Write(this Stream stream, IsoIndexHeader[] isoIndices, int offset, int size)
     {
         foreach (var index in isoIndices)
         {
@@ -185,7 +185,7 @@ public static class StreamExtensions
         stream.Write(resource, 0, resource.Length);
     }
 
-    public static void WriteSFO(this Stream stream, SFOData sfo)
+    public static void WriteSFO(this Stream stream, SfoFile sfo)
     {
         stream.WriteUInt32(sfo.Magic, 1);
         stream.WriteUInt32(sfo.Version, 1);

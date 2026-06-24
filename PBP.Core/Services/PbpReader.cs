@@ -19,7 +19,7 @@ public class PbpReader
 
     private const uint PBPMAGIC = 0x50425000;
 
-    public SFOData SFOData { get; private set; }
+    public SfoFile SFOData { get; private set; }
     public List<PbpDiscEntry> Discs { get; private set; }
 
     public PbpReader(Stream stream)

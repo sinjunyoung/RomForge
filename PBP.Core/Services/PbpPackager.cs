@@ -1,4 +1,5 @@
 ﻿using Common;
+using PBP.Core.Constants;
 using PBP.Core.Models;
 using System.Diagnostics;
 
@@ -32,24 +33,24 @@ public static class PbpPackager
         }, ct);
     }
 
-    private static SFOData BuildDefaultSfo(string gameId, string gameTitle)
+    private static SfoFile BuildDefaultSfo(string gameId, string gameTitle)
     {
         var sfoBuilder = new SFOBuilder();
 
-        sfoBuilder.AddEntry(SFOKeys.BOOTABLE, 0x01);
-        sfoBuilder.AddEntry(SFOKeys.CATEGORY, SFOValues.PS1Category);
-        sfoBuilder.AddEntry(SFOKeys.DISC_ID, gameId);
-        sfoBuilder.AddEntry(SFOKeys.DISC_VERSION, "1.00");
-        sfoBuilder.AddEntry(SFOKeys.LICENSE, SFOValues.License);
-        sfoBuilder.AddEntry(SFOKeys.PARENTAL_LEVEL, SFOValues.ParentalLevel);
-        sfoBuilder.AddEntry(SFOKeys.PSP_SYSTEM_VER, SFOValues.PSPSystemVersion);
-        sfoBuilder.AddEntry(SFOKeys.REGION, 0x8000);
-        sfoBuilder.AddEntry(SFOKeys.TITLE, gameTitle);
+        sfoBuilder.AddEntry(SfoKeys.BOOTABLE, 0x01);
+        sfoBuilder.AddEntry(SfoKeys.CATEGORY, SfoValues.PS1Category);
+        sfoBuilder.AddEntry(SfoKeys.DISC_ID, gameId);
+        sfoBuilder.AddEntry(SfoKeys.DISC_VERSION, "1.00");
+        sfoBuilder.AddEntry(SfoKeys.LICENSE, SfoValues.License);
+        sfoBuilder.AddEntry(SfoKeys.PARENTAL_LEVEL, SfoValues.ParentalLevel);
+        sfoBuilder.AddEntry(SfoKeys.PSP_SYSTEM_VER, SfoValues.PSPSystemVersion);
+        sfoBuilder.AddEntry(SfoKeys.REGION, 0x8000);
+        sfoBuilder.AddEntry(SfoKeys.TITLE, gameTitle);
 
         return sfoBuilder.Build();
     }
 
-    private static void WriteCommonSections(Stream outputStream, uint[] header, SFOData sfo, PbpAssets assets, uint psarOffset)
+    private static void WriteCommonSections(Stream outputStream, uint[] header, SfoFile sfo, PbpAssets assets, uint psarOffset)
     {
         outputStream.Write(header, 0, 0x28);
         outputStream.WriteSFO(sfo);

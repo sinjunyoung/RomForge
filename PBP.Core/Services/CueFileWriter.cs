@@ -9,7 +9,7 @@ public static class CueFileWriter
         using var stream = new FileStream(path, FileMode.Create, FileAccess.Write);
         using var writer = new StreamWriter(stream);
 
-        foreach (var entry in cueFile.FileEntries)
+        foreach (var entry in cueFile.Entries)
         {
             writer.WriteLine($"FILE \"{entry.FileName}\" {entry.FileType}");
 

@@ -15,7 +15,7 @@ public static class TOCHelper
 
     public static int LBAToFrame(int lba) => lba % 75;
 
-    public static CueFile TOCtoCUE(List<TOCEntry> tocEntries, string fileName)
+    public static CueFile TOCtoCUE(List<TocEntry> tocEntries, string fileName)
     {
         var cueFile = new CueFile();
         var cueFileEntry = new CueFileEntry
@@ -24,13 +24,13 @@ public static class TOCHelper
             FileType = "BINARY"
         };
 
-        cueFile.FileEntries.Add(cueFileEntry);
+        cueFile.Entries.Add(cueFileEntry);
 
-        var audioLeadIn = new IndexPosition { Seconds = 2 };
+        var audioLeadIn = new MsfPosition { Seconds = 2 };
 
         foreach (var track in tocEntries)
         {
-            var position = new IndexPosition { Minutes = track.Minutes, Seconds = track.Seconds, Frames = track.Frames };
+            var position = new MsfPosition { Minutes = track.Minutes, Seconds = track.Seconds, Frames = track.Frames };
             var indexes = new List<CueIndex>();
 
             if (track.TrackType == TrackType.Audio)

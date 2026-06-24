@@ -1,4 +1,5 @@
-﻿using PBP.Core.Models;
+﻿using PBP.Core.Constants;
+using PBP.Core.Models;
 
 namespace PBP.Core.Services;
 
@@ -6,7 +7,7 @@ public static class TocBuilder
 {
     public static byte[] BuildToc(CueFile cue, uint isoSize)
     {
-        var tracks = cue.FileEntries.SelectMany(f => f.Tracks).ToList();
+        var tracks = cue.Entries.SelectMany(f => f.Tracks).ToList();
         var tocData = new byte[0xA * (tracks.Count + 3)];
         var buf = new byte[0xA];
 
@@ -62,17 +63,17 @@ public static class TocBuilder
 
     public static byte GetTrackType(string dataType) => dataType switch
     {
-        CueDataTypes.Data => 0x41,
-        CueDataTypes.Audio => 0x01,
+        CueFormatStrings.Data => 0x41,
+        CueFormatStrings.Audio => 0x01,
         _ => throw new NotSupportedException("PS1 게임 디스크만 지원합니다.")
     };
 
     public static byte ToBcd(int value) => (byte)((value / 10) * 0x10 + (value % 10));
 
-    public static IndexPosition PositionFromFrames(long frames)
+    public static MsfPosition PositionFromFrames(long frames)
     {
         var totalSeconds = (int)(frames / 75);
 
-        return new IndexPosition { Minutes = totalSeconds / 60, Seconds = totalSeconds % 60, Frames = (int)(frames % 75) };
+        return new MsfPosition { Minutes = totalSeconds / 60, Seconds = totalSeconds % 60, Frames = (int)(frames % 75) };
     }
 }

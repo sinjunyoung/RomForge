@@ -1,6 +1,6 @@
 ﻿namespace PBP.Core.Models;
 
-public class SFOData
+public class SfoFile
 {
     public uint Magic { get; set; }
 
@@ -12,7 +12,7 @@ public class SFOData
 
     public uint DataTableOffset { get; set; }
 
-    public List<SFODir> Entries { get; set; } = [];
+    public List<SfoIndexEntry> Entries { get; set; } = [];
 
     public uint Size { get; set; }
 }

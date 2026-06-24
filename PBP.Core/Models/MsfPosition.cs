@@ -3,11 +3,11 @@
 namespace PBP.Core.Models;
 
 [DebuggerDisplay("{Minutes}:{Seconds}:{Frames}")]
-public partial class IndexPosition
+public partial class MsfPosition
 {
-    public IndexPosition() { }
+    public MsfPosition() { }
 
-    public IndexPosition(int minutes, int seconds, int frames)
+    public MsfPosition(int minutes, int seconds, int frames)
     {
         Minutes = minutes;
         Seconds = seconds;
@@ -22,7 +22,7 @@ public partial class IndexPosition
 
     public override string ToString() => $"{Minutes:00}:{Seconds:00}:{Frames:00}";
 
-    public static IndexPosition operator +(IndexPosition a, IndexPosition b)
+    public static MsfPosition operator +(MsfPosition a, MsfPosition b)
     {
         var frames = a.Frames + b.Frames;
         var framesCarry = 0;
@@ -42,10 +42,10 @@ public partial class IndexPosition
             seconds %= 60; 
         }
 
-        return new IndexPosition(a.Minutes + b.Minutes + secondsCarry, seconds, frames);
+        return new MsfPosition(a.Minutes + b.Minutes + secondsCarry, seconds, frames);
     }
 
-    public static IndexPosition operator -(IndexPosition a, IndexPosition b)
+    public static MsfPosition operator -(MsfPosition a, MsfPosition b)
     {
         var frames = a.Frames - b.Frames;
         var secondsBorrow = 0;
@@ -65,10 +65,10 @@ public partial class IndexPosition
             seconds += 60; 
         }
 
-        return new IndexPosition(a.Minutes - b.Minutes - minutesBorrow, seconds, frames);
+        return new MsfPosition(a.Minutes - b.Minutes - minutesBorrow, seconds, frames);
     }
 
-    public static IndexPosition operator -(IndexPosition a, int framesB)
+    public static MsfPosition operator -(MsfPosition a, int framesB)
     {
         var mm = framesB / (60 * 75);
         var ss = (framesB - mm * 60 * 75) / 75;
@@ -91,10 +91,10 @@ public partial class IndexPosition
             seconds += 60; 
         }
 
-        return new IndexPosition(a.Minutes - mm - minutesBorrow, seconds, frames);
+        return new MsfPosition(a.Minutes - mm - minutesBorrow, seconds, frames);
     }
 
-    public static IndexPosition operator +(IndexPosition a, int framesB)
+    public static MsfPosition operator +(MsfPosition a, int framesB)
     {
         var frames = a.Frames + framesB;
         var framesCarry = 0;
@@ -114,7 +114,7 @@ public partial class IndexPosition
             seconds %= 60;
         }
 
-        return new IndexPosition(a.Minutes + secondsCarry, seconds, frames);
+        return new MsfPosition(a.Minutes + secondsCarry, seconds, frames);
     }
 
 }

@@ -2,7 +2,7 @@
 
 namespace PBP.Core.Models;
 
-public class TOCEntry
+public class TocEntry
 {
     public TrackType TrackType { get; set; }
 

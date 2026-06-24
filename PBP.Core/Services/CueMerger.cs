@@ -7,12 +7,12 @@ public static class CueMerger
     public static (Stream Stream, CueFile MergedCue) MergeStreams(CueFile unmergedCue)
     {
         var mergedEntry = new CueFileEntry { FileType = "BINARY", Tracks = [] };
-        var merged = new CueFile { FileEntries = [mergedEntry] };
+        var merged = new CueFile { Entries = [mergedEntry] };
         var streams = new List<Stream>();
         long currentFrame = 0;
-        var basePath = Path.GetDirectoryName(unmergedCue.Path) ?? string.Empty;
+        var basePath = Path.GetDirectoryName(unmergedCue.FilePath) ?? string.Empty;
 
-        foreach (var entry in unmergedCue.FileEntries)
+        foreach (var entry in unmergedCue.Entries)
         {
             var binPath = entry.FileName;
 

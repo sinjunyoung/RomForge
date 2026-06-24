@@ -40,9 +40,9 @@ public class PackingMainViewModel : ToolTabViewModel
     private string _progressSpeed = string.Empty;
     private bool _isDownloading;    
 
-    private byte[] _icon0Bytes = PbpResources.ICON0;
-    private byte[] _pic0Bytes = PbpResources.PIC0;
-    private byte[] _pic1Bytes = PbpResources.PIC1;
+    private byte[] _icon0Bytes = EmbeddedAssetProvider.GetDefaultIcon0();
+    private byte[] _pic0Bytes = EmbeddedAssetProvider.GetDefaultPic0();
+    private byte[] _pic1Bytes = EmbeddedAssetProvider.GetDefaultPic1();
 
     public string GameTitle
     {
@@ -241,9 +241,9 @@ public class PackingMainViewModel : ToolTabViewModel
         FileItems.Clear();
         OnPropertyChanged(nameof(HintVisibility));
         _lastIconGameId = null;
-        Icon0Image = PbpResources.ICON0.ToBitmapImage();
-        Pic0Image = PbpResources.PIC0.ToBitmapImage();
-        Pic1Image = PbpResources.PIC1.ToBitmapImage();
+        Icon0Image = EmbeddedAssetProvider.GetDefaultIcon0().ToBitmapImage();
+        Pic0Image = EmbeddedAssetProvider.GetDefaultPic0().ToBitmapImage();
+        Pic1Image = EmbeddedAssetProvider.GetDefaultPic1().ToBitmapImage();
     }
 
     public void SetIcon0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { Icon0Bytes = bytes; Icon0Image = img; }, 80, 80);
@@ -360,17 +360,17 @@ public class PackingMainViewModel : ToolTabViewModel
 
             var icon0Png = await CoverArtFetcher.TryDownloadIconPngAsync(primary.GameId, ct);
             ct.ThrowIfCancellationRequested();
-            Icon0Bytes = icon0Png ?? PbpResources.ICON0;
+            Icon0Bytes = icon0Png ?? EmbeddedAssetProvider.GetDefaultIcon0();
             Icon0Image = Icon0Bytes.ToBitmapImage();
 
             var pic0Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic0, ct) : null;
             ct.ThrowIfCancellationRequested();
-            Pic0Bytes = pic0Png ?? PbpResources.PIC0;
+            Pic0Bytes = pic0Png ?? EmbeddedAssetProvider.GetDefaultPic0();
             Pic0Image = Pic0Bytes.ToBitmapImage();
 
             var pic1Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic1, ct) : null;
             ct.ThrowIfCancellationRequested();
-            Pic1Bytes = pic1Png ?? PbpResources.PIC1;
+            Pic1Bytes = pic1Png ?? EmbeddedAssetProvider.GetDefaultPic1();
             Pic1Image = Pic1Bytes.ToBitmapImage();
         }
         catch (OperationCanceledException) { }
@@ -408,7 +408,7 @@ public class PackingMainViewModel : ToolTabViewModel
                 Icon0Png = Icon0Bytes.ResizePng(80, 80),
                 Pic0Png = Pic0Bytes.ResizePng(480, 272),
                 Pic1Png = Pic1Bytes.ResizePng(480, 272),
-                DataPsp = PbpResources.DATA
+                DataPsp = EmbeddedAssetProvider.GetDefaultData()
             };
 
             string baseDirectory = Path.GetDirectoryName(orderedItems[0].FilePath)!;

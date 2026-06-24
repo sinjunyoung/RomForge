@@ -1,6 +1,6 @@
 ﻿using CHD.Core.Models;
+using PBP.Core.Constants;
 using PBP.Core.Models;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace PBP.Core.Services;
@@ -13,7 +13,7 @@ public static class CueFileReader
 
     public static CueFile Dummy() => new()
     {
-        FileEntries =
+        Entries =
         [
             new CueFileEntry
             {
@@ -22,9 +22,9 @@ public static class CueFileReader
                 [
                     new CueTrack
                     {
-                        DataType = CueDataTypes.Data,
+                        DataType = CueFormatStrings.Data,
                         Number = 1,
-                        Indexes = [new CueIndex { Number = 1, Position = new IndexPosition() }]
+                        Indexes = [new CueIndex { Number = 1, Position = new MsfPosition() }]
                     }
                 ]
             }
@@ -33,7 +33,7 @@ public static class CueFileReader
 
     public static CueFile Read(string file)
     {
-        var cueFile = new CueFile { Path = file };
+        var cueFile = new CueFile { FilePath = file };
         CueFileEntry? cueFileEntry = null;
         CueTrack? cueTrack = null;
 
@@ -51,7 +51,7 @@ public static class CueFileReader
                     FileType = fileMatch.Groups[2].Value,
                     Tracks = []
                 };
-                cueFile.FileEntries.Add(cueFileEntry);
+                cueFile.Entries.Add(cueFileEntry);
             }
             else if (trackMatch.Success)
             {
@@ -70,7 +70,7 @@ public static class CueFileReader
                 cueTrack!.Indexes.Add(new CueIndex
                 {
                     Number = int.Parse(indexMatch.Groups[1].Value),
-                    Position = new IndexPosition
+                    Position = new MsfPosition
                     {
                         Minutes = int.Parse(pos[0]),
                         Seconds = int.Parse(pos[1]),
@@ -111,15 +111,15 @@ public static class CueFileReader
             {
                 Number = track.TrackNumber,
                 DataType = track.TrackType?.ToUpperInvariant().Contains("AUDIO", StringComparison.InvariantCultureIgnoreCase) == true
-                    ? CueDataTypes.Audio
-                    : CueDataTypes.Data,
+                    ? CueFormatStrings.Audio
+                    : CueFormatStrings.Data,
                 Indexes = indexes
             });
 
             currentFrame += track.Frames;
         }
 
-        return new CueFile { FileEntries = [entry] };
+        return new CueFile { Entries = [entry] };
     }
 
     public static CueFile Parse(string content)
@@ -144,7 +144,7 @@ public static class CueFileReader
                     FileType = fileMatch.Groups[2].Value, 
                     Tracks = [] 
                 };
-                cueFile.FileEntries.Add(cueFileEntry);
+                cueFile.Entries.Add(cueFileEntry);
             }
             else if (trackMatch.Success)
             {
@@ -163,7 +163,7 @@ public static class CueFileReader
                 cueTrack!.Indexes.Add(new CueIndex
                 {
                     Number = int.Parse(indexMatch.Groups[1].Value),
-                    Position = new IndexPosition 
+                    Position = new MsfPosition 
                     { 
                         Minutes = int.Parse(pos[0]), 
                         Seconds = int.Parse(pos[1]), 

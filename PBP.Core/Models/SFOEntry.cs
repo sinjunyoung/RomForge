@@ -1,6 +1,6 @@
 ﻿namespace PBP.Core.Models;
 
-public class SFOEntry
+public class SfoEntry
 {
     public string Key { get; set; } = string.Empty;
 

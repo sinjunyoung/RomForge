@@ -22,9 +22,20 @@ public static class Compression
     {
         var output = new byte[outputSize];
         using var ms = new MemoryStream(input);
-        using var inflater = new InflaterInputStream(ms, new Inflater(true));
+        var inflater = new Inflater(true);
+        using var inflaterStream = new InflaterInputStream(ms, inflater);
 
-        inflater.Read(output, 0, outputSize);
+        int bytesRead = 0;
+
+        while (bytesRead < outputSize)
+        {
+            int read = inflaterStream.Read(output, bytesRead, outputSize - bytesRead);
+
+            if (read <= 0)
+                break;
+
+            bytesRead += read;
+        }
 
         return output;
     }

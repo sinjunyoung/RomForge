@@ -14,7 +14,7 @@ public static class CuePreprocessor
 
         var cueFile = CueFileReader.Read(inputPath);
 
-        if (cueFile.FileEntries.Count > 1)
+        if (cueFile.Entries.Count > 1)
         {
             var (stream, merged) = CueMerger.MergeStreams(cueFile);
             var size = (uint)stream.Length;

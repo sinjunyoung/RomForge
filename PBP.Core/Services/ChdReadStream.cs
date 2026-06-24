@@ -80,6 +80,14 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo inf
         return _position;
     }
 
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            _currentHunk = null;
+
+        base.Dispose(disposing);
+    }
+
     public override bool CanRead => true;
     public override bool CanSeek => true;
     public override bool CanWrite => false;

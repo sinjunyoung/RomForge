@@ -28,7 +28,7 @@ public static class PsarDiscWriter
         outputStream.WriteUInt32(isoSize + 0x100000, 1);
         outputStream.WriteInt32(0, 0xFC);
 
-        var data1 = (byte[])PbpTemplates.Data1.Clone();
+        var data1 = (byte[])PbpTemplateProvider.GetBaseHeaderTemplate().Clone();
         var idBytes = System.Text.Encoding.ASCII.GetBytes(gameId);
 
         Array.Copy(idBytes, 0, data1, 1, 4);
@@ -48,7 +48,7 @@ public static class PsarDiscWriter
             outputStream.WriteUInt32(isoSize + 0x100000 + 0x2d31, 1);
         }
 
-        var data2 = (byte[])PbpTemplates.Data2.Clone();
+        var data2 = (byte[])PbpTemplateProvider.GetBaseFooterTemplate().Clone();
         var titleBytes = System.Text.Encoding.ASCII.GetBytes(gameTitle);
 
         Array.Clear(data2, 8, 128);
@@ -102,7 +102,7 @@ public static class PsarDiscWriter
         }
         else
         {
-            var indexes = new IsoIndex[isoSize / BlockSize];
+            var indexes = new IsoIndexHeader[isoSize / BlockSize];
             var idx = 0;
 
             offset = 0;
@@ -124,7 +124,7 @@ public static class PsarDiscWriter
 
                 var compressedSize = (uint)Compression.Compress(readBuffer, compressedBuffer, compressionLevel);
 
-                indexes[idx] = new IsoIndex { Offset = offset };
+                indexes[idx] = new IsoIndexHeader { Offset = offset };
 
                 if (compressedSize >= BlockSize)
                 {

@@ -1,20 +1,21 @@
-﻿using PBP.Core.Models;
+﻿using PBP.Core.Constants;
+using PBP.Core.Models;
 
 namespace PBP.Core.Services;
 
 public class SFOBuilder
 {
-    private readonly List<SFOEntry> _entries = [];
+    private readonly List<SfoEntry> _entries = [];
 
     public SFOBuilder() { }
 
-    public SFOBuilder(IEnumerable<SFOEntry> entries) => _entries.AddRange(entries);
+    public SFOBuilder(IEnumerable<SfoEntry> entries) => _entries.AddRange(entries);
 
-    public void AddEntry(string key, object value) => _entries.Add(new SFOEntry { Key = key, Value = value });
+    public void AddEntry(string key, object value) => _entries.Add(new SfoEntry { Key = key, Value = value });
 
-    public SFOData Build()
+    public SfoFile Build()
     {
-        var sfo = new SFOData
+        var sfo = new SfoFile
         {
             Magic = 0x46535000,
             Version = 0x00000101,
@@ -46,7 +47,7 @@ public class SFOBuilder
             if (entryLength > maxLength)
                 throw new Exception($"Value for {entry.Key} exceeds maximum allowed length");
 
-            sfo.Entries.Add(new SFODir
+            sfo.Entries.Add(new SfoIndexEntry
             {
                 KeyOffset = keyOffset,
                 Format = GetEntryType(entry.Key),
@@ -68,15 +69,15 @@ public class SFOBuilder
 
     private static uint GetMaxLength(string key) => key switch
     {
-        SFOKeys.BOOTABLE => 4,
-        SFOKeys.CATEGORY => 4,
-        SFOKeys.DISC_ID => 16,
-        SFOKeys.DISC_VERSION => 8,
-        SFOKeys.LICENSE => 512,
-        SFOKeys.PARENTAL_LEVEL => 4,
-        SFOKeys.PSP_SYSTEM_VER => 8,
-        SFOKeys.REGION => 4,
-        SFOKeys.TITLE => 128,
+        SfoKeys.BOOTABLE => 4,
+        SfoKeys.CATEGORY => 4,
+        SfoKeys.DISC_ID => 16,
+        SfoKeys.DISC_VERSION => 8,
+        SfoKeys.LICENSE => 512,
+        SfoKeys.PARENTAL_LEVEL => 4,
+        SfoKeys.PSP_SYSTEM_VER => 8,
+        SfoKeys.REGION => 4,
+        SfoKeys.TITLE => 128,
         _ => throw new ArgumentOutOfRangeException(nameof(key))
     };
 
@@ -87,15 +88,15 @@ public class SFOBuilder
 
         return key switch
         {
-            SFOKeys.BOOTABLE => intType,
-            SFOKeys.CATEGORY => stringType,
-            SFOKeys.DISC_ID => stringType,
-            SFOKeys.DISC_VERSION => stringType,
-            SFOKeys.LICENSE => stringType,
-            SFOKeys.PARENTAL_LEVEL => intType,
-            SFOKeys.PSP_SYSTEM_VER => stringType,
-            SFOKeys.REGION => intType,
-            SFOKeys.TITLE => stringType,
+            SfoKeys.BOOTABLE => intType,
+            SfoKeys.CATEGORY => stringType,
+            SfoKeys.DISC_ID => stringType,
+            SfoKeys.DISC_VERSION => stringType,
+            SfoKeys.LICENSE => stringType,
+            SfoKeys.PARENTAL_LEVEL => intType,
+            SfoKeys.PSP_SYSTEM_VER => stringType,
+            SfoKeys.REGION => intType,
+            SfoKeys.TITLE => stringType,
             _ => throw new ArgumentOutOfRangeException(nameof(key))
         };
     }
@@ -109,15 +110,15 @@ public class SFOBuilder
 
         return key switch
         {
-            SFOKeys.BOOTABLE => 4,
-            SFOKeys.CATEGORY => strlen,
-            SFOKeys.DISC_ID => strlen,
-            SFOKeys.DISC_VERSION => strlen,
-            SFOKeys.LICENSE => strlen,
-            SFOKeys.PARENTAL_LEVEL => 4,
-            SFOKeys.PSP_SYSTEM_VER => strlen,
-            SFOKeys.REGION => 4,
-            SFOKeys.TITLE => strlen,
+            SfoKeys.BOOTABLE => 4,
+            SfoKeys.CATEGORY => strlen,
+            SfoKeys.DISC_ID => strlen,
+            SfoKeys.DISC_VERSION => strlen,
+            SfoKeys.LICENSE => strlen,
+            SfoKeys.PARENTAL_LEVEL => 4,
+            SfoKeys.PSP_SYSTEM_VER => strlen,
+            SfoKeys.REGION => 4,
+            SfoKeys.TITLE => strlen,
             _ => throw new ArgumentOutOfRangeException(nameof(key))
         };
     }

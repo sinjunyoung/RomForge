@@ -1,6 +1,6 @@
-﻿namespace PBP.Core.Models;
+﻿namespace PBP.Core.Constants;
 
-public class SFOKeys
+public class SfoKeys
 {
     public const string BOOTABLE = "BOOTABLE";
     public const string CATEGORY = "CATEGORY";
