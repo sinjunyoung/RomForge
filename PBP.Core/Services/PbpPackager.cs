@@ -35,7 +35,7 @@ public static class PbpPackager
 
     private static SfoFile BuildDefaultSfo(string gameId, string gameTitle)
     {
-        var sfoBuilder = new SFOBuilder();
+        var sfoBuilder = new SfoBuilder();
 
         sfoBuilder.AddEntry(SfoKeys.BOOTABLE, 0x01);
         sfoBuilder.AddEntry(SfoKeys.CATEGORY, SfoValues.PS1Category);
