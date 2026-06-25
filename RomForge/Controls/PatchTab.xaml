@@ -125,7 +125,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadeSourceDrop_Drop" MouseLeftButtonDown="ArcadeSourceDrop_Click">
+                        <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadeSourceDrop_Drop">
                             <Grid Margin="14,0">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Image Source="/Assets/Images/ZipFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
@@ -135,7 +135,7 @@
                             </Grid>
                         </Border>
 
-                        <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadePatchDrop_Drop" MouseLeftButtonDown="ArcadePatchDrop_Click">
+                        <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadePatchDrop_Drop">
                             <Grid Margin="14,0">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Image Source="/Assets/Images/ZipFolder.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>

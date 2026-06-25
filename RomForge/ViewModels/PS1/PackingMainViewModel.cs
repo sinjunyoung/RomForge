@@ -343,6 +343,8 @@ public class PackingMainViewModel : ToolTabViewModel
             if (primary == null || primary.GameId == _lastIconGameId || primary.GameId is "인식중..." or "인식실패")
                 return;
 
+            IsDownloading = true;
+
             var meta = GameMetadataLookup.Find(primary.GameId);
 
             if (meta != null && !string.IsNullOrWhiteSpace(meta.ETitle))
@@ -351,33 +353,46 @@ public class PackingMainViewModel : ToolTabViewModel
             _lastIconGameId = primary.GameId;
 
             var old = Interlocked.Exchange(ref _iconCts, new CancellationTokenSource());
-            old?.Cancel();
-            old?.Dispose();
+
+            if (old != null)
+            {
+                old.Cancel();
+                old.Dispose();
+            }
 
             var ct = _iconCts.Token;
-
-            IsDownloading = true;
-
             var icon0Png = await CoverArtFetcher.TryDownloadIconPngAsync(primary.GameId, ct);
+
             ct.ThrowIfCancellationRequested();
+
             Icon0Bytes = icon0Png ?? EmbeddedAssetProvider.GetDefaultIcon0();
             Icon0Image = Icon0Bytes.ToBitmapImage();
 
             var pic0Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic0, ct) : null;
+
             ct.ThrowIfCancellationRequested();
+
             Pic0Bytes = pic0Png ?? EmbeddedAssetProvider.GetDefaultPic0();
             Pic0Image = Pic0Bytes.ToBitmapImage();
 
             var pic1Png = meta != null ? await GameMetadataLookup.TryDownloadImagePngAsync(meta.Pic1, ct) : null;
+
             ct.ThrowIfCancellationRequested();
+
             Pic1Bytes = pic1Png ?? EmbeddedAssetProvider.GetDefaultPic1();
             Pic1Image = Pic1Bytes.ToBitmapImage();
         }
-        catch (OperationCanceledException) { }
-        finally
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch (Exception)
         {
             IsDownloading = false;
+            throw;
         }
+
+        IsDownloading = false;
     }
 
     private async Task RunAsync()

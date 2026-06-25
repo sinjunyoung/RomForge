@@ -95,8 +95,8 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         }
     }
 
-    public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 ZIP을 드래그하거나 클릭하세요";
-    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치(IPS/폴더/ZIP)를 드래그하거나 클릭하세요";
+    public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 ZIP을 드래그하세요";
+    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치(IPS/폴더/ZIP)를 드래그하세요";
     public Visibility HintVisibility => MatchItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
     public Visibility MismatchVisibility => MismatchReason is not null ? Visibility.Visible : Visibility.Collapsed;
 

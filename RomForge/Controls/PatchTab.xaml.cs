@@ -68,34 +68,10 @@ public partial class PatchTab : UserControl
         }
     }
 
-    private void ArcadeSourceDrop_Click(object sender, MouseButtonEventArgs e)
-    {
-        var dlg = new OpenFileDialog
-        {
-            Title = "원본 ZIP 선택",
-            Filter = "ZIP 파일|*.zip|모든 파일|*.*"
-        };
-
-        if(dlg.ShowDialog() == true)
-            ViewModel.PatchVM.ArcadeVM.SourcePath = dlg.FileName;            
-    }
-
     private void ArcadeSourceDrop_Drop(object sender, DragEventArgs e)
     {
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
             ViewModel.PatchVM.ArcadeVM.SourcePath = files[0];
-    }
-
-    private void ArcadePatchDrop_Click(object sender, MouseButtonEventArgs e)
-    {
-        var folderDlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
-        {
-            Description = "패치 폴더 선택",
-            UseDescriptionForTitle = true
-        };
-
-        if (folderDlg.ShowDialog() == true)
-            ViewModel.PatchVM.ArcadeVM.PatchPath = folderDlg.SelectedPath;
     }
 
     private void ArcadePatchDrop_Drop(object sender, DragEventArgs e)

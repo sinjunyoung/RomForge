@@ -121,6 +121,9 @@
   <data name="BASE" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\BASE.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Config" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Config.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="DATA" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\DATA.psp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

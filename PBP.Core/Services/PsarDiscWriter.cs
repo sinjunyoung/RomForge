@@ -9,7 +9,7 @@ public static class PsarDiscWriter
     private const int BlockSize = 0x9300;
     private const int BufferSize = 1048576;
 
-    public static void WriteDisc(Stream outputStream, Stream isoStream, long isoLength, string gameId, string gameTitle, byte[] tocData, uint psarOffset, bool isMultiDisc, int compressionLevel, CancellationToken cancellationToken, Action<long, long>? onProgress = null)
+    public static void WriteDisc(Stream outputStream, Stream isoStream, long isoLength, string gameId, string gameTitle, byte[] tocData, byte[]? configData, uint psarOffset, bool isMultiDisc, int compressionLevel, CancellationToken cancellationToken, Action<long, long>? onProgress = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -32,6 +32,9 @@ public static class PsarDiscWriter
 
         Array.Copy(idBytes, 0, data1, 1, 4);
         Array.Copy(idBytes, 4, data1, 6, 5);
+
+        if (configData != null && configData.Length > 0)
+            Array.Copy(configData, 0, data1, 0x20, configData.Length);
 
         if (tocData == null || tocData.Length == 0)
             throw new Exception("Invalid TOC");

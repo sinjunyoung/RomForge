@@ -1,4 +1,6 @@
-﻿namespace PBP.Core.Services;
+﻿using System.IO.Compression;
+
+namespace PBP.Core.Services;
 
 public static class PsarPackager
 {
@@ -59,9 +61,11 @@ public static class PsarPackager
                 outputStream.Write(zeroBuffer, 0, (int)pad);
             }
 
+            byte[]? config = GetPopsConfig(disc.GameId);
+
             isoPositions[discNo] = (uint)(outputStream.Position - psarOffset);
 
-            PsarDiscWriter.WriteDisc(outputStream, disc.IsoStream, disc.IsoLength, disc.GameId, disc.GameTitle, disc.TocData, psarOffset, isMulti, compressionLevel, cancellationToken, (cur, _) => onProgress?.Invoke(completedBytes + cur, totalBytes));
+            PsarDiscWriter.WriteDisc(outputStream, disc.IsoStream, disc.IsoLength, disc.GameId, disc.GameTitle, disc.TocData, config, psarOffset, isMulti, compressionLevel, cancellationToken, (cur, _) => onProgress?.Invoke(completedBytes + cur, totalBytes));
 
             completedBytes += disc.IsoLength;
         }
@@ -83,5 +87,23 @@ public static class PsarPackager
         outputStream.Seek(mOffset, SeekOrigin.Begin);
         outputStream.Write(isoPositions, 1, sizeof(uint) * 5);
         outputStream.Seek(finalOffset, SeekOrigin.Begin);
+    }
+
+    public static byte[]? GetPopsConfig(string gameId)
+    {
+        using var zipStream = new MemoryStream(Properties.Resources.Config);
+        using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
+
+        var entry = archive.GetEntry($"{gameId}.bin");
+        if (entry == null)
+            return null;
+
+        using var entryStream = entry.Open();
+        using var output = new MemoryStream();
+        entryStream.CopyTo(output);
+
+        var raw = output.ToArray();
+
+        return raw;
     }
 }
