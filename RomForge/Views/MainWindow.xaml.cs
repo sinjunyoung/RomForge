@@ -27,12 +27,27 @@ public partial class MainWindow : Window
     {
         var keyStore = new _3DS.Core.Crypto.KeyStore();
         await using var cciSource = await CciSource.OpenAsync(@"D:\3ds\Super Mario 3D Land.cci", keyStore);
+        var ct = CancellationToken.None;
 
         var (ncchStream, _) = cciSource.OpenContentDecrypted(0);
         await using (ncchStream)
         {
-            var result = await NcchUnpacker.UnpackAsync(ncchStream, cciSource.MainHeader, CancellationToken.None);
-            await NcchUnpacker.SaveToDirectoryAsync(ncchStream, result, @"D:\ncch_out", CancellationToken.None);
+            // 언팩
+            var result = await ExeFsUnpacker.UnpackAsync(ncchStream, cciSource.MainHeader, ct);
+
+            // 재패킹
+            byte[] repacked = ExeFsPacker.Pack(result.Files);
+
+            // 원본 읽기
+            long exefsOffset = (long)cciSource.MainHeader.ExefsOffset * 0x200;
+            long exefsSize = (long)cciSource.MainHeader.ExefsSize * 0x200;
+            byte[] original = new byte[exefsSize];
+            ncchStream.Position = exefsOffset;
+            await ncchStream.ReadExactlyAsync(original, ct);
+
+            // 비교 (재패킹은 실제 데이터 크기만큼만 비교)
+            bool match = repacked.AsSpan().SequenceEqual(original.AsSpan(0, repacked.Length));
+            Debug.WriteLine($"ExeFS 재패킹 검증: {(match ? "OK ✅" : "FAIL ❌")}");
         }
     }
 
