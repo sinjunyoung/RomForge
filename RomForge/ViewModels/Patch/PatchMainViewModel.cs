@@ -9,11 +9,13 @@ public class PatchMainViewModel : MultiToolTabViewModel
     private readonly Action<string> _navigateToHashAction;
 
     public NormalPatchMainViewModel NormalVM { get; }
+
     public ArcadePatchMainViewModel ArcadeVM { get; }
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
+
     public ICommand ClearCommand { get; }
+
     public ICommand CalculateHashCommand { get; }
 
     private IPatchViewModel? SelectedPatchVM => SelectedTool as IPatchViewModel;

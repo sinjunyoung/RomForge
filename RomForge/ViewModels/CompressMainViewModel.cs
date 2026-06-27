@@ -33,7 +33,6 @@ public class CompressMainViewModel : ToolTabViewModel
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
 
     public event Action<CompressFileItem>? ScrollToItemRequested;
 

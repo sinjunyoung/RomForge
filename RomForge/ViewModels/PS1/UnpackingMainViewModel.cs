@@ -1,6 +1,5 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
-using LibHac.Diag;
 using PBP.Core.Enums;
 using PBP.Core.Services;
 using RomForge.Core.Services.PS1;
@@ -8,7 +7,6 @@ using RomForge.Helpers;
 using RomForge.Models;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Runtime.InteropServices.Marshalling;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -47,7 +45,6 @@ public class UnpackingMainViewModel : ToolTabViewModel
     #region Commands
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
 
     #endregion
 

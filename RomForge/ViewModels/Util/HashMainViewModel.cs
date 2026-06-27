@@ -64,7 +64,6 @@ public class HashMainViewModel : ToolTabViewModel
     #region Commands
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
 
     #endregion
 

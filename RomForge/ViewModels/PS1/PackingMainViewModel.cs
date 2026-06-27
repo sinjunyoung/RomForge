@@ -131,7 +131,7 @@ public class PackingMainViewModel : ToolTabViewModel
 
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
+
     public ICommand SettingsCommand { get; }
     
 

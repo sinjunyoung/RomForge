@@ -114,4 +114,19 @@ public class MainViewModel : ToolTabViewModel
     }
 
     public void SaveConfig() => _config.Save();
+
+    public bool IsAnyChildLocked()
+    {   
+        if (Tools.Any(vm => vm.IsLocked))
+            return true;
+
+        
+        foreach (var child in Tools)
+        {            
+            if (child.Tools != null && child.Tools.Any(child=>child.IsLocked))
+                return true;
+        }
+
+        return false;
+    }
 }

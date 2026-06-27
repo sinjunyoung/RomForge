@@ -101,7 +101,7 @@
 
         <GridSplitter Grid.Row="1" Height="5" HorizontalAlignment="Stretch" Background="#1E1E1E" Cursor="SizeNS"/>
 
-        <Border BorderBrush="#444444" BorderThickness="1" CornerRadius="10" Background="Transparent" Grid.Row="2">
+        <Border BorderBrush="#444444" BorderThickness="1" CornerRadius="10" Background="Transparent" Grid.Row="2" Visibility="Hidden">
             <RichTextBox x:Name="logBox" Style="{StaticResource LogBox}" helpers:RichTextBoxLogger.LogEntries="{Binding ActiveLogEntries}" BorderThickness="0" Background="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"/>
         </Border>
     </Grid>

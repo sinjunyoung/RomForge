@@ -3,7 +3,6 @@ using Common.WPF.ViewModels;
 using RomForge.Helpers;
 using RomForge.Models;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -47,7 +46,6 @@ public class CueMainViewModel : ToolTabViewModel
     #region Commands
 
     public ICommand RunCommand { get; }
-    public ICommand CancelCommand { get; }
 
     #endregion
 

@@ -1,13 +1,7 @@
-﻿using _3DS.Core.Crypto;
-using _3DS.Core.Models;
-using _3DS.Core.Services;
-using Common;
-using NSW.WPF.UI;
+﻿using NSW.WPF.UI;
 using RomForge.Helpers;
 using RomForge.ViewModels;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 
@@ -38,7 +32,8 @@ public partial class MainWindow : Window
     private void MainWindow_Closing(object? sender, CancelEventArgs e)
     {
         ViewModel.SaveConfig();
-        bool busy = ViewModel.CompressVM.IsLocked || ViewModel.PatchVM.IsLocked;
+
+        bool busy = ViewModel.IsAnyChildLocked();
 
         if (!busy)
             return;
@@ -46,10 +41,7 @@ public partial class MainWindow : Window
         var result = MessageBoxHelper.ShowQuestion("작업이 진행 중입니다. 취소하고 종료할까요?");
 
         if (result)
-        {
-            ViewModel.CompressVM.CancelCommand.Execute(null);
-            ViewModel.PatchVM.CancelCommand.Execute(null);
-        }
+            ViewModel.CancelAll();
         else
             e.Cancel = true;
     }

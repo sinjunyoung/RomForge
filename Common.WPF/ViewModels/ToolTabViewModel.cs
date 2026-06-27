@@ -15,6 +15,8 @@ public abstract class ToolTabViewModel : ViewModelBase
 
     public List<ToolTabViewModel> Tools => _tools;
 
+    public ICommand? CancelCommand { set;  get; }
+
     protected void RegisterChild(ToolTabViewModel child)
     {
         child.PropertyChanged += (_, e) =>
@@ -40,6 +42,19 @@ public abstract class ToolTabViewModel : ViewModelBase
             CommandManager.InvalidateRequerySuggested();
         });
     }
+
+    public void CancelAll()
+    {
+        foreach (var child in Tools)
+        {
+            if (child.IsLocked && child.CancelCommand?.CanExecute(null) == true)
+                child.CancelCommand.Execute(null);
+
+            if (child.Tools != null)
+                child.CancelAll();
+        }
+    }
+
     private sealed class ActionDisposable(Action action) : IDisposable
     {
         public void Dispose() => action();
