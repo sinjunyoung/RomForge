@@ -41,7 +41,7 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Margin="5,0,5,0">
-                <TextBlock Text="[한글패치] or [xdelta 폴더]" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                <TextBlock Text="[한글패치 폴더]" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                 <Grid Height="36">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -50,7 +50,7 @@
                     <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="TxtPatch_DragEnter" PreviewDragOver="TxtPatch_DragOver" PreviewDrop="TxtPatch_Drop">
                         <Grid>
                             <TextBox x:Name="txtPatch" Text="{Binding PatchPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                            <TextBlock Text="[한글패치] or [xdelta 폴더]를 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                            <TextBlock Text="[한글패치 폴더]를 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
                         </Grid>
                     </Border>
                     <Button Grid.Column="1" x:Name="btnOpenPatchFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
@@ -97,7 +97,7 @@
 
             <core:IconButton Grid.Column="1"
                              Margin="5,0,0,0"
-                             DefaultText="리팩"
+                             DefaultText="리팩(폴더 기반)"
                              DefaultIcon="/Assets/Images/Repack.png"
                              CancelText="취소"
                              CancelIcon="/Assets/Images/Cancel.png"
@@ -107,7 +107,7 @@
 
             <core:IconButton Grid.Column="2"
                              Margin="5,0,5,0"
-                             DefaultText="언팩 + 리팩 (Full)"
+                             DefaultText="언팩 + 리팩 (메모리 기반)"
                              DefaultIcon="/Assets/Images/Run.png"
                              CancelText="취소"
                              CancelIcon="/Assets/Images/Cancel.png"

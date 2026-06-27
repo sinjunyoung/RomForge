@@ -10,8 +10,6 @@ namespace RomForge.Controls._3DS
     {
         RepackMainViewModel ViewModel => (RepackMainViewModel)DataContext;
 
-        private CancellationTokenSource? _cts;
-
         public RepackTab()
         {
             InitializeComponent();

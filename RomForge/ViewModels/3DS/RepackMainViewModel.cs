@@ -136,29 +136,30 @@ public class RepackMainViewModel : ToolTabViewModel
         var keyStore = new KeyStore();
         string unpackedPath = Path.Combine(OutputPath, "unpacked");
         string outputCci = Utils.GetUniqueFilePath(Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(InputPath) + "_Repack.cci"));
-
         var sw = System.Diagnostics.Stopwatch.StartNew();
         long startTime = System.Diagnostics.Stopwatch.GetTimestamp();
-
-        Action<long, long> reporter = CreateProgressReporter(sw, startTime);
+        Action<long, long> reporter = CreateProgressReporter(startTime);
+        bool isCompleted = false;
 
         try
         {
+            if (!Directory.Exists(OutputPath))
+                Directory.CreateDirectory(OutputPath);
+
             switch (mode)
             {
                 case BuildMode.UnpackOnly:
                     await UnpackAsync(keyStore, unpackedPath, ct);
                     break;
-
                 case BuildMode.RebuildOnly:
                     await RepackAsync(keyStore, unpackedPath, outputCci, reporter, ct);
                     break;
-
                 case BuildMode.FullProcess:
                     await RepackDirectAsync(keyStore, outputCci, reporter, ct);
                     break;
             }
 
+            isCompleted = true;
             Log($"완료! 총 소요: {sw.Elapsed:mm\\:ss}", LogLevel.Ok);
             OutputPath.OpenFolder();
         }
@@ -169,6 +170,17 @@ public class RepackMainViewModel : ToolTabViewModel
         catch (Exception ex)
         {
             Log($"오류: {ex.Message}", LogLevel.Error);
+        }
+        finally
+        {
+            if (!isCompleted)
+            {
+                if (mode != BuildMode.UnpackOnly && File.Exists(outputCci))
+                    try { File.Delete(outputCci); } catch { }
+
+                if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
+                    try { Directory.Delete(unpackedPath, true); } catch { }
+            }
         }
     }
 
@@ -208,11 +220,11 @@ public class RepackMainViewModel : ToolTabViewModel
 
     private async Task RepackDirectAsync(KeyStore keyStore, string outputCci, Action<long, long> reporter, CancellationToken ct)
     {
-        Log("변환 시작...", LogLevel.Highlight);
+        Log("메모리 기반 리팩 시작...", LogLevel.Highlight);
 
         await using var source = await OpenSourceAsync(InputPath, keyStore, (msg, level, _) => Log(msg, level), ct);
 
-        var repackedNcchs = new Dictionary<int, (NcchUnpackResult unpack, byte[] exefsBlock, Stream ncchSource, RomFsUnpackResult? romFs)>();
+        var repackedNcchs = new Dictionary<int, (NcchUnpackResult, byte[], Stream, RomFsUnpackResult?, IRomFsFileSource?)>();
 
         foreach (var content in source.Contents)
         {
@@ -229,18 +241,18 @@ public class RepackMainViewModel : ToolTabViewModel
             string? exefsPatchDir = GetPatchDir("exefs");
             string? romfsPatchDir = GetPatchDir("romfs");
 
-            var exefsBlock = unpack.ExeFs != null
+            byte[] exefsBlock = unpack.ExeFs != null
                 ? await ExeFsPacker.PackWithPatchAsync(unpack.ExeFs.Files, idx == 0 ? exefsPatchDir : null, ct)
-                : Array.Empty<byte>();
+                : [];
 
             IRomFsFileSource? patchSource = idx == 0 && romfsPatchDir != null
                 ? new PatchFolderFileSource(romfsPatchDir)
                 : null;
 
-            repackedNcchs[idx] = (unpack, exefsBlock, ncchStream, unpack.RomFs);
+            repackedNcchs[idx] = (unpack, exefsBlock, ncchStream, unpack.RomFs, patchSource);
         }
 
-        var repackedSource = await RepackedNcsdSource.CreateAsync(repackedNcchs, source.Contents);
+        var repackedSource = await RepackedNcsdSource.CreateAsync(repackedNcchs, source.Contents, ct);
 
         await using var outputStream = File.Open(outputCci, FileMode.Create, FileAccess.ReadWrite);
         await NcsdBuilder.BuildAsync(repackedSource, outputStream, reporter, ct);
@@ -269,7 +281,7 @@ public class RepackMainViewModel : ToolTabViewModel
         };
     }
 
-    private Action<long, long> CreateProgressReporter(System.Diagnostics.Stopwatch sw, long startTime)
+    private Action<long, long> CreateProgressReporter(long startTime)
     {
         var reportLock = new object();
         var reportSw = System.Diagnostics.Stopwatch.StartNew();

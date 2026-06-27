@@ -93,6 +93,9 @@ public class InstallerMainViewModel : ToolTabViewModel
         InstalledTitles = new InstalledTitlesMainViewModel(msg => StatusMessage = msg);
         Install = new InstallMainViewModel();
 
+        Tools.Add(InstalledTitles);
+        Tools.Add(Install);
+
         RegisterChild(InstalledTitles);
         RegisterChild(Install);
 
