@@ -24,6 +24,11 @@ public class PatchConfig : ViewModelBase
         set { SetProperty(ref _autoCompress, value); }
     }
 }
+public class ChdmanConfig : ViewModelBase
+{
+    private string _compression = "zlib";
+    public string Compression { get => _compression; set => SetProperty(ref _compression, value); }
+}
 
 public class SwitchConfig : ViewModelBase
 {
@@ -75,6 +80,9 @@ public class AppConfig : ViewModelBase
     private PatchConfig _patch = new();
     public PatchConfig Patch { get => _patch; set => SetProperty(ref _patch, value); }
 
+    private ChdmanConfig _chdman = new();
+    public ChdmanConfig Chdman { get => _chdman; set => SetProperty(ref _chdman, value); }
+
     private SwitchConfig _switch = new();
     public SwitchConfig Switch { get => _switch; set => SetProperty(ref _switch, value); }
 
@@ -99,6 +107,7 @@ public class AppConfig : ViewModelBase
             {
                 Common = loaded.Common ?? new();
                 Patch = loaded.Patch ?? new();
+                Chdman = loaded.Chdman ?? new();
                 Switch = loaded.Switch ?? new();
                 Azahar = loaded.Azahar ?? new();
                 Dolphin = loaded.Dolphin ?? new();                
@@ -116,6 +125,7 @@ public class AppConfig : ViewModelBase
         void AutoSave(object? s, PropertyChangedEventArgs e) => Save();
 
         Common.PropertyChanged += AutoSave;
+        Chdman.PropertyChanged += AutoSave;
         Switch.PropertyChanged += AutoSave;
         Azahar.PropertyChanged += AutoSave;
         Dolphin.PropertyChanged += AutoSave;

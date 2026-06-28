@@ -1,12 +1,14 @@
-﻿namespace RomForge.ViewModels.PSP;
+﻿using RomForge.Core;
+
+namespace RomForge.ViewModels.PSP;
 
 public class PSPMainViewModel : MultiToolTabViewModel
-{
+{   
     public PSPConverterViewModel ConverterVM { get; }
 
-    public PSPMainViewModel()
+    public PSPMainViewModel(AppConfig config)
     {
-        ConverterVM = new PSPConverterViewModel();
+        ConverterVM = new PSPConverterViewModel(config);
 
         Tools.Add(ConverterVM);
 

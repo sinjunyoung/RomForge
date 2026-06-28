@@ -154,8 +154,8 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Cue:
                         case RomFormat.Gdi:
                         case RomFormat.Chd:
-                            {
-                                FileConverter chdConverter = new();
+                            {                                
+                                FileConverter chdConverter = new(_config.Chdman.Compression);
 
                                 chdConverter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
                                 chdConverter.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);

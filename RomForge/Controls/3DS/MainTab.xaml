@@ -42,6 +42,16 @@
                 <local:ConverterTab DataContext="{Binding ConverterVM}"/>
             </TabItem>
 
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Common.WPF;component/Assets/Images/Lock.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="복호화" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:DecryptorTab DataContext="{Binding DecryptorVM}"/>
+            </TabItem>
+
         </TabControl>
     </Grid>
 </UserControl>

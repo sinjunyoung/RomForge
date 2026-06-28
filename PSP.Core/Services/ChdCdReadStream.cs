@@ -7,7 +7,7 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
     private long _position;
     private byte[]? _currentHunk;
     private uint _cachedHunkIndex = uint.MaxValue;
-    private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / 2448u;
+    private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / 2352u;
 
     public override int Read(byte[] buffer, int offset, int count)
     {
@@ -31,9 +31,7 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
 
             int toRead = (int)Math.Min(count - bytesRead, 2048 - posInSector);
             toRead = (int)Math.Min(toRead, totalLength - _position);
-
-            //Array.Copy(_currentHunk, hunkOffset + 16 + posInSector, buffer, offset + bytesRead, toRead);
-            Array.Copy(_currentHunk, hunkOffset + 8 + posInSector, buffer, offset + bytesRead, toRead);
+            Array.Copy(_currentHunk, hunkOffset + posInSector, buffer, offset + bytesRead, toRead);
 
             bytesRead += toRead;
             _position += toRead;

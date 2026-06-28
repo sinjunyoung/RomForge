@@ -85,7 +85,7 @@ public class MainViewModel : ToolTabViewModel
         Main3DsVM = new _3DSMainViewModel();
         PS1MainVM = new PS1MainViewModel(_config);
         PS1MainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;
-        PSPMainVM = new PSPMainViewModel();
+        PSPMainVM = new PSPMainViewModel(_config);
         UtilMainVM = new UtilMainViewModel();
         Settings = new SettingsMainViewModel(_config);
 

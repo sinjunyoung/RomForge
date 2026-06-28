@@ -164,27 +164,20 @@ public class CsoService
         await output.WriteAsync(indexBytes, ct);
     }
 
-    public static Task CompressZsoAsync(Stream input, Stream output, IProgress<double>? progress = null, CancellationToken ct = default) => CompressAsync(input, output, magic: CsoHeader.MagicZSO, version: 1, isLz4: true, progress, ct);
-
     public static async Task CompressFromChdAsync(string chdPath, Stream output, byte version = 1, IProgress<double>? progress = null, CancellationToken ct = default)
     {
+        var info = ChdInfoReader.ReadChdInfo(chdPath);
+
         using var wrapper = new LibChdrWrapper();
         var err = wrapper.Open(chdPath);
 
-        var h = wrapper.ReadHunk(0);
-
-        Debug.WriteLine(BitConverter.ToString(h.Skip(0).Take(64).ToArray()));
-
         if (err != ChdrError.CHDERR_NONE)
             throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
-
-        var header = wrapper.Header ?? throw new InvalidDataException("CHD 헤더 없음");
+                
         
-        var info = ChdInfoReader.ReadChdInfo(chdPath);
-
         if (info.SourceType == ChdSourceType.DVD)
         { 
-            long totalLength = (long)header.logicalbytes;
+            long totalLength = (long)info.LogicalBytes;
             using var chdStream = new ChdReadStream(wrapper, totalLength);
 
             await CompressAsync(chdStream, output, version: version, progress: progress, ct: ct);
@@ -198,24 +191,9 @@ public class CsoService
         }
     }
 
-    public static async Task CompressZsoFromChdAsync(string chdPath, Stream output, IProgress<double>? progress = null, CancellationToken ct = default)
-    {
-        using var wrapper = new LibChdrWrapper();
-        var err = wrapper.Open(chdPath);
+    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, string compression = "zlib", CancellationToken ct = default) => await _chdman.CreateDvdAsync(isoPath, chdPath, compression, ct);
 
-        if (err != ChdrError.CHDERR_NONE)
-            throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
-
-        var header = wrapper.Header ?? throw new InvalidDataException("CHD 헤더 없음");
-        long totalLength = (long)header.logicalbytes;
-        using var chdStream = new ChdReadStream(wrapper, totalLength);
-
-        await CompressZsoAsync(chdStream, output, progress, ct);
-    }
-
-    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, CancellationToken ct = default) => await _chdman.CreateDvdAsync(isoPath, chdPath, ct);
-
-    public async Task<bool> CompressCsoToChdAsync(string csoPath, string chdPath, IProgress<double>? progress = null, CancellationToken ct = default)
+    public async Task<bool> CompressCsoToChdAsync(string csoPath, string chdPath, IProgress<double>? progress = null, string compression = "zlib", CancellationToken ct = default)
     {
         var tmpIso = Utils.GetUniqueFilePath(Path.ChangeExtension(csoPath, ".iso"));
 
@@ -228,7 +206,7 @@ public class CsoService
                 await isoStream.FlushAsync(ct);
             }
 
-            return await _chdman.CreateDvdAsync(tmpIso, chdPath, ct);
+            return await _chdman.CreateDvdAsync(tmpIso, chdPath, compression, ct);
         }
         catch (Exception ex)
         {

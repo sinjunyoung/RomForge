@@ -41,7 +41,6 @@ public class PspFileItem : ViewModelBase
     {
         "iso" => Brush("#94C8FF"),
         "cso" => Brush("#94FFB5"),
-        "zso" => Brush("#FFD494"),
         "chd" => Brush("#D494FF"),
         _ => Brushes.Transparent
     };
@@ -62,22 +61,17 @@ public class PspFileItem : ViewModelBase
         switch (Extension)
         {
             case "iso":
-                AvailableFormats.AddRange(["CSO", "ZSO", "CHD"]);
+                AvailableFormats.AddRange(["CSO", "CHD"]);
                 SelectedTargetFormat = "CSO";
                 break;
 
             case "cso":
-                AvailableFormats.AddRange(["ISO", "ZSO", "CHD"]);
-                SelectedTargetFormat = "ISO";
-                break;
-
-            case "zso":
-                AvailableFormats.AddRange(["ISO", "CSO", "CHD"]);
+                AvailableFormats.AddRange(["ISO", "CHD"]);
                 SelectedTargetFormat = "ISO";
                 break;
 
             case "chd":
-                AvailableFormats.AddRange(["ISO", "CSO", "ZSO"]);
+                AvailableFormats.AddRange(["ISO", "CSO"]);
                 SelectedTargetFormat = "ISO";
                 break;
 

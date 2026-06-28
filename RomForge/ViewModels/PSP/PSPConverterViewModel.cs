@@ -1,6 +1,7 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
 using PSP.Core.Services;
+using RomForge.Core;
 using RomForge.Helpers;
 using RomForge.Models;
 using System.Collections.ObjectModel;
@@ -14,12 +15,13 @@ public class PSPConverterViewModel : ToolTabViewModel
 {
     #region Fields
 
+    private readonly AppConfig _config;
     private bool _isConverting;
     private CancellationTokenSource _cts = new();
     private readonly CsoService _csoService = new();
 
     private static readonly HashSet<string> SupportedExtensions =
-        [".iso", ".cso", ".zso", ".chd"];
+        [".iso", ".cso", ".chd"];
 
     #endregion
 
@@ -52,8 +54,9 @@ public class PSPConverterViewModel : ToolTabViewModel
 
     #region Constructor
 
-    public PSPConverterViewModel()
+    public PSPConverterViewModel(AppConfig config)
     {
+        _config = config;
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsConverting && FileItems.Count > 0);
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsConverting);
     }
@@ -147,41 +150,18 @@ public class PSPConverterViewModel : ToolTabViewModel
                                     await CsoService.CompressAsync(input, output, progress: progressHandler, ct: _cts.Token);
                                 break;
 
-                            case ("iso", "zso"):
-                                await using (var input = File.OpenRead(item.FilePath))
-                                await using (var output = File.Create(outPath))
-                                    await CsoService.CompressZsoAsync(input, output, progressHandler, _cts.Token);
-                                break;
-
                             case ("iso", "chd"):
-                                await _csoService.CompressToChdAsync(item.FilePath, outPath, _cts.Token);
+                                await _csoService.CompressToChdAsync(item.FilePath, outPath, _config.Chdman.Compression, _cts.Token);
                                 break;
 
                             case ("cso", "iso"):
-                            case ("zso", "iso"):
                                 await using (var input = File.OpenRead(item.FilePath))
                                 await using (var output = File.Create(outPath))
                                     await CsoService.DecompressAsync(input, output, progressHandler, _cts.Token);
                                 break;
 
-                            case ("cso", "zso"):
-                            case ("zso", "cso"):
-                                await using (var input = File.OpenRead(item.FilePath))
-                                await using (var tmp = new MemoryStream())
-                                {
-                                    await CsoService.DecompressAsync(input, tmp, null, _cts.Token);
-                                    tmp.Seek(0, SeekOrigin.Begin);
-                                    await using var output = File.Create(outPath);
-                                    if (outputExt == "zso")
-                                        await CsoService.CompressZsoAsync(tmp, output, progressHandler, _cts.Token);
-                                    else
-                                        await CsoService.CompressAsync(input, output, progress: progressHandler, ct: _cts.Token);
-                                }
-                                break;
-
                             case ("cso", "chd"):
-                            case ("zso", "chd"):
-                                await _csoService.CompressCsoToChdAsync(item.FilePath, outPath, progressHandler, _cts.Token);
+                                await _csoService.CompressCsoToChdAsync(item.FilePath, outPath, progressHandler, _config.Chdman.Compression, _cts.Token);
                                 break;
 
                             case ("chd", "iso"):
@@ -191,11 +171,6 @@ public class PSPConverterViewModel : ToolTabViewModel
                             case ("chd", "cso"):
                                 await using (var output = File.Create(outPath))
                                     await CsoService.CompressFromChdAsync(item.FilePath, output, version: 1, progressHandler, _cts.Token);
-                                break;
-
-                            case ("chd", "zso"):
-                                await using (var output = File.Create(outPath))
-                                    await CsoService.CompressZsoFromChdAsync(item.FilePath, output, progressHandler, _cts.Token);
                                 break;
 
                             default:
