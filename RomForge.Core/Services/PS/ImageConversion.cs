@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.Core.Services.PS1;
+namespace RomForge.Core.Services.PS;
 
 public static class ImageConversion
 {

@@ -1,12 +1,12 @@
 ﻿using NSW.WPF.Services;
-using RomForge.ViewModels.PS1;
+using RomForge.ViewModels.PS;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.Controls.PS1;
+namespace RomForge.Controls.PS;
 
 public partial class PackingTab : UserControl
 {

@@ -9,7 +9,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.ViewModels.PS;
 
 public class PSPConverterViewModel : ToolTabViewModel
 {

@@ -1,9 +1,9 @@
-﻿<UserControl x:Class="RomForge.Controls.PS1.MainTab"
+﻿<UserControl x:Class="RomForge.Controls.PS.MainTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.expression/blend/2008" 
-             xmlns:local="clr-namespace:RomForge.Controls.PS1"
+             xmlns:local="clr-namespace:RomForge.Controls.PS"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
@@ -31,6 +31,16 @@
                     </StackPanel>
                 </TabItem.Header>
                 <local:UnpackingTab DataContext="{Binding UnPackingVM}"/>
+            </TabItem>
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Convert.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="포멧 변환" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:ConverterTab DataContext="{Binding ConverterVM}"/>
             </TabItem>
 
         </TabControl>

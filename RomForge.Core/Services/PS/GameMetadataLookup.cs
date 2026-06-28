@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Text.Json;
 
-namespace RomForge.Core.Services.PS1;
+namespace RomForge.Core.Services.PS;
 
 public static class GameMetadataLookup
 {

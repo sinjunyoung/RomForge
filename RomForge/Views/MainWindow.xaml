@@ -5,8 +5,7 @@
         xmlns:controls="clr-namespace:RomForge.Controls"        
         xmlns:switch="clr-namespace:RomForge.Controls.Switch"
         xmlns:_3ds="clr-namespace:RomForge.Controls._3DS"
-        xmlns:ps1="clr-namespace:RomForge.Controls.PS1"
-        xmlns:psp="clr-namespace:RomForge.Controls.PSP"
+        xmlns:ps="clr-namespace:RomForge.Controls.PS"
         xmlns:util="clr-namespace:RomForge.Controls.Util"
         xmlns:settings="clr-namespace:RomForge.Controls.Settings"
         xmlns:vm="clr-namespace:RomForge.ViewModels"
@@ -31,8 +30,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Assets/Images/Patch.png" Width="24" Height="24" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <TextBlock Text="패치" FontSize ="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <TextBlock Text="패치" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:PatchTab/>
@@ -41,8 +40,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Compress.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="압축" FontSize ="13" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Compress.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="압축" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:CompressTab/>
@@ -51,8 +50,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Switch.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Switch" FontSize ="13" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Switch" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <switch:MainTab DataContext="{Binding SwitchMainVM}"/>
@@ -61,8 +60,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/3DS.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="3DS" FontSize ="13" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="3DS" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <_3ds:MainTab DataContext="{Binding Main3DsVM}"/>
@@ -71,28 +70,18 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/PS1.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="PSX" FontSize ="13" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="PS" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
-                <ps1:MainTab DataContext="{Binding PS1MainVM}"/>
+                <ps:MainTab DataContext="{Binding PSMainVM}"/>
             </TabItem>
 
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/PSP.png" Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                        <TextBlock Text="PSP" FontSize ="13" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </TabItem.Header>
-                <psp:MainTab DataContext="{Binding PSPMainVM}"/>
-            </TabItem>
-
-            <TabItem IsEnabled="{Binding IsIdle}">
-                <TabItem.Header>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Utility.png" Width="24" Height="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="유틸" FontSize ="13" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Utility.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="유틸" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <util:MainTab DataContext="{Binding UtilMainVM}"/>
@@ -101,8 +90,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Assets/Images/Settings.png" Width="24" Height="24" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <TextBlock Text="설정" FontSize ="13" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Settings.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <TextBlock Text="설정" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <settings:MainTab DataContext="{Binding Settings}"/>

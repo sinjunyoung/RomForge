@@ -4,7 +4,7 @@ using NSW.WPF.Services;
 using PBP.Core.Models;
 using PBP.Core.Services;
 using RomForge.Core;
-using RomForge.Core.Services.PS1;
+using RomForge.Core.Services.PS;
 using RomForge.Helpers;
 using RomForge.Models;
 using SixLabors.ImageSharp;
@@ -15,7 +15,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.ViewModels.PS1;
+namespace RomForge.ViewModels.PS;
 
 public class PackingMainViewModel : ToolTabViewModel
 {

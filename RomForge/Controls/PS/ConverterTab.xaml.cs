@@ -1,5 +1,5 @@
 ﻿using NSW.WPF.Services;
-using RomForge.ViewModels.PSP;
+using RomForge.ViewModels.PS;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
@@ -8,7 +8,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace RomForge.Controls.PSP;
+namespace RomForge.Controls.PS;
 
 public partial class ConverterTab : UserControl
 {

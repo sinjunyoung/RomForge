@@ -2,7 +2,7 @@
 using Common.WPF.ViewModels;
 using PBP.Core.Enums;
 using PBP.Core.Services;
-using RomForge.Core.Services.PS1;
+using RomForge.Core.Services.PS;
 using RomForge.Helpers;
 using RomForge.Models;
 using System.Collections.ObjectModel;
@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.ViewModels.PS1;
+namespace RomForge.ViewModels.PS;
 
 public class UnpackingMainViewModel : ToolTabViewModel
 {

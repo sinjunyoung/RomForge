@@ -4,8 +4,7 @@ using RomForge.Core;
 using RomForge.Models;
 using RomForge.ViewModels._3DS;
 using RomForge.ViewModels.Patch;
-using RomForge.ViewModels.PS1;
-using RomForge.ViewModels.PSP;
+using RomForge.ViewModels.PS;
 using RomForge.ViewModels.Settings;
 using RomForge.ViewModels.Switch;
 using RomForge.ViewModels.Util;
@@ -32,9 +31,7 @@ public class MainViewModel : ToolTabViewModel
 
     public _3DSMainViewModel Main3DsVM { get; }
 
-    public PS1MainViewModel PS1MainVM { get; }
-
-    public PSPMainViewModel PSPMainVM { get; }
+    public PS1MainViewModel PSMainVM { get; }
 
     public UtilMainViewModel UtilMainVM { get; }
 
@@ -68,9 +65,8 @@ public class MainViewModel : ToolTabViewModel
         1 => CompressVM.LogEntries,
         2 => SwitchMainVM.LogEntries,
         3 => Main3DsVM.LogEntries,
-        4 => PS1MainVM.LogEntries,
-        5 => PSPMainVM.LogEntries,
-        6 => UtilMainVM.LogEntries,
+        4 => PSMainVM.LogEntries,
+        5 => UtilMainVM.LogEntries,
         _ => PatchVM.LogEntries
     };
 
@@ -83,9 +79,8 @@ public class MainViewModel : ToolTabViewModel
         SwitchMainVM = new SwitchMainViewModel(_config);
         SwitchMainVM.MergeVM.SettingsClicked += async (s, e) => await NavigateSwitchCompressSettings();
         Main3DsVM = new _3DSMainViewModel();
-        PS1MainVM = new PS1MainViewModel(_config);
-        PS1MainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;
-        PSPMainVM = new PSPMainViewModel(_config);
+        PSMainVM = new PS1MainViewModel(_config);
+        PSMainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;
         UtilMainVM = new UtilMainViewModel();
         Settings = new SettingsMainViewModel(_config);
 
@@ -93,8 +88,7 @@ public class MainViewModel : ToolTabViewModel
         Tools.Add(CompressVM);
         Tools.Add(SwitchMainVM);
         Tools.Add(Main3DsVM);
-        Tools.Add(PS1MainVM);
-        Tools.Add(PSPMainVM);
+        Tools.Add(PSMainVM);
         Tools.Add(UtilMainVM);
         Tools.Add(Settings);
 

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Media;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.ViewModels.PS;
 
 public class PspFileItem : ViewModelBase
 {

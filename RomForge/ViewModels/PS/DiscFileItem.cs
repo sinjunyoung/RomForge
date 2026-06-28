@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Media;
 
-namespace RomForge.ViewModels.PS1;
+namespace RomForge.ViewModels.PS;
 
 public class DiscFileItem(string filePath) : ViewModelBase
 {

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.ViewModels.PS1;
+namespace RomForge.ViewModels.PS;
 
 public class PbpFileItem : ViewModelBase
 {
