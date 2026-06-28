@@ -1,6 +1,5 @@
 ﻿using Common;
 using RomForge.Core.Models.Switch;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
