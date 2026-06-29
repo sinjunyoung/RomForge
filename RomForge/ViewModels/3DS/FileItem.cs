@@ -17,8 +17,7 @@ public class FileItem : ViewModelBase
     private string _selectedTargetFormat = string.Empty;
     private int _progress;
     private bool _crypto = false;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; }
 
@@ -97,6 +96,12 @@ public class FileItem : ViewModelBase
     {
         get => _crypto;
         set { _crypto = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public TitleType Type => (TitleType)(Convert.ToUInt64(TitleId, 16) >> 32);

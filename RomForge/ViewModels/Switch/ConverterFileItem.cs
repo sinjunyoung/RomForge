@@ -7,14 +7,13 @@ public class ConverterFileItem : GameFile
     private int _progress;
     private string _status = "대기중";
     private string _selectedTargetFormat = string.Empty;
+    private int _no;
 
     public ConverterFileItem(string filePath) : base(filePath)
     {
         AvailableFormats = GetAvailableFormats(Extension);
         _selectedTargetFormat = AvailableFormats.FirstOrDefault() ?? string.Empty;
     }
-
-    public int No { get; set; }
 
     public List<string> AvailableFormats { get; }
 
@@ -34,6 +33,12 @@ public class ConverterFileItem : GameFile
     {
         get => _status;
         set { _status = value; OnPropertyChanged(); OnPropertyChanged(nameof(StatusColor)); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public string StatusColor => Status switch

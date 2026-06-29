@@ -9,8 +9,8 @@ public class PspFileItem : ViewModelBase
     private string _status = string.Empty;
     private string _selectedTargetFormat = string.Empty;
     private int _progress;
+    private int _no;
 
-    public int No { get; set; }
     public string FilePath { get; }
     public string FileName => Path.GetFileNameWithoutExtension(FilePath);
     public string Extension => Path.GetExtension(FilePath).TrimStart('.').ToLowerInvariant();
@@ -35,6 +35,12 @@ public class PspFileItem : ViewModelBase
     {
         get => _status;
         set { _status = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public Brush ExtensionBackground => Extension switch
@@ -85,7 +91,9 @@ public class PspFileItem : ViewModelBase
     {
         var c = (Color)ColorConverter.ConvertFromString(hex);
         var brush = new SolidColorBrush(c);
+
         brush.Freeze();
+
         return brush;
     }
 }

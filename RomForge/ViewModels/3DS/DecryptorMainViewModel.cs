@@ -97,8 +97,10 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     vm.Icon = bitmap;
                 }
 
-                vm.No = FileItems.Count + 1;
                 FileItems.Add(vm);
+
+                for (int i = 0; i < FileItems.Count; i++)
+                    FileItems[i].No = i + 1;
             }
             catch (Exception ex)
             {
@@ -114,6 +116,9 @@ public class DecryptorMainViewModel : ToolTabViewModel
     {
         foreach (var item in items.ToList())
             FileItems.Remove(item);
+
+        for (int i = 0; i < FileItems.Count; i++)
+            FileItems[i].No = i + 1;
 
         OnPropertyChanged(nameof(HintVisibility));
     }

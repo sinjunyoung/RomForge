@@ -105,7 +105,7 @@
 
             <core:IconButton Grid.Column="1"
                              Margin="5,0,0,0"
-                             DefaultText="리팩(폴더 기반)"
+                             DefaultText="리팩 (폴더 기반)"
                              DefaultIcon="/Assets/Images/Repack.png"
                              CancelText="취소"
                              CancelIcon="/Assets/Images/Cancel.png"

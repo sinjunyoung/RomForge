@@ -16,8 +16,7 @@ public class DecryptorFileItem : ViewModelBase
     private string _status = string.Empty;
     private bool _crypto;
     private int _progress;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; }
 
@@ -77,6 +76,12 @@ public class DecryptorFileItem : ViewModelBase
     {
         get => _crypto;
         set { _crypto = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public TitleType Type => (TitleType)(Convert.ToUInt64(TitleId, 16) >> 32);

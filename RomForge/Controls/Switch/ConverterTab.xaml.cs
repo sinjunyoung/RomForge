@@ -48,22 +48,32 @@ public partial class ConverterTab : UserControl
 
     private async void LvFiles_Drop(object sender, DragEventArgs e)
     {
-        if (ViewModel == null) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
+        if (ViewModel == null) 
+            return;
+
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) 
+            return;
+
         await ViewModel.AddPathsAsync(ExpandPaths(paths));
     }
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Delete) return;
+        if (e.Key != Key.Delete) 
+            return;
+
         var selected = lvFiles.SelectedItems.Cast<ConverterFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
     private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
     {
-        if (e.OriginalSource is not GridViewColumnHeader header) return;
-        if (header.Tag is not string sortBy) return;
+        if (e.OriginalSource is not GridViewColumnHeader header) 
+            return;
+
+        if (header.Tag is not string sortBy) 
+            return;
 
         var direction =
             _lastSortColumn == sortBy && _lastSortDirection == ListSortDirection.Ascending
@@ -71,7 +81,9 @@ public partial class ConverterTab : UserControl
                 : ListSortDirection.Ascending;
 
         var dataView = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-        if (dataView == null) return;
+
+        if (dataView == null) 
+            return;
 
         dataView.SortDescriptions.Clear();
         dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
@@ -83,7 +95,8 @@ public partial class ConverterTab : UserControl
 
     private async void BtnAddFiles_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel == null) return;
+        if (ViewModel == null) 
+            return;
 
         var dialog = new OpenFileDialog
         {
@@ -92,13 +105,16 @@ public partial class ConverterTab : UserControl
             Filter = "Switch 파일 (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|모든 파일|*.*"
         };
 
-        if (dialog.ShowDialog() != true) return;
+        if (dialog.ShowDialog() != true) 
+            return;
+
         await ViewModel.AddPathsAsync(dialog.FileNames);
     }
 
     private async void BtnAddFolder_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel == null) return;
+        if (ViewModel == null) 
+            return;
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
@@ -106,7 +122,9 @@ public partial class ConverterTab : UserControl
             UseDescriptionForTitle = true
         };
 
-        if (dialog.ShowDialog() != true) return;
+        if (dialog.ShowDialog() != true) 
+            return;
+
         await ViewModel.AddPathsAsync(ExpandPaths([dialog.SelectedPath]));
     }
 
@@ -130,7 +148,10 @@ public partial class ConverterTab : UserControl
     private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<ConverterFileItem>().FirstOrDefault();
-        if (selected == null) return;
+
+        if (selected == null) 
+            return;
+
         Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
     }
 

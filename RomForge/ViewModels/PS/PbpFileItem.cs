@@ -13,8 +13,7 @@ public class PbpFileItem : ViewModelBase
     private List<string> _languages = [];
     private string _status = string.Empty;
     private int _progress;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; }
 
@@ -68,6 +67,12 @@ public class PbpFileItem : ViewModelBase
     {
         get => _languages;
         set { _languages = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public PbpFileItem(string filePath)

@@ -10,8 +10,7 @@ public class CompressFileItem : ViewModelBase
 {
     private int _progress;
     private string _status = string.Empty;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; }
 
@@ -48,6 +47,12 @@ public class CompressFileItem : ViewModelBase
     {
         get => _status;
         set { _status = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public Brush ExtensionBackground => Extension.ToLowerInvariant() switch

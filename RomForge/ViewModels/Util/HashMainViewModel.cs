@@ -90,12 +90,12 @@ public class HashMainViewModel : ToolTabViewModel
             if (!existing.Add(path))
                 continue;
 
-            var vm = new HashFileItem(path)
-            {
-                No = FileItems.Count + 1
-            };
+            var vm = new HashFileItem(path);
 
             FileItems.Add(vm);
+
+            for (int i = 0; i < FileItems.Count; i++)
+                FileItems[i].No = i + 1;
         }
 
         OnPropertyChanged(nameof(HintVisibility));
@@ -107,9 +107,8 @@ public class HashMainViewModel : ToolTabViewModel
         foreach (var item in items.ToList())
             FileItems.Remove(item);
 
-        int no = 1;
-        foreach (var item in FileItems)
-            item.No = no++;
+        for (int i = 0; i < FileItems.Count; i++)
+            FileItems[i].No = i + 1;
 
         OnPropertyChanged(nameof(HintVisibility));
     }

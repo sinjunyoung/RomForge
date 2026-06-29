@@ -1,5 +1,4 @@
 ﻿using RomForge.Core;
-using static System.Resources.ResXFileRef;
 
 namespace RomForge.ViewModels.Switch;
 

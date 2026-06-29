@@ -8,8 +8,7 @@ public class HashFileItem : ViewModelBase
     private int _progress;
     private string _status = string.Empty;
     private string _hashResult = string.Empty;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; }
 
@@ -35,6 +34,12 @@ public class HashFileItem : ViewModelBase
     {
         get => _hashResult;
         set { _hashResult = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 
     public HashFileItem(string filePath)

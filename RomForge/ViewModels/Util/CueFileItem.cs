@@ -7,8 +7,7 @@ public class CueFileItem(string filePath) : ViewModelBase
 {
     private int _progress;
     private string _status = string.Empty;
-
-    public int No { get; set; }
+    private int _no;
 
     public string FilePath { get; } = filePath;
 
@@ -28,5 +27,11 @@ public class CueFileItem(string filePath) : ViewModelBase
     {
         get => _status;
         set { _status = value; OnPropertyChanged(); }
+    }
+
+    public int No
+    {
+        get => _no;
+        set { _no = value; OnPropertyChanged(); }
     }
 }

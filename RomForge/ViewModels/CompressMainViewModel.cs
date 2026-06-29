@@ -62,8 +62,12 @@ public class CompressMainViewModel : ToolTabViewModel
             if (!existing.Add(path))
                 continue;
 
-            var item = new CompressFileItem(path) { No = FileItems.Count + 1 };
+            var item = new CompressFileItem(path);
+
             FileItems.Add(item);
+
+            for (int i = 0; i < FileItems.Count; i++)
+                FileItems[i].No = i + 1;
         }
 
         OnPropertyChanged(nameof(HintVisibility));
@@ -74,6 +78,9 @@ public class CompressMainViewModel : ToolTabViewModel
     {
         foreach (var item in items.ToList())
             FileItems.Remove(item);
+
+        for (int i = 0; i < FileItems.Count; i++)
+            FileItems[i].No = i + 1;
 
         OnPropertyChanged(nameof(HintVisibility));
     }
