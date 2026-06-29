@@ -14,6 +14,8 @@ public class ConverterFileItem : GameFile
         _selectedTargetFormat = AvailableFormats.FirstOrDefault() ?? string.Empty;
     }
 
+    public int No { get; set; }
+
     public List<string> AvailableFormats { get; }
 
     public string SelectedTargetFormat

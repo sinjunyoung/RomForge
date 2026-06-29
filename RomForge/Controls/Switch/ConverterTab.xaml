@@ -1,10 +1,9 @@
-﻿<UserControl x:Class="RomForge.Controls.PS.UnpackingTab"
+﻿<UserControl x:Class="RomForge.Controls.Switch.ConverterTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:helpers="clr-namespace:RomForge.Helpers"
-             xmlns:converters="clr-namespace:RomForge.Converters"
+             xmlns:vm="clr-namespace:RomForge.ViewModels.Switch"
              xmlns:converters2="clr-namespace:Common.WPF.Converters;assembly=Common.WPF"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
@@ -17,19 +16,14 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
             <ListView x:Name="lvFiles" Grid.Row="0"
                       ItemsSource="{Binding FileItems}"
-                      IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}"
+                      IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
                       SelectionMode="Extended"
                       KeyUp="LvFiles_KeyUp"
                       AllowDrop="True"
                       Drop="LvFiles_Drop"
-                      DragOver="LvFiles_DragOver" 
+                      DragOver="LvFiles_DragOver"
                       GridViewColumnHeader.Click="GridViewColumnHeader_Click"
                       ContextMenuOpening="LvFiles_ContextMenuOpening">
                 <ListView.ItemContainerStyle>
@@ -48,6 +42,7 @@
                         </Style.Triggers>
                     </Style>
                 </ListView.ItemContainerStyle>
+
                 <ListView.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -71,7 +66,7 @@
 
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="70">
+                        <GridViewColumn Width="60">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="No">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -87,18 +82,15 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="270">
+                        <GridViewColumn Width="280">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="FileName"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="TitleName">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
@@ -108,60 +100,92 @@
                                             </Border.Background>
                                         </Border>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding TitleName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="260" ToolTip="{Binding FilePath}"/>
-                                            <TextBlock Text="{Binding TitleId}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="260"  ToolTip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding TitleName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="220" ToolTip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding TitleID}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="220"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="270">
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="TitleLocalName"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="로컬 타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn Header="종류" Width="90">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="8,5" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding TitleLocalName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="260"/>
-                                        <ItemsControl ItemsSource="{Binding Languages}" Margin="0,4,0,0">
-                                            <ItemsControl.ItemsPanel>
-                                                <ItemsPanelTemplate>
-                                                    <StackPanel Orientation="Horizontal"/>
-                                                </ItemsPanelTemplate>
-                                            </ItemsControl.ItemsPanel>
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Image Width="16" Height="16" Margin="0,0,3,0"
-                                                           Source="{Binding Converter={StaticResource PbpLanguageToFlagConverter}}"/>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                    <Border Background="{Binding TypeBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding FileType}" Foreground="{Binding TypeForeground}" FontSize="11" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Width="75">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="Extension">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <Image Source="/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="입력" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding ExtensionBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" Margin="2,0">
+                                        <TextBlock Text="{Binding Extension, StringFormat={}{0:U}}" Foreground="{Binding ExtensionForeground}"
+                                                   FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Width="80">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image Source="/Assets/Images/Output.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="출력" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <ComboBox ItemsSource="{Binding AvailableFormats}"
+                                              SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              Width="65" Height="26"
+                                              HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <ComboBox.ItemContainerStyle>
+                                            <Style TargetType="ComboBoxItem">
+                                                <Setter Property="Foreground" Value="White"/>
+                                            </Style>
+                                        </ComboBox.ItemContainerStyle>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+
+                        <GridViewColumn Width="70">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Tag="Version">
+                                    <TextBlock Text="버전" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Version}" Foreground="#888888" FontSize="11" HorizontalAlignment="Center"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
                         <GridViewColumn Width="90">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="FileSizeBytes"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="FileSize">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FileSize}" Padding="6,0" HorizontalAlignment="Right"/>
@@ -169,27 +193,28 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="120">
+                        <GridViewColumn Width="110">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="Progress"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="Status">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="진행률" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="상태" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Grid Margin="6,0">
-                                        <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}"/>
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Progress}" Foreground="White" FontSize="11" FontWeight="Bold"/>
-                                            <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
-                                        </StackPanel>
-                                    </Grid>
+                                    <StackPanel Margin="6,0">
+                                        <Grid>
+                                            <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="14"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Progress}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                                <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                        <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor}" FontSize="10"
+                                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -197,7 +222,7 @@
                 </ListView.View>
             </ListView>
 
-            <Border Grid.Row="0" IsHitTestVisible="False"
+            <Border IsHitTestVisible="False"
                     Visibility="{Binding HintVisibility}"
                     BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15"
                     CornerRadius="6">
@@ -206,8 +231,8 @@
                 </Border.Background>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                     <Image Source="/Assets/Images/drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                    <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="PBP를 원본 BIN+CUE로 복원합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="파일 또는 폴더를 여기에 드래그하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="하기 파일 포멧을 상호 변환합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                     <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -216,9 +241,30 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.Items>
                             <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                <TextBlock Text="PBP" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                <TextBlock Text="NSP" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                     <TextBlock.Effect>
                                         <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="NSZ" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFA254" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="XCI" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="XCZ" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
                                     </TextBlock.Effect>
                                 </TextBlock>
                             </Border>
@@ -231,7 +277,9 @@
         <Border Grid.Row="1" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource RunButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Command="{Binding RunCommand}" Margin="0,0,6,0">
+                    <Button Style="{StaticResource RunButton}"
+                            IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                            Command="{Binding RunCommand}" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Run.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -239,8 +287,7 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting}" Command="{Binding CancelCommand}">
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked}" Command="{Binding CancelCommand}">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -251,7 +298,9 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnAddFiles_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}"
+                            IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                            Click="BtnAddFiles_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -259,8 +308,9 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnAddFolder_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}"
+                            IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                            Click="BtnAddFolder_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -268,8 +318,9 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}"
+                            IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                            Click="BtnRemove_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -277,8 +328,9 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnClear_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}"
+                            IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                            Click="BtnClear_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
