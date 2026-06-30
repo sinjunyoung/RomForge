@@ -165,10 +165,13 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
         var pvdSectors = (uint)(outBuffer[104] + (outBuffer[105] << 8) + (outBuffer[106] << 16) + (outBuffer[107] << 24));
         var pvdSize = pvdSectors * ISO_BLOCK_SIZE;
         var maxSize = (uint)(IsoIndex.Count * 16 * ISO_BLOCK_SIZE);
+        const uint blockTolerance = 16 * ISO_BLOCK_SIZE;
 
-        mismatch = pvdSize > maxSize || pvdSize == 0;
+        var diff = pvdSize > maxSize ? pvdSize - maxSize : maxSize - pvdSize;
 
-        return pvdSize;
+        mismatch = pvdSize == 0 || diff > blockTolerance;
+
+        return mismatch ? maxSize : pvdSize;
     }
 
     public long EndOffset

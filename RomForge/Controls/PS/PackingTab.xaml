@@ -269,12 +269,12 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <CheckBox Grid.Column="0" Content="동영상 프리징 픽스 (cmd 0x00)" IsChecked="{Binding UseFmvFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11" />
-                    <ComboBox Grid.Column="2" ItemsSource="{Binding FmvFixPresets}" SelectedItem="{Binding FmvFixValue}" IsEnabled="{Binding UseFmvFix}" VerticalAlignment="Center" FontSize="11">
+                    <ComboBox Grid.Column="2" ItemsSource="{Binding FmvFixPresets}" DisplayMemberPath="Label" SelectedItem="{Binding SelectedFmvFix}" IsEnabled="{Binding UseFmvFix}" VerticalAlignment="Center" FontSize="11">
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Left"/>

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <None Remove="BASE.zip" />
+    <None Remove="BLANK.PNG" />
     <None Remove="Config.zip" />
     <None Remove="DATA.psp" />
     <None Remove="DATA1.bin" />

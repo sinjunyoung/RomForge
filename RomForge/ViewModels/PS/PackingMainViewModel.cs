@@ -26,8 +26,12 @@ public class PackingMainViewModel : ToolTabViewModel
         ".cue", ".m3u", ".iso", ".chd"
     };
 
-    public ObservableCollection<string> FmvFixPresets { get; } = [
-        "0x04: 다수 게임에서 검증됨", "0x07: 실험적" ];
+    public record FmvFixOption(string Label, uint Value);
+
+    public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [
+        new("0x04 (다수 게임에서 검증됨)", 0x04),
+    new("0x07 (실험적)", 0x07)
+    ];
 
     private CancellationTokenSource _cts = new();
     private CancellationTokenSource? _iconCts;
@@ -44,7 +48,6 @@ public class PackingMainViewModel : ToolTabViewModel
     private bool _isDownloading;
     private bool _isValidating;
     private bool _useFmvFix;
-    private string _fmvFixValue = "0x04";
     private bool _useCdTimingFix;
 
     public byte[] Icon0Bytes { get; set; } = EmbeddedAssetProvider.GetDefaultIcon0();
@@ -53,7 +56,7 @@ public class PackingMainViewModel : ToolTabViewModel
 
     public byte[] Pic1Bytes { get; set; } = EmbeddedAssetProvider.GetDefaultPic1();
 
-    public byte[] BootLogoBytes { get; set; }
+    public byte[]? BootLogoBytes { get; set; }
 
     public string GameTitle
     {
@@ -114,16 +117,17 @@ public class PackingMainViewModel : ToolTabViewModel
         }
     }
 
+    private FmvFixOption _selectedFmvFix;
+    public FmvFixOption SelectedFmvFix
+    {
+        get => _selectedFmvFix;
+        set => SetProperty(ref _selectedFmvFix, value);
+    }
+
     public bool UseFmvFix
     {
         get => _useFmvFix;
         set => SetProperty(ref _useFmvFix, value);
-    }
-
-    public string FmvFixValue
-    {
-        get => _fmvFixValue;
-        set => SetProperty(ref _fmvFixValue, value);
     }
 
     public bool UseCdTimingFix
@@ -131,7 +135,6 @@ public class PackingMainViewModel : ToolTabViewModel
         get => _useCdTimingFix;
         set => SetProperty(ref _useCdTimingFix, value);
     }
-
 
     private BitmapImage? _icon0Image;
     public BitmapImage? Icon0Image
@@ -202,6 +205,8 @@ public class PackingMainViewModel : ToolTabViewModel
         Icon0Image = Icon0Bytes.ToBitmapImage();
         Pic0Image = Pic0Bytes.ToBitmapImage();
         Pic1Image = Pic1Bytes.ToBitmapImage();
+
+        SelectedFmvFix = FmvFixPresets[0];
 
         FileItems.CollectionChanged += (s, e) => OnPropertyChanged(nameof(CanAdd));
 
@@ -386,6 +391,8 @@ public class PackingMainViewModel : ToolTabViewModel
 
         OnPropertyChanged(nameof(HintVisibility));
         ResortAndRenumber();
+        OnPropertyChanged(nameof(HasPresetConfig));
+        OnPropertyChanged(nameof(CanEditPopsConfig));
     }
 
     public void ClearItems()
@@ -397,6 +404,8 @@ public class PackingMainViewModel : ToolTabViewModel
         Pic0Image = EmbeddedAssetProvider.GetDefaultPic0().ToBitmapImage();
         Pic1Image = EmbeddedAssetProvider.GetDefaultPic1().ToBitmapImage();
         ResetBootLogo();
+        OnPropertyChanged(nameof(HasPresetConfig));
+        OnPropertyChanged(nameof(CanEditPopsConfig));
     }
 
     public void SetIcon0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { Icon0Bytes = bytes; Icon0Image = img; }, 80, 80);
@@ -575,7 +584,15 @@ public class PackingMainViewModel : ToolTabViewModel
                     discInfos.Add(new DiscWriteInfo(resolved.IsoStream, resolved.IsoLength, item.GameId, orderedItems.Count > 1 ? $"{gameTitle} - Disc {item.No}" : gameTitle, resolved.TocData));
                 }
 
-                await PbpPackager.WritePbpAsync(discInfos, mainGameId, gameTitle, targetOutputPath, _config.PS1.CompressLevel, assets, FileItems.FirstOrDefault(i => i.No == 1)?.PresetConfigBytes, BuildProgressReporter(), _cts.Token);
+                byte[]? popsConfig = orderedItems[0].PresetConfigBytes;
+
+                if (popsConfig == null && (UseFmvFix || UseCdTimingFix))
+                {
+                    var fmvValue = UseFmvFix ? SelectedFmvFix.Value : 0;
+                    popsConfig = ExternalConfigBuilder.Build(UseFmvFix, fmvValue, UseCdTimingFix);
+                }
+
+                await PbpPackager.WritePbpAsync(discInfos, mainGameId, gameTitle, targetOutputPath, _config.PS1.CompressLevel, assets, popsConfig, BuildProgressReporter(), _cts.Token);
 
                 ProgressPct = 100;
                 AppendLog($"작업 완료: {targetOutputPath}", LogLevel.Ok);
@@ -676,6 +693,7 @@ public class PackingMainViewModel : ToolTabViewModel
 
     public void ResetBootLogo()
     {
+        BootLogoBytes = null;
         BootLogoImage = null;        
     }
 }
