@@ -270,13 +270,13 @@
                 </StackPanel>
 
                 <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button x:Name="btnForceLanguage" Width="130" Height="32" Margin="5,0,0,0" Padding="0" BorderThickness="1" ToolTip="리팩 진행 시 선택한 언어만 플래그를 켜고 나머지는 전부 끕니다." Style="{StaticResource GrayButton}" Click="BtnForceLanguage_Click">
+                    <Button x:Name="btnForceLanguage" Width="130" Height="32" Margin="5,0,0,0" Padding="0" BorderThickness="1" ToolTip="리팩 진행 시 선택한 언어만 플래그를 켜고 나머지는 전부 끕니다." Style="{StaticResource PrimaryButton}" Click="BtnForceLanguage_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="pack://application:,,,/NSW.WPF;component/Assets/Images/Language.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock Text="강제 언어 설정" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btnForceLanguageCancel" Width="130" Height="32" Margin="5,0,0,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Click="BtnForceLanguageCancel_Click">
+                    <Button x:Name="btnForceLanguageCancel" Width="130" Height="32" Margin="5,0,0,0" Padding="0" BorderThickness="1" Style="{StaticResource CancelButton}" Click="BtnForceLanguageCancel_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="pack://application:,,,/NSW.WPF;component/Assets/Images/CancelLanguage.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                             <TextBlock Text="강제 언어 취소" FontSize="12" VerticalAlignment="Center"/>

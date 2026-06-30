@@ -106,6 +106,35 @@ public partial class PackingTab : UserControl
         ExportImage(ViewModel?.Pic1Image, "Background.PNG");
     }
 
+    private void BootLogo_Drop(object sender, DragEventArgs e)
+    {
+        e.Handled = true;
+
+        var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+
+        if (files is not { Length: > 0 })
+            return;
+
+        string ext = Path.GetExtension(files[0]).ToLowerInvariant();
+
+        if (!_imgExts.Contains(ext))
+            return;
+
+        byte[] rawBytes = File.ReadAllBytes(files[0]);
+        ViewModel?.SetBootLogoFromBytes(rawBytes);
+    }
+
+    private void BootLogo_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (ViewModel?.BootLogoImage != null)
+            ExportImage(ViewModel.BootLogoImage, "BootLogo.PNG");
+    }
+
+    private void BootLogo_Reset_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel?.ResetBootLogo();
+    }
+
     private void ExportImage(BitmapImage bmp, string fileNameBase)
     {
         char[] invalidChars = Path.GetInvalidFileNameChars();

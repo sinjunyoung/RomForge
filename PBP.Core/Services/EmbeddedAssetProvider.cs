@@ -11,4 +11,6 @@ public static class EmbeddedAssetProvider
     public static byte[] GetGamesDatabase() => Properties.Resources.GamesDB;
 
     public static byte[] GetDefaultData() => Properties.Resources.DATA;
+
+    public static byte[] GetBlankImage() => Properties.Resources.BLANK;
 }

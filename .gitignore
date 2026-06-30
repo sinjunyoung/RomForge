@@ -3,6 +3,7 @@
 [Dd]ebug/
 [Rr]elease/
 bin/
+binary/
 obj/
 *.user
 *.suo

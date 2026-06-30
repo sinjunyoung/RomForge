@@ -26,7 +26,7 @@ public static class PbpPackager
             var reporter = new ProgressReporter(gameTitle, gameId, totalEstimated: 0, progress);
 
             PsarPackager.WritePsar(outputStream, gameTitle, gameId, discInfos, psarOffset, compressionLevel, reporter.CreateAction(), ct);
-            StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng);
+            StartDatWriter.WriteStartDat(outputStream, basePbpBytes, assets.BootPng ?? EmbeddedAssetProvider.GetBlankImage());
 
             return outputPath;
         }, ct);

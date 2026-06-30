@@ -6,84 +6,94 @@
              xmlns:local="clr-namespace:RomForge.Controls.PS"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="900">
-    <Grid>
+    <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="300"/>
+            <!-- Row 0: 리스트 + 미리보기 -->
+            <RowDefinition Height="8"/>
             <RowDefinition Height="Auto"/>
+            <!-- Row 2: 고급 설정 (전체 폭, 맨 아래) -->
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <!-- Row 4: 진행도 -->
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="Auto"/>
+            <!-- Row 6: 버튼 바 -->
         </Grid.RowDefinitions>
 
+        <!-- ===== Row 0: 파일 리스트(좌) + 이미지 탭(우) ===== -->
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="400"/>
             </Grid.ColumnDefinitions>
 
-            <Grid>
-            <ListView x:Name="lvFiles" Grid.Column="0" ItemsSource="{Binding FileItems}" AllowDrop="True" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" IsEnabled="{Binding IsUnlocked}" ContextMenuOpening="LvFiles_ContextMenuOpening">                
-                <ListView.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <Separator/>
-                        <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="전체 삭제" Click="BtnClear_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </ContextMenu>
-                </ListView.ContextMenu>
-                <ListView.View>
-                    <GridView>
+            <Grid Grid.Column="0">
+                <ListView x:Name="lvFiles" ItemsSource="{Binding FileItems}" AllowDrop="True" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" IsEnabled="{Binding IsUnlocked}" ContextMenuOpening="LvFiles_ContextMenuOpening">
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator/>
+                            <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="파일명">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FileName}" TextAlignment="Left" ToolTip="{Binding FilePath}"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="파일명">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding FileName}" TextAlignment="Left" ToolTip="{Binding FilePath}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        
-                        <GridViewColumn Width="60">
-                            <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="Extension"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="확장자" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Border Background="{Binding ExtensionBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" Margin="2,0">
-                                        <TextBlock Text="{Binding Extension}" Foreground="#111111" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
-                                    </Border>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
+                            <GridViewColumn Width="60">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Extension"/>
+                                </GridViewColumn.Header>
+                                <GridViewColumn.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Text="확장자" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GridViewColumn.HeaderTemplate>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{Binding ExtensionBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" Margin="2,0">
+                                            <TextBlock Text="{Binding Extension}" Foreground="#111111" FontWeight="Bold" FontSize="11" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
 
-                        <GridViewColumn Header="게임ID" DisplayMemberBinding="{Binding GameId}" Width="80"/>
-                        
-                        <GridViewColumn Header="용량" Width="70">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding FileSize}" TextAlignment="Right"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-                <Border IsHitTestVisible="False" Visibility="{Binding HintVisibility}" BorderBrush="#333337" BorderThickness="1"  Margin="15,55,15,15" CornerRadius="6" Background="#E6181818">
+                            <GridViewColumn Header="게임ID" DisplayMemberBinding="{Binding GameId}" Width="80"/>
+
+                            <GridViewColumn Header="용량" Width="70">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding FileSize}" TextAlignment="Right"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+
+                <Border IsHitTestVisible="False" Visibility="{Binding HintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15" CornerRadius="6" Background="#E6181818">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                         <Image Source="/Assets/Images/drag.png" Width="32" Height="32" Margin="0,0,0,12"/>
                         <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -94,7 +104,6 @@
                                     <WrapPanel Orientation="Horizontal" />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
-
                             <ItemsControl.Items>
                                 <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
                                     <TextBlock Text="M3U" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
@@ -103,7 +112,6 @@
                                         </TextBlock.Effect>
                                     </TextBlock>
                                 </Border>
-
                                 <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
                                     <TextBlock Text="CUE" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                         <TextBlock.Effect>
@@ -111,7 +119,6 @@
                                         </TextBlock.Effect>
                                     </TextBlock>
                                 </Border>
-
                                 <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
                                     <TextBlock Text="CHD" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                         <TextBlock.Effect>
@@ -125,95 +132,188 @@
                 </Border>
             </Grid>
 
-            <StackPanel Grid.Column="1" IsEnabled="{Binding IsUnlocked}">
-                <TextBlock Text="{Binding GameTitle}" ToolTip="{Binding GameTitle}" TextTrimming="CharacterEllipsis" MaxWidth="380" FontSize="15" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <Viewbox Stretch="Uniform">
-                    <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" AllowDrop="True" Drop="Pic1_Drop">
-                        <Border.OpacityMask>
-                            <VisualBrush>
-                                <VisualBrush.Visual>
-                                    <Border Background="Black" CornerRadius="15" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" /> </VisualBrush.Visual>
-                            </VisualBrush>
-                        </Border.OpacityMask>
-                        <Grid>
-                            <Image Source="{Binding Pic1Image}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Pic1_MouseLeftButtonDown" />
-                            <Grid>
-                                <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Background="Transparent" AllowDrop="True" Drop="Icon0_Drop">
-                                    <Border Width="80" Height="80" BorderBrush="DimGray" BorderThickness="1.5" CornerRadius="10" Opacity="0.8">
-                                        <Border.OpacityMask>
-                                            <VisualBrush>
-                                                <VisualBrush.Visual>
-                                                    <Border Background="Black" CornerRadius="10" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" />
-                                                </VisualBrush.Visual>
-                                            </VisualBrush>
-                                        </Border.OpacityMask>
-                                        <Image Source="{Binding Icon0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Icon0_MouseLeftButtonDown" />
-                                    </Border>
+            <TabControl Grid.Column="1" IsEnabled="{Binding IsUnlocked}" Background="Transparent" BorderThickness="0">
+                <TabItem Header="기본 이미지">
+                    <StackPanel>
+                        <TextBlock Text="{Binding GameTitle}" ToolTip="{Binding GameTitle}" TextTrimming="CharacterEllipsis" MaxWidth="380" FontSize="15" FontWeight="Bold" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Viewbox Stretch="Uniform">
+                            <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="0" AllowDrop="True" Drop="Pic1_Drop">
+                                <Border.OpacityMask>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Border Background="Black" CornerRadius="15" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" />
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Border.OpacityMask>
+                                <Grid>
+                                    <Image Source="{Binding Pic1Image}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Pic1_MouseLeftButtonDown" />
+                                    <Grid>
+                                        <Grid Width="80" Height="80" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="15" Background="Transparent" AllowDrop="True" Drop="Icon0_Drop">
+                                            <Border Width="80" Height="80" BorderBrush="DimGray" BorderThickness="0" CornerRadius="10" Opacity="0.8">
+                                                <Border.OpacityMask>
+                                                    <VisualBrush>
+                                                        <VisualBrush.Visual>
+                                                            <Border Background="Black" CornerRadius="10" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" />
+                                                        </VisualBrush.Visual>
+                                                    </VisualBrush>
+                                                </Border.OpacityMask>
+                                                <Image Source="{Binding Icon0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Icon0_MouseLeftButtonDown" />
+                                            </Border>
+                                        </Grid>
+                                        <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15" MaxWidth="270" MaxHeight="150" BorderBrush="DimGray" BorderThickness="1" CornerRadius="12" Opacity="0.8" AllowDrop="True" Drop="Pic0_Drop">
+                                            <Border.OpacityMask>
+                                                <VisualBrush>
+                                                    <VisualBrush.Visual>
+                                                        <Border Background="Black" CornerRadius="12" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" />
+                                                    </VisualBrush.Visual>
+                                                </VisualBrush>
+                                            </Border.OpacityMask>
+                                            <Image Source="{Binding Pic0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Pic0_MouseLeftButtonDown" />
+                                        </Border>
+                                    </Grid>
                                 </Grid>
-                                <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="15" MaxWidth="270" MaxHeight="150" BorderBrush="DimGray" BorderThickness="1.5" CornerRadius="12" Opacity="0.8" AllowDrop="True" Drop="Pic0_Drop">
-                                    <Border.OpacityMask>
-                                        <VisualBrush>
-                                            <VisualBrush.Visual>
-                                                <Border Background="Black" CornerRadius="12" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}" />
-                                            </VisualBrush.Visual>
-                                        </VisualBrush>
-                                    </Border.OpacityMask>
-                                    <Image Source="{Binding Pic0Image}" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="Pic0_MouseLeftButtonDown" />
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    </Border>
-                </Viewbox>
+                            </Border>
+                        </Viewbox>
+                    </StackPanel>
+                </TabItem>
 
-                <Grid Margin="5,0,5,5" x:Name="progressArea" Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid Grid.Row="0" Margin="5,0,0,5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0" x:Name="progressLabel"
-                           Text="{Binding ProgressLabel}"
-                           FontSize="11" Foreground="#A0A0A0" VerticalAlignment="Center"/>
-
-                        <TextBlock Grid.Column="1" x:Name="progressPercent"
-                           Text="{Binding ProgressPercent}"
-                           Margin="10,0,15,0" FontSize="11" Foreground="#4CAF50" VerticalAlignment="Center"/>
-
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock x:Name="progressSpeed"
-                               Text="{Binding ProgressSpeed}"
-                               Foreground="Gray" FontSize="11" Margin="0,0,10,0" VerticalAlignment="Center"/>
-                            <TextBlock x:Name="progressTime"
-                               Text="{Binding ProgressTime}"
-                               FontSize="11" Foreground="#4CAF50" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Grid>
-
-                    <ProgressBar Grid.Row="1" x:Name="progress" Value="{Binding ProgressPct}" Minimum="0" Maximum="100" Height="4">
-                        <ProgressBar.Template>
-                            <ControlTemplate TargetType="ProgressBar">
-                                <Grid x:Name="progressBarGrid">
-                                    <Border Background="#25FFFFFF" CornerRadius="2"/>
-                                    <Border x:Name="PART_Track" CornerRadius="2"/>
-                                    <Border x:Name="PART_Indicator" Background="#4CAF50" CornerRadius="2" HorizontalAlignment="Left"/>
+                <TabItem Header="부트 로고">
+                    <StackPanel>
+                        <TextBlock Text="{Binding GameTitle}" ToolTip="{Binding GameTitle}" TextTrimming="CharacterEllipsis" MaxWidth="380" FontSize="15" FontWeight="Bold" Margin="5,5,5,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Viewbox Stretch="Uniform">
+                            <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" Background="Transparent" AllowDrop="True" Drop="BootLogo_Drop">
+                                <Border.OpacityMask>
+                                    <VisualBrush>
+                                        <VisualBrush.Visual>
+                                            <Border Background="Black" CornerRadius="15" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Border}}" Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Border}}"/>
+                                        </VisualBrush.Visual>
+                                    </VisualBrush>
+                                </Border.OpacityMask>
+                                <Grid>
+                                    <Image Source="{Binding BootLogoImage}" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality" MouseLeftButtonDown="BootLogo_MouseLeftButtonDown"/>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False" Visibility="{Binding ShowBootLogoHint, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <StackPanel.Style>
+                                            <Style TargetType="StackPanel">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=imgGame, Path=Source}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </StackPanel.Style>
+                                        <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
+                                        <TextBlock Text="이미지 파일을 드래그&amp;드롭하세요" FontSize="12" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
+                                        <ItemsControl HorizontalAlignment="Center">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.Items>
+                                                <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                                    <TextBlock Text="PNG" Foreground="#FFA254" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFA254" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                                <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                                    <TextBlock Text="JPG" Foreground="#8FA3FF" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                                <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                                    <TextBlock Text="GIF" Foreground="#CCCCCC" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                                <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                                    <TextBlock Text="BMP" Foreground="#FF73C9" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                                <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                                    <TextBlock Text="WEBP" Foreground="#54FFB5" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ItemsControl.Items>
+                                        </ItemsControl>
+                                    </StackPanel>
                                 </Grid>
-                            </ControlTemplate>
-                        </ProgressBar.Template>
-                    </ProgressBar>
-                </Grid>
-
-            </StackPanel>
-
+                            </Border>
+                        </Viewbox>
+                        <Button Style="{StaticResource CancelButton}" Content="비우기" Click="BootLogo_Reset_Click" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
         </Grid>
 
-        <Border Grid.Row="1" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0">
+        <!-- ===== Row 2: POPS 호환성 고급 설정 (전체 폭, 맨 아래쪽) ===== -->
+        <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12,8" IsEnabled="{Binding IsUnlocked}">
+            <StackPanel>
+                <TextBlock Text="POPS 호환성 고급 설정" Foreground="#D4AF37" FontSize="12" FontWeight="Bold" Margin="0,0,0,8"/>
+
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="100"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="100"/>
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" Content="FMV 프리징 픽스 (cmd 0x00)" IsChecked="{Binding UseFmvFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11" ToolTip="값이 클수록 효과는 강하지만 슬로다운 부작용이 있을 수 있습니다"/>
+                    <ComboBox Grid.Column="2" ItemsSource="{Binding FmvFixPresets}" Text="{Binding FmvFixValue}" IsEnabled="{Binding UseFmvFix}" VerticalAlignment="Center" FontSize="11" ToolTip="값이 클수록 효과는 강하지만 슬로다운 부작용이 있을 수 있습니다">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+
+                    <CheckBox Grid.Column="4" Content="CD 타이밍 픽스 (cmd 0x04)" IsChecked="{Binding UseCdTimingFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11"/>
+                </Grid>                
+            </StackPanel>
+        </Border>
+
+        <!-- ===== Row 4: 진행도 ===== -->
+        <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,0,0,2" Padding="8,0" Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid Height="28">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="140"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding ProgressPercent}" Foreground="#4CAF50" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
+
+                <Grid Grid.Column="2" Height="10" VerticalAlignment="Center">
+                    <Border Background="#25FFFFFF" CornerRadius="5"/>
+                    <Border CornerRadius="5" ClipToBounds="True">
+                        <Border Background="#4CAF50" CornerRadius="5" RenderTransformOrigin="0,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="{Binding ProgressPct, Converter={StaticResource ProgressToStarConverter}, FallbackValue=0}"/>
+                            </Border.RenderTransform>
+                        </Border>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <!-- ===== Row 6: 버튼 바 ===== -->
+        <Border Grid.Row="6" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Style="{StaticResource RunButton}" IsEnabled="{Binding CanRun}" Command="{Binding RunCommand}" Margin="0,0,6,0">
@@ -236,7 +336,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding CanAdd}" Click="BtnAddFiles_Click" Margin="0,0,6,0" >
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding CanAdd}" Click="BtnAddFiles_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -278,19 +378,17 @@
                             <TextBlock Text="설정" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    
                 </StackPanel>
             </DockPanel>
         </Border>
 
-        <Grid Grid.RowSpan="2" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="999" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" d:IsHidden="True">
+        <Grid Grid.RowSpan="7" Visibility="{Binding IsDownloading, Converter={StaticResource BooleanToVisibilityConverter}}" Panel.ZIndex="999" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" d:IsHidden="True">
             <Rectangle Fill="#CC1E1E2E"/>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center"/>
                 <TextBlock Text="이미지 다운로드 중..." Foreground="#8888A8" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
-                <ProgressBar IsIndeterminate="True"  Width="240" Height="3" Margin="0,16,0,0" Background="#2A2A3A" Foreground="#4F8EF7" BorderThickness="0"/>
+                <ProgressBar IsIndeterminate="True" Width="240" Height="3" Margin="0,16,0,0" Background="#2A2A3A" Foreground="#4F8EF7" BorderThickness="0"/>
             </StackPanel>
         </Grid>
-
     </Grid>
 </UserControl>

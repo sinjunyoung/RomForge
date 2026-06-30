@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
+using Microsoft.VisualBasic.FileIO;
 using NSW.WPF.Services;
 using PBP.Core.Models;
 using PBP.Core.Services;
@@ -26,6 +27,9 @@ public class PackingMainViewModel : ToolTabViewModel
         ".cue", ".m3u", ".iso", ".chd"
     };
 
+    public ObservableCollection<string> FmvFixPresets { get; } = [
+        "0x04", "0x07", "0xFB" ];
+
     private CancellationTokenSource _cts = new();
     private CancellationTokenSource? _iconCts;
 
@@ -40,10 +44,17 @@ public class PackingMainViewModel : ToolTabViewModel
     private string _progressSpeed = string.Empty;
     private bool _isDownloading;
     private bool _isValidating;
+    private bool _useFmvFix;
+    private string _fmvFixValue = "0x04";
+    private bool _useCdTimingFix;
 
-    private byte[] _icon0Bytes = EmbeddedAssetProvider.GetDefaultIcon0();
-    private byte[] _pic0Bytes = EmbeddedAssetProvider.GetDefaultPic0();
-    private byte[] _pic1Bytes = EmbeddedAssetProvider.GetDefaultPic1();
+    public byte[] Icon0Bytes { get; set; } = EmbeddedAssetProvider.GetDefaultIcon0();
+
+    public byte[] Pic0Bytes { get; set; } = EmbeddedAssetProvider.GetDefaultPic0();
+
+    public byte[] Pic1Bytes { get; set; } = EmbeddedAssetProvider.GetDefaultPic1();
+
+    public byte[] BootLogoBytes { get; set; }
 
     public string GameTitle
     {
@@ -104,32 +115,61 @@ public class PackingMainViewModel : ToolTabViewModel
         }
     }
 
-    public byte[] Icon0Bytes 
-    { 
-        get => _icon0Bytes; 
-        set => _icon0Bytes = value; 
+    public bool UseFmvFix
+    {
+        get => _useFmvFix;
+        set => SetProperty(ref _useFmvFix, value);
     }
 
-    public byte[] Pic0Bytes 
-    { 
-        get => _pic0Bytes; 
-        set => _pic0Bytes = value; 
+    public string FmvFixValue
+    {
+        get => _fmvFixValue;
+        set => SetProperty(ref _fmvFixValue, value);
     }
 
-    public byte[] Pic1Bytes 
-    { 
-        get => _pic1Bytes; 
-        set => _pic1Bytes = value;
+    public bool UseCdTimingFix
+    {
+        get => _useCdTimingFix;
+        set => SetProperty(ref _useCdTimingFix, value);
     }
+
 
     private BitmapImage? _icon0Image;
-    public BitmapImage? Icon0Image { get => _icon0Image; set { _icon0Image = value; OnPropertyChanged(); } }
+    public BitmapImage? Icon0Image
+    {
+        get => _icon0Image;
+        set => SetProperty(ref _icon0Image, value);
+    }
 
     private BitmapImage? _pic0Image;
-    public BitmapImage? Pic0Image { get => _pic0Image; set { _pic0Image = value; OnPropertyChanged(); } }
+    public BitmapImage? Pic0Image
+    {
+        get => _pic0Image;
+        set => SetProperty(ref _pic0Image, value);
+    }
 
     private BitmapImage? _pic1Image;
-    public BitmapImage? Pic1Image { get => _pic1Image; set { _pic1Image = value; OnPropertyChanged(); } }
+    public BitmapImage? Pic1Image
+    {
+        get => _pic1Image;
+        set => SetProperty(ref _pic1Image, value);
+    }
+
+    private BitmapImage? _bootLogoImage;
+    public BitmapImage? BootLogoImage
+    {
+        get => _bootLogoImage;
+        set
+        {
+            SetProperty(ref _bootLogoImage, value);
+            OnPropertyChanged(nameof(HasBootLogo));
+            OnPropertyChanged(nameof(ShowBootLogoHint));
+        }
+    }
+
+    public bool HasBootLogo => BootLogoImage != null;
+
+    public bool ShowBootLogoHint => !HasBootLogo;
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
@@ -341,11 +381,13 @@ public class PackingMainViewModel : ToolTabViewModel
         Icon0Image = EmbeddedAssetProvider.GetDefaultIcon0().ToBitmapImage();
         Pic0Image = EmbeddedAssetProvider.GetDefaultPic0().ToBitmapImage();
         Pic1Image = EmbeddedAssetProvider.GetDefaultPic1().ToBitmapImage();
+        ResetBootLogo();
     }
 
     public void SetIcon0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { Icon0Bytes = bytes; Icon0Image = img; }, 80, 80);
     public void SetPic0FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { Pic0Bytes = bytes; Pic0Image = img; }, 270, 150);
     public void SetPic1FromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { Pic1Bytes = bytes; Pic1Image = img; }, 480, 272);
+    public void SetBootLogoFromBytes(byte[] rawBytes) => SetImage(rawBytes, (bytes, img) => { BootLogoBytes = bytes; BootLogoImage = img; }, 480, 272);
 
     private static void SetImage(byte[] rawBytes, Action<byte[], BitmapImage> apply, int targetWidth, int targetHeight)
     {
@@ -478,6 +520,7 @@ public class PackingMainViewModel : ToolTabViewModel
                 Icon0Png = Icon0Bytes.ResizePng(80, 80),
                 Pic0Png = Pic0Bytes.ResizePng(480, 272),
                 Pic1Png = Pic1Bytes.ResizePng(480, 272),
+                BootPng = BootLogoBytes?.ResizePng(480, 272),
                 DataPsp = EmbeddedAssetProvider.GetDefaultData()
             };
 
@@ -614,5 +657,10 @@ public class PackingMainViewModel : ToolTabViewModel
         var wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
 
         return $"지원 파일|{wildcards}|모든 파일|*.*";
+    }
+
+    public void ResetBootLogo()
+    {
+        BootLogoImage = null;        
     }
 }

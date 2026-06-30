@@ -73,6 +73,16 @@ namespace PBP.Core.Properties {
         /// <summary>
         ///   System.Byte[] 형식의 지역화된 리소스를 찾습니다.
         /// </summary>
+        internal static byte[] BLANK {
+            get {
+                object obj = ResourceManager.GetObject("BLANK", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   System.Byte[] 형식의 지역화된 리소스를 찾습니다.
+        /// </summary>
         internal static byte[] Config {
             get {
                 object obj = ResourceManager.GetObject("Config", resourceCulture);

@@ -52,16 +52,15 @@ public static class Iso9660GameIdExtractor
     private static string? ReadSystemCnf(Func<uint, byte[]> sectorReader, uint lba)
     {
         var content = Encoding.ASCII.GetString(sectorReader(lba));
-        var boot = Regex.Match(content, @"BOOT\s*=\s*cdrom[:\\\/]+([A-Z]{4}_\d{3}\.\d+)", RegexOptions.IgnoreCase);
 
-        if (!boot.Success)
-            return null;
-
-        var id = Regex.Match(boot.Groups[1].Value.ToUpperInvariant(), @"([A-Z]{4})_(\d{3})\.(\d+)");
+        var id = Regex.Match(
+            content,
+            @"([A-Z]{4})_(\d{3})\.(\d+)",
+            RegexOptions.IgnoreCase);
 
         if (!id.Success)
             return null;
 
-        return $"{id.Groups[1].Value}{id.Groups[2].Value}{id.Groups[3].Value}";
+        return $"{id.Groups[1].Value.ToUpperInvariant()}{id.Groups[2].Value}{id.Groups[3].Value}";
     }
 }
