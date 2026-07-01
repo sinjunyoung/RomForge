@@ -7,8 +7,13 @@ public class _3DSMainViewModel : MultiToolTabViewModel
     public ConverterMainViewModel ConverterVM { get; } = new();
     public DecryptorMainViewModel DecryptorVM { get; } = new();
 
+    public event EventHandler RunNavigateCerts;
+
     public _3DSMainViewModel()
     {
+        InstallerVM.RunNavigateCerts += (s, e) => RunNavigateCerts?.Invoke(s, e);
+        ConverterVM.RunNavigateCerts += (s, e) => RunNavigateCerts?.Invoke(s, e);
+
         Tools.Add(RepackVM);
         Tools.Add(InstallerVM);
         Tools.Add(ConverterVM);

@@ -1,5 +1,6 @@
 ﻿using _3DS.Core.Crypto;
 using _3DS.Core.FileSystem;
+using _3DS.Core.Models;
 using _3DS.Core.Services;
 using Common;
 using Common.WPF.ViewModels;
@@ -83,10 +84,16 @@ public class InstallerMainViewModel : ToolTabViewModel
     }
 
     public bool IsPathValid => !string.IsNullOrEmpty(SdPath) && !string.IsNullOrEmpty(MovablePath);
+
     public bool CanLoad => IsPathValid && !_isLoading && InstalledTitles.IsUnlocked;
+
     public Visibility ProgressPanelVisibility => _isLoading ? Visibility.Visible : Visibility.Collapsed;
+
     public Visibility CancelButtonVisibility => _extractCts != null ? Visibility.Visible : Visibility.Collapsed;
+
     public bool CanInstall => CanLoad && Install.IsUnlocked && Install.IsNotInstalling;
+
+    public event EventHandler RunNavigateCerts;
 
     public InstallerMainViewModel()
     {
@@ -234,6 +241,10 @@ public class InstallerMainViewModel : ToolTabViewModel
                             await extractor.ExtractToCiaAsync(selected.Title, outputPath, ct);
                     },
                     $"추출 완료: {selected.ShortDescription}");
+            }
+            catch (CertsBinNotFoundException)
+            {
+                RunNavigateCerts?.Invoke(this, EventArgs.Empty);
             }
             finally
             {

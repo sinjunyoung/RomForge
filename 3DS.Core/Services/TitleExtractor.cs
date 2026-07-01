@@ -99,7 +99,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         string certsPath = Path.Combine(AppContext.BaseDirectory, "certs.bin");
 
         if (!File.Exists(certsPath))
-            throw new InvalidOperationException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
+            throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
 

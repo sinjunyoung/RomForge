@@ -79,6 +79,7 @@ public class MainViewModel : ToolTabViewModel
         SwitchMainVM = new SwitchMainViewModel(_config);
         SwitchMainVM.MergeVM.SettingsClicked += async (s, e) => await NavigateSwitchCompressSettings();
         Main3DsVM = new _3DSMainViewModel();
+        Main3DsVM.RunNavigateCerts += MainVM_RunNavigateCerts;
         PSMainVM = new PS1MainViewModel(_config);
         PSMainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;
         UtilMainVM = new UtilMainViewModel();
@@ -118,6 +119,12 @@ public class MainViewModel : ToolTabViewModel
         SelectedViewModel = Settings;
         Settings.SelectedViewModel = Settings.Compress;
         Settings.Compress.SelectedTabIndex = 1;
+    }
+
+    private void MainVM_RunNavigateCerts(object? sender, EventArgs e)
+    {
+        SelectedViewModel = UtilMainVM;
+        UtilMainVM.SelectedViewModel = UtilMainVM.CertsVM;
     }
 
     private void PS1MainVM_RunNavigatePackingSettings(object? sender, EventArgs e)

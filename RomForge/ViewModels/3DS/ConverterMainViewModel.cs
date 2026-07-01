@@ -1,4 +1,5 @@
 using _3DS.Core.Crypto;
+using _3DS.Core.Models;
 using _3DS.Core.Services;
 using Common;
 using Common.WPF.ViewModels;
@@ -49,6 +50,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     #endregion
 
     public event Action<_3DSFileItem>? ScrollToItemRequested;
+    public event EventHandler RunNavigateCerts;
 
     #region Constructor
 
@@ -204,6 +206,11 @@ public class ConverterMainViewModel : ToolTabViewModel
                         item.Progress = 100;
                         item.Status = "완료";
                         cnt++;
+                    }
+                    catch (CertsBinNotFoundException e)
+                    {
+                        AppendLog(e.Message, LogLevel.Error);
+                        RunNavigateCerts?.Invoke(this, EventArgs.Empty);
                     }
                     catch (OperationCanceledException)
                     {

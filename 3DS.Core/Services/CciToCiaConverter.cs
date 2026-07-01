@@ -42,7 +42,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         }
     }
 
-    public async Task ConvertAsync(Stream input, Stream output, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel, string>? log = null, CancellationToken ct = default)
+    private async Task ConvertAsync(Stream input, Stream output, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel, string>? log = null, CancellationToken ct = default)
     {
         uint saveSize = 0;
         byte[]? exheader = null;
@@ -160,7 +160,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         string certsPath = Path.Combine(AppContext.BaseDirectory, "certs.bin");
 
         if (!File.Exists(certsPath))
-            throw new InvalidOperationException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
+            throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
 
