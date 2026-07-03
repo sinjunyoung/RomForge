@@ -18,9 +18,8 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
                     converter.LogMessage += (_, e) => log(e.Message, e.Level);
-                    converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = e.Percent });
 
-                    var chdResult = await converter.ConvertFileAsync(outputCuePath!, ct);
+                    var chdResult = await converter.ConvertFileAsync(outputCuePath!, progress, ct);
 
                     if (!chdResult.Success)
                         throw new Exception($"CHD 변환 실패: {chdResult.Message}");
@@ -33,6 +32,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                             File.Delete(trackPath);
 
                     copiedTrackPaths.Clear();
+
                     break;
                 }
             case RomFormat.Iso:
@@ -41,14 +41,14 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
                     converter.LogMessage += (_, e) => log(e.Message, e.Level);
-                    converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = e.Percent });
 
-                    var chdResult = await converter.ConvertFileAsync(outputPath, ct);
+                    var chdResult = await converter.ConvertFileAsync(outputPath, progress, ct);
 
                     if (!chdResult.Success)
                         throw new Exception($"CHD 변환 실패: {chdResult.Message}");
 
                     File.Delete(outputPath);
+
                     break;
                 }
             case RomFormat.Gcm:
@@ -63,6 +63,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
 
                     await dolphin.ConvertFileAsync(outputPath, detected.Format.ToString(), detected.OutputExtension, dolphinCompressLevel, ct);
                     File.Delete(outputPath);
+
                     break;
                 }
         }

@@ -13,10 +13,8 @@ public sealed class ChdmanService : IDisposable
 
     private readonly SemaphoreSlim _lock = new(1, 1);
 
-    private readonly ProgressCallback _progressCallback;
     private readonly LogCallback _logCallback;
 
-    private int _lastProgress;
     private bool _disposed;
 
     #region DllImport
@@ -47,86 +45,53 @@ public sealed class ChdmanService : IDisposable
 
     #endregion
 
-    public event EventHandler<ProgressInfo>? ProgressChanged;
     public event EventHandler<string>? ErrorReceived;
 
-    public ChdmanService()
-    {
-        _progressCallback = percent =>
-        {
-            if (percent >= _lastProgress)
-            {
-                _lastProgress = percent;
-                ProgressChanged?.Invoke(this, new ProgressInfo { Label = "진행 중", Percent = percent });
-            }
-        };
-        _logCallback = msg => { if (!string.IsNullOrEmpty(msg)) ErrorReceived?.Invoke(this, msg); };
-    }
+    public ChdmanService() => _logCallback = msg => { if (!string.IsNullOrEmpty(msg)) ErrorReceived?.Invoke(this, msg); };
 
-    public Task<bool> CreateCdAsync(string cuePath, string chdPath, CancellationToken ct = default)
+    public Task<bool> CreateCdAsync(string cuePath, string chdPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         cuePath = Path.GetFullPath(cuePath);
         chdPath = Path.GetFullPath(chdPath);
 
-        return RunLockedAsync(
-            workingDir: Path.GetDirectoryName(cuePath)!,
-            input: Path.GetFileName(cuePath),
-            output: chdPath,
-            invoke: chdman_create_cd,
-            ct: ct);
+        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, "압축 중...", chdman_create_cd, progress, ct);
     }
 
-    public Task<bool> CreateDvdAsync(string isoPath, string chdPath, string compression = "zlib", CancellationToken ct = default)
+    public Task<bool> CreateDvdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         isoPath = Path.GetFullPath(isoPath);
         chdPath = Path.GetFullPath(chdPath);
 
-        return RunLockedAsync(
-            workingDir: Path.GetDirectoryName(isoPath) ?? Path.GetPathRoot(isoPath)!,
-            input: isoPath,
-            output: chdPath,
-            invoke: (i, o, p, l) => chdman_create_dvd(i, o, compression, p, l),
-            ct: ct);
+        return RunLockedAsync(Path.GetDirectoryName(isoPath) ?? Path.GetPathRoot(isoPath)!, isoPath, chdPath, "압축 중...", (i, o, p, l) => chdman_create_dvd(i, o, compression, p, l), progress, ct);
     }
 
-    public Task<bool> ExtractCdAsync(string chdPath, string cuePath, CancellationToken ct = default)
+    public Task<bool> ExtractCdAsync(string chdPath, string cuePath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         chdPath = Path.GetFullPath(chdPath);
         cuePath = Path.GetFullPath(cuePath);
 
-        return RunLockedAsync(
-            workingDir: Path.GetDirectoryName(cuePath)!,
-            input: chdPath,
-            output: cuePath,
-            invoke: chdman_extract_cd,
-            ct: ct);
+        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, chdPath, cuePath, "추출 중...", chdman_extract_cd, progress, ct);
     }
 
-    public Task<bool> ExtractRawAsync(string chdPath, string isoPath, CancellationToken ct = default)
+    public Task<bool> ExtractRawAsync(string chdPath, string isoPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         chdPath = Path.GetFullPath(chdPath);
         isoPath = Path.GetFullPath(isoPath);
 
-        return RunLockedAsync(
-            workingDir: Path.GetDirectoryName(isoPath)!,
-            input: chdPath,
-            output: isoPath,
-            invoke: chdman_extract_raw,
-            ct: ct);
+        return RunLockedAsync(Path.GetDirectoryName(isoPath)!, chdPath, isoPath, "추출 중...", chdman_extract_raw, progress, ct);
     }
 
-    private async Task<bool> RunLockedAsync(string workingDir, string input, string output, Func<string, string, ProgressCallback, LogCallback, int> invoke, CancellationToken ct)
+    private async Task<bool> RunLockedAsync(string workingDir, string input, string output, string label, Func<string, string, ProgressCallback, LogCallback, int> invoke, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
         await _lock.WaitAsync(ct).ConfigureAwait(false);
+
         try
         {
             using var cancelReg = ct.Register(static () => chdman_cancel());
 
-            return await Task.Run(() => RunWithCwd(workingDir, input, output, invoke, cancelReg, ct),
-                                  ct)
-                             .ConfigureAwait(false);
+            return await Task.Run(() => RunWithCwd(workingDir, input, output, label, invoke, progress, cancelReg, ct), ct).ConfigureAwait(false);
         }
         finally
         {
@@ -134,13 +99,72 @@ public sealed class ChdmanService : IDisposable
         }
     }
 
-    private bool RunWithCwd(string workingDir, string input, string output, Func<string, string, ProgressCallback, LogCallback, int> invoke, CancellationTokenRegistration cancelReg, CancellationToken ct)
+    private bool RunWithCwd(string workingDir, string input, string output, string label, Func<string, string, ProgressCallback, LogCallback, int> invoke, IProgress<ProgressInfo>? progress, CancellationTokenRegistration cancelReg, CancellationToken ct)
     {
         string originalDir = Directory.GetCurrentDirectory();
+        int lastProgress = 0;
+
+        string ext = Path.GetExtension(input);
+
+        long totallSize = 0;
+
+        switch (ext.ToLowerInvariant())
+        {
+            case ".cue":
+                {
+                    var referencedBins = ConversionSource.ParseBinsFromCue(Path.Combine(workingDir, input));                    
+
+                    foreach (var binName in referencedBins)
+                    {
+                        string binPath = Path.Combine(workingDir, Path.GetFileName(binName));
+
+                        if (File.Exists(binPath))
+                            totallSize += new FileInfo(binPath).Length;
+                    }
+                }
+                break;
+            case ".gdi":
+                {
+                    var referencedBins = ConversionSource.ParseFilesFromGdi(Path.Combine(workingDir, input));
+
+                    foreach (var binName in referencedBins)
+                    {
+                        string binPath = Path.Combine(workingDir, Path.GetFileName(binName));
+
+                        if (File.Exists(binPath))
+                            totallSize += new FileInfo(binPath).Length;
+                    }
+                }
+                break;
+            case ".bin":
+            case ".iso":
+            case ".chd":
+                {
+                    string path = Path.Combine(workingDir, input);
+
+                    if (File.Exists(path))
+                        totallSize = new FileInfo(path).Length;
+                }
+                break;
+        }
+
+        var reporter = progress is null ? null : new ProgressReporter(label, string.Empty, totallSize, progress);
+
+        ProgressCallback progressCallback = percent =>
+        {
+            if (percent >= lastProgress)
+            {
+                lastProgress = percent;                
+                reporter?.ReportPercent(percent / 100.0);
+            }
+        };
+
+        GCHandle handle = GCHandle.Alloc(progressCallback);
+
         try
         {
             Directory.SetCurrentDirectory(workingDir);
-            int result = invoke(input, output, _progressCallback, _logCallback);
+            int result = invoke(input, output, progressCallback, _logCallback);
 
             cancelReg.Dispose();
 
@@ -151,6 +175,7 @@ public sealed class ChdmanService : IDisposable
         }
         finally
         {
+            handle.Free();
             Directory.SetCurrentDirectory(originalDir);
         }
     }
@@ -167,10 +192,7 @@ public sealed class ChdmanService : IDisposable
             var info = ChdInfoReader.ReadChdInfo(chdPath);
             var fileInfo = new FileInfo(chdPath);
             long originalSize = CalculateOriginalSize(info);
-
-            string ratio = originalSize > 0
-                ? $"{(double)fileInfo.Length / originalSize * 100:F1}%"
-                : "0%";
+            string ratio = originalSize > 0 ? $"{(double)fileInfo.Length / originalSize * 100:F1}%" : "0%";
 
             return new ChdmanInfo
             {
@@ -192,7 +214,9 @@ public sealed class ChdmanService : IDisposable
         var sb = new StringBuilder();
 
         LogCallback logDelegate = msg => sb.AppendLine(msg);
+
         int result = chdman_get_info(chdPath, logDelegate);
+
         GC.KeepAlive(logDelegate);
 
         if (result != 0)
@@ -261,7 +285,9 @@ public sealed class ChdmanService : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed) 
+            return;
+
         _disposed = true;
         _lock.Dispose();
     }

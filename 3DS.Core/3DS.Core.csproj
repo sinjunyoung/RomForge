@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

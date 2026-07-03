@@ -101,6 +101,7 @@ public class CompressMainViewModel : ToolTabViewModel
         using (BeginWork())
         {
             int totalCount = FileItems.Count;
+
             AppendLog($"총 {totalCount}개의 작업을 시작합니다.", LogLevel.Highlight);
 
             int cnt = 0;
@@ -124,6 +125,7 @@ public class CompressMainViewModel : ToolTabViewModel
                     var detected = FormatDetector.Detect(item.FilePath);
 
                     item.Status = "변환중";
+
                     ScrollToItemRequested?.Invoke(item);
 
                     var progressHandler = new Progress<ProgressInfo>(p =>
@@ -162,13 +164,12 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Cue:
                         case RomFormat.Gdi:
                         case RomFormat.Chd:
-                            {                                
+                            {
                                 FileConverter chdConverter = new(AppConfig.Instance.Chdman.Compression);
 
                                 chdConverter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
-                                chdConverter.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Percent);
 
-                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, _cts.Token);
+                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, progressHandler, _cts.Token);
 
                                 if (!chdResult.Success)
                                     throw new InvalidOperationException(chdResult.Message);
@@ -193,7 +194,6 @@ public class CompressMainViewModel : ToolTabViewModel
                         default:
                             item.Status = "미지원";
                             AppendLog($"[{item.FileName}] 지원하지 않는 포맷", LogLevel.Error);
-
                             continue;
                     }
 

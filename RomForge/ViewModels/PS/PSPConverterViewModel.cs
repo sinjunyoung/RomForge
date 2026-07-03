@@ -142,7 +142,7 @@ public class PSPConverterViewModel : ToolTabViewModel
 
                     ScrollToItemRequested?.Invoke(item);
 
-                    var progressHandler = new Progress<double>(p => item.Progress = (int)(p * 100));
+                    var progressHandler = new Progress<ProgressInfo>(p => item.Progress = p.Percent);
                     string inputExt = item.Extension.ToLowerInvariant();
                     string outputExt = item.SelectedTargetFormat.ToLowerInvariant();
                     string outPath = Path.ChangeExtension(item.FilePath, outputExt);
@@ -160,7 +160,7 @@ public class PSPConverterViewModel : ToolTabViewModel
                                 break;
 
                             case ("iso", "chd"):
-                                await _csoService.CompressToChdAsync(item.FilePath, outPath, AppConfig.Instance.Chdman.Compression, _cts.Token);
+                                await _csoService.CompressToChdAsync(item.FilePath, outPath, AppConfig.Instance.Chdman.Compression, progressHandler, _cts.Token);
                                 break;
 
                             case ("cso", "iso"):
@@ -179,7 +179,7 @@ public class PSPConverterViewModel : ToolTabViewModel
 
                             case ("chd", "cso"):
                                 await using (var output = File.Create(outPath))
-                                    await CsoService.CompressFromChdAsync(item.FilePath, output, version: 1, progressHandler, _cts.Token);
+                                    await CsoService.CompressFromChdAsync(item.FilePath, output, version: 1, progress: progressHandler, ct: _cts.Token);
                                 break;
 
                             default:
@@ -247,13 +247,17 @@ public class PSPConverterViewModel : ToolTabViewModel
 
     private void AppendLog(string msg, LogLevel level = LogLevel.Info)
     {
-        if (Application.Current?.Dispatcher == null) return;
+        if (Application.Current?.Dispatcher == null) 
+            return;
+
         Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
     }
 
     private void ClearLog()
     {
-        if (Application.Current?.Dispatcher == null) return;
+        if (Application.Current?.Dispatcher == null) 
+            return;
+
         Application.Current.Dispatcher.Invoke(() => LogEntries.Clear());
     }
 

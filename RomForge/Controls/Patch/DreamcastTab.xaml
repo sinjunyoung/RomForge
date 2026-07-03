@@ -75,26 +75,38 @@
         </ToggleButton>
 
         <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,0,0,2" Padding="8,0">
-            <Grid Height="28">
+            <Grid x:Name="progressArea" Height="28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="140"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding PatchVM.DreamcastVM.ProgressStatus}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding PatchVM.DreamcastVM.ProgressText}" Foreground="#4CAF50" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-                <Grid Grid.Column="2" Height="10" VerticalAlignment="Center">
+
+                <TextBlock Grid.Column="0" x:Name="progressLabel" Text="{Binding PatchVM.DreamcastVM.ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                <TextBlock Grid.Column="1" x:Name="progressPercent" Margin="0,0,10,0" Text="{Binding PatchVM.DreamcastVM.ProgressPercent}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Column="2" x:Name="progressSpeed" Margin="0,0,10,0" Text="{Binding PatchVM.DreamcastVM.ProgressSpeed}" Foreground="Gray" FontSize="11" VerticalAlignment="Center"/>
+
+                <TextBlock Grid.Column="3" x:Name="progressTime" Margin="0,0,10,0" Text="{Binding PatchVM.DreamcastVM.ProgressTime}" Foreground="#4CAF50" FontSize="11" VerticalAlignment="Center"/>
+                <Grid Grid.Column="4" Height="10" VerticalAlignment="Center">
                     <Border Background="#25FFFFFF" CornerRadius="5"/>
-                    <Border CornerRadius="5" ClipToBounds="True">
-                        <Border Background="#4CAF50" CornerRadius="5" RenderTransformOrigin="0,0.5">
-                            <Border.RenderTransform>
-                                <ScaleTransform ScaleX="{Binding PatchVM.DreamcastVM.Progress, Converter={StaticResource ProgressToStarConverter}, FallbackValue=0}"/>
-                            </Border.RenderTransform>
+                    <Border x:Name="barTrack" CornerRadius="5" ClipToBounds="True">
+                        <Border Background="#4CAF50" CornerRadius="5" HorizontalAlignment="Left">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
+                                    <Binding Path="ActualWidth" ElementName="barTrack"/>
+                                    <Binding Path="PatchVM.DreamcastVM.ProgressPct"/>
+                                </MultiBinding>
+                            </Border.Width>
                         </Border>
                     </Border>
                 </Grid>
             </Grid>
         </Border>
+        
     </Grid>
     
 </UserControl>

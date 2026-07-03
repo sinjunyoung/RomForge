@@ -13,7 +13,6 @@ public class FileConverter : IDisposable
 
     public string CurrentOutputPath { get; private set; }
 
-    public event EventHandler<ProgressInfo> ProgressChanged;
     public event EventHandler<(string Message, LogLevel Level)> LogMessage;
 
     private static readonly Regex TrackMode1Regex = new(@"^TRACK\s+\d+\s+MODE1", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -21,13 +20,12 @@ public class FileConverter : IDisposable
     public FileConverter(string compression = "zlib")
     {
         _chdman = new ChdmanService();
-        _chdman.ProgressChanged += (s, e) => ProgressChanged?.Invoke(s, e);
         _chdman.ErrorReceived += (s, msg) => Log(msg, LogLevel.Error);
         _compression = compression;
 
     }
 
-    public async Task<ConversionResult> ConvertFileAsync(string filePath, CancellationToken ct = default)
+    public async Task<ConversionResult> ConvertFileAsync(string filePath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -45,16 +43,16 @@ public class FileConverter : IDisposable
 
         return source.Format switch
         {
-            InputFormat.Chd => await ConvertFromChdAsync(source, ct),
-            InputFormat.Iso => await ConvertIsoChdAsync(source, ct),
-            InputFormat.BinCue => await ConvertToChdAsync(source, ct),
-            InputFormat.Gdi => await ConvertToChdAsync(source, ct),
+            InputFormat.Chd => await ConvertFromChdAsync(source, progress, ct),
+            InputFormat.Iso => await ConvertIsoChdAsync(source, progress, ct),
+            InputFormat.BinCue => await ConvertToChdAsync(source, progress, ct),
+            InputFormat.Gdi => await ConvertToChdAsync(source, progress, ct),
 
             _ => ConversionResult.Fail($"지원하지 않는 형식: {source.Format}")
         };
     }
 
-    private async Task<ConversionResult> ConvertFromChdAsync(ConversionSource source, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertFromChdAsync(ConversionSource source, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
     {
         var chdPath = source.PrimaryFile;
         var dir = Path.GetDirectoryName(chdPath)!;
@@ -76,7 +74,7 @@ public class FileConverter : IDisposable
 
                 Log("ISO 추출 중...");
 
-                bool extracted = await _chdman.ExtractRawAsync(chdPath, isoPath, cancellationToken);
+                bool extracted = await _chdman.ExtractRawAsync(chdPath, isoPath, progress, cancellationToken);
 
                 if (!extracted || !File.Exists(isoPath))
                     return ConversionResult.Fail("ISO 추출 실패");
@@ -85,7 +83,7 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = null;
 
-                ProgressChanged?.Invoke(this, new ProgressInfo { Label = "추출 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
 
                 return new ConversionResult
                 {
@@ -102,7 +100,8 @@ public class FileConverter : IDisposable
                 CurrentOutputPath = cuePath;
 
                 Log("BIN/CUE 추출 중...");
-                bool extracted = await _chdman.ExtractCdAsync(chdPath, cuePath, cancellationToken);
+
+                bool extracted = await _chdman.ExtractCdAsync(chdPath, cuePath, progress, cancellationToken);
 
                 if (!extracted)
                     return ConversionResult.Fail("CHD 추출 실패");
@@ -124,7 +123,7 @@ public class FileConverter : IDisposable
 
                 var result = extractedBins.Count == 1 && IsSingleTrackMode1(cuePath) ? ProduceSingleTrackIso(cuePath, extractedBins[0]) : ProduceMultiTrackBinCue(cuePath, extractedBins);
 
-                ProgressChanged?.Invoke(this, new ProgressInfo { Label = "추출 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
 
                 return result;
             }
@@ -133,7 +132,6 @@ public class FileConverter : IDisposable
         {
             Log("변환 취소중...", LogLevel.Error);
             CleanupFiles(CurrentOutputPath);
-
             CurrentOutputPath = null;
 
             throw;
@@ -157,9 +155,10 @@ public class FileConverter : IDisposable
 
         if (File.Exists(isoPath))
             File.Delete(isoPath);
+
         File.Move(binPath, isoPath);
 
-        if (File.Exists(cuePath)) 
+        if (File.Exists(cuePath))
             File.Delete(cuePath);
 
         Log($"변환 완료: {isoPath}", LogLevel.Ok);
@@ -189,12 +188,12 @@ public class FileConverter : IDisposable
         };
     }
 
-    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
     {
         var inputPath = source.PrimaryFile;
         var chdPath = Path.ChangeExtension(inputPath, ".chd");
-
         chdPath = Utils.GetUniqueFilePath(chdPath);
+
         Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
 
         CurrentOutputPath = chdPath;
@@ -203,7 +202,7 @@ public class FileConverter : IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, cancellationToken);
+            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, progress, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -224,7 +223,7 @@ public class FileConverter : IDisposable
                 {
                     string binPath = Path.Combine(sourceDir, Path.GetFileName(binName));
 
-                    if (File.Exists(binPath)) 
+                    if (File.Exists(binPath))
                         originalSize += new FileInfo(binPath).Length;
                 }
 
@@ -233,13 +232,13 @@ public class FileConverter : IDisposable
             else if (extension == ".gdi")
             {
                 var sourceDir = Path.GetDirectoryName(inputPath)!;
-                var referencedFiles = ParseFilesFromGdi(inputPath);
+                var referencedFiles = ConversionSource.ParseFilesFromGdi(inputPath);
 
                 foreach (var fileName in referencedFiles)
                 {
                     string filePath = Path.Combine(sourceDir, Path.GetFileName(fileName));
 
-                    if (File.Exists(filePath)) 
+                    if (File.Exists(filePath))
                         originalSize += new FileInfo(filePath).Length;
                 }
 
@@ -251,8 +250,8 @@ public class FileConverter : IDisposable
             long compressedSize = new FileInfo(chdPath).Length;
 
             double ratio = originalSize > 0 ? (compressedSize * 100.0 / originalSize) : 0.0;
-            Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
 
+            Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
             Log($"압축 완료: {chdPath}", LogLevel.Ok);
 
             var result = new ConversionResult
@@ -264,7 +263,7 @@ public class FileConverter : IDisposable
                 VerificationPerformed = true
             };
 
-            ProgressChanged?.Invoke(this, new ProgressInfo { Label = "압축 완료", Percent = 100 });
+            progress?.Report(new ProgressInfo { Label = "압축 완료", Percent = 100 });
 
             return result;
         }
@@ -285,7 +284,7 @@ public class FileConverter : IDisposable
         }
     }
 
-    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
     {
         var inputPath = source.PrimaryFile;
         var chdPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, ".chd"));
@@ -297,7 +296,7 @@ public class FileConverter : IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, cancellationToken);
+            bool success = await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -313,7 +312,7 @@ public class FileConverter : IDisposable
             Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
             Log($"압축 완료: {chdPath}", LogLevel.Ok);
 
-            ProgressChanged?.Invoke(this, new ProgressInfo { Label = "압축 완료", Percent = 100 });
+            progress?.Report(new ProgressInfo { Label = "압축 완료", Percent = 100 });
 
             return new ConversionResult
             {
@@ -339,32 +338,6 @@ public class FileConverter : IDisposable
 
             return ConversionResult.Fail($"오류: {ex.Message}");
         }
-    }
-
-    private static List<string> ParseFilesFromGdi(string gdiPath)
-    {
-        var files = new List<string>();
-
-        if (!File.Exists(gdiPath)) 
-            return files;
-
-        var lines = File.ReadAllLines(gdiPath);
-
-        foreach (var line in lines.Skip(1))
-        {
-            if (string.IsNullOrWhiteSpace(line)) 
-                continue;
-
-            var tokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (tokens.Length >= 5)
-            {
-                string fileName = tokens[4].Replace("\"", string.Empty);
-                files.Add(fileName);
-            }
-        }
-
-        return files;
     }
 
     private static bool IsSingleTrackMode1(string cuePath)
@@ -397,7 +370,7 @@ public class FileConverter : IDisposable
     {
         try
         {
-            if (!File.Exists(cuePath)) 
+            if (!File.Exists(cuePath))
                 return;
 
             var bins = ConversionSource.ParseBinsFromCue(cuePath);
@@ -413,7 +386,7 @@ public class FileConverter : IDisposable
     {
         foreach (var path in paths)
         {
-            if (string.IsNullOrEmpty(path) || !File.Exists(path)) 
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
                 continue;
 
             try

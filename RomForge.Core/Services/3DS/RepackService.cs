@@ -144,7 +144,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
             string? exefsPatchDir = idx == 0 ? GetPatchDir("exefs") : null;
             string exefsDir = Path.Combine(partDir, "exefs");
             var exefsFiles = Directory.Exists(exefsDir) ? ExeFsUnpacker.LoadFromDirectory(exefsDir) : [];
-            byte[] exefsBlock = exefsFiles.Count > 0 ? await ExeFsPacker.PackWithPatchAsync(exefsFiles, exefsPatchDir, ct) : [];
+            byte[] exefsBlock = exefsFiles.Count > 0 ? await ExeFsPacker.PackWithPatchAsync(exefsFiles, exefsPatchDir, exHeader, getPatchPath(), ct) : [];
             string? romfsPatchDir = idx == 0 ? GetPatchDir("romfs") : null;
             string romfsDir = Path.Combine(partDir, "romfs");
             RomFsUnpackResult? romfsResult = null;
@@ -207,7 +207,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
 
             string? exefsPatchDir = idx == 0 ? GetPatchDir("exefs") : null;
             string? romfsPatchDir = idx == 0 ? GetPatchDir("romfs") : null;
-            byte[] exefsBlock = unpack.ExeFs != null ? await ExeFsPacker.PackWithPatchAsync(unpack.ExeFs.Files, exefsPatchDir, ct) : [];
+            byte[] exefsBlock = unpack.ExeFs != null ? await ExeFsPacker.PackWithPatchAsync(unpack.ExeFs.Files, exefsPatchDir, unpack.ExHeader, getPatchPath(), ct) : [];
             IRomFsFileSource? patchSource = romfsPatchDir != null ? new PatchFolderFileSource(romfsPatchDir) : null;
 
             repackedNcchs[idx] = (unpack, exefsBlock, ncchStream, unpack.RomFs, patchSource);

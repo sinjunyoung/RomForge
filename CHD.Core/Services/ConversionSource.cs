@@ -82,6 +82,32 @@ public class ConversionSource
         return bins;
     }
 
+    public static IReadOnlyList<string> ParseFilesFromGdi(string gdiPath)
+    {
+        var files = new List<string>();
+
+        if (!File.Exists(gdiPath))
+            return files;
+
+        var lines = File.ReadAllLines(gdiPath);
+
+        foreach (var line in lines.Skip(1))
+        {
+            if (string.IsNullOrWhiteSpace(line))
+                continue;
+
+            var tokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (tokens.Length >= 5)
+            {
+                string fileName = tokens[4].Replace("\"", string.Empty);
+                files.Add(fileName);
+            }
+        }
+
+        return files;
+    }
+
     public string Validate()
     {
         return Format switch

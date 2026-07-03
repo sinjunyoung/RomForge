@@ -16,9 +16,9 @@ public class CsoService
 {
     private const uint HeaderSize = 0x18;
 
-    private readonly ChdmanService _chdman = new ();
+    private readonly ChdmanService _chdman = new();
 
-    public static async Task DecompressAsync(Stream input, Stream output, IProgress<double>? progress = null, CancellationToken ct = default)
+    public static async Task DecompressAsync(Stream input, Stream output, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         var magic = new byte[4];
 
@@ -52,6 +52,8 @@ public class CsoService
             indexTable[i] = BinaryPrimitives.ReadUInt32LittleEndian(indexBytes.AsSpan(i * 4));
 
         var blockBuf = new byte[header.BlockSize * 2];
+        var reporter = progress is null ? null : new ProgressReporter("압축 해제 중...", string.Empty, blockCount, progress);
+        var report = reporter?.CreateAction();
 
         for (int i = 0; i < blockCount; i++)
         {
@@ -86,11 +88,11 @@ public class CsoService
                 await ds.CopyToAsync(output, ct);
             }
 
-            progress?.Report((double)(i + 1) / blockCount);
+            report?.Invoke(i + 1, blockCount);
         }
     }
 
-    public static async Task CompressAsync(Stream input, Stream output, byte[]? magic = null, byte version = 1, bool isLz4 = false, IProgress<double>? progress = null, CancellationToken ct = default)
+    public static async Task CompressAsync(Stream input, Stream output, byte[]? magic = null, byte version = 1, bool isLz4 = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         magic ??= CsoHeader.MagicCSO;
         isLz4 = isLz4 || version == 2;
@@ -108,6 +110,7 @@ public class CsoService
 
         headerBytes[16] = version;
         headerBytes[17] = 0;
+
         await output.WriteAsync(headerBytes, ct);
 
         long indexOffset = output.Position;
@@ -117,6 +120,8 @@ public class CsoService
 
         var inputBuf = new byte[blockSize];
         var compBuf = new byte[blockSize * 2];
+        var reporter = progress is null ? null : new ProgressReporter("압축 중...", string.Empty, blockCount, progress);
+        var report = reporter?.CreateAction();
 
         for (int i = 0; i < blockCount; i++)
         {
@@ -126,7 +131,7 @@ public class CsoService
             long blockOffset = output.Position;
 
             indexTable[i] = (uint)blockOffset;
-            
+
             int compLen;
             bool useUncompressed;
 
@@ -150,7 +155,7 @@ public class CsoService
             else
                 await output.WriteAsync(compBuf.AsMemory(0, compLen), ct);
 
-            progress?.Report((double)(i + 1) / blockCount);
+            report?.Invoke(i + 1, blockCount);
         }
 
         indexTable[blockCount] = (uint)output.Position;
@@ -164,7 +169,7 @@ public class CsoService
         await output.WriteAsync(indexBytes, ct);
     }
 
-    public static async Task CompressFromChdAsync(string chdPath, Stream output, byte version = 1, IProgress<double>? progress = null, CancellationToken ct = default)
+    public static async Task CompressFromChdAsync(string chdPath, Stream output, byte version = 1, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         var info = ChdInfoReader.ReadChdInfo(chdPath);
 
@@ -173,16 +178,16 @@ public class CsoService
 
         if (err != ChdrError.CHDERR_NONE)
             throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
-                
-        
+
+
         if (info.SourceType == ChdSourceType.DVD)
-        { 
+        {
             long totalLength = (long)info.LogicalBytes;
             using var chdStream = new ChdReadStream(wrapper, totalLength);
 
             await CompressAsync(chdStream, output, version: version, progress: progress, ct: ct);
         }
-        else if(info.SourceType == ChdSourceType.ISO)
+        else if (info.SourceType == ChdSourceType.ISO)
         {
             long totalLength = (long)info.Tracks[0].Frames * 2048;
             using var chdStream = new ChdCdReadStream(wrapper, totalLength);
@@ -191,9 +196,9 @@ public class CsoService
         }
     }
 
-    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, string compression = "zlib", CancellationToken ct = default) => await _chdman.CreateDvdAsync(isoPath, chdPath, compression, ct);
+    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => await _chdman.CreateDvdAsync(isoPath, chdPath, compression, progress, ct);
 
-    public async Task<bool> CompressCsoToChdAsync(string csoPath, string chdPath, IProgress<double>? progress = null, string compression = "zlib", CancellationToken ct = default)
+    public async Task<bool> CompressCsoToChdAsync(string csoPath, string chdPath, IProgress<ProgressInfo>? progress = null, string compression = "zlib", CancellationToken ct = default)
     {
         var tmpIso = Utils.GetUniqueFilePath(Path.ChangeExtension(csoPath, ".iso"));
 
@@ -206,7 +211,7 @@ public class CsoService
                 await isoStream.FlushAsync(ct);
             }
 
-            return await _chdman.CreateDvdAsync(tmpIso, chdPath, compression, ct);
+            return await _chdman.CreateDvdAsync(tmpIso, chdPath, compression, progress, ct);
         }
         catch (Exception ex)
         {
@@ -219,15 +224,12 @@ public class CsoService
         }
     }
 
-    public async Task ExtractChdToIsoAsync(string chdPath, string isoPath, IProgress<double>? progress = null, CancellationToken ct = default)
+    public async Task ExtractChdToIsoAsync(string chdPath, string isoPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        if (progress != null)
-            _chdman.ProgressChanged += (s, e) => progress.Report(e.Percent / 100.0);
-
         var info = ChdInfoReader.ReadChdInfo(chdPath);
 
         if (info.SourceType == ChdSourceType.DVD)
-            await _chdman.ExtractRawAsync(chdPath, isoPath, ct);
+            await _chdman.ExtractRawAsync(chdPath, isoPath, progress, ct);
         else
         {
             var cuePath = Path.ChangeExtension(isoPath, ".cue");
@@ -235,7 +237,7 @@ public class CsoService
 
             try
             {
-                await _chdman.ExtractCdAsync(chdPath, cuePath, ct);
+                await _chdman.ExtractCdAsync(chdPath, cuePath, progress, ct);
 
                 if (File.Exists(binPath))
                     File.Move(binPath, isoPath, overwrite: true);
@@ -247,6 +249,7 @@ public class CsoService
             {
                 File.Delete(cuePath);
                 File.Delete(binPath);
+
                 throw;
             }
         }

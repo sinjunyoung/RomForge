@@ -1,4 +1,5 @@
 ﻿using _3DS.Core.Models;
+using Patch.Core.Formats;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -8,6 +9,8 @@ public static class ExeFsPacker
 {
     private const int BlockSize = 0x200;
     private const int MaxEntries = 8;
+    private const int ExHeaderCompressFlagOffset = 0x0D;
+    private const byte ExHeaderCompressFlagBit = 0x01;
 
     public static byte[] Pack(IReadOnlyList<ExeFsFile> files)
     {
@@ -90,26 +93,53 @@ public static class ExeFsPacker
         return Pack(files);
     }
 
-    public static async Task<byte[]> PackWithPatchAsync(IReadOnlyList<ExeFsFile> originalFiles, string? exefsPatchDir, CancellationToken ct = default)
+    public static async Task<byte[]> PackWithPatchAsync(IReadOnlyList<ExeFsFile> originalFiles, string? exefsPatchDir, byte[]? exHeader, string? patchRootDir, CancellationToken ct = default)
     {
-        if (exefsPatchDir == null || !Directory.Exists(exefsPatchDir))
+        bool hasExefsDir = exefsPatchDir != null && Directory.Exists(exefsPatchDir);
+        bool hasRootFallback = !string.IsNullOrEmpty(patchRootDir);
+
+        if (!hasExefsDir && !hasRootFallback)
             return Pack(originalFiles);
 
         var patchedFiles = new List<ExeFsFile>();
 
         foreach (var file in originalFiles)
         {
-            string fileName = file.Name == ".code" ? "code.bin" : file.Name + ".bin";
-            string patchPath = Path.Combine(exefsPatchDir, fileName);
+            string baseName = file.Name == ".code" ? "code" : file.Name;
+            bool allowRootFallback = file.Name == ".code";
 
-            if (File.Exists(patchPath))
+            var (binPath, ipsPath) = ResolvePatchFiles(baseName, hasExefsDir ? exefsPatchDir : null, patchRootDir, allowRootFallback);
+
+            if (binPath != null)
             {
-                byte[] patchData = await File.ReadAllBytesAsync(patchPath, ct);
+                byte[] patchData = await File.ReadAllBytesAsync(binPath, ct);
 
                 patchedFiles.Add(new ExeFsFile
                 {
                     Name = file.Name,
                     Data = patchData,
+                    ExpectedHash = [],
+                    HashValid = false,
+                });
+            }
+            else if (ipsPath != null)
+            {
+                byte[] sourceData = file.Data;
+                bool isCompressedCode = file.Name == ".code" && exHeader != null && exHeader.Length > ExHeaderCompressFlagOffset && (exHeader[ExHeaderCompressFlagOffset] & ExHeaderCompressFlagBit) != 0;
+
+                if (isCompressedCode)
+                    sourceData = BackwardLz77.Decompress(sourceData);
+
+                byte[] ipsData = await File.ReadAllBytesAsync(ipsPath, ct);
+                byte[] patchedData = await Ips.ApplyPatchAsync(sourceData, ipsData, null, ct);
+
+                if (isCompressedCode)
+                    exHeader![ExHeaderCompressFlagOffset] &= unchecked((byte)~ExHeaderCompressFlagBit);
+
+                patchedFiles.Add(new ExeFsFile
+                {
+                    Name = file.Name,
+                    Data = patchedData,
                     ExpectedHash = [],
                     HashValid = false,
                 });
@@ -121,6 +151,29 @@ public static class ExeFsPacker
         }
 
         return Pack(patchedFiles);
+    }
+
+    private static (string? binPath, string? ipsPath) ResolvePatchFiles(string baseName, string? exefsPatchDir, string? patchRootDir, bool allowRootFallback)
+    {
+        if (exefsPatchDir != null)
+        {
+            string bin = Path.Combine(exefsPatchDir, baseName + ".bin");
+            string ips = Path.Combine(exefsPatchDir, baseName + ".ips");
+
+            if (File.Exists(bin)) return (bin, null);
+            if (File.Exists(ips)) return (null, ips);
+        }
+
+        if (allowRootFallback && !string.IsNullOrEmpty(patchRootDir))
+        {
+            string bin = Path.Combine(patchRootDir, baseName + ".bin");
+            string ips = Path.Combine(patchRootDir, baseName + ".ips");
+
+            if (File.Exists(bin)) return (bin, null);
+            if (File.Exists(ips)) return (null, ips);
+        }
+
+        return (null, null);
     }
 
     private static uint AlignUp(uint v, uint a) => (v + a - 1) & ~(a - 1);
