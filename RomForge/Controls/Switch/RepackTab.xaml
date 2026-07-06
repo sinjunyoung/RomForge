@@ -51,7 +51,7 @@
                         <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="TxtPatch_DragEnter" PreviewDragOver="TxtPatch_DragOver" PreviewDrop="TxtPatch_Drop">
                             <Grid>
                                 <TextBox x:Name="txtPatch" Text="{Binding PatchPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                                <TextBlock Text="[한글패치] or [xdelta 폴더]를 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
+                                <TextBlock Text="한글패치 / xdelta 폴더를 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
                             </Grid>
                         </Border>
                         <Button Grid.Column="1" x:Name="btnOpenPatchFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
@@ -67,7 +67,7 @@
                         <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="TxtDlc_DragEnter" PreviewDragOver="TxtDlc_DragOver" PreviewDrop="TxtDlc_Drop">
                             <Grid>
                                 <TextBox x:Name="txtDlc" Text="{Binding DlcPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                                <TextBlock Text="DLC 루트 폴더를 드래그&amp;드롭하세요" Visibility="{Binding DlcHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
+                                <TextBlock Text="한글패치 DLC 루트 폴더를 드래그&amp;드롭하세요" Visibility="{Binding DlcHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
                             </Grid>
                         </Border>
                         <Button Grid.Column="1" x:Name="btnOpenDlcFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseDlcCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
