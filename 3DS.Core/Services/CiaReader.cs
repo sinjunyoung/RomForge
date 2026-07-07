@@ -77,6 +77,7 @@ public class CiaReader(KeyStore keyStore)
         TmdSize = BinaryPrimitives.ReadUInt32LittleEndian(buf.AsSpan(0x10)),
         MetaSize = BinaryPrimitives.ReadUInt32LittleEndian(buf.AsSpan(0x14)),
         ContentSize = BinaryPrimitives.ReadUInt64LittleEndian(buf.AsSpan(0x18)),
+        ContentIndexBitmask = buf.AsSpan(0x20, 0x2000).ToArray(),
     };
 
     private static CiaTicket ParseTicket(byte[] buf)

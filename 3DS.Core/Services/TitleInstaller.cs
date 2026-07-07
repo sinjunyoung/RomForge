@@ -64,6 +64,13 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
             ct.ThrowIfCancellationRequested();
 
             var content = tmd.Contents[i];
+
+            if (!source.IsContentPresent(content.ContentIndex))
+            {
+                Log($"경고: 콘텐츠 인덱스 {content.ContentIndex} 미포함, 건너뜀");
+                continue;
+            }
+
             string contentFilename = $"{content.ContentId:x8}.app";
             string contentSdPath, contentOutputPath;
 
@@ -156,6 +163,9 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
         foreach (var content in tmd.Contents)
         {
+            if (!source.IsContentPresent(content.ContentIndex))
+                continue;
+
             highestIndex = Math.Max(highestIndex, content.ContentIndex);
 
             var (ncchStream, _) = await source.OpenContentNcchEncrypted(content.ContentIndex);

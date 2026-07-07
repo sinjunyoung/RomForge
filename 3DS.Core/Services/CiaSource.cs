@@ -45,6 +45,9 @@ public class CiaSource : IInstallSource
 
         foreach (var chunk in Contents)
         {
+            if (!IsContentPresent(chunk.ContentIndex))
+                continue;
+
             if (chunk.ContentIndex == contentIndex)
             {
                 target = chunk;
@@ -84,11 +87,15 @@ public class CiaSource : IInstallSource
 
         foreach (var chunk in Contents)
         {
+            if (!IsContentPresent(chunk.ContentIndex))
+                continue;
+
             if (chunk.ContentIndex == contentIndex)
             {
                 target = chunk;
                 break;
             }
+
             offset = AlignUp(offset + chunk.ContentSize, 64);
         }
 
@@ -161,6 +168,8 @@ public class CiaSource : IInstallSource
             }
         }
     }
+
+    public bool IsContentPresent(int contentIndex) => CiaHeader.IsContentPresent(contentIndex);
 
     private static long AlignUp(long value, int alignment) => (value + alignment - 1) & ~(alignment - 1L);
 
