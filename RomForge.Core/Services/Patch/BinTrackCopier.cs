@@ -64,7 +64,14 @@ public class BinTrackCopier(Action<string, LogLevel> log)
         try
         {
             string cueContent = await File.ReadAllTextAsync(cuePath).ConfigureAwait(false);
-            string updatedCueContent = Regex.Replace(cueContent, @"FILE\s+""([^""]+)""\s+BINARY", $"FILE \"{newBinFileName}\" BINARY", RegexOptions.IgnoreCase);
+            string updatedCueContent = Regex.Replace(cueContent, @"FILE\s+""([^""]+)""\s+BINARY", m =>
+            {
+                string referencedFileName = Path.GetFileName(m.Groups[1].Value);
+
+                return string.Equals(referencedFileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase)
+                    ? $"FILE \"{newBinFileName}\" BINARY"
+                    : m.Value;
+            }, RegexOptions.IgnoreCase);
 
             await File.WriteAllTextAsync(outputCuePath, updatedCueContent).ConfigureAwait(false);
 
