@@ -1,4 +1,14 @@
-﻿using System;
+﻿// WudReader.cs
+//
+// C# port of cemu-project/WudCompress (wud.h / wud.cpp).
+// Transparently reads both .wud (raw Wii U disc image) and .wux (sector-deduplicated,
+// NOT compressed — despite the name, WUX uses no zlib/zstd, just an index table that lets
+// identical sectors share one physical copy) as a single flat byte stream.
+//
+// Note: unlike the ZArchive/.wua format, the .wud/.wux header and index table are stored
+// in NATIVE LITTLE-ENDIAN, matching the original Windows/MSVC tool.
+
+using System;
 using System.Buffers.Binary;
 using System.IO;
 
