@@ -44,6 +44,9 @@ public static class Ups
             long inputSize = ReadVli(pPat, ref pos, patch.Length);
             long outputSize = ReadVli(pPat, ref pos, patch.Length);
 
+            if (input.LongLength != inputSize)
+                throw new InvalidDataException($"원본 파일 크기와 패치 파일 크기가 일치하지 않습니다. (패치가 기대하는 크기: {inputSize:N0} bytes, 실제 파일 크기: {input.LongLength:N0} bytes) ");
+
             byte[] output = new byte[outputSize];
             Buffer.BlockCopy(input, 0, output, 0, (int)Math.Min(input.Length, outputSize));
 
@@ -57,6 +60,7 @@ public static class Ups
                     ct.ThrowIfCancellationRequested();
 
                     long skip = ReadVli(pPat, ref pos, patchEnd);
+
                     outOffset += skip;
 
                     while (pos < patchEnd)
@@ -64,7 +68,9 @@ public static class Ups
                         ct.ThrowIfCancellationRequested();
 
                         byte b = pPat[pos++];
-                        if (b == 0) break;
+
+                        if (b == 0) 
+                            break;
 
                         if (outOffset < outputSize)
                             pOut[outOffset] ^= b;
@@ -173,7 +179,8 @@ public static class Ups
             byte b = patch[pos++];
             value += (b & 0x7f) * shift;
 
-            if ((b & 0x80) != 0) break;
+            if ((b & 0x80) != 0) 
+                break;
 
             shift <<= 7;
             value += shift;
@@ -187,6 +194,7 @@ public static class Ups
         while (true)
         {
             byte b = (byte)(value & 0x7f);
+
             value >>= 7;
 
             if (value == 0)
@@ -202,7 +210,8 @@ public static class Ups
 
     private unsafe static uint CalculateCrc32(byte[] data, int length = -1)
     {
-        if (length == -1) length = data.Length;
+        if (length == -1) 
+            length = data.Length;
 
         uint crc = 0xFFFFFFFF;
 

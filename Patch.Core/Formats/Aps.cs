@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Common;
+﻿using Common;
 
 namespace Patch.Core.Formats;
 
@@ -62,8 +61,13 @@ public static class Aps
                     if (length == 0 || pos + length > patch.Length)
                         break;
 
-                    if (offset + length <= output.Length)
-                        Buffer.MemoryCopy(pPat + pos, pOut + offset, output.Length - offset, length);
+                    long offsetLong = offset;
+                    long lengthLong = length;
+
+                    if (offsetLong + lengthLong > output.Length)
+                        throw new InvalidDataException($"패치 레코드가 원본 파일 범위를 벗어납니다. (오프셋: {offsetLong:N0}, 길이: {lengthLong}, 원본 파일 크기: {output.Length:N0} bytes) ");
+
+                    Buffer.MemoryCopy(pPat + pos, pOut + offsetLong, output.Length - offsetLong, length);
 
                     pos += length;
 

@@ -1,5 +1,4 @@
 ﻿using Common;
-using System.IO;
 
 namespace Patch.Core.Formats;
 
@@ -101,6 +100,7 @@ public static class Ips
                         ms.WriteByte((byte)(size & 0xFF));
 
                         int available = Math.Min(size, modified.Length - start);
+
                         ms.Write(modified, start, Math.Max(0, available));
 
                         for (int i = available; i < size; i++)
@@ -161,6 +161,9 @@ public static class Ips
 
                 if (size == 0)
                 {
+                    if (pos + 3 > ips.Length)
+                        throw new InvalidDataException("IPS 패치 파일이 손상되었습니다. (RLE 레코드가 파일 끝에서 잘려 있습니다.)");
+
                     int rleCount = (pIps[pos] << 8) | pIps[pos + 1];
                     byte rleValue = pIps[pos + 2];
 
@@ -177,6 +180,9 @@ public static class Ips
                 }
                 else
                 {
+                    if (pos + size > ips.Length)
+                        throw new InvalidDataException("IPS 패치 파일이 손상되었습니다. (데이터 블록이 파일 끝에서 잘려 있습니다.)");
+
                     EnsureCapacity(ref result, offset + size);
 
                     if (offset + size > actualFinalSize)
