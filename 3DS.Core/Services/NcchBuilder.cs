@@ -58,7 +58,10 @@ public static class NcchBuilder
             Dictionary<string, long>? patchSizeMap = null;
 
             if (patchSource != null)
-                patchSizeMap = await RomFsPacker.BuildPatchSizeMapAsync(romFs.Files, patchSource, ct);
+            {
+                long dataBase = romFs.DataLevel2Offset + romFs.RomFsHeader.DataOffset;
+                patchSizeMap = await RomFsPacker.BuildPatchSizeMapAsync(romFs.Files, patchSource, ncchSource, dataBase, ct);
+            }
 
             var (totalSize, level0Size, _, _, _) = RomFsPacker.CalculateLayout(romFs.Directories, romFs.Files, patchSizeMap);
 
@@ -208,7 +211,7 @@ public static class NcchBuilder
         await output.WriteAsync(ncchHdr, ct);
     }
 
-    public static async Task<long> CalculateSizeAsync(NcchUnpackResult unpack, byte[] exefsBlock, RomFsUnpackResult? romFs, IRomFsFileSource? patchSource, CancellationToken ct = default)
+    public static async Task<long> CalculateSizeAsync(NcchUnpackResult unpack, byte[] exefsBlock, RomFsUnpackResult? romFs, IRomFsFileSource? patchSource, Stream ncchSource, CancellationToken ct = default)
     {
         long ncchSize = MediaUnit;
 
@@ -227,8 +230,12 @@ public static class NcchBuilder
         if (romFs != null)
         {
             Dictionary<string, long>? patchSizeMap = null;
+
             if (patchSource != null)
-                patchSizeMap = await RomFsPacker.BuildPatchSizeMapAsync(romFs.Files, patchSource, ct);
+            {
+                long dataBase = romFs.DataLevel2Offset + romFs.RomFsHeader.DataOffset;
+                patchSizeMap = await RomFsPacker.BuildPatchSizeMapAsync(romFs.Files, patchSource, ncchSource, dataBase, ct);
+            }
 
             var (totalSize, _, _, _, _) = RomFsPacker.CalculateLayout(romFs.Directories, romFs.Files, patchSizeMap);
             ncchSize = AlignUp(ncchSize, RomFsAlign) + AlignUp((long)totalSize, MediaUnit);

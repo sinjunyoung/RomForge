@@ -2,5 +2,5 @@
 
 public interface IRomFsFileSource
 {
-    ValueTask<Stream?> OpenFileAsync(string fullPath, CancellationToken ct = default);
+    ValueTask<Stream?> OpenFileAsync(string fullPath, Func<CancellationToken, ValueTask<Stream?>>? getOriginal = null, CancellationToken ct = default);
 }

@@ -24,7 +24,7 @@ public class RepackedNcsdSource : INcsdSource
             if (ncchs.TryGetValue(chunk.ContentIndex, out var entry))
             {
                 var (unpack, exefsBlock, ncchSource, romFs, patchSource) = entry;
-                long size = await NcchBuilder.CalculateSizeAsync(unpack, exefsBlock, romFs, patchSource, ct);
+                long size = await NcchBuilder.CalculateSizeAsync(unpack, exefsBlock, romFs, patchSource, ncchSource, ct);
 
                 resolved[chunk.ContentIndex] = (unpack, exefsBlock, ncchSource, romFs, patchSource, size);
                 updatedContents.Add(new Contents

@@ -86,7 +86,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="270">
+                        <GridViewColumn Width="210">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileName"/>
                             </GridViewColumn.Header>

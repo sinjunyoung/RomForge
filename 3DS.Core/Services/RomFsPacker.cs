@@ -24,11 +24,11 @@ public static class RomFsPacker
         Dictionary<string, long>? patchSizeMap = null;
 
         if (patchSource != null)
-            patchSizeMap = await BuildPatchSizeMapAsync(unpack.Files, patchSource, ct);
+            patchSizeMap = await BuildPatchSizeMapAsync(unpack.Files, patchSource, ncchStream, dataBase, ct);
 
         var (totalSize, _, _, _, _) = CalculateLayout(unpack.Directories, unpack.Files, patchSizeMap);
-
         long startPos = output.Position;
+
         if (output.CanSeek && output.Length < startPos + (long)totalSize)
             output.SetLength(startPos + (long)totalSize);
 
@@ -40,17 +40,16 @@ public static class RomFsPacker
     {
         var (dirs, files) = ScanFolder(folderPath);
 
-        Dictionary<string, long>? patchSizeMap = null;
-        if (patchSource != null)
-            patchSizeMap = await BuildPatchSizeMapAsync(files, patchSource, ct);
+        IRomFsFileSource effectiveSource = new FolderRomFsFileSource(folderPath, patchSource);
 
+        var patchSizeMap = await BuildPatchSizeMapAsync(files, effectiveSource, null, 0, ct);
         var (totalSize, _, _, _, _) = CalculateLayout(dirs, files, patchSizeMap);
-
         long startPos = output.Position;
+
         if (output.CanSeek && output.Length < startPos + (long)totalSize)
             output.SetLength(startPos + (long)totalSize);
 
-        await PackInternalAsync(Stream.Null, 0, dirs, files, output, startPos, 0, patchSource ?? new FolderRomFsFileSource(folderPath), null, progress, ct);
+        await PackInternalAsync(Stream.Null, 0, dirs, files, output, startPos, 0, effectiveSource, patchSizeMap, progress, ct);
     }
 
     public static (ulong totalSize, ulong level0Size, ulong offLevel3, ulong offLevel1Hash, ulong offLevel2Hash) CalculateLayout(IReadOnlyList<RomFsDirNode> dirs, IReadOnlyList<RomFsFileNode> files, Dictionary<string, long>? patchSizeMap = null)
@@ -96,13 +95,19 @@ public static class RomFsPacker
         return (totalSize, level0Size, offLevel3, offLevel1Hash, offLevel2Hash);
     }
 
-    public static async Task<Dictionary<string, long>> BuildPatchSizeMapAsync(IReadOnlyList<RomFsFileNode> files, IRomFsFileSource patchSource, CancellationToken ct = default)
+    public static async Task<Dictionary<string, long>> BuildPatchSizeMapAsync(IReadOnlyList<RomFsFileNode> files, IRomFsFileSource patchSource, Stream? ncchStream = null, long dataBase = 0, CancellationToken ct = default)
     {
         var map = new Dictionary<string, long>();
 
+        bool hasOriginalSource = ncchStream != null && ncchStream != Stream.Null;
+
         foreach (var file in files)
         {
-            var stream = await patchSource.OpenFileAsync(file.FullPath, ct);
+            Func<CancellationToken, ValueTask<Stream?>>? getOriginal = hasOriginalSource
+                ? (ct2 => ReadOriginalSliceAsync(ncchStream!, dataBase, file, ct2))
+                : null;
+
+            var stream = await patchSource.OpenFileAsync(file.FullPath, getOriginal, ct);
 
             if (stream != null)
             {
@@ -178,6 +183,20 @@ public static class RomFsPacker
             Directories = dirs,
             Files = files,
         };
+    }
+
+    private static async ValueTask<Stream?> ReadOriginalSliceAsync(Stream ncchStream, long dataBase, RomFsFileNode file, CancellationToken ct)
+    {
+        if (file.DataSize == 0)
+            return new MemoryStream([]);
+
+        ncchStream.Position = dataBase + (long)file.DataOffset;
+
+        byte[] buffer = new byte[(long)file.DataSize];
+
+        await ncchStream.ReadExactlyAsync(buffer, ct);
+
+        return new MemoryStream(buffer);
     }
 
     private static async Task PackInternalAsync(Stream ncchStream, long dataBase, IReadOnlyList<RomFsDirNode> dirs, IReadOnlyList<RomFsFileNode> files, Stream output, long startPos, long totalBytes, IRomFsFileSource? patchSource = null, Dictionary<string, long>? patchSizeMap = null, Action<long, long>? progress = null, CancellationToken ct = default)
@@ -396,6 +415,8 @@ public static class RomFsPacker
 
         long cumulativeWritten = 0;
 
+        bool hasOriginalSource = ncchStream != null && ncchStream != Stream.Null;
+
         foreach (var file in files)
         {
             long actualSize = patchSizeMap?.TryGetValue(file.FullPath, out long ps) == true ? ps : (long)file.DataSize;
@@ -414,7 +435,11 @@ public static class RomFsPacker
                 await hashingStream.WriteAsync(new byte[padSize], ct);
             }
 
-            Stream? patchStream = patchSource != null ? await patchSource.OpenFileAsync(file.FullPath, ct) : null;
+            Func<CancellationToken, ValueTask<Stream?>>? getOriginal = hasOriginalSource
+                ? (ct2 => ReadOriginalSliceAsync(ncchStream, dataBase, file, ct2))
+                : null;
+
+            Stream? patchStream = patchSource != null ? await patchSource.OpenFileAsync(file.FullPath, getOriginal, ct) : null;
             long before = cumulativeWritten;
 
             if (patchStream != null)
@@ -486,17 +511,17 @@ public static class RomFsPacker
 
     private static uint GetHashTableCount(uint num)
     {
-        if (num < 3) 
+        if (num < 3)
             return 3;
 
         uint count = num;
 
-        if (count < 19) 
-        { 
-            if (count % 2 == 0) 
-                count++; 
+        if (count < 19)
+        {
+            if (count % 2 == 0)
+                count++;
 
-            return count; 
+            return count;
         }
 
         while (count % 2 == 0 || count % 3 == 0 || count % 5 == 0 || count % 7 == 0 || count % 11 == 0 || count % 13 == 0 || count % 17 == 0)
