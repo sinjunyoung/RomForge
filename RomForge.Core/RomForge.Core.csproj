@@ -23,5 +23,6 @@
     <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
     <ProjectReference Include="..\PBP.Core\PBP.Core.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
+    <ProjectReference Include="..\WiiU.Core\WiiU.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -1,35 +1,23 @@
-﻿// WudReader.cs
-//
-// C# port of cemu-project/WudCompress (wud.h / wud.cpp).
-// Transparently reads both .wud (raw Wii U disc image) and .wux (sector-deduplicated,
-// NOT compressed — despite the name, WUX uses no zlib/zstd, just an index table that lets
-// identical sectors share one physical copy) as a single flat byte stream.
-//
-// Note: unlike the ZArchive/.wua format, the .wud/.wux header and index table are stored
-// in NATIVE LITTLE-ENDIAN, matching the original Windows/MSVC tool.
-
-using System;
 using System.Buffers.Binary;
-using System.IO;
 
 namespace WiiU.Core.Services;
 
 public sealed class WudReader : IDisposable
 {
-    private const uint WuxMagic0 = 0x30585557; // "WUX0" as little-endian uint32
+    private const uint WuxMagic0 = 0x30585557;
     private const uint WuxMagic1 = 0x1099d02e;
-    private const int HeaderSize = 32; // sizeof(wuxHeader_t) with natural struct alignment
+    private const int HeaderSize = 32;
 
     private readonly Stream _stream;
     private readonly bool _leaveOpen;
-
-    public bool IsCompressed { get; private set; }
-    public long UncompressedSize { get; private set; }
-
     private uint _sectorSize;
-    private uint[] _indexTable = Array.Empty<uint>();
+    private uint[] _indexTable = [];
     private long _offsetIndexTable;
     private long _offsetSectorArray;
+
+    public bool IsCompressed { get; private set; }
+
+    public long UncompressedSize { get; private set; }
 
     private WudReader(Stream stream, bool leaveOpen)
     {
@@ -40,6 +28,7 @@ public sealed class WudReader : IDisposable
     public static WudReader Open(string path)
     {
         var fs = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
         try
         {
             return Open(fs, leaveOpen: false);
@@ -55,6 +44,7 @@ public sealed class WudReader : IDisposable
     {
         var reader = new WudReader(stream, leaveOpen);
         reader.Initialize();
+
         return reader;
     }
 
@@ -63,8 +53,11 @@ public sealed class WudReader : IDisposable
         long inputFileSize = _stream.Length;
 
         Span<byte> header = stackalloc byte[HeaderSize];
+
         _stream.Position = 0;
+
         int read = _stream.ReadAtLeast(header, HeaderSize, throwOnEndOfStream: false);
+
         if (read != HeaderSize)
             throw new InvalidDataException("File is too short to be a valid .wud/.wux.");
 
@@ -81,18 +74,26 @@ public sealed class WudReader : IDisposable
                 throw new InvalidDataException("Invalid .wux sector size.");
 
             uint indexTableEntryCount = (uint)((UncompressedSize + (_sectorSize - 1)) / _sectorSize);
-            _offsetIndexTable = _stream.Position; // right after header, matches wud_getCurrentSeek64
+
+            _offsetIndexTable = _stream.Position;
+
             long offsetSectorArray = _offsetIndexTable + (long)indexTableEntryCount * sizeof(uint);
+
             offsetSectorArray += _sectorSize - 1;
             offsetSectorArray -= offsetSectorArray % _sectorSize;
             _offsetSectorArray = offsetSectorArray;
 
             _indexTable = new uint[indexTableEntryCount];
+
             var indexBytes = new byte[indexTableEntryCount * sizeof(uint)];
+
             _stream.Position = _offsetIndexTable;
+
             int gotBytes = _stream.ReadAtLeast(indexBytes, indexBytes.Length, throwOnEndOfStream: false);
+
             if (gotBytes != indexBytes.Length)
                 throw new InvalidDataException("Could not read the full .wux index table.");
+
             for (int i = 0; i < indexTableEntryCount; i++)
                 _indexTable[i] = BinaryPrimitives.ReadUInt32LittleEndian(indexBytes.AsSpan(i * 4, 4));
         }
@@ -103,63 +104,67 @@ public sealed class WudReader : IDisposable
         }
     }
 
-    /// <summary>
-    /// Reads up to <paramref name="buffer"/>.Length bytes starting at logical <paramref name="offset"/>
-    /// into the uncompressed WUD data stream. Returns the number of bytes actually read
-    /// (fewer than requested only at end-of-file).
-    /// </summary>
     public int ReadData(Span<byte> buffer, long offset)
     {
         long fileBytesLeft = UncompressedSize - offset;
-        if (fileBytesLeft <= 0) return 0;
+
+        if (fileBytesLeft <= 0) 
+            return 0;
+
         int length = buffer.Length;
-        if (fileBytesLeft < length) length = (int)fileBytesLeft;
+
+        if (fileBytesLeft < length) 
+            length = (int)fileBytesLeft;
 
         int totalRead = 0;
 
         if (!IsCompressed)
         {
             _stream.Position = offset;
-            totalRead = _stream.ReadAtLeast(buffer[..length], length, throwOnEndOfStream: false);
+            totalRead = _stream.ReadAtLeast(buffer[..length], length, false);
+
             return totalRead;
         }
 
         int remaining = length;
         var dest = buffer;
+
         while (remaining > 0)
         {
             uint sectorOffset = (uint)(offset % _sectorSize);
             uint remainingSectorBytes = _sectorSize - sectorOffset;
             uint logicalSectorIndex = (uint)(offset / _sectorSize);
             int bytesToRead = (int)Math.Min(remainingSectorBytes, (uint)remaining);
-
             uint physicalSectorIndex = _indexTable[logicalSectorIndex];
             long physicalPos = _offsetSectorArray + (long)physicalSectorIndex * _sectorSize + sectorOffset;
 
             _stream.Position = physicalPos;
-            int got = _stream.ReadAtLeast(dest[..bytesToRead], bytesToRead, throwOnEndOfStream: false);
-            totalRead += got;
 
+            int got = _stream.ReadAtLeast(dest[..bytesToRead], bytesToRead, false);
+
+            totalRead += got;
             dest = dest[bytesToRead..];
             remaining -= bytesToRead;
             offset += bytesToRead;
 
-            if (got != bytesToRead) break; // unexpected EOF mid-sector
+            if (got != bytesToRead)
+                break;
         }
         return totalRead;
     }
 
-    /// <summary>Reads the full uncompressed WUD contents in <paramref name="chunkSize"/>-sized pieces,
-    /// invoking <paramref name="onChunk"/> for each. Useful for streaming the disc image out
-    /// to a decryption/parsing pass without buffering the whole thing in memory.</summary>
     public void ReadAll(Action<ReadOnlyMemory<byte>, long> onChunk, int chunkSize = 1 * 1024 * 1024)
     {
         var buffer = new byte[chunkSize];
         long offset = 0;
+
         while (offset < UncompressedSize)
         {
             int got = ReadData(buffer, offset);
-            if (got <= 0) break;
+
+            if (got <= 0) 
+                break;
+
             onChunk(buffer.AsMemory(0, got), offset);
             offset += got;
         }
