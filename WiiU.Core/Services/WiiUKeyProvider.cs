@@ -1,29 +1,33 @@
-﻿// WiiUKeyProvider.cs
+// WiiUKeyProvider.cs
 //
-// Reads Wii U decryption keys from an external file supplied by the user.
-// RomForge itself ships with no key material — the common key (and optionally
-// per-title key overrides) must be provided out-of-band, e.g. extracted by the
-// user from their own console.
+// C# port of Cemu's actual keys.txt loader (src/Cafe/Filesystem/FST/KeyCache.cpp,
+// function KeyCache_Prepare — verified directly against the cemu-project/Cemu source).
 //
-// Supported file format ("keys.txt"-style, one entry per line, '#' for comments):
+// The real algorithm is much simpler than community documentation suggests, and does NOT
+// distinguish "common key" from "disc key" from "title key" at load time at all:
+//   1. Truncate the line at the first '#' or ';'.
+//   2. Strip every space, tab, '-' and '_' character from what remains (not just the ends —
+//      every occurrence, anywhere in the line).
+//   3. If what's left isn't pure hex, or isn't exactly 32 hex chars (16 bytes), skip the line.
+//   4. Otherwise, add it as one more AES-128 key candidate to a single flat list.
 //
-//   commonKey = 32-hex-chars-here
-//   # optional per-title overrides (rarely needed — normally derived from title.tik):
-//   0005000e10102000 = 32-hex-chars-title-key
-//
-// Whitespace around '=' and blank lines are ignored. Hex is case-insensitive.
+// This means a line like "00050000101c9300 082fa2981e004defac03524cc685f693 # BotW JP" is
+// NOT parsed as a titleId->key mapping — after whitespace stripping it becomes a 48-character
+// string, which is rejected as an invalid key length and silently ignored. Only bare
+// 32-hex-char keys (with or without a trailing "# comment") are ever used. This is intentional
+// and matches Cemu's real behavior: every candidate key is tried by brute force wherever a key
+// is needed (see WuDiscReader's FindDiscKey), verified via a structural check, not looked up by
+// title ID.
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 
 namespace WiiU.Core.Services;
 
 public sealed class WiiUKeyProvider
 {
-    private byte[]? _commonKey;
-    private readonly Dictionary<string, byte[]> _titleKeyOverrides = new(StringComparer.OrdinalIgnoreCase);
+    /// <summary>Every valid 16-byte key candidate found in the file, in file order.</summary>
+    public IReadOnlyList<byte[]> KeyCandidates => _keyCandidates;
+
+    private readonly List<byte[]> _keyCandidates = new();
 
     private WiiUKeyProvider() { }
 
@@ -33,72 +37,48 @@ public sealed class WiiUKeyProvider
             throw new FileNotFoundException($"Wii U key file not found: {path}", path);
 
         var provider = new WiiUKeyProvider();
+
         foreach (var rawLine in File.ReadLines(path))
         {
-            var line = StripComment(rawLine).Trim();
-            if (line.Length == 0) continue;
+            string line = rawLine;
 
-            int eq = line.IndexOf('=');
-            if (eq < 0)
-                throw new InvalidDataException($"Malformed key file line (expected 'key = value'): \"{rawLine}\"");
-
-            var key = line[..eq].Trim();
-            var value = line[(eq + 1)..].Trim();
-            var bytes = ParseHex(value, rawLine);
-
-            if (string.Equals(key, "commonKey", StringComparison.OrdinalIgnoreCase))
+            // truncate at first '#' or ';'
+            int cut = line.Length;
+            for (int i = 0; i < line.Length; i++)
             {
-                if (bytes.Length != 16)
-                    throw new InvalidDataException("commonKey must be exactly 16 bytes (32 hex chars).");
-                provider._commonKey = bytes;
+                if (line[i] == '#' || line[i] == ';') { cut = i; break; }
             }
-            else
+            line = line[..cut];
+
+            // strip spaces, tabs, dashes, underscores (anywhere, not just at the ends)
+            var stripped = new System.Text.StringBuilder(line.Length);
+            foreach (char c in line)
             {
-                // treat as a titleId -> titleKey override
-                var normalizedTitleId = key.Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToLowerInvariant();
-                if (bytes.Length != 16)
-                    throw new InvalidDataException($"Title key override for {key} must be exactly 16 bytes (32 hex chars).");
-                provider._titleKeyOverrides[normalizedTitleId] = bytes;
+                if (c is ' ' or '\t' or '-' or '_') continue;
+                stripped.Append(c);
             }
+            string cleaned = stripped.ToString();
+            if (cleaned.Length == 0) continue;
+
+            if (!IsHex(cleaned)) continue;
+            if (cleaned.Length != 32) continue; // only exact 128-bit keys are used
+
+            var keyBytes = new byte[16];
+            for (int i = 0; i < 16; i++)
+                keyBytes[i] = Convert.ToByte(cleaned.Substring(i * 2, 2), 16);
+            provider._keyCandidates.Add(keyBytes);
         }
-
-        if (provider._commonKey is null)
-            throw new InvalidDataException("Key file did not contain a 'commonKey' entry.");
 
         return provider;
     }
 
-    /// <summary>The Wii U common key (16 bytes), used to decrypt the title key stored in title.tik.</summary>
-    public ReadOnlySpan<byte> CommonKey => _commonKey!;
-
-    /// <summary>
-    /// Returns a manually-provided title key override for the given 16-hex-digit title ID, if present.
-    /// Normally not needed — the title key should be derived from title.tik + CommonKey instead.
-    /// </summary>
-    public bool TryGetTitleKeyOverride(string titleIdHex, out byte[] titleKey)
+    private static bool IsHex(string s)
     {
-        var normalized = titleIdHex.Replace("0x", "", StringComparison.OrdinalIgnoreCase).ToLowerInvariant();
-        return _titleKeyOverrides.TryGetValue(normalized, out titleKey!);
-    }
-
-    private static string StripComment(string line)
-    {
-        int idx = line.IndexOf('#');
-        return idx < 0 ? line : line[..idx];
-    }
-
-    private static byte[] ParseHex(string hex, string context)
-    {
-        hex = hex.Replace(" ", "").Replace("0x", "", StringComparison.OrdinalIgnoreCase);
-        if (hex.Length % 2 != 0)
-            throw new InvalidDataException($"Odd-length hex value in key file: \"{context}\"");
-
-        var bytes = new byte[hex.Length / 2];
-        for (int i = 0; i < bytes.Length; i++)
+        foreach (char c in s)
         {
-            if (!byte.TryParse(hex.AsSpan(i * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out bytes[i]))
-                throw new InvalidDataException($"Invalid hex value in key file: \"{context}\"");
+            bool ok = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+            if (!ok) return false;
         }
-        return bytes;
+        return true;
     }
 }

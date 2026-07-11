@@ -1,472 +1,550 @@
-﻿// WuDiscReader.cs
+// WuDiscReader.cs
 //
-// C# port of maki-chan/wudecrypt (https://github.com/maki-chan/wudecrypt, AGPLv3).
-// Parses the partition table and per-partition file system table (FST) of a Wii U
-// disc image (read through WudReader, so both .wud and .wux work transparently),
-// derives GM (game) partition keys from the title keys stored in the SI/GI
-// partitions, and extracts individual files (handling both the "hashed" SHA-1
-// hash-tree content format and the plain "unhashed" format).
+// C# port of Cemu's actual disc-image handling (src/Cafe/Filesystem/FST/FST.cpp,
+// FSTVolume::FindDiscKey / OpenFromDiscImage / OpenFST / ProcessFST / ReadFile_HashModeRaw /
+// ReadFile_HashModeHashed / DetermineUnhashedBlockIV), verified directly against the
+// cemu-project/Cemu source — not the older (and, in places, incorrect) community wudecrypt
+// tool this file used to be based on.
 //
-// All disc-side crypto is AES-128-CBC with PaddingMode.None (data is always a
-// multiple of the block size). Nothing here embeds Nintendo's actual common key —
-// both the common key and the per-disc key must come from WiiUKeyProvider /
-// an external "disc key" file supplied by the user.
+// Key corrections versus the earlier version of this file:
+//   - Partition byte offset is simply partitionAddress * DISC_SECTOR_SIZE (no "-0x10000").
+//   - Each partition starts with a small PLAINTEXT header (not encrypted!) that stores where
+//     its FST actually begins (fstSector) and how big it is (fstSize).
+//   - The FST binary blob is decrypted in ONE continuous AES-CBC(zero IV) pass over the whole
+//     blob — not per-0x8000-block with the IV reset every time (that was a real bug).
+//   - Cluster byte offset is clusterEntry.offset * DISC_SECTOR_SIZE directly (no adjustment).
+//   - File byte offset is fileEntry.offset * offsetFactor (offsetFactor is a field read from
+//     the FST header itself, not a hardcoded shift).
+//   - Unhashed ("RAW") content: block 0 of a cluster uses IV = {clusterIndexHigh, clusterIndexLow,
+//     0...}; every later block chains normally, using the tail 16 ciphertext bytes of the
+//     PRECEDING block as its IV (this is what makes the format seekable without decrypting
+//     from the start).
+//   - Hashed content: 0x10000-byte physical blocks (0x400-byte hash header + 0xFC00-byte file
+//     data). The hash header is decrypted with a zero IV; the file data is then decrypted using
+//     the (now-decrypted) H0 hash entry for this block (blockIndex % 16) as the IV, and verified
+//     by comparing the SHA-1 of the decrypted data against that same H0 hash — no extra XOR
+//     adjustment (an earlier version of this file invented one; it doesn't exist in Cemu).
+//   - The Wii U common key is hardcoded (see TitleTicket.cs) — never asked from the user.
+//   - The disc key is never asked from the user either: every candidate key from keys.txt is
+//     brute-forced against a structural check (see FindDiscKey), falling back to a companion
+//     "<wudname>.key" file (16 raw bytes) only if none of them work, exactly like Cemu.
 
-using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace WiiU.Core.Services;
 
-public sealed class WuCluster
+public sealed class WuFstCluster
 {
-    public long Offset;   // byte offset, relative to partition start, already -0x8000 adjusted
-    public long Size;
-    public uint Unknown1;
-    public uint Unknown2;
+    public long Offset;   // bytes, relative to partition start
+    public long Size;     // bytes
+    public byte HashMode; // 0 = RAW, 1 = RAW_STREAM, 2 = HASH_INTERLEAVED
 }
 
 public sealed class WuFstEntry
 {
     public bool IsDirectory;
-    public uint NameOffset;
-    public string EntryName = "";
-    public long OffsetInCluster;
-    public uint LastRowInDir; // only valid for directories: exclusive end index of children range
-    public long Size;         // only valid for files
-    public ushort Unknown;
-    public ushort StartingCluster;
+    public string Name = "";
+
+    // directory
+    public int ParentDirIndex;
+    public int DirEndIndex;
+
+    // file
+    public long FileOffsetField; // raw field value; actual byte offset = this * OffsetFactor
+    public long FileSize;
+    public int ClusterIndex;
 }
 
-public sealed class WuPartition
+public sealed class WuFstVolume
 {
-    public string Name = "";        // full null-terminated partition name, e.g. "GM0005000E10102000"
-    public string Identifier = "";  // first 0x19 bytes
-    public long Offset;             // partition offset within the disc (already table-decoded)
-    public byte[] Key = Array.Empty<byte>();
-    public byte[] Iv = Array.Empty<byte>();
-    public List<WuCluster> Clusters = new();
-    public List<WuFstEntry> Entries = new();
-
-    public string TypeCode => Name.Length >= 2 ? Name[..2] : "";
-}
-
-public sealed class WuFileEntry
-{
-    public string ParentPath = "";
-    public string FileName = "";
-    public WuPartition Partition = null!;
-    public int EntryIndex;
+    public long PartitionBaseOffset;
+    public uint OffsetFactor;
+    public const long SectorSize = 0x8000;
+    public byte[] PartitionTitleKey = Array.Empty<byte>();
+    public List<WuFstCluster> Clusters { get; } = new();
+    public List<WuFstEntry> Entries { get; } = new();
 }
 
 public sealed class WuDiscReader
 {
-    private const long WiiUDecryptedAreaOffset = 0x18000;
-    private const int PartitionTocOffset = 0x800;
-    private const int PtocSize = 0x80;
-    private static readonly byte[] DiscMagic = { 0x57, 0x55, 0x50, 0x2D }; // "WUP-"
-    private static readonly byte[] DecryptedAreaSignature = { 0xCC, 0xA6, 0xE6, 0x7B };
-    private static readonly byte[] FstSignature = { 0x46, 0x53, 0x54, 0x00 }; // "FST\0"
+    private const long DiscSectorSize = 0x8000;
+    private const uint PartitionTableMagic = 0xCCA6E67B;
+    private const uint PartitionHeaderMagic = 0xCC93A4F5;
+    private const uint FstMagic = 0x46535400; // "FST\0"
 
     private readonly WudReader _wud;
-    private readonly byte[] _discKey;
 
-    public List<WuPartition> Partitions { get; } = new();
+    public byte[] DiscKey { get; }
+    public WuFstVolume SiVolume { get; private set; } = null!;
+    public WuFstVolume GmVolume { get; private set; } = null!;
+    public int GmPartitionIndex { get; private set; }
+    public string GmPartitionName { get; private set; } = "";
 
     private WuDiscReader(WudReader wud, byte[] discKey)
     {
         _wud = wud;
-        _discKey = discKey;
+        DiscKey = discKey;
     }
 
-    public static WuDiscReader Open(WudReader wud, byte[] discKey, WiiUKeyProvider keys)
+    // -----------------------------------------------------------------
+    // Disc key discovery (mirrors FSTVolume::FindDiscKey)
+    // -----------------------------------------------------------------
+
+    /// <summary>
+    /// Tries every candidate key by brute force against a fixed region of the disc that is
+    /// known to decrypt to all-zero bytes when the correct key is used. Falls back to a
+    /// companion "&lt;wudBaseName&gt;.key" file (16 raw bytes) next to <paramref name="wudPath"/>
+    /// if none of the candidates work — matching Cemu exactly.
+    /// </summary>
+    public static byte[]? FindDiscKey(WudReader wud, string wudPath, IReadOnlyList<byte[]> candidates)
+    {
+        var header = new byte[16 * 3];
+        int got = wud.ReadData(header, DiscSectorSize * 3 + 0x100);
+        if (got == header.Length)
+        {
+            var iv = header.AsSpan(0, 16).ToArray();
+            var ciphertext = header.AsSpan(16, 32).ToArray();
+            var scratch = new byte[32];
+            foreach (var key in candidates)
+            {
+                Array.Copy(ciphertext, scratch, 32);
+                AesCbcDecryptInPlace(scratch, 32, key, iv);
+                if (Array.TrueForAll(scratch, b => b == 0))
+                    return key;
+            }
+        }
+
+        string keyPath = Path.ChangeExtension(wudPath, ".key");
+        if (File.Exists(keyPath))
+        {
+            var bytes = File.ReadAllBytes(keyPath);
+            if (bytes.Length == 16)
+                return bytes;
+        }
+
+        return null;
+    }
+
+    // -----------------------------------------------------------------
+    // Top-level open
+    // -----------------------------------------------------------------
+
+    public static WuDiscReader Open(WudReader wud, byte[] discKey)
     {
         var reader = new WuDiscReader(wud, discKey);
-        reader.Initialize(keys);
+        reader.Initialize();
         return reader;
     }
 
-    private void Initialize(WiiUKeyProvider keys)
+    private void Initialize()
     {
-        Span<byte> magic = stackalloc byte[4];
-        _wud.ReadData(magic, 0);
-        if (!magic.SequenceEqual(DiscMagic))
-            throw new InvalidDataException("This does not look like a valid Wii U disc image (missing \"WUP-\" magic).");
+        // decrypt partition table: one 0x8000-byte sector at absolute sector index 3, zero IV
+        var table = new byte[DiscSectorSize];
+        if (_wud.ReadData(table, DiscSectorSize * 3) != table.Length)
+            throw new InvalidDataException("Could not read partition table sector.");
+        AesCbcDecryptInPlace(table, table.Length, DiscKey, new byte[16]);
 
-        var toc = ReadEncryptedOffset(_discKey, WiiUDecryptedAreaOffset, 0x8000);
-        if (!toc.AsSpan(0, 4).SequenceEqual(DecryptedAreaSignature))
-            throw new InvalidDataException("Could not decrypt partition table — wrong disc key?");
+        uint magic = BE32(table, 0);
+        if (magic != PartitionTableMagic)
+            throw new InvalidDataException("Partition table signature mismatch — wrong disc key?");
+        uint blockSize = BE32(table, 4);
+        if (blockSize != DiscSectorSize)
+            throw new InvalidDataException($"Unexpected partition table block size 0x{blockSize:X}.");
+        uint numPartitions = BE32(table, 0x1C);
+        if (numPartitions > 30)
+            throw new InvalidDataException($"Disc image exceeds the supported partition count ({numPartitions}).");
 
-        uint partitionCount = BE32(toc, 0x1C);
-
-        // titleId (hex, uppercase, 16 chars) -> (titleKey, iv) derived from SI/GI tickets
-        var titleKeys = new Dictionary<string, (byte[] Key, byte[] Iv)>(StringComparer.Ordinal);
-
-        for (uint i = 0; i < partitionCount; i++)
+        int siIndex = -1, gmIndex = -1;
+        var addresses = new uint[numPartitions];
+        var names = new string[numPartitions];
+        for (int i = 0; i < numPartitions; i++)
         {
-            int entryOffset = PartitionTocOffset + (int)(i * PtocSize);
-            string identifier = ReadFixedAscii(toc, entryOffset, 0x19);
-            string name = ReadNullTerminatedAscii(toc, entryOffset, PtocSize);
-            uint rawOffset = BE32(toc, entryOffset + 0x20);
-            long partitionOffset = (long)rawOffset * 0x8000 - 0x10000;
+            int entryOffset = 0x800 + i * 0x80;
+            string name = ReadNullTerminatedAscii(table, entryOffset, 31);
+            uint address = BE32(table, entryOffset + 0x20);
+            addresses[i] = address;
+            names[i] = name;
 
-            var partition = new WuPartition { Identifier = identifier, Name = name, Offset = partitionOffset };
-            string typeCode = partition.TypeCode;
-            string hashName18 = name.Length >= 18 ? name[..18] : name;
-
-            byte[]? key = null;
-            byte[]? iv = null;
-            if (typeCode is "SI" or "UP" or "GI")
+            if (name.Length >= 2 && name[0] == 'S' && name[1] == 'I')
             {
-                key = _discKey;
-                iv = new byte[16];
+                if (siIndex != -1)
+                    throw new InvalidDataException("Disc image has multiple SI partitions — not supported.");
+                siIndex = i;
             }
-            else if (titleKeys.TryGetValue(hashName18, out var tk))
-            {
-                key = tk.Key;
-                iv = tk.Iv;
-            }
+            if (name.Length >= 2 && name[0] == 'G' && name[1] == 'M' && gmIndex == -1)
+                gmIndex = i;
+        }
 
-            if (key is null)
-            {
-                // No known key for this partition (e.g. an unrecognized GM before its SI has
-                // been scanned, or a genuinely unsupported partition type) — skip it.
-                Partitions.Add(partition);
-                continue;
-            }
+        if (siIndex == -1 || gmIndex == -1)
+            throw new InvalidDataException("Disc image has no SI or GM partition.");
 
-            partition.Key = key;
-            partition.Iv = iv!;
-            ParseFst(partition);
-            Partitions.Add(partition);
+        long siBase = (long)addresses[siIndex] * DiscSectorSize;
+        long gmBase = (long)addresses[gmIndex] * DiscSectorSize;
 
-            if (typeCode is "SI" or "GI")
-                CollectTitleKeysFromTicket(partition, keys, titleKeys);
+        var siHeader = ReadPartitionHeader(siBase);
+        var gmHeader = ReadPartitionHeader(gmBase);
+
+        SiVolume = OpenFST(siBase, siHeader, DiscKey);
+
+        string tikPath = $"{gmIndex:x2}/title.tik";
+        byte[]? tikData = ExtractFile(SiVolume, tikPath);
+        if (tikData is null)
+            throw new InvalidDataException($"Could not find \"{tikPath}\" in the SI partition.");
+
+        var ticket = TitleTicket.Parse(tikData);
+        byte[] gmTitleKey = ticket.DecryptTitleKey();
+
+        GmVolume = OpenFST(gmBase, gmHeader, gmTitleKey);
+        GmPartitionIndex = gmIndex;
+        GmPartitionName = names[gmIndex];
+    }
+
+    // -----------------------------------------------------------------
+    // Partition header (PLAINTEXT — not encrypted)
+    // -----------------------------------------------------------------
+
+    private readonly struct PartitionHeaderInfo
+    {
+        public readonly uint FstSize;
+        public readonly uint FstSector;
+        public readonly byte FstHashType;
+        public PartitionHeaderInfo(uint fstSize, uint fstSector, byte fstHashType)
+        {
+            FstSize = fstSize; FstSector = fstSector; FstHashType = fstHashType;
         }
     }
 
-    private void CollectTitleKeysFromTicket(WuPartition partition, WiiUKeyProvider keys,
-        Dictionary<string, (byte[] Key, byte[] Iv)> titleKeys)
+    private PartitionHeaderInfo ReadPartitionHeader(long partitionBaseOffset)
     {
-        foreach (var entry in partition.Entries)
-        {
-            if (entry.IsDirectory) continue;
-            if (!string.Equals(entry.EntryName, "TITLE.TIK", StringComparison.OrdinalIgnoreCase)) continue;
-
-            var cluster = partition.Clusters[entry.StartingCluster];
-            byte[] encryptedTitleKey = ReadVolumeEncryptedOffset(partition, cluster, entry.OffsetInCluster + 0x1BF, 16);
-            byte[] titleIdBytes = ReadVolumeEncryptedOffset(partition, cluster, entry.OffsetInCluster + 0x1DC, 8);
-
-            var iv = new byte[16];
-            titleIdBytes.CopyTo(iv, 0);
-
-            using var aes = Aes.Create();
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.None;
-            aes.Key = keys.CommonKey.ToArray();
-            aes.IV = iv;
-            var titleKey = new byte[16];
-            using var decryptor = aes.CreateDecryptor();
-            decryptor.TransformBlock(encryptedTitleKey, 0, 16, titleKey, 0);
-
-            string titleIdHexUpper = Convert.ToHexString(titleIdBytes); // uppercase hex, 16 chars
-            titleKeys["GM" + titleIdHexUpper] = (titleKey, iv);
-        }
+        var buf = new byte[0x60];
+        if (_wud.ReadData(buf, partitionBaseOffset) != buf.Length)
+            throw new InvalidDataException("Could not read partition header.");
+        uint magic = BE32(buf, 0);
+        if (magic != PartitionHeaderMagic)
+            throw new InvalidDataException("Partition header signature mismatch.");
+        uint fstSize = BE32(buf, 0x14);
+        uint fstSector = BE32(buf, 0x18);
+        byte fstHashType = buf[0x24];
+        return new PartitionHeaderInfo(fstSize, fstSector, fstHashType);
     }
 
-    // ---------------------------------------------------------------
-    // FST parsing
-    // ---------------------------------------------------------------
+    // -----------------------------------------------------------------
+    // FST parsing (mirrors FSTVolume::OpenFST + ProcessFST)
+    // -----------------------------------------------------------------
 
-    private void ParseFst(WuPartition partition)
+    private WuFstVolume OpenFST(long partitionBaseOffset, PartitionHeaderInfo header, byte[] partitionTitleKey)
     {
-        int ftSize = 0x8000;
-        byte[] block = ReadVolumeEncryptedOffset(partition, WiiUDecryptedAreaOffset + partition.Offset, ftSize);
-        if (!block.AsSpan(0, 4).SequenceEqual(FstSignature))
-            throw new InvalidDataException($"Partition {partition.Name} did not decrypt to a valid FST (signature mismatch) — wrong key?");
+        long fstOffset = (long)header.FstSector * DiscSectorSize;
+        uint fstSizePadded = (header.FstSize + 15u) & ~15u;
 
-        uint clusterCount = BE32(block, 8);
-        uint clusterTableStride = BE32(block, 4); // observed to equal the 0x20-byte cluster descriptor size
-        for (uint c = 0; c < clusterCount; c++)
+        var fstData = new byte[fstSizePadded];
+        if (_wud.ReadData(fstData, partitionBaseOffset + fstOffset) != fstData.Length)
+            throw new InvalidDataException("Could not read FST data.");
+
+        // FST is decrypted as ONE continuous CBC(zero IV) pass over the whole blob
+        AesCbcDecryptInPlace(fstData, fstData.Length, partitionTitleKey, new byte[16]);
+
+        uint magic = BE32(fstData, 0);
+        if (magic != FstMagic)
+            throw new InvalidDataException("FST signature mismatch — wrong key, or wrong fstSector/fstSize?");
+        uint offsetFactor = BE32(fstData, 4);
+        uint numCluster = BE32(fstData, 8);
+        if (numCluster >= 0x1000)
+            throw new InvalidDataException("FST cluster count out of range.");
+
+        var volume = new WuFstVolume
         {
-            int off = 0x20 + (int)(0x20 * c);
-            long clusterStart = (long)BE32(block, off) * 0x8000;
-            var cluster = new WuCluster
+            PartitionBaseOffset = partitionBaseOffset,
+            OffsetFactor = offsetFactor,
+            PartitionTitleKey = partitionTitleKey,
+        };
+
+        int clusterTableOffset = 0x20;
+        for (int i = 0; i < numCluster; i++)
+        {
+            int off = clusterTableOffset + i * 0x20;
+            uint clusterOffsetUnits = BE32(fstData, off);
+            uint clusterSizeUnits = BE32(fstData, off + 4);
+            byte hashMode = fstData[off + 0x14];
+            volume.Clusters.Add(new WuFstCluster
             {
-                Offset = clusterStart > 0 ? clusterStart - 0x8000 : 0,
-                Size = (long)BE32(block, off + 4) * 0x8000,
-                Unknown1 = BE32(block, off + 0x10),
-                Unknown2 = BE32(block, off + 0x14),
-            };
-            partition.Clusters.Add(cluster);
+                Offset = (long)clusterOffsetUnits * DiscSectorSize,
+                Size = (long)clusterSizeUnits * DiscSectorSize,
+                HashMode = hashMode,
+            });
         }
 
-        long entriesOffset = (long)clusterTableStride * clusterCount + 0x20;
+        int fileTableOffset = clusterTableOffset + (int)numCluster * 0x20;
+        if (fileTableOffset + 0x10 > fstData.Length)
+            throw new InvalidDataException("FST file table is out of bounds.");
 
-        WuFstEntry ReadEntry(ReadOnlySpan<byte> raw)
+        uint rootTypeAndNameOffset = BE32(fstData, fileTableOffset);
+        bool rootIsDir = ((rootTypeAndNameOffset >> 24) & 0x01) != 0;
+        uint numFileEntries = BE32(fstData, fileTableOffset + 8); // root's dir end index == total entry count
+        if (!rootIsDir || numFileEntries == 0 || fileTableOffset + (long)numFileEntries * 0x10 > fstData.Length)
+            throw new InvalidDataException("FST root entry is invalid.");
+
+        int nameTableOffset = fileTableOffset + (int)numFileEntries * 0x10;
+        int nameTableLength = (int)header.FstSize - nameTableOffset; // names run to the true (unpadded) FST size
+        if (nameTableLength < 0) nameTableLength = 0;
+
+        for (int i = 0; i < numFileEntries; i++)
         {
-            var e = new WuFstEntry();
-            if (raw[0] == 1)
+            int entryOffset = fileTableOffset + i * 0x10;
+            uint typeAndNameOffset = BE32(fstData, entryOffset);
+            bool isDir = ((typeAndNameOffset >> 24) & 0x01) != 0;
+            uint nameOffset = typeAndNameOffset & 0xFFFFFF;
+            uint offsetField = BE32(fstData, entryOffset + 4);
+            uint sizeField = BE32(fstData, entryOffset + 8);
+            ushort clusterIndex = BinaryPrimitives.ReadUInt16BigEndian(fstData.AsSpan(entryOffset + 0xE, 2));
+
+            string name = i == 0
+                ? "" // root has no meaningful name
+                : ReadNullTerminatedAscii(fstData, nameTableOffset + (int)nameOffset, Math.Max(0, nameTableLength - (int)nameOffset));
+
+            var entry = new WuFstEntry { IsDirectory = isDir, Name = name };
+            if (isDir)
             {
-                e.IsDirectory = true;
-                e.LastRowInDir = BinaryPrimitives.ReadUInt32BigEndian(raw.Slice(8, 4));
+                entry.ParentDirIndex = (int)offsetField;
+                entry.DirEndIndex = (int)sizeField;
             }
             else
             {
-                e.IsDirectory = false;
-                e.Size = BinaryPrimitives.ReadUInt32BigEndian(raw.Slice(8, 4));
+                entry.FileOffsetField = offsetField;
+                entry.FileSize = sizeField;
+                entry.ClusterIndex = clusterIndex;
             }
-            e.NameOffset = BinaryPrimitives.ReadUInt32BigEndian(raw[..4]) & 0x00FFFFFF;
-            e.OffsetInCluster = (long)BinaryPrimitives.ReadUInt32BigEndian(raw.Slice(4, 4)) << 5;
-            e.Unknown = BinaryPrimitives.ReadUInt16BigEndian(raw.Slice(0xC, 2));
-            e.StartingCluster = BinaryPrimitives.ReadUInt16BigEndian(raw.Slice(0xE, 2));
-            return e;
+            volume.Entries.Add(entry);
         }
 
-        EnsureFstLoaded(partition, ref block, ref ftSize, entriesOffset + 16);
-        var root = ReadEntry(block.AsSpan((int)entriesOffset, 16));
-        uint totalEntries = root.LastRowInDir;
-        long nameTableOffset = entriesOffset + totalEntries * 16;
+        return volume;
+    }
 
-        EnsureFstLoaded(partition, ref block, ref ftSize, nameTableOffset + root.NameOffset + 0x200);
-        root.EntryName = ReadNullTerminatedAscii(block, (int)(nameTableOffset + root.NameOffset), 0x200);
-        partition.Entries.Add(root);
+    // -----------------------------------------------------------------
+    // Path lookup / enumeration
+    // -----------------------------------------------------------------
 
-        for (uint j = 1; j < totalEntries; j++)
+    private static int? FindEntryIndexByPath(WuFstVolume volume, string path)
+    {
+        var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        int currentIndex = 0;
+        int searchStart = 1;
+        int searchEnd = volume.Entries.Count > 0 ? volume.Entries[0].DirEndIndex : 0;
+
+        foreach (var part in parts)
         {
-            long currentEntryOffset = entriesOffset + j * 16;
-            EnsureFstLoaded(partition, ref block, ref ftSize, currentEntryOffset + 16);
-            var entry = ReadEntry(block.AsSpan((int)currentEntryOffset, 16));
-
-            long currentNameOffset = nameTableOffset + entry.NameOffset;
-            EnsureFstLoaded(partition, ref block, ref ftSize, currentNameOffset + 0x200);
-            entry.EntryName = ReadNullTerminatedAscii(block, (int)currentNameOffset, 0x200);
-
-            partition.Entries.Add(entry);
+            int? found = null;
+            int idx = searchStart;
+            while (idx < searchEnd)
+            {
+                if (string.Equals(volume.Entries[idx].Name, part, StringComparison.OrdinalIgnoreCase))
+                {
+                    found = idx;
+                    break;
+                }
+                idx = volume.Entries[idx].IsDirectory ? volume.Entries[idx].DirEndIndex : idx + 1;
+            }
+            if (found is null) return null;
+            currentIndex = found.Value;
+            if (!volume.Entries[currentIndex].IsDirectory) { searchStart = searchEnd = currentIndex; continue; }
+            searchStart = currentIndex + 1;
+            searchEnd = volume.Entries[currentIndex].DirEndIndex;
         }
+        return currentIndex;
     }
 
-    private void EnsureFstLoaded(WuPartition partition, ref byte[] block, ref int ftSize, long neededSize)
+    /// <summary>Enumerates every file in the volume as (fullPath, entryIndex).</summary>
+    public static IEnumerable<(string Path, int EntryIndex)> EnumerateFiles(WuFstVolume volume)
     {
-        while (neededSize > ftSize)
+        if (volume.Entries.Count == 0) yield break;
+
+        var pathStack = new Stack<(int EndIndex, string Path)>();
+        pathStack.Push((volume.Entries[0].DirEndIndex, ""));
+
+        int i = 1;
+        while (i < volume.Entries.Count)
         {
-            ftSize += 0x8000;
-            block = ReadVolumeEncryptedOffset(partition, WiiUDecryptedAreaOffset + partition.Offset, ftSize);
-        }
-    }
-
-    // ---------------------------------------------------------------
-    // Directory tree walking (mirrors create_directory/extract_dir)
-    // ---------------------------------------------------------------
-
-    /// <summary>Enumerates every file entry in a partition as (fullVirtualPath, entry).</summary>
-    public IEnumerable<(string Path, WuFileEntry File)> EnumerateFiles(WuPartition partition)
-    {
-        if (partition.Entries.Count == 0) yield break;
-        int index = 0;
-        foreach (var item in WalkDirectory(partition, ref index, ""))
-            yield return item;
-    }
-
-    private IEnumerable<(string, WuFileEntry)> WalkDirectory(WuPartition partition, ref int index, string parentPath)
-    {
-        var dirEntry = partition.Entries[index];
-        string dirPath = parentPath.Length == 0 ? dirEntry.EntryName : $"{parentPath}/{dirEntry.EntryName}";
-        uint lastRow = dirEntry.LastRowInDir;
-        index++;
-
-        var results = new List<(string, WuFileEntry)>();
-        while (index < lastRow)
-        {
-            var entry = partition.Entries[index];
+            while (pathStack.Count > 0 && i >= pathStack.Peek().EndIndex)
+                pathStack.Pop();
+            string parentPath = pathStack.Count > 0 ? pathStack.Peek().Path : "";
+            var entry = volume.Entries[i];
+            string fullPath = parentPath.Length == 0 ? entry.Name : $"{parentPath}/{entry.Name}";
             if (entry.IsDirectory)
             {
-                int localIndex = index;
-                foreach (var sub in WalkDirectory(partition, ref localIndex, dirPath))
-                    results.Add(sub);
-                index = localIndex;
+                pathStack.Push((entry.DirEndIndex, fullPath));
+                i++;
             }
             else
             {
-                results.Add(($"{dirPath}/{entry.EntryName}", new WuFileEntry
-                {
-                    ParentPath = dirPath,
-                    FileName = entry.EntryName,
-                    Partition = partition,
-                    EntryIndex = index
-                }));
-                index++;
+                yield return (fullPath, i);
+                i++;
             }
         }
-        return results;
     }
 
-    // ---------------------------------------------------------------
-    // File extraction (mirrors extract_file / extract_file_hashed / extract_file_unhashed)
-    // ---------------------------------------------------------------
-
-    public void ExtractFileTo(WuFileEntry file, Stream destination)
+    /// <summary>Extracts a whole file by path (e.g. "00/title.tik") and returns its bytes, or null if not found.</summary>
+    public byte[]? ExtractFile(WuFstVolume volume, string path)
     {
-        var partition = file.Partition;
-        var entry = partition.Entries[file.EntryIndex];
-        var cluster = partition.Clusters[entry.StartingCluster];
+        var index = FindEntryIndexByPath(volume, path);
+        if (index is null || volume.Entries[index.Value].IsDirectory) return null;
+        var entry = volume.Entries[index.Value];
+        var buffer = new byte[entry.FileSize];
+        ReadFile(volume, index.Value, 0, buffer, 0, buffer.Length);
+        return buffer;
+    }
 
-        Span<byte> firstIv = stackalloc byte[16];
-        // cluster id, byte-swapped into the first two IV bytes (matches original's
-        // little-endian reinterpretation of the big-endian-stored StartingCluster)
-        firstIv[0] = (byte)(entry.StartingCluster & 0xFF);
-        firstIv[1] = (byte)(entry.StartingCluster >> 8);
+    public void ExtractFileTo(WuFstVolume volume, int entryIndex, Stream destination)
+    {
+        var entry = volume.Entries[entryIndex];
+        const int chunkSize = 1024 * 1024;
+        var buffer = new byte[Math.Min(chunkSize, entry.FileSize == 0 ? 1 : entry.FileSize)];
+        long offset = 0;
+        while (offset < entry.FileSize)
+        {
+            int toRead = (int)Math.Min(buffer.Length, entry.FileSize - offset);
+            int got = ReadFile(volume, entryIndex, offset, buffer, 0, toRead);
+            if (got <= 0) break;
+            destination.Write(buffer, 0, got);
+            offset += got;
+        }
+    }
 
-        bool isHashed = entry.Unknown == 0x0400 || entry.Unknown == 0x0040
-            || (cluster.Unknown1 == 0x00000400 && cluster.Unknown2 == 0x02000000);
+    // -----------------------------------------------------------------
+    // File content reading (mirrors ReadFile_HashModeRaw / ReadFile_HashModeHashed)
+    // -----------------------------------------------------------------
 
-        if (isHashed)
-            ExtractHashed(partition, cluster, entry, firstIv, destination);
+    private int ReadFile(WuFstVolume volume, int entryIndex, long readOffset, byte[] dest, int destOffset, int size)
+    {
+        var entry = volume.Entries[entryIndex];
+        var cluster = volume.Clusters[entry.ClusterIndex];
+        return cluster.HashMode switch
+        {
+            2 => ReadFileHashed(volume, entry, cluster, readOffset, dest, destOffset, size),
+            _ => ReadFileRaw(volume, entry, cluster, readOffset, dest, destOffset, size),
+        };
+    }
+
+    private int ReadFileRaw(WuFstVolume volume, WuFstEntry entry, WuFstCluster cluster, long readOffset, byte[] dest, int destOffset, int size)
+    {
+        if (readOffset >= entry.FileSize) return 0;
+        long remaining = entry.FileSize - readOffset;
+        int actualSize = (int)Math.Min(size, remaining);
+
+        long absFileOffset = entry.FileOffsetField * volume.OffsetFactor + readOffset;
+        int totalRead = 0;
+        while (totalRead < actualSize)
+        {
+            long blockIndex = absFileOffset / WuFstVolume.SectorSize;
+            long blockOffsetWithin = absFileOffset % WuFstVolume.SectorSize;
+            byte[] block = GetDecryptedRawBlock(volume, entry.ClusterIndex, cluster, blockIndex);
+            int copyLen = (int)Math.Min(actualSize - totalRead, WuFstVolume.SectorSize - blockOffsetWithin);
+            Array.Copy(block, blockOffsetWithin, dest, destOffset + totalRead, copyLen);
+            totalRead += copyLen;
+            absFileOffset += copyLen;
+        }
+        return totalRead;
+    }
+
+    private byte[] GetDecryptedRawBlock(WuFstVolume volume, int clusterIndex, WuFstCluster cluster, long blockIndex)
+    {
+        long absolute = volume.PartitionBaseOffset + cluster.Offset + blockIndex * WuFstVolume.SectorSize;
+        var block = new byte[WuFstVolume.SectorSize];
+        if (_wud.ReadData(block, absolute) != block.Length)
+            throw new InvalidDataException("Failed to read raw FST content block.");
+
+        byte[] iv = new byte[16];
+        if (blockIndex == 0)
+        {
+            iv[0] = (byte)(clusterIndex >> 8);
+            iv[1] = (byte)(clusterIndex & 0xFF);
+        }
         else
-            ExtractUnhashed(partition, cluster, entry, firstIv, destination);
-    }
-
-    private void ExtractUnhashed(WuPartition partition, WuCluster cluster, WuFstEntry entry, ReadOnlySpan<byte> iv, Stream destination)
-    {
-        long size = entry.Size;
-        long fileOffset = entry.OffsetInCluster;
-        var ivArr = iv.ToArray();
-
-        while (size > 0)
         {
-            long blockNumber = fileOffset / 0x8000;
-            long blockOffset = fileOffset % 0x8000;
-            long readOffset = WiiUDecryptedAreaOffset + partition.Offset + cluster.Offset + blockNumber * 0x8000;
-
-            byte[] decrypted = ReadEncryptedOffsetWithIv(partition.Key, ivArr, readOffset, 0x8000);
-
-            long maxCopy = 0x8000 - blockOffset;
-            long copySize = Math.Min(size, maxCopy);
-            destination.Write(decrypted, (int)blockOffset, (int)copySize);
-
-            size -= copySize;
-            fileOffset += copySize;
+            // IV = last 16 bytes of the PRECEDING block's ciphertext (seekable CBC chaining)
+            if (_wud.ReadData(iv, absolute - 16) != 16)
+                throw new InvalidDataException("Failed to read IV for raw FST content block.");
         }
+
+        AesCbcDecryptInPlace(block, block.Length, volume.PartitionTitleKey, iv);
+        return block;
     }
 
-    private void ExtractHashed(WuPartition partition, WuCluster cluster, WuFstEntry entry, ReadOnlySpan<byte> iv, Stream destination)
+    private int ReadFileHashed(WuFstVolume volume, WuFstEntry entry, WuFstCluster cluster, long readOffset, byte[] dest, int destOffset, int size)
     {
-        const long blockSize = 0xFC00;
-        long size = entry.Size;
-        long fileOffset = entry.OffsetInCluster;
-        var ivArr = iv.ToArray();
-        var zeroIv = new byte[16];
+        const long BlockFileSize = 0xFC00;
+
+        if (readOffset >= entry.FileSize) return 0;
+        long remaining = entry.FileSize - readOffset;
+        int actualSize = (int)Math.Min(size, remaining);
+
+        long fileReadOffset = entry.FileOffsetField * volume.OffsetFactor + readOffset;
+        long blockIndex = fileReadOffset / BlockFileSize;
+        long offsetWithinBlock = fileReadOffset % BlockFileSize;
+
+        int totalRead = 0;
+        while (totalRead < actualSize)
+        {
+            byte[] fileData = GetDecryptedHashedBlockFileData(volume, entry.ClusterIndex, cluster, blockIndex);
+            int copyLen = (int)Math.Min(actualSize - totalRead, BlockFileSize - offsetWithinBlock);
+            Array.Copy(fileData, offsetWithinBlock, dest, destOffset + totalRead, copyLen);
+            totalRead += copyLen;
+            blockIndex++;
+            offsetWithinBlock = 0;
+        }
+        return totalRead;
+    }
+
+    private byte[] GetDecryptedHashedBlockFileData(WuFstVolume volume, int clusterIndex, WuFstCluster cluster, long blockIndex)
+    {
+        const int BlockSize = 0x10000;
+        const int BlockHashSize = 0x400;
+        const int BlockFileSize = 0xFC00;
+
+        long absolute = volume.PartitionBaseOffset + cluster.Offset + blockIndex * BlockSize;
+        var block = new byte[BlockSize];
+        if (_wud.ReadData(block, absolute) != block.Length)
+            throw new InvalidDataException("Failed to read hashed FST content block.");
+
+        var hashPart = block.AsSpan(0, BlockHashSize).ToArray();
+        AesCbcDecryptInPlace(hashPart, BlockHashSize, volume.PartitionTitleKey, new byte[16]);
+
+        int h0Index = (int)(blockIndex % 16);
+        var h0 = hashPart.AsSpan(h0Index * 20, 20).ToArray();
+        var iv = h0.AsSpan(0, 16).ToArray();
+
+        var fileData = block.AsSpan(BlockHashSize, BlockFileSize).ToArray();
+        AesCbcDecryptInPlace(fileData, BlockFileSize, volume.PartitionTitleKey, iv);
+
         using var sha1 = SHA1.Create();
+        var computed = sha1.ComputeHash(fileData);
+        if (!computed.AsSpan().SequenceEqual(h0.AsSpan(0, 20)))
+            throw new InvalidDataException($"H0 hash mismatch in hashed content (cluster {clusterIndex}, block {blockIndex}) — corrupt dump or wrong key.");
 
-        while (size > 0)
-        {
-            long blockNumber = fileOffset / blockSize;
-            long blockOffset = fileOffset - blockNumber * blockSize;
-            long ivBlock = blockNumber & 0xF;
-
-            long readOffset = WiiUDecryptedAreaOffset + partition.Offset + cluster.Offset + blockNumber * 0x10000;
-
-            byte[] header = ReadEncryptedOffsetWithIv(partition.Key, ivArr, readOffset, 0x400);
-
-            var clusterIv = new byte[16];
-            var h0 = new byte[20];
-            Array.Copy(header, (int)(ivBlock * 0x14), clusterIv, 0, 16);
-            Array.Copy(header, (int)(ivBlock * 0x14), h0, 0, 20);
-            if (ivBlock == 0)
-                clusterIv[1] ^= (byte)entry.StartingCluster;
-
-            byte[] decrypted = ReadEncryptedOffsetWithIv(partition.Key, clusterIv, readOffset + 0x400, (int)blockSize);
-
-            var computedHash = sha1.ComputeHash(decrypted);
-            if (ivBlock == 0)
-                computedHash[1] ^= (byte)entry.StartingCluster;
-            if (!computedHash.AsSpan().SequenceEqual(h0))
-                throw new InvalidDataException($"SHA-1 hash mismatch while extracting \"{entry.EntryName}\" — corrupt dump or wrong key.");
-
-            long maxCopy = blockSize - blockOffset;
-            long copySize = Math.Min(size, maxCopy);
-            destination.Write(decrypted, (int)blockOffset, (int)copySize);
-
-            size -= copySize;
-            fileOffset += copySize;
-        }
+        return fileData;
     }
 
-    // ---------------------------------------------------------------
-    // Low-level encrypted reads
-    // ---------------------------------------------------------------
+    // -----------------------------------------------------------------
+    // Small helpers
+    // -----------------------------------------------------------------
 
-    private byte[] ReadEncryptedOffset(byte[] key, long offset, int count)
-        => ReadEncryptedOffsetWithIv(key, new byte[16], offset, count);
-
-    private byte[] ReadEncryptedOffsetWithIv(byte[] key, byte[] iv, long offset, int count)
+    private static void AesCbcDecryptInPlace(byte[] data, int length, byte[] key, byte[] iv)
     {
-        var cipher = new byte[count];
-        int got = _wud.ReadData(cipher, offset);
-        if (got != count)
-            throw new EndOfStreamException($"Expected {count} bytes at offset 0x{offset:X}, got {got}.");
-
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
         aes.Key = key;
         aes.IV = iv;
-        var plain = new byte[count];
         using var decryptor = aes.CreateDecryptor();
-        decryptor.TransformBlock(cipher, 0, count, plain, 0);
-        return plain;
+        decryptor.TransformBlock(data, 0, length, data, 0);
     }
-
-    /// <summary>Reads and decrypts an arbitrary-length, arbitrary-offset span from a partition's
-    /// volume area, re-deriving each 0x8000 physical block independently (matches wudecrypt's
-    /// readVolumeEncryptedOffset: every block uses the SAME fixed IV, i.e. blocks are not chained).</summary>
-    private byte[] ReadVolumeEncryptedOffset(WuPartition partition, WuCluster cluster, long fileOffsetInCluster, int size)
-        => ReadVolumeEncryptedOffset(partition, WiiUDecryptedAreaOffset + partition.Offset + cluster.Offset, fileOffsetInCluster, size);
-
-    private byte[] ReadVolumeEncryptedOffset(WuPartition partition, long baseOffset, long fileOffset, int size)
-    {
-        var output = new byte[size];
-        int written = 0;
-        long remaining = size;
-        var zeroIv = new byte[16];
-
-        while (remaining > 0)
-        {
-            long blockNumber = fileOffset / 0x8000;
-            long blockOffset = fileOffset % 0x8000;
-            long readOffset = baseOffset + blockNumber * 0x8000;
-
-            byte[] decrypted = ReadEncryptedOffsetWithIv(partition.Key, zeroIv, readOffset, 0x8000);
-
-            long maxCopy = 0x8000 - blockOffset;
-            long copySize = Math.Min(remaining, maxCopy);
-            Array.Copy(decrypted, blockOffset, output, written, copySize);
-
-            remaining -= copySize;
-            written += (int)copySize;
-            fileOffset += copySize;
-        }
-        return output;
-    }
-
-    // convenience overload used for reading the partition table / FST itself (partition-less)
-    private byte[] ReadVolumeEncryptedOffset(WuPartition partition, long baseOffset, int size)
-        => ReadVolumeEncryptedOffset(partition, baseOffset, 0, size);
-
-    // ---------------------------------------------------------------
-    // Small helpers
-    // ---------------------------------------------------------------
 
     private static uint BE32(byte[] buffer, int offset) => BinaryPrimitives.ReadUInt32BigEndian(buffer.AsSpan(offset, 4));
 
-    private static string ReadFixedAscii(byte[] buffer, int offset, int length)
-        => Encoding.ASCII.GetString(buffer, offset, length);
-
     private static string ReadNullTerminatedAscii(byte[] buffer, int offset, int maxLength)
     {
+        if (offset < 0 || offset >= buffer.Length || maxLength <= 0) return "";
         int len = 0;
         while (len < maxLength && offset + len < buffer.Length && buffer[offset + len] != 0) len++;
         return Encoding.ASCII.GetString(buffer, offset, len);

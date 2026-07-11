@@ -20,12 +20,9 @@
 //   writer.StartNewFile("0005000e10102000_v32/code/main.rpx");
 //   writer.AppendData(rpxBytes);
 //   // ... repeat StartNewFile/AppendData for every file in the title dump ...
-//   writer.Finalize();
+//   writer.FinalizeArchive();
 
-using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using ZstdSharp;
@@ -171,7 +168,7 @@ public sealed class WuaWriter : IDisposable
         _inputOffset += (ulong)dataLen;
     }
 
-    public void Finalize()
+    public void FinalizeArchive()
     {
         if (_finalized) throw new InvalidOperationException("Already finalized.");
         _finalized = true;
@@ -260,20 +257,22 @@ public sealed class WuaWriter : IDisposable
         _secNames = (_outputOffset, 0);
         _nodeNameOffsets.Clear();
         uint currentOffset = 0;
+        Span<byte> header = stackalloc byte[2];
         foreach (var name in _nodeNames)
         {
             _nodeNameOffsets.Add(currentOffset);
             var bytes = Encoding.UTF8.GetBytes(name.Length > 0x7FFF ? name[..0x7FFF] : name);
             if (bytes.Length >= 0x80)
             {
-                Span<byte> header = [(byte)((bytes.Length & 0x7F) | 0x80), (byte)(bytes.Length >> 7)];
+                header[0] = (byte)((bytes.Length & 0x7F) | 0x80);
+                header[1] = (byte)(bytes.Length >> 7);
                 OutputData(header);
                 currentOffset += 2;
             }
             else
             {
-                Span<byte> header = [(byte)(bytes.Length & 0x7F)];
-                OutputData(header);
+                header[0] = (byte)(bytes.Length & 0x7F);
+                OutputData(header[..1]);
                 currentOffset += 1;
             }
             OutputData(bytes);

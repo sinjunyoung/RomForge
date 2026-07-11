@@ -1,85 +1,68 @@
-﻿// TitleTicket.cs
+// TitleTicket.cs
 //
-// Parses a Wii U title.tik (ticket) file and derives the real (decrypted) title key
-// using the common key from WiiUKeyProvider.
+// C# port of Cemu's NCrypto::ETicketParser (src/Cemu/ncrypto/ncrypto.cpp / .h),
+// verified directly against the cemu-project/Cemu source.
 //
-// Ticket layout (offsets relative to start of a standard v0 ticket, signature type
-// 0x10001 / RSA-2048 — the type used by virtually all released Wii U titles):
-//   0x000            : signature type (uint32, big-endian)
-//   0x004            : signature (0x100 bytes) + padding -> header total 0x140 bytes
-//   0x1BF            : encrypted title key (16 bytes)
-//   0x1DC            : title ID (8 bytes, big-endian) — also used as the AES-CBC IV
-//                       (IV = titleId || 8 zero bytes)
+// Ticket layout (offsets confirmed against Cemu's ETicketBody struct):
+//   0x1BF : encryptedTitleKey (16 bytes)
+//   0x1DC : titleIdHigh (uint32 BE)
+//   0x1E0 : titleIdLow  (uint32 BE)
+//   (together, titleIdHigh<<32 | titleIdLow forms the 8-byte big-endian title ID)
 //
-// Source: publicly documented ticket format (WiiBrew "Ticket" page and Wii U CDN/NUS
-// tooling that follows the same layout). No secret key material is embedded here —
-// the common key must come from WiiUKeyProvider, supplied by the user.
+// The Wii U common key used to decrypt the title key is hardcoded directly in Cemu's own
+// open-source repository (ncrypto.cpp, ETicketParser::GetTitleKey) — it is not something
+// RomForge needs to ask the user for. This class simply mirrors that.
 
-using System;
 using System.Buffers.Binary;
-using System.IO;
 using System.Security.Cryptography;
 
 namespace WiiU.Core.Services;
 
 public sealed class TitleTicket
 {
-    private const uint ExpectedSignatureType = 0x10001; // RSA-2048, the layout this class assumes
     private const int EncryptedTitleKeyOffset = 0x1BF;
-    private const int TitleIdOffset = 0x1DC;
+    private const int TitleIdHighOffset = 0x1DC;
+    private const int TitleIdLowOffset = 0x1E0;
+
+    // Same constant Cemu's open-source code hardcodes (src/Cemu/ncrypto/ncrypto.cpp).
+    private static readonly byte[] WiiUCommonKey =
+    {
+        0xD7, 0xB0, 0x04, 0x02, 0x65, 0x9B, 0xA2, 0xAB,
+        0xD2, 0xCB, 0x0D, 0xB2, 0x7F, 0xA2, 0xB6, 0x56
+    };
 
     public ulong TitleId { get; }
-    public byte[] TitleIdBytes { get; }
     public byte[] EncryptedTitleKey { get; }
 
-    private TitleTicket(ulong titleId, byte[] titleIdBytes, byte[] encryptedTitleKey)
+    private TitleTicket(ulong titleId, byte[] encryptedTitleKey)
     {
         TitleId = titleId;
-        TitleIdBytes = titleIdBytes;
         EncryptedTitleKey = encryptedTitleKey;
     }
 
-    public static TitleTicket ParseFile(string path)
+    public static TitleTicket Parse(ReadOnlySpan<byte> ticketData)
     {
-        using var fs = File.OpenRead(path);
-        return Parse(fs);
+        if (ticketData.Length < TitleIdLowOffset + 4)
+            throw new InvalidDataException("Ticket data is too short.");
+
+        var encryptedTitleKey = ticketData.Slice(EncryptedTitleKeyOffset, 16).ToArray();
+        uint titleIdHigh = BinaryPrimitives.ReadUInt32BigEndian(ticketData.Slice(TitleIdHighOffset, 4));
+        uint titleIdLow = BinaryPrimitives.ReadUInt32BigEndian(ticketData.Slice(TitleIdLowOffset, 4));
+        ulong titleId = ((ulong)titleIdHigh << 32) | titleIdLow;
+
+        return new TitleTicket(titleId, encryptedTitleKey);
     }
 
-    public static TitleTicket Parse(Stream tikStream)
-    {
-        Span<byte> sigTypeBuf = stackalloc byte[4];
-        tikStream.ReadExactly(sigTypeBuf);
-        uint sigType = BinaryPrimitives.ReadUInt32BigEndian(sigTypeBuf);
-        if (sigType != ExpectedSignatureType)
-        {
-            throw new NotSupportedException(
-                $"Unexpected ticket signature type 0x{sigType:X}. This ticket uses a different " +
-                "signature scheme than the standard RSA-2048 layout this parser assumes, so the " +
-                "fixed offsets (0x1BF/0x1DC) may not apply. Needs a variable-header-size implementation.");
-        }
-
-        Span<byte> titleKeyBuf = stackalloc byte[16];
-        tikStream.Position = EncryptedTitleKeyOffset;
-        tikStream.ReadExactly(titleKeyBuf);
-
-        Span<byte> titleIdBuf = stackalloc byte[8];
-        tikStream.Position = TitleIdOffset;
-        tikStream.ReadExactly(titleIdBuf);
-
-        ulong titleId = BinaryPrimitives.ReadUInt64BigEndian(titleIdBuf);
-        return new TitleTicket(titleId, titleIdBuf.ToArray(), titleKeyBuf.ToArray());
-    }
-
-    /// <summary>Decrypts and returns the real 16-byte title key using the Wii U common key.</summary>
-    public byte[] DecryptTitleKey(WiiUKeyProvider keys)
+    /// <summary>Decrypts and returns the real 16-byte title key, using the hardcoded Wii U common key.</summary>
+    public byte[] DecryptTitleKey()
     {
         Span<byte> iv = stackalloc byte[16];
-        TitleIdBytes.CopyTo(iv); // first 8 bytes = title ID, remaining 8 bytes stay zero
+        BinaryPrimitives.WriteUInt64BigEndian(iv, TitleId);
 
         using var aes = Aes.Create();
         aes.Mode = CipherMode.CBC;
         aes.Padding = PaddingMode.None;
-        aes.Key = keys.CommonKey.ToArray();
+        aes.Key = WiiUCommonKey;
         aes.IV = iv.ToArray();
 
         using var decryptor = aes.CreateDecryptor();
@@ -88,7 +71,5 @@ public sealed class TitleTicket
         return titleKey;
     }
 
-    /// <summary>16-digit lowercase hex title ID, e.g. "0005000e10102000" — matches the .wua
-    /// subfolder naming convention (titleId + "_v" + version).</summary>
     public string TitleIdHex => TitleId.ToString("x16");
 }

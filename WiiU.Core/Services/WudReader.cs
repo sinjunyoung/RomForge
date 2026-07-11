@@ -8,7 +8,9 @@
 // Note: unlike the ZArchive/.wua format, the .wud/.wux header and index table are stored
 // in NATIVE LITTLE-ENDIAN, matching the original Windows/MSVC tool.
 
+using System;
 using System.Buffers.Binary;
+using System.IO;
 
 namespace WiiU.Core.Services;
 
