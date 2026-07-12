@@ -158,7 +158,7 @@ public static class NspNameBuilder
             return string.Empty;
 
         foreach (char c in _invalidChars)
-            name = name.Replace(c, ' ');
+            name = name.Replace(c.ToString(), string.Empty);
 
         return name.Trim();
     }

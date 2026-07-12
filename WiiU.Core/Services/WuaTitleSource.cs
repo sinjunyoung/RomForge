@@ -42,7 +42,7 @@ public sealed class WuaTitleSource : ITitleSource
         }
 
         if (dirNames.Count == 0) 
-            dirNames.Add("");
+            dirNames.Add(string.Empty);
 
         var shared = new RefCountedReader(reader, dirNames.Count);
 

@@ -9,6 +9,14 @@ public sealed class UnpackService
 
     public static IReadOnlyList<ITitleSource> OpenAll(string inputPath, string? keysTxtPath = null)
     {
+        if (Directory.Exists(inputPath))
+        {
+            if (WupTitleSource.LooksLikeWupFolder(inputPath))
+                return [new WupTitleSource(inputPath)];
+
+            throw new NotSupportedException($"Unsupported folder input: \"{inputPath}\". Expected a WUP folder containing title.tmd/title.tik.");
+        }
+
         if (!File.Exists(inputPath))
             throw new FileNotFoundException($"Input file not found: {inputPath}", inputPath);
 

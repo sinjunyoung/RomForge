@@ -1,17 +1,19 @@
 ﻿using Common.WPF.ViewModels;
+using SixLabors.ImageSharp.PixelFormats;
+using System.IO;
 using System.Windows.Media;
 
 namespace RomForge.Core.Models.WiiU;
 
-public class TitleInputEntry(string filePath) : FileItemBase(filePath)
+public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 {
     public bool IsFolder { get; init; }
 
     public int SubTitleIndex { get; init; }
 
-    public string Kind { get; init; } = "알수없음";
+    public string Kind { get; init; } = GuessKind(titleIdHex);
 
-    public string TitleIdHex { get; init; } = "0000000000000000";
+    public string TitleIdHex { get; init; } = titleIdHex;
 
     public int TitleVersion { get; init; }
 
@@ -21,6 +23,13 @@ public class TitleInputEntry(string filePath) : FileItemBase(filePath)
 
     public ImageSource? Icon { get; init; }
 
+    private string? _filePath;
+    public string FilePath
+    {
+        get => _filePath ?? filePath;
+        set { _filePath = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayName)); }
+    }
+
     private string? _patchPath;
     public string? PatchPath
     {
@@ -28,22 +37,20 @@ public class TitleInputEntry(string filePath) : FileItemBase(filePath)
         set { _patchPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(PatchDisplay)); }
     }
 
-    public string DisplayName => string.IsNullOrWhiteSpace(TitleName) ? SourceDisplay : TitleName!;
+    public string DisplayName => string.IsNullOrWhiteSpace(TitleName) ? FilePath : TitleName!;
 
     public string TitleIdVersionDisplay => $"{TitleIdHex}_v{TitleVersion}";
 
-    public string SourceDisplay => FilePath;
-
     public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
 
-    public static string GuessKind(string titleIdHex)
+    private static string GuessKind(string titleIdHex)
     {
         if (titleIdHex.Length < 8)
             return "알수없음";
 
         return titleIdHex[..8].ToLowerInvariant() switch
         {
-            "00050000" => "베이스",
+            "00050000" => "본편",
             "0005000e" => "업데이트",
             "0005000c" => "DLC",
             _ => "알수없음",
@@ -56,7 +63,7 @@ public class TitleInputEntry(string filePath) : FileItemBase(filePath)
         {
             return Kind switch
             {
-                "베이스" => new SolidColorBrush(Color.FromRgb(0x4F, 0x8E, 0xF7)),
+                "본편" => new SolidColorBrush(Color.FromRgb(0x4F, 0x8E, 0xF7)),
                 "업데이트" => new SolidColorBrush(Color.FromRgb(0x3D, 0xD6, 0x8C)),
                 "DLC" => new SolidColorBrush(Color.FromRgb(0xC9, 0x7B, 0xF7)),
                 _ => new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x6A)),
@@ -64,6 +71,31 @@ public class TitleInputEntry(string filePath) : FileItemBase(filePath)
         }
     }
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.ETC.FileSize.FormatSize(bytes);
+    public string Size
+    {
+        get
+        {
+            try
+            {
+                long size = IsFolder
+                    ? GetDirectorySize(new DirectoryInfo(FilePath))
+                    : new FileInfo(FilePath).Length;
 
+                return PickPack.Disk.ETC.FileSize.FormatSize(size);
+            }
+            catch
+            {
+                return "0";
+            }
+        }
+    }
+
+    private static long GetDirectorySize(DirectoryInfo directoryInfo)
+    {
+        long size = 0;
+        foreach (FileInfo file in directoryInfo.EnumerateFiles("*", SearchOption.AllDirectories))
+            size += file.Length;
+
+        return size;
+    }
 }

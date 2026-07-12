@@ -44,10 +44,10 @@ namespace RomForge.Core.Services.WiiU
 
         #endregion
 
-        /// <param name="keysTxtPath">wud/wux 입력일 때 디스크키 후보를 찾기 위해 필요. wua만 다룰 때는 생략 가능.</param>
         public static async Task<ExtractorMetadata> Extract(string filePath, string? keysTxtPath = null)
         {
-            if (_cache.TryGetValue(filePath, out var cached)) return cached;
+            if (_cache.TryGetValue(filePath, out var cached)) 
+                return cached;
 
             var ext = Path.GetExtension(filePath).ToLower();
             var metadata = ext switch
@@ -62,15 +62,48 @@ namespace RomForge.Core.Services.WiiU
             return metadata!;
         }
 
-        /// <summary>
-        /// 이미 언팩된 폴더(예: RepackTab에서 폴더로 추가한 타이틀)에서 meta.xml / iconTex.tga를 직접 읽어 메타데이터를 뽑는다.
-        /// 언팩된 폴더는 "{folder}/meta/meta.xml", "{folder}/meta/iconTex.tga" 형태를 가정한다.
-        /// </summary>
+        public static ExtractorMetadata? ExtractFromTitleSource(ITitleSource source)
+        {
+            try
+            {
+                var metadata = new ExtractorMetadata();
+
+                try
+                {
+                    using var metaXmlStream = source.OpenRead("meta/meta.xml");
+                    using var ms = new MemoryStream();
+                    metaXmlStream.CopyTo(ms);
+                    ParseMetaXml(Encoding.UTF8.GetString(ms.ToArray()), metadata);
+                }
+                catch (FileNotFoundException) { }
+
+                foreach (var iconPath in new[] { "meta/iconTex.tga", "meta/bootTvTex.tga" })
+                {
+                    byte[] tgaData;
+                    try
+                    {
+                        using var iconStream = source.OpenRead(iconPath);
+                        using var ms = new MemoryStream();
+                        iconStream.CopyTo(ms);
+                        tgaData = ms.ToArray();
+                    }
+                    catch (FileNotFoundException) { continue; }
+
+                    var converted = ConvertWiiUIcon(tgaData);
+                    if (converted != null) { metadata.Image = converted; break; }
+                }
+
+                return metadata;
+            }
+            catch { return null; }
+        }
+
         public static ExtractorMetadata? ExtractFromFolder(string folderPath)
         {
             string cacheKey = "folder:" + folderPath;
 
-            if (_cache.TryGetValue(cacheKey, out var cached)) return cached;
+            if (_cache.TryGetValue(cacheKey, out var cached)) 
+                return cached;
 
             try
             {
@@ -121,31 +154,38 @@ namespace RomForge.Core.Services.WiiU
                     using var stream = File.OpenRead(wuaPath);
                     long fileSize = stream.Length;
 
-                    if (fileSize <= 0x90) return null;
+                    if (fileSize <= 0x90) 
+                        return null;
 
                     stream.Seek(fileSize - 0x90, SeekOrigin.Begin);
+
                     byte[] footerData = new byte[0x90];
 
-                    if (stream.Read(footerData, 0, 0x90) != 0x90) return null;
+                    if (stream.Read(footerData, 0, 0x90) != 0x90) 
+                        return null;
 
                     var footer = ParseZArchiveFooter(footerData);
 
-                    if (footer == null) return null;
+                    if (footer == null) 
+                        return null;
 
                     var nameTable = ReadSection(stream, footer.Value.SectionNames);
 
-                    if (nameTable == null) return null;
+                    if (nameTable == null)
+                        return null;
 
                     var fileTree = ReadFileTree(stream, footer.Value.SectionFileTree);
 
-                    if (fileTree == null || fileTree.Length <= 1) return null;
+                    if (fileTree == null || fileTree.Length <= 1) 
+                        return null;
 
                     var metadata = new ExtractorMetadata();
                     string? gameDirName = null;
 
                     if (!fileTree[1].IsFile) gameDirName = GetName(nameTable, fileTree[1].NameOffset);
 
-                    if (gameDirName == null) return null;
+                    if (gameDirName == null) 
+                        return null;
 
                     var metaXmlNode = FindFile(fileTree, nameTable, $"{gameDirName}/meta/meta.xml");
 
@@ -163,9 +203,7 @@ namespace RomForge.Core.Services.WiiU
 
                     if (string.IsNullOrEmpty(metadata.Title)) metadata.Title = gameDirName;
 
-                    string[] iconPaths = [
-                        $"{gameDirName}/meta/iconTex.tga",
-                        $"{gameDirName}/meta/bootTvTex.tga", ];
+                    string[] iconPaths = [$"{gameDirName}/meta/iconTex.tga", $"{gameDirName}/meta/bootTvTex.tga", ];
 
                     foreach (var iconPath in iconPaths)
                     {
@@ -197,12 +235,6 @@ namespace RomForge.Core.Services.WiiU
             });
         }
 
-        /// <summary>
-        /// wud/wux 디스크 이미지에서 GM 파티션을 열어 meta.xml / 아이콘을 읽는다.
-        /// WudReader가 wud/wux 포맷 차이를 알아서 흡수해주므로 두 확장자를 같은 경로로 처리한다.
-        /// GM 파티션 FST 루트에 code/, content/, meta/ 서브폴더가 있다고 가정함 — 실제 덤프 구조가 다르면
-        /// meta.xml/아이콘이 안 나올 수 있으니 그럴 땐 경로를 확인해서 조정해야 함.
-        /// </summary>
         private static async Task<ExtractorMetadata?> ExtractFromWud(string path, string? keysTxtPath)
         {
             return await Task.Run(() =>
@@ -370,14 +402,15 @@ namespace RomForge.Core.Services.WiiU
                 int height = tgaData[14] | (tgaData[15] << 8);
                 int bpp = tgaData[16];
 
-                if (width != 128 || height != 128 || bpp != 32) return null;
+                if (width != 128 || height != 128 || bpp != 32) 
+                    return null;
 
                 int headerSize = 18 + tgaData[0];
                 int pixelDataSize = width * height * 4;
 
-                if (tgaData.Length < headerSize + pixelDataSize) return null;
+                if (tgaData.Length < headerSize + pixelDataSize) 
+                    return null;
 
-                // TGA 픽셀은 이미 BGRA 순서라 PixelFormats.Bgra32로 바로 매핑 가능 (채널 재배열 불필요)
                 byte[] bgra = new byte[pixelDataSize];
 
                 for (int y = 0; y < height; y++)
@@ -413,13 +446,15 @@ namespace RomForge.Core.Services.WiiU
             const uint MAGIC = 0x169f52d6;
             const uint VERSION1 = 0x61bf3a01;
 
-            if (data.Length < 0x90) return null;
+            if (data.Length < 0x90) 
+                return null;
 
             uint magic = BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(data.Length - 4, 4));
             uint version = BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(data.Length - 8, 4));
             ulong totalSize = BinaryPrimitives.ReadUInt64BigEndian(data.AsSpan(data.Length - 16, 8));
 
-            if (magic != MAGIC || version != VERSION1) return null;
+            if (magic != MAGIC || version != VERSION1)
+                return null;
 
             int offset = 0;
 
@@ -436,7 +471,8 @@ namespace RomForge.Core.Services.WiiU
 
         private static byte[]? ReadSection(FileStream stream, WuaSectionInfo section)
         {
-            if (section.Size > int.MaxValue) return null;
+            if (section.Size > int.MaxValue) 
+                return null;
 
             stream.Seek((long)section.Offset, SeekOrigin.Begin);
             byte[] data = new byte[section.Size];
@@ -448,11 +484,13 @@ namespace RomForge.Core.Services.WiiU
         {
             var data = ReadSection(stream, section);
 
-            if (data == null) return null;
+            if (data == null) 
+                return null;
 
             const int entrySize = 16;
 
-            if (data.Length % entrySize != 0) return null;
+            if (data.Length % entrySize != 0) 
+                return null;
 
             int entryCount = data.Length / entrySize;
             var entries = new FileEntry[entryCount];
@@ -461,7 +499,8 @@ namespace RomForge.Core.Services.WiiU
             {
                 int offset = i * entrySize;
 
-                if (offset + 16 > data.Length) break;
+                if (offset + 16 > data.Length) 
+                    break;
 
                 uint flags = BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(offset, 4));
                 uint value1 = BinaryPrimitives.ReadUInt32BigEndian(data.AsSpan(offset + 4, 4));
@@ -478,14 +517,16 @@ namespace RomForge.Core.Services.WiiU
 
         private static string? GetName(byte[] nameTable, uint nameOffset)
         {
-            if (nameOffset >= nameTable.Length) return null;
+            if (nameOffset >= nameTable.Length) 
+                return null;
 
             int offset = (int)nameOffset;
             ushort nameLength = (ushort)(nameTable[offset] & 0x7F);
 
             if ((nameTable[offset] & 0x80) != 0)
             {
-                if (offset + 1 >= nameTable.Length) return null;
+                if (offset + 1 >= nameTable.Length)
+                    return null;
 
                 nameLength = (ushort)(nameLength | ((ushort)nameTable[offset + 1] << 7));
                 offset += 2;
@@ -503,7 +544,8 @@ namespace RomForge.Core.Services.WiiU
 
             foreach (var part in parts)
             {
-                if (fileTree[currentNode].IsFile) return null;
+                if (fileTree[currentNode].IsFile)
+                    return null;
 
                 ulong startIndex = fileTree[currentNode].OffsetOrNodeStart;
                 ulong count = fileTree[currentNode].SizeOrCount;
@@ -513,7 +555,8 @@ namespace RomForge.Core.Services.WiiU
                 {
                     int nodeIndex = (int)(startIndex + i);
 
-                    if (nodeIndex >= fileTree.Length) return null;
+                    if (nodeIndex >= fileTree.Length)
+                        return null;
 
                     var name = GetName(nameTable, fileTree[nodeIndex].NameOffset);
                     if (name != null && name.Equals(part, StringComparison.OrdinalIgnoreCase))
@@ -524,7 +567,8 @@ namespace RomForge.Core.Services.WiiU
                     }
                 }
 
-                if (!found) return null;
+                if (!found) 
+                    return null;
             }
 
             return fileTree[currentNode].IsFile ? currentNode : null;
@@ -532,7 +576,8 @@ namespace RomForge.Core.Services.WiiU
 
         private static byte[]? ReadFileFromWua(FileStream stream, FileEntry file, ZArchiveFooter footer)
         {
-            if (!file.IsFile || file.SizeOrCount > 10 * 1024 * 1024) return null;
+            if (!file.IsFile || file.SizeOrCount > 10 * 1024 * 1024) 
+                return null;
 
             const int BLOCK_SIZE = 0x10000;
             const int ENTRIES_PER_RECORD = 16;
@@ -544,26 +589,29 @@ namespace RomForge.Core.Services.WiiU
             {
                 var offsetRecords = ReadSection(stream, footer.SectionOffsetRecords);
 
-                if (offsetRecords == null) return null;
+                if (offsetRecords == null)
+                    return null;
 
                 int recordSize = 8 + (2 * ENTRIES_PER_RECORD);
                 ulong startBlockIndex = fileOffset / BLOCK_SIZE;
                 ulong endBlockIndex = (fileOffset + fileSize - 1) / BLOCK_SIZE;
                 using var decompressor = new Decompressor();
-                var resultData = new System.Collections.Generic.List<byte>();
+                var resultData = new List<byte>();
 
                 for (ulong blockIdx = startBlockIndex; blockIdx <= endBlockIndex; blockIdx++)
                 {
                     var blockData = ReadBlockData(stream, footer, offsetRecords, recordSize, blockIdx, decompressor);
 
-                    if (blockData == null) return null;
+                    if (blockData == null) 
+                        return null;
 
                     resultData.AddRange(blockData);
                 }
 
                 int offsetInDecompressed = (int)(fileOffset - (startBlockIndex * BLOCK_SIZE));
 
-                if ((ulong)offsetInDecompressed + fileSize > (ulong)resultData.Count) return null;
+                if ((ulong)offsetInDecompressed + fileSize > (ulong)resultData.Count) 
+                    return null;
 
                 return [.. resultData.GetRange(offsetInDecompressed, (int)fileSize)];
             }
@@ -583,7 +631,8 @@ namespace RomForge.Core.Services.WiiU
                 int recordIndex = (int)(blockIndex / ENTRIES_PER_RECORD);
                 int subIndex = (int)(blockIndex % ENTRIES_PER_RECORD);
 
-                if (recordIndex * recordSize + recordSize > offsetRecords.Length) return null;
+                if (recordIndex * recordSize + recordSize > offsetRecords.Length) 
+                    return null;
 
                 int recordOffset = recordIndex * recordSize;
                 ulong baseOffset = BinaryPrimitives.ReadUInt64BigEndian(offsetRecords.AsSpan(recordOffset, 8));
@@ -610,7 +659,8 @@ namespace RomForge.Core.Services.WiiU
 
                 byte[] compressed = new byte[compressedSize];
 
-                if (stream.Read(compressed, 0, compressedSize) != compressedSize) return null;
+                if (stream.Read(compressed, 0, compressedSize) != compressedSize) 
+                    return null;
 
                 byte[] decompressed = new byte[BLOCK_SIZE];
                 int decompressedSize = decompressor.Unwrap(compressed, decompressed);

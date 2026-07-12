@@ -132,6 +132,9 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public async Task AddFileAsync(string path)
     {
+        if (IsDuplicate(path))
+            return;
+
         try
         {
             bool isWua = string.Equals(Path.GetExtension(path), ".wua", StringComparison.OrdinalIgnoreCase);
@@ -143,9 +146,6 @@ public class RepackMainViewModel : ToolTabViewModel
             }
 
             var rows = await RepackService.PeekFileAsync(path, KeysPath, CancellationToken.None);
-
-            // WiiU 입력은 한 번에 하나의 소스만 허용 — 기존 항목은 새 소스로 교체
-            Entries.Clear();
 
             foreach (var row in rows)
                 Entries.Add(row);
@@ -160,18 +160,24 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public void AddFolder(string folderPath)
     {
+        if (IsDuplicate(folderPath))
+            return;
+
         try
         {
             var row = RepackService.PeekFolder(folderPath);
 
-            // WiiU 입력은 한 번에 하나의 소스만 허용 — 기존 항목은 새 소스로 교체
-            Entries.Clear();
             Entries.Add(row);
         }
         catch (Exception ex)
         {
             Log($"'{folderPath}' 추가 실패: {ex.Message}", LogLevel.Error);
         }
+    }
+
+    private bool IsDuplicate(string path)
+    {
+        return Entries.Any(e => string.Equals(e.FilePath, path, StringComparison.OrdinalIgnoreCase));
     }
 
     private void RemoveSelected()
@@ -355,7 +361,7 @@ public class RepackMainViewModel : ToolTabViewModel
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "베이스 / 업데이트 / DLC 파일 선택",
+            Title = "본편 / 업데이트 / DLC 파일 선택",
             Filter = "Wii U ROM 파일|*.wud;*.wux;*.wua",
             Multiselect = false,
         };

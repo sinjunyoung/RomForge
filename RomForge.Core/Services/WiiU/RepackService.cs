@@ -1,4 +1,5 @@
 using Common;
+using NSW.Utils;
 using RomForge.Core.Models.WiiU;
 using System.Diagnostics;
 using System.IO;
@@ -39,7 +40,9 @@ public sealed class RepackService()
 
     public static TitleInputEntry PeekFolder(string folderPath)
     {
-        using var source = new FolderTitleSource(folderPath);
+        using ITitleSource source = WupTitleSource.LooksLikeWupFolder(folderPath)
+            ? new WupTitleSource(folderPath)
+            : new FolderTitleSource(folderPath);
 
         return BuildRowFromFolder(folderPath, source);
     }
@@ -85,20 +88,18 @@ public sealed class RepackService()
         {
         }
 
-        return new TitleInputEntry(path)
+        return new TitleInputEntry(path, source.TitleIdHex)
         {
             IsFolder = isFolder,
             SubTitleIndex = subTitleIndex,
-            TitleIdHex = source.TitleIdHex,
             TitleVersion = source.TitleVersion,
-            Kind = TitleInputEntry.GuessKind(source.TitleIdHex),
             FileCount = fileCount,
             TitleName = titleName,
             Icon = icon,
         };
     }
 
-    private static TitleInputEntry BuildRowFromFolder(string folderPath, FolderTitleSource source)
+    private static TitleInputEntry BuildRowFromFolder(string folderPath, ITitleSource source)
     {
         int fileCount = source.EnumerateFiles().Count();
 
@@ -107,7 +108,9 @@ public sealed class RepackService()
 
         try
         {
-            var meta = WiiUMetadataExtractor.ExtractFromFolder(folderPath);
+            var meta = source is WupTitleSource
+                ? WiiUMetadataExtractor.ExtractFromTitleSource(source)
+                : WiiUMetadataExtractor.ExtractFromFolder(folderPath);
 
             if (meta is not null)
             {
@@ -121,13 +124,11 @@ public sealed class RepackService()
         {  
         }
 
-        return new TitleInputEntry(folderPath)
+        return new TitleInputEntry(folderPath, source.TitleIdHex)
         {
             IsFolder = true,
             SubTitleIndex = 0,
-            TitleIdHex = source.TitleIdHex,
-            TitleVersion = source.TitleVersion,
-            Kind = TitleInputEntry.GuessKind(source.TitleIdHex),
+            TitleVersion = source.TitleVersion,            
             FileCount = fileCount,
             TitleName = titleName,
             Icon = icon,
@@ -157,7 +158,11 @@ public sealed class RepackService()
     private static ITitleSource ReopenSource(TitleInputEntry entry, string keysTxtPath)
     {
         if (entry.IsFolder)
-            return new FolderTitleSource(entry.FilePath);
+        {
+            return WupTitleSource.LooksLikeWupFolder(entry.FilePath)
+                ? new WupTitleSource(entry.FilePath)
+                : new FolderTitleSource(entry.FilePath);
+        }
 
         var sources = UnpackService.OpenAll(entry.FilePath, keysTxtPath);
 
@@ -218,8 +223,11 @@ public sealed class RepackService()
                 for (int i = 0; i < entries.Count; i++)
                     repackEntries.Add(new RepackEntry(sources[i], entries[i].PatchPath));
 
-                string baseTitleIdHex = sources[0].TitleIdHex;
-                string outputWuaPath = Utils.GetUniqueFilePath(Path.Combine(outputPath, $"{baseTitleIdHex}_Repack.wua"));
+                string fileName = entries[0].DisplayName;
+
+                fileName = NspNameBuilder.SafeFileName(fileName);
+
+                string outputWuaPath = Utils.GetUniqueFilePath(Path.Combine(outputPath, $"{fileName}_Repack.wua"));
 
                 var sw = Stopwatch.StartNew();
                 WiiURepackService.RepackMultiple(

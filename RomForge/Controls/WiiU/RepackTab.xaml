@@ -52,6 +52,13 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
+                                <GridViewColumn Header="버전" Width="50">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding TitleVersion}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                                 <GridViewColumn Header="한글패치" Width="150">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
@@ -73,14 +80,7 @@
                                     </GridViewColumn.HeaderTemplate>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding FileSize}" Padding="6,0" HorizontalAlignment="Right"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="경로" Width="220">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding SourceDisplay}" ToolTip="{Binding SourceDisplay}"/>
+                                            <TextBlock Text="{Binding Size}" Padding="6,0" HorizontalAlignment="Right"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn> 
@@ -124,7 +124,7 @@
                                         </TextBlock>
                                     </Border>
                                     <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                        <TextBlock Text="폴더" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                        <TextBlock Text="폴더 ( WUP, Loadiine )" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                             <TextBlock.Effect>
                                                 <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
                                             </TextBlock.Effect>
