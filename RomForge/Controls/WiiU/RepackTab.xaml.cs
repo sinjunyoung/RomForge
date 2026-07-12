@@ -1,5 +1,4 @@
 ﻿using NSW.Core.Enums;
-using RomForge.Core.Models.Switch;
 using RomForge.ViewModels.WiiU;
 using System.IO;
 using System.Windows;
