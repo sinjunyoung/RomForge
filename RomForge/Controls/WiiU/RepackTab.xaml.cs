@@ -31,36 +31,29 @@ namespace RomForge.Controls.WiiU
             }
 
             string[]? items = (string[]?)e.Data.GetData(DataFormats.FileDrop);
-
             if (items is null || items.Length == 0)
             {
                 e.Handled = true;
                 return;
             }
 
-            string? lastFolder = null;
-            string? lastFile = null;
-
+            // 본편/업데이트/DLC는 이제 Kind 기준으로 자동 분류되니, 드롭된 항목을 전부 순서대로 추가한다.
             foreach (var item in items)
             {
                 if (Directory.Exists(item))
                 {
-                    lastFolder = item;
+                    ViewModel.AddFolder(item);
                     continue;
                 }
 
                 string extension = Path.GetExtension(item);
-
-                if (string.Equals(extension, ".wud", StringComparison.OrdinalIgnoreCase) || string.Equals(extension, ".wux", StringComparison.OrdinalIgnoreCase) || string.Equals(extension, ".wua", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(extension, ".wud", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(extension, ".wux", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(extension, ".wua", StringComparison.OrdinalIgnoreCase))
                 {
-                    lastFile = item;
+                    await ViewModel.AddFileAsync(item);
                 }
             }
-
-            if (lastFolder is not null && (lastFile is null || Array.IndexOf(items, lastFolder) > Array.IndexOf(items, lastFile)))
-                ViewModel.AddFolder(lastFolder);
-            else if (lastFile is not null)
-                await ViewModel.AddFileAsync(lastFile);
 
             e.Handled = true;
         }
@@ -70,9 +63,10 @@ namespace RomForge.Controls.WiiU
             if (e.Key != Key.Delete)
                 return;
 
-            var selected = ViewModel?.SelectedEntry;
+            var selected = ViewModel?.SelectedDlcEntry;
 
-            ViewModel?.Entries.Remove(selected);
+            if (selected is not null)
+                ViewModel?.DlcEntries.Remove(selected);
         }
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)

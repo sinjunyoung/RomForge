@@ -121,14 +121,14 @@ public sealed class RepackService()
             }
         }
         catch
-        {  
+        {
         }
 
         return new TitleInputEntry(folderPath, source.TitleIdHex)
         {
             IsFolder = true,
             SubTitleIndex = 0,
-            TitleVersion = source.TitleVersion,            
+            TitleVersion = source.TitleVersion,
             FileCount = fileCount,
             TitleName = titleName,
             Icon = icon,
@@ -208,7 +208,7 @@ public sealed class RepackService()
         }, ct);
     }
 
-    public static async Task RepackAsync(IReadOnlyList<TitleInputEntry> entries, string keysTxtPath, string outputPath, Action<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+    public static async Task RepackAsync(IReadOnlyList<TitleInputEntry> entries, string keysTxtPath, string outputPath, RepackOutputFormat format, Action<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         if (entries.Count == 0)
             throw new InvalidOperationException("패킹할 타이틀이 없습니다.");
@@ -224,8 +224,13 @@ public sealed class RepackService()
                     repackEntries.Add(new RepackEntry(sources[i], entries[i].PatchPath));
 
                 string fileName = entries[0].DisplayName;
-
                 fileName = NspNameBuilder.SafeFileName(fileName);
+
+                if (format == RepackOutputFormat.Wup)
+                {
+                    RepackToWup(repackEntries, sources, fileName, outputPath, progress, log, ct);
+                    return;
+                }
 
                 string outputWuaPath = Utils.GetUniqueFilePath(Path.Combine(outputPath, $"{fileName}_Repack.wua"));
 
@@ -253,5 +258,87 @@ public sealed class RepackService()
                     s.Dispose();
             }
         }, ct);
+    }
+
+    /// <summary>
+    /// WUA 리팩과 달리, WUP는 소스(베이스/업데이트/DLC 등) 개수만큼 별도의 WUP 폴더를 각각 만든다
+    /// (실제 NUS 배포 방식대로 타이틀당 tmd/tik 세트 하나). 소스 하나마다:
+    /// code/는 파일별로 개별 raw 콘텐츠, meta/는 파일별로 개별 hashed 콘텐츠, 그 외(content/ 등)는
+    /// 하나의 hashed 콘텐츠로 묶는다 — NUSPacker의 기본 규칙과 동일한 방식.
+    /// </summary>
+    private static void RepackToWup(List<RepackEntry> repackEntries, List<ITitleSource> sources, string fileName, string outputPath, Action<ProgressInfo>? progress, Action<string, LogLevel>? log, CancellationToken ct)
+    {
+        for (int i = 0; i < sources.Count; i++)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var source = sources[i];
+            string? patchPath = repackEntries[i].PatchFolder;
+
+            var codeFiles = new List<WupFileEntry>();
+            var metaFiles = new List<WupFileEntry>();
+            var contentFiles = new List<WupFileEntry>();
+
+            foreach (string relPath in source.EnumerateFiles())
+            {
+                ct.ThrowIfCancellationRequested();
+
+                byte[] data;
+
+                string? patchFilePath = patchPath is null ? null : Path.Combine(patchPath, relPath.Replace('/', Path.DirectorySeparatorChar));
+
+                if (patchFilePath is not null && File.Exists(patchFilePath))
+                {
+                    data = File.ReadAllBytes(patchFilePath);
+                }
+                else
+                {
+                    using var stream = source.OpenRead(relPath);
+                    using var ms = new MemoryStream();
+                    stream.CopyTo(ms);
+                    data = ms.ToArray();
+                }
+
+                var entry = new WupFileEntry(relPath, data);
+
+                if (relPath.StartsWith("code/", StringComparison.OrdinalIgnoreCase))
+                    codeFiles.Add(entry);
+                else if (relPath.StartsWith("meta/", StringComparison.OrdinalIgnoreCase))
+                    metaFiles.Add(entry);
+                else
+                    contentFiles.Add(entry);
+            }
+
+            var groups = new List<WupContentGroup>();
+
+            foreach (var f in codeFiles)
+                groups.Add(new WupContentGroup { Hashed = false, Files = [f] });
+
+            foreach (var f in metaFiles)
+                groups.Add(new WupContentGroup { Hashed = true, Files = [f] });
+
+            if (contentFiles.Count > 0)
+                groups.Add(new WupContentGroup { Hashed = true, Files = contentFiles });
+
+            ulong titleId = Convert.ToUInt64(source.TitleIdHex, 16);
+            ushort titleVersion = (ushort)source.TitleVersion;
+
+            string suffix = sources.Count > 1 ? $"_{i}_{source.TitleIdHex}_v{titleVersion}" : "";
+            string wupFolder = Utils.GetUniqueFilePath(Path.Combine(outputPath, $"{fileName}{suffix}_WUP"));
+
+            log?.Invoke($"WUP로 패키징 중 ({i + 1}/{sources.Count}): {wupFolder}", LogLevel.Info);
+
+            WupPacker.Pack(wupFolder, titleId, titleVersion, groups);
+
+            progress?.Invoke(new ProgressInfo
+            {
+                Percent = (int)((i + 1) * 100.0 / sources.Count),
+                Label = $"WUP 생성 완료: {source.TitleIdHex}_v{titleVersion}",
+                TimeInfo = string.Empty,
+                Speed = string.Empty,
+            });
+
+            log?.Invoke($"완료: {wupFolder}", LogLevel.Ok);
+        }
     }
 }
