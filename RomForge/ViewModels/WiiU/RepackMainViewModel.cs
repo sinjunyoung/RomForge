@@ -18,7 +18,7 @@ public class RepackMainViewModel : ToolTabViewModel
 {
     private CancellationTokenSource _cts = new();
     private BuildMode? _currentMode;
-    private TitleInputEntry? _selectedDlcEntry;
+    private TitleInputEntry? _selectedEntry;
     private string _outputPath = string.Empty;
     private int _progressPct;
     private string _progressLabel = "대기 중...";
@@ -49,55 +49,12 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
-    /// <summary>DLC만 담는다. 본편/업데이트는 BaseEntry/UpdateEntry 단일 슬롯으로 따로 관리.</summary>
-    public ObservableCollection<TitleInputEntry> DlcEntries { get; } = [];
+    public ObservableCollection<TitleInputEntry> Entries { get; } = [];
 
-    private TitleInputEntry? _baseEntry;
-    public TitleInputEntry? BaseEntry
+    public TitleInputEntry? SelectedEntry
     {
-        get => _baseEntry;
-        set
-        {
-            _baseEntry = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(BaseDisplayText));
-            OnPropertyChanged(nameof(BaseHintVisibility));
-            OnPropertyChanged(nameof(HasBase));
-            OnPropertyChanged(nameof(KeysPathRequired));
-        }
-    }
-
-    private TitleInputEntry? _updateEntry;
-    public TitleInputEntry? UpdateEntry
-    {
-        get => _updateEntry;
-        set
-        {
-            _updateEntry = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(UpdateDisplayText));
-            OnPropertyChanged(nameof(UpdateHintVisibility));
-            OnPropertyChanged(nameof(HasUpdate));
-            OnPropertyChanged(nameof(KeysPathRequired));
-        }
-    }
-
-    public string BaseDisplayText => BaseEntry?.DisplayName ?? "";
-
-    public string UpdateDisplayText => UpdateEntry?.DisplayName ?? "";
-
-    public Visibility BaseHintVisibility => BaseEntry is null ? Visibility.Visible : Visibility.Collapsed;
-
-    public Visibility UpdateHintVisibility => UpdateEntry is null ? Visibility.Visible : Visibility.Collapsed;
-
-    public bool HasBase => BaseEntry is not null;
-
-    public bool HasUpdate => UpdateEntry is not null;
-
-    public TitleInputEntry? SelectedDlcEntry
-    {
-        get => _selectedDlcEntry;
-        set { _selectedDlcEntry = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasDlcSelection)); }
+        get => _selectedEntry;
+        set { _selectedEntry = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasSelection)); }
     }
 
     public string OutputPath
@@ -136,13 +93,13 @@ public class RepackMainViewModel : ToolTabViewModel
         set { _progressSpeed = value; OnPropertyChanged(); }
     }
 
-    public Visibility DlcHintVisibility => DlcEntries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility EntriesHintVisibility => Entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
-    public bool HasDlcSelection => SelectedDlcEntry != null;
+    public bool HasSelection => SelectedEntry != null;
 
-    public bool KeysPathRequired => AllEntries().Any(e => !e.IsFolder && !string.Equals(Path.GetExtension(e.FilePath), ".wua", StringComparison.OrdinalIgnoreCase));
+    public bool KeysPathRequired => Entries.Any(e => !e.IsFolder && !string.Equals(Path.GetExtension(e.FilePath), ".wua", StringComparison.OrdinalIgnoreCase));
 
     public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
 
@@ -156,31 +113,23 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess;
 
+    /// <summary>본편: wud/wux/wua 파일. wua가 여러 타이틀을 번들하고 있으면 그 안에서만 자체 분류를 신뢰한다.</summary>
     public ICommand BrowseBaseFileCommand { get; }
 
+    /// <summary>본편: 폴더(언팩된 폴더 또는 WUP 폴더). title ID와 무관하게 무조건 본편으로 취급.</summary>
     public ICommand BrowseBaseFolderCommand { get; }
 
-    public ICommand BrowsePatchForBaseCommand { get; }
+    /// <summary>업데이트: 폴더만. title ID와 무관하게 무조건 업데이트로 취급. 기존 업데이트는 교체.</summary>
+    public ICommand BrowseUpdateCommand { get; }
 
-    public ICommand ClearBaseCommand { get; }
+    /// <summary>DLC: 폴더만, 여러 개 가능. title ID와 무관하게 무조건 DLC로 취급.</summary>
+    public ICommand BrowseDlcCommand { get; }
 
-    public ICommand BrowseUpdateFileCommand { get; }
+    public ICommand BrowsePatchForSelectedCommand { get; }
 
-    public ICommand BrowseUpdateFolderCommand { get; }
+    public ICommand RemoveSelectedCommand { get; }
 
-    public ICommand BrowsePatchForUpdateCommand { get; }
-
-    public ICommand ClearUpdateCommand { get; }
-
-    public ICommand BrowseAddDlcFileCommand { get; }
-
-    public ICommand BrowseAddDlcFolderCommand { get; }
-
-    public ICommand BrowsePatchForSelectedDlcCommand { get; }
-
-    public ICommand RemoveSelectedDlcCommand { get; }
-
-    public ICommand RemoveAllDlcCommand { get; }
+    public ICommand RemoveAllCommand { get; }
 
     public ICommand BrowseOutputCommand { get; }
 
@@ -188,27 +137,20 @@ public class RepackMainViewModel : ToolTabViewModel
     {
         OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
 
-        BrowseBaseFileCommand = new RelayCommand(async _ => await BrowseFile());
-        BrowseBaseFolderCommand = new RelayCommand(async _ => await BrowseFolder());
-        BrowsePatchForBaseCommand = new RelayCommand(async _ => await BrowsePatchFor(BaseEntry), _ => HasBase);
-        ClearBaseCommand = new RelayCommand(_ => BaseEntry = null, _ => HasBase);
+        BrowseBaseFileCommand = new RelayCommand(async _ => await BrowseBaseFile());
+        BrowseBaseFolderCommand = new RelayCommand(async _ => await BrowseBaseFolder());
+        BrowseUpdateCommand = new RelayCommand(async _ => await BrowseUpdate());
+        BrowseDlcCommand = new RelayCommand(async _ => await BrowseDlc());
 
-        BrowseUpdateFileCommand = new RelayCommand(async _ => await BrowseFile());
-        BrowseUpdateFolderCommand = new RelayCommand(async _ => await BrowseFolder());
-        BrowsePatchForUpdateCommand = new RelayCommand(async _ => await BrowsePatchFor(UpdateEntry), _ => HasUpdate);
-        ClearUpdateCommand = new RelayCommand(_ => UpdateEntry = null, _ => HasUpdate);
-
-        BrowseAddDlcFileCommand = new RelayCommand(async _ => await BrowseFile());
-        BrowseAddDlcFolderCommand = new RelayCommand(async _ => await BrowseFolder());
-        BrowsePatchForSelectedDlcCommand = new RelayCommand(async _ => await BrowsePatchFor(SelectedDlcEntry), _ => HasDlcSelection);
-        RemoveSelectedDlcCommand = new RelayCommand(_ => RemoveSelectedDlc(), _ => HasDlcSelection);
-        RemoveAllDlcCommand = new RelayCommand(_ => DlcEntries.Clear(), _ => DlcEntries.Count > 0);
+        BrowsePatchForSelectedCommand = new RelayCommand(async _ => await BrowsePatchForSelected(), _ => HasSelection);
+        RemoveSelectedCommand = new RelayCommand(_ => RemoveSelected(), _ => HasSelection);
+        RemoveAllCommand = new RelayCommand(_ => Entries.Clear(), _ => Entries.Count > 0);
 
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 
-        DlcEntries.CollectionChanged += (_, _) =>
+        Entries.CollectionChanged += (_, _) =>
         {
-            OnPropertyChanged(nameof(DlcHintVisibility));
+            OnPropertyChanged(nameof(EntriesHintVisibility));
             OnPropertyChanged(nameof(KeysPathRequired));
         };
 
@@ -219,17 +161,41 @@ public class RepackMainViewModel : ToolTabViewModel
         };
     }
 
-    private IEnumerable<TitleInputEntry> AllEntries()
-    {
-        if (BaseEntry is not null) yield return BaseEntry;
-        if (UpdateEntry is not null) yield return UpdateEntry;
+    private bool IsDuplicate(string path) => Entries.Any(e => string.Equals(e.FilePath, path, StringComparison.OrdinalIgnoreCase));
 
-        foreach (var e in DlcEntries)
-            yield return e;
+    /// <summary>role을 강제 지정해서 목록에 추가한다. 본편/업데이트는 기존 것을 교체하고, DLC는 그냥 추가한다.</summary>
+    private void AddWithRole(TitleInputEntry row, TitleRole role)
+    {
+        row.Role = role;
+
+        if (role is TitleRole.Base or TitleRole.Update)
+        {
+            var existing = Entries.FirstOrDefault(e => e.Role == role);
+
+            if (existing is not null)
+            {
+                Entries.Remove(existing);
+                Log($"기존 {(role == TitleRole.Base ? "본편" : "업데이트")}을(를) 새 항목으로 교체합니다.", LogLevel.Info);
+            }
+        }
+
+        Entries.Add(row);
     }
 
-    public async Task AddFileAsync(string path)
+    private async Task BrowseBaseFile()
     {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "본편 파일 선택",
+            Filter = "Wii U ROM 파일|*.wud;*.wux;*.wua",
+            Multiselect = false,
+        };
+
+        if (dlg.ShowDialog() != true)
+            return;
+
+        string path = dlg.FileName;
+
         if (IsDuplicate(path))
             return;
 
@@ -245,10 +211,19 @@ public class RepackMainViewModel : ToolTabViewModel
 
             var rows = await RepackService.PeekFileAsync(path, KeysPath, CancellationToken.None);
 
-            foreach (var row in rows)
-                AssignRow(row);
+            if (isWua && rows.Count > 1)
+            {
+                // WUA 하나에 여러 타이틀이 정상적으로 번들된 경우만 title ID 기준 자체 분류를 신뢰한다.
+                foreach (var row in rows)
+                    AddWithRole(row, row.Role);
 
-            Log($"{Path.GetFileName(path)} — {rows.Count}개 타이틀 추가됨.", LogLevel.Info);
+                Log($"{Path.GetFileName(path)} — {rows.Count}개 타이틀 추가됨.", LogLevel.Info);
+            }
+            else
+            {
+                // wud/wux, 또는 단일 타이틀 wua는 title ID를 신뢰할 수 없으니 무조건 본편으로 지정한다.
+                AddWithRole(rows[0], TitleRole.Base);
+            }
         }
         catch (Exception ex)
         {
@@ -256,56 +231,42 @@ public class RepackMainViewModel : ToolTabViewModel
         }
     }
 
-    public void AddFolder(string folderPath)
+    private async Task BrowseBaseFolder() => await BrowseFolderWithRole("본편 폴더 선택", TitleRole.Base);
+
+    private async Task BrowseUpdate() => await BrowseFolderWithRole("업데이트 폴더 선택", TitleRole.Update);
+
+    private async Task BrowseDlc() => await BrowseFolderWithRole("DLC 폴더 선택", TitleRole.Dlc);
+
+    private async Task BrowseFolderWithRole(string title, TitleRole role)
     {
-        if (IsDuplicate(folderPath))
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = title };
+
+        if (dlg.ShowDialog() != true)
+            return;
+
+        string path = dlg.FolderName;
+
+        if (IsDuplicate(path))
             return;
 
         try
         {
-            var row = RepackService.PeekFolder(folderPath);
+            var row = RepackService.PeekFolder(path);
 
-            AssignRow(row);
+            AddWithRole(row, role);
         }
         catch (Exception ex)
         {
-            Log($"'{folderPath}' 추가 실패: {ex.Message}", LogLevel.Error);
+            Log($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
         }
+
+        await Task.CompletedTask;
     }
 
-    /// <summary>타이틀 종류(Kind)에 따라 본편/업데이트 슬롯 또는 DLC 목록으로 자동 배치한다.
-    /// 어느 버튼(본편/업데이트/DLC 찾아보기)으로 추가했든 이 규칙에 따라 알맞은 자리로 들어간다.</summary>
-    private void AssignRow(TitleInputEntry row)
+    private void RemoveSelected()
     {
-        switch (row.Kind)
-        {
-            case "베이스":
-                if (BaseEntry is not null)
-                    Log("기존 본편을 새 파일로 교체합니다.", LogLevel.Info);
-                BaseEntry = row;
-                break;
-
-            case "업데이트":
-                if (UpdateEntry is not null)
-                    Log("기존 업데이트를 새 파일로 교체합니다.", LogLevel.Info);
-                UpdateEntry = row;
-                break;
-
-            default:
-                DlcEntries.Add(row);
-                break;
-        }
-    }
-
-    private bool IsDuplicate(string path) =>
-        (BaseEntry is not null && string.Equals(BaseEntry.FilePath, path, StringComparison.OrdinalIgnoreCase)) ||
-        (UpdateEntry is not null && string.Equals(UpdateEntry.FilePath, path, StringComparison.OrdinalIgnoreCase)) ||
-        DlcEntries.Any(e => string.Equals(e.FilePath, path, StringComparison.OrdinalIgnoreCase));
-
-    private void RemoveSelectedDlc()
-    {
-        if (SelectedDlcEntry is not null)
-            DlcEntries.Remove(SelectedDlcEntry);
+        if (SelectedEntry is not null)
+            Entries.Remove(SelectedEntry);
     }
 
     public async Task StartAsync(BuildMode mode)
@@ -359,20 +320,21 @@ public class RepackMainViewModel : ToolTabViewModel
                 return;
             }
 
-            var oldEntries = AllEntries().ToList();
-
             foreach (var row in scanned)
             {
-                var existing = oldEntries.FirstOrDefault(e => e.TitleIdHex == row.TitleIdHex && e.TitleVersion == row.TitleVersion);
-                if (existing?.PatchPath is not null) row.PatchPath = existing.PatchPath;
+                var existing = Entries.FirstOrDefault(e => e.TitleIdHex == row.TitleIdHex && e.TitleVersion == row.TitleVersion);
+
+                if (existing is not null)
+                {
+                    if (existing.PatchPath is not null) row.PatchPath = existing.PatchPath;
+                    row.Role = existing.Role;
+                }
             }
 
-            BaseEntry = null;
-            UpdateEntry = null;
-            DlcEntries.Clear();
+            Entries.Clear();
 
             foreach (var row in scanned)
-                AssignRow(row);
+                Entries.Add(row);
         }
 
         var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -382,7 +344,7 @@ public class RepackMainViewModel : ToolTabViewModel
         try
         {
             Directory.CreateDirectory(OutputPath);
-            var entriesSnapshot = AllEntries().ToList();
+            var entriesSnapshot = Entries.ToList();
 
             switch (mode)
             {
@@ -435,7 +397,7 @@ public class RepackMainViewModel : ToolTabViewModel
     {
         error = string.Empty;
 
-        if (mode != BuildMode.RebuildOnly && !AllEntries().Any())
+        if (mode != BuildMode.RebuildOnly && Entries.Count == 0)
         {
             error = "타이틀을 하나 이상 추가하세요.";
             return false;
@@ -482,36 +444,17 @@ public class RepackMainViewModel : ToolTabViewModel
     private void Log(string msg, LogLevel level = LogLevel.Info) =>
         Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
 
-    private async Task BrowseFile()
+    private async Task BrowsePatchForSelected()
     {
-        var dlg = new Microsoft.Win32.OpenFileDialog
-        {
-            Title = "본편 / 업데이트 / DLC 파일 선택",
-            Filter = "Wii U ROM 파일|*.wud;*.wux;*.wua",
-            Multiselect = false,
-        };
-
-        if (dlg.ShowDialog() == true)
-            await AddFileAsync(dlg.FileName);
-    }
-
-    private async Task BrowseFolder()
-    {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "이미 언팩된 폴더 또는 WUP 폴더 선택" };
-
-        if (dlg.ShowDialog() == true)
-            AddFolder(dlg.FolderName);
-    }
-
-    private async Task BrowsePatchFor(TitleInputEntry? entry)
-    {
-        if (entry is null)
+        if (SelectedEntry is null)
             return;
 
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = $"{entry.TitleName}에 적용할 한글패치 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = $"{SelectedEntry.TitleName}에 적용할 한글패치 폴더 선택" };
 
         if (dlg.ShowDialog() == true)
-            entry.PatchPath = dlg.FolderName;
+            SelectedEntry.PatchPath = dlg.FolderName;
+
+        await Task.CompletedTask;
     }
 
     private async Task BrowseOutput()
@@ -520,5 +463,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
         if (dlg.ShowDialog() == true)
             OutputPath = dlg.FolderName;
+
+        await Task.CompletedTask;
     }
 }

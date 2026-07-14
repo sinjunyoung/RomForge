@@ -6,11 +6,11 @@
              xmlns:vm="clr-namespace:RomForge.ViewModels.WiiU"
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              mc:Ignorable="d" 
-             d:DesignHeight="640" d:DesignWidth="800"
-             AllowDrop="True" DragEnter="Root_DragEnter" DragOver="Root_DragEnter" Drop="Root_Drop">
+             d:DesignHeight="640" d:DesignWidth="800">
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -18,189 +18,119 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Margin="5,0,5,10" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8">
-            <Grid Margin="5">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <!-- 추가 버튼 4개 -->
+        <Grid Grid.Row="0" Margin="5,0,5,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <!-- 본편 -->
-                <Grid Grid.Row="0" Height="36" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="본편" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
-                    <Border Grid.Column="1" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Height ="30">
-                        <Grid>
-                            <TextBox Text="{Binding BaseDisplayText, Mode=OneWay}" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" Height ="30"/>
-                            <TextBlock Text="본편 파일/폴더를 선택하세요" Visibility="{Binding BaseHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
-                        </Grid>
-                    </Border>
-                    <Button Grid.Column="2" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseBaseFileCommand}" IsEnabled="{Binding IsIdle}">
-                        <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="파일 선택"/>
-                    </Button>
-                    <Button Grid.Column="3" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseBaseFolderCommand}" IsEnabled="{Binding IsIdle}">
-                        <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="폴더 선택"/>
-                    </Button>
-                    <Button Grid.Column="4" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchForBaseCommand}" IsEnabled="{Binding HasBase}">
-                        <Image Source="/Assets/Images/Patch.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="한글패치 폴더"/>
-                    </Button>
-                    <Button Grid.Column="5" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding ClearBaseCommand}" IsEnabled="{Binding HasBase}">
-                        <Image Source="/Assets/Images/Delete.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="지우기"/>
-                    </Button>
-                </Grid>
+            <Button Grid.Column="0" Margin="0,0,4,0" Height="36" Style="{StaticResource GrayButton}" Command="{Binding BrowseBaseFileCommand}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Source="/Assets/Images/AddFile.png" Width="20" Height="20" Margin="0,0,6,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="본편 파일 추가" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+            </Button>
 
-                <!-- 업데이트 -->
-                <Grid Grid.Row="1" Height="36" Margin="0,0,0,8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="60"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="업데이트" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center"/>
-                    <Border Grid.Column="1" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Height="30">
-                        <Grid>
-                            <TextBox Text="{Binding UpdateDisplayText, Mode=OneWay}" IsReadOnly="True" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" Height ="30"/>
-                            <TextBlock Text="업데이트 파일/폴더를 선택하세요" Visibility="{Binding UpdateHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
-                        </Grid>
-                    </Border>
-                    <Button Grid.Column="2" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseUpdateFileCommand}" IsEnabled="{Binding IsIdle}">
-                        <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="파일 선택"/>
-                    </Button>
-                    <Button Grid.Column="3" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseUpdateFolderCommand}" IsEnabled="{Binding IsIdle}">
-                        <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="폴더 선택"/>
-                    </Button>
-                    <Button Grid.Column="4" Width="30" Height="30" Margin="0,0,5,0" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchForUpdateCommand}" IsEnabled="{Binding HasUpdate}">
-                        <Image Source="/Assets/Images/Patch.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="한글패치 폴더"/>
-                    </Button>
-                    <Button Grid.Column="5" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding ClearUpdateCommand}" IsEnabled="{Binding HasUpdate}">
-                        <Image Source="/Assets/Images/Delete.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="지우기"/>
-                    </Button>
-                </Grid>
+            <Button Grid.Column="1" Margin="4,0,4,0" Height="36" Style="{StaticResource GrayButton}" Command="{Binding BrowseBaseFolderCommand}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20" Margin="0,0,6,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="본편 폴더 추가" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+            </Button>
 
-                <!-- DLC (여러 개 가능 - 기존 리스트뷰 유지) -->
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="50"/>
-                    </Grid.ColumnDefinitions>
+            <Button Grid.Column="2" Margin="4,0,4,0" Height="36" Style="{StaticResource GrayButton}" Command="{Binding BrowseUpdateCommand}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20" Margin="0,0,6,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="업데이트 추가" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+            </Button>
 
-                    <Grid Grid.Column="0">
-                        <ListView Margin="0,0,0,0" ItemsSource="{Binding DlcEntries}" SelectedItem="{Binding SelectedDlcEntry}" Background="Transparent" BorderThickness="0" KeyUp="LvFiles_KeyUp">
-                            <ListView.View>
-                                <GridView>
-                                    <GridViewColumn Header="종류" Width="90">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <Border Background="{Binding KindBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center">
-                                                    <TextBlock Text="{Binding Kind}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+            <Button Grid.Column="3" Margin="4,0,0,0" Height="36" Style="{StaticResource GrayButton}" Command="{Binding BrowseDlcCommand}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20" Margin="0,0,6,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="DLC 추가" VerticalAlignment="Center" FontSize="12"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- 목록 -->
+        <Border Grid.Row="1" Margin="5,0,5,10" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.Column="0">
+                    <ListView ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}" Background="Transparent" BorderThickness="0" Margin="5" KeyUp="LvFiles_KeyUp">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="종류" Width="90">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Background="{Binding KindBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center">
+                                                <TextBlock Text="{Binding Kind}" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="타이틀" Width="260">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,5">
+                                                <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,10,0" Background="#252526" ClipToBounds="True">
+                                                    <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
                                                 </Border>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="타이틀" Width="260">
-                                        <GridViewColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="4,5">
-                                                    <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,10,0" Background="#252526" ClipToBounds="True">
-                                                        <Image Source="{Binding Icon}" Stretch="UniformToFill"/>
-                                                    </Border>
-                                                    <StackPanel VerticalAlignment="Center">
-                                                        <TextBlock Text="{Binding DisplayName}" Foreground="#E8E8F0" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="200" ToolTip="{Binding DisplayName}"/>
-                                                        <TextBlock Text="{Binding TitleIdVersionDisplay}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0"/>
-                                                    </StackPanel>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DisplayName}" Foreground="#E8E8F0" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="200" ToolTip="{Binding DisplayName}"/>
+                                                    <TextBlock Text="{Binding TitleIdVersionDisplay}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0"/>
                                                 </StackPanel>
-                                            </DataTemplate>
-                                        </GridViewColumn.CellTemplate>
-                                    </GridViewColumn>
-                                    <GridViewColumn Header="한글패치" Width="150" DisplayMemberBinding="{Binding PatchDisplay}"/>
-                                    <GridViewColumn Header="경로" Width="220" DisplayMemberBinding="{Binding SourceDisplay}"/>
-                                </GridView>
-                            </ListView.View>
-                        </ListView>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="한글패치" Width="150" DisplayMemberBinding="{Binding PatchDisplay}"/>
+                                <GridViewColumn Header="경로" Width="220" DisplayMemberBinding="{Binding FilePath}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
 
-                        <Border IsHitTestVisible="False" Visibility="{Binding DlcHintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15" CornerRadius="6">
-                            <Border.Background>
-                                <SolidColorBrush Color="#181818" Opacity="0.95"/>
-                            </Border.Background>
-                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
-                                <Image Source="/Assets/Images/drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                                <TextBlock Text="DLC 파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                                <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel Orientation="Horizontal" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.Items>
-                                        <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                            <TextBlock Text="WUD" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
-                                                </TextBlock.Effect>
-                                            </TextBlock>
-                                        </Border>
-                                        <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                            <TextBlock Text="WUX" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFA254" Opacity="0.4"/>
-                                                </TextBlock.Effect>
-                                            </TextBlock>
-                                        </Border>
-                                        <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                            <TextBlock Text="WUA" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
-                                                </TextBlock.Effect>
-                                            </TextBlock>
-                                        </Border>
-                                        <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                            <TextBlock Text="폴더" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
-                                                <TextBlock.Effect>
-                                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
-                                                </TextBlock.Effect>
-                                            </TextBlock>
-                                        </Border>
-                                    </ItemsControl.Items>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
-
-                    <StackPanel Grid.Column="1" Margin="5,5,5,5" VerticalAlignment="Top">
-                        <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseAddDlcFileCommand}">
-                            <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="DLC 파일 추가"/>
-                        </Button>
-                        <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseAddDlcFolderCommand}">
-                            <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="DLC 폴더 추가"/>
-                        </Button>
-                        <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchForSelectedDlcCommand}">
-                            <Image Source="/Assets/Images/Patch.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="패치 폴더"/>
-                        </Button>
-                        <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding RemoveSelectedDlcCommand}">
-                            <Image Source="/Assets/Images/Delete.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="선택 삭제"/>
-                        </Button>
-                        <Button Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding RemoveAllDlcCommand}">
-                            <Image Source="/Assets/Images/Clear.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="모두 삭제"/>
-                        </Button>
-                    </StackPanel>
+                    <Border IsHitTestVisible="False" Visibility="{Binding EntriesHintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,15,15,15" CornerRadius="6">
+                        <Border.Background>
+                            <SolidColorBrush Color="#181818" Opacity="0.95"/>
+                        </Border.Background>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
+                            <TextBlock Text="위 버튼으로 본편 / 업데이트 / DLC를 추가하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
                 </Grid>
+
+                <StackPanel Grid.Column="1" Margin="5" VerticalAlignment="Top">
+                    <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchForSelectedCommand}">
+                        <Image Source="/Assets/Images/Patch.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="한글패치 폴더"/>
+                    </Button>
+                    <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding RemoveSelectedCommand}">
+                        <Image Source="/Assets/Images/Delete.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="선택 삭제"/>
+                    </Button>
+                    <Button Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding RemoveAllCommand}">
+                        <Image Source="/Assets/Images/Clear.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" ToolTip="모두 삭제"/>
+                    </Button>
+                </StackPanel>
             </Grid>
         </Border>
 
+        <!-- 출력 포맷 선택 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="5,0,0,10">
+            <TextBlock Text="출력 포맷:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <RadioButton Content="WUA" GroupName="OutputFormat" IsChecked="{Binding IsWuaFormat}" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0"/>
+            <RadioButton Content="WUP (실기 설치용)" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" Foreground="White" VerticalAlignment="Center"/>
+        </StackPanel>
+
         <!-- 작업 폴더 -->
-        <StackPanel Grid.Row="1" Margin="5,5,5,10">
-            <TextBlock Text="작업 폴더" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+        <StackPanel Grid.Row="3" Margin="5,0,5,10">
             <Grid Height="36">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -218,15 +148,8 @@
             </Grid>
         </StackPanel>
 
-        <!-- 출력 포맷 선택 -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="5,0,0,10">
-            <TextBlock Text="출력 포맷:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <RadioButton Content="WUA" GroupName="OutputFormat" IsChecked="{Binding IsWuaFormat}" IsEnabled="{Binding IsIdle}" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0"/>
-            <RadioButton Content="WUP (실기 설치용)" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" IsEnabled="{Binding IsIdle}" Foreground="White" VerticalAlignment="Center"/>
-        </StackPanel>
-
         <!-- 실행 버튼 -->
-        <Grid Grid.Row="3" Margin="5,0,0,10">
+        <Grid Grid.Row="4" Margin="5,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -264,7 +187,7 @@
         </Grid>
 
         <!-- 진행률 -->
-        <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
+        <Border Grid.Row="5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
             <Grid Height="28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

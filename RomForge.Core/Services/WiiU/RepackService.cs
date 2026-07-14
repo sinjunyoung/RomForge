@@ -221,14 +221,14 @@ public sealed class RepackService()
             {
                 var repackEntries = new List<RepackEntry>();
                 for (int i = 0; i < entries.Count; i++)
-                    repackEntries.Add(new RepackEntry(sources[i], entries[i].PatchPath));
+                    repackEntries.Add(new RepackEntry(sources[i], entries[i].PatchPath, TitleIdHexOverride: entries[i].RoleCorrectedTitleIdHex));
 
                 string fileName = entries[0].DisplayName;
                 fileName = NspNameBuilder.SafeFileName(fileName);
 
                 if (format == RepackOutputFormat.Wup)
                 {
-                    RepackToWup(repackEntries, sources, fileName, outputPath, progress, log, ct);
+                    RepackToWup(repackEntries, sources, entries, fileName, outputPath, progress, log, ct);
                     return;
                 }
 
@@ -265,8 +265,10 @@ public sealed class RepackService()
     /// (실제 NUS 배포 방식대로 타이틀당 tmd/tik 세트 하나). 소스 하나마다:
     /// code/는 파일별로 개별 raw 콘텐츠, meta/는 파일별로 개별 hashed 콘텐츠, 그 외(content/ 등)는
     /// 하나의 hashed 콘텐츠로 묶는다 — NUSPacker의 기본 규칙과 동일한 방식.
+    /// title ID는 entry.Role 기준으로 보정한 값(RoleCorrectedTitleIdHex)을 쓴다 — 업데이트/DLC로
+    /// 지정한 폴더의 실제 title ID가 본편 카테고리로 찍혀있는 흔한 경우에도 결과물이 올바르게 나오게 하기 위함.
     /// </summary>
-    private static void RepackToWup(List<RepackEntry> repackEntries, List<ITitleSource> sources, string fileName, string outputPath, Action<ProgressInfo>? progress, Action<string, LogLevel>? log, CancellationToken ct)
+    private static void RepackToWup(List<RepackEntry> repackEntries, List<ITitleSource> sources, IReadOnlyList<TitleInputEntry> entries, string fileName, string outputPath, Action<ProgressInfo>? progress, Action<string, LogLevel>? log, CancellationToken ct)
     {
         for (int i = 0; i < sources.Count; i++)
         {
@@ -320,10 +322,10 @@ public sealed class RepackService()
             if (contentFiles.Count > 0)
                 groups.Add(new WupContentGroup { Hashed = true, Files = contentFiles });
 
-            ulong titleId = Convert.ToUInt64(source.TitleIdHex, 16);
+            ulong titleId = entries[i].GetRoleCorrectedTitleId();
             ushort titleVersion = (ushort)source.TitleVersion;
 
-            string suffix = sources.Count > 1 ? $"_{i}_{source.TitleIdHex}_v{titleVersion}" : "";
+            string suffix = sources.Count > 1 ? $"_{i}_{entries[i].Kind}_v{titleVersion}" : "";
             string wupFolder = Utils.GetUniqueFilePath(Path.Combine(outputPath, $"{fileName}{suffix}_WUP"));
 
             log?.Invoke($"WUP로 패키징 중 ({i + 1}/{sources.Count}): {wupFolder}", LogLevel.Info);
@@ -333,7 +335,7 @@ public sealed class RepackService()
             progress?.Invoke(new ProgressInfo
             {
                 Percent = (int)((i + 1) * 100.0 / sources.Count),
-                Label = $"WUP 생성 완료: {source.TitleIdHex}_v{titleVersion}",
+                Label = $"WUP 생성 완료: {titleId:x16}_v{titleVersion}",
                 TimeInfo = string.Empty,
                 Speed = string.Empty,
             });
