@@ -331,13 +331,13 @@ public sealed class RepackService()
             var groups = new List<WupContentGroup>();
 
             foreach (var f in codeFiles)
-                groups.Add(new WupContentGroup { Hashed = false, Files = [f] });
+                groups.Add(new WupContentGroup { Hashed = false, FstFlags = 0x0000, Files = [f] });
 
             foreach (var f in metaFiles)
-                groups.Add(new WupContentGroup { Hashed = true, Files = [f] });
+                groups.Add(new WupContentGroup { Hashed = true, FstFlags = 0x0040, Files = [f] });
 
             if (contentFiles.Count > 0)
-                groups.Add(new WupContentGroup { Hashed = true, Files = contentFiles });
+                groups.Add(new WupContentGroup { Hashed = true, FstFlags = 0x0400, Files = contentFiles });
 
             ulong titleId = entries[i].GetRoleCorrectedTitleId();
             ushort titleVersion = (ushort)source.TitleVersion;
