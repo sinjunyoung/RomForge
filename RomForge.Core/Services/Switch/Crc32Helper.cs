@@ -52,6 +52,7 @@ namespace RomForge.Core.Services.Switch
         public static string BuildTitleId(uint crc32)
         {
             string hex = crc32.ToString("X8");
+
             return $"010{hex}000";
         }
     }

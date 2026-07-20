@@ -25,11 +25,11 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDrop="Cue_Drop" PreviewDragOver="OnPreviewDragOver">
                     <Grid>
-                        <TextBox Text="{Binding CuePath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                        <TextBox Text="{Binding CuePath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" IsEnabled="{Binding IsIdle}"/>
                         <TextBlock Text="CUE 파일을 드래그&amp;드롭하세요" Visibility="{Binding CueHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
                     </Grid>
                 </Border>
-                <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseCueCommand}">
+                <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseCueCommand}" IsEnabled="{Binding IsIdle}">
                     <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
@@ -42,11 +42,11 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDrop="Nsp_Drop" PreviewDragOver="OnPreviewDragOver">
                     <Grid>
-                        <TextBox Text="{Binding NspPath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                        <TextBox Text="{Binding NspPath, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" IsEnabled="{Binding IsIdle}" />
                         <TextBlock Text="원본 NSP/NSZ 파일을 드래그&amp;드롭하세요" Visibility="{Binding NspHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
                     </Grid>
                 </Border>
-                <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseNspCommand}">
+                <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseNspCommand}" IsEnabled="{Binding IsIdle}">
                     <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
@@ -58,7 +58,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver">
+            <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
                 <Grid>
                     <TextBlock Text="커버 이미지" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
                     <Image Source="{Binding CoverImagePath}" Stretch="Uniform" Margin="5"/>
@@ -68,7 +68,7 @@
             <StackPanel Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center">
                 <TextBlock Text="게임명" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Height="36" Margin="0,0,0,15">
-                    <TextBox Text="{Binding GameTitle, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" VerticalContentAlignment="Center" Padding="10,0"/>
+                    <TextBox Text="{Binding GameTitle, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" VerticalContentAlignment="Center" Padding="10,0" IsEnabled="{Binding IsIdle}"/>
                 </Border>
                 <Grid>
                     <Grid.ColumnDefinitions>

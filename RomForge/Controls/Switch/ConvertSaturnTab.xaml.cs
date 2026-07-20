@@ -23,7 +23,9 @@ namespace RomForge.Controls.Switch
         private void Cue_Drop(object sender, DragEventArgs e)
         {
             e.Handled = true;
+
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
             if (files != null && files.Length > 0 && files[0].EndsWith(".cue", StringComparison.OrdinalIgnoreCase))
                 ViewModel.CuePath = files[0];
         }
@@ -31,7 +33,9 @@ namespace RomForge.Controls.Switch
         private void Nsp_Drop(object sender, DragEventArgs e)
         {
             e.Handled = true;
+
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
             if (files != null && files.Length > 0 && (files[0].EndsWith(".nsp", StringComparison.OrdinalIgnoreCase) || files[0].EndsWith(".nsz", StringComparison.OrdinalIgnoreCase)))
                 ViewModel.NspPath = files[0];
         }
@@ -39,14 +43,13 @@ namespace RomForge.Controls.Switch
         private void Cover_Drop(object sender, DragEventArgs e)
         {
             e.Handled = true;
+
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
             if (files != null && files.Length > 0)
                 ViewModel.CoverImagePath = files[0];
         }
 
-        private async void BtnStart_Click(object sender, RoutedEventArgs e)
-        {
-            await ViewModel.ConvertAsync();
-        }
+        private async void BtnStart_Click(object sender, RoutedEventArgs e) => await ViewModel.ConvertAsync();
     }
 }

@@ -1,6 +1,4 @@
-﻿using RomForge.Core;
-
-namespace RomForge.ViewModels.Switch;
+﻿namespace RomForge.ViewModels.Switch;
 
 public class SwitchMainViewModel : MultiToolTabViewModel
 {
