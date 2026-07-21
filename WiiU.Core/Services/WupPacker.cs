@@ -95,21 +95,36 @@ public static class WupPacker
 
             NUSPackage nusPackage = NUSPackageFactory.CreateNewPackage(config);
 
-            int totalContents = nusPackage.GetContents().GetContentCount() - 1; // exclude the FST itself
-            int packedContents = 0;
-            long processedBytes = 0;
+            // Each content is processed in two full passes (hash, then encrypt), so total "work"
+            // is roughly 2x the plain input size. Track how far each content has gotten in each
+            // phase so we can turn per-block callbacks into a single smoothly increasing total.
+            var contentProgress = new Dictionary<Content, (long hash, long encrypt)>();
+            long totalWork = totalBytes * 2;
+            long doneWork = 0;
 
             onProgress?.Invoke(0, totalBytes, "패킹 중");
 
-            nusPackage.PackContents(outputFolder, content =>
+            nusPackage.PackContents(outputFolder, onContentPacked: null, onContentBytesProcessed: (content, phase, done, total) =>
             {
                 ct.ThrowIfCancellationRequested();
-                packedContents++;
-                // Weight by the content's actual (encrypted) size, not by content count - a folder's
-                // worth of data packed into one big content shouldn't count the same as a 200-byte xml.
-                processedBytes += content.GetEncryptedFileSize();
-                long reportedBytes = Math.Min(processedBytes, totalBytes);
-                onProgress?.Invoke(reportedBytes, totalBytes, $"content {packedContents}/{totalContents} (#{content.GetID():x8})");
+
+                contentProgress.TryGetValue(content, out var prev);
+                long delta;
+                if (phase == "hash")
+                {
+                    delta = done - prev.hash;
+                    prev.hash = done;
+                }
+                else
+                {
+                    delta = done - prev.encrypt;
+                    prev.encrypt = done;
+                }
+                contentProgress[content] = prev;
+
+                doneWork += delta;
+                long reportedBytes = Math.Min(doneWork / 2, totalBytes);
+                onProgress?.Invoke(reportedBytes, totalBytes, $"{phase} #{content.GetID():x8}");
             });
 
             // NUSPackerSharp writes content filenames in uppercase hex (ported from the original

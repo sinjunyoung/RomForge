@@ -164,12 +164,26 @@ namespace NUSPacker.Nuspackage.Contents
         /// </param>
         public void PackContents(string outputDir, System.Action<Content>? onContentPacked)
         {
+            PackContents(outputDir, onContentPacked, null);
+        }
+
+        /// <param name="onContentBytesProcessed">
+        /// Optional: invoked repeatedly while EACH content is being hashed/encrypted, as
+        /// (content, phase, bytesInPhase, totalBytesInPhase) where phase is "hash" then "encrypt".
+        /// Lets a caller show smooth progress even when one content dominates the total size.
+        /// Purely observational.
+        /// </param>
+        public void PackContents(string outputDir, System.Action<Content>? onContentPacked, System.Action<Content, string, long, long>? onContentBytesProcessed)
+        {
             // At first pack all non FST contents.
             foreach (Content c in GetContents())
             {
                 if (!c.Equals(GetFSTContent()))
                 {
-                    c.PackContentToFile(outputDir);
+                    Content current = c;
+                    c.PackContentToFile(outputDir, onContentBytesProcessed == null
+                        ? null
+                        : (phase, done, total) => onContentBytesProcessed(current, phase, done, total));
                     onContentPacked?.Invoke(c);
                 }
             }

@@ -18,13 +18,18 @@ namespace NUSPacker.Nuspackage.Crypto
 
         private int blockCount = 0;
 
-        public ContentHashes(string filePath, bool hashed)
+        public ContentHashes(string filePath, bool hashed) : this(filePath, hashed, null)
+        {
+        }
+
+        /// <param name="onBytesHashed">Optional: invoked after each block is hashed, with cumulative bytes hashed so far. Purely observational.</param>
+        public ContentHashes(string filePath, bool hashed, Action<long>? onBytesHashed)
         {
             if (hashed)
             {
                 try
                 {
-                    CalculateH0Hashes(filePath);
+                    CalculateH0Hashes(filePath, onBytesHashed);
                     CalculateOtherHashes(1, h0hashes, h1hashes);
                     CalculateOtherHashes(2, h1hashes, h2hashes);
                     CalculateOtherHashes(3, h2hashes, h3hashes);
@@ -73,7 +78,7 @@ namespace NUSPacker.Nuspackage.Crypto
             Console.WriteLine("\rcalculating h" + hash_level + ": done");
         }
 
-        private void CalculateH0Hashes(string filePath)
+        private void CalculateH0Hashes(string filePath, Action<long>? onBytesHashed)
         {
             using FileStream in_ = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             int buffer_size = 0xFC00;
@@ -96,6 +101,7 @@ namespace NUSPacker.Nuspackage.Crypto
                 h0hashes[block] = HashUtil.HashSHA1(buffer);
 
                 block++;
+                onBytesHashed?.Invoke((long)block * buffer_size);
                 int progress = (int)((block * 1.0 / total_blocks * 1.0) * 100);
                 if (block % 100 == 0)
                 {

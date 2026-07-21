@@ -229,6 +229,16 @@ namespace NUSPacker.Nuspackage.Contents
 
         public void PackContentToFile(string outputDir)
         {
+            PackContentToFile(outputDir, null);
+        }
+
+        /// <param name="onBytesProcessed">
+        /// Optional: invoked repeatedly while this content is being hashed and encrypted, with
+        /// (phase, bytesInPhase, totalBytesInPhase). phase is "hash" then "encrypt". Purely
+        /// observational - does not change what gets packed.
+        /// </param>
+        public void PackContentToFile(string outputDir, System.Action<string, long, long>? onBytesProcessed)
+        {
             Console.WriteLine("Packing Content " + GetID().ToString("X8"));
             Console.WriteLine();
 
@@ -237,18 +247,21 @@ namespace NUSPacker.Nuspackage.Contents
             Console.WriteLine("Packing files into one file:");
             // At first we need to create the decrypted file.
             string decryptedFile = PackDecrypted();
+            long decryptedSize = new FileInfo(decryptedFile).Length;
 
             Console.WriteLine();
             Console.WriteLine("Generate hashes:");
             // Calculates the hashes for the decrypted content. If the content is not hashed,
             // only the hash of the decrypted file will be calculated
-            ContentHashes contentHashes = new ContentHashes(decryptedFile, IsHashed());
+            ContentHashes contentHashes = new ContentHashes(decryptedFile, IsHashed(),
+                onBytesHashed: bytes => onBytesProcessed?.Invoke("hash", bytes, decryptedSize));
             string h3_path = outputDir + "/" + GetID().ToString("X8") + ".h3";
             contentHashes.SaveH3ToFile(h3_path);
             SetHash(contentHashes.GetTMDHash());
             Console.WriteLine();
             Console.WriteLine("Encrypt content (" + GetID().ToString("X8") + ")");
-            string encryptedFile = PackEncrypted(outputDir, decryptedFile, contentHashes, encryption);
+            string encryptedFile = PackEncrypted(outputDir, decryptedFile, contentHashes, encryption,
+                onBytesEncrypted: bytes => onBytesProcessed?.Invoke("encrypt", bytes, decryptedSize));
 
             SetEncryptedFileSize(new FileInfo(encryptedFile).Length);
 
@@ -257,16 +270,16 @@ namespace NUSPacker.Nuspackage.Contents
             Console.WriteLine("-------------");
         }
 
-        private string PackEncrypted(string outputDir, string decryptedFile, ContentHashes hashes, Encryption encryption)
+        private string PackEncrypted(string outputDir, string decryptedFile, ContentHashes hashes, Encryption encryption, System.Action<long>? onBytesEncrypted)
         {
             string outputFilePath = $"{outputDir}/{GetID():X8}.app";
             if ((GetContentType() & TYPE_HASHED) == TYPE_HASHED)
             {
-                encryption.EncryptFileHashed(decryptedFile, this, outputFilePath, hashes);
+                encryption.EncryptFileHashed(decryptedFile, this, outputFilePath, hashes, onBytesEncrypted);
             }
             else
             {
-                encryption.EncryptFileWithPadding(decryptedFile, this, outputFilePath, CONTENT_FILE_PADDING);
+                encryption.EncryptFileWithPadding(decryptedFile, this, outputFilePath, CONTENT_FILE_PADDING, onBytesEncrypted);
             }
             Console.WriteLine("Saved encrypted file to: " + outputFilePath);
             return outputFilePath;

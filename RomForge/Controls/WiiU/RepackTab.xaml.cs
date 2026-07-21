@@ -1,6 +1,5 @@
 ﻿using NSW.Core.Enums;
 using NSW.WPF.Services;
-using RomForge.Core.Models.PS;
 using RomForge.ViewModels.WiiU;
 using System.IO;
 using System.Windows;

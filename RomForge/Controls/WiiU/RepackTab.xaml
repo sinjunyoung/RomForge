@@ -98,13 +98,13 @@
                         </ListView.View>
                     </ListView>
 
-                    <Border IsHitTestVisible="False" Visibility="{Binding EntriesHintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,15,15,15" CornerRadius="6">
+                    <Border IsHitTestVisible="False" Visibility="{Binding EntriesHintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,15,15,15" CornerRadius="6" IsEnabled="{Binding IsIdle}">
                         <Border.Background>
                             <SolidColorBrush Color="#181818" Opacity="0.95"/>
                         </Border.Background>
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                             <Image Source="/Assets/Images/drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                            <TextBlock Text="본편(wud/wux/wua) / WUP 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                            <TextBlock Text="게임 파일 / 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                             <TextBlock Text="본편/업데이트/DLC는 title ID로 자동 분류됩니다" Foreground="#D4AF37" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center"/>
                             <ItemsControl HorizontalAlignment="Center" Margin="0,8,0,0">
                                 <ItemsControl.ItemsPanel>
@@ -135,9 +135,16 @@
                                         </TextBlock>
                                     </Border>
                                     <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
-                                        <TextBlock Text="WUP 폴더" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                        <TextBlock Text="WUP" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                             <TextBlock.Effect>
                                                 <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                            </TextBlock.Effect>
+                                        </TextBlock>
+                                    </Border>
+                                    <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3,0">
+                                        <TextBlock Text="Loadiine" Foreground="#CCCCCC" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                            <TextBlock.Effect>
+                                                <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
                                             </TextBlock.Effect>
                                         </TextBlock>
                                     </Border>
@@ -161,8 +168,8 @@
         <!-- 출력 포맷 선택 -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5,0,0,10">
             <TextBlock Text="출력 포맷:" Foreground="White" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <RadioButton Content="WUA ( 에뮬레이터 )" GroupName="OutputFormat" IsChecked="{Binding IsWuaFormat}" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0"/>
-            <RadioButton Content="WUP ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" Foreground="White" VerticalAlignment="Center"/>
+            <RadioButton Content="WUA ( 에뮬레이터 )" GroupName="OutputFormat" IsChecked="{Binding IsWuaFormat}" Foreground="White" VerticalAlignment="Center" Margin="0,0,15,0" IsEnabled="{Binding IsIdle}"/>
+            <RadioButton Content="WUP ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" Foreground="White" VerticalAlignment="Center" IsEnabled="{Binding IsIdle}"/>
         </StackPanel>
 
         <!-- 작업 폴더 -->
@@ -213,7 +220,7 @@
 
             <core:IconButton Grid.Column="2"
                              Margin="5,0,5,0"
-                             DefaultText="언팩 + 리팩 (다이렉트)"
+                             DefaultText="언팩 + 리팩 (Full)"
                              DefaultIcon="/Assets/Images/Run.png"
                              CancelText="취소"
                              CancelIcon="/Assets/Images/Cancel.png"

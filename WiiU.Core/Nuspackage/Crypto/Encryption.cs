@@ -51,13 +51,24 @@ namespace NUSPacker.Nuspackage.Crypto
 
         public void EncryptFileWithPadding(string filePath, Content content, string output_filename, int BLOCKSIZE)
         {
+            EncryptFileWithPadding(filePath, content, output_filename, BLOCKSIZE, null);
+        }
+
+        public void EncryptFileWithPadding(string filePath, Content content, string output_filename, int BLOCKSIZE, Action<long>? onBytesEncrypted)
+        {
             using Stream in_ = new FileStream(filePath, FileMode.Open, FileAccess.Read);
             using FileStream out_ = new FileStream(output_filename, FileMode.Create, FileAccess.Write);
             IV ivObj = new IV(JByteBuffer.Allocate(0x10).PutShort((short)content.GetID()).Array());
-            EncryptSingleFile(in_, out_, new FileInfo(filePath).Length, ivObj, BLOCKSIZE);
+            EncryptSingleFile(in_, out_, new FileInfo(filePath).Length, ivObj, BLOCKSIZE, onBytesEncrypted);
         }
 
         public void EncryptSingleFile(Stream in_, Stream out_, long length, IV? iv, int BLOCKSIZE)
+        {
+            EncryptSingleFile(in_, out_, length, iv, BLOCKSIZE, null);
+        }
+
+        /// <param name="onBytesEncrypted">Optional: invoked after each block is encrypted, with cumulative bytes encrypted so far. Purely observational.</param>
+        public void EncryptSingleFile(Stream in_, Stream out_, long length, IV? iv, int BLOCKSIZE, Action<long>? onBytesEncrypted)
         {
             long inputSize = length;
             long targetSize = Utils.Utils.Align(inputSize, BLOCKSIZE);
@@ -100,22 +111,29 @@ namespace NUSPacker.Nuspackage.Crypto
 
                 cur_position += inBlockBufferRead;
                 out_.Write(output, 0, inBlockBufferRead);
+                onBytesEncrypted?.Invoke(cur_position);
             } while (cur_position < targetSize && (inBlockBufferRead == BLOCKSIZE));
         }
 
         public void EncryptFileHashed(string filePath, Content content, string output_filename, ContentHashes hashes)
+        {
+            EncryptFileHashed(filePath, content, output_filename, hashes, null);
+        }
+
+        /// <param name="onBytesEncrypted">Optional: invoked after each block is encrypted, with cumulative bytes encrypted so far. Purely observational.</param>
+        public void EncryptFileHashed(string filePath, Content content, string output_filename, ContentHashes hashes, Action<long>? onBytesEncrypted)
         {
             long inputLength = new FileInfo(filePath).Length;
 
             using (Stream in_ = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             using (Stream out_ = new FileStream(output_filename, FileMode.Create, FileAccess.Write))
             {
-                EncryptFileHashed(in_, out_, inputLength, content, hashes);
+                EncryptFileHashed(in_, out_, inputLength, content, hashes, onBytesEncrypted);
             }
             content.SetEncryptedFileSize(new FileInfo(output_filename).Length);
         }
 
-        private void EncryptFileHashed(Stream in_, Stream out_, long length, Content content, ContentHashes hashes)
+        private void EncryptFileHashed(Stream in_, Stream out_, long length, Content content, ContentHashes hashes, Action<long>? onBytesEncrypted)
         {
             int BLOCKSIZE = 0x10000;
             int HASHBLOCKSIZE = 0xFC00;
@@ -142,6 +160,7 @@ namespace NUSPacker.Nuspackage.Crypto
                 out_.Write(output, 0, output.Length);
 
                 block++;
+                onBytesEncrypted?.Invoke((long)block * HASHBLOCKSIZE);
                 int progress = totalblocks == 0 ? 100 : (int)((block * 1.0 / totalblocks * 1.0) * 100);
                 if ((block % 100) == 0)
                 {
