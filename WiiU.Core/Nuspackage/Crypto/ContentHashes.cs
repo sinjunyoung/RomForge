@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using WiiU.Core.Nuspackage.Contents;
-using WiiU.Core.Utils;
+using NUSPacker.Nuspackage.Contents;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage.Crypto
+namespace NUSPacker.Nuspackage.Crypto
 {
     public class ContentHashes
     {

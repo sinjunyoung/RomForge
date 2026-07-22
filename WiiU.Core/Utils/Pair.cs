@@ -1,4 +1,4 @@
-namespace WiiU.Core.Utils
+namespace NUSPacker.Utils
 {
     public class Pair<T, K>
     {

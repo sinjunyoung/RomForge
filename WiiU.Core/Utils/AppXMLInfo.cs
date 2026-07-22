@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace WiiU.Core.Utils
+namespace NUSPacker.Utils
 {
     public class AppXMLInfo
     {

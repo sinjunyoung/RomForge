@@ -1,4 +1,4 @@
-namespace WiiU.Core.Nuspackage.Packaging
+namespace NUSPacker.Nuspackage.Packaging
 {
     public class ContentRule
     {

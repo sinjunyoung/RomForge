@@ -1,6 +1,6 @@
-using WiiU.Core.Nuspackage.Packaging;
+using NUSPacker.Nuspackage.Packaging;
 
-namespace WiiU.Core.Nuspackage.Interfaces
+namespace NUSPacker.Nuspackage.Interfaces
 {
     public interface IContentRule
     {

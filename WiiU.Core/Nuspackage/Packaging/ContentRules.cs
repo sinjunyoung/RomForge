@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using WiiU.Core.Nuspackage.Interfaces;
+using NUSPacker.Nuspackage.Interfaces;
 
-namespace WiiU.Core.Nuspackage.Packaging
+namespace NUSPacker.Nuspackage.Packaging
 {
     /// <summary>
     /// Set of ContentRule objects which contains the rules for assigning file to specific content files.

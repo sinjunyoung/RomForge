@@ -1,9 +1,15 @@
-using WiiU.Core.Nuspackage.Contents;
-using WiiU.Core.Nuspackage.Interfaces;
-using WiiU.Core.Utils;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using NUSPacker.Nuspackage.Contents;
+using NUSPacker.Nuspackage.Interfaces;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage.Fst
+namespace NUSPacker.Nuspackage.Fst
 {
+    /// <summary>
+    /// Represents a Entry of a FST
+    /// </summary>
     public class FSTEntry : IHasData, ICloneable
     {
         public enum Types : byte
@@ -60,6 +66,15 @@ namespace WiiU.Core.Nuspackage.Fst
 
         private bool notInPackage = false;
 
+        /// <summary>
+        /// Lazily-opened stream source for this entry, when it was created via the stream-factory
+        /// constructor. This is the preferred way to hand this library a file whose bytes live
+        /// somewhere other than a real path on disk (e.g. inside an already-open WUD/WUX/WUA/WUP
+        /// source) WITHOUT ever materializing the whole file into a single byte[] - important for
+        /// content files that can be hundreds of MB to several GB.
+        /// </summary>
+        private Func<Stream>? streamFactory = null;
+
         public FSTEntry(string filePath) : this(filePath, false)
         {
         }
@@ -84,6 +99,29 @@ namespace WiiU.Core.Nuspackage.Fst
                 decryptedSHA1 = null;
             }
         }
+
+        /// <summary>
+        /// Creates a file FSTEntry backed by a lazily-opened stream instead of a real file on disk.
+        /// Preferred over pointing at a real path for anything that could be large, since the
+        /// file's bytes are never fully materialized in memory at once - the packing pipeline only
+        /// ever streams through them once, sequentially.
+        /// </summary>
+        /// <param name="name">The entry's file name (not a full path).</param>
+        /// <param name="openRead">Called (once) to obtain a readable stream positioned at the start of the file's data. The caller is responsible for the stream being fresh/re-openable if this entry ends up read more than once.</param>
+        /// <param name="length">The exact byte length of the data the stream will yield.</param>
+        public FSTEntry(string name, Func<Stream> openRead, long length)
+        {
+            file = null;
+            streamFactory = openRead ?? throw new ArgumentNullException(nameof(openRead));
+            SetDir(false);
+            SetFileName(name);
+            SetFileSize(length);
+            SetNotInPackage(false);
+            decryptedSHA1 = null;
+        }
+
+        /// <summary>Stream factory for this entry if it was created via the stream-factory constructor, else null.</summary>
+        public Func<Stream>? GetStreamFactory() => streamFactory;
 
         public FSTEntry(bool root)
         {

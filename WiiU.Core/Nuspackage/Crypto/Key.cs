@@ -1,4 +1,6 @@
-namespace WiiU.Core.Nuspackage.Crypto
+using NUSPacker.Utils;
+
+namespace NUSPacker.Nuspackage.Crypto
 {
     public class Key
     {

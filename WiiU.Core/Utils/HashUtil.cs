@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace WiiU.Core.Utils
+namespace NUSPacker.Utils
 {
     public static class HashUtil
     {

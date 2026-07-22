@@ -1,4 +1,4 @@
-namespace WiiU.Core.Nuspackage.Crypto
+namespace NUSPacker.Nuspackage.Crypto
 {
     public class IV
     {

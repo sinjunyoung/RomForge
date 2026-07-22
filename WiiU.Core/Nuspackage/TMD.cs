@@ -1,10 +1,10 @@
 using System;
-using WiiU.Core.Nuspackage.Contents;
-using WiiU.Core.Nuspackage.Crypto;
-using WiiU.Core.Nuspackage.Interfaces;
-using WiiU.Core.Utils;
+using NUSPacker.Nuspackage.Contents;
+using NUSPacker.Nuspackage.Crypto;
+using NUSPacker.Nuspackage.Interfaces;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage
+namespace NUSPacker.Nuspackage
 {
     public class TMD : IHasData
     {

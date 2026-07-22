@@ -1,7 +1,7 @@
 using System;
 using System.Xml;
 
-namespace WiiU.Core.Utils
+namespace NUSPacker.Utils
 {
     public class XMLParser
     {
@@ -11,6 +11,13 @@ namespace WiiU.Core.Utils
         {
             var doc = new XmlDocument();
             doc.Load(path);
+            document = doc;
+        }
+
+        public void LoadDocument(System.IO.Stream stream)
+        {
+            var doc = new XmlDocument();
+            doc.Load(stream);
             document = doc;
         }
 

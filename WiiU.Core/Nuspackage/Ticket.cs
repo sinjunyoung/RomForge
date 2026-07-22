@@ -1,8 +1,8 @@
 using System;
-using WiiU.Core.Nuspackage.Crypto;
-using WiiU.Core.Utils;
+using NUSPacker.Nuspackage.Crypto;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage
+namespace NUSPacker.Nuspackage
 {
     /// <summary>Represents a ticket</summary>
     public class Ticket

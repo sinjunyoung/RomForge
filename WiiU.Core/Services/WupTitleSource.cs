@@ -266,7 +266,7 @@ public sealed class WupTitleSource : ITitleSource
 
             while (idx < searchEnd)
             {
-                if (string.Equals(_entries[idx].Name, part, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(_entries[idx].Name, part, StringComparison.Ordinal))
                 {
                     found = idx;
                     break;

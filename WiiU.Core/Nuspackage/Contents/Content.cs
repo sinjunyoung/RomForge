@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using WiiU.Core;
-using WiiU.Core.Nuspackage.Crypto;
-using WiiU.Core.Nuspackage.Fst;
-using WiiU.Core.Nuspackage.Interfaces;
-using WiiU.Core.Nuspackage.Packaging;
-using WiiU.Core.Utils;
+using NUSPacker.Nuspackage.Crypto;
+using NUSPacker.Nuspackage.Fst;
+using NUSPacker.Nuspackage.Interfaces;
+using NUSPacker.Nuspackage.Packaging;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage.Contents
+namespace NUSPacker.Nuspackage.Contents
 {
     /// <summary>
     /// Represents a content used in a package.
@@ -234,9 +233,10 @@ namespace WiiU.Core.Nuspackage.Contents
         }
 
         /// <param name="onBytesProcessed">
-        /// Optional: invoked repeatedly while this content is being hashed and encrypted, with
-        /// (phase, bytesInPhase, totalBytesInPhase). phase is "hash" then "encrypt". Purely
-        /// observational - does not change what gets packed.
+        /// Optional: invoked repeatedly while this content is being staged, hashed, and encrypted,
+        /// with (phase, bytesInPhase, totalBytesInPhase). phase is "stage" (copying source files
+        /// into the content's scratch file), then "hash", then "encrypt". Purely observational -
+        /// does not change what gets packed.
         /// </param>
         public void PackContentToFile(string outputDir, System.Action<string, long, long>? onBytesProcessed)
         {
@@ -247,7 +247,7 @@ namespace WiiU.Core.Nuspackage.Contents
             Encryption encryption = nusPackage.GetEncryption();
             Console.WriteLine("Packing files into one file:");
             // At first we need to create the decrypted file.
-            string decryptedFile = PackDecrypted();
+            string decryptedFile = PackDecrypted(onBytesCopied: onBytesProcessed == null ? null : (done, total) => onBytesProcessed("stage", done, total));
             long decryptedSize = new FileInfo(decryptedFile).Length;
 
             Console.WriteLine();
@@ -286,8 +286,18 @@ namespace WiiU.Core.Nuspackage.Contents
             return outputFilePath;
         }
 
-        private string PackDecrypted() // TODO: Proper error handling.
+        private string PackDecrypted(System.Action<long, long>? onBytesCopied) // TODO: Proper error handling.
         {
+            long totalFileBytes = 0;
+            foreach (FSTEntry e in GetFSTEntries())
+            {
+                if (!e.IsNotInPackage() && e.IsFile())
+                {
+                    totalFileBytes += e.GetFilesize();
+                }
+            }
+
+            long copiedSoFar = 0;
             string tmp_path = $"{Settings.tmpDir}/{GetID():X8}.dec";
             using (FileStream fos = new FileStream(tmp_path, FileMode.Create, FileAccess.Write))
             {
@@ -311,7 +321,27 @@ namespace WiiU.Core.Nuspackage.Contents
                             string output = string.Format("[{0:D5}/{1:D5}] Writing at {2:x8} | FileSize: {3:x8} | {4}",
                                 cnt_file, totalCount, old_offset, entry.GetFilesize(), entry.GetFilename());
 
-                            Utils.Utils.CopyFileInto(entry.GetFile()!, fos, output);
+                            Func<Stream>? streamFactory = entry.GetStreamFactory();
+
+                            if (streamFactory != null)
+                            {
+                                Console.WriteLine(output);
+                                using Stream src = streamFactory();
+                                byte[] copyBuffer = new byte[1 << 20]; // 1 MB chunks, so large content files report incremental progress instead of going quiet for the whole copy
+                                int read;
+                                while ((read = src.Read(copyBuffer, 0, copyBuffer.Length)) > 0)
+                                {
+                                    fos.Write(copyBuffer, 0, read);
+                                    copiedSoFar += read;
+                                    onBytesCopied?.Invoke(copiedSoFar, totalFileBytes);
+                                }
+                            }
+                            else
+                            {
+                                Utils.Utils.CopyFileInto(entry.GetFile()!, fos, output);
+                                copiedSoFar += entry.GetFilesize();
+                                onBytesCopied?.Invoke(copiedSoFar, totalFileBytes);
+                            }
 
                             int padding = (int)(cur_offset - (old_offset + entry.GetFilesize()));
                             byte[] paddingBytes = new byte[padding];

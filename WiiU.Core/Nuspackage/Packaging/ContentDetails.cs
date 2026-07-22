@@ -1,4 +1,4 @@
-namespace WiiU.Core.Nuspackage.Packaging
+namespace NUSPacker.Nuspackage.Packaging
 {
     /// <summary>
     /// This class represents the attributes of each content file. Type, flags and permission can be set here.

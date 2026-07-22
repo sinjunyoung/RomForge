@@ -3,7 +3,7 @@ using System.IO;
 using System.Numerics;
 using System.Text;
 
-namespace WiiU.Core.Utils
+namespace NUSPacker.Utils
 {
     public static class Utils
     {

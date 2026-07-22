@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using WiiU.Core.Nuspackage.Contents;
-using WiiU.Core.Nuspackage.Interfaces;
-using WiiU.Core.Utils;
+using NUSPacker.Nuspackage.Contents;
+using NUSPacker.Nuspackage.Interfaces;
+using NUSPacker.Utils;
 
-namespace WiiU.Core.Nuspackage.Fst
+namespace NUSPacker.Nuspackage.Fst
 {
     public class FSTEntries : IHasData
     {

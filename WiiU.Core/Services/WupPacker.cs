@@ -1,11 +1,12 @@
 ﻿using System.Security.Cryptography;
+using NUSPacker;
+using NUSPacker.Nuspackage;
+using NUSPacker.Nuspackage.Contents;
+using NUSPacker.Nuspackage.Crypto;
+using NUSPacker.Nuspackage.Fst;
+using NUSPacker.Nuspackage.Packaging;
+using NUSPacker.Utils;
 using WiiU.Core.Models;
-using WiiU.Core.Nuspackage;
-using WiiU.Core.Nuspackage.Contents;
-using WiiU.Core.Nuspackage.Crypto;
-using WiiU.Core.Nuspackage.Fst;
-using WiiU.Core.Nuspackage.Packaging;
-using WiiU.Core.Utils;
 
 namespace WiiU.Core.Services;
 
@@ -31,7 +32,7 @@ public static class WupPacker
         ulong titleId,
         ushort titleVersion,
         IReadOnlyList<WupContentGroup> groups,
-        Action<long, long, string>? onProgress = null,
+        Action<ulong, ulong, string>? onProgress = null,
         CancellationToken ct = default)
     {
         Directory.CreateDirectory(outputFolder);
@@ -44,10 +45,10 @@ public static class WupPacker
         {
             Directory.CreateDirectory(Settings.tmpDir);
 
-            long totalBytes = 0;
+            ulong totalBytes = 0;
             foreach (var group in groups)
                 foreach (var file in group.Files)
-                    totalBytes += file.Length;
+                    totalBytes += (ulong)file.Length;
 
             // ---- build the FST tree entirely in memory ----
             var contents = new Contents();
@@ -148,11 +149,12 @@ public static class WupPacker
 
             NUSPackage nusPackage = NUSPackageFactory.CreatePackageFromBuiltTree(contents, fst, appInfo, encryptionKey, encryptWithKey);
 
-            // Each content is processed in two full passes (hash, then encrypt), so total "work" is
-            // roughly 2x the plain input size. Track how far each content has gotten in each phase
-            // so per-block callbacks turn into one smoothly increasing total.
-            var contentProgress = new Dictionary<Content, (long hash, long encrypt)>();
-            long totalWork = totalBytes * 2;
+            // Each content is processed in three full passes (stage into scratch, hash, then
+            // encrypt), so total "work" is roughly 3x the plain input size. Track how far each
+            // content has gotten in each phase so per-block callbacks turn into one smoothly
+            // increasing total.
+            var contentLastDone = new Dictionary<(Content, string), long>();
+            long totalWork = (long)totalBytes * 3;
             long doneWork = 0;
 
             onProgress?.Invoke(0, totalBytes, "패킹 중");
@@ -161,22 +163,19 @@ public static class WupPacker
             {
                 ct.ThrowIfCancellationRequested();
 
-                contentProgress.TryGetValue(content, out var prev);
-                long delta;
-                if (phase == "hash")
-                {
-                    delta = done - prev.hash;
-                    prev.hash = done;
-                }
-                else
-                {
-                    delta = done - prev.encrypt;
-                    prev.encrypt = done;
-                }
-                contentProgress[content] = prev;
+                var key = (content, phase);
+                contentLastDone.TryGetValue(key, out long prevDone);
+
+                long delta = done - prevDone;
+                if (delta < 0) delta = 0; // 혹시라도 리셋되는 경우 방지
+                contentLastDone[key] = done;
 
                 doneWork += delta;
-                long reportedBytes = totalWork > 0 ? Math.Min(doneWork * totalBytes / totalWork, totalBytes) : totalBytes;
+                if (doneWork > totalWork) doneWork = totalWork;
+
+                // 전체 작업량 대비 진행도를 안전하게 계산 (double 사용 후 ulong 변환으로 오버플로우 원천 차단)
+                ulong reportedBytes = totalWork > 0 ? (ulong)((double)doneWork / totalWork * totalBytes) : totalBytes;
+
                 onProgress?.Invoke(reportedBytes, totalBytes, $"{phase} #{content.GetID():x8}");
             });
 

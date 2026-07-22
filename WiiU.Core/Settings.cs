@@ -1,4 +1,4 @@
-namespace WiiU.Core
+namespace NUSPacker
 {
     public static class Settings
     {
