@@ -192,13 +192,6 @@ public sealed class WupTitleSource : ITitleSource
         return new FstEntryStream(this, entry, path);
     }
 
-    /// <summary>
-    /// Lazily reads an FstEntry's bytes on demand instead of eagerly allocating a single
-    /// entry.FileSize-sized byte[] up front (the previous OpenRead did this, which both wasted
-    /// memory for every read and outright crashed - via an OverflowException converting the size
-    /// to an array length - for any content file over ~2GB, since entry.FileSize is a uint that no
-    /// longer fits as a single array's length past that point).
-    /// </summary>
     private sealed class FstEntryStream(WupTitleSource owner, FstEntry entry, string path) : Stream
     {
         private long _position;
