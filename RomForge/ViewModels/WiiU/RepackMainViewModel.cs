@@ -4,7 +4,6 @@ using NSW.Core.Enums;
 using NSW.WPF.Services;
 using NSW.WPF.UI;
 using RomForge.Core.Models;
-using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services.WiiU;
 using RomForge.Core.UI.Command;

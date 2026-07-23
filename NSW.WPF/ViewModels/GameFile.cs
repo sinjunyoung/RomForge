@@ -9,6 +9,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, Core.Properties.
     private string? _titleId;
     private string? _version;
     private ImageSource? _icon;
+    private string? _patchPath;
 
     public string FileType
     {
@@ -45,6 +46,23 @@ public class GameFile(string filePath) : FileItemBase(filePath, Core.Properties.
         get => _icon;
         set => SetProperty(ref _icon, value);
     }
+
+    public string? PatchPath
+    {
+        get => _patchPath;
+        set
+        {
+            SetProperty(ref _patchPath, value);
+            OnPropertyChanged(nameof(PatchDisplay));
+            OnPropertyChanged(nameof(PatchIconSource));
+        }
+    }
+
+    public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
+
+    public string PatchIconSource => string.IsNullOrEmpty(PatchPath)
+        ? "/Assets/Images/NoPatch.png"
+        : "/Assets/Images/Patch.png";
 
     public bool IsKeyMissing => FileType == Core.Properties.Resources.Status_NoKey;
 

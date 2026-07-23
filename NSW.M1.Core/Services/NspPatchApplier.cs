@@ -71,14 +71,12 @@ public static class NspPatchApplier
         }
     }
 
-    public static void ApplyDlcPatch(string dlcPatchRoot, string titleIdStr, string romfsDir, IProgress<(int pct, string label)> progress, Action<string, LogLevel> log)
+    public static void ApplyDlcPatch(string patchDir, string titleIdStr, string romfsDir, IProgress<(int pct, string label)> progress, Action<string, LogLevel> log)
     {
-        string dlcPatchDir = Path.Combine(dlcPatchRoot, titleIdStr);
-
-        if (!Directory.Exists(dlcPatchDir))
+        if (!Directory.Exists(patchDir))
             return;
 
-        string patchRomfs = Path.Combine(dlcPatchDir, "romfs");
+        string patchRomfs = Path.Combine(patchDir, "romfs");
 
         if (Directory.Exists(patchRomfs))
         {
@@ -87,7 +85,7 @@ public static class NspPatchApplier
             MergeDirectory(patchRomfs, romfsDir);
         }
 
-        var xdeltaFiles = Directory.EnumerateFiles(dlcPatchDir, "*.xdelta", SearchOption.AllDirectories)
+        var xdeltaFiles = Directory.EnumerateFiles(patchDir, "*.xdelta", SearchOption.AllDirectories)
                                    .OrderBy(f => f)
                                    .ToList();
 

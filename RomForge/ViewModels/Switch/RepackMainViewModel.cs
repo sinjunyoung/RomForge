@@ -26,8 +26,6 @@ namespace RomForge.ViewModels.Switch
         private int _progressPct;
         private string _progressLabel = "대기 중...";
         private string _progressTime = "00:00 경과";
-        private string _patchPath = string.Empty;
-        private string _dlcPath = string.Empty;
         private string _outputPath = string.Empty;
         private BuildMode? _currentMode;        
         
@@ -51,18 +49,6 @@ namespace RomForge.ViewModels.Switch
             set { _progressTime = value; OnPropertyChanged(); }
         }
 
-        public string PatchPath
-        {
-            get => _patchPath;
-            set { _patchPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(PatchHintVisibility)); }
-        }
-
-        public string DlcPath
-        {
-            get => _dlcPath;
-            set { _dlcPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(DlcHintVisibility)); }
-        }
-
         public string OutputPath
         {
             get => _outputPath;
@@ -81,27 +67,17 @@ namespace RomForge.ViewModels.Switch
 
         public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess;
 
-        public Visibility PatchHintVisibility => string.IsNullOrEmpty(PatchPath) ? Visibility.Visible : Visibility.Collapsed;
-
-        public Visibility DlcHintVisibility => string.IsNullOrEmpty(DlcPath) ? Visibility.Visible : Visibility.Collapsed;
-
         public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
         public record BuildContext(IList<GameFile> GameFiles, GameMetadata? Metadata, ApplicationControlProperty.Language ForcedLanguage, byte? TargetIdOffset);
 
         public BuildContext? Context { get; set; }
 
-        public ICommand BrowsePatchCommand { get; }
-
-        public ICommand BrowseDlcCommand { get; }
-
         public ICommand BrowseOutputCommand { get; }
 
         public RepackMainViewModel()
         {
             OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
-            BrowsePatchCommand = new RelayCommand(async _ => await BrowsePatch());
-            BrowseDlcCommand = new RelayCommand(async _ => await BrowseDlc());
             BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 
             PropertyChanged += (_, e) =>
@@ -220,75 +196,60 @@ namespace RomForge.ViewModels.Switch
             req = null;
             errorMsg = string.Empty;
 
-            if (string.IsNullOrEmpty(OutputPath)) 
-            { 
-                errorMsg = "작업 폴더를 설정하세요."; 
-                return false; 
+            if (string.IsNullOrEmpty(OutputPath))
+            {
+                errorMsg = "작업 폴더를 설정하세요.";
+                return false;
             }
 
             if (mode == BuildMode.RebuildOnly)
             {
                 string unpackedPath = Path.Combine(OutputPath, "unpacked");
 
-                if (!Directory.Exists(unpackedPath)) 
-                { 
-                    errorMsg = "언팩된 데이터가 없습니다."; 
-                    return false; 
+                if (!Directory.Exists(unpackedPath))
+                {
+                    errorMsg = "언팩된 데이터가 없습니다.";
+                    return false;
                 }
 
                 string tempPath = Path.Combine(OutputPath, "temp");
-
-                if (!Directory.Exists(tempPath)) 
+                if (!Directory.Exists(tempPath))
                     Directory.CreateDirectory(tempPath);
 
-                req = new BuildRequest(string.Empty, string.Empty, [], PatchPath.Trim(), OutputPath)
-                {
-                    DlcPatchDir = DlcPath.Trim()
-                };
-
+                req = new BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath);
                 return true;
             }
 
             var gameFiles = Context?.GameFiles;
 
-            if (gameFiles == null || !gameFiles.Any(f => f.FileType.Contains('B'))) 
-            { 
-                errorMsg = "원본 파일(BASE)이 리스트에 없습니다."; 
-                return false; 
-            }
-
-            if (gameFiles.Any(f => f.IsKeyMissing)) 
-            { 
-                errorMsg = NSW.Core.Properties.Resources.Main_Err_NoKeys; 
-                return false; 
-            }
-
-            var baseFile = gameFiles.First(f => f.FileType.Contains('B')).FilePath;
-            var updateFile = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'))?.FilePath ?? string.Empty;
-            var dlcFiles = gameFiles.Where(f => f.FileType.Contains('D')).Select(f => f.FilePath).ToList();
-
-            req = new BuildRequest(baseFile, updateFile, dlcFiles, PatchPath.Trim(), OutputPath)
+            if (gameFiles == null || !gameFiles.Any(f => f.FileType.Contains('B')))
             {
-                DlcPatchDir = DlcPath.Trim()               
+                errorMsg = "원본 파일(BASE)이 리스트에 없습니다.";
+                return false;
+            }
+
+            if (gameFiles.Any(f => f.IsKeyMissing))
+            {
+                errorMsg = NSW.Core.Properties.Resources.Main_Err_NoKeys;
+                return false;
+            }
+
+            var baseEntry = gameFiles.First(f => f.FileType.Contains('B'));
+            var updateEntry = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'));
+            var dlcEntries = gameFiles.Where(f => f.FileType.Contains('D')).ToList();
+
+            string mainPatch = (baseEntry.PatchPath ?? updateEntry?.PatchPath ?? string.Empty).Trim();
+
+            var dlcPatchDirs = dlcEntries
+                .Where(f => !string.IsNullOrEmpty(f.PatchPath) && !string.IsNullOrEmpty(f.TitleID))
+                .ToDictionary(f => f.TitleID!, f => f.PatchPath!.Trim(), StringComparer.OrdinalIgnoreCase);
+
+            req = new BuildRequest(baseEntry.FilePath, updateEntry?.FilePath ?? string.Empty, [.. dlcEntries.Select(f => f.FilePath)], mainPatch, OutputPath)
+            {
+                DlcPatchDirs = dlcPatchDirs
             };
 
             return true;
-        }
-
-        private async Task BrowsePatch()
-        {
-            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "한글패치 루트 폴더 선택" };
-
-            if (dlg.ShowDialog() == true) 
-                PatchPath = dlg.FolderName;
-        }
-
-        private async Task BrowseDlc()
-        {
-            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "DLC 루트 폴더 선택" };
-
-            if (dlg.ShowDialog() == true)
-                DlcPath = dlg.FolderName;
         }
 
         private async Task BrowseOutput()

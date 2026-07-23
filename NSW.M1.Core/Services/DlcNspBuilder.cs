@@ -32,8 +32,8 @@ public static class DlcNspBuilder
 
             string romfsPath = Path.Combine(dlcDir, "romfs");
 
-            if (req.HasDlcPatch)
-                NspPatchApplier.ApplyDlcPatch(req.DlcPatchDir, titleIdStr, romfsPath, progress, log);
+            if (req.DlcPatchDirs.TryGetValue(titleIdStr, out var dlcPatchDir) && !string.IsNullOrEmpty(dlcPatchDir))
+                NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, romfsPath, progress, log);
 
             bool hasRomfs = Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any();
 

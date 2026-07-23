@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"   
+             xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
+             xmlns:local="clr-namespace:RomForge.Controls.Switch"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="800">
     <Grid>
@@ -23,7 +24,7 @@
                             <TextBlock Text="파일" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
-                    <core:FileManagerControl x:Name="fileMgr" IsEnabled="{Binding IsIdle}"/>
+                    <local:SwitchTitleListControl x:Name="titleList" IsEnabled="{Binding IsIdle}"/>
                 </TabItem>
                 <TabItem IsEnabled="{Binding IsIdle}">
                     <TabItem.Header>
@@ -36,65 +37,23 @@
                 </TabItem>
             </TabControl>
 
-            <Grid Grid.Row="1" Margin="0,0,0,5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Margin="5,0,5,0">
-                    <Grid Height="30">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="TxtPatch_DragEnter" PreviewDragOver="TxtPatch_DragOver" PreviewDrop="TxtPatch_Drop">
-                            <Grid>
-                                <TextBox x:Name="txtPatch" Text="{Binding PatchPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                                <TextBlock Text="한글패치 / xdelta 폴더를 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
-                            </Grid>
-                        </Border>
-                        <Button Grid.Column="1" x:Name="btnOpenPatchFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
-                            <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
-                        </Button>
-                    </Grid>
-
-                    <Grid Height="30" Margin="0,5,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="TxtDlc_DragEnter" PreviewDragOver="TxtDlc_DragOver" PreviewDrop="TxtDlc_Drop">
-                            <Grid>
-                                <TextBox x:Name="txtDlc" Text="{Binding DlcPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                                <TextBlock Text="한글패치 DLC 루트 폴더를 드래그&amp;드롭하세요" Visibility="{Binding DlcHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="5,0,0,0" IsHitTestVisible="False"/>
-                            </Grid>
-                        </Border>
-                        <Button Grid.Column="1" x:Name="btnOpenDlcFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseDlcCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
-                            <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Margin="5,0,5,0" VerticalAlignment="Center">
-                    <TextBlock Text="작업 폴더" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
-                    <Grid Height="30">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6">
-                            <Grid>
-                                <TextBox x:Name="txtOutput" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                                <TextBlock Text="작업 폴더를 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
-                            </Grid>
-                        </Border>
-                        <Button Grid.Column="1" x:Name="btnOpenWorkSpaceFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
-                            <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
-                        </Button>
-                    </Grid>
-                </StackPanel>
-            </Grid>
+            <StackPanel Grid.Row="1" Margin="5,0,5,5">
+                <Grid Height="30">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Margin="0,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6">
+                        <Grid>
+                            <TextBox x:Name="txtOutput" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                            <TextBlock Text="작업 폴더를 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
+                        </Grid>
+                    </Border>
+                    <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
+                        <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                </Grid>
+            </StackPanel>
 
             <Grid Grid.Row="2" Margin="5,0,0,5">
                 <Grid.ColumnDefinitions>

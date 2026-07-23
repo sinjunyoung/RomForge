@@ -9,9 +9,7 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public bool HasPatch => !string.IsNullOrEmpty(PatchDir) && Directory.Exists(PatchDir);
 
-    public string DlcPatchDir { get; init; } = string.Empty;
-
-    public bool HasDlcPatch => !string.IsNullOrEmpty(DlcPatchDir) && Directory.Exists(DlcPatchDir);
+    public IReadOnlyDictionary<string, string> DlcPatchDirs { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
     public GameMetadata? UserMetadata { get; set; }
 
