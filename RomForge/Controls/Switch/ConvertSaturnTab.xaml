@@ -76,7 +76,7 @@
                     <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8" Visibility="{Binding CoverHintVisibility}"/>
                     <TextBlock Text="이미지 파일을" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
                     <TextBlock Text="드래그&amp;드롭 하세요" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
-                    <Image Source="{Binding CoverImageSource}" Stretch="Uniform" Margin="5"/>
+                    <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="Uniform" Margin="5" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
                 </StackPanel>
             </Border>
 

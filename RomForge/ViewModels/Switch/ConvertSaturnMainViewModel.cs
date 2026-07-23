@@ -28,20 +28,21 @@ namespace RomForge.ViewModels.Switch
         private string _selectedSoundVolume = "100%";
 
         public ObservableCollection<string> SoundVolumeItems { get; } =
-            [ "60%", "80%", "100%", "120%" ];
+            ["60%", "80%", "100%", "120%"];
 
         private string _cuePath = string.Empty;
         private string _nspPath = string.Empty;
         private string _workPath = string.Empty;
         private string _coverImagePath = string.Empty;
-        private ImageSource? _coverImageSource;        
-        
+        private ImageSource? _coverImageSource;
+        private byte[]? _coverBytes;
+
         private bool _isConverting;
         private string _progressLabel = "대기 중...";
         private string _progressPercent = "0%";
         private string _progressSpeed = string.Empty;
         private string _progressTime = "00:00 경과";
-        private double _progressPct;        
+        private double _progressPct;
 
         private readonly Stopwatch _totalSw = new();
 
@@ -91,20 +92,22 @@ namespace RomForge.ViewModels.Switch
             {
                 _coverImagePath = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(CoverHintVisibility));
 
                 if (!string.IsNullOrEmpty(value) && File.Exists(value))
-                {
-                    byte[] bytes = value.ToImageBytes();
-                    CoverImageSource = bytes.ToBitmapImage();
-                }
+                    SetCover(value.ToImageBytes());
             }
         }
 
         public ImageSource? CoverImageSource
         {
             get => _coverImageSource;
-            set { _coverImageSource = value; OnPropertyChanged(); }
+            set { _coverImageSource = value; OnPropertyChanged(); OnPropertyChanged(nameof(CoverHintVisibility)); }
+        }
+
+        private void SetCover(byte[] bytes)
+        {
+            _coverBytes = bytes;
+            CoverImageSource = bytes.ToBitmapImage();
         }
 
         public bool IsConverting { get => _isConverting; set { _isConverting = value; OnPropertyChanged(); } }
@@ -125,7 +128,7 @@ namespace RomForge.ViewModels.Switch
 
         public Visibility WorkHintVisibility => string.IsNullOrEmpty(WorkPath) ? Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility CoverHintVisibility => string.IsNullOrEmpty(CoverImagePath) ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility CoverHintVisibility => CoverImageSource == null ? Visibility.Visible : Visibility.Collapsed;
 
         public ICommand BrowseCueCommand { get; }
 
@@ -162,7 +165,7 @@ namespace RomForge.ViewModels.Switch
 
         private async Task ParseSaturnDataAsync(string cuePath)
         {
-            if (string.IsNullOrEmpty(cuePath) || !File.Exists(cuePath)) 
+            if (string.IsNullOrEmpty(cuePath) || !File.Exists(cuePath))
                 return;
 
             try
@@ -182,12 +185,12 @@ namespace RomForge.ViewModels.Switch
                         }
                     }
                 }
-                if (string.IsNullOrEmpty(binPath) || !File.Exists(binPath)) 
+                if (string.IsNullOrEmpty(binPath) || !File.Exists(binPath))
                     return;
 
                 using var fs = new FileStream(binPath, FileMode.Open, FileAccess.Read);
 
-                if (fs.Length < 0x90) 
+                if (fs.Length < 0x90)
                     return;
 
                 fs.Seek(0x30, SeekOrigin.Begin);
@@ -213,6 +216,8 @@ namespace RomForge.ViewModels.Switch
                 await fs.ReadAsync(titleBuffer.AsMemory(0, 32));
 
                 GameTitle = Encoding.ASCII.GetString(titleBuffer).Trim();
+
+                await TryAutoDownloadCoverAsync(GameId);
             }
             catch
             {
@@ -220,6 +225,16 @@ namespace RomForge.ViewModels.Switch
                 GameId = string.Empty;
                 GameVersion = string.Empty;
             }
+        }
+
+        private async Task TryAutoDownloadCoverAsync(string gameId)
+        {
+            var bytes = await SaturnCoverArtFetcher.TryDownloadCoverPngAsync(gameId);
+
+            if (bytes == null)
+                return;
+
+            SetCover(bytes);
         }
 
         public async Task ConvertAsync()
@@ -261,7 +276,7 @@ namespace RomForge.ViewModels.Switch
 
         private async Task RunConversionProcess(CancellationToken token)
         {
-            if(!Directory.Exists(WorkPath))
+            if (!Directory.Exists(WorkPath))
                 WorkPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
 
             string unpackedDir = Path.Combine(WorkPath, "unpacked");
@@ -311,10 +326,10 @@ namespace RomForge.ViewModels.Switch
                 ini.SetValue("Screen", "WideScreen", WideScreen ? "1" : "0");
 
                 double volumeMultiplier = 1.0;
-                
+
                 if (!string.IsNullOrEmpty(SelectedSoundVolume) && double.TryParse(SelectedSoundVolume.TrimEnd('%'), out double parsedVal))
                     volumeMultiplier = parsedVal / 100.0;
-                
+
                 ini.SetValue("Sound", "Volume", volumeMultiplier.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
                 await ini.SaveAsync();
                 await CopyFileAsync(CuePath, Path.Combine(targetDir, cueFileName), token);
@@ -330,8 +345,8 @@ namespace RomForge.ViewModels.Switch
                     koLang.TitleName = GameTitle;
                     koLang.Publisher = Publisher;
                     koLang.Flag = true;
-                    if (!string.IsNullOrEmpty(CoverImagePath) && File.Exists(CoverImagePath))
-                        koLang.LogoData = CoverImagePath.ToImageBytes();
+                    if (_coverBytes != null)
+                        koLang.LogoData = _coverBytes;
                 }
 
                 token.ThrowIfCancellationRequested();
