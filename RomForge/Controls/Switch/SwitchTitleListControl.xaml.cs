@@ -79,17 +79,17 @@ public partial class SwitchTitleListControl : UserControl
 
     private void BtnBulkPatch_Click(object sender, RoutedEventArgs e)
     {
-        var dlcEntries = GameFiles.Where(f => f.FileType.Contains('D')).ToList();
+        var targets = GameFiles.Where(f => !string.IsNullOrEmpty(f.TitleID)).ToList();
 
-        if (dlcEntries.Count == 0)
+        if (targets.Count == 0)
         {
-            MessageBox.Show("DLC 항목이 없습니다.", "DLC 패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("타이틀 정보가 있는 항목이 없습니다.", "한글패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
 
         var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            Description = "DLC 패치 루트 폴더 선택 (titleId 이름의 하위 폴더를 자동 매칭합니다)",
+            Description = "한글패치 루트 폴더 선택 (titleId 이름의 하위 폴더를 자동 매칭합니다)",
             UseDescriptionForTitle = true
         };
 
@@ -98,21 +98,18 @@ public partial class SwitchTitleListControl : UserControl
 
         int matched = 0;
 
-        foreach (var dlc in dlcEntries)
+        foreach (var file in targets)
         {
-            if (string.IsNullOrEmpty(dlc.TitleID))
-                continue;
-
-            string candidate = Path.Combine(dlg.SelectedPath, dlc.TitleID);
+            string candidate = Path.Combine(dlg.SelectedPath, file.TitleID!);
 
             if (Directory.Exists(candidate))
             {
-                dlc.PatchPath = candidate;
+                file.PatchPath = candidate;
                 matched++;
             }
         }
 
-        MessageBox.Show($"DLC {dlcEntries.Count}개 중 {matched}개에 패치 매칭됨.", "DLC 패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show($"{targets.Count}개 중 {matched}개에 패치 매칭됨.", "한글패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void BtnRemoveFile_Click(object sender, RoutedEventArgs e)

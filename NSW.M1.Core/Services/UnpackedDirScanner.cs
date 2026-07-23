@@ -11,9 +11,22 @@ public static class UnpackedDirScanner
 {
     public static UnpackResult Scan(string unpackedDir, uint? overrideSdkVersion = null, byte? overrideKeyGeneration = null)
     {
-        string nacpPath = Path.Combine(unpackedDir, "control", "control.nacp");
+        var programDirs = Directory.GetDirectories(unpackedDir)
+            .Select(d => new { Dir = d, Name = Path.GetFileName(d) })
+            .Where(x => x.Name.Length == 16 && ulong.TryParse(x.Name, System.Globalization.NumberStyles.HexNumber, null, out _))
+            .Select(x => new { x.Dir, Id = ulong.Parse(x.Name, System.Globalization.NumberStyles.HexNumber) })
+            .OrderBy(x => x.Id)
+            .ToList();
+
+        if (programDirs.Count == 0)
+            throw new Exception("언팩된 프로그램 폴더(titleId)를 찾을 수 없습니다.");
+
+        ulong baseTitleId = programDirs[0].Id;
+
+        string nacpPath = Path.Combine(programDirs[0].Dir, "control", "control.nacp");
         string controlFile = Directory.GetFiles(unpackedDir, "control*.nca").FirstOrDefault() ?? string.Empty;
         var (krTitle, enTitle, displayVersion, titleId) = LibHacHelper.ReadNacpInfo(nacpPath);
+
         byte keyGeneration = 1;
         uint sdkVersion = 0;
         uint gameVersion = 0;
@@ -55,57 +68,43 @@ public static class UnpackedDirScanner
         var legalDirs = new Dictionary<byte, string>();
         var rawProgramNcaPaths = new Dictionary<byte, string>();
 
-        for (byte i = 0; i < 16; i++)
+        foreach (var pd in programDirs)
         {
-            string suffix = i == 0 ? string.Empty : i.ToString();
-            string exefs = Path.Combine(unpackedDir, $"exefs{suffix}");
+            byte idOffset = (byte)(pd.Id - baseTitleId);
 
-            if (Directory.Exists(exefs))
-                exefsDirs[i] = exefs;
+            string exefs = Path.Combine(pd.Dir, "exefs");
+            if (Directory.Exists(exefs)) exefsDirs[idOffset] = exefs;
 
-            string romfs = Path.Combine(unpackedDir, $"romfs{suffix}");
+            string romfs = Path.Combine(pd.Dir, "romfs");
+            if (Directory.Exists(romfs)) romfsDirs[idOffset] = romfs;
 
-            if (Directory.Exists(romfs))
-                romfsDirs[i] = romfs;
+            string logo = Path.Combine(pd.Dir, "logo");
+            if (Directory.Exists(logo)) logoDirs[idOffset] = logo;
 
-            string logo = Path.Combine(unpackedDir, $"logo{suffix}");
+            string control = Path.Combine(pd.Dir, "control");
+            if (Directory.Exists(control)) controlDirs[idOffset] = control;
 
-            if (Directory.Exists(logo))
-                logoDirs[i] = logo;
+            string htmldoc = Path.Combine(pd.Dir, "htmldoc");
+            if (Directory.Exists(htmldoc)) htmlDocDirs[idOffset] = htmldoc;
 
-            string control = Path.Combine(unpackedDir, $"control{suffix}");
+            string legal = Path.Combine(pd.Dir, "legal");
+            if (Directory.Exists(legal)) legalDirs[idOffset] = legal;
+        }
 
-            if (Directory.Exists(control))
-                controlDirs[i] = control;
+        string rawDir = Path.Combine(unpackedDir, "rawprograms");
 
-            string htmldoc = Path.Combine(unpackedDir, $"htmldoc{suffix}");
+        if (Directory.Exists(rawDir))
+        {
+            var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
 
-            if (Directory.Exists(htmldoc))
-                htmlDocDirs[i] = htmldoc;
-
-            string legal = Path.Combine(unpackedDir, $"legal{suffix}");
-
-            if (Directory.Exists(legal))
-                legalDirs[i] = legal;
-
-            string rawDir = Path.Combine(unpackedDir, "rawprograms");
-
-            if (Directory.Exists(rawDir))
+            foreach (var ncaFile in Directory.GetFiles(rawDir, "*.nca"))
             {
-                var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+                using var fs = new FileStream(ncaFile, FileMode.Open, FileAccess.Read);
+                var nca = new Nca(keySet, new StreamStorage(fs, false));
 
-                foreach (var ncaFile in Directory.GetFiles(rawDir, "*.nca"))
-                {
-                    using var fs = new FileStream(ncaFile, FileMode.Open, FileAccess.Read);
-                    var nca = new Nca(keySet, new StreamStorage(fs, false));
-
-                    byte offset = (byte)(nca.Header.TitleId - titleId);
-                    rawProgramNcaPaths[offset] = ncaFile;
-                }
+                byte offset = (byte)(nca.Header.TitleId - baseTitleId);
+                rawProgramNcaPaths[offset] = ncaFile;
             }
-
-            if (i > 0 && !exefsDirs.ContainsKey(i) && !romfsDirs.ContainsKey(i) && !rawProgramNcaPaths.ContainsKey(i))
-                break;
         }
 
         return new UnpackResult

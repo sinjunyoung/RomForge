@@ -67,15 +67,11 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 ncas.BaseProgs.TryGetValue(idOffset, out var baseProg);
                 ncas.UpdateProgs.TryGetValue(idOffset, out var updateProg);
 
-                if (baseProg == null && updateProg == null) 
+                if (baseProg == null && updateProg == null)
                     continue;
 
-                string exefsName = idOffset == 0 ? "exefs" : $"exefs{idOffset}";
-                string romfsName = idOffset == 0 ? "romfs" : $"romfs{idOffset}";
-                string logoName = idOffset == 0 ? "logo" : $"logo{idOffset}";
-                string controlName = idOffset == 0 ? "control" : $"control{idOffset}";
-                string htmlName = idOffset == 0 ? "htmldoc" : $"htmldoc{idOffset}";
-                string legalName = idOffset == 0 ? "legal" : $"legal{idOffset}";
+                ulong programTitleId = result.TitleId + idOffset;
+                string programDir = Path.Combine(outDir, programTitleId.ToString("X16"));
 
                 var effectiveProg = baseProg ?? updateProg!;
                 var patchProg = baseProg != null ? updateProg : null;
@@ -99,40 +95,39 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 else
                 {
                     if (effectiveProg.CanOpenSection(NcaSectionType.Code))
-                    result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, exefsName, outDir, progCtx, progress, ct);
+                        result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, "exefs", programDir, progCtx, progress, ct);
 
                     if (effectiveProg.CanOpenSection(NcaSectionType.Data))
-                        result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, romfsName, outDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), progress, ct);
+                        result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), progress, ct);
                 }
 
-                var logoDir = extractor.ExtractLogo(effectiveProg, logoName, outDir, progCtx, progress, ct);
+                var logoDir = extractor.ExtractLogo(effectiveProg, "logo", programDir, progCtx, progress, ct);
 
-                if (logoDir != null) 
+                if (logoDir != null)
                     result.LogoDirs[idOffset] = logoDir;
 
                 ncas.BaseControls.TryGetValue(idOffset, out var baseControl);
                 ncas.UpdateControls.TryGetValue(idOffset, out var updateControl);
 
                 var effectiveControl = baseControl ?? updateControl;
-                var controlDir = extractor.ExtractControl(effectiveControl, baseControl != null ? updateControl : null, req, result, controlName, outDir, BaseNspPath, progCtx, progress, ct);
+                var controlDir = extractor.ExtractControl(effectiveControl, baseControl != null ? updateControl : null, req, result, "control", programDir, BaseNspPath, progCtx, progress, ct);
 
-                if (controlDir != null) 
+                if (controlDir != null)
                     result.ControlDirs[idOffset] = controlDir;
 
                 ncas.BaseHtmls.TryGetValue(idOffset, out var baseHtml);
                 ncas.UpdateHtmls.TryGetValue(idOffset, out var updateHtml);
 
-                var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, htmlName, outDir, progCtx, progress, ct);
+                var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, "htmldoc", programDir, progCtx, progress, ct);
 
-                if (htmlDir != null) 
+                if (htmlDir != null)
                     result.HtmlDocDirs[idOffset] = htmlDir;
 
                 ncas.BaseLegals.TryGetValue(idOffset, out var baseLegal);
-
                 ncas.UpdateLegals.TryGetValue(idOffset, out var updateLegal);
-                var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, legalName, outDir, progCtx, progress, ct);
+                var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, "legal", programDir, progCtx, progress, ct);
 
-                if (legalDir != null) 
+                if (legalDir != null)
                     result.LegalDirs[idOffset] = legalDir;
             }
 

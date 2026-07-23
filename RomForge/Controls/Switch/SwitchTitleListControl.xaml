@@ -119,7 +119,7 @@
                 <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" ToolTip="폴더 추가" Style="{StaticResource GrayButton}" Click="BtnAddFolder_Click">
                     <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
-                <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" ToolTip="DLC 패치 일괄 지정 (루트 폴더)" Style="{StaticResource GrayButton}" Click="BtnBulkPatch_Click">
+                <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" ToolTip="한글패치 일괄 지정 (루트 폴더)" Style="{StaticResource GrayButton}" Click="BtnBulkPatch_Click">
                     <Image Source="/Assets/Images/Patch.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
                 <Button Width="30" Height="30" Margin="0,0,0,8" Padding="0" BorderThickness="1" ToolTip="선택 삭제" Style="{StaticResource GrayButton}" Click="BtnRemoveFile_Click">
