@@ -71,13 +71,68 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
-                <StackPanel VerticalAlignment="Center">
-                    <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8" Visibility="{Binding CoverHintVisibility}"/>
-                    <TextBlock Text="이미지 파일을" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
-                    <TextBlock Text="드래그&amp;드롭 하세요" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
-                    <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="Uniform" Margin="5" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
-                </StackPanel>
+            <Border x:Name="borderCover" Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="15" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
+                <Border.OpacityMask>
+                    <VisualBrush>
+                        <VisualBrush.Visual>
+                            <Border Width="{Binding ActualWidth, ElementName=borderCover}" Height="{Binding ActualHeight, ElementName=borderCover}" CornerRadius="15" Background="Black"/>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Border.OpacityMask>
+
+                <Grid>
+                    <StackPanel VerticalAlignment="Center" ZIndex="1">
+                        <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8" Visibility="{Binding CoverHintVisibility}"/>
+                        <TextBlock Text="이미지 파일을" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
+                        <TextBlock Text="드래그&amp;드롭 하세요" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
+                        <ItemsControl HorizontalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.Items>
+                                <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3">
+                                    <TextBlock Text="PNG" Foreground="#FFA254" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFA254" Opacity="0.4"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3">
+                                    <TextBlock Text="JPG" Foreground="#8FA3FF" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3">
+                                    <TextBlock Text="GIF" Foreground="#CCCCCC" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3">
+                                    <TextBlock Text="BMP" Foreground="#FF73C9" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                                <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="3">
+                                    <TextBlock Text="WEBP" Foreground="#54FFB5" FontWeight="Bold" FontSize="10" VerticalAlignment="Center">
+                                        <TextBlock.Effect>
+                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                        </TextBlock.Effect>
+                                    </TextBlock>
+                                </Border>
+                            </ItemsControl.Items>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="UniformToFill" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
+                </Grid>
             </Border>
 
             <StackPanel Grid.Column="1" Margin="15,0,0,0">
