@@ -30,6 +30,8 @@ nav:
   - 홈: index.md
   - 실행 및 키파일 설정: installation.md
   - 사용법: usage.md
+  - 기능별 매뉴얼:
+      - 패치 - 일반: patch-general.md
   - 자주 묻는 질문: faq.md
 
 markdown_extensions:
