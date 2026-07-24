@@ -14,7 +14,7 @@
 8. **패치 취소** — 진행 중인 패치를 취소하고, 만들어지던 파일은 삭제합니다
 9. **로그**
 
-<!-- TODO: 스크린샷 추가 (docs/assets/patch-dreamcast-1.png) -->
+<img width="850" height="666" alt="1784515416" src="https://github.com/user-attachments/assets/4a58dd8c-0953-4417-a129-fe0d84cd3fc2" />
 
 ---
 
