@@ -18,6 +18,45 @@
                     <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                     <TextBlock Text="게임 파일 / 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                     <TextBlock Text="본편/업데이트는 자동 교체, DLC는 계속 추가됩니다" Foreground="#D4AF37" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center"/>
+
+                    <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.Items>
+                            <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="NSP" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="NSZ" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFA254" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="XCI" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                            <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="4,0">
+                                <TextBlock Text="XCZ" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                    </TextBlock.Effect>
+                                </TextBlock>
+                            </Border>
+                        </ItemsControl.Items>
+                    </ItemsControl>
+
                 </StackPanel>
 
                 <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening">

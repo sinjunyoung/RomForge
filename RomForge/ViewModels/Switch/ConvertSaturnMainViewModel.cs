@@ -425,6 +425,12 @@ namespace RomForge.ViewModels.Switch
                 return false;
             }
 
+            if (this.GameId == "T-1315G")
+            {
+                errorMsg = "통곡 그리고...는 현재 버전에서는 지원하지 않습니다.";
+                return false;
+            }
+
             return true;
         }
 
