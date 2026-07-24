@@ -1,0 +1,43 @@
+site_name: RomForge 매뉴얼
+site_description: Switch / 3DS / Wii U 등 멀티 플랫폼 롬 관리 툴 RomForge 사용 설명서
+site_url: https://sinjunyoung.github.io/RomForge/
+repo_url: https://github.com/sinjunyoung/RomForge
+repo_name: sinjunyoung/RomForge
+
+theme:
+  name: material
+  language: ko
+  palette:
+    - scheme: default
+      primary: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 다크 모드로 전환
+    - scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 라이트 모드로 전환
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - 홈: index.md
+  - 실행 및 키파일 설정: installation.md
+  - 사용법: usage.md
+  - 자주 묻는 질문: faq.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+      slugify: !!python/name:pymdownx.slugs.uslugify

@@ -5,6 +5,12 @@
 bin/
 binary/
 obj/
+site/
+__pycache__/
+
+*.pyc
+.venv/
+
 *.user
 *.suo
 
