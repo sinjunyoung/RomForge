@@ -32,6 +32,11 @@ nav:
   - 기능별 매뉴얼:
       - 패치 - 일반: patch-general.md
       - 패치 - 아케이드: patch-arcade.md
+      - 패치 - 드림캐스트: patch-dreamcast.md
+      - 압축 / 압축 해제: compression.md
+      - Switch - 언팩 / 리팩: switch-unpack-repack.md
+      - Switch - 병합 / 분리: switch-merge.md
+      - Switch - 포맷 변환: switch-format.md
   - 자주 묻는 질문: faq.md
 
 markdown_extensions:
