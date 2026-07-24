@@ -1,6 +1,6 @@
 # 패치 - 아케이드
 
-꿀렁이 전용 아케이드 한글 패치를 진행하는 탭입니다.
+꿀렁이님이 배포하는 아케이드 한글 패치를 진행하는 탭입니다.
 
 ## 화면 구성
 
@@ -14,7 +14,7 @@
 8. **패치 취소** — 진행 중인 패치를 취소하고, 만들어지던 파일은 삭제합니다
 9. **로그**
 
-<!-- TODO: 스크린샷 추가 (docs/assets/patch-arcade-1.png) -->
+<img width="850" height="680" alt="1783771525" src="https://github.com/user-attachments/assets/a3d689a4-c2d7-4a07-a042-cb974bd41fc3" />
 
 ---
 
@@ -24,7 +24,7 @@
 - **2번 영역**: IPS 파일 여러 개, ZIP 파일, 또는 IPS 파일이 포함된 폴더를 드래그 앤 드롭 가능
 - **3번**: 등록된 패치 목록 중에서 원하는 패치를 선택
 
-<!-- TODO: 스크린샷 추가 (docs/assets/patch-arcade-2.png) -->
+<img width="850" height="680" alt="1783771525" src="https://github.com/user-attachments/assets/a3d689a4-c2d7-4a07-a042-cb974bd41fc3" />
 
 ---
 
@@ -34,4 +34,4 @@
 2. 3번에서 적용할 패치를 선택합니다.
 3. **패치 시작**을 누릅니다.
 
-<!-- TODO: 스크린샷 추가 (docs/assets/patch-arcade-3.png) -->
+<img width="850" height="683" alt="1783772680" src="https://github.com/user-attachments/assets/ae7033db-98f6-41f1-ba20-bb19cbeebbde" />
