@@ -16,7 +16,7 @@
 10. **리팩** — 분해한 폴더를 NSP로 다시 패킹
 11. **로그**
 
-<!-- TODO: 스크린샷 추가 (docs/assets/switch-merge-1.png) -->
+<img width="850" height="684" alt="1783840797" src="https://github.com/user-attachments/assets/40b3e83a-87f1-478f-ad17-1b53c2bfa133" />
 
 ---
 
