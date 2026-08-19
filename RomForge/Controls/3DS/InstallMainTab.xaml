@@ -41,7 +41,7 @@
                         <TextBlock DockPanel.Dock="Left" Text="movable.sed" Foreground="#8888A8" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,15,0" 
                                    ToolTip="1. GodMode9 실행 ( START + POWER )&#x0a;2. SYSNAND CTRNAND → private → movable.sed 선택&#x0a;3. 가장 하단 Copy to 0:/gm9/out 실행"/>
                         <Button x:Name="BrowseMovableButton" DockPanel.Dock="Right" Height="32" Width="32" Margin="15,0,0,0" Click="BrowseMovable_Click" Background="Transparent" BorderBrush="Transparent" Padding="0" IsEnabled="{Binding IsIdle}">
-                            <Image Source="/Assets/Images/AddFile.png" Width="32" Height="32" Stretch="UniformToFill"/>
+                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="32" Height="32" Stretch="UniformToFill"/>
                         </Button>
                         <TextBox x:Name="MovablePathBox" IsReadOnly="True" Text="{Binding MovablePath, Mode=OneWay}"/>
                     </DockPanel>

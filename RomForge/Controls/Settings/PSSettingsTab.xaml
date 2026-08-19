@@ -55,7 +55,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <Image Grid.Column="0" Source="/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0"/>
+                        <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0"/>
                         <TextBlock Grid.Column="1" Text="출력 옵션" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,8"/>
                         <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="8,4">

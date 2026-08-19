@@ -41,7 +41,7 @@
                         <Button.ToolTip>
                             <ToolTip Content="압축 설정"/>
                         </Button.ToolTip>
-                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Settings.png" Stretch="Uniform"/>
+                        <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/Settings.png" Stretch="Uniform"/>
                     </Button>
 
                     <Button Background="Transparent" BorderThickness="0" Click="BtnHelp_Click" Height="30" HorizontalContentAlignment="Center" Margin="10,0,0,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center" Width="36" x:Name="btnHelp">

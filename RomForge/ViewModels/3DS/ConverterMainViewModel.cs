@@ -69,7 +69,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in Common.Utils.ExpandPaths(paths))
+        foreach (var path in Utils.ExpandPaths(paths))
         {
             if (!InstallMainViewModel.SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
@@ -92,22 +92,20 @@ public class ConverterMainViewModel : ToolTabViewModel
                 if (result?.IconPixels is not null)
                 {
                     var bitmap = BitmapSource.Create(48, 48, 96, 96, PixelFormats.Bgr32, null, result?.IconPixels, 48 * 4);
-
                     bitmap.Freeze();
-
                     vm.Icon = bitmap;
                 }
 
                 FileItems.Add(vm);
-
-                for (int i = 0; i < FileItems.Count; i++)
-                    FileItems[i].No = i + 1;
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
             }
         }
+
+        for (int i = 0; i < FileItems.Count; i++)
+            FileItems[i].No = i + 1;
 
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();

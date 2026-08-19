@@ -23,7 +23,7 @@
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
                         <MenuItem.Icon>
-                            <Image Source="/Assets/Images/AddFolder.png" Width="20" Height="20"/>
+                            <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
@@ -64,7 +64,7 @@
                         <GridViewColumn.HeaderTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="파일명" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </DataTemplate>
@@ -253,13 +253,13 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFiles_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="파일 추가" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFolder_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="폴더 추가" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>

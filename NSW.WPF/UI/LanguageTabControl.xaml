@@ -241,7 +241,6 @@
                 </Grid>
             </Border>
 
-            <!-- 타이틀/배급사/버튼 -->
             <Grid Grid.Column="2">
                 <StackPanel VerticalAlignment="Top">
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">

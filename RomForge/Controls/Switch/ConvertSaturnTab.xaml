@@ -29,7 +29,7 @@
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Margin="0,0,5,5" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseCueCommand}" IsEnabled="{Binding IsIdle}">
-                    <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
             <Grid Height="36">
@@ -44,7 +44,7 @@
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Margin="0,0,5,5" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseNspCommand}" IsEnabled="{Binding IsIdle}">
-                    <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
             <Grid Height="36">
@@ -59,7 +59,7 @@
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Margin="0,0,5,5" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseWorkCommand}" IsEnabled="{Binding IsIdle}">
-                    <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
 

@@ -112,7 +112,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Assets/Images/Settings.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Image Source="/Common.WPF;component/Assets/Images/Settings.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock Text="설정" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>

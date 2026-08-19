@@ -83,8 +83,28 @@ public class ConverterMainViewModel : ToolTabViewModel
     public async Task AddPaths(IEnumerable<string> paths)
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var resolvedPaths = new List<string>();
 
         foreach (var path in paths)
+        {
+            if (Directory.Exists(path))
+            {
+                if (IsGameFolder(path))
+                {
+                    resolvedPaths.Add(path);
+                }
+                else
+                {
+                    CollectValidPaths(path, resolvedPaths);
+                }
+            }
+            else if (File.Exists(path))
+            {
+                resolvedPaths.Add(path);
+            }
+        }
+
+        foreach (var path in resolvedPaths)
         {
             bool isFolder = Directory.Exists(path);
 
@@ -109,6 +129,52 @@ public class ConverterMainViewModel : ToolTabViewModel
 
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();
+    }
+
+    private bool IsGameFolder(string dir)
+    {
+        try
+        {
+            return Directory.Exists(Path.Combine(dir, "code")) ||
+                   Directory.Exists(Path.Combine(dir, "meta")) ||
+                   Directory.Exists(Path.Combine(dir, "content"));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private void CollectValidPaths(string currentDir, List<string> results)
+    {
+        try
+        {
+            foreach (var file in Directory.GetFiles(currentDir))
+            {
+                if (SupportedExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+                {
+                    results.Add(file);
+                }
+            }
+
+            foreach (var subDir in Directory.GetDirectories(currentDir))
+            {
+                if (IsGameFolder(subDir))
+                {
+                    results.Add(subDir);
+                }
+                else
+                {
+                    CollectValidPaths(subDir, results);
+                }
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (Exception)
+        {
+        }
     }
 
     public void RemoveItems(IEnumerable<WiiUFileItem> items)

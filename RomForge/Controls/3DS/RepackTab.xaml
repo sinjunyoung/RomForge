@@ -32,7 +32,7 @@
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" x:Name="btnOpenRomFile" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseInputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
-                    <Image Source="/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
                 </Button>                
             </Grid>
         </StackPanel>
@@ -73,7 +73,7 @@
                         </Grid>
                     </Border>
                     <Button Grid.Column="1" x:Name="btnOpenWorkSpaceFolder" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}">
-                        <Image Source="/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                     </Button>
                 </Grid>
             </StackPanel>

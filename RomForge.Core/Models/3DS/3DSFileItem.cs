@@ -52,6 +52,26 @@ public class _3DSFileItem(string filePath) : ConvertibleFileItemBase(filePath, "
 
     public TitleType Type => (TitleType)(Convert.ToUInt64(TitleId, 16) >> 32);
 
+    public string RegionSortKey
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(_productCode) || _productCode.Length < 7) return "Z";
+            try
+            {
+                int dashIndex = _productCode.IndexOf('-', 4);
+                if (dashIndex < 0 || dashIndex + 4 >= _productCode.Length) return "Z";
+
+                char regionChar = _productCode[dashIndex + 4];
+                return regionChar.ToString();
+            }
+            catch
+            {
+                return "Z";
+            }
+        }
+    }
+
     public string TypeLabel => Type switch
     {
         TitleType.Application => "본편",

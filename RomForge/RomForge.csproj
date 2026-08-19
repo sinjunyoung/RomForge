@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.6.0.4</VersionPrefix>
+    <VersionPrefix>1.6.0.5</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -18,6 +18,7 @@
     <NoWarn>1701;1702;CA1401;CS8601;CS8604;CS8618;CA1416;SYSLIB1045;SYSLIB1054;NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Images\Categories.png" />
     <None Remove="Assets\Images\Certs.png" />
     <None Remove="Assets\Images\Check.png" />
     <None Remove="Assets\Images\Copy.png" />
@@ -30,12 +31,14 @@
     <None Remove="Assets\Images\Insert.png" />
     <None Remove="Assets\Images\Keygen.png" />
     <None Remove="Assets\Images\Left.png" />
+    <None Remove="Assets\Images\Lock.png" />
     <None Remove="Assets\Images\LowerA.png" />
     <None Remove="Assets\Images\movable.sed.png" />
     <None Remove="Assets\Images\Neural.png" />
     <None Remove="Assets\Images\NoPatch.png" />
     <None Remove="Assets\Images\OpenFolder.png" />
     <None Remove="Assets\Images\PSP.png" />
+    <None Remove="Assets\Images\Region.png" />
     <None Remove="Assets\Images\Repack.png" />
     <None Remove="Assets\Images\Right.png" />
     <None Remove="Assets\Images\Saturn.png" />
@@ -43,6 +46,7 @@
     <None Remove="Assets\Images\Split.png" />
     <None Remove="Assets\Images\Unpack.png" />
     <None Remove="Assets\Images\UpperA.png" />
+    <None Remove="Assets\Images\Version.png" />
     <None Remove="Assets\Images\WiiU.png" />
     <None Remove="Assets\Images\WorkSpace.png" />
   </ItemGroup>
@@ -114,8 +118,6 @@
     <!-- <ProjectReference Include="..\..\RomZip\RomZip.Core\RomZip.Core.csproj"/> -->
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\Images\AddFile.png" />
-    <Resource Include="Assets\Images\AddFolder.png" />
     <Resource Include="Assets\Images\Azahar.png" />
     <Resource Include="Assets\Images\BlockMode.png" />
     <Resource Include="Assets\Images\Cancel.png" />
@@ -147,7 +149,6 @@
     <Resource Include="Assets\Images\ReadTab.png" />
     <Resource Include="Assets\Images\SdCard.png" />
     <Resource Include="Assets\Images\Seed.png" />
-    <Resource Include="Assets\Images\Settings.png" />
     <Resource Include="Assets\Images\size.png" />
     <Resource Include="Assets\Images\Switch.png" />
     <Resource Include="Assets\Images\Unchecked.png" />

@@ -26,7 +26,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
+                        <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                         <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                     </Grid>
                     <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
@@ -49,7 +49,7 @@
 
         <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,2,0,2" VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Image Source="/Assets/Images/AddFile.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="원본 자동 압축해제 지원 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
                 <ItemsControl VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>

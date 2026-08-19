@@ -16,7 +16,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Images\AddFile.png" />
     <None Remove="Assets\Images\AddFolder.png" />
     <None Remove="Assets\Images\CancelLanguage.png" />
     <None Remove="Assets\Images\Clear.png" />
@@ -40,8 +39,6 @@
 
   <ItemGroup>
     <Resource Include="Assets\icon.ico" />
-    <Resource Include="Assets\Images\AddFile.png" />
-    <Resource Include="Assets\Images\AddFolder.png" />
     <Resource Include="Assets\Images\american.png" />
     <Resource Include="Assets\Images\arabic.png" />
     <Resource Include="Assets\Images\brazilian.png" />
@@ -73,7 +70,6 @@
     <Resource Include="Assets\Images\portuguese.png" />
     <Resource Include="Assets\Images\romanian.png" />
     <Resource Include="Assets\Images\russian.png" />
-    <Resource Include="Assets\Images\Settings.png" />
     <Resource Include="Assets\Images\slovak.png" />
     <Resource Include="Assets\Images\spanish.png" />
     <Resource Include="Assets\Images\swedish.png" />

@@ -37,7 +37,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Image Grid.Column="0" Source="/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding SelectedFile.FilePath}"/>
+                    <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding SelectedFile.FilePath}"/>
                     <TextBlock Grid.Column="1" Text="{Binding SelectedFile.FileName}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding SelectedFile.FilePath}"/>
                     <TextBlock Grid.Column="1" Text="CIA" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
                 </Grid>
@@ -124,7 +124,7 @@
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFile_Click">
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="파일 선택" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
