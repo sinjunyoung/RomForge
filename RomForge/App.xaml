@@ -29,6 +29,7 @@
             <converters:Locale3dsLanguageToLabelConverter x:Key="LanguageLabelConverter"/>
             <converters:PatchIconOpacityConverter x:Key="PatchIconOpacityConverter"/>
             <converters:CdOutputFormatLabelConverter x:Key="CdOutputFormatLabelConverter"/>
+            <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
 
             <Style TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>

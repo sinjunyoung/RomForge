@@ -127,15 +127,12 @@ public class RepackMainViewModel : ToolTabViewModel
 
         RemoveSelectedCommand = new RelayCommand(_ => RemoveSelected(), _ => HasSelection);
         RemoveAllCommand = new RelayCommand(_ => Entries.Clear(), _ => Entries.Count > 0);
-
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
-
         Entries.CollectionChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(EntriesHintVisibility));
             OnPropertyChanged(nameof(KeysPathRequired));
         };
-
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsLocked))
@@ -177,7 +174,9 @@ public class RepackMainViewModel : ToolTabViewModel
                 }
 
                 var row = RepackService.PeekFolder(path);
+
                 AssignByGuessedRole(row);
+                WiiUEntryListOrganizer.Reorganize(Entries);
                 return;
             }
 
@@ -202,6 +201,8 @@ public class RepackMainViewModel : ToolTabViewModel
             foreach (var row in rows)
                 AssignByGuessedRole(row);
 
+            WiiUEntryListOrganizer.Reorganize(Entries);
+
             Log($"{Path.GetFileName(path)} — {rows.Count}개 타이틀 추가됨.", LogLevel.Info);
         }
         catch (Exception ex)
@@ -210,11 +211,7 @@ public class RepackMainViewModel : ToolTabViewModel
         }
     }
 
-    private static bool LooksLikeSupportedFolder(string path) =>
-        WupTitleSource.LooksLikeWupFolder(path) ||
-        (Directory.Exists(Path.Combine(path, "code")) &&
-         Directory.Exists(Path.Combine(path, "content")) &&
-         Directory.Exists(Path.Combine(path, "meta")));
+    private static bool LooksLikeSupportedFolder(string path) => WupTitleSource.LooksLikeWupFolder(path) || (Directory.Exists(Path.Combine(path, "code")) && Directory.Exists(Path.Combine(path, "content")) && Directory.Exists(Path.Combine(path, "meta")));
 
     private void RemoveSelected()
     {
@@ -231,6 +228,7 @@ public class RepackMainViewModel : ToolTabViewModel
         }
 
         _currentMode = mode;
+
         NotifyButtonStates();
 
         using (BeginWork())
@@ -238,13 +236,16 @@ public class RepackMainViewModel : ToolTabViewModel
             try
             {
                 _cts.Dispose();
+
                 _cts = new CancellationTokenSource();
+
                 await ExecuteAsync(mode, _cts.Token);
             }
             finally
             {
                 ProgressPct = 0;
                 _currentMode = null;
+
                 NotifyButtonStates();
             }
         }
@@ -267,6 +268,7 @@ public class RepackMainViewModel : ToolTabViewModel
         if (mode == BuildMode.RebuildOnly)
         {
             var scanned = RepackService.ScanUnpacked(OutputPath);
+
             if (scanned.Count == 0)
             {
                 Log("언팩된 데이터가 없습니다.", LogLevel.Error);
@@ -276,7 +278,9 @@ public class RepackMainViewModel : ToolTabViewModel
             foreach (var row in scanned)
             {
                 var existing = Entries.FirstOrDefault(e => e.TitleIdHex == row.TitleIdHex && e.TitleVersion == row.TitleVersion);
-                if (existing?.PatchPath is not null) row.PatchPath = existing.PatchPath;
+
+                if (existing?.PatchPath is not null) 
+                    row.PatchPath = existing.PatchPath;
             }
 
             Entries.Clear();

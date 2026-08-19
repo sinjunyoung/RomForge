@@ -1,7 +1,5 @@
-﻿using LibHac.Ncm;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using NSW.Core;
-using NSW.Core.Models;
 using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
 using Patch.Core.Services;
@@ -23,12 +21,15 @@ public partial class SwitchTitleListControl : UserControl
 
     public event Action? FileListChanged;
 
-    private bool _syncingPatch;
+    private readonly GameFilePatchSyncManager _patchSync;
+    private readonly SwitchGameFileImporter _importer;
 
     public SwitchTitleListControl()
     {
         InitializeComponent();
         lvFiles.ItemsSource = GameFiles;
+        _patchSync = new GameFilePatchSyncManager(GameFiles);
+        _importer = new SwitchGameFileImporter(GameFiles, _patchSync, SupportedExtensions);
         UpdateDropHint();
     }
 
@@ -85,7 +86,7 @@ public partial class SwitchTitleListControl : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            _ = AddFilesAsync(ExpandPaths(dlg.FileNames));
+            _ = _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths(dlg.FileNames), UpdateDropHint);
     }
 
     private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
@@ -93,7 +94,7 @@ public partial class SwitchTitleListControl : UserControl
         var dlg = new System.Windows.Forms.FolderBrowserDialog { Description = "게임 폴더 선택", UseDescriptionForTitle = true };
 
         if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            _ = AddFilesAsync(ExpandPaths([dlg.SelectedPath]));
+            _ = _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths([dlg.SelectedPath]), UpdateDropHint);
     }
 
     private void BtnBulkPatch_Click(object sender, RoutedEventArgs e)
@@ -108,7 +109,9 @@ public partial class SwitchTitleListControl : UserControl
     private void BulkPatchMenu_FromFolder_Click(object sender, RoutedEventArgs e)
     {
         var targets = GetBulkPatchTargets();
-        if (targets == null) return;
+
+        if (targets == null) 
+            return;
 
         var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
@@ -119,39 +122,7 @@ public partial class SwitchTitleListControl : UserControl
         if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             return;
 
-        int matched = 0;
-
-        foreach (var file in targets)
-        {
-            string folderCandidate = Path.Combine(dlg.SelectedPath, file.TitleID!);
-
-            if (Directory.Exists(folderCandidate))
-            {
-                file.PatchPath = folderCandidate;
-                matched++;
-                continue;
-            }
-
-            string? recursiveMatch = PatchFolderResolver.FindSubDir(dlg.SelectedPath, file.TitleID!);
-
-            if (recursiveMatch != null)
-            {
-                file.PatchPath = recursiveMatch;
-                matched++;
-                continue;
-            }
-
-            string[] exts = [".zip", ".7z"];
-            string? archiveCandidate = exts
-                .Select(ext => Path.Combine(dlg.SelectedPath, file.TitleID! + ext))
-                .FirstOrDefault(File.Exists);
-
-            if (archiveCandidate != null)
-            {
-                file.PatchPath = archiveCandidate;
-                matched++;
-            }
-        }
+        int matched = SwitchBulkPatchMatcher.MatchFromFolder(targets, dlg.SelectedPath);
 
         ShowBulkPatchResult(targets.Count, matched);
     }
@@ -172,8 +143,7 @@ public partial class SwitchTitleListControl : UserControl
         if (dlg.ShowDialog() != true)
             return;
 
-        int matched = 0;
-        string? password;
+        int matched;
 
         try
         {
@@ -183,19 +153,8 @@ public partial class SwitchTitleListControl : UserControl
                 return;
 
             using var archive = opened.Value.Archive;
-            password = opened.Value.Password;
 
-            foreach (var file in targets)
-            {
-                string? prefix = ArchivePatchFolderResolver.FindSubDir(archive.EntryPaths, file.TitleID!);
-
-                if (prefix == null)
-                    continue;
-
-                file.PatchPath = ArchivePatchSourceFactory.CombineScope(dlg.FileName, prefix);
-                file.PatchPassword = password;
-                matched++;
-            }
+            matched = SwitchBulkPatchMatcher.MatchFromArchive(targets, archive, dlg.FileName, opened.Value.Password);
         }
         catch (Exception ex)
         {
@@ -226,17 +185,18 @@ public partial class SwitchTitleListControl : UserControl
     {
         foreach (var item in lvFiles.SelectedItems.Cast<GameFile>().ToList())
         {
-            DetachPatchSync(item);
+            _patchSync.Detach(item);
             GameFiles.Remove(item);
         }
 
+        SwitchGameFileListOrganizer.Reorganize(GameFiles);
         UpdateDropHint();
     }
 
     private void BtnRemoveAllFiles_Click(object sender, RoutedEventArgs e)
     {
         foreach (var item in GameFiles)
-            DetachPatchSync(item);
+            _patchSync.Detach(item);
 
         GameFiles.Clear();
         UpdateDropHint();
@@ -270,199 +230,13 @@ public partial class SwitchTitleListControl : UserControl
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
             return;
 
-        await AddFilesAsync(ExpandPaths(paths));
-    }
-
-    private async Task AddFilesAsync(IEnumerable<string> paths)
-    {
-        var keySet = KeySetProvider.Instance.KeySet;
-        var existing = GameFiles.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var newPaths = await Task.Run(() =>
-            paths.Where(p => SupportedExtensions.Contains(Path.GetExtension(p)))
-                 .Where(p => existing.Add(p))
-                 .ToList());
-
-        foreach (var path in newPaths)
-        {
-            var vm = new GameFile(path) { FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing };
-
-            if (keySet != null)
-            {
-                var info = MetadataReader.GetGameFileInfo(keySet, path);
-                if (info != null)
-                {
-                    vm.TitleName = info.TitleName;
-                    vm.TitleID = info.TitleId;
-                    vm.Version = info.DisplayVersion;
-                    vm.FileType = info.Type;
-                    if (info.IconData != null) vm.Icon = info.IconData.ToBitmapImage();
-                }
-
-                List<MetadataResult> allMeta;
-                try { allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); }
-                catch { allMeta = []; }
-
-                var dlcResults = allMeta
-                    .Where(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta)
-                    .GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase)
-                    .Select(g => g.First())
-                    .ToList();
-
-                if (dlcResults.Count > 0)
-                {
-                    bool hasBaseOrUpdate = vm.FileType.Contains('B') || vm.FileType.Contains('U');
-
-                    vm.FileType = string.Concat(vm.FileType.Where(c => c != 'D'));
-
-                    foreach (var dlc in dlcResults)
-                    {
-                        var dlcVm = new GameFile(path)
-                        {
-                            FileType = "D",
-                            TitleID = dlc.TitleId,
-                            Version = dlc.GetEffectiveDisplayVersion(),
-                            TitleName = string.IsNullOrEmpty(vm.TitleName) ? dlc.TitleId : $"{vm.TitleName} (DLC {dlc.TitleId[^4..]})",
-                            Icon = vm.Icon,
-                        };
-
-                        AssignOrReplace(dlcVm);
-                    }
-
-                    if (!hasBaseOrUpdate)
-                    {
-                        UpdateDropHint();
-                        continue;
-                    }
-                }
-            }
-
-            if (string.IsNullOrEmpty(vm.TitleName))
-                vm.TitleName = Path.GetFileNameWithoutExtension(path);
-
-            AssignOrReplace(vm);
-            UpdateDropHint();
-        }
-    }
-
-    private void AssignOrReplace(GameFile vm)
-    {
-        if (vm.FileType.Contains('B'))
-        {
-            var existingBase = GameFiles.FirstOrDefault(f => f.FileType.Contains('B'));
-            if (existingBase != null)
-            {
-                if (vm.PatchPath == null)
-                {
-                    vm.PatchPath = existingBase.PatchPath;
-                    vm.PatchPassword = existingBase.PatchPassword;
-                }
-                DetachPatchSync(existingBase);
-                GameFiles.Remove(existingBase);
-            }
-        }
-
-        if (vm.FileType.Contains('U'))
-        {
-            var existingUpdate = GameFiles.FirstOrDefault(f => f.FileType.Contains('U'));
-            if (existingUpdate != null)
-            {
-                if (vm.PatchPath == null)
-                {
-                    vm.PatchPath = existingUpdate.PatchPath;
-                    vm.PatchPassword = existingUpdate.PatchPassword;
-                }
-                DetachPatchSync(existingUpdate);
-                GameFiles.Remove(existingUpdate);
-            }
-        }
-
-        GameFiles.Add(vm);
-        AttachPatchSync(vm);
-        SyncPatchToPartner(vm);
-    }
-
-    private void AttachPatchSync(GameFile vm) => vm.PropertyChanged += GameFile_PatchPropertyChanged;
-
-    private void DetachPatchSync(GameFile vm) => vm.PropertyChanged -= GameFile_PatchPropertyChanged;
-
-    private void GameFile_PatchPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (_syncingPatch)
-            return;
-
-        if (sender is not GameFile file)
-            return;
-
-        if (e.PropertyName != nameof(GameFile.PatchPath) && e.PropertyName != nameof(GameFile.PatchPassword))
-            return;
-
-        SyncPatchToPartner(file);
-    }
-
-    private GameFile? FindPatchPartner(GameFile file)
-    {
-        bool isBase = file.FileType.Contains('B');
-        bool isUpdate = file.FileType.Contains('U');
-
-        if (!isBase && !isUpdate)
-            return null;
-
-        return isBase
-            ? GameFiles.FirstOrDefault(f => f.FileType.Contains('U'))
-            : GameFiles.FirstOrDefault(f => f.FileType.Contains('B'));
-    }
-
-    private void SyncPatchToPartner(GameFile file)
-    {
-        var partner = FindPatchPartner(file);
-
-        if (partner == null || ReferenceEquals(partner, file))
-            return;
-
-        if (string.IsNullOrEmpty(file.PatchPath) && !string.IsNullOrEmpty(partner.PatchPath))
-        {
-            ApplySyncedPatch(file, partner.PatchPath, partner.PatchPassword);
-            return;
-        }
-
-        if (partner.PatchPath == file.PatchPath && partner.PatchPassword == file.PatchPassword)
-            return;
-
-        ApplySyncedPatch(partner, file.PatchPath, file.PatchPassword);
-    }
-
-    private void ApplySyncedPatch(GameFile target, string? patchPath, string? patchPassword)
-    {
-        _syncingPatch = true;
-
-        try
-        {
-            target.PatchPath = patchPath;
-            target.PatchPassword = patchPassword;
-        }
-        finally
-        {
-            _syncingPatch = false;
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var opts = new EnumerationOptions { IgnoreInaccessible = true, RecurseSubdirectories = true, AttributesToSkip = FileAttributes.System | FileAttributes.Hidden };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
-        }
+        await _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths(paths), UpdateDropHint);
     }
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
-        if (lvFiles.SelectedItems.Count == 0) e.Handled = true;
+        if (lvFiles.SelectedItems.Count == 0)
+            e.Handled = true;
     }
 
     private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
@@ -473,33 +247,14 @@ public partial class SwitchTitleListControl : UserControl
             return;
 
         string? dir = Path.GetDirectoryName(GameFiles[selected].FilePath);
+
         dir?.OpenFolder();
     }
 
     private void MenuItem_RemovePatch_Click(object sender, RoutedEventArgs e)
     {
         if (lvFiles.SelectedItem is GameFile file)
-        {
-            var partner = FindPatchPartner(file);
-
-            _syncingPatch = true;
-
-            try
-            {
-                file.PatchPath = null;
-                file.PatchPassword = null;
-
-                if (partner != null)
-                {
-                    partner.PatchPath = null;
-                    partner.PatchPassword = null;
-                }
-            }
-            finally
-            {
-                _syncingPatch = false;
-            }
-        }
+            _patchSync.ClearPatch(file);
     }
 
     private void PatchDropTarget_Click(object sender, MouseButtonEventArgs e)
@@ -546,14 +301,11 @@ public partial class SwitchTitleListControl : UserControl
 
     private void PatchDropTarget_DragEnter(object sender, DragEventArgs e)
     {
-        e.Effects = IsValidPatchDrop(e.Data) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Effects = SwitchPatchDropValidator.IsValidPatchDrop(e.Data) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
-    private void PatchDropTarget_DragLeave(object sender, DragEventArgs e)
-    {
-        e.Handled = true;
-    }
+    private void PatchDropTarget_DragLeave(object sender, DragEventArgs e) => e.Handled = true;
 
     private async void PatchDropTarget_Drop(object sender, DragEventArgs e)
     {
@@ -565,7 +317,7 @@ public partial class SwitchTitleListControl : UserControl
 
         string path = paths[0];
 
-        if (!IsValidPatchPath(path))
+        if (!SwitchPatchDropValidator.IsValidPatchPath(path))
             return;
 
         if (ArchivePatchSourceFactory.IsArchivePath(path))
@@ -595,26 +347,5 @@ public partial class SwitchTitleListControl : UserControl
             MessageBox.Show($"압축파일을 여는 중 오류가 발생했습니다: {ex.Message}", "한글패치 지정", MessageBoxButton.OK, MessageBoxImage.Error);
             return false;
         }
-    }
-
-    private static bool IsValidPatchDrop(IDataObject data)
-    {
-        if (data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length != 1)
-            return false;
-
-        return IsValidPatchPath(paths[0]);
-    }
-
-    private static bool IsValidPatchPath(string path)
-    {
-        if (Directory.Exists(path))
-            return true;
-
-        if (!File.Exists(path))
-            return false;
-
-        string ext = Path.GetExtension(path);
-
-        return string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase) || string.Equals(ext, ".7z", StringComparison.OrdinalIgnoreCase);
     }
 }

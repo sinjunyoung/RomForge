@@ -5,6 +5,7 @@ using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
 using RomForge.Core;
 using RomForge.Core.Models;
+using RomForge.Core.Models.Switch;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;
@@ -33,8 +34,7 @@ public class MergeMainViewModel : ToolTabViewModel
     private string _progressPercent = string.Empty;
     private string _progressTime = string.Empty;
     private string _progressSpeed = string.Empty;
-    private bool _useNSP = true;
-    private bool _useXCI = false;
+    private SwitchOutputFormat _outputFormat = SwitchOutputFormat.NSP;
 
     public int ProgressPct
     {
@@ -72,16 +72,10 @@ public class MergeMainViewModel : ToolTabViewModel
         set { _outputPath = value; OnPropertyChanged(); }
     }
 
-    public bool UseNSP
+    public SwitchOutputFormat OutputFormat
     {
-        get => _useNSP;
-        set { _useNSP = value; OnPropertyChanged(); }
-    }
-
-    public bool UseXCI
-    {
-        get => _useXCI;
-        set { _useXCI = value; OnPropertyChanged(); }
+        get => _outputFormat;
+        set { _outputFormat = value; OnPropertyChanged(); }
     }
 
     public bool IsMergeRunning => IsLocked && _currentMode == MergeMode.Merge;
@@ -191,8 +185,8 @@ public class MergeMainViewModel : ToolTabViewModel
                 var results = new List<string>();
                 bool useCompression = compressLevel > 0;
 
-                List<string> output = 
-                    UseXCI
+                List<string> output =
+                    OutputFormat == SwitchOutputFormat.XCI
                     ? await XciMergeService.RunMergeAll(inputPaths, outputDir, useCompression, compressLevel, UseBlockMode, VerifyCompress, ForceKeyGen0, keySet.Clone(), progress, Log, _cts.Token)
                     : await NspMergeService.RunMergeAll(inputPaths, outputDir, useCompression, compressLevel, UseBlockMode, VerifyCompress, ForceKeyGen0, keySet.Clone(), progress, Log, _cts.Token);
 
@@ -256,7 +250,7 @@ public class MergeMainViewModel : ToolTabViewModel
                 for (int i = 0; i < gameFiles.Count; i++)
                 {
                     _cts.Token.ThrowIfCancellationRequested();
-                    resultCount += await SwitchSplitService.Split(gameFiles[i].FilePath, outputDir, compressLevel, UseBlockMode, VerifyCompress, ForceKeyGen0, UseXCI, i + 1, gameFiles.Count, progress, Log, _cts.Token);
+                    resultCount += await SwitchSplitService.Split(gameFiles[i].FilePath, outputDir, compressLevel, UseBlockMode, VerifyCompress, ForceKeyGen0, OutputFormat == SwitchOutputFormat.XCI, i + 1, gameFiles.Count, progress, Log, _cts.Token);
                 }
 
                 Log(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);

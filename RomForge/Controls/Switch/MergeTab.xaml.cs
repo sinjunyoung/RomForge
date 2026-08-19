@@ -2,8 +2,6 @@
 using RomForge.ViewModels.Switch;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Res = NSW.Core.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
@@ -15,6 +13,7 @@ public partial class MergeTab : UserControl
     public MergeTab()
     {
         InitializeComponent();
+        fileMgr.FileListChanged += () => SwitchGameFileListOrganizer.Reorganize(fileMgr.GameFiles);
     }
 
     private void BtnSettings_Click(object sender, RoutedEventArgs e)
@@ -55,10 +54,10 @@ public partial class MergeTab : UserControl
 
     private async void BtnMergeStart_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsMergeRunning) 
-        { 
-            ViewModel.Cancel(); 
-            return; 
+        if (ViewModel.IsMergeRunning)
+        {
+            ViewModel.Cancel();
+            return;
         }
 
         if (!fileMgr.GameFiles.Any())
@@ -81,9 +80,9 @@ public partial class MergeTab : UserControl
 
     private async void BtnSplitStart_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsSplitRunning) 
-        { 
-            ViewModel.Cancel(); 
+        if (ViewModel.IsSplitRunning)
+        {
+            ViewModel.Cancel();
             return;
         }
 

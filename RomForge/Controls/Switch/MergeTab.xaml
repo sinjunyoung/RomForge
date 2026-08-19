@@ -6,6 +6,7 @@
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              xmlns:l="clr-namespace:NSW.Core.Properties;assembly=NSW.Core"             
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
+             xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
@@ -29,8 +30,8 @@
                 <Border Grid.Column="0" IsEnabled="{Binding IsIdle}">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
                         <TextBlock Text="출력 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <RadioButton Content="NSP, NSZ" GroupName="OutputFormat" IsChecked="{Binding UseNSP}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0"/>
-                        <RadioButton Content="XCI, XCZ" GroupName="OutputFormat" IsChecked="{Binding UseXCI}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <RadioButton Content="NSP, NSZ" IsChecked="{Binding OutputFormat, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:SwitchOutputFormat.NSP}}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0"/>
+                        <RadioButton Content="XCI, XCZ" IsChecked="{Binding OutputFormat, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:SwitchOutputFormat.XCI}}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0"/>
                         <TextBlock Text="※ 압축 설정에 따라 자동으로 선택 됩니다 ( 설정 화면에서 변경 가능 )" Foreground="#D4AF37" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     </StackPanel>
                 </Border>
