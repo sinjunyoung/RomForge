@@ -1,11 +1,10 @@
-﻿using NSW.WPF.Services;
+﻿using Common.WPF;
+using NSW.WPF.Services;
 using RomForge.Core.Models._3DS;
 using RomForge.ViewModels._3DS;
-using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -67,35 +66,9 @@ public partial class ConverterTab : UserControl
         ViewModel?.RemoveItems(selected);
     }
 
-    private string? _lastSortColumn;
-    private ListSortDirection _lastSortDirection;
+    private readonly ListViewColumnSorter _sorter = new();
 
-    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is not GridViewColumnHeader header)
-            return;
-
-        if (header.Tag is not string sortBy)
-            return;
-
-        var direction =
-            _lastSortColumn == sortBy &&
-            _lastSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-        ICollectionView dataView = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-
-        if (dataView == null) 
-            return;
-
-        dataView.SortDescriptions.Clear();
-        dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
-        dataView.Refresh();
-
-        _lastSortColumn = sortBy;
-        _lastSortDirection = direction;
-    }
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 
     private async void BtnAddFiles_Click(object sender, RoutedEventArgs e)
     {

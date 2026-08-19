@@ -1,11 +1,10 @@
-﻿using NSW.WPF.Services;
+﻿using Common.WPF;
+using NSW.WPF.Services;
 using RomForge.Core.Models.PS;
 using RomForge.ViewModels.PS;
-using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -40,54 +39,39 @@ public partial class ConverterTab : UserControl
 
     private void LvFiles_DragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
-            ? DragDropEffects.Copy
-            : DragDropEffects.None;
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
     private void LvFiles_Drop(object sender, DragEventArgs e)
     {
-        if (ViewModel == null) return;
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
+        if (ViewModel == null) 
+            return;
+
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) 
+            return;
+
         ViewModel.AddPaths(paths);
     }
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key != Key.Delete) return;
+        if (e.Key != Key.Delete)
+            return;
+
         var selected = lvFiles.SelectedItems.Cast<PspFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
-    private string? _lastSortColumn;
-    private ListSortDirection _lastSortDirection;
+    private readonly ListViewColumnSorter _sorter = new();
 
-    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is not GridViewColumnHeader header) return;
-        if (header.Tag is not string sortBy) return;
-
-        var direction =
-            _lastSortColumn == sortBy &&
-            _lastSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-        ICollectionView dataView = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-        if (dataView == null) return;
-
-        dataView.SortDescriptions.Clear();
-        dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
-        dataView.Refresh();
-
-        _lastSortColumn = sortBy;
-        _lastSortDirection = direction;
-    }
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 
     private void BtnAddFiles_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel == null) return;
+        if (ViewModel == null) 
+            return;
 
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
@@ -102,7 +86,8 @@ public partial class ConverterTab : UserControl
 
     private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel == null) return;
+        if (ViewModel == null)
+            return;
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
@@ -117,13 +102,11 @@ public partial class ConverterTab : UserControl
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<PspFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
-    private void BtnClear_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel?.ClearItems();
-    }
+    private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearItems();
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
@@ -134,9 +117,12 @@ public partial class ConverterTab : UserControl
     private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<PspFileItem>().ToList();
-        if (selected.Count == 0) return;
+
+        if (selected.Count == 0) 
+            return;
 
         string? dir = Path.GetDirectoryName(selected[0].FilePath);
+
         dir?.OpenFolder();
     }
 }

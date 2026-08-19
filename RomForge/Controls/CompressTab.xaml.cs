@@ -1,12 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using Common.WPF;
+using Microsoft.Win32;
 using NSW.WPF.Services;
 using RomForge.Core.Models.Compression;
 using RomForge.ViewModels;
-using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -14,8 +13,7 @@ namespace RomForge.Controls;
 
 public partial class CompressTab : UserControl
 {
-    private string? _lastSortColumn;
-    private ListSortDirection _lastSortDirection;
+    private readonly ListViewColumnSorter _sorter = new();
 
     private MainViewModel ViewModel => (MainViewModel)DataContext;
 
@@ -99,10 +97,7 @@ public partial class CompressTab : UserControl
 
     private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel.CompressVM.ClearItems();
 
-    private async void BtnSettings_Click(object sender, RoutedEventArgs e)
-    {
-        await ViewModel.NavigateCompressSettings();
-    }    
+    private async void BtnSettings_Click(object sender, RoutedEventArgs e) => await ViewModel.NavigateCompressSettings();
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
@@ -122,25 +117,5 @@ public partial class CompressTab : UserControl
         dir?.OpenFolder();
     }
 
-    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is not GridViewColumnHeader header)
-            return;
-
-        if (header.Tag is not string sortBy)
-            return;
-
-        var direction = _lastSortColumn == sortBy && _lastSortDirection == ListSortDirection.Ascending
-            ? ListSortDirection.Descending
-            : ListSortDirection.Ascending;
-
-        var view = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-
-        view.SortDescriptions.Clear();
-        view.SortDescriptions.Add(new SortDescription(sortBy, direction));
-        view.Refresh();
-
-        _lastSortColumn = sortBy;
-        _lastSortDirection = direction;
-    }
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 }

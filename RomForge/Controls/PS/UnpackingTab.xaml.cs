@@ -1,11 +1,10 @@
-﻿using NSW.WPF.Services;
+﻿using Common.WPF;
+using NSW.WPF.Services;
 using RomForge.Core.Models.PS;
 using RomForge.ViewModels.PS;
-using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -31,19 +30,11 @@ public partial class UnpackingTab : UserControl
             newVm.ScrollToItemRequested += OnScrollToItemRequested;
     }
 
-    private void OnScrollToItemRequested(PbpFileItem item)
-    {
-        Dispatcher.InvokeAsync(() =>
-        {
-            lvFiles.ScrollIntoView(item);
-        }, DispatcherPriority.Background);
-    }
+    private void OnScrollToItemRequested(PbpFileItem item) => Dispatcher.InvokeAsync(() => { lvFiles.ScrollIntoView(item); }, DispatcherPriority.Background);
 
     private void LvFiles_DragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
-            ? DragDropEffects.Copy
-            : DragDropEffects.None;
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
@@ -52,10 +43,16 @@ public partial class UnpackingTab : UserControl
         if (ViewModel == null)
             return;
 
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || paths.Length == 0)
             return;
 
-        await ViewModel.AddPaths(paths);
+        var pbpFiles = paths
+            .Where(path => !Directory.Exists(path) &&
+                           string.Equals(Path.GetExtension(path), ".pbp", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        if (pbpFiles.Length > 0)
+            await ViewModel.AddPaths(pbpFiles);
     }
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
@@ -64,38 +61,13 @@ public partial class UnpackingTab : UserControl
             return;
 
         var selected = lvFiles.SelectedItems.Cast<PbpFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
-    private string? _lastSortColumn;
-    private ListSortDirection _lastSortDirection;
+    private readonly ListViewColumnSorter _sorter = new();
 
-    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is not GridViewColumnHeader header)
-            return;
-
-        if (header.Tag is not string sortBy)
-            return;
-
-        var direction =
-            _lastSortColumn == sortBy &&
-            _lastSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-        ICollectionView dataView = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-
-        if (dataView == null)
-            return;
-
-        dataView.SortDescriptions.Clear();
-        dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
-        dataView.Refresh();
-
-        _lastSortColumn = sortBy;
-        _lastSortDirection = direction;
-    }
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 
     private async void BtnAddFiles_Click(object sender, RoutedEventArgs e)
     {
@@ -131,13 +103,11 @@ public partial class UnpackingTab : UserControl
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<PbpFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
-    private void BtnClear_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel?.ClearItems();
-    }
+    private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearItems();
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {

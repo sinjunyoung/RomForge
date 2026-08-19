@@ -1,12 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using Common.WPF;
+using Microsoft.Win32;
 using NSW.WPF.Services;
 using RomForge.Core.Models.Switch;
 using RomForge.ViewModels.Switch;
-using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -16,12 +15,12 @@ public partial class ConverterTab : UserControl
 {
     private ConverterMainViewModel? ViewModel => DataContext as ConverterMainViewModel;
 
-    private string? _lastSortColumn;
-    private ListSortDirection _lastSortDirection;
+    private readonly ListViewColumnSorter _sorter = new();
 
     public ConverterTab()
     {
         InitializeComponent();
+
         DataContextChanged += ConverterTab_DataContextChanged;
     }
 
@@ -34,16 +33,11 @@ public partial class ConverterTab : UserControl
             newVm.ScrollToItemRequested += OnScrollToItemRequested;
     }
 
-    private void OnScrollToItemRequested(ConverterFileItem item)
-    {
-        Dispatcher.InvokeAsync(() => lvFiles.ScrollIntoView(item), DispatcherPriority.Background);
-    }
+    private void OnScrollToItemRequested(ConverterFileItem item) => Dispatcher.InvokeAsync(() => lvFiles.ScrollIntoView(item), DispatcherPriority.Background);
 
     private void LvFiles_DragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
-            ? DragDropEffects.Copy
-            : DragDropEffects.None;
+        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
@@ -68,31 +62,7 @@ public partial class ConverterTab : UserControl
         ViewModel?.RemoveItems(selected);
     }
 
-    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is not GridViewColumnHeader header) 
-            return;
-
-        if (header.Tag is not string sortBy) 
-            return;
-
-        var direction =
-            _lastSortColumn == sortBy && _lastSortDirection == ListSortDirection.Ascending
-                ? ListSortDirection.Descending
-                : ListSortDirection.Ascending;
-
-        var dataView = CollectionViewSource.GetDefaultView(lvFiles.ItemsSource);
-
-        if (dataView == null) 
-            return;
-
-        dataView.SortDescriptions.Clear();
-        dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
-        dataView.Refresh();
-
-        _lastSortColumn = sortBy;
-        _lastSortDirection = direction;
-    }
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 
     private async void BtnAddFiles_Click(object sender, RoutedEventArgs e)
     {
@@ -132,13 +102,11 @@ public partial class ConverterTab : UserControl
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<ConverterFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 
-    private void BtnClear_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel?.ClearItems();
-    }
+    private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearItems();
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
@@ -155,5 +123,4 @@ public partial class ConverterTab : UserControl
 
         Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
     }
-
 }
