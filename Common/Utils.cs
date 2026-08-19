@@ -99,4 +99,23 @@ public static class Utils
             ArrayPool<byte>.Shared.Return(buf);
         }
     }
+
+    public static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
+    {
+        var opts = new EnumerationOptions
+        {
+            IgnoreInaccessible = true,
+            RecurseSubdirectories = true,
+            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
+        };
+
+        foreach (var path in paths)
+        {
+            if (Directory.Exists(path))
+                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
+                    yield return f;
+            else if (File.Exists(path))
+                yield return path;
+        }
+    }
 }

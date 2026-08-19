@@ -69,13 +69,12 @@ public class UnpackingMainViewModel : ToolTabViewModel
         {
             var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var path in ExpandPaths(paths))
+            foreach (var path in Common.Utils.ExpandPaths(paths))
             {
                 if (!existing.Add(path))
                     continue;
 
                 var vm = new PbpFileItem(path);
-
                 using var stream = new FileStream(path, FileMode.Open, FileAccess.Read);
                 var reader = new PbpReader(stream);
                 var meta = GameMetadataLookup.Find(reader.Discs[0].DiscID);
@@ -223,25 +222,6 @@ public class UnpackingMainViewModel : ToolTabViewModel
             {
                 IsConverting = false;
             }
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var options = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", options))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
         }
     }
 

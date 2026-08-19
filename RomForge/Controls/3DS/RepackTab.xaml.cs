@@ -1,4 +1,5 @@
-﻿using NSW.Core.Enums;
+﻿using Common.WPF;
+using NSW.Core.Enums;
 using RomForge.ViewModels._3DS;
 using System.IO;
 using System.Windows;
@@ -8,6 +9,8 @@ namespace RomForge.Controls._3DS
 {
     public partial class RepackTab : UserControl
     {
+        private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".3ds", ".cci", ".zcci", ".cia" };
+
         RepackMainViewModel ViewModel => (RepackMainViewModel)DataContext;
 
         public RepackTab()
@@ -26,17 +29,8 @@ namespace RomForge.Controls._3DS
                     string filePath = files[0];
                     string extension = Path.GetExtension(filePath);
 
-                    if (string.Equals(extension, ".3ds", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(extension, ".cci", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(extension, ".zcci", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(extension, ".cia", StringComparison.OrdinalIgnoreCase))
-                    {
+                    if (SupportedExtensions.Contains(extension))
                         ViewModel.InputPath = filePath;
-                    }
-                    else
-                    {
-                        
-                    }
                 }
             }
 
@@ -58,25 +52,12 @@ namespace RomForge.Controls._3DS
         private void TxtPatch_Drop(object sender, DragEventArgs e)
         {
             var items = (string[]?)e.Data.GetData(DataFormats.FileDrop);
-            var path = items?.FirstOrDefault(IsValidPatchPath);
+            var path = items?.FirstOrDefault(PatchDropValidator.IsValidPatchPath);
 
             if (path != null)
                 ViewModel.PatchPath = path;
 
             e.Handled = true;
-        }
-
-        private static bool IsValidPatchPath(string path)
-        {
-            if (Directory.Exists(path))
-                return true;
-
-            if (!File.Exists(path))
-                return false;
-
-            string ext = Path.GetExtension(path);
-
-            return string.Equals(ext, ".zip", StringComparison.OrdinalIgnoreCase) || string.Equals(ext, ".7z", StringComparison.OrdinalIgnoreCase);
         }
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)

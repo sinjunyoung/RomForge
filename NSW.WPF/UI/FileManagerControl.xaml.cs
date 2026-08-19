@@ -91,7 +91,7 @@ public partial class FileManagerControl : UserControl
             Multiselect = true
         };
         if (dlg.ShowDialog() == true)
-            _ = AddFilesAsync(ExpandPaths(dlg.FileNames));
+            _ = AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames));
     }
 
     private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
@@ -102,7 +102,7 @@ public partial class FileManagerControl : UserControl
             UseDescriptionForTitle = true
         };
         if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            _ = AddFilesAsync(ExpandPaths([dlg.SelectedPath]));
+            _ = AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
     }
 
     private void BtnRemoveFile_Click(object sender, RoutedEventArgs e)
@@ -143,7 +143,7 @@ public partial class FileManagerControl : UserControl
     private async void LvFiles_Drop(object sender, DragEventArgs e)
     {
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
-        await AddFilesAsync(ExpandPaths(paths));
+        await AddFilesAsync(Common.Utils.ExpandPaths(paths));
     }
 
     private async Task AddFilesAsync(IEnumerable<string> paths)
@@ -182,25 +182,6 @@ public partial class FileManagerControl : UserControl
 
             GameFiles.Add(vm);
             UpdateDropHint();
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var opts = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
         }
     }
 

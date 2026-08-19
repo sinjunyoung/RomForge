@@ -69,7 +69,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in ExpandPaths(paths))
+        foreach (var path in Common.Utils.ExpandPaths(paths))
         {
             string ext = Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
 
@@ -264,6 +264,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
             for (int i = 0; i < 8; i++)
             {
                 int off = 0x120 + i * 8;
+
                 partitionMap[i] = (BinaryPrimitives.ReadUInt32LittleEndian(ncsdBuf.AsSpan(off)), BinaryPrimitives.ReadUInt32LittleEndian(ncsdBuf.AsSpan(off + 4)));
             }
 
@@ -320,7 +321,6 @@ public class DecryptorMainViewModel : ToolTabViewModel
                 while ((bytesRead = await decStream.ReadAsync(buf, ct)) > 0)
                 {
                     ct.ThrowIfCancellationRequested();
-
                     await outputStream.WriteAsync(buf.AsMemory(0, bytesRead), ct);
 
                     written += bytesRead;
@@ -361,25 +361,6 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     }
                 }
             }
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var options = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", options))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
         }
     }
 

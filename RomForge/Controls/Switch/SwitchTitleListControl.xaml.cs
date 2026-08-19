@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.WPF;
+using Microsoft.Win32;
 using NSW.Core;
 using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
@@ -86,7 +87,7 @@ public partial class SwitchTitleListControl : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            _ = _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths(dlg.FileNames), UpdateDropHint);
+            _ = _importer.AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames), UpdateDropHint);
     }
 
     private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
@@ -94,7 +95,7 @@ public partial class SwitchTitleListControl : UserControl
         var dlg = new System.Windows.Forms.FolderBrowserDialog { Description = "게임 폴더 선택", UseDescriptionForTitle = true };
 
         if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            _ = _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths([dlg.SelectedPath]), UpdateDropHint);
+            _ = _importer.AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]), UpdateDropHint);
     }
 
     private void BtnBulkPatch_Click(object sender, RoutedEventArgs e)
@@ -178,8 +179,7 @@ public partial class SwitchTitleListControl : UserControl
         return targets;
     }
 
-    private static void ShowBulkPatchResult(int total, int matched) =>
-        MessageBox.Show($"{total}개 중 {matched}개에 패치 매칭됨.", "한글패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
+    private static void ShowBulkPatchResult(int total, int matched) => MessageBox.Show($"{total}개 중 {matched}개에 패치 매칭됨.", "한글패치 일괄 지정", MessageBoxButton.OK, MessageBoxImage.Information);
 
     private void BtnRemoveFile_Click(object sender, RoutedEventArgs e)
     {
@@ -230,12 +230,12 @@ public partial class SwitchTitleListControl : UserControl
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
             return;
 
-        await _importer.AddFilesAsync(SwitchPatchDropValidator.ExpandPaths(paths), UpdateDropHint);
+        await _importer.AddFilesAsync(Common.Utils.ExpandPaths(paths), UpdateDropHint);
     }
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
-        if (lvFiles.SelectedItems.Count == 0)
+        if (lvFiles.SelectedItems.Count == 0) 
             e.Handled = true;
     }
 
@@ -301,7 +301,7 @@ public partial class SwitchTitleListControl : UserControl
 
     private void PatchDropTarget_DragEnter(object sender, DragEventArgs e)
     {
-        e.Effects = SwitchPatchDropValidator.IsValidPatchDrop(e.Data) ? DragDropEffects.Copy : DragDropEffects.None;
+        e.Effects = PatchDropValidator.IsValidPatchDrop(e.Data) ? DragDropEffects.Copy : DragDropEffects.None;
         e.Handled = true;
     }
 
@@ -317,7 +317,7 @@ public partial class SwitchTitleListControl : UserControl
 
         string path = paths[0];
 
-        if (!SwitchPatchDropValidator.IsValidPatchPath(path))
+        if (!PatchDropValidator.IsValidPatchPath(path))
             return;
 
         if (ArchivePatchSourceFactory.IsArchivePath(path))

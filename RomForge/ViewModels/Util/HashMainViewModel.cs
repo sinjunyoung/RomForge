@@ -31,8 +31,8 @@ public class HashMainViewModel : ToolTabViewModel
                 return;
 
             _useUpperCase = value;
-            OnPropertyChanged();
 
+            OnPropertyChanged();
             ApplyHashCase();
         }
     }
@@ -51,7 +51,14 @@ public class HashMainViewModel : ToolTabViewModel
     public bool IsConverting
     {
         get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
+        set 
+        { 
+            _isConverting = value; 
+            
+            OnPropertyChanged(); 
+            OnPropertyChanged(nameof(IsLocked)); 
+            CommandManager.InvalidateRequerySuggested(); 
+        }
     }
 
     public HashAlgorithmType SelectedAlgorithm
@@ -88,7 +95,7 @@ public class HashMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in ExpandPaths(paths))
+        foreach (var path in Common.Utils.ExpandPaths(paths))
         {
             if (!existing.Add(path))
                 continue;
@@ -131,11 +138,15 @@ public class HashMainViewModel : ToolTabViewModel
     private async Task RunAsync()
     {
         IsConverting = true;
+
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
+
         ClearLog();
 
         var algoType = SelectedAlgorithm;
+
         AppendLog($"총 {FileItems.Count}개의 파일 해시 계산을 시작합니다. (알고리즘: {algoType})", LogLevel.Highlight);
 
         using (BeginWork())
@@ -168,12 +179,15 @@ public class HashMainViewModel : ToolTabViewModel
                         item.HashResult = FormatHex(result);
                         item.Progress = 100;
                         item.Status = "완료";
+
                         Interlocked.Increment(ref successCount);
+
                         AppendLog($"[완료] {item.FileName} -> {result}");
                     }
                     else
                     {
                         item.Status = "실패";
+
                         AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
                     }
                 });
@@ -197,6 +211,7 @@ public class HashMainViewModel : ToolTabViewModel
             finally
             {
                 IsConverting = false;
+
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -220,6 +235,7 @@ public class HashMainViewModel : ToolTabViewModel
                 {
                     byte[] hashBytes = crc.GetHashAndReset();
                     uint crcValue = System.Buffers.Binary.BinaryPrimitives.ReadUInt32LittleEndian(hashBytes);
+
                     return crcValue.ToString("x8");
                 }, ct);
             }
@@ -246,6 +262,7 @@ public class HashMainViewModel : ToolTabViewModel
             while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
             {
                 ct.ThrowIfCancellationRequested();
+
                 totalRead += read;
 
                 if (totalRead == totalBytes)
@@ -284,6 +301,7 @@ public class HashMainViewModel : ToolTabViewModel
         while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
         {
             ct.ThrowIfCancellationRequested();
+
             totalRead += read;
 
             appendAction(buffer, read);
@@ -316,33 +334,12 @@ public class HashMainViewModel : ToolTabViewModel
         return sb.ToString();
     }
 
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var options = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", options))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
-        }
-    }
-
     private void AppendLog(string msg, LogLevel level = LogLevel.Info)
     {
         if (Application.Current?.Dispatcher == null)
             return;
 
-        Application.Current.Dispatcher.Invoke(() =>
-            LogEntries.Add(new LogEntry { Message = msg, Level = level })
-        );
+        Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
     }
 
     private void ClearLog()

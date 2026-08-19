@@ -68,7 +68,7 @@ public class CueMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in ExpandPaths(paths))
+        foreach (var path in Common.Utils.ExpandPaths(paths))
         {
             if (!SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
@@ -108,6 +108,7 @@ public class CueMainViewModel : ToolTabViewModel
     public static string GetFileDialogFilter()
     {
         string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
+
         return $"지원 파일|{wildcards}|모든 파일|*.*";
     }
 
@@ -118,8 +119,11 @@ public class CueMainViewModel : ToolTabViewModel
     private async Task RunAsync()
     {
         IsConverting = true;
+
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
+
         ClearLog();
 
         using (BeginWork())
@@ -141,6 +145,7 @@ public class CueMainViewModel : ToolTabViewModel
                     item.Status = "대기중";
                     item.Progress = 0;
                     item.Status = "변환중";
+
                     ScrollToItemRequested?.Invoke(item);
 
                     bool success = await Task.Run(() => ProcessSingleFile(item, _cts.Token));
@@ -154,10 +159,9 @@ public class CueMainViewModel : ToolTabViewModel
                     else
                     {
                         item.Progress = 0;
+
                         if (item.Status == "변환중")
-                        {
                             item.Status = "실패";
-                        }
                     }
                 }
 
@@ -166,6 +170,7 @@ public class CueMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
                 {
                     item.Status = "취소";
@@ -175,6 +180,7 @@ public class CueMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";
             }
@@ -197,29 +203,32 @@ public class CueMainViewModel : ToolTabViewModel
             if (File.Exists(targetCuePath))
             {
                 item.Status = "미지원";
+
                 AppendLog($"[패스] 이미 {item.TargetName} 파일이 존재하므로 생성을 건너뜁니다. (덮어쓰기 방지)", LogLevel.Error);
+
                 return false;
             }
 
             string trackMode = DetectBinTrackMode(item.FilePath);
+
             AppendLog($"[{item.FileName}] 분석 완료 -> 포맷: {trackMode}");
 
             string binFileNameWithExt = Path.GetFileName(item.FilePath);
-
             var sb = new StringBuilder();
+
             sb.AppendLine($"FILE \"{binFileNameWithExt}\" BINARY");
             sb.AppendLine($"  TRACK 01 {trackMode}");
             sb.AppendLine("    INDEX 01 00:00:00");
-
             ct.ThrowIfCancellationRequested();
-
             File.WriteAllText(targetCuePath, sb.ToString(), Encoding.UTF8);
             AppendLog($"[성공] CUE 파일 생성 완료: {item.TargetName}");
+
             return true;
         }
         catch (Exception ex)
         {
             AppendLog($"[실패] {item.FileName} 처리 중 에러: {ex.Message}", LogLevel.Error);
+
             return false;
         }
     }
@@ -235,6 +244,7 @@ public class CueMainViewModel : ToolTabViewModel
 
             byte[] header = new byte[16];
             int read = fs.Read(header, 0, 16);
+
             if (read < 16)
                 return "MODE1/2352";
 
@@ -253,33 +263,12 @@ public class CueMainViewModel : ToolTabViewModel
         }
     }
 
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var options = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", options))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
-        }
-    }
-
     private void AppendLog(string msg, LogLevel level = LogLevel.Info)
     {
         if (Application.Current?.Dispatcher == null)
             return;
 
-        Application.Current.Dispatcher.Invoke(() =>
-            LogEntries.Add(new LogEntry { Message = msg, Level = level })
-        );
+        Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
     }
 
     private void ClearLog()

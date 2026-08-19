@@ -55,7 +55,7 @@ public partial class ConverterTab : UserControl
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) 
             return;
 
-        await ViewModel.AddPathsAsync(ExpandPaths(paths));
+        await ViewModel.AddPathsAsync(Common.Utils.ExpandPaths(paths));
     }
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
@@ -126,7 +126,7 @@ public partial class ConverterTab : UserControl
         if (dialog.ShowDialog() != true) 
             return;
 
-        await ViewModel.AddPathsAsync(ExpandPaths([dialog.SelectedPath]));
+        await ViewModel.AddPathsAsync(Common.Utils.ExpandPaths([dialog.SelectedPath]));
     }
 
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
@@ -156,22 +156,4 @@ public partial class ConverterTab : UserControl
         Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
     }
 
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var opts = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
-        }
-    }
 }

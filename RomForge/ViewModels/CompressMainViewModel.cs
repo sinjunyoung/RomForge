@@ -57,7 +57,7 @@ public class CompressMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in ExpandPaths(paths))
+        foreach (var path in Common.Utils.ExpandPaths(paths))
         {
             if (!SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
@@ -97,7 +97,9 @@ public class CompressMainViewModel : ToolTabViewModel
     private async Task RunAsync()
     {
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
+
         ClearLog();
 
         using (BeginWork())
@@ -229,6 +231,7 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Unknown:
                         default:
                             item.Status = "미지원";
+
                             AppendLog($"[{item.FileName}] 지원하지 않는 포맷", LogLevel.Error);
                             continue;
                     }
@@ -247,6 +250,7 @@ public class CompressMainViewModel : ToolTabViewModel
                 catch (Exception ex)
                 {
                     AppendLog($"오류 ([{item.FileName}]): {ex.Message}", LogLevel.Error);
+
                     item.Status = "실패";
                 }
             }
@@ -264,25 +268,6 @@ public class CompressMainViewModel : ToolTabViewModel
         {
             remainingItem.Status = "취소";
             remainingItem.Progress = 0;
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var opts = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", opts))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
         }
     }
 

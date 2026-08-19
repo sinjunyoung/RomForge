@@ -69,7 +69,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in ExpandPaths(paths))
+        foreach (var path in Common.Utils.ExpandPaths(paths))
         {
             if (!InstallMainViewModel.SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
@@ -92,7 +92,9 @@ public class ConverterMainViewModel : ToolTabViewModel
                 if (result?.IconPixels is not null)
                 {
                     var bitmap = BitmapSource.Create(48, 48, 96, 96, PixelFormats.Bgr32, null, result?.IconPixels, 48 * 4);
+
                     bitmap.Freeze();
+
                     vm.Icon = bitmap;
                 }
 
@@ -135,8 +137,11 @@ public class ConverterMainViewModel : ToolTabViewModel
     private async Task RunAsync()
     {
         IsConverting = true;
+
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
+
         ClearLog();
 
         using (BeginWork())
@@ -173,6 +178,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                                 {
                                     KeyStore key = new();
                                     CciToCiaConverter c = new(key);
+
                                     await c.ConvertAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
                                 }
                                 break;
@@ -194,6 +200,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                                     {
                                         KeyStore key = new();
                                         var ciaToCci = new CiaToCciConverter(key);
+
                                         await ciaToCci.ConvertAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
                                     }
                                 }
@@ -219,6 +226,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                     catch (Exception ex)
                     {
                         AppendLog($"[{item.FileName}.{item.Extension}] 변환 실패: {ex.Message}", LogLevel.Error);
+
                         item.Status = "실패";
                         item.Progress = 0;
                     }
@@ -230,12 +238,14 @@ public class ConverterMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
+
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";
             }
@@ -243,25 +253,6 @@ public class ConverterMainViewModel : ToolTabViewModel
             {
                 IsConverting = false;
             }
-        }
-    }
-
-    private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)
-    {
-        var options = new EnumerationOptions
-        {
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = true,
-            AttributesToSkip = FileAttributes.System | FileAttributes.Hidden
-        };
-
-        foreach (var path in paths)
-        {
-            if (Directory.Exists(path))
-                foreach (var f in Directory.EnumerateFiles(path, "*.*", options))
-                    yield return f;
-            else if (File.Exists(path))
-                yield return path;
         }
     }
 
