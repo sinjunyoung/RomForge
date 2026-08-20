@@ -18,7 +18,7 @@ public class PSSettingsMainViewModel() : ToolTabViewModel
         {
             AppConfig.Instance.PS1.UseGameIdMode = value;
 
-            if (value) 
+            if (value)
                 AppConfig.Instance.PS1.UseFileNameMode = false;
 
             OnPropertyChanged();
@@ -33,11 +33,24 @@ public class PSSettingsMainViewModel() : ToolTabViewModel
         {
             AppConfig.Instance.PS1.UseFileNameMode = value;
 
-            if (value) 
+            if (value)
                 AppConfig.Instance.PS1.UseGameIdMode = false;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(UseGameIdMode));
         }
     }
+
+    public bool UseUpperCase
+    {
+        get => AppConfig.Instance.PS1.UseUpperCase;
+        set
+        {
+            AppConfig.Instance.PS1.UseUpperCase = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ExtensionText));
+        }
+    }
+
+    public string ExtensionText => UseUpperCase ? "PBP" : "pbp";
 }

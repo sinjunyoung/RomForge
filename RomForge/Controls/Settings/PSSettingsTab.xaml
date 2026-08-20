@@ -33,7 +33,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            
+
                             <Image Grid.Column="0" Source="/Assets/Images/Level.png" Width="24" Margin="0,0,5,0"/>
                             <Slider Grid.Column="1" x:Name="sliderPS1" Style="{StaticResource SliderStyle}"
                                     Minimum="0" Maximum="9" Value="{Binding CompressLevel}"
@@ -46,7 +46,7 @@
                     </StackPanel>
                 </Border>
 
-                <Border Margin="5,0,5,0" Grid.Row="2" Style="{StaticResource OptionBorder}" Height="50">
+                <Border Margin="5,0,5,0" Grid.Row="2" Style="{StaticResource OptionBorder}" Height="Auto" Padding="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -54,13 +54,40 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        
-                        <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0"/>
+
+                        <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="출력 옵션" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
-                        <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,8"/>
+                        <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,4"/>
+
                         <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="8,4">
-                            <RadioButton Content="일반 ( 타이틀명.pbp )" GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" Margin="0,0,0,5"/>
-                            <RadioButton Content="실기 ( 타이틀ID / EBOOT.PBP)" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
+                                <RadioButton GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="일반 ( 타이틀명." FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding ExtensionText, FallbackValue=pbp}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text=" )" FontSize="11" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </RadioButton>
+
+                                <Border Width="1" Background="#3F3F46" Margin="12,2" Height="14" VerticalAlignment="Center"/>
+
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding UseFileNameMode}">
+                                    <RadioButton IsChecked="{Binding UseUpperCase, Converter={StaticResource InverseBool}, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Assets/Images/LowerA.png" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="소문자" FontSize="11" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </RadioButton>
+                                    <RadioButton IsChecked="{Binding UseUpperCase, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Assets/Images/UpperA.png" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="대문자" FontSize="11" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </RadioButton>                                    
+                                </StackPanel>
+                            </StackPanel>
+
+                            <RadioButton Content="실기 ( 타이틀ID / EBOOT.PBP )" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Border>

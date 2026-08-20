@@ -43,6 +43,7 @@ public class PatchConfig : ViewModelBase
         set { SetProperty(ref _autoCompress, value); }
     }
 }
+
 public class ChdmanConfig : ViewModelBase
 {
     private string _compression = "zlib";
@@ -89,6 +90,9 @@ public class PS1Config : ViewModelBase
 
     private bool _useFileNameMode = true;
     public bool UseFileNameMode { get => _useFileNameMode; set => SetProperty(ref _useFileNameMode, value); }
+
+    private bool _useUpperCase = false;
+    public bool UseUpperCase { get => _useUpperCase; set => SetProperty(ref _useUpperCase, value); }
 }
 
 public class PatchSearchConfig : ViewModelBase
