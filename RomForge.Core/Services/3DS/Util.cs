@@ -18,7 +18,7 @@ public static class Util
         InstalledTitle? title = null;
         SmdhInfo? smdhInfo = null;
         NcchHeader? ncchHeader = null;
-        KeyStore keyStore = new();
+        KeyStore keyStore = KeyStoreProvider.Instance.KeyStore;
 
         switch (ext)
         {

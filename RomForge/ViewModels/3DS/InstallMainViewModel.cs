@@ -36,7 +36,7 @@ public class InstallMainViewModel : ToolTabViewModel
             if (!SupportedExtensions.Contains(ext) || Items.Any(f => f.FilePath == fullPath))
                 continue;
 
-            var result = await Core.Services._3DS.Util.ParseFile(fullPath);
+            var result = await Task.Run(() => Core.Services._3DS.Util.ParseFile(fullPath));
             var vm = new TitleViewModel()
             {
                 Title = result.Title!,

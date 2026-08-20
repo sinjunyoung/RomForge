@@ -9,7 +9,7 @@
              d:DesignHeight="400" d:DesignWidth="800">
 
     <UserControl.Resources>
-        
+
         <Style TargetType="Button">
             <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="18,0"/>
@@ -41,7 +41,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
     </UserControl.Resources>
 
     <Border BorderBrush="#33FFFFFF" 
@@ -104,7 +104,8 @@
                     </ItemsControl>
                 </StackPanel>
 
-                <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening">
+                <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening"
+                          GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -129,10 +130,12 @@
                         <GridView>
                             <GridViewColumn Width="80">
                                 <GridViewColumn.Header>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="{x:Static l:Resources.Header_Type}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <GridViewColumnHeader Tag="FileType">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="{x:Static l:Resources.Header_Type}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -144,10 +147,12 @@
                             </GridViewColumn>
                             <GridViewColumn Width="380">
                                 <GridViewColumn.Header>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="/Common.WPF;component/Assets/Images/Title.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <GridViewColumnHeader Tag="TitleName">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Common.WPF;component/Assets/Images/Title.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -168,10 +173,12 @@
 
                             <GridViewColumn Width="120">
                                 <GridViewColumn.Header>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="/Common.WPF;component/Assets/Images/Version.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="버전" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <GridViewColumnHeader Tag="Version">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Common.WPF;component/Assets/Images/Version.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="버전" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -184,10 +191,12 @@
 
                             <GridViewColumn Width="90">
                                 <GridViewColumn.Header>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="{x:Static l:Resources.Header_Ext}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <GridViewColumnHeader Tag="Extension">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Common.WPF;component/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="{x:Static l:Resources.Header_Ext}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -200,10 +209,12 @@
 
                             <GridViewColumn Width="75">
                                 <GridViewColumn.Header>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="{x:Static l:Resources.Header_Size}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <GridViewColumnHeader Tag="FileSize">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Common.WPF;component/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="{x:Static l:Resources.Header_Size}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>

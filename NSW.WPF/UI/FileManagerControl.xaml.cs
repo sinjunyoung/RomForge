@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.WPF;
+using Microsoft.Win32;
 using NSW.Core;
 using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
@@ -15,6 +16,8 @@ public partial class FileManagerControl : UserControl
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
 
+    private readonly ListViewColumnSorter _sorter = new();
+
     public Button ExtraButton1 => btnExtra1;
     public Action ExtraButton1Clicked;
 
@@ -28,10 +31,12 @@ public partial class FileManagerControl : UserControl
     public FileManagerControl()
     {
         InitializeComponent();
+
         lvFiles.ItemsSource = GameFiles;
+
         UpdateDropHint();
 
-        
+
     }
 
     public static bool KeyExists() => KeySetProvider.Instance.KeySet != null;
@@ -39,13 +44,15 @@ public partial class FileManagerControl : UserControl
     public void RecalcKeyMissingFiles(Action onCompleted)
     {
         var targets = GameFiles.Where(f => f.IsKeyMissing).ToList();
+
         if (targets.Count == 0)
         {
             onCompleted();
             return;
-        }        
+        }
 
         var keySet = KeySetProvider.Instance.KeySet;
+
         if (keySet == null)
         {
             onCompleted();
@@ -53,9 +60,11 @@ public partial class FileManagerControl : UserControl
         }
 
         int remaining = targets.Count;
+
         foreach (var vm in targets)
         {
             string capturedPath = vm.FilePath;
+
             _ = Task.Run(() =>
             {
                 string result = MetadataReader.DetectFileType(keySet, capturedPath);
@@ -69,9 +78,7 @@ public partial class FileManagerControl : UserControl
                     });
                 }
                 else
-                {
                     Dispatcher.Invoke(() => vm.FileType = result);
-                }
             });
         }
     }
@@ -79,6 +86,7 @@ public partial class FileManagerControl : UserControl
     private void UpdateDropHint()
     {
         dropHint.Visibility = GameFiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
         FileListChanged?.Invoke();
     }
 
@@ -90,6 +98,7 @@ public partial class FileManagerControl : UserControl
             Filter = $"{Res.Filter_SwitchFiles} (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|{Res.Filter_AllFiles}|*.*",
             Multiselect = true
         };
+
         if (dlg.ShowDialog() == true)
             _ = AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames));
     }
@@ -101,6 +110,7 @@ public partial class FileManagerControl : UserControl
             Description = "게임 폴더 선택",
             UseDescriptionForTitle = true
         };
+
         if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             _ = AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
     }
@@ -131,7 +141,8 @@ public partial class FileManagerControl : UserControl
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Delete) BtnRemoveFile_Click(sender, new RoutedEventArgs());
+        if (e.Key == Key.Delete)
+            BtnRemoveFile_Click(sender, new RoutedEventArgs());
     }
 
     private void LvFiles_DragEnter(object sender, DragEventArgs e)
@@ -142,7 +153,9 @@ public partial class FileManagerControl : UserControl
 
     private async void LvFiles_Drop(object sender, DragEventArgs e)
     {
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
+        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
+            return;
+
         await AddFilesAsync(Common.Utils.ExpandPaths(paths));
     }
 
@@ -151,7 +164,6 @@ public partial class FileManagerControl : UserControl
         var keySet = KeySetProvider.Instance.KeySet;
         var existing = GameFiles.Select(f => f.FilePath)
                                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         var newPaths = await Task.Run(() =>
             paths.Where(p => SupportedExtensions.Contains(Path.GetExtension(p)))
                  .Where(p => existing.Add(p))
@@ -172,18 +184,21 @@ public partial class FileManagerControl : UserControl
                     vm.TitleID = info.TitleId;
                     vm.Version = info.DisplayVersion;
                     vm.FileType = info.Type;
+
                     if (info.IconData != null)
                         vm.Icon = info.IconData.ToBitmapImage();
                 }
             }
 
-            if(string.IsNullOrEmpty(vm.TitleName))
+            if (string.IsNullOrEmpty(vm.TitleName))
                 vm.TitleName = Path.GetFileNameWithoutExtension(path);
 
             GameFiles.Add(vm);
             UpdateDropHint();
         }
     }
+
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {

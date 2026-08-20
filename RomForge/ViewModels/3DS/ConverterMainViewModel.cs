@@ -79,7 +79,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
             try
             {
-                var result = await Core.Services._3DS.Util.ParseFile(path);
+                var result = await Task.Run(() => Core.Services._3DS.Util.ParseFile(path));
                 var vm = new _3DSFileItem(path)
                 {
                     TitleId = result.Title!.TitleId,
@@ -256,7 +256,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     private void AppendLog(string msg, LogLevel level = LogLevel.Info)
     {
-        if (Application.Current?.Dispatcher == null) 
+        if (Application.Current?.Dispatcher == null)
             return;
 
         Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
@@ -264,7 +264,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     private void ClearLog()
     {
-        if (Application.Current?.Dispatcher == null) 
+        if (Application.Current?.Dispatcher == null)
             return;
 
         Application.Current.Dispatcher.Invoke(() => LogEntries.Clear());

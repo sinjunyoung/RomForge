@@ -81,7 +81,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
 
             try
             {
-                var result = await Core.Services._3DS.Util.ParseFile(path);
+                var result = await Task.Run(() => Core.Services._3DS.Util.ParseFile(path));
                 var vm = new DecryptorFileItem(path)
                 {
                     TitleId = result.Title!.TitleId,

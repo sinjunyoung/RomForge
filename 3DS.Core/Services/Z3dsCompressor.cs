@@ -37,7 +37,7 @@ public static class Z3dsCompressor
             {
                 log?.Invoke("암호화된 롬 감지, 복호화 파이프라인 구동...", LogLevel.Info);
 
-                var keyStore = new KeyStore();
+                var keyStore = KeyStoreProvider.Instance.KeyStore;
 
                 fileStream.Position = 0;
 
@@ -83,7 +83,7 @@ public static class Z3dsCompressor
 
         try
         {
-            var keyStore = new KeyStore();
+            var keyStore = KeyStoreProvider.Instance.KeyStore;
             var unpacker = new CiaReader(keyStore);
             await using var ctx = await unpacker.OpenAsync(inputPath, log, ct);
             uint titleType = (uint)(ctx.Ticket.TitleId >> 32);

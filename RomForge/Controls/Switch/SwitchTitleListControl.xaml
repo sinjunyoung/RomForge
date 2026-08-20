@@ -191,7 +191,7 @@
                                 <GridViewColumn.Header>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="크기" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>

@@ -39,43 +39,43 @@ public class RepackMainViewModel : ToolTabViewModel
     public RepackOutputFormat OutputFormat
     {
         get => _outputFormat;
-        set 
-        { 
+        set
+        {
             _outputFormat = value; OnPropertyChanged();
 
-            OnPropertyChanged(nameof(IsCciFormat)); 
+            OnPropertyChanged(nameof(IsCciFormat));
             OnPropertyChanged(nameof(IsZcciFormat));
-            OnPropertyChanged(nameof(IsCiaFormat)); 
+            OnPropertyChanged(nameof(IsCiaFormat));
         }
     }
 
     public bool IsCciFormat
     {
         get => OutputFormat == RepackOutputFormat.Cci;
-        set 
-        { 
-            if (value) 
-                OutputFormat = RepackOutputFormat.Cci; 
+        set
+        {
+            if (value)
+                OutputFormat = RepackOutputFormat.Cci;
         }
     }
 
     public bool IsZcciFormat
     {
         get => OutputFormat == RepackOutputFormat.Zcci;
-        set 
-        { 
-            if (value) 
-                OutputFormat = RepackOutputFormat.Zcci; 
+        set
+        {
+            if (value)
+                OutputFormat = RepackOutputFormat.Zcci;
         }
     }
 
     public bool IsCiaFormat
     {
         get => OutputFormat == RepackOutputFormat.Cia;
-        set 
-        { 
-            if (value) 
-                OutputFormat = RepackOutputFormat.Cia; 
+        set
+        {
+            if (value)
+                OutputFormat = RepackOutputFormat.Cia;
         }
     }
 
@@ -95,10 +95,10 @@ public class RepackMainViewModel : ToolTabViewModel
     public string PatchPath
     {
         get => _patchPath;
-        set 
-        { 
+        set
+        {
             _patchPath = value; OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchHintVisibility)); 
+            OnPropertyChanged(nameof(PatchHintVisibility));
         }
     }
 
@@ -225,7 +225,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
     private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {
-        var keyStore = new KeyStore();
+        var keyStore = KeyStoreProvider.Instance.KeyStore;
         string unpackedPath = Path.Combine(OutputPath, "unpacked");
 
         if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
