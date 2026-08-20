@@ -14,6 +14,8 @@ public class UtilMainViewModel : MultiToolTabViewModel
 
     public HashMainViewModel HashVM { get; } = new();
 
+    public TistoryMainViewModel TistoryVM { get; } = new();
+
     public bool IsAdmin
     {
         get => _isAdmin;
@@ -37,7 +39,8 @@ public class UtilMainViewModel : MultiToolTabViewModel
         Tools.Add(HashVM);
         Tools.Add(ZipImageToolVM);
         Tools.Add(CertsVM);
-        Tools.Add(CueVM);        
+        Tools.Add(CueVM);
+        Tools.Add(TistoryVM);
 
         foreach (var tool in Tools)
             tool.PropertyChanged += Child_PropertyChanged;

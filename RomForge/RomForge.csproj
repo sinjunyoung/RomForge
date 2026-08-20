@@ -44,6 +44,7 @@
     <None Remove="Assets\Images\Saturn.png" />
     <None Remove="Assets\Images\Search.png" />
     <None Remove="Assets\Images\Split.png" />
+    <None Remove="Assets\Images\Tistory.png" />
     <None Remove="Assets\Images\Unpack.png" />
     <None Remove="Assets\Images\UpperA.png" />
     <None Remove="Assets\Images\Version.png" />
@@ -81,6 +82,7 @@
     <Resource Include="Assets\Images\SD.png" />
     <Resource Include="Assets\Images\Search.png" />
     <Resource Include="Assets\Images\Split.png" />
+    <Resource Include="Assets\Images\Tistory.png" />
     <Resource Include="Assets\Images\Unpack.png" />
     <Resource Include="Assets\Images\UpperA.png" />
     <Resource Include="Assets\Images\WiiU.png" />
