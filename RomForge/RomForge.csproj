@@ -21,6 +21,7 @@
     <None Remove="Assets\Images\Categories.png" />
     <None Remove="Assets\Images\Certs.png" />
     <None Remove="Assets\Images\Check.png" />
+    <None Remove="Assets\Images\Comment.png" />
     <None Remove="Assets\Images\Copy.png" />
     <None Remove="Assets\Images\CUE.png" />
     <None Remove="Assets\Images\Dreamcast.png" />
@@ -59,6 +60,7 @@
     <Resource Include="Assets\Images\Cartridge.png" />
     <Resource Include="Assets\Images\Certs.png" />
     <Resource Include="Assets\Images\Check.png" />
+    <Resource Include="Assets\Images\Comment.png" />
     <Resource Include="Assets\Images\Convert.png" />
     <Resource Include="Assets\Images\Copy.png" />
     <Resource Include="Assets\Images\CUE.png" />

@@ -42,21 +42,12 @@ public partial class TistoryTab : UserControl
         }, DispatcherPriority.Background);
     }
 
-    private void TxtUrl_GotFocus(object sender, RoutedEventArgs e)
+    private void TxtUrl_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (sender is TextBox textBox)
-        {
-            textBox.Dispatcher.InvokeAsync(() =>
-            {
-                textBox.SelectAll();
-            }, DispatcherPriority.Input);
-        }
-    }
-
-    private void TxtUrl_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key != Key.Enter)
+        if (e.Key != Key.Enter || Keyboard.Modifiers != ModifierKeys.Control)
             return;
+
+        e.Handled = true;
 
         if (ViewModel.AnalyzeCommand.CanExecute(null))
             ViewModel.AnalyzeCommand.Execute(null);

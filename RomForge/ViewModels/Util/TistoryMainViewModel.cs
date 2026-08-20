@@ -15,10 +15,9 @@ namespace RomForge.ViewModels.Util;
 
 public class TistoryMainViewModel : ToolTabViewModel
 {
-    private string _pageUrl = string.Empty;
-    private string _saveDirectory = string.IsNullOrWhiteSpace(AppConfig.Instance.Tistory.SaveDirectory)
-        ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TistoryDownloads")
-        : AppConfig.Instance.Tistory.SaveDirectory;
+    private static readonly char[] separator = ['\r', '\n'];
+    private string _pageUrls = string.Empty;
+    private string _saveDirectory = string.IsNullOrWhiteSpace(AppConfig.Instance.Tistory.SaveDirectory) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TistoryDownloads") : AppConfig.Instance.Tistory.SaveDirectory;
     private bool _isBusy;
     private bool _autoExtractAfterDownload = AppConfig.Instance.Tistory.AutoExtractAfterDownload;
     private CancellationTokenSource _cts = new();
@@ -27,10 +26,14 @@ public class TistoryMainViewModel : ToolTabViewModel
 
     public ObservableCollection<TistoryDownloadItem> FileItems { get; } = [];
 
-    public string PageUrl
+    public string PageUrls
     {
-        get => _pageUrl;
-        set { SetProperty(ref _pageUrl, value); CommandManager.InvalidateRequerySuggested(); }
+        get => _pageUrls;
+        set
+        {
+            SetProperty(ref _pageUrls, value);
+            CommandManager.InvalidateRequerySuggested(); 
+        }
     }
 
     public string SaveDirectory
@@ -69,7 +72,7 @@ public class TistoryMainViewModel : ToolTabViewModel
 
     public TistoryMainViewModel()
     {
-        AnalyzeCommand = new RelayCommand(async _ => await AnalyzeAsync(), _ => !IsBusy && !string.IsNullOrWhiteSpace(PageUrl));
+        AnalyzeCommand = new RelayCommand(async _ => await AnalyzeAsync(), _ => !IsBusy && !string.IsNullOrWhiteSpace(PageUrls));
         RunCommand = new RelayCommand(async _ => await DownloadSelectedAsync(), _ => !IsBusy && FileItems.Any(i => i.IsSelected));
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsBusy);
     }
@@ -106,12 +109,16 @@ public class TistoryMainViewModel : ToolTabViewModel
         {
             try
             {
-                AppendLog($"[분석 시작] {PageUrl}", LogLevel.Highlight);
+                var urlsList = PageUrls
+                    .Split(separator, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(u => u.Trim())
+                    .Where(u => !string.IsNullOrEmpty(u))
+                    .ToList();
 
-                var urls = await TistoryAttachmentService.ExtractAttachmentUrlsAsync(PageUrl, msg => AppendLog(msg), _cts.Token);
+                AppendLog($"[분석 시작] 총 {urlsList.Count}개 URL", LogLevel.Highlight);
 
+                var urls = await TistoryAttachmentService.ExtractAttachmentUrlsAsync(urlsList, msg => AppendLog(msg), _cts.Token);
                 var excludedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg", ".webp", ".gif" };
-
                 var existing = FileItems.Select(f => f.Url).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var addedCount = 0;
 
@@ -121,10 +128,9 @@ public class TistoryMainViewModel : ToolTabViewModel
                     {
                         var uri = new Uri(url);
                         var ext = Path.GetExtension(uri.LocalPath);
+
                         if (!string.IsNullOrEmpty(ext) && excludedExtensions.Contains(ext))
-                        {
                             continue;
-                        }
                     }
                     catch
                     {
@@ -135,7 +141,6 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                     var fileName = TistoryAttachmentService.GetCachedFileName(url);
                     var fileSize = TistoryAttachmentService.GetCachedFileSize(url);
-
                     var item = new TistoryDownloadItem(url)
                     {
                         FileName = fileName,
@@ -149,6 +154,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                     };
 
                     FileItems.Add(item);
+
                     addedCount++;
                 }
 
@@ -157,9 +163,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                 if (FileItems.Count > 0)
                     ScrollToItemRequested?.Invoke(FileItems[^1]);
 
-                AppendLog(addedCount > 0
-                    ? $"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다."
-                    : "[분석 완료] 새로 추가된 첨부파일이 없습니다.", addedCount > 0 ? LogLevel.Highlight : LogLevel.Error);
+                AppendLog(addedCount > 0 ? $"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다." : "[분석 완료] 새로 추가된 첨부파일이 없습니다.", addedCount > 0 ? LogLevel.Highlight : LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
@@ -172,6 +176,7 @@ public class TistoryMainViewModel : ToolTabViewModel
             finally
             {
                 IsBusy = false;
+
                 OnPropertyChanged(nameof(HintVisibility));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -192,7 +197,6 @@ public class TistoryMainViewModel : ToolTabViewModel
                 var targetItems = FileItems.Where(i => i.IsSelected).ToList();
                 int totalCount = targetItems.Count;
                 int successCount = 0;
-
                 object lockObj = new();
 
                 AppendLog($"선택된 총 {totalCount}개의 첨부파일 다운로드를 시작합니다. (최대 5개 병렬)", LogLevel.Highlight);
@@ -228,29 +232,32 @@ public class TistoryMainViewModel : ToolTabViewModel
                         item.Status = "완료";
 
                         lock (lockObj)
-                        {
                             successCount++;
-                        }
-
-                        AppendLog($"[성공] {item.FileName} 저장 완료");
                     }
                     catch (OperationCanceledException)
                     {
                         throw;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         item.Progress = 0;
                         item.Status = "실패";
-
-                        AppendLog($"[실패] {item.FileName}: {ex.Message}", LogLevel.Error);
                     }
                 });
 
-                AppendLog($"작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Highlight);
+                AppendLog($"다운로드 작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Ok);
 
                 if (AutoExtractAfterDownload)
-                    await ExtractCompletedArchivesAsync(targetItems, _cts.Token);
+                {
+                    AppendLog("압축해제를 시작합니다...", LogLevel.Highlight);
+
+                    var (success, total) = await ExtractCompletedArchivesAsync(targetItems, _cts.Token);
+                    int failCount = total - success;
+
+                    AppendLog($"압축해제 완료 (성공: {success} / 실패: {failCount} / 전체 그룹: {total})", failCount == 0 ? LogLevel.Ok : LogLevel.Error);
+                }
+
+                AppendLog("모든 작업이 종료되었습니다.", LogLevel.Highlight);
 
                 if (successCount > 0)
                     SaveDirectory.OpenFolder();
@@ -273,10 +280,12 @@ public class TistoryMainViewModel : ToolTabViewModel
         }
     }
 
-    private async Task ExtractCompletedArchivesAsync(List<TistoryDownloadItem> targetItems, CancellationToken token)
+    private async Task<(int success, int total)> ExtractCompletedArchivesAsync(List<TistoryDownloadItem> targetItems, CancellationToken token)
     {
+        int successCount = 0;
         var downloaded = targetItems.Where(i => i.Status == "완료" && !string.IsNullOrWhiteSpace(i.SavedPath)).ToList();
-        var groups = downloaded.GroupBy(i => TistoryArchiveExtractor.GetGroupKey(i.FileName));
+        var groups = downloaded.GroupBy(i => TistoryArchiveExtractor.GetGroupKey(i.FileName)).ToList();
+        int totalGroups = groups.Count;
 
         foreach (var group in groups)
         {
@@ -293,6 +302,10 @@ public class TistoryMainViewModel : ToolTabViewModel
             if (isMultiVolume && !TistoryArchiveExtractor.HasContiguousParts(items.Select(i => i.FileName)))
             {
                 AppendLog($"[압축해제 건너뜀] {representative.FileName} 계열의 볼륨 파일이 일부만 선택되어 있습니다.", LogLevel.Error);
+
+                foreach (var item in items)
+                    item.Status = "압축해제실패";
+
                 continue;
             }
 
@@ -303,9 +316,12 @@ public class TistoryMainViewModel : ToolTabViewModel
                 var allPaths = items.Select(i => i.SavedPath!).ToList();
 
                 foreach (var item in items)
+                {
                     item.Progress = 0;
+                    item.Status = "압축해제중";
+                }
 
-                AppendLog($"[압축해제 시작] {representative.FileName}");
+                ScrollToItemRequested?.Invoke(representative);
 
                 var extractProgress = new Progress<int>(p =>
                 {
@@ -321,15 +337,24 @@ public class TistoryMainViewModel : ToolTabViewModel
                     item.SavedPath = extractDir;
                     item.FileName = displayName;
                     item.Progress = 100;
+                    item.Status = "압축해제완료";
                 }
 
-                AppendLog($"[압축해제] {displayName} 완료 (원본 {items.Count}개 삭제됨)");
+                successCount++;
+                AppendLog($"[압축해제] {displayName} 완료", LogLevel.Ok);
             }
             catch (Exception ex)
             {
+                foreach (var item in items)
+                {
+                    item.Progress = 0;
+                    item.Status = "압축해제실패";
+                }
                 AppendLog($"[압축해제 실패] {representative.FileName}: {ex.Message}", LogLevel.Error);
             }
         }
+
+        return (successCount, totalGroups);
     }
 
     private void Renumber()

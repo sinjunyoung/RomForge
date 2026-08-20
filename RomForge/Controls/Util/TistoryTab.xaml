@@ -25,21 +25,22 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="티스토리 URL" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,6"/>
-                <TextBox x:Name="txtUrl" Grid.Row="0" Grid.Column="1" Text="{Binding PageUrl, UpdateSourceTrigger=PropertyChanged}"
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="티스토리 URL" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" Margin="0,4,10,6"/>
+                <TextBox x:Name="txtUrl" Grid.Row="0" Grid.Column="1" Text="{Binding PageUrls, UpdateSourceTrigger=PropertyChanged}"
                          IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
-                         Margin="0,0,10,6" Padding="6,4" VerticalContentAlignment="Center"
-                         KeyUp="TxtUrl_KeyUp"
-                         GotFocus="TxtUrl_GotFocus"
-                         ToolTip="티스토리 게시글 URL을 입력하세요"/>
-                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource RunButton}" Command="{Binding AnalyzeCommand}" Margin="0,0,0,6">
+                         AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         Height="70" Margin="0,0,10,6" Padding="6,4" VerticalContentAlignment="Top"
+                         PreviewKeyDown="TxtUrl_PreviewKeyDown"
+                         ToolTip="티스토리 게시글 URL을 한 줄에 하나씩 입력하세요 (여러 개 입력 가능, Ctrl+Enter로 분석 실행)"/>
+                <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource RunButton}" Command="{Binding AnalyzeCommand}" Height="70" Margin="0,0,0,6">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/Search.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="분석" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                     </StackPanel>
                 </Button>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="다운로드 폴더" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="다운로드 위치" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SaveDirectory}" IsReadOnly="True" Margin="0,0,10,0" Padding="6,4" VerticalContentAlignment="Center" Foreground="#AAAAAA"/>
                 <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnChangeFolder_Click">
                     <StackPanel Orientation="Horizontal">
@@ -76,7 +77,6 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-
                     <GridViewColumn Width="60">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="No">
@@ -91,6 +91,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="380">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="FileName"/>
@@ -109,6 +110,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="90">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="FileSizeBytes"/>
@@ -126,7 +128,8 @@
                                 <TextBlock Text="{Binding FileSize}" Padding="6,0"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                    </GridViewColumn>      
+                    
                     <GridViewColumn Width="140">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Progress"/>
@@ -154,6 +157,24 @@
 
                     <GridViewColumn Width="90">
                         <GridViewColumn.Header>
+                            <GridViewColumnHeader Tag="Status"/>
+                        </GridViewColumn.Header>
+                        <GridViewColumn.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="/Assets/Images/Comment.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.HeaderTemplate>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Status}" Padding="6,0" HorizontalAlignment="Center"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="90">
+                        <GridViewColumn.Header>
                             <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
                                 <TextBlock Text="전체선택/해제" Foreground="#BBBBBB" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,0,0,4"/>
                                 <CheckBox IsChecked="True" Checked="ChkAll_Checked" Unchecked="ChkAll_Unchecked" HorizontalAlignment="Center" ToolTip="전체 선택/해제"/>
@@ -165,7 +186,6 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-
                 </GridView>
             </ListView.View>
         </ListView>
@@ -176,7 +196,7 @@
             </Border.Background>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                 <Image Source="/Assets/Images/Search.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                <TextBlock Text="티스토리 URL을 입력하고 분석 버튼을 클릭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="티스토리 URL을 입력하고 분석 버튼을 눌러주세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <TextBlock Text="첨부파일 링크를 찾아 목록에 추가합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
@@ -198,7 +218,10 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox Content="자동 압축 해제 (완료 후 원본 삭제)" IsChecked="{Binding AutoExtractAfterDownload}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" FontWeight="Bold" Foreground="#BBBBBB" VerticalAlignment="Center" Margin="0,0,20,0" ToolTip="다운로드한 파일이 압축파일(zip/7z/rar)이면 자동으로 압축을 풀고 원본 압축파일을 삭제합니다"/>
+                    <CheckBox Content="압축 자동 해제 (완료 후 원본 삭제)" IsChecked="{Binding AutoExtractAfterDownload}"
+                              IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                              Foreground="#BBBBBB" VerticalAlignment="Center" Margin="0,0,20,0"
+                              ToolTip="다운로드한 파일이 압축파일(zip/7z/rar)이면 자동으로 압축을 풀고 원본 압축파일을 삭제합니다"/>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>

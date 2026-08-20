@@ -16,98 +16,108 @@ public static class TistoryAttachmentService
     private static readonly ConcurrentDictionary<string, string> FileNameCache = new(StringComparer.OrdinalIgnoreCase);
     private static readonly ConcurrentDictionary<string, long> FileSizeCache = new(StringComparer.OrdinalIgnoreCase);
 
-    public static async Task<List<string>> ExtractAttachmentUrlsAsync(string pageUrl, Action<string>? log = null, CancellationToken ct = default)
+    public static async Task<List<string>> ExtractAttachmentUrlsAsync(IEnumerable<string> pageUrls, Action<string>? log = null, CancellationToken ct = default)
     {
-        if (!Uri.TryCreate(pageUrl, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
-            throw new ArgumentException("올바른 URL 형식이 아닙니다.", nameof(pageUrl));
-
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-
-        cts.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
-
-        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
-
-        request.Headers.Add("User-Agent", UserAgent);
-
-        using var response = await Http.SendAsync(request, cts.Token);
-
-        response.EnsureSuccessStatusCode();
-
-        var html = await response.Content.ReadAsStringAsync(cts.Token);
-        var doc = new HtmlDocument();
-
-        doc.LoadHtml(html);
-
-        var targetNode = doc.DocumentNode.SelectSingleNode(TargetDivXPath);
-        var searchNode = targetNode ?? doc.DocumentNode;
         var urls = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var node in searchNode.DescendantsAndSelf())
+        foreach (var pageUrl in pageUrls)
         {
-            if (node.Name == "a")
+            if (!Uri.TryCreate(pageUrl, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+                continue;
+
+            try
             {
-                var href = node.GetAttributeValue("href", string.Empty).Trim();
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
 
-                if (IsCandidateUrl(href) && IsAttachmentUrl(href))
+                cts.CancelAfter(TimeSpan.FromSeconds(TimeoutSeconds));
+
+                using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+
+                request.Headers.Add("User-Agent", UserAgent);
+
+                using var response = await Http.SendAsync(request, cts.Token);
+
+                response.EnsureSuccessStatusCode();
+
+                var html = await response.Content.ReadAsStringAsync(cts.Token);
+                var doc = new HtmlDocument();
+
+                doc.LoadHtml(html);
+
+                var targetNode = doc.DocumentNode.SelectSingleNode(TargetDivXPath);
+                var searchNode = targetNode ?? doc.DocumentNode;
+
+                foreach (var node in searchNode.DescendantsAndSelf())
                 {
-                    urls.Add(href);
-
-                    var text = HtmlEntity.DeEntitize(node.InnerText).Trim();
-                    var containerText = node.ParentNode != null ? HtmlEntity.DeEntitize(node.ParentNode.InnerText).Trim() : text;
-                    var sizeMatch = Regex.Match(containerText, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
-
-                    if (!sizeMatch.Success)
-                        sizeMatch = Regex.Match(text, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
-
-                    if (sizeMatch.Success)
+                    if (node.Name == "a")
                     {
-                        var targetSourceText = containerText.Contains(sizeMatch.Value) ? containerText : text;
-                        var rawName = targetSourceText.Substring(0, sizeMatch.Index).Trim();
+                        var href = node.GetAttributeValue("href", string.Empty).Trim();
 
-                        rawName = Regex.Replace(rawName, @"[\-\|]+$", "").Trim();
-                        rawName = rawName.Trim('[', ']', '(', ')', '{', '}').Trim();
-
-                        if (!string.IsNullOrWhiteSpace(rawName) && !rawName.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                            FileNameCache[href] = rawName;
-
-                        if (double.TryParse(sizeMatch.Groups[1].Value, out double num))
+                        if (IsCandidateUrl(href) && IsAttachmentUrl(href))
                         {
-                            string unit = sizeMatch.Groups[2].Value.ToUpper();
-                            long bytes = unit switch
+                            urls.Add(href);
+
+                            var text = HtmlEntity.DeEntitize(node.InnerText).Trim();
+                            var containerText = node.ParentNode != null ? HtmlEntity.DeEntitize(node.ParentNode.InnerText).Trim() : text;
+                            var sizeMatch = Regex.Match(containerText, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
+
+                            if (!sizeMatch.Success)
+                                sizeMatch = Regex.Match(text, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
+
+                            if (sizeMatch.Success)
                             {
-                                "KB" => (long)(num * 1024),
-                                "MB" => (long)(num * 1024 * 1024),
-                                "GB" => (long)(num * 1024 * 1024 * 1024),
-                                _ => -1
-                            };
+                                var targetSourceText = containerText.Contains(sizeMatch.Value) ? containerText : text;
+                                var rawName = targetSourceText[..sizeMatch.Index].Trim();
 
-                            if (bytes > 0)
-                                FileSizeCache[href] = bytes;
+                                rawName = Regex.Replace(rawName, @"[\-\|]+$", "").Trim();
+                                rawName = rawName.Trim('[', ']', '(', ')', '{', '}').Trim();
+
+                                if (!string.IsNullOrWhiteSpace(rawName) && !rawName.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                    FileNameCache[href] = rawName;
+
+                                if (double.TryParse(sizeMatch.Groups[1].Value, out double num))
+                                {
+                                    string unit = sizeMatch.Groups[2].Value.ToUpper();
+                                    long bytes = unit switch
+                                    {
+                                        "KB" => (long)(num * 1024),
+                                        "MB" => (long)(num * 1024 * 1024),
+                                        "GB" => (long)(num * 1024 * 1024 * 1024),
+                                        _ => -1
+                                    };
+
+                                    if (bytes > 0)
+                                        FileSizeCache[href] = bytes;
+                                }
+                            }
+                            else
+                            {
+                                var cleaned = Regex.Replace(text, @"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", "", RegexOptions.IgnoreCase);
+                                cleaned = cleaned.Replace("다운로드", "").Trim();
+
+                                if (!string.IsNullOrWhiteSpace(cleaned) && !cleaned.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                    FileNameCache[href] = cleaned;
+                                else
+                                {
+                                    var title = node.GetAttributeValue("title", string.Empty).Trim();
+
+                                    if (!string.IsNullOrWhiteSpace(title))
+                                        FileNameCache[href] = title;
+                                }
+                            }
                         }
                     }
-                    else
-                    {
-                        var cleaned = Regex.Replace(text, @"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", "", RegexOptions.IgnoreCase);
 
-                        cleaned = cleaned.Replace("다운로드", "").Trim();
+                    var dataUrl = node.GetAttributeValue("data-url", string.Empty).Trim();
 
-                        if (!string.IsNullOrWhiteSpace(cleaned) && !cleaned.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                            FileNameCache[href] = cleaned;
-                        else
-                        {
-                            var title = node.GetAttributeValue("title", string.Empty).Trim();
-
-                            if (!string.IsNullOrWhiteSpace(title))
-                                FileNameCache[href] = title;
-                        }
-                    }
+                    if (IsCandidateUrl(dataUrl) && IsAttachmentUrl(dataUrl))
+                        urls.Add(dataUrl);
                 }
             }
-
-            var dataUrl = node.GetAttributeValue("data-url", string.Empty).Trim();
-
-            if (IsCandidateUrl(dataUrl) && IsAttachmentUrl(dataUrl))
-                urls.Add(dataUrl);
+            catch (Exception ex)
+            {
+                log?.Invoke($"URL 처리 실패 ({pageUrl}): {ex.Message}");
+            }
         }
 
         var filtered = urls
@@ -129,7 +139,7 @@ public static class TistoryAttachmentService
             string fnameVal = url[(fnameIdx + 6)..];
             int ampersandIdx = fnameVal.IndexOf('&');
 
-            if (ampersandIdx >= 0) 
+            if (ampersandIdx >= 0)
                 fnameVal = fnameVal[..ampersandIdx];
 
             fnameVal = Uri.UnescapeDataString(fnameVal);
@@ -241,13 +251,13 @@ public static class TistoryAttachmentService
 
     private static int GetUrlPriority(string url)
     {
-        if (url.Contains("kakaocdn.net")) 
+        if (url.Contains("kakaocdn.net"))
             return 3;
 
-        if (url.Contains("daum.net") || url.Contains("daumcdn.net")) 
+        if (url.Contains("daum.net") || url.Contains("daumcdn.net"))
             return 2;
 
-        if (url.Contains("tistory")) 
+        if (url.Contains("tistory"))
             return 1;
 
         return 0;
