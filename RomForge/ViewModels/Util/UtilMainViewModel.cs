@@ -37,10 +37,10 @@ public class UtilMainViewModel : MultiToolTabViewModel
         IsAdmin = CheckAdmin();
 
         Tools.Add(HashVM);
+        Tools.Add(TistoryVM);
         Tools.Add(ZipImageToolVM);
         Tools.Add(CertsVM);
-        Tools.Add(CueVM);
-        Tools.Add(TistoryVM);
+        Tools.Add(CueVM);        
 
         foreach (var tool in Tools)
             tool.PropertyChanged += Child_PropertyChanged;

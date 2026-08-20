@@ -6,6 +6,7 @@ using NSW.Core.Enums;
 using NSW.Utils;
 using NSW.WPF.Services;
 using NSW.WPF.UI;
+using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services._3DS;
@@ -112,6 +113,8 @@ public class RepackMainViewModel : ToolTabViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(OutputHintVisibility));
 
+            AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath = value;
+
             if (string.IsNullOrEmpty(InputPath))
                 _ = RefreshRomInfoAsync();
         }
@@ -180,7 +183,9 @@ public class RepackMainViewModel : ToolTabViewModel
     {
         _service = new RepackService(Log, () => PatchPath);
 
-        OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath)
+            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
+            : AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath;
         BrowseInputCommand = new RelayCommand(async _ => await BrowseInput());
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 

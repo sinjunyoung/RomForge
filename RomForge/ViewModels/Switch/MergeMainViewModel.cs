@@ -69,7 +69,12 @@ public class MergeMainViewModel : ToolTabViewModel
     public string OutputPath
     {
         get => _outputPath;
-        set { _outputPath = value; OnPropertyChanged(); }
+        set
+        {
+            _outputPath = value;
+            OnPropertyChanged();
+            AppConfig.Instance.OutputFolders.SwitchMergeOutputPath = value;
+        }
     }
 
     public SwitchOutputFormat OutputFormat
@@ -143,7 +148,9 @@ public class MergeMainViewModel : ToolTabViewModel
 
     public MergeMainViewModel()
     {
-        OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchMergeOutputPath)
+            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
+            : AppConfig.Instance.OutputFolders.SwitchMergeOutputPath;
         OpenWorkSpaceCommand = new RelayCommand(_ => ExecuteOpenWorkSpace());
 
         PropertyChanged += (_, e) =>
@@ -318,17 +325,17 @@ public class MergeMainViewModel : ToolTabViewModel
         outputDir = string.Empty;
         errorMsg = string.Empty;
 
-        if (gameFiles.Any(f => f.IsKeyMissing)) 
-        { 
-            errorMsg = Res.Main_Err_NoKeys; 
-            return false; 
+        if (gameFiles.Any(f => f.IsKeyMissing))
+        {
+            errorMsg = Res.Main_Err_NoKeys;
+            return false;
         }
 
         outputDir = OutputPath?.Trim() ?? string.Empty;
 
-        if (string.IsNullOrEmpty(outputDir)) 
-        { 
-            errorMsg = Res.Main_Err_NoOutput; 
+        if (string.IsNullOrEmpty(outputDir))
+        {
+            errorMsg = Res.Main_Err_NoOutput;
             return false;
         }
 
@@ -341,7 +348,7 @@ public class MergeMainViewModel : ToolTabViewModel
     {
         var path = OutputPath?.Trim();
 
-        if (string.IsNullOrEmpty(path) || !Directory.Exists(path)) 
+        if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
             return;
 
         path?.OpenFolder();

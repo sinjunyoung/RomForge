@@ -103,6 +103,33 @@ public class PatchSearchConfig : ViewModelBase
     public DateTime? EndDate { get => _endDate; set => SetProperty(ref _endDate, value); }
 }
 
+public class TistoryConfig : ViewModelBase
+{
+    private string? _saveDirectory;
+    public string? SaveDirectory { get => _saveDirectory; set => SetProperty(ref _saveDirectory, value); }
+
+    private bool _autoExtractAfterDownload;
+    public bool AutoExtractAfterDownload { get => _autoExtractAfterDownload; set => SetProperty(ref _autoExtractAfterDownload, value); }
+}
+
+public class OutputFoldersConfig : ViewModelBase
+{
+    private string? _switchRepackOutputPath;
+    public string? SwitchRepackOutputPath { get => _switchRepackOutputPath; set => SetProperty(ref _switchRepackOutputPath, value); }
+
+    private string? _switchMergeOutputPath;
+    public string? SwitchMergeOutputPath { get => _switchMergeOutputPath; set => SetProperty(ref _switchMergeOutputPath, value); }
+
+    private string? _wiiURepackOutputPath;
+    public string? WiiURepackOutputPath { get => _wiiURepackOutputPath; set => SetProperty(ref _wiiURepackOutputPath, value); }
+
+    private string? _wiiUConvertOutputPath;
+    public string? WiiUConvertOutputPath { get => _wiiUConvertOutputPath; set => SetProperty(ref _wiiUConvertOutputPath, value); }
+
+    private string? _threeDsRepackOutputPath;
+    public string? ThreeDsRepackOutputPath { get => _threeDsRepackOutputPath; set => SetProperty(ref _threeDsRepackOutputPath, value); }
+}
+
 public class AppConfig : ViewModelBase
 {
     private static readonly string DefaultFilePath = Path.ChangeExtension(Environment.ProcessPath!, "config.json");
@@ -138,6 +165,12 @@ public class AppConfig : ViewModelBase
     private PatchSearchConfig _patchSearch = new();
     public PatchSearchConfig PatchSearch { get => _patchSearch; set => SetProperty(ref _patchSearch, value); }
 
+    private TistoryConfig _tistory = new();
+    public TistoryConfig Tistory { get => _tistory; set => SetProperty(ref _tistory, value); }
+
+    private OutputFoldersConfig _outputFolders = new();
+    public OutputFoldersConfig OutputFolders { get => _outputFolders; set => SetProperty(ref _outputFolders, value); }
+
     [JsonConstructor]
     private AppConfig() { }
 
@@ -166,6 +199,8 @@ public class AppConfig : ViewModelBase
                 Dolphin = loaded.Dolphin ?? new();
                 PS1 = loaded.PS1 ?? new();
                 PatchSearch = loaded.PatchSearch ?? new();
+                Tistory = loaded.Tistory ?? new();
+                OutputFolders = loaded.OutputFolders ?? new();
             }
         }
         catch
@@ -190,6 +225,8 @@ public class AppConfig : ViewModelBase
         Patch.PropertyChanged += AutoSave;
         PS1.PropertyChanged += AutoSave;
         PatchSearch.PropertyChanged += AutoSave;
+        Tistory.PropertyChanged += AutoSave;
+        OutputFolders.PropertyChanged += AutoSave;
     }
 
     public void Save() => File.WriteAllText(DefaultFilePath, JsonSerializer.Serialize(this, JsonOptions));

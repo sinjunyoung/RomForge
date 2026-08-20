@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
+using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services.WiiU;
@@ -46,7 +47,13 @@ public class ConverterMainViewModel : ToolTabViewModel
     public string OutputPath
     {
         get => _outputPath;
-        set { _outputPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(OutputHintVisibility)); }
+        set
+        {
+            _outputPath = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(OutputHintVisibility));
+            AppConfig.Instance.OutputFolders.WiiUConvertOutputPath = value;
+        }
     }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -69,7 +76,9 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     public ConverterMainViewModel()
     {
-        _outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiUConvertOutputPath)
+            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
+            : AppConfig.Instance.OutputFolders.WiiUConvertOutputPath;
 
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsConverting && FileItems.Count > 0);
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsConverting);

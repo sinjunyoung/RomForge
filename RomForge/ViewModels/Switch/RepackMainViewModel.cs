@@ -8,6 +8,7 @@ using NSW.M1.Core.Services;
 using NSW.WPF.Services;
 using NSW.WPF.UI;
 using NSW.WPF.ViewModels;
+using RomForge.Core;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Models;
 using System.Collections.ObjectModel;
@@ -53,7 +54,13 @@ namespace RomForge.ViewModels.Switch
         public string OutputPath
         {
             get => _outputPath;
-            set { _outputPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(OutputHintVisibility)); }
+            set
+            {
+                _outputPath = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(OutputHintVisibility));
+                AppConfig.Instance.OutputFolders.SwitchRepackOutputPath = value;
+            }
         }
 
         public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
@@ -78,7 +85,9 @@ namespace RomForge.ViewModels.Switch
 
         public RepackMainViewModel()
         {
-            OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+            OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchRepackOutputPath)
+                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
+                : AppConfig.Instance.OutputFolders.SwitchRepackOutputPath;
             BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 
             PropertyChanged += (_, e) =>

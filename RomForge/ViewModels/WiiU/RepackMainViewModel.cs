@@ -3,6 +3,7 @@ using Common.WPF.ViewModels;
 using NSW.Core.Enums;
 using NSW.WPF.Services;
 using NSW.WPF.UI;
+using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services.WiiU;
@@ -62,7 +63,13 @@ public class RepackMainViewModel : ToolTabViewModel
     public string OutputPath
     {
         get => _outputPath;
-        set { _outputPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(OutputHintVisibility)); }
+        set
+        {
+            _outputPath = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(OutputHintVisibility));
+            AppConfig.Instance.OutputFolders.WiiURepackOutputPath = value;
+        }
     }
 
     public int ProgressPct
@@ -123,7 +130,9 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public RepackMainViewModel()
     {
-        OutputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiURepackOutputPath)
+            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
+            : AppConfig.Instance.OutputFolders.WiiURepackOutputPath;
 
         RemoveSelectedCommand = new RelayCommand(_ => RemoveSelected(), _ => HasSelection);
         RemoveAllCommand = new RelayCommand(_ => Entries.Clear(), _ => Entries.Count > 0);
@@ -279,7 +288,7 @@ public class RepackMainViewModel : ToolTabViewModel
             {
                 var existing = Entries.FirstOrDefault(e => e.TitleIdHex == row.TitleIdHex && e.TitleVersion == row.TitleVersion);
 
-                if (existing?.PatchPath is not null) 
+                if (existing?.PatchPath is not null)
                     row.PatchPath = existing.PatchPath;
             }
 
