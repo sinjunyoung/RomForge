@@ -124,6 +124,19 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
+                                <GridViewColumn Width="90">
+                                    <GridViewColumn.Header>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
+                                            <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumn.Header>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Size}" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
                                 <GridViewColumn Width="220">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -136,7 +149,7 @@
                                             <TextBlock Text="{Binding FilePath}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
+                                </GridViewColumn>                                
                             </GridView>
                         </ListView.View>
                     </ListView>
@@ -249,7 +262,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            
+
             <core:IconButton Grid.Column="0" DefaultText="언팩" DefaultIcon="/Assets/Images/Unpack.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
             <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="리팩 (폴더 기반)" DefaultIcon="/Assets/Images/Repack.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
             <core:IconButton Grid.Column="2" Margin="5,0,5,0" DefaultText="언팩 + 리팩 (Full)" DefaultIcon="/Assets/Images/Run.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
