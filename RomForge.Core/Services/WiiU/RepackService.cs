@@ -279,13 +279,15 @@ public sealed class RepackService()
             string unpackedRoot = Path.Combine(outputPath, "unpacked");
             var sw = Stopwatch.StartNew();
 
+            log?.Invoke("언팩 시작...", LogLevel.Highlight);
+
             foreach (var entry in entries)
             {
                 ct.ThrowIfCancellationRequested();
 
                 using var source = ReopenSource(entry, keysTxtPath);
 
-                log($"[{entry.Kind}] {source.TitleIdHex}_v{source.TitleVersion} 언팩 중...", LogLevel.Info);
+                log?.Invoke($"[{entry.Kind}] {source.TitleIdHex}_v{source.TitleVersion} 언팩 중...", LogLevel.Info);
 
                 string roleSuffix = entry.Role switch
                 {
@@ -324,6 +326,8 @@ public sealed class RepackService()
         {
             Directory.CreateDirectory(outputPath);
             var sources = entries.Select(e => ReopenSource(e, keysTxtPath)).ToList();
+
+            log?.Invoke("리팩 시작...", LogLevel.Highlight);
 
             try
             {

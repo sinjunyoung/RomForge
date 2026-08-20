@@ -75,7 +75,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
                 }
 
                 await NcchUnpacker.SaveToDirectoryAsync(ncchStream, unpack, partDir, content, partitionReporter, ct);
-                log($"파티션 {idx} 언팩 완료", LogLevel.Info);
+                log($"파티션 {idx} 언팩 완료", LogLevel.Ok);
             }
         }
 
@@ -225,7 +225,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
                 log($"romfs 패치 적용 완료: {romfsPatchSource.AppliedCount}개 파일", LogLevel.Ok);
         }
 
-        log($"출력: {outputFilePath}", LogLevel.Ok);
+        log($"완료: {outputFilePath}", LogLevel.Ok);
 
         return outputFilePath;
     }
@@ -305,7 +305,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
                 log($"RomFS 패치 적용 완료: {romfsPatchSource.AppliedCount}개 파일", LogLevel.Ok);
         }
 
-        log($"출력: {outputFilePath}", LogLevel.Ok);
+        log($"완료: {outputFilePath}", LogLevel.Ok);
 
         return outputFilePath;
     }

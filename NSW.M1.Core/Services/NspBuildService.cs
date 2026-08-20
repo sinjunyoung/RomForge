@@ -41,7 +41,7 @@ public static class NspBuildService
 
         if (mode == BuildMode.RebuildOnly)
         {
-            log("━━ 기존 언팩 데이터 스캔 중... ━━", LogLevel.Info);
+            log("━━ 기존 언팩 데이터 스캔 중... ━━", LogLevel.Highlight);
             unpackResult = UnpackedDirScanner.Scan(dirs.Unpacked, req.OverrideSdkVersion, req.OverrideKeyGeneration);
         }
         else
@@ -126,7 +126,7 @@ public static class NspBuildService
     {
         var sw = Stopwatch.StartNew();
 
-        log("━━ 1단계(1/9): 언패킹 ━━", LogLevel.Info);
+        log("━━ 1단계(1/9): 언패킹 ━━", LogLevel.Highlight);
         progress.Report((0, "언패킹 중..."));
 
         var unpacker = new NspUnpacker(libHacKeySet);
@@ -141,7 +141,7 @@ public static class NspBuildService
     {
         var sw = Stopwatch.StartNew();
 
-        log("━━ 2단계(2/9): 설정 초기화 ━━", LogLevel.Info);
+        log("━━ 2단계(2/9): 설정 초기화 ━━", LogLevel.Highlight);
 
         byte keyGeneration = result.BaseKeyGeneration == 0 ? (byte)1 : result.BaseKeyGeneration;
         int keygenIdx = keyGeneration - 1;
@@ -201,7 +201,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log($"━━ 3단계(3/9): NPDM 처리 (IdOffset={settings.IdOffset}) ━━", LogLevel.Info);
+        log($"━━ 3단계(3/9): NPDM 처리 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
 
         NpdmProcessor.PatchNpdmMetadata(settings);
         log($"  NPDM 완료 ({sw.Elapsed.TotalSeconds:F2}s)", LogLevel.Ok);
@@ -213,7 +213,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log("━━ 4단계(4/9): Program NCA 생성 ━━", LogLevel.Info);
+        log("━━ 4단계(4/9): Program NCA 생성 ━━", LogLevel.Highlight);
         progress.Report((0, "Program NCA 생성 중..."));
 
         if (req.HasPatch)
@@ -227,7 +227,7 @@ public static class NspBuildService
 
     private static void StepManualNcas(List<NcaGenerationOptions> settingsList, UnpackResult unpackResult, IProgress<(int pct, string label)> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        log("━━ 5단계(5/9): Manual NCA 생성 ━━", LogLevel.Info);
+        log("━━ 5단계(5/9): Manual NCA 생성 ━━", LogLevel.Highlight);
 
         foreach (var (idOffset, htmlDir) in unpackResult.HtmlDocDirs)
         {
@@ -278,7 +278,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log($"━━ 6단계(6/9): Control NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Info);
+        log($"━━ 6단계(6/9): Control NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
         progress.Report((0, "Control NCA 생성 중..."));
 
         if (!unpackResult.ControlDirs.TryGetValue(settings.IdOffset, out var controlDir))
@@ -299,7 +299,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log("━━ 8단계(8/9): Meta NCA 생성 ━━", LogLevel.Info);
+        log("━━ 8단계(8/9): Meta NCA 생성 ━━", LogLevel.Highlight);
         progress.Report((-1, "Meta NCA 생성 중..."));
 
         var baseSettings = settingsList.First(s => s.IdOffset == 0);
@@ -340,7 +340,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log("━━ 9단계(9/9): NSP 패키징 ━━", LogLevel.Info);
+        log("━━ 9단계(9/9): NSP 패키징 ━━", LogLevel.Highlight);
         progress.Report((0, "NSP 패키징 중..."));
 
         Directory.CreateDirectory(req.OutputDir);
