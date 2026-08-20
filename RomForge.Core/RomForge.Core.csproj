@@ -28,7 +28,4 @@
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
     <ProjectReference Include="..\WiiU.Core\WiiU.Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Services\Util\" />
-  </ItemGroup>
 </Project>

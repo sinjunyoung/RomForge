@@ -16,6 +16,7 @@ public class TistoryMainViewModel : ToolTabViewModel
     private string _pageUrl = string.Empty;
     private string _saveDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TistoryDownloads");
     private bool _isBusy;
+    private bool _autoExtractAfterDownload;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
@@ -38,6 +39,12 @@ public class TistoryMainViewModel : ToolTabViewModel
     {
         get => _isBusy;
         set { _isBusy = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
+    }
+
+    public bool AutoExtractAfterDownload
+    {
+        get => _autoExtractAfterDownload;
+        set => SetProperty(ref _autoExtractAfterDownload, value);
     }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -90,9 +97,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                 AppendLog($"[분석 시작] {PageUrl}", LogLevel.Highlight);
 
                 var urls = await TistoryAttachmentService.ExtractAttachmentUrlsAsync(PageUrl, msg => AppendLog(msg), _cts.Token);
-
                 var excludedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg", ".webp", ".gif" };
-
                 var existing = FileItems.Select(f => f.Url).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 var addedCount = 0;
 
@@ -102,10 +107,9 @@ public class TistoryMainViewModel : ToolTabViewModel
                     {
                         var uri = new Uri(url);
                         var ext = Path.GetExtension(uri.LocalPath);
+
                         if (!string.IsNullOrEmpty(ext) && excludedExtensions.Contains(ext))
-                        {
                             continue;
-                        }
                     }
                     catch
                     {
@@ -116,7 +120,6 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                     var fileName = TistoryAttachmentService.GetCachedFileName(url);
                     var fileSize = TistoryAttachmentService.GetCachedFileSize(url);
-
                     var item = new TistoryDownloadItem(url)
                     {
                         FileName = fileName,
@@ -130,6 +133,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                     };
 
                     FileItems.Add(item);
+
                     addedCount++;
                 }
 
@@ -138,9 +142,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                 if (FileItems.Count > 0)
                     ScrollToItemRequested?.Invoke(FileItems[^1]);
 
-                AppendLog(addedCount > 0
-                    ? $"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다."
-                    : "[분석 완료] 새로 추가된 첨부파일이 없습니다.", addedCount > 0 ? LogLevel.Highlight : LogLevel.Error);
+                AppendLog(addedCount > 0 ? $"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다." : "[분석 완료] 새로 추가된 첨부파일이 없습니다.", addedCount > 0 ? LogLevel.Highlight : LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
@@ -153,6 +155,7 @@ public class TistoryMainViewModel : ToolTabViewModel
             finally
             {
                 IsBusy = false;
+
                 OnPropertyChanged(nameof(HintVisibility));
                 CommandManager.InvalidateRequerySuggested();
             }
@@ -164,6 +167,7 @@ public class TistoryMainViewModel : ToolTabViewModel
         IsBusy = true;
 
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
 
         using (BeginWork())
@@ -173,7 +177,6 @@ public class TistoryMainViewModel : ToolTabViewModel
                 var targetItems = FileItems.Where(i => i.IsSelected).ToList();
                 int totalCount = targetItems.Count;
                 int successCount = 0;
-
                 object lockObj = new();
 
                 AppendLog($"선택된 총 {totalCount}개의 첨부파일 다운로드를 시작합니다. (최대 5개 병렬)", LogLevel.Highlight);
@@ -209,11 +212,31 @@ public class TistoryMainViewModel : ToolTabViewModel
                         item.Status = "완료";
 
                         lock (lockObj)
-                        {
                             successCount++;
-                        }
 
                         AppendLog($"[성공] {item.FileName} 저장 완료");
+
+                        if (AutoExtractAfterDownload && TistoryArchiveExtractor.IsArchiveFile(savedPath))
+                        {
+                            try
+                            {
+                                item.Status = "압축해제중";
+
+                                var extractDir = await Task.Run(() => TistoryArchiveExtractor.ExtractAndDeleteSource(savedPath), token);
+
+                                item.SavedPath = extractDir;
+                                item.FileName = Path.GetFileName(extractDir);
+                                item.Status = "완료";
+
+                                AppendLog($"[압축해제] {item.FileName} 완료 (원본 삭제됨)");
+                            }
+                            catch (Exception ex)
+                            {
+                                item.Status = "완료";
+
+                                AppendLog($"[압축해제 실패] {Path.GetFileName(savedPath)}: {ex.Message}", LogLevel.Error);
+                            }
+                        }
                     }
                     catch (OperationCanceledException)
                     {

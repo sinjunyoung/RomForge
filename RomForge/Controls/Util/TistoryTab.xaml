@@ -76,7 +76,7 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView>
-                    
+
                     <GridViewColumn Width="60">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="No">
@@ -198,6 +198,10 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
+                    <CheckBox Content="자동 압축 해제 (완료 후 원본 삭제)" IsChecked="{Binding AutoExtractAfterDownload}"
+                              IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
+                              Foreground="#BBBBBB" VerticalAlignment="Center" Margin="0,0,20,0"
+                              ToolTip="다운로드한 파일이 압축파일(zip/7z/rar)이면 자동으로 압축을 풀고 원본 압축파일을 삭제합니다"/>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
