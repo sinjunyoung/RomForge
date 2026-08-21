@@ -24,7 +24,7 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 - **파일 추가 / 폴더 추가 / 선택 삭제 / 전체 삭제**
 - **시작 / 취소**
 
-<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/4123a3f8-11df-46e5-bc8f-5e72e1f10e70" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/70a48c72-cc6f-4cbe-b29e-0070a039129c" />
 
 ---
 
@@ -47,13 +47,12 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 
 - 순수 포맷 교환만 하며, 압축(NSZ/XCZ)은 관여하지 않습니다. NSP를 넣으면 출력 옵션은 XCI만 뜨고, XCI를 넣으면 NSP만 뜹니다.
 - 변환에는 **prod.keys**가 필요합니다.
-- **XCI ↔ NSP 변환 중 `certs.bin`이 없으면 오류가 나면서, 앱이 자동으로 certs.bin 추출 화면으로 이동합니다.** (설정 탭의 3DS 관련 유틸이 아니라, Switch 인증서 추출 절차입니다 — 해당 화면 안내에 따라 certs.bin을 먼저 추출한 뒤 다시 시도하면 됩니다.)
 
 ### 3DS (CCI, 3DS ↔ CIA)
 
 - CCI/3DS를 넣으면 CIA로만, CIA를 넣으면 CCI로만 변환할 수 있습니다(ZCCI 압축은 [압축](compression.md) 탭 전용).
 - 암호화된 타이틀을 다루므로 **aes_keys.txt, boot9.bin**이 필요하고, 타이틀에 따라 **seeddb.bin**도 필요할 수 있습니다.
-- **CCI/3DS → CIA 변환에는 `certs.bin`도 필요합니다.** 없으면 "certs.bin 추출 필요" 오류와 함께 certs.bin 추출 화면으로 자동 이동합니다. (CIA → CCI 방향은 certs.bin이 없어도 됩니다.)
+- **CCI/3DS → CIA 변환에는 `certs.bin`도 필요합니다.** 없으면 "certs.bin 추출 필요" 오류와 함께 certs.bin 추출 화면으로 자동 이동합니다. (CIA → CCI 방향은 certs.bin이 없어도 됩니다.) certs.bin은 별도로 구할 필요 없이, 갖고 있는 아무 정식 CIA 파일 하나만 있으면 이동한 화면에서 바로 추출할 수 있습니다.
 
 ### Wii U (WUD/WUX/WUA/WUP/Loadiine 상호 변환)
 
@@ -61,7 +60,7 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 - 입력이 WUA 파일이면 → WUP, Loadiine로 변환 가능합니다(자기 자신인 WUA는 목록에서 빠집니다).
 - 입력이 WUP 폴더면 → Loadiine, WUA로 변환 가능합니다.
 - 입력이 Loadiine 폴더면 → WUP, WUA로 변환 가능합니다.
-- **키파일로 `keys.txt`가 필요합니다.** (Switch의 prod.keys, 3DS의 aes_keys.txt와는 별개의, Wii U 전용 키 파일입니다. 자세한 내용은 [실행 및 키파일 설정](installation.md) 참고.)
+- **키파일로 `keys.txt`가 필요하지만, 원본이 WUD/WUX일 때만 필요합니다.** WUA 파일이나 WUP/Loadiine 폴더가 원본이면 keys.txt 없이도 변환됩니다. (Switch의 prod.keys, 3DS의 aes_keys.txt와는 별개의, Wii U 전용 키 파일입니다. 자세한 내용은 [실행 및 키파일 설정](installation.md) 참고.)
 - 출력은 원본 파일이 있던 폴더에 `타이틀명 [WUP]`, `타이틀명 [Loadiine]` 폴더 또는 `타이틀명.wua` 파일로 생성되며, 이미 같은 이름이 있으면 자동으로 겹치지 않는 이름으로 만들어집니다.
 
 ### CD Image (MDS+MDF, CCD+IMG+SUB → BIN+CUE / ISO)
