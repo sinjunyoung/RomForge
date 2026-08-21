@@ -4,6 +4,11 @@ Wii U 게임 파일을 다른 포맷으로 상호 변환하는 탭입니다.
 
 WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 
+!!! danger "keys.txt는 원본이 WUD/WUX일 때만 필요합니다"
+    3DS의 aes_keys.txt, Switch의 prod.keys와는 별개의, Wii U 전용 `keys.txt` 파일입니다.
+
+    **WUA 파일이나 WUP/Loadiine 폴더가 원본이면 keys.txt 없이도 변환됩니다.** 목록에 WUD 또는 WUX 파일이 있을 때만 필요합니다. 자세한 내용은 [실행 및 키파일 설정](installation.md)을 참고하세요.
+
 ## 변환 가능 조합
 
 | 입력 | 변환 가능한 출력 |
@@ -20,7 +25,30 @@ WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 - **파일 추가 / 폴더 추가 / 선택 삭제 / 전체 삭제**
 - **시작 / 취소**
 
-<img width="850" height="684" alt="image" src="https://github.com/user-attachments/assets/21e68188-4a5f-4237-a450-ff6ceb169c8d" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/aa581d61-a660-440b-994f-4d02b9e205d8" />
+
+---
+
+## 폴더 추가 시 인식 방식
+
+폴더를 드롭하면, 그 폴더 자체가 WUP(`code`/`content`/`meta` 등)나 Loadiine 구조로 보이면 폴더 자체를 하나의 항목으로 추가합니다. 그렇지 않은 일반 폴더라면 하위 폴더까지 재귀적으로 뒤져서, **그 안에서 WUP/Loadiine로 보이는 하위 폴더나 WUD/WUX/WUA 파일을 찾아 각각 개별 항목으로 추가**합니다.
+
+---
+
+## 하나의 WUA 안에 여러 타이틀이 들어있는 경우 (숨은 동작)
+
+**WUA 파일 하나에 본편 + 업데이트 + DLC 여러 개가 합쳐져 있을 수 있습니다** ([병합](switch-merge.md)과 비슷하게, Wii U에서도 여러 콘텐츠를 하나의 WUA로 묶어둘 수 있기 때문입니다). 이런 WUA를 변환하면, **안에 들어있는 타이틀 각각에 대해 결과물이 따로따로 생성됩니다.** 예를 들어 본편+DLC 2개가 든 WUA를 WUP로 변환하면, WUP 폴더 3개가 나옵니다. 반대로 순수 WUD/WUX(디스크 이미지)는 보통 타이틀이 하나뿐이라 결과물도 하나만 나옵니다.
+
+---
+
+## 출력 파일명
+
+- WUP로 변환하면 `타이틀명 [WUP]` 폴더, Loadiine이면 `타이틀명 [Loadiine]` 폴더, WUA면 `타이틀명.wua` 파일로 만들어집니다.
+- 이미 같은 이름이 있으면 자동으로 겹치지 않는 새 이름으로 저장됩니다.
+
+## 재시작 규칙
+
+**시작**을 다시 누르면, 이미 **완료**되었거나 **미지원**으로 표시된 항목은 건너뛰고 나머지만 처리합니다.
 
 ---
 
