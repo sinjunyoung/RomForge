@@ -30,7 +30,7 @@ nav:
   - 기능별 매뉴얼:
       - 패치 - 일반: patch-general.md
       - 패치 - 아케이드: patch-arcade.md
-      - 압축 / 압축 해제: compression.md
+      - 압축: compression.md
       - 변환: convert.md
       - Switch - 리팩: switch-unpack-repack.md
       - Switch - 병합: switch-merge.md
