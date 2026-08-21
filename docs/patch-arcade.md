@@ -17,7 +17,7 @@
     - 항목별 드롭다운에서, 자동 인식된 패치 파일 목록 중 다른 걸 골라서 재배정할 수도 있습니다.
 - **전체 진행률** — 매칭된 항목들의 평균 진행률이 하단에 표시됩니다.
 
-<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/de3753bf-894d-4c56-bb46-a5e039715e32" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/b38fe11f-289d-4403-adb0-ab8f71ac3f1a" />
 
 ---
 
