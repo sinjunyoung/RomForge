@@ -32,7 +32,7 @@
 - **설정** — 압축 세부 옵션(레벨, 알고리즘 등)을 여는 버튼
 - **시작 / 취소**
 
-<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/5f65e339-4634-45a2-a121-49a637209e63" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/c53ab62e-bcfa-48e3-9361-1bb2e4449527" />
 
 ---
 
