@@ -25,7 +25,7 @@
 8. **패치 취소** — 진행 중인 패치를 중단합니다. 그 시점까지 만들어지고 있던 결과 파일과, BIN/CUE·GDI 등에서 함께 복사되던 부속 파일까지 전부 자동으로 삭제되어 output 폴더에 찌꺼기가 남지 않습니다.
 9. **로그**
 
-<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/d31bdc35-ef61-4f14-96d4-ad5eecd06186" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/3aa545e7-b7c5-48f1-ba63-dae83bdc014d" />
 
 ---
 
@@ -134,4 +134,5 @@ DCP는 흔한 바이너리 diff 패치가 아니라, **드림캐스트 GD-ROM �
 3. **패치 시작**을 누릅니다.
 4. 완료되면 자동으로 열리는 output 폴더에서 결과물을 확인합니다.
 
-<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/dde8a5c9-af6f-4dd3-a6f5-00af2900d02e" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/e96ea43b-6364-41dc-b8d9-f618987c77ad" />
+
