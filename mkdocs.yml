@@ -47,6 +47,8 @@ nav:
       - PS - PBP 변환: psp-pbp-convert.md
       - PS - PBP 복원: psp-pbp-restore.md
       - PS - 포맷 변환: psp-format.md
+  - 유틸리티:
+      - 티스토리 다운로더: util-tistory.md
   - 홈: index.md
   - 실행 및 키파일 설정: installation.md
   - 자주 묻는 질문: faq.md
