@@ -5,21 +5,24 @@
 !!! danger "키셋 + movable.sed 필수"
     이 기능은 3DS 키셋과 `movable.sed` 파일이 반드시 있어야 동작합니다.
 
-    `movable.sed`는 SD 카드 루트 또는 `/gm9/out/` 하위에 복사해두면 자동으로 인식됩니다.
+    `movable.sed`는 SD 카드 루트 또는 `/gm9/out/` 하위에 복사해두면 자동으로 인식됩니다. 구하는 방법은 아래 화면 구성의 movable.sed 항목 툴팁을 참고하세요.
 
 ## 화면 구성
 
 1. **SD 카드** — 대상 SD 카드 지정
-2. **movable.sed** — 클릭하면 [seedminer.hacks.guide](https://seedminer.hacks.guide/) 사이트로 이동
-3. **movable.sed 선택**
-4. **설치 게임 검색**
+2. **movable.sed** — 아이콘/텍스트에 마우스를 올리면 구하는 방법이 툴팁으로 표시됩니다:
+    1. GodMode9 실행 (START + POWER)
+    2. SYSNAND CTRNAND → private → movable.sed 선택
+    3. 가장 하단의 Copy to 0:/gm9/out 실행
+3. **movable.sed 선택** — 위 방법대로 SD 카드에 복사해두면 자동으로 인식되고, 위치가 다르면 이 버튼으로 직접 지정할 수 있습니다.
+4. **설치 게임 검색** — 게임명, 배급사, Title ID 세 가지를 기준으로 검색합니다.
 5. **필터** — 전체, 본편, 업데이트, DLC로 필터링
 6. **설치된 게임 목록 불러오기**
 7. **게임 리스트**
 8. **진행도, 게임 추출 취소**
 9. **로그**
 
-<img width="850" height="684" alt="1783830234" src="https://github.com/user-attachments/assets/e9739792-77a5-4dbb-b531-044df8738f78" />
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/71c1e7ce-ad0c-4c7c-9d3e-966d377043c5" />
 
 ---
 
@@ -30,9 +33,15 @@
 <img width="850" height="120" alt="1783836624" src="https://github.com/user-attachments/assets/24163b7c-f2b1-4179-90c2-d6ce1948fbee" />
 
 !!! note "업데이트 / DLC는 CIA만 가능"
-    업데이트와 DLC는 CCI 형식으로는 추출할 수 없어서, CIA로만 추출 가능합니다.
+    업데이트와 DLC는 CCI 형식으로는 추출할 수 없어서, CIA로만 추출 가능합니다. 여러 개를 함께 선택했을 때, 선택한 것 중 하나라도 업데이트/DLC가 섞여 있으면 CCI 메뉴 자체가 아예 숨겨집니다.
 
 <img width="850" height="83" alt="1783938877" src="https://github.com/user-attachments/assets/013999f3-293c-4ed3-8952-660a104a3454" />
+
+**여러 게임을 한꺼번에 선택할 수는 있지만, 실제 추출은 한 번에 하나씩만 진행됩니다.** 다중 선택은 CCI 메뉴를 보여줄지 말지 판단하는 데만 쓰이고, 우클릭 메뉴를 누르면 리스트에서 **가장 마지막으로 클릭(선택)된 게임 하나만** 추출됩니다. 여러 개를 뽑고 싶다면 하나씩 선택해서 반복해야 합니다.
+
+추출할 때마다 **저장 위치를 직접 지정하는 창이 뜹니다.** 다른 탭들처럼 output 폴더에 자동으로 쌓이는 게 아니라, 게임을 고를 때마다 파일 저장 대화상자에서 경로와 파일명(기본값은 게임명)을 매번 확인하게 됩니다.
+
+**CIA로 추출할 때는 `certs.bin`이 필요합니다.** CCI는 필요 없습니다. certs.bin이 없으면 추출이 실패하며, 자동으로 certs.bin 추출 화면으로 이동합니다. 추출한 뒤 다시 시도하면 됩니다.
 
 ---
 
