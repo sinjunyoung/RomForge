@@ -27,12 +27,10 @@ theme:
     - content.code.copy
 
 nav:
-  - 홈: index.md
-  - 실행 및 키파일 설정: installation.md
   - 기능별 매뉴얼:
       - 패치 - 일반: patch-general.md
       - 패치 - 아케이드: patch-arcade.md
-      - 압축 / 압축 해제: compression.md
+      - 압축: compression.md
       - 변환: convert.md
       - Switch - 리팩: switch-unpack-repack.md
       - Switch - 병합: switch-merge.md
@@ -46,9 +44,13 @@ nav:
       - 3DS - 설치 - 신규 게임 설치: 3ds-pc-install.md
       - 3DS - 포맷 변환: 3ds-format.md
       - 3DS - 복호화: 3ds-decrypt.md
-      - PSP - PBP 변환: psp-pbp-convert.md
-      - PSP - PBP 복원: psp-pbp-restore.md
-      - PSP - 포맷 변환: psp-format.md
+      - PS - PBP 패킹: psp-pbp-convert.md
+      - PS - PBP 언팩: psp-pbp-restore.md
+      - PS - 포맷 변환: psp-format.md
+  - 유틸리티:
+      - 티스토리 다운로더: util-tistory.md
+  - 홈: index.md
+  - 실행 및 키파일 설정: installation.md
   - 자주 묻는 질문: faq.md
 
 markdown_extensions:
