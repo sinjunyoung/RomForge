@@ -2,21 +2,21 @@
 
 Wii U 게임 파일을 다른 포맷으로 상호 변환하는 탭입니다.
 
-WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
+WUP/로딘 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 
 !!! danger "keys.txt는 원본이 WUD/WUX일 때만 필요합니다"
     3DS의 aes_keys.txt, Switch의 prod.keys와는 별개의, Wii U 전용 `keys.txt` 파일입니다.
 
-    **WUA 파일이나 WUP/Loadiine 폴더가 원본이면 keys.txt 없이도 변환됩니다.** 목록에 WUD 또는 WUX 파일이 있을 때만 필요합니다. 자세한 내용은 [실행 및 키파일 설정](installation.md)을 참고하세요.
+    **WUA 파일이나 WUP/로딘 폴더가 원본이면 keys.txt 없이도 변환됩니다.** 목록에 WUD 또는 WUX 파일이 있을 때만 필요합니다. 자세한 내용은 [실행 및 키파일 설정](installation.md)을 참고하세요.
 
 ## 변환 가능 조합
 
 | 입력 | 변환 가능한 출력 |
 | --- | --- |
-| WUP (폴더) | Loadiine 폴더, WUA |
-| Loadiine (폴더) | WUP 폴더, WUA |
-| WUD/WUX (디스크 이미지) | WUA, WUP 폴더, Loadiine 폴더 |
-| WUA (Cemu 아카이브) | WUP 폴더, Loadiine 폴더 |
+| WUP (폴더) | 로딘 폴더, WUA |
+| 로딘 (폴더) | WUP 폴더, WUA |
+| WUD/WUX (디스크 이미지) | WUA, WUP 폴더, 로딘 폴더 |
+| WUA (Cemu 아카이브) | WUP 폴더, 로딘 폴더 |
 
 ---
 
@@ -33,7 +33,7 @@ WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 
 ## 폴더 추가 시 인식 방식
 
-폴더를 드롭하면, 그 폴더 자체가 WUP(`code`/`content`/`meta` 등)나 Loadiine 구조로 보이면 폴더 자체를 하나의 항목으로 추가합니다. 그렇지 않은 일반 폴더라면 하위 폴더까지 재귀적으로 뒤져서, **그 안에서 WUP/Loadiine로 보이는 하위 폴더나 WUD/WUX/WUA 파일을 찾아 각각 개별 항목으로 추가**합니다.
+폴더를 드롭하면, 그 폴더 자체가 WUP(`code`/`content`/`meta` 등)나 로딘 구조로 보이면 폴더 자체를 하나의 항목으로 추가합니다. 그렇지 않은 일반 폴더라면 하위 폴더까지 재귀적으로 뒤져서, **그 안에서 WUP/로딘으로 보이는 하위 폴더나 WUD/WUX/WUA 파일을 찾아 각각 개별 항목으로 추가**합니다.
 
 ---
 
@@ -45,7 +45,7 @@ WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 
 ## 출력 파일명
 
-- WUP로 변환하면 `타이틀명 [WUP]` 폴더, Loadiine이면 `타이틀명 [Loadiine]` 폴더, WUA면 `타이틀명.wua` 파일로 만들어집니다.
+- WUP로 변환하면 `타이틀명 [WUP]` 폴더, 로딘이면 `타이틀명 [로딘]` 폴더, WUA면 `타이틀명.wua` 파일로 만들어집니다.
 - 이미 같은 이름이 있으면 자동으로 겹치지 않는 새 이름으로 저장됩니다.
 
 ---
@@ -58,7 +58,7 @@ WUP/Loadiine 폴더, WUD/WUX/WUA 파일을 드래그 앤 드롭하면 됩니다.
 
 ## 사용 방법
 
-1. 변환할 WUP/Loadiine 폴더, 또는 WUD/WUX/WUA 파일을 리스트에 추가합니다.
+1. 변환할 WUP/로딘 폴더, 또는 WUD/WUX/WUA 파일을 리스트에 추가합니다.
 2. 각 파일의 **출력** 열에서 원하는 변환 포맷을 개별적으로 선택합니다.
 3. **출력 폴더**를 지정합니다.
 4. **시작**을 눌러 변환을 진행합니다.

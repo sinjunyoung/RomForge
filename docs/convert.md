@@ -10,9 +10,9 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 | --- | --- |
 | **Switch** | NSP ↔ XCI |
 | **3DS** | CCI, 3DS ↔ CIA |
-| **Wii U** | WUD, WUX, WUA, WUP 폴더, Loadiine 폴더 → WUP, Loadiine, WUA (자기 자신으로의 변환은 제외) |
-| **CD Image** | MDS+MDF, CCD+IMG+SUB → BIN+CUE (또는 단일 트랙이면 ISO도 선택 가능) |
-| **PSP** | PBP → BIN+CUE (자동으로 CUE 시트까지 생성) |
+| **Wii U** | WUD, WUX, WUA, WUP 폴더, 로딘 폴더 → WUP, 로딘, WUA (자기 자신으로의 변환은 제외) |
+| **CD Image** | MDF+MDS, CCD+IMG+SUB → BIN+CUE (또는 단일 트랙이면 ISO도 선택 가능) |
+| **PS** | PBP → BIN+CUE (자동으로 CUE 시트까지 생성) |
 
 ---
 
@@ -34,7 +34,7 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 
 - 이 목록에 없는 확장자(NSZ/XCZ, ZCCI 등 압축 포맷 포함)는 드래그해도 추가되지 않습니다. 압축된 파일을 원본으로 되돌리려면 [압축](compression.md) 탭을 사용하세요.
 - **폴더를 드롭했을 때 동작이 두 가지로 나뉩니다.**
-    - 폴더 구조가 **Wii U WUP 설치 폴더**이거나 **Loadiine 폴더**(내부에 `code`, `content`, `meta` 세 폴더가 모두 있는 구조)로 인식되면, 그 **폴더 자체가 통째로 하나의 항목**으로 추가됩니다.
+    - 폴더 구조가 **Wii U WUP 설치 폴더**이거나 **로딘 폴더**(내부에 `code`, `content`, `meta` 세 폴더가 모두 있는 구조)로 인식되면, 그 **폴더 자체가 통째로 하나의 항목**으로 추가됩니다.
     - 그 외의 일반 폴더는 하위 폴더까지 재귀적으로 훑어서, 위 지원 확장자를 가진 파일들만 개별 항목으로 추가됩니다.
 - 같은 파일(경로)은 중복 추가되지 않습니다.
 - 항목이 추가되면 백그라운드로 메타데이터를 자동 조회합니다(3DS 타이틀명/아이콘/암호화 여부, Wii U 타이틀명, CD 트랙 수, PSP 게임 타이틀/아이콘). 조회에 실패해도(예: 키파일 없음) 조용히 무시되고 항목 자체는 그대로 남으며, 변환 시도는 막지 않습니다.
@@ -54,16 +54,16 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 - 암호화된 타이틀을 다루므로 **aes_keys.txt, boot9.bin**이 필요하고, 타이틀에 따라 **seeddb.bin**도 필요할 수 있습니다.
 - **CCI/3DS → CIA 변환에는 `certs.bin`도 필요합니다.** 없으면 "certs.bin 추출 필요" 오류와 함께 certs.bin 추출 화면으로 자동 이동합니다. (CIA → CCI 방향은 certs.bin이 없어도 됩니다.) certs.bin은 별도로 구할 필요 없이, 갖고 있는 아무 정식 CIA 파일 하나만 있으면 이동한 화면에서 바로 추출할 수 있습니다.
 
-### Wii U (WUD/WUX/WUA/WUP/Loadiine 상호 변환)
+### Wii U (WUD/WUX/WUA/WUP/로딘 상호 변환)
 
-- 입력이 WUD/WUX 파일이면 → WUA, WUP, Loadiine 세 가지 모두로 변환 가능합니다.
-- 입력이 WUA 파일이면 → WUP, Loadiine로 변환 가능합니다(자기 자신인 WUA는 목록에서 빠집니다).
-- 입력이 WUP 폴더면 → Loadiine, WUA로 변환 가능합니다.
-- 입력이 Loadiine 폴더면 → WUP, WUA로 변환 가능합니다.
-- **키파일로 `keys.txt`가 필요하지만, 원본이 WUD/WUX일 때만 필요합니다.** WUA 파일이나 WUP/Loadiine 폴더가 원본이면 keys.txt 없이도 변환됩니다. (Switch의 prod.keys, 3DS의 aes_keys.txt와는 별개의, Wii U 전용 키 파일입니다. 자세한 내용은 [실행 및 키파일 설정](installation.md) 참고.)
-- 출력은 원본 파일이 있던 폴더에 `타이틀명 [WUP]`, `타이틀명 [Loadiine]` 폴더 또는 `타이틀명.wua` 파일로 생성되며, 이미 같은 이름이 있으면 자동으로 겹치지 않는 이름으로 만들어집니다.
+- 입력이 WUD/WUX 파일이면 → WUA, WUP, 로딘 세 가지 모두로 변환 가능합니다.
+- 입력이 WUA 파일이면 → WUP, 로딘으로 변환 가능합니다(자기 자신인 WUA는 목록에서 빠집니다).
+- 입력이 WUP 폴더면 → 로딘, WUA로 변환 가능합니다.
+- 입력이 로딘 폴더면 → WUP, WUA로 변환 가능합니다.
+- **키파일로 `keys.txt`가 필요하지만, 원본이 WUD/WUX일 때만 필요합니다.** WUA 파일이나 WUP/로딘 폴더가 원본이면 keys.txt 없이도 변환됩니다. (Switch의 prod.keys, 3DS의 aes_keys.txt와는 별개의, Wii U 전용 키 파일입니다. 자세한 내용은 [실행 및 키파일 설정](installation.md) 참고.)
+- 출력은 원본 파일이 있던 폴더에 `타이틀명 [WUP]`, `타이틀명 [로딘]` 폴더 또는 `타이틀명.wua` 파일로 생성되며, 이미 같은 이름이 있으면 자동으로 겹치지 않는 이름으로 만들어집니다.
 
-### CD Image (MDS+MDF, CCD+IMG+SUB → BIN+CUE / ISO)
+### CD Image (MDF+MDS, CCD+IMG+SUB → BIN+CUE / ISO)
 
 - MDS나 CCD 파일을 넣으면, 자동으로 트랙 수를 확인해서 출력 옵션을 결정합니다.
     - **싱글 트랙**이면 BIN+CUE와 ISO 둘 다 선택할 수 있습니다.
@@ -71,7 +71,7 @@ Switch, 3DS, Wii U, CD 이미지, PSP까지 서로 다른 플랫폼의 파일을
 - MDS는 같은 폴더의 MDF를, CCD는 같은 폴더의 IMG/SUB를 함께 참조하므로, 이 파일들이 실제로 같은 폴더에 있어야 정상적으로 변환됩니다.
 - 키파일이 필요 없습니다.
 
-### PSP (PBP → BIN+CUE)
+### PS (PBP → BIN+CUE)
 
 - 항상 BIN+CUE로만 변환되며, 다른 출력 옵션은 없습니다(CUE 시트도 자동 생성됩니다).
 - 목록에 추가하면 PBP 안의 디스크 ID로 내장 PSP 게임 데이터베이스를 조회해서, 정식 타이틀명과 아이콘을 자동으로 보여줍니다(데이터베이스에 없는 타이틀이면 조회 없이 원래 파일명이 표시됩니다). 이 조회 결과는 표시용이며 변환 결과물에는 영향을 주지 않습니다.
