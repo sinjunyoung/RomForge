@@ -1,6 +1,6 @@
 using Patch.Core.Formats.Xdelta.Models;
 
-namespace Patch.Core.Formats.Xdelta.Services;
+namespace Patch.Core.Formats.Xdelta;
 
 public static class Xd3AddrCacheOps
 {
@@ -18,7 +18,6 @@ public static class Xd3AddrCacheOps
         if (cache.SNear > 0 && cache.NearArray != null)
         {
             Array.Clear(cache.NearArray, 0, cache.NearArray.Length);
-
             cache.NextSlot = 0;
         }
 

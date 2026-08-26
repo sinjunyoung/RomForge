@@ -1,6 +1,6 @@
 using Patch.Core.Formats.Xdelta.Models;
 
-namespace Patch.Core.Formats.Xdelta.Services;
+namespace Patch.Core.Formats.Xdelta;
 
 public static class Xd3CodeTable
 {

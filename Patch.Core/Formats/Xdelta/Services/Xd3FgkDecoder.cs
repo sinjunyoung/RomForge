@@ -1,4 +1,4 @@
-﻿using Patch.Core.Formats.Xdelta.Models;
+using Patch.Core.Formats.Xdelta.Models;
 
 namespace Patch.Core.Formats.Xdelta.Services;
 
@@ -102,11 +102,9 @@ public sealed class Xd3FgkDecoder
         h.ZeroFreqRem = h.ZeroFreqCount - i;
     }
 
-    private static FgkBlock MakeBlock(FgkNode lead) => new() { Leader = lead };
+    private static FgkBlock MakeBlock(FgkNode lead) => new () { Leader = lead };
 
-    private static void FreeBlock(FgkBlock b)
-    {
-    }
+    private static void FreeBlock(FgkBlock b) { }
 
     private static void EliminateZero(FgkStream h, FgkNode node)
     {
@@ -225,7 +223,9 @@ public sealed class Xd3FgkDecoder
         moveFwd.Right = moveBack.Right;
 
         if (tmp == moveBack)
+        {
             moveBack.Right = moveFwd;
+        }
         else
         {
             tmp!.Left = moveBack;
@@ -361,7 +361,9 @@ public sealed class Xd3FgkDecoder
         }
 
         h.CodedDepth = 0;
+
         UpdateTree(h, elt);
+
         h.DecodePtr = h.RootNode;
 
         return elt;

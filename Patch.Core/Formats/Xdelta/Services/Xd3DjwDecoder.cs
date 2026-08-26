@@ -85,6 +85,7 @@ public static class Xd3DjwDecoder
 
                     if (bitCount >= minClen && code <= limitArr[bitCount])
                         goto done;
+
                 } while (bits.CurMask != 0x100);
             }
 
@@ -188,7 +189,6 @@ public static class Xd3DjwDecoder
         for (i = 0; i < numCodes; i++)
         {
             uint value = DecodeBits(buf, ref pos, max, ref bits, DjwClclenBits);
-
             clClen[i] = (byte)value;
         }
 
@@ -320,6 +320,7 @@ public static class Xd3DjwDecoder
             for (uint gp = 0; gp < groups + 1; gp++)
             {
                 uint value = DecodeBits(input, ref inputPos, inputEnd, ref bits, DjwGbclenBits);
+
                 selClen[gp] = (byte)value;
                 selMtf[gp] = (byte)gp;
             }

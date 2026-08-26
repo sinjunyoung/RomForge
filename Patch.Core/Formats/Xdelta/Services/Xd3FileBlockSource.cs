@@ -1,9 +1,9 @@
-﻿using Patch.Core.Formats.Xdelta.Models;
+using Patch.Core.Formats.Xdelta.Models;
 using System.IO.MemoryMappedFiles;
 
 namespace Patch.Core.Formats.Xdelta.Services;
 
-public sealed class Xd3FileBlockSource : IXd3BlockSource, IDisposable
+public sealed class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource, IDisposable
 {
     private const uint DefaultBlkSize = 256 * 1024;
 
@@ -30,30 +30,37 @@ public sealed class Xd3FileBlockSource : IXd3BlockSource, IDisposable
             BlkSize = BlkSize,
             MaxWinSize = Math.Max(FileLength, 1)
         };
+
         Xd3SourceOps.SetSourceAndSize(source, FileLength);
+
         return source;
     }
 
     public void FillBlock(Xd3Source source, long blockNumber)
     {
         long offset = blockNumber * BlkSize;
+
         if (offset < 0 || offset > FileLength)
-        {
             throw new Xd3Exception("block number out of range");
-        }
 
         int toRead = (int)Math.Min(BlkSize, FileLength - offset);
 
         if (_reusableBuf == null || _reusableBuf.Length != toRead)
-        {
             _reusableBuf = new byte[toRead];
-        }
 
         _accessor.ReadArray(offset, _reusableBuf, 0, toRead);
 
         source.CurBlk = _reusableBuf;
         source.OnBlk = (uint)toRead;
         source.CurBlkNo = blockNumber;
+    }
+
+    public void ReadAt(long offset, byte[] dest, int destOffset, int count)
+    {
+        if (offset < 0 || offset + count > FileLength)
+            throw new Xd3Exception("source read out of range");
+
+        _accessor.ReadArray(offset, dest, destOffset, count);
     }
 
     public void Dispose()

@@ -171,7 +171,9 @@ internal sealed class LzmaDecoder
                     symbol = (symbol << 1) | rc.DecodeBit(ref Unsafe.Add(ref litSub, (int)symbol));
 
                 output[pos++] = (byte)symbol;
+
                 state = LzmaConstants.StateUpdateLiteral(state);
+
                 remaining--;
             }
             else

@@ -13,7 +13,7 @@ public static class Xd3Decoder
         return output.ToArray();
     }
 
-    public static void Decode(byte[] patch, Xd3Source? source, IXd3BlockSource? blockSource, Stream output)
+    public static void Decode(byte[] patch, Xd3Source? source, IXd3BlockSource? blockSource, Stream output, Action<long>? onProgress = null, CancellationToken ct = default)
     {
         int pos;
 
@@ -47,15 +47,18 @@ public static class Xd3Decoder
         if ((hdrInd & Xd3Constants.VcdAppHeader) != 0)
         {
             uint appLen = Xd3VarInt.ReadSize(patch, ref pos, patch.Length);
-
             pos += (int)appLen;
         }
 
         Xd3FgkDecoder? dataFgk = null, instFgk = null, addrFgk = null;
         Xd3LzmaDecoder? dataLzma = null, instLzma = null, addrLzma = null;
 
+        long totalWritten = 0;
+
         while (pos < patch.Length)
         {
+            ct.ThrowIfCancellationRequested();
+
             byte winInd = patch[pos++];
 
             if ((winInd & Xd3Constants.VcdInvWin) != 0)
@@ -81,6 +84,7 @@ public static class Xd3Decoder
 
             uint encLen = Xd3VarInt.ReadSize(patch, ref pos, patch.Length);
             uint tgtLen = Xd3VarInt.ReadSize(patch, ref pos, patch.Length);
+
             byte delInd = patch[pos++];
 
             if ((delInd & Xd3Constants.VcdInvDel) != 0)
@@ -121,7 +125,6 @@ public static class Xd3Decoder
             if (hasSrc)
             {
                 Xd3SourceOps.BlksizeDiv((long)cpyOff, source!, out long cpyOffBlocks, out uint cpyOffBlkOff);
-
                 source!.CpyOffBlocks = cpyOffBlocks;
                 source.CpyOffBlkOff = cpyOffBlkOff;
             }
@@ -239,6 +242,10 @@ public static class Xd3Decoder
 
             output.Write(targetWindow, 0, targetWindow.Length);
 
+            totalWritten += targetWindow.Length;
+
+            onProgress?.Invoke(totalWritten);
+
             pos = sectionsEnd;
         }
     }
@@ -290,6 +297,12 @@ public static class Xd3Decoder
 
     private static void CopyFromSource(Xd3Source source, IXd3BlockSource blockSource, ulong absoluteOffset, uint size, byte[] dest, int destPos)
     {
+        if (blockSource is IXd3RandomAccessSource ras)
+        {
+            ras.ReadAt((long)absoluteOffset, dest, destPos, (int)size);
+            return;
+        }
+
         Xd3SourceOps.BlksizeDiv((long)absoluteOffset, source, out long block, out uint blkoff);
 
         uint remaining = size;

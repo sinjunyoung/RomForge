@@ -1,4 +1,4 @@
-﻿namespace Patch.Core.Formats.Xdelta.Models;
+namespace Patch.Core.Formats.Xdelta.Models;
 
 public struct Xd3Hinst
 {

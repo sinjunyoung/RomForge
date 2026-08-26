@@ -1,4 +1,4 @@
-namespace Patch.Core.Formats.Xdelta.Models;
+﻿namespace Patch.Core.Formats.Xdelta.Models;
 
 public sealed class Xd3AddrCache
 {

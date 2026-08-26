@@ -33,6 +33,7 @@ public sealed class Xd3LzmaDecoder
         if (_totalOut != targetOut)
             throw new Xd3Exception("secondary decoder short output");
 
+
         pos = p;
 
         var windowSlice = new byte[decSize];
@@ -118,7 +119,6 @@ public sealed class Xd3LzmaDecoder
                 inPos += 2;
 
                 EnsureCapacity(_totalOut + dataSize);
-
                 Array.Copy(input, inPos, _output, _totalOut, dataSize);
 
                 _totalOut += dataSize;
@@ -176,9 +176,7 @@ public sealed class Xd3LzmaDecoder
             int outPos = _totalOut;
 
             _lzmaDecoder.DecodeChunk(ref rc, _output, ref outPos, _dictStart, uncompSize);
-
             _totalOut = outPos;
-
             inPos += compSize;
         }
     }

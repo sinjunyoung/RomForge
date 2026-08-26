@@ -7,7 +7,6 @@ public static class Xd3SourceOps
     public static bool CheckPow2(long value, out uint log)
     {
         long x = 1;
-
         log = 0;
 
         while (x != 0)
@@ -69,7 +68,6 @@ public static class Xd3SourceOps
         if (!CheckPow2(src.BlkSize, out uint shiftby))
         {
             src.BlkSize = Pow2Roundup(src.BlkSize);
-
             CheckPow2(src.BlkSize, out shiftby);
         }
 
