@@ -1,14 +1,16 @@
 using Patch.Core.Formats.Xdelta.Models;
 using System.IO.MemoryMappedFiles;
+using System.Runtime.InteropServices;
 
 namespace Patch.Core.Formats.Xdelta.Services;
 
-public sealed class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource, IDisposable
+public sealed unsafe class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource, IDisposable
 {
     private const uint DefaultBlkSize = 256 * 1024;
 
     private readonly MemoryMappedFile _mmf;
     private readonly MemoryMappedViewAccessor _accessor;
+    private readonly byte* _ptr;
     private byte[]? _reusableBuf;
 
     public Xd3FileBlockSource(string path, uint blkSize = DefaultBlkSize)
@@ -18,6 +20,7 @@ public sealed class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource
 
         _mmf = MemoryMappedFile.CreateFromFile(path, FileMode.Open, mapName: null, capacity: 0, MemoryMappedFileAccess.Read);
         _accessor = _mmf.CreateViewAccessor(0, FileLength, MemoryMappedFileAccess.Read);
+        _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref _ptr);
     }
 
     public uint BlkSize { get; }
@@ -48,7 +51,7 @@ public sealed class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource
         if (_reusableBuf == null || _reusableBuf.Length != toRead)
             _reusableBuf = new byte[toRead];
 
-        _accessor.ReadArray(offset, _reusableBuf, 0, toRead);
+        Marshal.Copy((IntPtr)(_ptr + offset), _reusableBuf, 0, toRead);
 
         source.CurBlk = _reusableBuf;
         source.OnBlk = (uint)toRead;
@@ -60,11 +63,12 @@ public sealed class Xd3FileBlockSource : IXd3BlockSource, IXd3RandomAccessSource
         if (offset < 0 || offset + count > FileLength)
             throw new Xd3Exception("source read out of range");
 
-        _accessor.ReadArray(offset, dest, destOffset, count);
+        Marshal.Copy((IntPtr)(_ptr + offset), dest, destOffset, count);
     }
 
     public void Dispose()
     {
+        _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
         _accessor.Dispose();
         _mmf.Dispose();
     }

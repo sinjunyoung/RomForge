@@ -129,9 +129,13 @@ public static class Xd3Decoder
                 source.CpyOffBlkOff = cpyOffBlkOff;
             }
 
-            byte[] dataBuf = ExtractSection(patch, dataStart, (int)dataLen, dataComp, secondaryId, ref dataFgk, ref dataLzma);
-            byte[] instBuf = ExtractSection(patch, instStart, (int)instLen, instComp, secondaryId, ref instFgk, ref instLzma);
-            byte[] addrBuf = ExtractSection(patch, addrStart, (int)addrLen, addrComp, secondaryId, ref addrFgk, ref addrLzma);
+            byte[] dataBuf = null!, instBuf = null!, addrBuf = null!;
+
+            Parallel.Invoke(
+                () => dataBuf = ExtractSection(patch, dataStart, (int)dataLen, dataComp, secondaryId, ref dataFgk, ref dataLzma),
+                () => instBuf = ExtractSection(patch, instStart, (int)instLen, instComp, secondaryId, ref instFgk, ref instLzma),
+                () => addrBuf = ExtractSection(patch, addrStart, (int)addrLen, addrComp, secondaryId, ref addrFgk, ref addrLzma));
+
             var targetWindow = new byte[tgtLen];
             int outPos = 0;
             int dataPos = 0;
@@ -208,13 +212,25 @@ public static class Xd3Decoder
 
                     default:
                         if (addr < cpyLen)
+                        {
                             CopyFromSource(source!, blockSource!, cpyOff + addr, size, targetWindow, outPos);
+                        }
                         else
                         {
                             uint srcPos = addr - cpyLen;
+                            int originalGap = outPos - (int)srcPos;
+                            int remaining = (int)size;
+                            int written = 0;
 
-                            for (int i = 0; i < size; i++)
-                                targetWindow[outPos + i] = targetWindow[(int)srcPos + i];
+                            while (remaining > 0)
+                            {
+                                int chunk = Math.Min(originalGap + written, remaining);
+
+                                Array.Copy(targetWindow, (int)srcPos, targetWindow, outPos + written, chunk);
+
+                                written += chunk;
+                                remaining -= chunk;
+                            }
                         }
 
                         outPos += (int)size;
