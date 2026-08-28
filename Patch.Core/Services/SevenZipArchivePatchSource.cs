@@ -4,8 +4,13 @@ namespace Patch.Core.Services;
 
 public sealed class SevenZipArchivePatchSource : IArchivePatchSource
 {
+    private readonly string _archivePath;
+    private readonly string? _password;
     private readonly string _tempDir;
-    private readonly Dictionary<string, string> _diskPaths = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, ArchiveFileInfo> _byKey = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, string> _extractedPaths = new(StringComparer.OrdinalIgnoreCase);
+    private readonly object _extractLock = new();
+    private bool _tempDirCreated;
 
     public IReadOnlyList<string> EntryPaths { get; }
 
@@ -15,51 +20,64 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
     {
         NativeSevenZip.EnsureInitialized();
 
+        _archivePath = path;
+        _password = password;
         _tempDir = Path.Combine(Path.GetDirectoryName(path)!, "romforge_7z_" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(_tempDir);
 
         try
         {
             using var extractor = string.IsNullOrEmpty(password) ? new SevenZipExtractor(path) : new SevenZipExtractor(path, password);
-            extractor.ExtractArchive(_tempDir);
+
+            foreach (var info in extractor.ArchiveFileData)
+            {
+                if (info.IsDirectory)
+                    continue;
+
+                _byKey[info.FileName.Replace('\\', '/')] = info;
+            }
         }
         catch (Exception)
         {
-            SafeDeleteTempDir();
             throw new ArchivePasswordRequiredException(path);
         }
 
-        foreach (var filePath in Directory.GetFiles(_tempDir, "*", SearchOption.AllDirectories))
-        {
-            var relativePath = Path.GetRelativePath(_tempDir, filePath).Replace('\\', '/');
-            _diskPaths[relativePath] = filePath;
-        }
-
-        if (_diskPaths.Count == 0)
-        {
-            SafeDeleteTempDir();
+        if (_byKey.Count == 0)
             throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
-        }
 
-        EntryPaths = [.. _diskPaths.Keys];
+        EntryPaths = [.. _byKey.Keys];
     }
 
-    private void SafeDeleteTempDir()
+    private string ExtractToDisk(string key, ArchiveFileInfo info)
     {
-        try
+        lock (_extractLock)
         {
-            if (Directory.Exists(_tempDir))
-                Directory.Delete(_tempDir, recursive: true);
+            if (_extractedPaths.TryGetValue(key, out var cached))
+                return cached;
+
+            if (!_tempDirCreated)
+            {
+                Directory.CreateDirectory(_tempDir);
+                _tempDirCreated = true;
+            }
+
+            var destPath = Path.Combine(_tempDir, Guid.NewGuid().ToString("N"));
+
+            using var extractor = string.IsNullOrEmpty(_password) ? new SevenZipExtractor(_archivePath) : new SevenZipExtractor(_archivePath, _password);
+
+            using (var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                extractor.ExtractFile(info.Index, fileStream);
+
+            _extractedPaths[key] = destPath;
+            return destPath;
         }
-        catch { }
     }
 
     public IArchivePatchEntry? FindEntry(string path)
     {
-        if (!_diskPaths.TryGetValue(path, out var diskPath))
+        if (!_byKey.TryGetValue(path, out var info))
             return null;
 
-        return new Entry(diskPath, path);
+        return new Entry(this, info, path);
     }
 
     public void Dispose()
@@ -76,12 +94,16 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
         catch { }
     }
 
-    private sealed class Entry(string diskPath, string fullPath) : IArchivePatchEntry
+    private sealed class Entry(SevenZipArchivePatchSource owner, ArchiveFileInfo info, string fullPath) : IArchivePatchEntry
     {
         public string FullPath => fullPath;
 
-        public long Length => new FileInfo(diskPath).Length;
+        public long Length => (long)info.Size;
 
-        public Stream Open() => new FileStream(diskPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        public Stream Open()
+        {
+            var diskPath = owner.ExtractToDisk(fullPath, info);
+            return new FileStream(diskPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        }
     }
 }

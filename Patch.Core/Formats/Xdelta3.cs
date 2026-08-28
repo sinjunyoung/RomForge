@@ -10,8 +10,6 @@ public static class Xdelta3
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ProgressCallback(double progress);
 
-    // ---- legacy monolithic API: still used by CreatePatch() and the byte[]-based ApplyPatch() ----
-
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
     private static extern int xd3_create_patch_w(string sourcePath, string newPath, string patchPath, IntPtr cb);
 
@@ -33,8 +31,6 @@ public static class Xdelta3
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr xd3_get_last_error();
 
-    // ---- streaming API: used by the file-based ApplyPatch() below ----
-
     private enum Xd3StreamStatus
     {
         Ok = 0,
@@ -43,8 +39,8 @@ public static class Xdelta3
         Error = -1
     }
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_open_decode_w", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern IntPtr xd3_stream_open_decode_w(string sourcePath);
+    [DllImport(DllName, EntryPoint = "xd3_stream_open_decode_buf", CallingConvention = CallingConvention.Cdecl)]
+    private static extern IntPtr xd3_stream_open_decode_buf(IntPtr sourceBuf, long sourceSize);
 
     [DllImport(DllName, EntryPoint = "xd3_stream_feed", CallingConvention = CallingConvention.Cdecl)]
     private static extern int xd3_stream_feed(IntPtr handle, byte[] patchChunk, nuint len, int isLastChunk);
@@ -59,20 +55,49 @@ public static class Xdelta3
 
     private static string GetLastError() => Marshal.PtrToStringAnsi(xd3_get_last_error()) ?? "unknown error";
 
-    /// <summary>
-    /// Applies a patch file to a source file, producing outputPath. Internally streams the
-    /// patch in fixed-size chunks through the native decoder instead of handing the whole
-    /// patch file to the native side at once — this is the plumbing needed so a future caller
-    /// can feed patch bytes as they arrive (e.g. over the network) with the same core loop.
-    /// </summary>
     public static void ApplyPatch(string sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ValidateInputFiles(sourcePath, patchPath);
 
-        IntPtr handle = xd3_stream_open_decode_w(sourcePath);
+        long sourceSize = new FileInfo(sourcePath).Length;
+        IntPtr sourceBuf = sourceSize > 0 ? Marshal.AllocHGlobal((nint)sourceSize) : IntPtr.Zero;
+
+        try
+        {
+            using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan))
+            {
+                var chunk = new byte[StreamChunkSize];
+                long offset = 0;
+
+                while (offset < sourceSize)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    int n = sourceStream.Read(chunk, 0, (int)Math.Min(chunk.Length, sourceSize - offset));
+
+                    if (n <= 0)
+                        throw new InvalidOperationException("소스 파일을 읽는 중 오류가 발생했습니다.");
+
+                    Marshal.Copy(chunk, 0, sourceBuf + (nint)offset, n);
+                    offset += n;
+                }
+            }
+
+            ApplyPatchFromBuffer(sourceBuf, sourceSize, patchPath, outputPath, progress, ct);
+        }
+        finally
+        {
+            if (sourceBuf != IntPtr.Zero)
+                Marshal.FreeHGlobal(sourceBuf);
+        }
+    }
+
+    private static void ApplyPatchFromBuffer(IntPtr sourceBuf, long sourceSize, string patchPath, string outputPath, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    {
+        IntPtr handle = xd3_stream_open_decode_buf(sourceBuf, sourceSize);
 
         if (handle == IntPtr.Zero)
-            throw new InvalidOperationException($"소스 파일을 열지 못했습니다: {GetLastError()}");
+            throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
 
         try
         {
@@ -81,14 +106,13 @@ public static class Xdelta3
 
             long patchTotal = patchStream.Length;
             long patchConsumed = 0;
-            long sourceTotal = new FileInfo(sourcePath).Length;
             long totalWritten = 0;
 
             Action<long, long>? report = null;
 
             if (progress is not null)
             {
-                var reporter = new ProgressReporter("패치중...", string.Empty, sourceTotal, progress);
+                var reporter = new ProgressReporter("패치중...", string.Empty, sourceSize, progress);
                 report = reporter.CreateAction();
             }
 
@@ -122,7 +146,7 @@ public static class Xdelta3
                     {
                         outStream.Write(outBuf, 0, (int)written);
                         totalWritten += (int)written;
-                        report?.Invoke(totalWritten, sourceTotal);
+                        report?.Invoke(totalWritten, sourceSize);
                     }
 
                     if (status != (int)Xd3StreamStatus.Ok)
@@ -133,7 +157,7 @@ public static class Xdelta3
                     break;
             }
 
-            report?.Invoke(Math.Max(totalWritten, sourceTotal), sourceTotal);
+            report?.Invoke(Math.Max(totalWritten, sourceSize), sourceSize);
         }
         finally
         {

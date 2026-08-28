@@ -19,16 +19,9 @@
 #include "xdelta3.h"
 
 #ifdef _WIN32
-#include <windows.h>
-#include <io.h>
 #define DLL_EXPORT __declspec(dllexport)
-#define fseek64 _fseeki64
-#define ftell64 _ftelli64
 #else
-#include <sys/mman.h>
 #define DLL_EXPORT __attribute__((visibility("default")))
-#define fseek64 fseeko
-#define ftell64 ftello
 #endif
 
 static char last_error_msg[512] = { 0 };
@@ -47,12 +40,8 @@ static void save_error(xd3_stream* stream, int code) {
 }
 
 typedef struct {
-    uint8_t* buf;
-    xoff_t   size;
-    FILE*    file;
-#ifdef _WIN32
-    HANDLE   hMap;
-#endif
+    const uint8_t* buf;
+    xoff_t         size;
 } src_ctx;
 
 static int my_getblk(xd3_stream* stream, xd3_source* source, xoff_t blkno)
@@ -64,61 +53,26 @@ static int my_getblk(xd3_stream* stream, xd3_source* source, xoff_t blkno)
     return 0;
 }
 
-static src_ctx* src_ctx_new_from_path(const void* source_path, int is_wide, xd3_source* source, xd3_stream* stream)
+static src_ctx* src_ctx_new_from_buffer(const uint8_t* buf, xoff_t size, xd3_source* source, xd3_stream* stream)
 {
     src_ctx* ctx = (src_ctx*)calloc(1, sizeof(src_ctx));
     if (!ctx) return NULL;
 
-#ifdef _WIN32
-    ctx->file = is_wide ? _wfopen((const wchar_t*)source_path, L"rb")
-                         : fopen((const char*)source_path, "rb");
-#else
-    ctx->file = fopen((const char*)source_path, "rb");
-#endif
-    if (!ctx->file) { free(ctx); return NULL; }
+    ctx->buf = buf;
+    ctx->size = size;
 
-    fseek64(ctx->file, 0, SEEK_END);
-    ctx->size = (xoff_t)ftell64(ctx->file);
-    fseek64(ctx->file, 0, SEEK_SET);
-
-    if (ctx->size == 0) {
-        ctx->buf = NULL;
-    }
-    else {
-#ifdef _WIN32
-        HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(ctx->file));
-        ctx->hMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-        if (!ctx->hMap) { fclose(ctx->file); free(ctx); return NULL; }
-        ctx->buf = (uint8_t*)MapViewOfFile(ctx->hMap, FILE_MAP_READ, 0, 0, 0);
-        if (!ctx->buf) { CloseHandle(ctx->hMap); fclose(ctx->file); free(ctx); return NULL; }
-#else
-        ctx->buf = (uint8_t*)mmap(NULL, ctx->size, PROT_READ, MAP_PRIVATE, fileno(ctx->file), 0);
-        if (ctx->buf == MAP_FAILED) { fclose(ctx->file); free(ctx); return NULL; }
-#endif
-    }
-
-    source->blksize = (usize_t)ctx->size;
+    source->blksize = (usize_t)size;
     source->ioh = ctx;
     source->curblk = ctx->buf;
     source->curblkno = 0;
-    source->onblk = (usize_t)ctx->size;
-    source->max_winsize = (usize_t)ctx->size;
+    source->onblk = (usize_t)size;
+    source->max_winsize = (usize_t)size;
 
-    xd3_set_source_and_size(stream, source, ctx->size);
+    xd3_set_source_and_size(stream, source, size);
     return ctx;
 }
 
 static void src_ctx_free(src_ctx* ctx) {
-    if (!ctx) return;
-    if (ctx->buf) {
-#ifdef _WIN32
-        UnmapViewOfFile(ctx->buf);
-        if (ctx->hMap) CloseHandle(ctx->hMap);
-#else
-        munmap(ctx->buf, ctx->size);
-#endif
-    }
-    if (ctx->file) fclose(ctx->file);
     free(ctx);
 }
 
@@ -144,7 +98,7 @@ typedef struct {
     int errored;
 } xd3_decode_handle;
 
-static xd3_decode_handle* xd3_stream_open_decode_impl(const void* source_path, int is_wide)
+DLL_EXPORT xd3_decode_handle* xd3_stream_open_decode_buf(const uint8_t* source_buf, xoff_t source_size)
 {
     xd3_decode_handle* h = (xd3_decode_handle*)calloc(1, sizeof(xd3_decode_handle));
     if (!h) return NULL;
@@ -162,9 +116,9 @@ static xd3_decode_handle* xd3_stream_open_decode_impl(const void* source_path, i
         return NULL;
     }
 
-    h->src = src_ctx_new_from_path(source_path, is_wide, &h->source, &h->stream);
+    h->src = src_ctx_new_from_buffer(source_buf, source_size, &h->source, &h->stream);
     if (!h->src) {
-        snprintf(last_error_msg, sizeof(last_error_msg), "failed to open/map source file");
+        snprintf(last_error_msg, sizeof(last_error_msg), "failed to bind source buffer");
         xd3_free_stream(&h->stream);
         free(h);
         return NULL;
@@ -172,16 +126,6 @@ static xd3_decode_handle* xd3_stream_open_decode_impl(const void* source_path, i
 
     return h;
 }
-
-#ifdef _WIN32
-DLL_EXPORT xd3_decode_handle* xd3_stream_open_decode_w(const wchar_t* source_path) {
-    return xd3_stream_open_decode_impl(source_path, 1);
-}
-#else
-DLL_EXPORT xd3_decode_handle* xd3_stream_open_decode(const char* source_path) {
-    return xd3_stream_open_decode_impl(source_path, 0);
-}
-#endif
 
 /* Feed one chunk of PATCH bytes. Call xd3_stream_read_output() repeatedly after this
  * until it returns XD3S_NEED_INPUT or XD3S_FINISHED before feeding the next chunk.
