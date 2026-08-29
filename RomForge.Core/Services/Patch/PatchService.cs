@@ -51,10 +51,10 @@ public static class PatchService
         byte[] sourceBytes;
 
         using (var srcStream = sourceEntry.Open())
-        using (var ms = new MemoryStream())
+        using (var ms = new MemoryStream(checked((int)sourceEntry.Length)))
         {
             await srcStream.CopyToAsync(ms, ct);
-            sourceBytes = ms.ToArray();
+            sourceBytes = ms.Length == ms.Capacity ? ms.GetBuffer() : ms.ToArray();
         }
 
         var patchBytes = await ReadPatchBytesAsync(patchEntry, openPatchZips, ct);

@@ -250,11 +250,13 @@ public sealed class RepackService()
             if (binaryPatches.TryGetValue(relPath, out var patchRef))
             {
                 byte[] originalData;
+                long expectedSize = source.GetFileSize(relPath);
+
                 using (var srcStream = source.OpenRead(relPath))
-                using (var ms = new MemoryStream())
+                using (var ms = new MemoryStream(checked((int)expectedSize)))
                 {
                     srcStream.CopyTo(ms);
-                    originalData = ms.ToArray();
+                    originalData = ms.Length == ms.Capacity ? ms.GetBuffer() : ms.ToArray();
                 }
 
                 byte[] patchData = patchRef.ReadSmallFileBytes();

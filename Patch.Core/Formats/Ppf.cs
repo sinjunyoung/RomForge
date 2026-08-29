@@ -97,7 +97,7 @@ public static class Ppf
         }
         else if (version == 2)
         {
-            ValidateBlockcheckInternal(header, pat, src, 0, 2);
+            ValidateBlockcheckInternal(pat, src, 0, 2);
             pos = 1084;
             pat.Position = pos;
         }
@@ -109,7 +109,7 @@ public static class Ppf
 
             if (blockcheck != 0)
             {
-                ValidateBlockcheckInternal(header, pat, src, imagetype, 3);
+                ValidateBlockcheckInternal(pat, src, imagetype, 3);
                 pos = 1084;
                 pat.Position = pos;
             }
@@ -170,7 +170,7 @@ public static class Ppf
 
             pat.ReadExactly(buffer, 0, length);
 
-            if (offset >= 0 && offset + length <= outStream.Length)
+            if (offset >= 0 && offset + length <= srcSize)
             {
                 outStream.Position = offset;
                 outStream.Write(buffer, 0, length);
@@ -261,7 +261,7 @@ public static class Ppf
             int bytesReadTar = tar.Read(tarBuf, 0, tarBuf.Length);
             int validLen = Math.Max(bytesReadSrc, bytesReadTar);
 
-            if (validLen == 0) 
+            if (validLen == 0)
                 break;
 
             for (int i = 0; i < validLen; i++)
@@ -279,7 +279,7 @@ public static class Ppf
                         byte currS = i < bytesReadSrc ? srcBuf[i] : (byte)0;
                         byte currT = i < bytesReadTar ? tarBuf[i] : (byte)0;
 
-                        if (currS == currT) 
+                        if (currS == currT)
                             break;
 
                         diffBytes.Add(currT);
@@ -309,7 +309,7 @@ public static class Ppf
         report?.Invoke(maxLen, maxLen);
     }
 
-    private static void ValidateBlockcheckInternal(byte[] header, Stream pat, Stream src, byte imagetype, int version)
+    private static void ValidateBlockcheckInternal(Stream pat, Stream src, byte imagetype, int version)
     {
         long sourceBlockStart = imagetype != 0 ? 0x80A0L : 0x9320L;
 
