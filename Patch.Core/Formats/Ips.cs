@@ -35,6 +35,7 @@ public static class Ips
     private unsafe static byte[] Encode(byte[] original, byte[] modified, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         using var ms = new MemoryStream();
+
         ms.Write(PatchHeader, 0, PatchHeader.Length);
 
         int maxLen = Math.Max(original.Length, modified.Length);
@@ -113,7 +114,7 @@ public static class Ips
                 {
                     progress.Report(new ProgressInfo
                     {
-                        Percent = pos / maxLen
+                        Percent = (int)(pos / (double)maxLen * 100)
                     });
                 }
             }
@@ -196,7 +197,7 @@ public static class Ips
 
                 progress?.Report(new ProgressInfo
                 {
-                    Percent = pos / ips.Length
+                    Percent = (int)(pos / (double)ips.Length * 100)
                 });
             }
 

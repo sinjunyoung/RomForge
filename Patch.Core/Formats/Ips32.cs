@@ -33,6 +33,7 @@ public static class Ips32
                 throw new InvalidDataException("유효하지 않은 IPS32 헤더입니다.");
 
             byte[] result = new byte[rom.Length];
+
             Buffer.BlockCopy(rom, 0, result, 0, rom.Length);
 
             int actualFinalSize = rom.Length;
@@ -46,12 +47,14 @@ public static class Ips32
                     break;
 
                 long offset = ((long)pIps[pos] << 24) | ((long)pIps[pos + 1] << 16) | ((long)pIps[pos + 2] << 8) | pIps[pos + 3];
+
                 pos += 4;
 
                 if (pos + 2 > ips.Length)
                     break;
 
                 int size = (pIps[pos] << 8) | pIps[pos + 1];
+
                 pos += 2;
 
                 if (size == 0)
@@ -61,6 +64,7 @@ public static class Ips32
 
                     int rleCount = (pIps[pos] << 8) | pIps[pos + 1];
                     byte rleValue = pIps[pos + 2];
+
                     pos += 3;
 
                     EnsureCapacity(ref result, (int)(offset + rleCount));
@@ -88,7 +92,7 @@ public static class Ips32
                     pos += size;
                 }
 
-                progress?.Report(new ProgressInfo { Percent = (int)(pos / (double)ips.Length) });
+                progress?.Report(new ProgressInfo { Percent = (int)(pos / (double)ips.Length * 100) });
             }
 
             if (result.Length != actualFinalSize)

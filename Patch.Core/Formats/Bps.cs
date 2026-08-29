@@ -130,7 +130,7 @@ public static class Bps
                     }
 
                     if (progress != null && pos % Math.Max(1, patchEnd / 100) == 0)
-                        progress.Report(new ProgressInfo { Percent = pos / patchEnd });
+                        progress.Report(new ProgressInfo { Percent = (int)(pos / (double)patchEnd * 100) });
                 }
 
                 if (outOffset != targetSize)
@@ -192,7 +192,7 @@ public static class Bps
                 }
 
                 if (progress != null && outOffset % 1000 == 0)
-                    progress.Report(new ProgressInfo { Percent = outOffset / target.Length });
+                    progress.Report(new ProgressInfo { Percent = (int)(outOffset / (double)target.Length * 100) });
             }
         }
 
@@ -241,6 +241,7 @@ public static class Bps
             }
 
             s.WriteByte(b);
+
             value--;
         }
     }

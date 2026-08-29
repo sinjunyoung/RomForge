@@ -64,6 +64,8 @@ public static class Xdelta3
 
         try
         {
+            ProgressReporter? loadReporter = progress is null || sourceSize <= 0 ? null : new ProgressReporter("소스 로딩중...", string.Empty, sourceSize, progress);
+            Action<long, long>? loadReport = loadReporter?.CreateAction();
             using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan))
             {
                 var chunk = new byte[StreamChunkSize];
@@ -79,7 +81,10 @@ public static class Xdelta3
                         throw new InvalidOperationException("소스 파일을 읽는 중 오류가 발생했습니다.");
 
                     Marshal.Copy(chunk, 0, sourceBuf + (nint)offset, n);
+
                     offset += n;
+
+                    loadReport?.Invoke(offset, sourceSize);
                 }
             }
 
@@ -103,19 +108,10 @@ public static class Xdelta3
         {
             using var patchStream = new FileStream(patchPath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan);
             using var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, StreamChunkSize);
-
             long patchTotal = patchStream.Length;
-            long patchConsumed = 0;
-            long totalWritten = 0;
-
-            Action<long, long>? report = null;
-
-            if (progress is not null)
-            {
-                var reporter = new ProgressReporter("패치중...", string.Empty, sourceSize, progress);
-                report = reporter.CreateAction();
-            }
-
+            long patchConsumed = 0;            
+            ProgressReporter? reporter = progress is null ? null : new ProgressReporter("패치중...", string.Empty, patchTotal, progress);
+            Action<long, long>? report = reporter?.CreateAction();
             var readBuf = new byte[StreamChunkSize];
             var outBuf = new byte[StreamChunkSize];
 
@@ -124,10 +120,10 @@ public static class Xdelta3
                 ct.ThrowIfCancellationRequested();
 
                 int n = patchStream.Read(readBuf, 0, readBuf.Length);
+
                 patchConsumed += n;
 
                 bool isLastChunk = patchConsumed >= patchTotal;
-
                 int feedRet = xd3_stream_feed(handle, readBuf, (nuint)n, isLastChunk ? 1 : 0);
 
                 if (feedRet != 0)
@@ -143,21 +139,19 @@ public static class Xdelta3
                         throw new InvalidOperationException($"패치 적용 중 오류: {GetLastError()}");
 
                     if ((int)written > 0)
-                    {
                         outStream.Write(outBuf, 0, (int)written);
-                        totalWritten += (int)written;
-                        report?.Invoke(totalWritten, sourceSize);
-                    }
 
                     if (status != (int)Xd3StreamStatus.Ok)
                         break;
                 }
 
+                report?.Invoke(patchConsumed, patchTotal);
+
                 if (isLastChunk)
                     break;
             }
 
-            report?.Invoke(Math.Max(totalWritten, sourceSize), sourceSize);
+            report?.Invoke(patchTotal, patchTotal);
         }
         finally
         {
@@ -180,13 +174,11 @@ public static class Xdelta3
                 long total = sourceData.Length;
                 var reporter = new ProgressReporter("패치중...", string.Empty, total, progress);
                 var report = reporter.CreateAction();
-
                 ProgressCallback cb = p =>
                 {
                     long current = (long)(p * total);
                     report(current, total);
                 };
-
                 GCHandle handle = GCHandle.Alloc(cb);
 
                 try
@@ -220,6 +212,7 @@ public static class Xdelta3
     public static void CreatePatch(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ValidateInputFiles(sourcePath, newPath);
+
         int result;
 
         using (ct.Register(() => xd3_cancel()))
@@ -231,13 +224,11 @@ public static class Xdelta3
                 long total = new FileInfo(newPath).Length;
                 var reporter = new ProgressReporter("패치 생성중...", string.Empty, total, progress);
                 var report = reporter.CreateAction();
-
                 ProgressCallback cb = p =>
                 {
                     long current = (long)(p * total);
                     report(current, total);
                 };
-
                 GCHandle handle = GCHandle.Alloc(cb);
 
                 try

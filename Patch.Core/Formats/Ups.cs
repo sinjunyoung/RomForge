@@ -69,7 +69,7 @@ public static class Ups
 
                         byte b = pPat[pos++];
 
-                        if (b == 0) 
+                        if (b == 0)
                             break;
 
                         if (outOffset < outputSize)
@@ -81,7 +81,7 @@ public static class Ups
                     outOffset++;
 
                     if (progress != null && pos % Math.Max(1, patchEnd / 100) == 0)
-                        progress.Report(new ProgressInfo { Percent = pos / patchEnd });
+                        progress.Report(new ProgressInfo { Percent = (int)(pos / (double)patchEnd * 100) });
                 }
             }
 
@@ -146,10 +146,12 @@ public static class Ups
                     {
                         byte sb = (blockStart + j) < source.Length ? pSrc[blockStart + j] : (byte)0;
                         byte tb = (blockStart + j) < target.Length ? pTar[blockStart + j] : (byte)0;
+
                         xorBlock[j] = (byte)(sb ^ tb);
                     }
 
                     xorBlock[i - blockStart] = 0;
+
                     ms.Write(xorBlock, 0, xorBlock.Length);
 
                     lastOffset = i;
@@ -157,7 +159,7 @@ public static class Ups
                 else i++;
 
                 if (progress != null && i % 1000 == 0)
-                    progress.Report(new ProgressInfo { Percent = i / maxLen });
+                    progress.Report(new ProgressInfo { Percent = (int)(i / (double)maxLen * 100) });
             }
         }
 
@@ -179,9 +181,10 @@ public static class Ups
         while (pos < maxLen)
         {
             byte b = patch[pos++];
+
             value += (b & 0x7f) * shift;
 
-            if ((b & 0x80) != 0) 
+            if ((b & 0x80) != 0)
                 break;
 
             shift <<= 7;
@@ -206,13 +209,14 @@ public static class Ups
             }
 
             s.WriteByte(b);
+
             value--;
         }
     }
 
     private unsafe static uint CalculateCrc32(byte[] data, int length = -1)
     {
-        if (length == -1) 
+        if (length == -1)
             length = data.Length;
 
         uint crc = 0xFFFFFFFF;
@@ -221,6 +225,7 @@ public static class Ups
             for (int i = 0; i < length; i++)
             {
                 crc ^= p[i];
+
                 for (int j = 0; j < 8; j++)
                     crc = (crc >> 1) ^ ((crc & 1) * 0xEDB88320);
             }
