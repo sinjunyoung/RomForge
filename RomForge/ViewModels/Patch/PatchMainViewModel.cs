@@ -12,6 +12,8 @@ public class PatchMainViewModel : MultiToolTabViewModel
 
     public ArcadePatchMainViewModel ArcadeVM { get; } = new();
 
+    public Pc98PatchMainViewModel Pc98VM { get; } = new();
+
     public ICommand RunCommand { get; }
 
     public ICommand ClearCommand { get; }
@@ -40,6 +42,7 @@ public class PatchMainViewModel : MultiToolTabViewModel
 
         Tools.Add(NormalVM);
         Tools.Add(ArcadeVM);
+        Tools.Add(Pc98VM);
 
         InitializeMultiTools();
     }
