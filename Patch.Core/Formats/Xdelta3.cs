@@ -161,51 +161,79 @@ public static class Xdelta3
 
     public static byte[] ApplyPatch(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        int ret;
-        IntPtr outPtr;
-        nuint outSize;
-
-        using (ct.Register(() => xd3_cancel()))
+        GCHandle sourceHandle = GCHandle.Alloc(sourceData, GCHandleType.Pinned);
+        try
         {
-            if (progress is null)
-                ret = xd3_apply_patch_mem(sourceData, (nuint)sourceData.Length, patchData, (nuint)patchData.Length, out outPtr, out outSize, IntPtr.Zero);
-            else
-            {
-                long total = sourceData.Length;
-                var reporter = new ProgressReporter("패치중...", string.Empty, total, progress);
-                var report = reporter.CreateAction();
-                ProgressCallback cb = p =>
-                {
-                    long current = (long)(p * total);
-                    report(current, total);
-                };
-                GCHandle handle = GCHandle.Alloc(cb);
+            IntPtr sourceBuf = sourceData.Length > 0 ? sourceHandle.AddrOfPinnedObject() : IntPtr.Zero;
+            IntPtr handle = xd3_stream_open_decode_buf(sourceBuf, sourceData.Length);
 
+            if (handle == IntPtr.Zero)
+                throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
+
+            using (ct.Register(() => xd3_cancel()))
+            {
                 try
                 {
-                    ret = xd3_apply_patch_mem(sourceData, (nuint)sourceData.Length, patchData, (nuint)patchData.Length, out outPtr, out outSize, cb);
+                    using var patchStream = new MemoryStream(patchData);
+                    using var outStream = new MemoryStream();
+                    long patchTotal = patchStream.Length;
+                    long patchConsumed = 0;
+                    ProgressReporter? reporter = progress is null ? null : new ProgressReporter("패치중...", string.Empty, patchTotal, progress);
+                    Action<long, long>? report = reporter?.CreateAction();
+                    var readBuf = new byte[StreamChunkSize];
+                    var outBuf = new byte[StreamChunkSize];
+
+                    while (true)
+                    {
+                        ct.ThrowIfCancellationRequested();
+
+                        int n = patchStream.Read(readBuf, 0, readBuf.Length);
+
+                        if (n <= 0)
+                            break;
+
+                        patchConsumed += n;
+
+                        bool isLastChunk = patchConsumed >= patchTotal;
+                        int feedRet = xd3_stream_feed(handle, readBuf, (nuint)n, isLastChunk ? 1 : 0);
+
+                        if (feedRet != 0)
+                            ThrowIfFailed(feedRet);
+
+                        while (true)
+                        {
+                            ct.ThrowIfCancellationRequested();
+
+                            int status = xd3_stream_read_output(handle, outBuf, (nuint)outBuf.Length, out nuint written);
+
+                            if (status == (int)Xd3StreamStatus.Error)
+                                throw new InvalidOperationException($"패치 적용 중 오류: {GetLastError()}");
+
+                            if ((int)written > 0)
+                                outStream.Write(outBuf, 0, (int)written);
+
+                            if (status != (int)Xd3StreamStatus.Ok)
+                                break;
+                        }
+
+                        report?.Invoke(patchConsumed, patchTotal);
+
+                        if (isLastChunk)
+                            break;
+                    }
+
+                    report?.Invoke(patchTotal, patchTotal);
+                    return outStream.ToArray();
                 }
                 finally
                 {
-                    handle.Free();
-                    ct.ThrowIfCancellationRequested();
+                    xd3_stream_close(handle);
                 }
             }
         }
-
-        ThrowIfFailed(ret);
-
-        try
-        {
-            var result = new byte[(int)outSize];
-
-            Marshal.Copy(outPtr, result, 0, (int)outSize);
-
-            return result;
-        }
         finally
         {
-            xd3_free_mem(outPtr);
+            sourceHandle.Free();
         }
     }
 
