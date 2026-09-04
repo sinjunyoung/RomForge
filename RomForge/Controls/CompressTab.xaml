@@ -203,13 +203,13 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": ISO(비표준), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
+                            <Run Text=": ISO (GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="GCM, WBFS" Foreground="#CCCCCC"/>
+                            <Run Text="ISO (GC/Wii)" Foreground="#CCCCCC"/>
                         </TextBlock>
                     </Grid>
                 </TextBlock>

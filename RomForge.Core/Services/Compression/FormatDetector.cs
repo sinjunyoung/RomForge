@@ -50,10 +50,10 @@ public static class FormatDetector
                 for (int i = 0; i <= scanBuffer.Length - 4; i++)
                 {
                     if (scanBuffer[i] == 0x5D && scanBuffer[i + 1] == 0x1C && scanBuffer[i + 2] == 0x9E && scanBuffer[i + 3] == 0xA3)
-                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "wbfs");
+                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
 
                     if (scanBuffer[i] == 0xC2 && scanBuffer[i + 1] == 0x33 && scanBuffer[i + 2] == 0x9F && scanBuffer[i + 3] == 0x3D)
-                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "gcm");
+                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
                 }
 
                 return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
