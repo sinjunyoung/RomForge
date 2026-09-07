@@ -12,6 +12,7 @@ typedef void (*LogCallback)(const char *message);
 CHDMAN_API int chdman_create_cd(
     const char *input,
     const char *output,
+    const char *compression,
     ProgressCallback progress,
     LogCallback log);
 

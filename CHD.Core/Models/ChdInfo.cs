@@ -1,6 +1,4 @@
-﻿using CHD.Core.Models.Enums;
-
-namespace CHD.Core.Models;
+﻿namespace CHD.Core.Models;
 
 public class ChdInfo
 {

@@ -1,4 +1,4 @@
-﻿namespace CHD.Core.Models.Enums;
+﻿namespace CHD.Core.Models;
 
 public enum ChdSourceType
 {

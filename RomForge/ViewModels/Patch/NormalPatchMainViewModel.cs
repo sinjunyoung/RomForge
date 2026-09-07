@@ -2,6 +2,7 @@
 using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
+using Patch.Core;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
@@ -165,6 +166,40 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             }
 
             extractDir ??= Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(actualSourcePath));
+
+            if (Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) ||
+                Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase))
+            {
+                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
+                string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
+
+                Log("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);
+
+                try
+                {
+                    await UniversalPatcher.ApplyPatchAsync(actualSourcePath, PatchPath, directOutputPath, BuildProgressReporter(), ct);
+
+                    stopwatch.Stop();
+                    outputPath = directOutputPath;
+
+                    Log($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
+
+                    outputDir.OpenFolder();
+
+                    return;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (InvalidOperationException ex) when (ex.Message.Contains("XD3_INVALID_INPUT") || ex.Message.Contains("미스매치"))
+                {
+                    Log("압축된 원본과 패치가 일치하지 않아 압축을 해제한 뒤 다시 시도합니다.", LogLevel.Highlight);
+
+                    if (File.Exists(directOutputPath))
+                        File.Delete(directOutputPath);
+                }
+            }
 
             var (resolvedSourcePath, detected) = await CompressedSourceDecompressor.ResolveAsync(actualSourcePath, extractDir, Log, BuildProgressReporter(), ct);
 

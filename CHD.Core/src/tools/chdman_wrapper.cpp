@@ -50,6 +50,7 @@ static int safe_call(std::function<void()> fn, LogCallback log)
 CHDMAN_API int chdman_create_cd(
     const char *input,
     const char *output,
+    const char *compression,
     ProgressCallback progress,
     LogCallback log)
 {
@@ -61,8 +62,12 @@ CHDMAN_API int chdman_create_cd(
         { "output", std::string(output) },
         { "force",  std::string("") }
     };
+    if (compression && compression[0] != '\0')
+        entries.emplace_back("compression", std::string(compression));
     auto params = make_params(entries);
-    return safe_call([&]() { do_create_cd(params); }, log);
+    int result = safe_call([&]() { do_create_cd(params); }, log);
+    if (g_cancel_requested) return -1;
+    return result;
 }
 
 CHDMAN_API int chdman_create_dvd(

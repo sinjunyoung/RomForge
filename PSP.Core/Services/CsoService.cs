@@ -1,6 +1,6 @@
 ﻿using CHD.Core.Interop;
 using CHD.Core.Interop.Enums;
-using CHD.Core.Models.Enums;
+using CHD.Core.Models;
 using CHD.Core.Services;
 using Common;
 using K4os.Compression.LZ4;

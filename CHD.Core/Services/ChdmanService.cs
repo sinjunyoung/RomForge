@@ -1,5 +1,4 @@
 ﻿using CHD.Core.Models;
-using CHD.Core.Models.Enums;
 using Common;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -26,7 +25,7 @@ public sealed class ChdmanService : IDisposable
     private delegate void LogCallback([MarshalAs(UnmanagedType.LPStr)] string message);
 
     [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_create_cd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, ProgressCallback progress, LogCallback log);
+    private static extern int chdman_create_cd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string? compression, ProgressCallback progress, LogCallback log);
 
     [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
     private static extern int chdman_create_dvd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string compression, ProgressCallback progress, LogCallback log);
@@ -49,12 +48,12 @@ public sealed class ChdmanService : IDisposable
 
     public ChdmanService() => _logCallback = msg => { if (!string.IsNullOrEmpty(msg)) ErrorReceived?.Invoke(this, msg); };
 
-    public Task<bool> CreateCdAsync(string cuePath, string chdPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public Task<bool> CreateCdAsync(string cuePath, string chdPath, string? compression = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         cuePath = Path.GetFullPath(cuePath);
         chdPath = Path.GetFullPath(chdPath);
 
-        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, "압축 중...", chdman_create_cd, progress, ct);
+        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, "압축 중...", (i, o, p, l) => chdman_create_cd(i, o, compression, p, l), progress, ct);
     }
 
     public Task<bool> CreateDvdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)

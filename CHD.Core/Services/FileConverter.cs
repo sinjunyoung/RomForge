@@ -1,5 +1,4 @@
 ﻿using CHD.Core.Models;
-using CHD.Core.Models.Enums;
 using Common;
 using System.Text.RegularExpressions;
 
@@ -243,7 +242,7 @@ public class FileConverter : IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, progress, cancellationToken);
+            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -337,7 +336,11 @@ public class FileConverter : IDisposable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, cancellationToken);
+            var rawSectorMode = CdRawSectorDetector.Detect(inputPath);
+
+            bool success = rawSectorMode != CdRawSectorMode.None
+                ? await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, cancellationToken)
+                : await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -380,6 +383,14 @@ public class FileConverter : IDisposable
             return ConversionResult.Fail($"오류: {ex.Message}");
         }
     }
+
+    private static string MapToCdCompression(string compression) => compression switch
+    {
+        "zlib" => "cdzl",
+        "lzma" => "cdlz",
+        "zstd" => "cdzs",
+        _ => compression
+    };
 
     private static bool IsSingleTrackMode1(string cuePath)
     {

@@ -1,4 +1,5 @@
-﻿using RomForge.Core.Models.Compression;
+﻿using CHD.Core.Models;
+using RomForge.Core.Models.Compression;
 using System.IO;
 using System.Text;
 
@@ -88,8 +89,21 @@ public static class FormatDetector
 
             fs.Seek(0x8001, SeekOrigin.Begin);
             var cdMagic = br.ReadBytes(5);
-            if (MatchMagic(cdMagic, "CD001"))
+            if (MatchMagic(cdMagic, "CD001") || MatchMagic(cdMagic, "BEA01"))
                 return Result(RomFormat.Iso, ConvertDirection.Compress, "chd");
+
+            if (fs.Length > 0x9320)
+            {
+                fs.Seek(0x9311, SeekOrigin.Begin);
+                var rawMode1Magic = br.ReadBytes(5);
+                if (MatchMagic(rawMode1Magic, "CD001"))
+                    return Result(RomFormat.Iso, ConvertDirection.Compress, "chd");
+
+                fs.Seek(0x9319, SeekOrigin.Begin);
+                var rawMode2Magic = br.ReadBytes(5);
+                if (MatchMagic(rawMode2Magic, "CD001"))
+                    return Result(RomFormat.Iso, ConvertDirection.Compress, "chd");
+            }
         }
         catch { }
 
@@ -104,10 +118,10 @@ public static class FormatDetector
 
             var outExt = info.SourceType switch
             {
-                CHD.Core.Models.Enums.ChdSourceType.GdRom => "gdi",
-                CHD.Core.Models.Enums.ChdSourceType.BinCue => "cue",
-                CHD.Core.Models.Enums.ChdSourceType.ISO => "iso",
-                CHD.Core.Models.Enums.ChdSourceType.DVD => "iso",
+                ChdSourceType.GdRom => "gdi",
+                ChdSourceType.BinCue => "cue",
+                ChdSourceType.ISO => "iso",
+                ChdSourceType.DVD => "iso",
                 _ => "iso"
             };
 
