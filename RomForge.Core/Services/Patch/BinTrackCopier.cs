@@ -7,7 +7,7 @@ namespace RomForge.Core.Services.Patch;
 
 public class BinTrackCopier(Action<string, LogLevel> log)
 {
-    public async Task<string?> CopyBinTracksAsync(string sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false)
+    public async Task<string?> CopyBinTracksAsync(string sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         string[] cueCandidates = Directory.GetFiles(Path.GetDirectoryName(sourcePath)!, "*.cue");
 
@@ -37,29 +37,33 @@ public class BinTrackCopier(Action<string, LogLevel> log)
         var sourceDir = Path.GetDirectoryName(cuePath)!;
         string sourceMainFileName = Path.GetFileName(sourcePath);
 
-        foreach (var binName in referencedBins)
+        var binsToCopy = referencedBins.Where(b => !string.Equals(Path.GetFileName(b), sourceMainFileName, StringComparison.OrdinalIgnoreCase)).ToList();
+        int trackIndex = 0;
+
+        foreach (var binName in binsToCopy)
         {
-            if (string.Equals(Path.GetFileName(binName), sourceMainFileName, StringComparison.OrdinalIgnoreCase))
-                continue;
+            ct.ThrowIfCancellationRequested();
+
+            trackIndex++;
 
             string sourceBinPath = Path.Combine(sourceDir, Path.GetFileName(binName));
             string targetBinPath = Path.Combine(outputDir, Path.GetFileName(binName));
 
-            if (File.Exists(sourceBinPath))
-            {
-                if (moveInsteadOfCopy)
-                    File.Move(sourceBinPath, targetBinPath, true);
-                else
-                    File.Copy(sourceBinPath, targetBinPath, true);
-
-                copiedTrackPaths.Add(targetBinPath);
-            }
-            else
+            if (!File.Exists(sourceBinPath))
             {
                 log($"멀티 트랙 파일을 찾을 수 없습니다: {Path.GetFileName(sourceBinPath)}", LogLevel.Error);
 
                 return null;
             }
+
+            progress?.Report(new ProgressInfo { Label = $"트랙 복사 중 ({trackIndex}/{binsToCopy.Count})", Percent = binsToCopy.Count > 0 ? trackIndex * 100 / binsToCopy.Count : 100 });
+
+            if (moveInsteadOfCopy)
+                File.Move(sourceBinPath, targetBinPath, true);
+            else
+                File.Copy(sourceBinPath, targetBinPath, true);
+
+            copiedTrackPaths.Add(targetBinPath);
         }
 
         string newBinFileName = Path.GetFileName(outputPath);

@@ -130,17 +130,17 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
 
         if (detected.Format == RomFormat.Bin)
         {
-            _outputCuePath = await _binTrackCopier.CopyBinTracksAsync(sourcePath, outputDir, outputPath, _copiedTrackPaths, sourceIsTemporary);
+            _outputCuePath = await Task.Run(() => _binTrackCopier.CopyBinTracksAsync(sourcePath, outputDir, outputPath, _copiedTrackPaths, sourceIsTemporary, progress, ct), ct);
             skipCompress = _outputCuePath is null;
         }
         else if (detected.Format == RomFormat.Ccd)
         {
-            _outputCcdPath = _ccdCompanionCopier.CopyCcd(sourcePath, outputPath, sourceIsTemporary);
+            _outputCcdPath = await Task.Run(() => _ccdCompanionCopier.CopyCcd(sourcePath, outputPath, sourceIsTemporary), ct);
             skipCompress = _outputCcdPath is null;
         }
         else if (detected.Format == RomFormat.Gdi)
         {
-            _outputGdiPath = _gdiTrackCopier.CopyGdiTracks(sourcePath, outputDir, outputPath, _copiedTrackPaths, sourceIsTemporary);
+            _outputGdiPath = await Task.Run(() => _gdiTrackCopier.CopyGdiTracks(sourcePath, outputDir, outputPath, _copiedTrackPaths, sourceIsTemporary, progress, ct), ct);
             skipCompress = _outputGdiPath is null;
         }
 

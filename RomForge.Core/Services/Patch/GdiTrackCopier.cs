@@ -7,7 +7,7 @@ namespace RomForge.Core.Services.Patch;
 
 public class GdiTrackCopier(Action<string, LogLevel> log)
 {
-    public string? CopyGdiTracks(string sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false)
+    public string? CopyGdiTracks(string sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         string[] gdiCandidates = Directory.GetFiles(Path.GetDirectoryName(sourcePath)!, "*.gdi");
 
@@ -37,29 +37,33 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
             return null;
         }
 
-        foreach (var track in gdi.Tracks)
+        var tracksToCopy = gdi.Tracks.Where(t => !string.Equals(t.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase)).ToList();
+        int trackIndex = 0;
+
+        foreach (var track in tracksToCopy)
         {
-            if (string.Equals(track.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase))
-                continue;
+            ct.ThrowIfCancellationRequested();
+
+            trackIndex++;
 
             string sourceTrackPath = gdi.GetTrackFullPath(track);
             string targetTrackPath = Path.Combine(outputDir, track.FileName);
 
-            if (File.Exists(sourceTrackPath))
-            {
-                if (moveInsteadOfCopy)
-                    File.Move(sourceTrackPath, targetTrackPath, true);
-                else
-                    File.Copy(sourceTrackPath, targetTrackPath, true);
-
-                copiedTrackPaths.Add(targetTrackPath);
-            }
-            else
+            if (!File.Exists(sourceTrackPath))
             {
                 log($"트랙 파일을 찾을 수 없습니다: {track.FileName}", LogLevel.Error);
 
                 return null;
             }
+
+            progress?.Report(new ProgressInfo { Label = $"트랙 복사 중 ({trackIndex}/{tracksToCopy.Count})", Percent = tracksToCopy.Count > 0 ? trackIndex * 100 / tracksToCopy.Count : 100 });
+
+            if (moveInsteadOfCopy)
+                File.Move(sourceTrackPath, targetTrackPath, true);
+            else
+                File.Copy(sourceTrackPath, targetTrackPath, true);
+
+            copiedTrackPaths.Add(targetTrackPath);
         }
 
         string newMainFileName = Path.GetFileName(outputPath);
