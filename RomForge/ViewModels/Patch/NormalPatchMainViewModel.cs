@@ -3,6 +3,7 @@ using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
 using Patch.Core;
+using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
@@ -167,8 +168,9 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             extractDir ??= Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(actualSourcePath));
 
-            if (Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) ||
-                Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase))
+            if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) ||
+                Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) &&
+                XdeltaAppHeaderReader.TargetsCompressedContainer(PatchPath!))
             {
                 string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
