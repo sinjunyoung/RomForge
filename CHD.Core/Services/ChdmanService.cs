@@ -11,7 +11,7 @@ public sealed class ChdmanService : IDisposable
 {
     private const string CHDMAN_DLL = "chdman.dll";
 
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private static readonly SemaphoreSlim _lock = new(1, 1);
 
     private readonly LogCallback _logCallback;
 
@@ -292,10 +292,9 @@ public sealed class ChdmanService : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) 
+        if (_disposed)
             return;
 
         _disposed = true;
-        _lock.Dispose();
     }
 }
