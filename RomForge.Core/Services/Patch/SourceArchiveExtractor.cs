@@ -1,5 +1,6 @@
 ﻿using CHD.Core.Services;
 using Common;
+using Patch.Core.Formats.DCP.Services;
 using Patch.Core.Services;
 using RomForge.Core.Models.Patch;
 using SevenZip;
@@ -63,6 +64,19 @@ public static class SourceArchiveExtractor
                 };
             }
 
+            var gdiEntries = entries.Where(e => string.Equals(Path.GetExtension(e.Key), ".gdi", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (gdiEntries.Count == 1)
+                return ResolveGdi(session, gdiEntries[0], entries, extractDir, progress, ct);
+
+            if (gdiEntries.Count > 1)
+            {
+                return new ArchiveExtractResult
+                {
+                    Candidates = [.. gdiEntries.Select(e => new ArchiveCandidate(e.Key, e.Size))]
+                };
+            }
+
             var candidates = entries.Where(e => RomLikeExtensions.Contains(Path.GetExtension(e.Key))).ToList();
 
             if (candidates.Count == 0)
@@ -108,6 +122,13 @@ public static class SourceArchiveExtractor
                 return cueResult.ResolvedPath!;
             }
 
+            if (string.Equals(Path.GetExtension(entry.Key), ".gdi", StringComparison.OrdinalIgnoreCase))
+            {
+                var gdiResult = ResolveGdi(session, entry, entries, extractDir, progress, ct);
+
+                return gdiResult.ResolvedPath!;
+            }
+
             var extracted = ExtractEntries(session, [entry], extractDir, progress, ct);
 
             return extracted[entry.Key];
@@ -135,11 +156,38 @@ public static class SourceArchiveExtractor
 
         var binExtracted = ExtractEntries(session, binEntries, extractDir, progress, ct);
         int mainIndex = ConversionSource.ResolveMainDataTrackIndex(cuePath);
-        string ? mainBinFileName = mainIndex >= 0 && mainIndex < referencedBins.Count ? Path.GetFileName(referencedBins[mainIndex]) : null;
+        string? mainBinFileName = mainIndex >= 0 && mainIndex < referencedBins.Count ? Path.GetFileName(referencedBins[mainIndex]) : null;
         var mainEntry = binEntries.FirstOrDefault(e => string.Equals(Path.GetFileName(e.Key), mainBinFileName, StringComparison.OrdinalIgnoreCase));
         string resolvedKey = mainEntry.Key ?? binEntries[0].Key;
 
         return new ArchiveExtractResult { ResolvedPath = binExtracted[resolvedKey] };
+    }
+
+    private static ArchiveExtractResult ResolveGdi(IArchiveSession session, ArchiveEntryInfo gdiEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
+    {
+        var gdiExtracted = ExtractEntries(session, [gdiEntry], extractDir, progress, ct);
+        string gdiPath = gdiExtracted[gdiEntry.Key];
+        var gdi = GdiFile.Parse(gdiPath);
+        string gdiDir = GetEntryDirectory(gdiEntry.Key);
+        var trackEntries = new List<ArchiveEntryInfo>();
+
+        foreach (var track in gdi.Tracks)
+        {
+            var match = entries.FirstOrDefault(e => GetEntryDirectory(e.Key) == gdiDir && string.Equals(Path.GetFileName(e.Key), track.FileName, StringComparison.OrdinalIgnoreCase));
+
+            if (match.Key is not null)
+                trackEntries.Add(match);
+        }
+
+        if (trackEntries.Count == 0)
+            throw new InvalidOperationException("GDI 파일이 참조하는 트랙 파일을 압축 안에서 찾을 수 없습니다.");
+
+        var trackExtracted = ExtractEntries(session, trackEntries, extractDir, progress, ct);
+        string mainTrackFileName = gdi.DataTrack.FileName;
+        var mainEntry = trackEntries.FirstOrDefault(e => string.Equals(Path.GetFileName(e.Key), mainTrackFileName, StringComparison.OrdinalIgnoreCase));
+        string resolvedKey = mainEntry.Key ?? trackEntries[0].Key;
+
+        return new ArchiveExtractResult { ResolvedPath = trackExtracted[resolvedKey] };
     }
 
     private static string GetEntryDirectory(string key)

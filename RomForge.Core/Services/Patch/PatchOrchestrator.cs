@@ -46,7 +46,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
             }
 
             string workDir = Path.GetDirectoryName(gdiPath)!;
-            string titleName = Path.GetFileNameWithoutExtension(gdiPath);
+            string titleName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileNameWithoutExtension(gdiPath), patchPath);
 
             if (sourceIsTemporary)
             {

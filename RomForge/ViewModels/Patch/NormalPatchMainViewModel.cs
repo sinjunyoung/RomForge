@@ -171,7 +171,9 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
 
-            outputPath = Path.Combine(outputDir, Path.GetFileName(actualSourcePath));
+            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
+
+            outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
 
             Log($"패치 시작: {Path.GetFileName(actualSourcePath)}", LogLevel.Highlight);
