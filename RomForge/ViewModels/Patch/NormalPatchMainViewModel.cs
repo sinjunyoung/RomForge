@@ -1,6 +1,8 @@
-﻿using Common;
+﻿using CHD.Core.Services;
+using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
+using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models.Patch;
@@ -171,7 +173,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
 
-            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
+            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), PatchPath!);
 
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
@@ -236,6 +238,34 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         ProgressPercent = "0%";
         ProgressTime = string.Empty;
         ProgressSpeed = string.Empty;
+    }
+
+    private static string ResolveOutputBaseFileName(string actualSourcePath)
+    {
+        string sourceMainFileName = Path.GetFileName(actualSourcePath);
+        string ext = Path.GetExtension(actualSourcePath);
+        var dir = Path.GetDirectoryName(actualSourcePath);
+
+        if (dir is not null)
+        {
+            foreach (var candidate in Directory.GetFiles(dir, "*.cue"))
+            {
+                if (ConversionSource.ParseBinsFromCue(candidate).Any(b => string.Equals(Path.GetFileName(b), sourceMainFileName, StringComparison.OrdinalIgnoreCase)))
+                    return Path.GetFileNameWithoutExtension(candidate) + ext;
+            }
+
+            foreach (var candidate in Directory.GetFiles(dir, "*.gdi"))
+            {
+                try
+                {
+                    if (GdiFile.Parse(candidate).Tracks.Any(t => string.Equals(t.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase)))
+                        return Path.GetFileNameWithoutExtension(candidate) + ext;
+                }
+                catch { }
+            }
+        }
+
+        return sourceMainFileName;
     }
 
     public void Cancel() => _runCts?.Cancel();

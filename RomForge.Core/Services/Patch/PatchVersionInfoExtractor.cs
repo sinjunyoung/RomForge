@@ -27,7 +27,7 @@ public static class PatchVersionInfoExtractor
 
         string nameOnly = Path.GetFileNameWithoutExtension(fileName);
         string ext = Path.GetExtension(fileName);
-        string suffix = version is not null ? $"_v{version}_{date}" : $"_v{date}";
+        string suffix = version is not null ? $" (v{version}_{date})" : $" (v{date})";
 
         return nameOnly + suffix + ext;
     }
