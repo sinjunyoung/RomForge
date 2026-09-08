@@ -24,6 +24,7 @@
     <None Remove="Assets\Images\Comment.png" />
     <None Remove="Assets\Images\Copy.png" />
     <None Remove="Assets\Images\CUE.png" />
+    <None Remove="Assets\Images\Desktop.png" />
     <None Remove="Assets\Images\Dreamcast.png" />
     <None Remove="Assets\Images\Excel.png" />
     <None Remove="Assets\Images\FontSize.png" />
@@ -64,6 +65,7 @@
     <Resource Include="Assets\Images\Convert.png" />
     <Resource Include="Assets\Images\Copy.png" />
     <Resource Include="Assets\Images\CUE.png" />
+    <Resource Include="Assets\Images\Desktop.png" />
     <Resource Include="Assets\Images\Dreamcast.png" />
     <Resource Include="Assets\Images\Excel.png" />
     <Resource Include="Assets\Images\FontSize.png" />
