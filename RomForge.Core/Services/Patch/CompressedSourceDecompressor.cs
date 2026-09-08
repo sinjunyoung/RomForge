@@ -25,7 +25,6 @@ public static class CompressedSourceDecompressor
         }
 
         Directory.CreateDirectory(workDir);
-
         log($"{Path.GetFileName(sourcePath)} 압축 해제 중...", LogLevel.Highlight);
 
         var result = ext == ".chd" ? await DecompressChdAsync(sourcePath, workDir, progress, log, ct) : await DecompressRvzAsync(sourcePath, workDir, progress, log, ct);
@@ -47,13 +46,20 @@ public static class CompressedSourceDecompressor
         if (gdiPath is null)
             return null;
 
-        var gdi = GdiFile.Parse(gdiPath);
-        var mainTrackPath = gdi.GetTrackFullPath(gdi.DataTrack);
+        try
+        {
+            var gdi = GdiFile.Parse(gdiPath);
+            var mainTrackPath = gdi.GetTrackFullPath(gdi.DataTrack);
 
-        if (!string.Equals(Path.GetFullPath(mainTrackPath), Path.GetFullPath(sourcePath), StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(Path.GetFullPath(mainTrackPath), Path.GetFullPath(sourcePath), StringComparison.OrdinalIgnoreCase))
+                return null;
+
+            return (mainTrackPath, new DetectResult { Format = RomFormat.Gdi, Direction = ConvertDirection.Compress, OutputExtension = "chd" });
+        }
+        catch
+        {
             return null;
-
-        return (mainTrackPath, new DetectResult { Format = RomFormat.Gdi, Direction = ConvertDirection.Compress, OutputExtension = "chd" });
+        }
     }
 
     private static async Task<(string ActualSourcePath, DetectResult Detected)> DecompressChdAsync(string chdPath, string outputDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)

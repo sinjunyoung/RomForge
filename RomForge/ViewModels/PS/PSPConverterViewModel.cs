@@ -69,7 +69,7 @@ public class PSPConverterViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in Common.Utils.ExpandPaths(paths))
+        foreach (var path in Utils.ExpandPaths(paths))
         {
             if (!SupportedExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
                 continue;
@@ -218,10 +218,19 @@ public class PSPConverterViewModel : ToolTabViewModel
                     }
                     catch (OperationCanceledException)
                     {
+                        if (File.Exists(outPath))
+                        {
+                            try { File.Delete(outPath); } catch { }
+                        }
                         throw;
                     }
                     catch (Exception ex)
                     {
+                        if (File.Exists(outPath))
+                        {
+                            try { File.Delete(outPath); } catch { }
+                        }
+
                         AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
 
                         item.Status = "실패";

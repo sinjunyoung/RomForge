@@ -246,9 +246,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             {
                 Log($"원본 압축 확인 중: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
 
-                extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath));
-
-                Directory.CreateDirectory(extractDir);
+                extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath));                Directory.CreateDirectory(extractDir);
 
                 var extractResult = await SourceArchiveExtractor.AnalyzeAndExtractAsync(SourcePath, extractDir, BuildProgressReporter(), ct);
 
@@ -259,8 +257,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                     if (RequestSourceSelectionAsync is null)
                         throw new InvalidOperationException("압축 안에 후보가 여러 개인데 선택 UI가 연결되어 있지 않습니다.");
 
-                    string entryKey = await RequestSourceSelectionAsync(extractResult.Candidates)
-                        ?? throw new OperationCanceledException();
+                    string entryKey = await RequestSourceSelectionAsync(extractResult.Candidates) ?? throw new OperationCanceledException();
 
                     actualSourcePath = await SourceArchiveExtractor.ExtractCandidateAsync(SourcePath, extractDir, entryKey, BuildProgressReporter(), ct);
                 }
@@ -274,7 +271,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && XdeltaAppHeaderReader.TargetsCompressedContainer(PatchPath!))
             {
-                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
+                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
 
                 Log("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);

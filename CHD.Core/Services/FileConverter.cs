@@ -384,7 +384,7 @@ public class FileConverter : IDisposable
         }
     }
 
-    private static string MapToCdCompression(string compression) => compression switch
+    public static string MapToCdCompression(string compression) => compression switch
     {
         "zlib" => "cdzl",
         "lzma" => "cdlz",

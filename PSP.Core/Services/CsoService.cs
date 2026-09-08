@@ -490,7 +490,16 @@ public class CsoService
         }
     }
 
-    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => await _chdman.CreateDvdAsync(isoPath, chdPath, compression, progress, ct);
+    public async Task<bool> CompressToChdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    {
+        var rawSectorMode = CdRawSectorDetector.Detect(isoPath);
+
+        bool success = rawSectorMode != CdRawSectorMode.None
+            ? await _chdman.CreateCdAsync(isoPath, chdPath, FileConverter.MapToCdCompression(compression), progress, ct)
+            : await _chdman.CreateDvdAsync(isoPath, chdPath, compression, progress, ct);
+
+        return success;
+    }
 
     public async Task<bool> CompressCsoToChdAsync(string csoPath, string chdPath, IProgress<ProgressInfo>? progress = null, string compression = "zlib", CancellationToken ct = default)
     {
