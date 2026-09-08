@@ -58,7 +58,7 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.Items>
-                        
+
                         <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="ZIP" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -66,7 +66,7 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-                        
+
                         <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="RAR" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -74,7 +74,7 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-                        
+
                         <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="7Z" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -82,7 +82,7 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-                        
+
                         <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="CHD" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -90,7 +90,7 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-                        
+
                         <Border Background="#1A6C5CE5" BorderBrush="#556C5CE5" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="RVZ" Foreground="#A29BFE" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -161,85 +161,119 @@
             </StackPanel>
         </Border>
 
-        <ToggleButton Grid.Row="6" Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,2">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
-                <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
-                <Grid VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="6">
+            <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,4">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
+                    <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <Grid VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
-                            <TextBlock Text="BIN / IMG / ISO" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                        <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
-                        <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="CHD" Foreground="#54FFB5" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
+                                <TextBlock Text="BIN / IMG / ISO" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                            <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
+                            <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="5" Padding="6,2">
+                                <TextBlock Text="CHD" Foreground="#54FFB5" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <Border Background="#1AFFCE73" BorderBrush="#4DFFCE73" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
+                                <TextBlock Text="3DS / CCI / CIA" Foreground="#FFCE73" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFCE73" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                            <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
+                            <Border Background="#1AD48843" BorderBrush="#55D48843" BorderThickness="1" CornerRadius="5" Padding="6,2">
+                                <TextBlock Text="ZCCI" Foreground="#D48843" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#D48843" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                            <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
+                                <TextBlock Text="GCM / Wii / WBFS" Foreground="#FF73C9" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                            <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
+                            <Border Background="#1A6C5CE5" BorderBrush="#556C5CE5" BorderThickness="1" CornerRadius="5" Padding="6,2">
+                                <TextBlock Text="RVZ" Foreground="#A29BFE" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#A29BFE" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
+                                <TextBlock Text="이외 기타" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                            <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
+
+                            <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2">
+                                <TextBlock Text="ZIP" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
+                                    <TextBlock.Effect>
+                                        <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                    </TextBlock.Effect></TextBlock>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </ToggleButton>
+
+            <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,2">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
+                    <TextBlock Text="결과 파일명에 버전/날짜 자동 표기" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <TextBlock Text="패치 파일명에서 버전과 날짜를 읽어와 결과 파일명에 표시합니다" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
+                </StackPanel>
+            </ToggleButton>
+
+            <Grid Margin="0,0,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8">
+                    <StackPanel>
+                        <TextBox Text="{Binding PatchVM.NormalVM.NamingFormat, UpdateSourceTrigger=PropertyChanged}"
+                                 IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}"
+                                 ToolTip="사용 가능한 값: {fileName}, {Version}, {Date}"/>
+                        <TextBlock Text="사용 가능: {fileName}, {Version}, {Date} — 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" Margin="0,4,0,0"/>
                     </StackPanel>
+                </Border>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <Border Background="#1AFFCE73" BorderBrush="#4DFFCE73" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
-                            <TextBlock Text="3DS / CCI / CIA" Foreground="#FFCE73" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFCE73" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                        <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
-                        <Border Background="#1AD48843" BorderBrush="#55D48843" BorderThickness="1" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="ZCCI" Foreground="#D48843" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#D48843" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
+                <Border Grid.Column="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="예상 파일명" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                     </StackPanel>
-
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                        <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
-                            <TextBlock Text="GCM / Wii / WBFS" Foreground="#FF73C9" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FF73C9" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                        <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
-                        <Border Background="#1A6C5CE5" BorderBrush="#556C5CE5" BorderThickness="1" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="RVZ" Foreground="#A29BFE" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#A29BFE" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                    </StackPanel>
-
-                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                        <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
-                            <TextBlock Text="이외 기타" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                        <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
-
-                        <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2">
-                            <TextBlock Text="ZIP" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
-                                <TextBlock.Effect>
-                                    <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
-                                </TextBlock.Effect></TextBlock>
-                        </Border>
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-        </ToggleButton>
+                </Border>
+            </Grid>
+        </StackPanel>
 
         <Border Grid.Row="7" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,5,0,5" Padding="8,0">
             <Grid x:Name="progressArea" Height="28">

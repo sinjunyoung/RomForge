@@ -42,6 +42,20 @@ public class PatchConfig : ViewModelBase
         get => _autoCompress;
         set { SetProperty(ref _autoCompress, value); }
     }
+
+    private bool _namingEnabled = true;
+    public bool NamingEnabled
+    {
+        get => _namingEnabled;
+        set { SetProperty(ref _namingEnabled, value); }
+    }
+
+    private string _namingFormat = "{fileName} (v{Version}_{Date})";
+    public string NamingFormat
+    {
+        get => _namingFormat;
+        set { SetProperty(ref _namingFormat, value); }
+    }
 }
 
 public class ChdmanConfig : ViewModelBase
@@ -93,18 +107,6 @@ public class PS1Config : ViewModelBase
 
     private bool _useUpperCase = false;
     public bool UseUpperCase { get => _useUpperCase; set => SetProperty(ref _useUpperCase, value); }
-}
-
-public class PatchSearchConfig : ViewModelBase
-{
-    private List<string>? _selectedSystems;
-    public List<string>? SelectedSystems { get => _selectedSystems; set => SetProperty(ref _selectedSystems, value); }
-
-    private DateTime? _startDate;
-    public DateTime? StartDate { get => _startDate; set => SetProperty(ref _startDate, value); }
-
-    private DateTime? _endDate;
-    public DateTime? EndDate { get => _endDate; set => SetProperty(ref _endDate, value); }
 }
 
 public class TistoryConfig : ViewModelBase
@@ -166,9 +168,6 @@ public class AppConfig : ViewModelBase
     private PS1Config _ps1 = new();
     public PS1Config PS1 { get => _ps1; set => SetProperty(ref _ps1, value); }
 
-    private PatchSearchConfig _patchSearch = new();
-    public PatchSearchConfig PatchSearch { get => _patchSearch; set => SetProperty(ref _patchSearch, value); }
-
     private TistoryConfig _tistory = new();
     public TistoryConfig Tistory { get => _tistory; set => SetProperty(ref _tistory, value); }
 
@@ -202,7 +201,6 @@ public class AppConfig : ViewModelBase
                 Azahar = loaded.Azahar ?? new();
                 Dolphin = loaded.Dolphin ?? new();
                 PS1 = loaded.PS1 ?? new();
-                PatchSearch = loaded.PatchSearch ?? new();
                 Tistory = loaded.Tistory ?? new();
                 OutputFolders = loaded.OutputFolders ?? new();
             }
@@ -228,7 +226,6 @@ public class AppConfig : ViewModelBase
         Dolphin.PropertyChanged += AutoSave;
         Patch.PropertyChanged += AutoSave;
         PS1.PropertyChanged += AutoSave;
-        PatchSearch.PropertyChanged += AutoSave;
         Tistory.PropertyChanged += AutoSave;
         OutputFolders.PropertyChanged += AutoSave;
     }

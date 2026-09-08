@@ -191,7 +191,7 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.90">
                 <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center"/>
                 <TextBlock Text="원본 ZIP, 패치(IPS, 폴더, ZIP)를 위에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="확장자 기준으로 자동 매칭됩니다" Foreground="#888" FontSize="11" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                <TextBlock Text="확장자 기준으로 자동 매칭됩니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 

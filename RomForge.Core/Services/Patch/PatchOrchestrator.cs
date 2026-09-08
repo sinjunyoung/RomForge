@@ -2,6 +2,7 @@
 using Common;
 using Patch.Core;
 using Patch.Core.Formats.DCP.Services;
+using RomForge.Core;
 using RomForge.Core.Models.Compression;
 using System.IO;
 
@@ -46,7 +47,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
             }
 
             string workDir = Path.GetDirectoryName(gdiPath)!;
-            string titleName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileNameWithoutExtension(gdiPath), patchPath);
+            string titleName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileNameWithoutExtension(gdiPath), patchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
 
             if (sourceIsTemporary)
             {

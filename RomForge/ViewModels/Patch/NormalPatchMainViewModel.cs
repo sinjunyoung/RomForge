@@ -7,7 +7,9 @@ using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
+using RomForge.Core.Models.Compression;
 using RomForge.Core.Models.Patch;
+using RomForge.Core.Services.Compression;
 using RomForge.Core.Services.Patch;
 using System.Diagnostics;
 using System.IO;
@@ -37,6 +39,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             _sourcePath = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(SourceLabel));
+            OnPropertyChanged(nameof(NamingPreview));
             CommandManager.InvalidateRequerySuggested();
         }
     }
@@ -49,6 +52,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             _patchPath = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(PatchLabel));
+            OnPropertyChanged(nameof(NamingPreview));
         }
     }
 
@@ -59,7 +63,87 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             AppConfig.Instance.Patch.AutoCompress = value;
             OnPropertyChanged(nameof(AutoCompress));
+            OnPropertyChanged(nameof(NamingPreview));
         }
+    }
+
+    public bool NamingEnabled
+    {
+        get => AppConfig.Instance.Patch.NamingEnabled;
+        set
+        {
+            AppConfig.Instance.Patch.NamingEnabled = value;
+            OnPropertyChanged(nameof(NamingEnabled));
+            OnPropertyChanged(nameof(NamingPreview));
+        }
+    }
+
+    public string NamingFormat
+    {
+        get => AppConfig.Instance.Patch.NamingFormat;
+        set
+        {
+            AppConfig.Instance.Patch.NamingFormat = value;
+            OnPropertyChanged(nameof(NamingFormat));
+            OnPropertyChanged(nameof(NamingPreview));
+        }
+    }
+
+    public string NamingPreview
+    {
+        get
+        {
+            string baseFileName = ResolvePreviewBaseFileName();
+
+            if (!NamingEnabled)
+                return baseFileName;
+
+            string? version;
+            string date;
+
+            if (PatchPath is not null && File.Exists(PatchPath))
+            {
+                (version, string? extractedDate) = PatchVersionInfoExtractor.Extract(Path.GetFileName(PatchPath));
+                date = extractedDate ?? File.GetCreationTime(PatchPath).ToString("yyMMdd");
+            }
+            else
+            {
+                version = "1.0";
+                date = DateTime.Now.ToString("yyMMdd");
+            }
+
+            return PatchVersionInfoExtractor.ApplyFormat(baseFileName, version, date, NamingFormat);
+        }
+    }
+
+    private string ResolvePreviewBaseFileName()
+    {
+        if (SourcePath is null)
+            return "GameName.bin";
+
+        if (!File.Exists(SourcePath) || SourceArchiveExtractor.IsArchivePath(SourcePath))
+            return Path.GetFileName(SourcePath);
+
+        string ext = Path.GetExtension(SourcePath);
+
+        if (ext.Equals(".chd", StringComparison.OrdinalIgnoreCase) || ext.Equals(".rvz", StringComparison.OrdinalIgnoreCase))
+            return Path.GetFileName(SourcePath);
+
+        string baseFileName = ResolveOutputBaseFileName(SourcePath);
+
+        if (AutoCompress)
+        {
+            try
+            {
+                var detected = FormatDetector.Detect(SourcePath);
+
+                if (detected.Direction == ConvertDirection.Compress && !string.IsNullOrEmpty(detected.OutputExtension))
+                    baseFileName = Path.ChangeExtension(baseFileName, detected.OutputExtension);
+            }
+            catch { }
+        }
+
+        return baseFileName;
     }
 
     public Func<IReadOnlyList<ArchiveCandidate>, Task<string?>>? RequestSourceSelectionAsync { get; set; }
@@ -103,13 +187,33 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         AppConfig.Instance.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(AppConfig.Patch))
+            {
                 OnPropertyChanged(nameof(AutoCompress));
+                OnPropertyChanged(nameof(NamingEnabled));
+                OnPropertyChanged(nameof(NamingFormat));
+                OnPropertyChanged(nameof(NamingPreview));
+            }
         };
 
         AppConfig.Instance.Patch.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(PatchConfig.AutoCompress))
+            {
                 OnPropertyChanged(nameof(AutoCompress));
+                OnPropertyChanged(nameof(NamingPreview));
+            }
+
+            if (e.PropertyName == nameof(PatchConfig.NamingEnabled))
+            {
+                OnPropertyChanged(nameof(NamingEnabled));
+                OnPropertyChanged(nameof(NamingPreview));
+            }
+
+            if (e.PropertyName == nameof(PatchConfig.NamingFormat))
+            {
+                OnPropertyChanged(nameof(NamingFormat));
+                OnPropertyChanged(nameof(NamingPreview));
+            }
         };
     }
 
@@ -129,7 +233,6 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
         string? extractDir = null;
         string? outputPath = null;
-
         var orchestrator = new PatchOrchestrator(Log, BuildProgressReporter(), AutoCompress, AppConfig.Instance.Dolphin.CompressLevel);
         var stopwatch = Stopwatch.StartNew();
 
@@ -144,6 +247,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                 Log($"원본 압축 확인 중: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
 
                 extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath));
+
                 Directory.CreateDirectory(extractDir);
 
                 var extractResult = await SourceArchiveExtractor.AnalyzeAndExtractAsync(SourcePath, extractDir, BuildProgressReporter(), ct);
@@ -168,9 +272,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             extractDir ??= Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(actualSourcePath));
 
-            if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) ||
-                Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) &&
-                XdeltaAppHeaderReader.TargetsCompressedContainer(PatchPath!))
+            if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && XdeltaAppHeaderReader.TargetsCompressedContainer(PatchPath!))
             {
                 string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
@@ -180,12 +282,11 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                 try
                 {
                     await UniversalPatcher.ApplyPatchAsync(actualSourcePath, PatchPath, directOutputPath, BuildProgressReporter(), ct);
-
                     stopwatch.Stop();
+
                     outputPath = directOutputPath;
 
                     Log($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
-
                     outputDir.OpenFolder();
 
                     return;
@@ -209,8 +310,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
-
-            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), PatchPath!);
+            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), PatchPath!, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
 
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
@@ -218,11 +318,8 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             Log($"패치 시작: {Path.GetFileName(actualSourcePath)}", LogLevel.Highlight);
 
             await orchestrator.PatchAsync(actualSourcePath, PatchPath, detected, outputDir, outputPath, sourceIsTemporary, ct);
-
             stopwatch.Stop();
-
             Log($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
-
             outputDir.OpenFolder();
         }
         catch (OperationCanceledException)
