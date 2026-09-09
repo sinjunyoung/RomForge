@@ -21,14 +21,10 @@ public class ChdInfoReader
         var result = wrapper.Open(filePath);
 
         if (result != ChdrError.CHDERR_NONE)
-        {
             throw new Exception($"Failed to open CHD: {LibChdrWrapper.GetErrorString(result)}");
-        }
 
         if (!wrapper.Header.HasValue)
-        {
             throw new Exception("Failed to read CHD header");
-        }
 
         var header = wrapper.Header.Value;
         var info = new ChdInfo
@@ -44,6 +40,7 @@ public class ChdInfoReader
         };
 
         var compressions = new List<string>();
+
         if (header.compression0 != 0)
             compressions.Add(LibChdrWrapper.GetCompressionName(header.compression0));
         if (header.compression1 != 0)
@@ -88,13 +85,7 @@ public class ChdInfoReader
         {
             ParseCdromMetadata(wrapper, info);
 
-            bool isSingleMode1 = info.TrackCount == 1
-                && info.Tracks.Length > 0
-                && info.Tracks[0].TrackType?.StartsWith("MODE1", StringComparison.OrdinalIgnoreCase) == true;
-
-            if (info.TrackCount > 1)
-                info.SourceType = ChdSourceType.BinCue;
-            else if (isSingleMode1)
+            if (info.TrackCount == 1)
                 info.SourceType = ChdSourceType.ISO;
             else
                 info.SourceType = ChdSourceType.BinCue;

@@ -484,9 +484,15 @@ public class CsoService
         else if (info.SourceType == ChdSourceType.ISO)
         {
             long totalLength = (long)info.Tracks[0].Frames * 2048;
-            using var chdStream = new ChdCdReadStream(wrapper, totalLength);
+            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info.Tracks[0].TrackType);
 
             await CompressAsync(chdStream, output, magic: magic, version: version, isLz4: isLz4, progress: progress, ct: ct);
+        }
+        else
+        {
+            string trackType = info.TrackCount > 0 ? info.Tracks[0].TrackType ?? "알 수 없음" : "알 수 없음";
+
+            throw new NotSupportedException($"이 CHD({info.SourceType}, 트랙 {info.TrackCount}개, 타입 {trackType})는 CSO/ZSO 변환을 지원하지 않습니다.");
         }
     }
 
@@ -532,29 +538,41 @@ public class CsoService
         var info = ChdInfoReader.ReadChdInfo(chdPath);
 
         if (info.SourceType == ChdSourceType.DVD)
+        {
             await _chdman.ExtractRawAsync(chdPath, isoPath, progress, ct);
+        }
+        else if (info.SourceType == ChdSourceType.ISO)
+        {
+            using var wrapper = new LibChdrWrapper();
+            var err = wrapper.Open(chdPath);
+
+            if (err != ChdrError.CHDERR_NONE)
+                throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
+
+            long totalLength = (long)info.Tracks[0].Frames * 2048;
+
+            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info.Tracks[0].TrackType);
+            await using var outputStream = File.Create(isoPath);
+
+            var buffer = new byte[1 << 20];
+            long written = 0;
+            int read;
+
+            while ((read = chdStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                await outputStream.WriteAsync(buffer.AsMemory(0, read), ct);
+
+                written += read;
+                progress?.Report(new ProgressInfo { Percent = totalLength > 0 ? (int)(written * 100 / totalLength) : 100, Label = "ISO 추출 중..." });
+            }
+        }
         else
         {
-            var cuePath = Path.ChangeExtension(isoPath, ".cue");
-            var binPath = Path.ChangeExtension(isoPath, ".bin");
+            string trackType = info.TrackCount > 0 ? info.Tracks[0].TrackType ?? "알 수 없음" : "알 수 없음";
 
-            try
-            {
-                await _chdman.ExtractCdAsync(chdPath, cuePath, progress, ct);
-
-                if (File.Exists(binPath))
-                    File.Move(binPath, isoPath, overwrite: true);
-
-                if (File.Exists(cuePath))
-                    File.Delete(cuePath);
-            }
-            catch
-            {
-                File.Delete(cuePath);
-                File.Delete(binPath);
-
-                throw;
-            }
+            throw new NotSupportedException($"이 CHD({info.SourceType}, 트랙 {info.TrackCount}개, 타입 {trackType})는 단일 ISO로 추출할 수 없습니다.");
         }
     }
 }
