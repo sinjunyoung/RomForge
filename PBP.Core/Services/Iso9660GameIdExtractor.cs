@@ -73,15 +73,17 @@ public static class Iso9660GameIdExtractor
             {
                 var sector = sectorReader(i);
                 var content = Encoding.ASCII.GetString(sector);
-                var matchHyphen = Regex.Match(content, @"(S[A-Z]{3})-(\d{5})", RegexOptions.IgnoreCase);
+                var match = Regex.Match(content, @"(S[A-Z]{3})[-_]?(?:([0-9]{5})|([0-9]{3})\.([0-9]{2}))", RegexOptions.IgnoreCase);
 
-                if (matchHyphen.Success)
-                    return $"{matchHyphen.Groups[1].Value.ToUpperInvariant()}{matchHyphen.Groups[2].Value}";
+                if (match.Success)
+                {
+                    var prefix = match.Groups[1].Value.ToUpperInvariant();
 
-                var matchDot = Regex.Match(content, @"(S[A-Z]{3})_(\d{3})\.(\d+)", RegexOptions.IgnoreCase);
+                    if (match.Groups[2].Success)
+                        return prefix + match.Groups[2].Value;
 
-                if (matchDot.Success)
-                    return $"{matchDot.Groups[1].Value.ToUpperInvariant()}{matchDot.Groups[2].Value}{matchDot.Groups[3].Value}";
+                    return prefix + match.Groups[3].Value + match.Groups[4].Value;
+                }
             }
             catch
             {
