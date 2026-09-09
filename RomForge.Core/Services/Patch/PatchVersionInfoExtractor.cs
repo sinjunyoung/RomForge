@@ -25,7 +25,7 @@ public static class PatchVersionInfoExtractor
         if (dateMatch.Success)
         {
             string rawDate = dateMatch.Value;
-            date = rawDate.Length == 8 ? rawDate.Substring(2) : rawDate;
+            date = rawDate.Length == 8 ? rawDate[2..] : rawDate;
         }
 
         return (version, date);
