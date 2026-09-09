@@ -120,7 +120,7 @@ public static class FormatDetector
             {
                 ChdSourceType.GdRom => "gdi",
                 ChdSourceType.BinCue => "cue",
-                ChdSourceType.ISO => "iso",
+                ChdSourceType.ISO => "cue",
                 ChdSourceType.DVD => "iso",
                 _ => "iso"
             };

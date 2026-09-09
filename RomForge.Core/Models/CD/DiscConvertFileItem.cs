@@ -53,15 +53,20 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
 
         var defaultTarget = detected.OutputExtension.ToUpperInvariant() switch
         {
-            "CUE" => "BIN+CUE",
+            "CUE" => "CUE",
             var ext => ext
         };
 
-        if (detected.Format == RomFormat.Iso)
-            return [defaultTarget, "CSO", "ZSO"];
+        if (extension.Equals("chd", StringComparison.OrdinalIgnoreCase) || detected.Format == RomFormat.Chd)
+        {
+            if (detected.OutputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase) || detected.OutputExtension.Equals("cue", StringComparison.OrdinalIgnoreCase))
+                return [defaultTarget, "CSO", "ZSO", "CHD"];
 
-        if (detected.Format == RomFormat.Chd && detected.OutputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase))
-            return [defaultTarget, "CSO", "ZSO"];
+            return [defaultTarget, "CHD"];
+        }
+
+        if (detected.Format == RomFormat.Iso)
+            return [defaultTarget, "CSO", "ZSO", "CHD"];
 
         return [defaultTarget];
     }

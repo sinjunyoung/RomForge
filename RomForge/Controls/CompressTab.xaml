@@ -172,13 +172,13 @@
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="Dolphin" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": ISO(표준), CUE(BIN), GDI, CCD(IMG)" Foreground="#CCCCCC"/>
+                            <Run Text=": ISO(표준), CUE+BIN, GDI+BIN+RAW, CCD+IMG+SUB" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="ISO, CUE+BIN, GDI+BIN" Foreground="#CCCCCC"/>
+                            <Run Text="ISO, CUE+BIN, GDI+BIN+RAW" Foreground="#CCCCCC"/>
                         </TextBlock>
 
                         <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,0,0,4">

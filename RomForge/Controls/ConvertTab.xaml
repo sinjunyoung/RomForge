@@ -173,64 +173,144 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                 <Image Source="/Assets/Images/drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                 <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="하기 기준으로 포맷 변환을 진행합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                <TextBlock Text="하기 기준으로 압축, 해제 및 포맷 변환을 진행합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                 <TextBlock TextAlignment="Left" Foreground="#A0A0A0" FontSize="11" Margin="0,15,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                </Grid.RowDefinitions>
-                <Image Grid.Row="0" Grid.Column="0" Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                <Image Grid.Row="1" Grid.Column="0" Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                <Image Grid.Row="2" Grid.Column="0" Source="/Assets/Images/WiiU.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                <Image Grid.Row="3" Grid.Column="0" Source="/Assets/Images/CUE.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                <Image Grid.Row="4" Grid.Column="0" Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                    <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>            
+                                    
+                        <Image Grid.Row="0" Grid.Column="0" Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="1" Grid.Column="0" Source="/Assets/Images/WiiU.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="2" Grid.Column="0" Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="3" Grid.Column="0" Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="4" Grid.Column="0" Source="/Assets/Images/Mame.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="5" Grid.Column="0" Source="/Assets/Images/Dolphin.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="6" Grid.Column="0" Source="/Assets/Images/CUE.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="Switch"    Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="Wii U"     Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="3DS"       Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>                                                                
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="PS"        Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="CHDMAN"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="Dolphin"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="CD Image"  Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
-                <TextBlock Grid.Row="0" Grid.Column="1" Text="Switch" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="1" Grid.Column="1" Text="3DS"    Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="2" Grid.Column="1" Text="Wii U"  Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="3" Grid.Column="1" Text="CD Image"     Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                <TextBlock Grid.Row="4" Grid.Column="1" Text="PS"    Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": NSP" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="NSZ, XCI, XCZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="NSZ" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="NSP, XCI, XCZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="XCI" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="NSP, NSZ, XCZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="XCZ" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="NSP, NSZ, XCI" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        </TextBlock>
+                        
+                        <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": WUP" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="Loadiine, WUA" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="Loadiine" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="WUP, WUA" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="WUD/WUX" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC"  FontWeight="Bold"/>
+                            <Run Text="WUA, WUP, Loadiine" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="WUA" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="WUP, Loadiine" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        </TextBlock>
+                
+                        <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": 3DS(CCI)" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="CIA, ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="CCI" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="CIA, ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="CIA" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="CCI, ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="ZCCI" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="CCI, CIA" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        </TextBlock>
 
-                <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
-                    <Run Text="NSP" Foreground="#FFFFFF" FontWeight="Bold"/>
-                    <Run Text=" ↔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                    <Run Text="XCI" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": ISO" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="CSO, ZSO, CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="CSO" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="ISO, ZSO, CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="ZSO" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="ISO, CSO, CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="CHD" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="ISO, CSO, ZSO" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="PBP" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="CUE+BIN" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        </TextBlock>
+                        
+                        <TextBlock Grid.Row="4" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": ISO(표준), CUE+BIN, GDI+BIN+RAW, CCD+IMG+SUB" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="ISO, CUE+BIN, GDI+BIN+RAW" Foreground="#CCCCCC"/>                            
+                        </TextBlock>
+                        
+                         <TextBlock Grid.Row="5" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": ISO (GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="ISO (GC/Wii)" Foreground="#CCCCCC"/>
+                        </TextBlock>
+                
+                        <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": MDF+MDS, CCD+IMG+SUB" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
+                            <Run Text="BIN+CUE, ISO" Foreground="#FFFFFF" FontWeight="Bold"/>
+                        </TextBlock>
+                
+                    </Grid>
                 </TextBlock>
-
-                <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,0,0,4">
-                    <Run Text="CCI, 3DS" Foreground="#FFFFFF" FontWeight="Bold"/>
-                    <Run Text=" ↔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                    <Run Text="CIA" Foreground="#FFFFFF" FontWeight="Bold"/>
-                </TextBlock>
-
-                <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
-                    <Run Text="WUD, WUX, WUA" Foreground="#CCCCCC"/>
-                    <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
-                    <Run Text="WUP, Loadiine, WUA" Foreground="#FFFFFF" FontWeight="Bold"/>
-                </TextBlock>
-
-                <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
-                    <Run Text="MDF+MDS, CCD+IMG+SUB" Foreground="#CCCCCC"/>
-                    <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
-                    <Run Text="BIN+CUE, ISO" Foreground="#FFFFFF" FontWeight="Bold"/>
-                </TextBlock>
-
-                <TextBlock Grid.Row="4" Grid.Column="2" Margin="0,0,0,4">
-                    <Run Text="PBP" Foreground="#CCCCCC"/>
-                    <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
-                    <Run Text="BIN+CUE" Foreground="#FFFFFF" FontWeight="Bold"/>
-                </TextBlock>
-            </Grid>
-        </TextBlock>
             </StackPanel>
         </Border>
 

@@ -229,10 +229,7 @@
                 </ListView.View>
             </ListView>
 
-            <Border IsHitTestVisible="False"
-                    Visibility="{Binding HintVisibility}"
-                    BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15"
-                    CornerRadius="6">
+            <Border IsHitTestVisible="False" Visibility="{Binding HintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15" CornerRadius="6">
                 <Border.Background>
                     <SolidColorBrush Color="#181818" Opacity="0.95"/>
                 </Border.Background>
