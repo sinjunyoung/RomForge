@@ -59,16 +59,29 @@ public class CdConvertFileItem(string filePath) : FileItemBase(filePath), Common
 
     public string ExtensionLabel => SourceFormat switch
     {
-        CdSourceFormat.MdfMds or CdSourceFormat.CcdImgSub => $"{Extension}→{(OutputFormat == CdOutputFormat.Iso ? "iso" : "cue")}",
+        CdSourceFormat.MdfMds or CdSourceFormat.CcdImgSub => $"{Extension}→{(_wantsChd ? "chd" : OutputFormat == CdOutputFormat.Iso ? "iso" : "cue")}",
         _ => Extension
     };
 
-    public List<string> AvailableFormats => [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "BIN+CUE")];
+    public List<string> AvailableFormats => Extension == "ccd"
+        ? [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "BIN+CUE"), "CHD"]
+        : [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "BIN+CUE")];
+
+    private bool _wantsChd;
 
     public string SelectedTargetFormat
     {
-        get => OutputFormat == CdOutputFormat.Iso ? "ISO" : "BIN+CUE";
-        set => OutputFormat = value == "ISO" ? CdOutputFormat.Iso : CdOutputFormat.BinCue;
+        get => _wantsChd ? "CHD" : OutputFormat == CdOutputFormat.Iso ? "ISO" : "BIN+CUE";
+        set
+        {
+            _wantsChd = value == "CHD";
+
+            if (!_wantsChd)
+                OutputFormat = value == "ISO" ? CdOutputFormat.Iso : CdOutputFormat.BinCue;
+
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(ExtensionLabel));
+        }
     }
 
     public Brush ExtensionBackground => ExtensionColorMap.Resolve(Extension, ColorMap);

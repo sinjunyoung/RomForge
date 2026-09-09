@@ -3,16 +3,23 @@ using _3DS.Core.Models;
 using _3DS.Core.Services;
 using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
+using CHD.Core.Services;
 using Common;
 using Common.WPF.ViewModels;
+using DolphinTool.Core.Services;
 using PBP.Core.Enums;
 using PBP.Core.Services;
+using PSP.Core.Models;
+using PSP.Core.Services;
+using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Models.CD;
+using RomForge.Core.Models.Compression;
 using RomForge.Core.Models.PS;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Models.WiiU;
+using RomForge.Core.Services.Compression;
 using RomForge.Core.Services.PS;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.Services.WiiU;
@@ -32,11 +39,14 @@ public class ConvertMainViewModel : ToolTabViewModel
 
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".nsp", ".xci",
-        ".cci", ".cia", ".3ds",
+        ".nsp", ".xci", ".nsz", ".xcz",
+        ".cci", ".cia", ".3ds", ".zcci",
         ".wud", ".wux", ".wua",
         ".mds", ".ccd",
         ".pbp",
+        ".iso", ".cue", ".gdi", ".chd",
+        ".gcm", ".wbfs", ".gcz", ".wia", ".rvz",
+        ".cso", ".zso",
     };
 
     private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
@@ -122,16 +132,17 @@ public class ConvertMainViewModel : ToolTabViewModel
         {
             case "nsp":
             case "xci":
+            case "nsz":
+            case "xcz":
                 var sw = new ConverterFileItem(path);
-                FilterFormats(sw, "XCI", "NSP");
                 return sw.SelectedTargetFormat == "" ? null : sw;
 
             case "cci":
             case "3ds":
             case "cia":
+            case "zcci":
                 var ds = new _3DSFileItem(path);
-                FilterFormats(ds, "CIA", "CCI");
-                return ds.SelectedTargetFormat == "" ? null : ds;
+                return ds.SelectedTargetFormat is "" or "미지원" ? null : ds;
 
             case "wud":
             case "wux":
@@ -145,6 +156,20 @@ public class ConvertMainViewModel : ToolTabViewModel
             case "pbp":
                 return new PbpFileItem(path);
 
+            case "iso":
+            case "cue":
+            case "gdi":
+            case "chd":
+            case "gcm":
+            case "wbfs":
+            case "gcz":
+            case "wia":
+            case "rvz":
+            case "cso":
+            case "zso":
+                var disc = new DiscConvertFileItem(path);
+                return disc.AvailableFormats.Count == 0 ? null : disc;
+
             default:
                 if (Directory.Exists(path))
                 {
@@ -154,15 +179,6 @@ public class ConvertMainViewModel : ToolTabViewModel
 
                 return null;
         }
-    }
-
-    private static void FilterFormats(Common.WPF.ViewModels.IConvertible item, params string[] allowed)
-    {
-        var kept = item.AvailableFormats.Where(f => allowed.Contains(f, StringComparer.OrdinalIgnoreCase)).ToList();
-
-        item.AvailableFormats.Clear();
-        item.AvailableFormats.AddRange(kept);
-        item.SelectedTargetFormat = kept.FirstOrDefault() ?? "";
     }
 
     private static async Task ProbeMetadataAsync(object item)
@@ -348,13 +364,45 @@ public class ConvertMainViewModel : ToolTabViewModel
         {
             case ConverterFileItem sw:
                 {
+                    int compressLevel = GetSwitchCompressLevel();
+
                     switch (sw.Extension.ToLowerInvariant(), sw.SelectedTargetFormat.ToUpperInvariant())
                     {
                         case ("nsp", "XCI"):
                             await NspXciConvertService.NspToXciAsync(sw.FilePath, progress, Log, _cts.Token);
                             break;
+                        case ("nsp", "NSZ"):
+                            await NspCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            break;
+                        case ("nsp", "XCZ"):
+                            await NspXciConvertService.NspToXczAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            break;
                         case ("xci", "NSP"):
                             await NspXciConvertService.XciToNspAsync(sw.FilePath, progress, Log, _cts.Token);
+                            break;
+                        case ("xci", "XCZ"):
+                            await XciCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            break;
+                        case ("xci", "NSZ"):
+                            await NspXciConvertService.XciToNszAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            break;
+                        case ("nsz", "NSP"):
+                            await NspCompressService.DecompressAsync(sw.FilePath, progress, Log, _cts.Token);
+                            break;
+                        case ("nsz", "XCI"):
+                            await NspXciConvertService.NszToXciAsync(sw.FilePath, progress, Log, _cts.Token);
+                            break;
+                        case ("nsz", "XCZ"):
+                            await NspXciConvertService.NszToXczAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            break;
+                        case ("xcz", "XCI"):
+                            await XciCompressService.DecompressAsync(sw.FilePath, progress, Log, _cts.Token);
+                            break;
+                        case ("xcz", "NSP"):
+                            await NspXciConvertService.XczToNspAsync(sw.FilePath, progress, Log, _cts.Token);
+                            break;
+                        case ("xcz", "NSZ"):
+                            await NspXciConvertService.XczToNszAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         default:
                             throw new NotSupportedException($"{sw.Extension} → {sw.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
@@ -374,6 +422,15 @@ public class ConvertMainViewModel : ToolTabViewModel
                         case ("cia", "CCI"):
                             await new CiaToCciConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _cts.Token);
                             break;
+                        case ("cci", "ZCCI") or ("3ds", "ZCCI"):
+                            await Z3dsArchiveService.CompressAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
+                            break;
+                        case ("cia", "ZCCI"):
+                            await Z3dsArchiveService.CompressFromCiaAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
+                            break;
+                        case ("zcci", "CCI"):
+                            await Z3dsArchiveService.DecompressAsync(ds.FilePath, progress, AppendLog, _cts.Token);
+                            break;
                         default:
                             throw new NotSupportedException($"{ds.Extension} → {ds.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
                     }
@@ -385,16 +442,11 @@ public class ConvertMainViewModel : ToolTabViewModel
                 break;
 
             case CdConvertFileItem cd:
-                {
-                    var reader = DiscImageReaderFactory.Resolve(cd.FilePath);
-                    var discImage = reader.Read(cd.FilePath);
-                    var outDir = ResolveOutputDir(cd.FilePath);
+                await ConvertCdOneAsync(cd, progress, _cts.Token);
+                break;
 
-                    if (cd.OutputFormat == CdOutputFormat.Iso)
-                        await IsoWriter.WriteAsync(discImage, outDir, cd.FileName, progress, _cts.Token);
-                    else
-                        await BinCueWriter.WriteAsync(discImage, outDir, cd.FileName, progress, _cts.Token);
-                }
+            case DiscConvertFileItem disc:
+                await ConvertDiscOneAsync(disc, progress, _cts.Token);
                 break;
 
             case PbpFileItem pbp:
@@ -409,6 +461,147 @@ public class ConvertMainViewModel : ToolTabViewModel
                 }
                 break;
         }
+    }
+
+    private static int GetSwitchCompressLevel()
+    {
+        int level = AppConfig.Instance.Switch.CompressLevel;
+        return level < 3 ? 3 : level;
+    }
+
+    private async Task ConvertCdOneAsync(CdConvertFileItem cd, IProgress<ProgressInfo> progress, CancellationToken ct)
+    {
+        if (cd.SelectedTargetFormat != "CHD")
+        {
+            var reader = DiscImageReaderFactory.Resolve(cd.FilePath);
+            var discImage = reader.Read(cd.FilePath);
+            var outDir = ResolveOutputDir(cd.FilePath);
+
+            if (cd.OutputFormat == CdOutputFormat.Iso)
+                await IsoWriter.WriteAsync(discImage, outDir, cd.FileName, progress, ct);
+            else
+                await BinCueWriter.WriteAsync(discImage, outDir, cd.FileName, progress, ct);
+
+            return;
+        }
+
+        var ccdReader = DiscImageReaderFactory.Resolve(cd.FilePath);
+        var ccdImage = ccdReader.Read(cd.FilePath);
+        var tempCuePath = await BinCueWriter.WriteAsync(ccdImage, cd.Directory, cd.FileName, progress, ct);
+        var tempBinPath = Path.ChangeExtension(tempCuePath, ".bin");
+
+        try
+        {
+            FileConverter chdFromCcd = new(AppConfig.Instance.Chdman.Compression);
+
+            chdFromCcd.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
+
+            var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progress, ct);
+
+            if (!chdFromCcdResult.Success)
+                throw new InvalidOperationException(chdFromCcdResult.Message);
+        }
+        finally
+        {
+            if (File.Exists(tempCuePath))
+                File.Delete(tempCuePath);
+
+            if (File.Exists(tempBinPath))
+                File.Delete(tempBinPath);
+        }
+    }
+
+    private async Task ConvertDiscOneAsync(DiscConvertFileItem item, IProgress<ProgressInfo> progress, CancellationToken ct)
+    {
+        string ext = item.Extension.ToLowerInvariant();
+        string target = item.SelectedTargetFormat.ToUpperInvariant();
+
+        if (item.DetectedFormat is RomFormat.Gcm or RomFormat.Wbfs or RomFormat.Gcz or RomFormat.Wia or RomFormat.Rvz or RomFormat.Wii)
+        {
+            var detected = FormatDetector.Detect(item.FilePath);
+
+            DolphinService dolphin = new();
+
+            dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
+            dolphin.ProgressChanged += (_, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
+
+            await dolphin.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.Dolphin.CompressLevel, null, ct);
+
+            return;
+        }
+
+        if (ext is "cso" or "zso")
+        {
+            string outPath = Utils.GetUniqueFilePath(Path.ChangeExtension(item.FilePath, target.ToLowerInvariant()));
+
+            CsoService csoService = new();
+
+            switch (ext, target)
+            {
+                case ("cso", "ISO") or ("zso", "ISO"):
+                    await using (var input = File.OpenRead(item.FilePath))
+                    await using (var output = File.Create(outPath))
+                        await CsoService.DecompressAsync(input, output, progress, ct);
+                    break;
+
+                case ("cso", "ZSO"):
+                    await using (var input = File.OpenRead(item.FilePath))
+                    await using (var output = File.Create(outPath))
+                        await CsoService.TranscodeAsync(input, output, targetMagic: CsoHeader.MagicZSO, targetIsLz4: true, progress: progress, ct: ct);
+                    break;
+
+                case ("zso", "CSO"):
+                    await using (var input = File.OpenRead(item.FilePath))
+                    await using (var output = File.Create(outPath))
+                        await CsoService.TranscodeAsync(input, output, targetMagic: CsoHeader.MagicCSO, targetIsLz4: false, progress: progress, ct: ct);
+                    break;
+
+                case ("cso", "CHD") or ("zso", "CHD"):
+                    await csoService.CompressCsoToChdAsync(item.FilePath, outPath, progress, AppConfig.Instance.Chdman.Compression, ct);
+                    break;
+
+                default:
+                    throw new NotSupportedException($"{ext} → {target}: 지원하지 않는 변환입니다.");
+            }
+
+            return;
+        }
+
+        if (target is "CSO" or "ZSO")
+        {
+            string outPath = Utils.GetUniqueFilePath(Path.ChangeExtension(item.FilePath, target.ToLowerInvariant()));
+
+            if (ext == "chd")
+            {
+                await using var output = File.Create(outPath);
+
+                if (target == "CSO")
+                    await CsoService.CompressFromChdAsync(item.FilePath, output, version: 1, progress: progress, ct: ct);
+                else
+                    await CsoService.CompressFromChdAsync(item.FilePath, output, magic: CsoHeader.MagicZSO, isLz4: true, progress: progress, ct: ct);
+            }
+            else
+            {
+                await using var input = File.OpenRead(item.FilePath);
+                await using var output = File.Create(outPath);
+
+                if (target == "CSO")
+                    await CsoService.CompressAsync(input, output, progress: progress, ct: ct);
+                else
+                    await CsoService.CompressAsync(input, output, magic: CsoHeader.MagicZSO, isLz4: true, progress: progress, ct: ct);
+            }
+
+            return;
+        }
+
+        FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
+
+        converter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
+
+        var result = await converter.ConvertFileAsync(item.FilePath, null, progress, ct);
+
+        if (!result.Success)
+            throw new InvalidOperationException(result.Message);
     }
 
     private void ConvertWiiUOne(WiiUFileItem item, CancellationToken ct)
@@ -460,7 +653,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             foreach (var s in sources)
                 s.Dispose();
         }
-    }    
+    }
     private static string ResolveOutputDir(string sourcePath) => Path.GetDirectoryName(sourcePath)!;
 
     private static string GetDisplayName(object item) => item switch

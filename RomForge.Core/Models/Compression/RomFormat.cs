@@ -26,4 +26,6 @@ public enum RomFormat
     Wii,
     Rvz,
     Gcz,
+    Cso,
+    Zso,
 }

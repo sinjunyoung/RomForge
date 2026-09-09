@@ -30,16 +30,16 @@ public class NspXciConvertService : BaseSwitchService
         return RunAsync(inputPath, ContainerFormat.Nsp, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
-    public static Task<string> NspToXczAsync(string inputPath, int compressionLevel, bool useBlockMode, bool validation, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> NspToXczAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        return RunAsync(inputPath, ContainerFormat.Xci, true, useBlockMode, validation, compressionLevel, keySet.Clone(), progress, log, ct);
+        return RunAsync(inputPath, ContainerFormat.Xci, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
-    public static Task<string> XciToNszAsync(string inputPath, int compressionLevel, bool useBlockMode, bool validation, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> XciToNszAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        return RunAsync(inputPath, ContainerFormat.Nsp, true, useBlockMode, validation, compressionLevel, keySet.Clone(), progress, log, ct);
+        return RunAsync(inputPath, ContainerFormat.Nsp, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> NszToXciAsync(string inputPath, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
@@ -54,21 +54,21 @@ public class NspXciConvertService : BaseSwitchService
         return RunAsync(inputPath, ContainerFormat.Nsp, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
-    public static Task<string> NszToXczAsync(string inputPath, int compressionLevel, bool useBlockMode, bool validation, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> NszToXczAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        return RunAsync(inputPath, ContainerFormat.Xci, true, useBlockMode, validation, compressionLevel, keySet.Clone(), progress, log, ct);
+        return RunAsync(inputPath, ContainerFormat.Xci, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
-    public static Task<string> XczToNszAsync(string inputPath, int compressionLevel, bool useBlockMode, bool validation, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> XczToNszAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        return RunAsync(inputPath, ContainerFormat.Nsp, true, useBlockMode, validation, compressionLevel, keySet.Clone(), progress, log, ct);
+        return RunAsync(inputPath, ContainerFormat.Nsp, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
     private enum ContainerFormat { Nsp, Xci }
 
-    private static async Task<string> RunAsync(string inputPath, ContainerFormat outputFormat, bool useCompression, bool useBlockMode, bool validation, int compressionLevel, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+    private static async Task<string> RunAsync(string inputPath, ContainerFormat outputFormat, bool useCompression, bool validation, bool useBlockMode, int compressionLevel, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
