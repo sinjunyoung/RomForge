@@ -44,7 +44,7 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,2,0,2" VerticalAlignment="Top">
+        <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,0,0,2" VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="HDI(FAT12/16) 내부 파일을 논리 경로로 찾아 교체합니다. 마운트 경로는 자동으로 감지됩니다." Foreground="#888888" FontSize="12" VerticalAlignment="Center"/>
@@ -59,7 +59,7 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,5,0,5" Padding="8,0">
+        <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">
             <Grid Height="28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

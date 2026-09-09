@@ -23,7 +23,6 @@ public static class PsarPackager
         var mOffset = (uint)outputStream.Position;
 
         outputStream.Write(isoPositions, 1, sizeof(uint) * 5);
-
         outputStream.WriteRandom(12);
         outputStream.WriteInt32(0, 8);
         outputStream.Write('_');
@@ -39,8 +38,8 @@ public static class PsarPackager
         outputStream.Write(mainGameTitle, 0, mainGameTitle.Length);
 
         var padCharCount = Math.Max(0, 0x80 - mainGameTitle.Length);
-        outputStream.WriteChar(0, padCharCount);
 
+        outputStream.WriteChar(0, padCharCount);
         outputStream.WriteInt32(7, 1);
         outputStream.WriteInt32(0, 0x1C);
 
@@ -91,13 +90,14 @@ public static class PsarPackager
     {
         using var zipStream = new MemoryStream(Properties.Resources.Config);
         using var archive = new ZipArchive(zipStream, ZipArchiveMode.Read);
-
         var entry = archive.GetEntry($"{gameId}.bin");
+
         if (entry == null)
             return null;
 
         using var entryStream = entry.Open();
         using var output = new MemoryStream();
+
         entryStream.CopyTo(output);
 
         var raw = output.ToArray();

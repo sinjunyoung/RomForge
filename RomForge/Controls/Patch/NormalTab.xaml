@@ -47,7 +47,7 @@
             </Border>
         </Grid>
 
-        <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,2,0,2" VerticalAlignment="Top">
+        <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,0,0,0" VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="원본 자동 압축해제 지원 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -103,7 +103,7 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="4" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,2,0,2" VerticalAlignment="Top">
+        <Border Grid.Row="4" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,0,0,2" VerticalAlignment="Top">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="지원 패치 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -162,7 +162,7 @@
         </Border>
 
         <StackPanel Grid.Row="6">
-            <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,4">
+            <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,2">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
                     <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
@@ -250,32 +250,29 @@
                 </StackPanel>
             </ToggleButton>
 
-            <Grid Margin="0,0,0,2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="2"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+            <StackPanel>
+                <Grid Grid.IsSharedSizeScope="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox Grid.Column="0" Text="{Binding PatchVM.NormalVM.NamingFormat, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}" ToolTip="사용 가능한 값: {fileName}, {Version}, {Date}" Height="30" FontSize="12" VerticalContentAlignment="Center" Margin="0,0,4,0"/>
+                    <TextBlock Grid.Column="1" Text="사용 가능: {fileName}, {Version}, {Date} 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" FontWeight="Bold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                </Grid>
 
-                <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8">
-                    <StackPanel>
-                        <TextBox Text="{Binding PatchVM.NormalVM.NamingFormat, UpdateSourceTrigger=PropertyChanged}"
-                                 IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}"
-                                 ToolTip="사용 가능한 값: {fileName}, {Version}, {Date}"/>
-                        <TextBlock Text="사용 가능: {fileName}, {Version}, {Date} — 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <Border Grid.Column="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8">
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="예상 파일명" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,0,0,8"/>
+                <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,2,0,2">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="예상 파일명: " Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                         <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                     </StackPanel>
                 </Border>
-            </Grid>
+                
+            </StackPanel>
+            
         </StackPanel>
 
-        <Border Grid.Row="7" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,5,0,5" Padding="8,0">
+        <Border Grid.Row="7" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">
             <Grid x:Name="progressArea" Height="28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

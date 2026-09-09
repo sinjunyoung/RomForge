@@ -31,7 +31,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Patch.png" Width="20" Height="20" Margin="0,0,6,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock Text="패치" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -41,7 +41,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Compress.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Compress.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="압축" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -51,7 +51,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Convert.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Convert.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="변환" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -61,7 +61,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Switch.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="Switch" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -71,7 +71,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/WiiU.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/WiiU.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="WiiU" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -82,7 +82,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/3DS.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="3DS" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -92,7 +92,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/PS1.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="PS" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -102,7 +102,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Utility.png" Width="16" Height="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Utility.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="유틸" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -112,7 +112,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Common.WPF;component/Assets/Images/Settings.png" Width="16" Height="16" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        <Image Source="/Common.WPF;component/Assets/Images/Settings.png" Width="20" Height="20" Margin="0,0,6,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
                         <TextBlock Text="설정" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>

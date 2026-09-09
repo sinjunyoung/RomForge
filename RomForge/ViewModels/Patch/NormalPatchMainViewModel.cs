@@ -119,7 +119,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     private string ResolvePreviewBaseFileName()
     {
         if (SourcePath is null)
-            return "GameName.bin";
+            return "원본.bin";
 
         if (!File.Exists(SourcePath) || SourceArchiveExtractor.IsArchivePath(SourcePath))
             return Path.GetFileName(SourcePath);
