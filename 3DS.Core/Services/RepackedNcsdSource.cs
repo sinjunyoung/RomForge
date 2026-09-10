@@ -63,12 +63,12 @@ public class RepackedNcsdSource : INcsdSource
     public async Task WriteContentAsync(int contentIndex, Stream output, long totalBytes, Action<long, long>? progress = null, CancellationToken ct = default)
     {
         var (unpack, exefsBlock, ncchSource, romFs, patchSource, ncchSize) = _ncchs[contentIndex];
-        long? basePos = output.CanSeek ? output.Position : null;
+
+        long basePos = output.Position;
 
         await NcchBuilder.BuildAsync(unpack, exefsBlock, ncchSource, romFs, output, patchSource, progress, Log, ct);
 
-        if (basePos.HasValue)
-            output.Position = basePos.Value + ncchSize;
+        output.Position = basePos + ncchSize;
     }
 
     public ValueTask<NcchHeader> GetNcchHeaderAsync(int contentIndex, CancellationToken ct = default)

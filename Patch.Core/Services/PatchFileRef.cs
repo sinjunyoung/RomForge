@@ -50,7 +50,7 @@ public sealed class PatchFileRef
         if (IsDisk)
             return MaterializedTempFile.Wrap(DiskPath!);
 
-        string tempPath = Path.Combine(Path.GetTempPath(), $"RomForgePatch_{Guid.NewGuid():N}{suggestedExtension}");
+        string tempPath = Path.Combine(AppContext.BaseDirectory, $"RomForgePatch_{Guid.NewGuid():N}{suggestedExtension}");
 
         using (var dst = File.Create(tempPath))
         using (var src = OpenRead())

@@ -267,31 +267,15 @@ public class RepackMainViewModel : ToolTabViewModel
                     break;
                 case BuildMode.RebuildOnly:
                     producedPath = await Task.Run(() => _service.RepackAsync(unpackedPath, OutputPath, _romInfo?.ShortDescription, RomInfo?.ShortDescriptionChanged == true ? RomInfo.ShortDescription : null, RomInfo?.PublisherChanged == true ? RomInfo.Publisher : null, keyStore, OutputFormat, reporter.CreateAction(), TrackOutput, ct), ct);
-
-                    if (OutputFormat != RepackOutputFormat.Cia)
-                    {
-                        if (OutputFormat == RepackOutputFormat.Zcci)
-                            TrackOutput(Path.ChangeExtension(producedPath, ".zcci"));
-
-                        producedPath = await FinalizeOutputFormatAsync(producedPath, progress, ct);
-                    }
                     break;
                 case BuildMode.FullProcess:
                     string safeName = NspNameBuilder.SafeFileName(_romInfo?.ShortDescription ?? string.Empty);
                     string fileName = string.IsNullOrEmpty(safeName) ? inputFileName : safeName;
                     string? titleId = _romInfo?.TitleId;
                     string namePart = string.IsNullOrEmpty(titleId) ? fileName : $"{fileName} [{titleId}]";
-                    string outputCci = Utils.GetUniqueFilePath(Path.Combine(OutputPath, namePart + "_Repack.cci"));
+                    string outputBasePath = Path.Combine(OutputPath, namePart + "_Repack");
 
-                    producedPath = await Task.Run(() => _service.RepackDirectAsync(InputPath, outputCci, keyStore, RomInfo?.ShortDescriptionChanged == true ? RomInfo.ShortDescription : null, RomInfo?.PublisherChanged == true ? RomInfo.Publisher : null, OutputFormat, reporter.CreateAction(), TrackOutput, ct), ct);
-
-                    if (OutputFormat != RepackOutputFormat.Cia)
-                    {
-                        if (OutputFormat == RepackOutputFormat.Zcci)
-                            TrackOutput(Path.ChangeExtension(producedPath, ".zcci"));
-
-                        producedPath = await FinalizeOutputFormatAsync(producedPath, progress, ct);
-                    }
+                    producedPath = await Task.Run(() => _service.RepackDirectAsync(InputPath, outputBasePath, keyStore, RomInfo?.ShortDescriptionChanged == true ? RomInfo.ShortDescription : null, RomInfo?.PublisherChanged == true ? RomInfo.Publisher : null, OutputFormat, reporter.CreateAction(), TrackOutput, ct), ct);
                     break;
             }
 
@@ -328,27 +312,6 @@ public class RepackMainViewModel : ToolTabViewModel
                     try { Directory.Delete(unpackedPath, true); } catch { }
             }
         }
-    }
-
-    private async Task<string> FinalizeOutputFormatAsync(string cciPath, Progress<ProgressInfo> progress, CancellationToken ct)
-    {
-        if (OutputFormat != RepackOutputFormat.Zcci)
-            return cciPath;
-
-        long cciSize = new FileInfo(cciPath).Length;
-        var zcciReporter = new ProgressReporter(Path.GetFileNameWithoutExtension(cciPath), string.Empty, cciSize, progress);
-        var zcciProgress = new Progress<ProgressInfo>(info => zcciReporter.ReportPercent(info.Percent / 100.0));
-
-        await Z3dsArchiveService.CompressAsync(cciPath, 18, zcciProgress, Log, ct);
-        TryDeleteFile(cciPath);
-
-        return Path.ChangeExtension(cciPath, ".zcci");
-    }
-
-    private static void TryDeleteFile(string path)
-    {
-        if (File.Exists(path))
-            try { File.Delete(path); } catch { }
     }
 
     private Progress<ProgressInfo> BuildProgressReporter() =>

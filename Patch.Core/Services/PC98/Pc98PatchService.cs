@@ -92,7 +92,7 @@ public static class Pc98PatchService
 
         if (File.Exists(patchPath) && patchPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
         {
-            tempDir = Path.Combine(Path.GetTempPath(), "pc98patch_" + Guid.NewGuid().ToString("N"));
+            tempDir = Path.Combine(Path.GetDirectoryName(patchPath)!, "pc98patch_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
             ZipFile.ExtractToDirectory(patchPath, tempDir);
 

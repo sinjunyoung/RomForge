@@ -5,7 +5,7 @@ namespace _3DS.Core.Services;
 
 public static class Z3dsArchiveService
 {
-    public static Task CompressAsync(string inputPath, int compressionLevel = 18, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default) => Z3dsCompressor.CompressAsync(inputPath, compressionLevel, progress, log, ct);
+    public static Task<string> CompressAsync(string inputPath, int compressionLevel = 18, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default) => Z3dsCompressor.CompressAsync(inputPath, compressionLevel, progress, log, ct);
 
     public static Task CompressFromCiaAsync(string inputPath, int compressionLevel = 18, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default) => Z3dsCompressor.CompressFromCiaAsync(inputPath, compressionLevel, progress, log, ct);
 

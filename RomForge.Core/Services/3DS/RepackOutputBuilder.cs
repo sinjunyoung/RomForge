@@ -2,6 +2,7 @@
 using _3DS.Core.FileSystem;
 using _3DS.Core.Services;
 using Common;
+using RomForge.Core;
 using RomForge.Core.Models._3DS;
 using System.IO;
 
@@ -9,31 +10,63 @@ namespace RomForge.Core.Services._3DS;
 
 internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
 {
-    public async Task<string> BuildOutputAsync(RepackedNcsdSource repackedSource, string outputCci, KeyStore? keyStore, RepackOutputFormat format, byte[]? exHeaderPart0, byte[]? exefsBlockPart0, Action<long, long>? reporter, Action<string>? onOutputPathKnown, CancellationToken ct)
+    public Task<string> BuildOutputAsync(RepackedNcsdSource repackedSource, string outputBasePath, KeyStore? keyStore, RepackOutputFormat format, byte[]? exHeaderPart0, byte[]? exefsBlockPart0, Action<long, long>? reporter, Action<string>? onOutputPathKnown, CancellationToken ct) => format switch
     {
-        if (format == RepackOutputFormat.Cia)
-        {
-            if (keyStore == null)
-                throw new InvalidOperationException("CIA를 생성하려면 키가 필요합니다.");
+        RepackOutputFormat.Cia => BuildCiaAsync(repackedSource, outputBasePath, keyStore, exHeaderPart0, exefsBlockPart0, reporter, onOutputPathKnown, ct),
+        RepackOutputFormat.Zcci => BuildZcciAsync(repackedSource, outputBasePath, reporter, onOutputPathKnown, ct),
+        _ => BuildCciAsync(repackedSource, outputBasePath, reporter, onOutputPathKnown, ct),
+    };
 
-            string outputCia = Utils.GetUniqueFilePath(Path.ChangeExtension(outputCci, ".cia"));
-            await using var ciaStream = File.Open(outputCia, FileMode.Create, FileAccess.ReadWrite);
-
-            onOutputPathKnown?.Invoke(outputCia);
-
-            byte[]? smdhPart0 = ExtractIcon(exefsBlockPart0);
-
-            await CiaBuilder.BuildAsync(repackedSource, keyStore, ciaStream, exHeaderPart0, smdhPart0, reporter, log, ct);
-
-            return outputCia;
-        }
-
+    private static async Task<string> BuildCciAsync(RepackedNcsdSource repackedSource, string outputBasePath, Action<long, long>? reporter, Action<string>? onOutputPathKnown, CancellationToken ct)
+    {
+        string outputCci = Utils.GetUniqueFilePath(Path.ChangeExtension(outputBasePath, RepackOutputFormat.Cci.ToFileExtension()));
         await using var cciStream = File.Open(outputCci, FileMode.Create, FileAccess.ReadWrite);
+
         onOutputPathKnown?.Invoke(outputCci);
 
         await NcsdBuilder.BuildAsync(repackedSource, cciStream, reporter, ct);
 
         return outputCci;
+    }
+
+    private async Task<string> BuildCiaAsync(RepackedNcsdSource repackedSource, string outputBasePath, KeyStore? keyStore, byte[]? exHeaderPart0, byte[]? exefsBlockPart0, Action<long, long>? reporter, Action<string>? onOutputPathKnown, CancellationToken ct)
+    {
+        if (keyStore == null)
+            throw new InvalidOperationException("CIA를 생성하려면 키가 필요합니다.");
+
+        string outputCia = Utils.GetUniqueFilePath(Path.ChangeExtension(outputBasePath, RepackOutputFormat.Cia.ToFileExtension()));
+        await using var ciaStream = File.Open(outputCia, FileMode.Create, FileAccess.ReadWrite);
+
+        onOutputPathKnown?.Invoke(outputCia);
+
+        byte[]? smdhPart0 = ExtractIcon(exefsBlockPart0);
+
+        await CiaBuilder.BuildAsync(repackedSource, keyStore, ciaStream, exHeaderPart0, smdhPart0, reporter, log, ct);
+
+        return outputCia;
+    }
+
+    private async Task<string> BuildZcciAsync(RepackedNcsdSource repackedSource, string outputBasePath, Action<long, long>? reporter, Action<string>? onOutputPathKnown, CancellationToken ct)
+    {
+        string tempCci = Utils.GetUniqueFilePath(Path.ChangeExtension(outputBasePath, RepackOutputFormat.Cci.ToFileExtension()));
+
+        try
+        {
+            await using (var cciStream = File.Open(tempCci, FileMode.Create, FileAccess.ReadWrite))
+                await NcsdBuilder.BuildAsync(repackedSource, cciStream, reporter, ct);
+
+            var zcciProgress = reporter == null ? null : new Progress<ProgressInfo>(info => reporter(info.Percent, 100));
+            string outputZcci = await Z3dsArchiveService.CompressAsync(tempCci, AppConfig.Instance.Azahar.CompressLevel, zcciProgress, log, ct);
+
+            onOutputPathKnown?.Invoke(outputZcci);
+
+            return outputZcci;
+        }
+        finally
+        {
+            if (File.Exists(tempCci))
+                try { File.Delete(tempCci); } catch { }
+        }
     }
 
     public static byte[]? ExtractIcon(byte[]? exefsBlock)

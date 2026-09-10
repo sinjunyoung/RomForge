@@ -210,9 +210,9 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         string safeFileName = NspNameBuilder.SafeFileName(displayName);
         string fileName = string.IsNullOrEmpty(safeFileName) ? "output" : safeFileName;
         string namePart = string.IsNullOrEmpty(titleId) ? fileName : $"{fileName} [{titleId.ToUpperInvariant()}]";
-        string outputCci = Utils.GetUniqueFilePath(Path.Combine(outputPath, namePart + "_Repack.cci"));
+        string outputBasePath = Path.Combine(outputPath, namePart + "_Repack");
         var repackedSource = await RepackedNcsdSource.CreateAsync(repackedNcchs, contentsList, log, ct);
-        string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputCci, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, onOutputPathKnown, ct);
+        string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputBasePath, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, onOutputPathKnown, ct);
 
         if (patchDirSpecified && exefsPatchedCount == 0 && (romfsPatchSource == null || romfsPatchSource.AppliedCount == 0))
             log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
@@ -230,7 +230,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         return outputFilePath;
     }
 
-    public async Task<string> RepackDirectAsync(string inputPath, string outputCci, KeyStore keyStore, string? gameName = null, string? publisher = null, RepackOutputFormat format = RepackOutputFormat.Cci, Action<long, long>? reporter = null, Action<string>? onOutputPathKnown = null, CancellationToken ct = default)
+    public async Task<string> RepackDirectAsync(string inputPath, string outputBasePath, KeyStore keyStore, string? gameName = null, string? publisher = null, RepackOutputFormat format = RepackOutputFormat.Cci, Action<long, long>? reporter = null, Action<string>? onOutputPathKnown = null, CancellationToken ct = default)
     {
         log("스트리밍 기반 리팩 시작...", LogLevel.Highlight);
 
@@ -292,7 +292,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         }
 
         var repackedSource = await RepackedNcsdSource.CreateAsync(repackedNcchs, source.Contents, log, ct);
-        string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputCci, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, onOutputPathKnown, ct);
+        string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputBasePath, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, onOutputPathKnown, ct);
 
         if (patchDirSpecified && exefsPatchedCount == 0 && (romfsPatchSource == null || romfsPatchSource.AppliedCount == 0))
             log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
