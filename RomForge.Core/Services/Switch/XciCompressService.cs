@@ -90,6 +90,10 @@ public static class XciCompressService
 
             string displayName = $"{(isCompressMode ? Res.Log_StatusCompressing : Res.Log_StatusDecompressing)} {NspNameBuilder.CompressDisplayNameBuild(meta.KrTitle, meta.TitleId, meta.DisplayVersion)}";
             var rootEntries = rootPartition.EnumerateEntries("/", "*").ToList();
+
+            if (isCompressMode)
+                rootEntries.RemoveAll(re => string.Equals(re.Name.ToString(), "update", StringComparison.OrdinalIgnoreCase));
+
             var fileEntries = new List<(string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label)>();
 
             foreach (var entry in securePartition.EnumerateEntries("/", "*"))
