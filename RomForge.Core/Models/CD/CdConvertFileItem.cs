@@ -64,14 +64,14 @@ public class CdConvertFileItem(string filePath) : FileItemBase(filePath), Common
     };
 
     public List<string> AvailableFormats => Extension == "ccd"
-        ? [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "BIN+CUE"), "CHD"]
-        : [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "BIN+CUE")];
+        ? [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "CUE"), "CHD"]
+        : [.. AvailableOutputFormats.Select(f => f == CdOutputFormat.Iso ? "ISO" : "CUE")];
 
     private bool _wantsChd;
 
     public string SelectedTargetFormat
     {
-        get => _wantsChd ? "CHD" : OutputFormat == CdOutputFormat.Iso ? "ISO" : "BIN+CUE";
+        get => _wantsChd ? "CHD" : OutputFormat == CdOutputFormat.Iso ? "ISO" : "CUE";
         set
         {
             _wantsChd = value == "CHD";

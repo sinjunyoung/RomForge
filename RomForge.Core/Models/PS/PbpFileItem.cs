@@ -1,10 +1,31 @@
 ﻿using Common.WPF.ViewModels;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace RomForge.Core.Models.PS;
 
-public class PbpFileItem(string filePath) : FileItemBase(filePath), Common.WPF.ViewModels.IConvertible
+public class PbpFileItem(string filePath) : FileItemBase(filePath), Common.WPF.ViewModels.IConvertible, IExtensionColored
 {
+    public Brush ExtensionBackground => ExtensionColorMap.Resolve(Extension, ColorMap);
+
+    public static Brush ExtensionForeground => ExtensionForegroundBrush;
+
+    private static readonly Brush ExtensionForegroundBrush = CreateForegroundBrush();
+
+    private static readonly Dictionary<string, string> ColorMap = new()
+    {
+        ["pbp"] = "#D4A8FF",
+    };
+
+    private static SolidColorBrush CreateForegroundBrush()
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(0x11, 0x11, 0x11));
+
+        brush.Freeze();
+
+        return brush;
+    }
+
     private BitmapSource? _icon;
     private string _titleId = string.Empty;
     private string _titleName = string.Empty;
@@ -43,11 +64,11 @@ public class PbpFileItem(string filePath) : FileItemBase(filePath), Common.WPF.V
 
     protected override string FormatSize(long bytes) => PickPack.Disk.ETC.FileSize.FormatSize(bytes);
 
-    public List<string> AvailableFormats { get; } = ["BIN+CUE"];
+    public List<string> AvailableFormats { get; } = ["CUE"];
 
     public string SelectedTargetFormat
     {
-        get => "BIN+CUE";
+        get => "CUE";
         set { }
     }
 }

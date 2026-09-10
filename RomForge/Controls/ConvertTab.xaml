@@ -91,7 +91,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Border Background="{Binding ExtensionBackground}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
-                                    <TextBlock Text="{Binding Extension}" Foreground="Black" FontSize="11" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Extension}" Foreground="{Binding ExtensionForeground}" FontSize="11" FontWeight="Bold"/>
                                 </Border>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

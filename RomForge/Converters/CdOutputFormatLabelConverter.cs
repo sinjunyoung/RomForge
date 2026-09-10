@@ -9,7 +9,7 @@ public class CdOutputFormatLabelConverter : IValueConverter
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
     {
         CdOutputFormat.Iso => "ISO",
-        CdOutputFormat.BinCue => "BIN+CUE",
+        CdOutputFormat.BinCue => "CUE",
         _ => value?.ToString() ?? string.Empty
     };
 
