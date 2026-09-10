@@ -105,7 +105,7 @@ public class _3DSFileItem(string filePath) : ConvertibleFileItemBase(filePath, "
         "3ds" => ["CIA", "ZCCI"],
         "cci" => ["CIA", "ZCCI"],
         "cia" => ["CCI", "ZCCI"],
-        "zcci" => ["CCI"],
+        "zcci" => ["CCI", "CIA"],
         _ => []
     };
 

@@ -27,10 +27,23 @@ public class CciToCiaConverter(KeyStore keyStore)
             outputPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, ".cia"));
             log?.Invoke($"{Path.GetFileName(inputPath)} → CIA 변환 시작", LogLevel.Highlight);
 
-            using var inputStream = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Stream inputStream = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+            byte[] magic = new byte[4];
+            await inputStream.ReadExactlyAsync(magic, ct);
+            inputStream.Position = 0;
+
+            if (magic.AsSpan().SequenceEqual("Z3DS"u8))
+            {
+                log?.Invoke("ZCCI 압축 감지, 스트리밍 압축 해제로 변환 진행", LogLevel.Info);
+                var z3dsHeader = Z3dsArchiveService.ParseZ3dsHeader(inputStream);
+                inputStream = new ZcciDecompressStream(inputStream, z3dsHeader);
+            }
+
             using var outputStream = File.Open(outputPath, FileMode.Create, FileAccess.Write);
 
-            await ConvertAsync(inputStream, outputStream, progress, log, ct);
+            await using (inputStream)
+                await ConvertAsync(inputStream, outputStream, progress, log, ct);
 
             isCompleted = true;
             log?.Invoke($"변환 완료: {outputPath}", LogLevel.Ok);

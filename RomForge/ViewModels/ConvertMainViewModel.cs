@@ -431,6 +431,9 @@ public class ConvertMainViewModel : ToolTabViewModel
                         case ("zcci", "CCI"):
                             await Z3dsArchiveService.DecompressAsync(ds.FilePath, progress, AppendLog, _cts.Token);
                             break;
+                        case ("zcci", "CIA"):
+                            await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _cts.Token);
+                            break;
                         default:
                             throw new NotSupportedException($"{ds.Extension} → {ds.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
                     }
