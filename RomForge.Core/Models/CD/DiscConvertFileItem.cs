@@ -57,18 +57,25 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
             var ext => ext
         };
 
+        IEnumerable<string> formats;
+
         if (extension.Equals("chd", StringComparison.OrdinalIgnoreCase) || detected.Format == RomFormat.Chd)
         {
             if (detected.OutputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase) || detected.OutputExtension.Equals("cue", StringComparison.OrdinalIgnoreCase))
-                return [defaultTarget, "CSO", "ZSO", "CHD"];
-
-            return [defaultTarget, "CHD"];
+                formats = [defaultTarget, "CSO", "ZSO", "CHD"];
+            else
+                formats = [defaultTarget, "CHD"];
+        }
+        else if (detected.Format == RomFormat.Iso)
+        {
+            formats = [defaultTarget, "CSO", "ZSO", "CHD"];
+        }
+        else
+        {
+            formats = [defaultTarget];
         }
 
-        if (detected.Format == RomFormat.Iso)
-            return [defaultTarget, "CSO", "ZSO", "CHD"];
-
-        return [defaultTarget];
+        return [.. formats.Distinct(StringComparer.OrdinalIgnoreCase)];
     }
 
     protected override string FormatSize(long bytes) => PickPack.Disk.ETC.FileSize.FormatSize(bytes);
