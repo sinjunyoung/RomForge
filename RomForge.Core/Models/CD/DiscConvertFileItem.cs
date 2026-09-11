@@ -40,10 +40,10 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
 
     protected override IReadOnlyList<string> GetAvailableFormats(string extension)
     {
-        if (extension == "cso")
+        if (extension.Equals("cso", StringComparison.OrdinalIgnoreCase))
             return ["ISO", "ZSO", "CHD"];
 
-        if (extension == "zso")
+        if (extension.Equals("zso", StringComparison.OrdinalIgnoreCase))
             return ["ISO", "CSO", "CHD"];
 
         var detected = FormatDetector.Detect(FilePath);
@@ -51,31 +51,24 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
         if (detected.Format == RomFormat.Unknown || string.IsNullOrEmpty(detected.OutputExtension))
             return [];
 
-        var defaultTarget = detected.OutputExtension.ToUpperInvariant() switch
-        {
-            "CUE" => "CUE",
-            var ext => ext
-        };
-
-        IEnumerable<string> formats;
+        var defaultTarget = detected.OutputExtension.ToUpperInvariant();
 
         if (extension.Equals("chd", StringComparison.OrdinalIgnoreCase) || detected.Format == RomFormat.Chd)
         {
-            if (detected.OutputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase) || detected.OutputExtension.Equals("cue", StringComparison.OrdinalIgnoreCase))
-                formats = [defaultTarget, "CSO", "ZSO", "CHD"];
-            else
-                formats = [defaultTarget, "CHD"];
-        }
-        else if (detected.Format == RomFormat.Iso)
-        {
-            formats = [defaultTarget, "CSO", "ZSO", "CHD"];
-        }
-        else
-        {
-            formats = [defaultTarget];
+            bool isIsoBased = detected.OutputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase);
+
+            if (isIsoBased)
+                return [defaultTarget, "CSO", "ZSO"];
+
+            return [defaultTarget];
         }
 
-        return [.. formats.Distinct(StringComparer.OrdinalIgnoreCase)];
+        if (detected.Format == RomFormat.Iso || extension.Equals("iso", StringComparison.OrdinalIgnoreCase))
+        {
+            return [defaultTarget, "CSO", "ZSO", "CHD"];
+        }
+
+        return [defaultTarget];
     }
 
     protected override string FormatSize(long bytes) => PickPack.Disk.ETC.FileSize.FormatSize(bytes);

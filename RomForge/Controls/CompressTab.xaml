@@ -146,7 +146,7 @@
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                 <Image Source="/Assets/Images/drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                 <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="하기 기준으로 압축 또는 해제합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                <TextBlock Text="하기 기준에 따라 포맷이 자동 선택되고 압축 또는 해제됩니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                 <TextBlock TextAlignment="Left" Foreground="#A0A0A0" FontSize="11" Margin="0,15,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -192,7 +192,7 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": 3DS, CCI, CIA" Foreground="#CCCCCC"/>
+                            <Run Text=": 3DS(CCI와 같은 포맷), CCI, CIA" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
@@ -202,13 +202,13 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": ISO (GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
+                            <Run Text=": ISO(GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="ISO (GC/Wii)" Foreground="#CCCCCC"/>
+                            <Run Text="ISO(GC/Wii)" Foreground="#CCCCCC"/>
                         </TextBlock>
                     </Grid>
                 </TextBlock>
