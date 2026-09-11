@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="RomForge.Controls.Patch.VitaTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="SourceDrop_Drop" MouseLeftButtonDown="SourceDrop_Click">
+                <Grid Margin="14,0">
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding SourcePath}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding SourcePath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding SourcePath}"/>
+                    </Grid>
+                    <TextBlock Text="원본 (app/patch/addcont 폴더)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
+                </Grid>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="PatchDrop_Drop" MouseLeftButtonDown="PatchDrop_Click">
+                <Grid Margin="14,0">
+                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchPath}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchPath}"/>
+                    </Grid>
+                    <TextBlock Text="xdelta 패치 (폴더/ZIP, 선택)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0" VerticalContentAlignment="Center"/>
+            <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Click="BtnBrowseOutput_Click" IsEnabled="{Binding IsIdle}">
+                <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+            </Button>
+        </Grid>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
+            <CheckBox Content="에뮬용 생성 (patch를 app에 병합)" IsChecked="{Binding BuildEmu}" Margin="0,0,16,0" Foreground="#CCCCCC"/>
+            <CheckBox Content="실기용 생성 (app/rePatch/reAddcont 분리)" IsChecked="{Binding BuildRetail}" Foreground="#CCCCCC"/>
+        </StackPanel>
+
+        <ListBox Grid.Row="4" ItemsSource="{Binding LogEntries}" Background="Transparent" BorderThickness="0" Margin="0,2,0,2">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Message}" Foreground="#AAAAAA" FontSize="11" TextWrapping="Wrap"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Border Grid.Row="5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">
+            <Grid Height="28">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="140"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <Grid Grid.Column="1" Height="10" VerticalAlignment="Center">
+                    <Border Background="#25FFFFFF" CornerRadius="5"/>
+                    <Border x:Name="barTrack" CornerRadius="5" ClipToBounds="True">
+                        <Border Background="#4CAF50" CornerRadius="5" HorizontalAlignment="Left">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
+                                    <Binding Path="ActualWidth" ElementName="barTrack"/>
+                                    <Binding Path="ProgressPct"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

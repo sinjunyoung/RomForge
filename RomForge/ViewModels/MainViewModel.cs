@@ -33,7 +33,7 @@ public class MainViewModel : ToolTabViewModel
 
     public WiiUMainViewModel WiiUMainVM { get; } = new();
 
-    public _3DSMainViewModel Main3DsVM { get; } = new ();
+    public _3DSMainViewModel Main3DsVM { get; } = new();
 
     public PS1MainViewModel PSMainVM { get; } = new();
 
@@ -50,7 +50,7 @@ public class MainViewModel : ToolTabViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(ActiveLogEntries));
 
-            if(Tools[_selectedTabIndex] == SwitchMainVM)
+            if (Tools[_selectedTabIndex] == SwitchMainVM)
                 SwitchMainVM?.RefreshKeysStatus();
         }
     }
@@ -99,7 +99,7 @@ public class MainViewModel : ToolTabViewModel
         Tools.Add(UtilMainVM);
         Tools.Add(Settings);
 
-        foreach(var tool in Tools)
+        foreach (var tool in Tools)
             RegisterChild(tool);
     }
 
@@ -142,14 +142,14 @@ public class MainViewModel : ToolTabViewModel
     public static void SaveConfig() => AppConfig.Instance.Save();
 
     public bool IsAnyChildLocked()
-    {   
+    {
         if (Tools.Any(vm => vm.IsLocked))
             return true;
 
-        
+
         foreach (var child in Tools)
-        {            
-            if (child.Tools != null && child.Tools.Any(child=>child.IsLocked))
+        {
+            if (child.Tools != null && child.Tools.Any(child => child.IsLocked))
                 return true;
         }
 

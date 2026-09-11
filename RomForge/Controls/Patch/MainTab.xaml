@@ -33,6 +33,16 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/PS1.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="PS Vita" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <controls:VitaTab DataContext="{Binding VitaVM}" Margin="0,-5,0,0"/>
+            </TabItem>
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Desktop.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="PC98" VerticalAlignment="Center"/>
                     </StackPanel>

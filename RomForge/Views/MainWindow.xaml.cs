@@ -1,5 +1,4 @@
-﻿using LibHac.Tools.Fs;
-using NSW.WPF.UI;
+﻿using NSW.WPF.UI;
 using RomForge.Core;
 using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;
@@ -7,7 +6,6 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
-using Vita.Core.Services;
 
 namespace RomForge.Views;
 
@@ -23,10 +21,6 @@ public partial class MainWindow : Window
         Closing += MainWindow_Closing;
 
         RestoreWindowState();
-
-        var p = new VitaSourcePreparer();
-        var results = p.PrepareAll(@"D:\Vita\PCSG00494", @"D:\Vita\PCSG00494_out");
-
     }
 
     private void RestoreWindowState()
