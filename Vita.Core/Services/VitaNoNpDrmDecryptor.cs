@@ -5,7 +5,9 @@ namespace Vita.Core.Services;
 
 public sealed class VitaNoNpDrmDecryptor
 {
-    public static void Decrypt(string titleIdPath, string destPath, byte[] klicensee, IProgress<double>? progress = null, CancellationToken ct = default)
+    public List<string> UnsupportedEntries { get; } = [];
+
+    public void Decrypt(string titleIdPath, string destPath, byte[] klicensee, IProgress<double>? progress = null, CancellationToken ct = default)
     {
         string filesDbPath = Path.Combine(titleIdPath, "sce_pfs", "files.db");
         string unicvDbPath = Path.Combine(titleIdPath, "sce_pfs", "unicv.db");
@@ -18,6 +20,7 @@ public sealed class VitaNoNpDrmDecryptor
 
         var flat = PfsFilesDbParser.Parse(filesDbPath);
         var unicv = PfsUnicvDbParser.Parse(unicvDbPath, flat.Count);
+
         var f00d = new VitaF00DEmulator();
 
         Directory.CreateDirectory(destPath);
@@ -49,17 +52,22 @@ public sealed class VitaNoNpDrmDecryptor
             {
                 File.Copy(srcFile, dstFile, overwrite: true);
                 progress?.Report((double)(i + 1) / flat.Count);
+
                 continue;
             }
 
             var unicvEntry = unicv[i];
             byte[] data = File.ReadAllBytes(srcFile);
 
-            if (unicvEntry.FileSectorSize > 0 && data.Length > 0)
+            if (unicvEntry.NSectors > 0 && data.Length > 0)
             {
-                var cipher = new VitaPfsGameDataCipher(f00d, klicensee, unicvEntry.DbSeed, (int)unicvEntry.FileSectorSize);
-
-                cipher.DecryptRange(0, data);
+                if (unicvEntry.HasDbSeed)
+                {
+                    var cipher = new VitaPfsGameDataCipher(f00d, klicensee, unicvEntry.DbSeed, (int)unicvEntry.FileSectorSize);
+                    cipher.DecryptRange(0, data);
+                }
+                else
+                    UnsupportedEntries.Add($"{relativePath} (table={unicvEntry.TableMagic}, dbseed 없음 - 레거시 키 유도 미구현, 원본 그대로 복사됨)");
             }
 
             File.WriteAllBytes(dstFile, data);

@@ -4,7 +4,9 @@ namespace Vita.Core.Services;
 
 public sealed class WorkBinReader
 {
-    public static WorkBinLicense Read(string workBinPath)
+    public const string RelativePath = "sce_sys/package/work.bin";
+
+    public WorkBinLicense Read(string workBinPath)
     {
         byte[] data = File.ReadAllBytes(workBinPath);
 
@@ -14,7 +16,6 @@ public sealed class WorkBinReader
         string contentId = System.Text.Encoding.ASCII
             .GetString(data, WorkBinLicense.ContentIdOffset, WorkBinLicense.ContentIdSize)
             .TrimEnd('\0');
-
         byte[] klicensee = data
             .AsSpan(WorkBinLicense.KlicenseeOffset, WorkBinLicense.KlicenseeSize)
             .ToArray();
@@ -29,25 +30,27 @@ public sealed class WorkBinReader
         };
     }
 
-    public static string? FindMatchingWorkBin(string workBinSearchDir, string contentId)
+    public WorkBinLicense ReadFromTitlePath(string titleIdPath)
     {
-        if (!Directory.Exists(workBinSearchDir))
-            return null;
+        string workBinPath = Path.Combine(titleIdPath, "sce_sys", "package", "work.bin");
 
-        foreach (var candidate in Directory.EnumerateFiles(workBinSearchDir, "*.bin", SearchOption.AllDirectories))
+        if (!File.Exists(workBinPath))
+            throw new FileNotFoundException($"work.bin이 고정 경로에 없습니다: {workBinPath}", workBinPath);
+
+        return Read(workBinPath);
+    }
+
+    public static bool TryGetTitleIdFromContentId(string contentId, out string titleId)
+    {
+        if (contentId.Length >= 16)
         {
-            try
-            {
-                var license = WorkBinReader.Read(candidate);
+            titleId = contentId.Substring(7, 9);
 
-                if (license.ContentId.Equals(contentId, StringComparison.OrdinalIgnoreCase))
-                    return candidate;
-            }
-            catch (InvalidDataException)
-            {
-            }
+            return true;
         }
 
-        return null;
+        titleId = string.Empty;
+
+        return false;
     }
 }

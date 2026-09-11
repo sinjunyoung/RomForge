@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
+using Vita.Core.Services;
 
 namespace RomForge.Views;
 
@@ -21,6 +22,13 @@ public partial class MainWindow : Window
         Closing += MainWindow_Closing;
 
         RestoreWindowState();
+
+
+        var preparer = new VitaSourcePreparer();
+
+        var results = preparer.PrepareAll(
+            extractedRoot: @"D:\Vita\PCSG00495",
+            outputRoot: @"D:\Vita\PCSG00495_out");
     }
 
     private void RestoreWindowState()

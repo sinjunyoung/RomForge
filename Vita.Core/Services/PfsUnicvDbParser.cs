@@ -5,55 +5,89 @@ namespace Vita.Core.Services;
 
 public sealed class PfsUnicvDbParser
 {
-    private const int SigTablePageSize = 0x400;
-    private const int MaxSignaturesPerTable = 0x32;
+    private const int PageSize = 0x400;
+    private const int MaxSignaturesPerTableIftbl = 0x32;
+    private const int MaxSignaturesPerTableIcvdb = 0x2D;
 
     public static List<PfsUnicvEntry> Parse(string unicvDbPath, int entryCount)
     {
         using var stream = File.OpenRead(unicvDbPath);
         using var reader = new BinaryReader(stream);
-
         var magic = reader.ReadBytes(8);
 
         if (Encoding.ASCII.GetString(magic) != "SCEIRODB")
             throw new InvalidDataException("unicv.db magic가 올바르지 않습니다.");
 
-        reader.ReadBytes(24);
-
         var entries = new List<PfsUnicvEntry>(entryCount);
+        long page = 1;
 
         for (int i = 0; i < entryCount; i++)
         {
+            stream.Seek(page * PageSize, SeekOrigin.Begin);
+
             var tableMagic = reader.ReadBytes(8);
+            string magicStr = Encoding.ASCII.GetString(tableMagic);
+            uint nSectors;
+            uint fileSectorSize;
+            byte[] dbSeed;
+            bool hasDbSeed;
+            int maxSignaturesPerTable;
 
-            if (Encoding.ASCII.GetString(tableMagic) != "SCEIFTBL")
-                throw new InvalidDataException($"unicv.db 항목 {i}의 magic이 올바르지 않습니다.");
-
-            reader.ReadUInt32();
-            reader.ReadUInt32();
-            reader.ReadUInt32();
-
-            uint nSectors = reader.ReadUInt32();
-            uint fileSectorSize = reader.ReadUInt32();
-
-            reader.ReadUInt32();
-            reader.ReadBytes(20);
-
-            byte[] dbSeed = reader.ReadBytes(20);
+            if (magicStr == "SCEIFTBL")
+            {
+                uint version = reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                nSectors = reader.ReadUInt32();
+                fileSectorSize = reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadBytes(20);
+                dbSeed = reader.ReadBytes(20);
+                hasDbSeed = version > 1;
+                maxSignaturesPerTable = MaxSignaturesPerTableIftbl;
+            }
+            else if (magicStr == "SCEICVDB")
+            {
+                reader.ReadUInt32();
+                fileSectorSize = reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt64();
+                nSectors = reader.ReadUInt32();
+                reader.ReadBytes(20);
+                dbSeed = [];
+                hasDbSeed = false;
+                maxSignaturesPerTable = MaxSignaturesPerTableIcvdb;
+            }
+            else if (magicStr == "SCEINULL")
+            {
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                reader.ReadUInt32();
+                nSectors = 0;
+                fileSectorSize = 0;
+                dbSeed = [];
+                hasDbSeed = false;
+                maxSignaturesPerTable = MaxSignaturesPerTableIftbl;
+            }
+            else
+                throw new InvalidDataException($"unicv.db 항목 {i}의 magic이 올바르지 않습니다 (page {page}): {magicStr}");
 
             entries.Add(new PfsUnicvEntry
             {
                 FileSectorSize = fileSectorSize,
                 DbSeed = dbSeed,
-                NSectors = nSectors
+                NSectors = nSectors,
+                HasDbSeed = hasDbSeed,
+                TableMagic = magicStr
             });
 
-            if (nSectors > 0)
-            {
-                int nSigTables = (int)((nSectors + MaxSignaturesPerTable - 1) / MaxSignaturesPerTable);
+            int nSigTables = nSectors == 0 ? 0 : (int)((nSectors + maxSignaturesPerTable - 1) / maxSignaturesPerTable);
 
-                stream.Seek((long)nSigTables * SigTablePageSize, SeekOrigin.Current);
-            }
+            page += 1 + nSigTables;
         }
 
         return entries;

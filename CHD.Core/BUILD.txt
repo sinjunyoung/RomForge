@@ -1,9 +1,1 @@
 make TOOLS=1 SUBTARGET=tiny CROSS_BUILD=1 TARGETOS=windows MINGW64=/usr PTR64=1 LDFLAGS="-s" -j4
-
-make TOOLS=1 SUBTARGET=tiny CROSS_BUILD=1 TARGETOS=windows MINGW64=/usr PTR64=1 \
-     OPTIMIZE=s \
-     NOWERROR=1 \
-     SEPARATE_BIN=1 \
-     ARCHOPTS="-ffunction-sections -fdata-sections" \
-     LDFLAGS="-s -Wl,--gc-sections" \
-     -j4
