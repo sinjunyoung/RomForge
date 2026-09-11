@@ -50,7 +50,7 @@ public class PatchConfig : ViewModelBase
         set { SetProperty(ref _namingEnabled, value); }
     }
 
-    private string _namingFormat = "{fileName} (v{Version}_{Date})";
+    private string _namingFormat = "{fileName} (v{Version}_{Date:yyMMdd})";
     public string NamingFormat
     {
         get => _namingFormat;

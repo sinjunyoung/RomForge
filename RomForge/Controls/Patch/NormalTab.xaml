@@ -251,15 +251,31 @@
             </ToggleButton>
 
             <StackPanel>
-                <Grid Grid.IsSharedSizeScope="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    
-                    <TextBox Grid.Column="0" Text="{Binding PatchVM.NormalVM.NamingFormat, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}" ToolTip="사용 가능한 값: {fileName}, {Version}, {Date}" Height="30" FontSize="12" VerticalContentAlignment="Center" Margin="0,0,4,0"/>
-                    <TextBlock Grid.Column="1" Text="사용 가능: {fileName}, {Version}, {Date} 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" FontWeight="Bold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="4,0,0,0"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0" Text="{Binding PatchVM.NormalVM.NamingFormat, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}" ToolTip="사용 가능한 값: {fileName}, {Version}, {Date:yyMMdd}" Height="30" FontSize="12" VerticalContentAlignment="Center" Margin="0,0,4,0"/>
+                            <Button Grid.Column="1" Style="{StaticResource GrayButton}" Width="80" Height="30" Padding="0" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}" Click="ResetNamingFormat_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Image Source="/Assets/Images/Clear.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="초기화" FontSize="11" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Grid.Column="1" Text="{}{fileName}, {Version}, {Date:yyMMdd} 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" FontWeight="Bold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </Grid>
+                </StackPanel>
 
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,2,0,2">
                     <StackPanel Orientation="Horizontal">

@@ -104,7 +104,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             if (PatchPath is not null && File.Exists(PatchPath))
             {
                 (version, string? extractedDate) = PatchVersionInfoExtractor.Extract(Path.GetFileName(PatchPath));
-                date = extractedDate ?? File.GetCreationTime(PatchPath).ToString("yyMMdd");
+                date = extractedDate ?? File.GetLastWriteTime(PatchPath).ToString("yyMMdd");
             }
             else
             {

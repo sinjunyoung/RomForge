@@ -385,11 +385,8 @@ public class FileConverter : IDisposable
     }
 
     public static string MapToCdCompression(string compression) => compression switch
-    {
-        "zlib" => "cdzl",
-        "lzma" => "cdlz",
-        "zstd" => "cdzs",
-        _ => compression
+    {        
+        _ => string.Empty
     };
 
     private static bool IsSingleTrackMode1(string cuePath)

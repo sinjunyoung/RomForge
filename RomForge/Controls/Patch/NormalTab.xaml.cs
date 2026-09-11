@@ -1,5 +1,7 @@
-﻿using Microsoft.Win32;
+﻿using LibHac.Ncm;
+using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
+using RomForge.Core.Services.Patch;
 using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;
 using System.IO;
@@ -245,5 +247,10 @@ public partial class NormalTab : UserControl
             if (sourceFiles.Count > 0)
                 ViewModel.PatchVM.NormalVM.SourcePath = sourceFiles[0];
         }
+    }
+
+    private void ResetNamingFormat_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PatchVM.NormalVM.NamingFormat = PatchVersionInfoExtractor.DefaultNamingFormat;
     }
 }

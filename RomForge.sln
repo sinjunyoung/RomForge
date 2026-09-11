@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiiU.Core", "WiiU.Core\WiiU
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CD.Core", "CD.Core\CD.Core.csproj", "{4368D2CE-BD95-82E3-C02B-6B383833D3A5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vita.Core", "Vita.Core\Vita.Core.csproj", "{1C5A962B-E04A-4B37-ABFE-864DE0F0664C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +125,10 @@ Global
 		{4368D2CE-BD95-82E3-C02B-6B383833D3A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4368D2CE-BD95-82E3-C02B-6B383833D3A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4368D2CE-BD95-82E3-C02B-6B383833D3A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C5A962B-E04A-4B37-ABFE-864DE0F0664C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C5A962B-E04A-4B37-ABFE-864DE0F0664C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C5A962B-E04A-4B37-ABFE-864DE0F0664C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C5A962B-E04A-4B37-ABFE-864DE0F0664C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
