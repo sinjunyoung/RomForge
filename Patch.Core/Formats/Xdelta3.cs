@@ -10,24 +10,6 @@ public static class Xdelta3
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void ProgressCallback(double progress);
 
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern int xd3_create_patch_w(string sourcePath, string newPath, string patchPath, IntPtr cb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
-    private static extern int xd3_create_patch_w(string sourcePath, string newPath, string patchPath, ProgressCallback cb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_apply_patch_mem(byte[] sourceData, nuint sourceSize, byte[] patchData, nuint patchSize, out IntPtr outputData, out nuint outputSize, IntPtr cb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_apply_patch_mem(byte[] sourceData, nuint sourceSize, byte[] patchData, nuint patchSize, out IntPtr outputData, out nuint outputSize, ProgressCallback cb);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void xd3_free_mem(IntPtr ptr);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void xd3_cancel();
-
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     private static extern IntPtr xd3_get_last_error();
 
@@ -168,89 +150,90 @@ public static class Xdelta3
 
     public static byte[] ApplyPatch(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        int ret;
-        IntPtr outPtr;
-        nuint outSize;
+        long sourceSize = sourceData.Length;
+        IntPtr sourceBuf = IntPtr.Zero;
 
-        using (ct.Register(() => xd3_cancel()))
+        GCHandle? sourceHandle = sourceSize > 0 ? GCHandle.Alloc(sourceData, GCHandleType.Pinned) : null;
+
+        if (sourceHandle.HasValue)
+            sourceBuf = sourceHandle.Value.AddrOfPinnedObject();
+
+        IntPtr handle = xd3_stream_open_decode_buf(sourceBuf, sourceSize);
+
+        if (handle == IntPtr.Zero)
         {
-            if (progress is null)
-                ret = xd3_apply_patch_mem(sourceData, (nuint)sourceData.Length, patchData, (nuint)patchData.Length, out outPtr, out outSize, IntPtr.Zero);
-            else
-            {
-                long total = sourceData.Length;
-                var reporter = new ProgressReporter("패치중...", string.Empty, total, progress);
-                var report = reporter.CreateAction();
-                ProgressCallback cb = p =>
-                {
-                    long current = (long)(p * total);
-                    report(current, total);
-                };
-                GCHandle handle = GCHandle.Alloc(cb);
-
-                try
-                {
-                    ret = xd3_apply_patch_mem(sourceData, (nuint)sourceData.Length, patchData, (nuint)patchData.Length, out outPtr, out outSize, cb);
-                }
-                finally
-                {
-                    handle.Free();
-                    ct.ThrowIfCancellationRequested();
-                }
-            }
+            sourceHandle?.Free();
+            throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
         }
-
-        ThrowIfFailed(ret);
 
         try
         {
-            var result = new byte[(int)outSize];
+            using var outStream = new MemoryStream();
+            long patchTotal = patchData.Length;
+            long patchConsumed = 0;
+            long totalWritten = 0;
+            long estimatedTotal = Math.Max(sourceSize, 1);
+            ProgressReporter? reporter = progress is null ? null : new ProgressReporter("패치중...", string.Empty, estimatedTotal, progress);
+            Action<long, long>? report = reporter?.CreateAction();
+            var readBuf = new byte[StreamChunkSize];
+            var outBuf = new byte[StreamChunkSize];
 
-            Marshal.Copy(outPtr, result, 0, (int)outSize);
+            while (patchConsumed < patchTotal)
+            {
+                ct.ThrowIfCancellationRequested();
 
-            return result;
+                int n = (int)Math.Min(StreamChunkSize, patchTotal - patchConsumed);
+
+                Array.Copy(patchData, patchConsumed, readBuf, 0, n);
+                patchConsumed += n;
+
+                bool isLastChunk = patchConsumed >= patchTotal;
+                int feedRet = xd3_stream_feed(handle, readBuf, (nuint)n, isLastChunk ? 1 : 0);
+
+                if (feedRet != 0)
+                    ThrowIfFailed(feedRet);
+
+                while (true)
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    int status = xd3_stream_read_output(handle, outBuf, (nuint)outBuf.Length, out nuint written);
+
+                    if (status == (int)Xd3StreamStatus.Error)
+                        throw new InvalidOperationException($"패치 적용 중 오류: {GetLastError()}");
+
+                    if ((int)written > 0)
+                    {
+                        outStream.Write(outBuf, 0, (int)written);
+                        totalWritten += (int)written;
+
+                        long reportValue = Math.Min(totalWritten, estimatedTotal - 1);
+
+                        report?.Invoke(reportValue, estimatedTotal);
+                    }
+
+                    if (status != (int)Xd3StreamStatus.Ok)
+                        break;
+                }
+
+                if (isLastChunk)
+                    break;
+            }
+
+            report?.Invoke(estimatedTotal, estimatedTotal);
+
+            return outStream.ToArray();
         }
         finally
         {
-            xd3_free_mem(outPtr);
+            xd3_stream_close(handle);
+            sourceHandle?.Free();
         }
     }
 
     public static void CreatePatch(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        ValidateInputFiles(sourcePath, newPath);
-
-        int result;
-
-        using (ct.Register(() => xd3_cancel()))
-        {
-            if (progress is null)
-                result = xd3_create_patch_w(sourcePath, newPath, patchPath, IntPtr.Zero);
-            else
-            {
-                long total = new FileInfo(newPath).Length;
-                var reporter = new ProgressReporter("패치 생성중...", string.Empty, total, progress);
-                var report = reporter.CreateAction();
-                ProgressCallback cb = p =>
-                {
-                    long current = (long)(p * total);
-                    report(current, total);
-                };
-                GCHandle handle = GCHandle.Alloc(cb);
-
-                try
-                {
-                    result = xd3_create_patch_w(sourcePath, newPath, patchPath, cb);
-                }
-                finally
-                {
-                    handle.Free();
-                    ct.ThrowIfCancellationRequested();
-                }
-            }
-        }
-
-        ThrowIfFailed(result);
+        
     }
 
     private static void ValidateInputFiles(params string[] paths)

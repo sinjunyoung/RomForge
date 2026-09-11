@@ -12,7 +12,13 @@ public sealed class PfsUnicvDbParser
     public static List<PfsUnicvEntry> Parse(string unicvDbPath, int entryCount)
     {
         using var stream = File.OpenRead(unicvDbPath);
-        using var reader = new BinaryReader(stream);
+
+        return Parse(stream, entryCount);
+    }
+
+    public static List<PfsUnicvEntry> Parse(Stream stream, int entryCount)
+    {
+        using var reader = new BinaryReader(stream, System.Text.Encoding.UTF8, leaveOpen: true);
         var magic = reader.ReadBytes(8);
 
         if (Encoding.ASCII.GetString(magic) != "SCEIRODB")
@@ -36,6 +42,7 @@ public sealed class PfsUnicvDbParser
             if (magicStr == "SCEIFTBL")
             {
                 uint version = reader.ReadUInt32();
+
                 reader.ReadUInt32();
                 reader.ReadUInt32();
                 nSectors = reader.ReadUInt32();

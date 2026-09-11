@@ -1,24 +1,26 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
 using RomForge.Core.Models;
+using RomForge.Core.Services.Patch;
 using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using Vita.Core.Models;
 using Vita.Core.Services;
 
 namespace RomForge.ViewModels.Patch;
 
-public class VitaPatchMainViewModel : ToolTabViewModel
+public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 {
     private readonly Stopwatch _totalSw = new();
     private CancellationTokenSource? _cts;
 
-    private string _sourcePath = string.Empty;
-    private string _patchPath = string.Empty;
-    private string _outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output", "vita");
+    private string? _sourcePath = string.Empty;
+    private string? _patchPath = string.Empty;
+    private string? _outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output", "vita");
     private bool _buildEmu = true;
     private bool _buildRetail;
     private int _progressPct;
@@ -26,19 +28,19 @@ public class VitaPatchMainViewModel : ToolTabViewModel
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
-    public string SourcePath
+    public string? SourcePath
     {
         get => _sourcePath;
         set { _sourcePath = value; OnPropertyChanged(); }
     }
 
-    public string PatchPath
+    public string? PatchPath
     {
         get => _patchPath;
         set { _patchPath = value; OnPropertyChanged(); }
     }
 
-    public string OutputPath
+    public string? OutputPath
     {
         get => _outputPath;
         set { _outputPath = value; OnPropertyChanged(); }
@@ -72,7 +74,7 @@ public class VitaPatchMainViewModel : ToolTabViewModel
 
     public VitaPatchMainViewModel()
     {
-        RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsLocked && !string.IsNullOrWhiteSpace(SourcePath) && !string.IsNullOrWhiteSpace(OutputPath));
+        RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsLocked && !string.IsNullOrWhiteSpace(SourcePath) && !string.IsNullOrWhiteSpace(PatchPath) && !string.IsNullOrWhiteSpace(OutputPath) && (BuildEmu || BuildRetail));
         CancelCommand = new RelayCommand(_ => Cancel());
     }
 
@@ -86,52 +88,33 @@ public class VitaPatchMainViewModel : ToolTabViewModel
             {
                 _cts = new CancellationTokenSource();
 
-                string decryptedRoot = Path.Combine(OutputPath, "_decrypted");
-                Directory.CreateDirectory(decryptedRoot);
-
-                Log("복호화 시작...");
-                var preparer = new VitaSourcePreparer();
-                var results = preparer.PrepareAll(SourcePath, decryptedRoot);
-
-                foreach (var r in results)
-                {
-                    if (r.Success)
-                        Log($"{r.Item.Category} {r.Item.TitleId}: 복호화 완료");
-                    else
-                        Log($"{r.Item.Category} {r.Item.TitleId}: 실패 - {r.Error}", LogLevel.Error);
-                }
-
-                if (results.Count == 0)
-                {
-                    Log("app/patch/addcont 폴더를 찾을 수 없습니다.", LogLevel.Error);
-                    return;
-                }
-
-                if (!string.IsNullOrWhiteSpace(PatchPath) && Directory.Exists(PatchPath))
-                {
-                    Log("xdelta 패치 매칭 중...");
-                    var matches = VitaPatchApplier.Match(decryptedRoot, PatchPath);
-
-                    Log($"매칭된 패치: {matches.Count}개");
-
-                    var progress = new Progress<double>(p => ProgressPct = (int)(p * 100));
-                    await VitaPatchApplier.ApplyAllAsync(matches, progress, _cts.Token);
-
-                    Log("패치 적용 완료");
-                }
+                string baseName = Path.GetFileNameWithoutExtension(SourcePath!.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+                var progress = new Progress<double>(p => ProgressPct = (int)(p * 100));
 
                 if (BuildEmu)
                 {
-                    string emuRoot = Path.Combine(OutputPath, "emu");
-                    VitaPatchOutputBuilder.BuildEmuOutput(decryptedRoot, emuRoot);
-                    Log($"에뮬용 출력 생성 완료: {emuRoot}");
+                    Log("에뮬용 패치 생성 중...");
+
+                    string emuZip = Path.Combine(OutputPath, $"{baseName}_emu.zip");
+                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, emuZip, VitaOutputTarget.Emu, progress, _cts.Token);
+
+                    foreach (var m in result.Messages)
+                        Log(m);
+
+                    Log($"에뮬용 완료: 매칭 {result.MatchedCandidates}개 중 {result.PatchedSuccessfully}개 성공 -> {emuZip}", LogLevel.Ok);
                 }
 
                 if (BuildRetail)
                 {
-                    string retailRoot = Path.Combine(OutputPath, "retail");
-                    VitaPatchOutputBuilder.BuildRetailOutput(decryptedRoot, retailRoot);
-                    Log($"실기용 출력 생성 완료: {retailRoot}");
+                    Log("실기용 패치 생성 중...");
+
+                    string retailZip = Path.Combine(OutputPath, $"{baseName}_retail.zip");
+                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, retailZip, VitaOutputTarget.Retail, progress, _cts.Token);
+
+                    foreach (var m in result.Messages)
+                        Log(m);
+
+                    Log($"실기용 완료: 매칭 {result.MatchedCandidates}개 중 {result.PatchedSuccessfully}개 성공 -> {retailZip}", LogLevel.Ok);
                 }
 
                 Log($"전체 완료 ({_totalSw.Elapsed:mm\\:ss})", LogLevel.Ok);
@@ -151,6 +134,19 @@ public class VitaPatchMainViewModel : ToolTabViewModel
                 ProgressPct = 0;
             }
         }
+    }
+
+    public void Clear()
+    {
+        _cts?.Cancel();
+
+        SourcePath = null;
+        PatchPath = null;
+
+        ProgressPct = 0;
+        ProgressLabel = string.Empty;
+
+        LogEntries.Clear();
     }
 
     public void Cancel() => _cts?.Cancel();

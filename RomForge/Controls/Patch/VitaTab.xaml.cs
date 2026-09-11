@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿using LibHac.Ncm;
+using Microsoft.Win32;
+using RomForge.ViewModels;
 using RomForge.ViewModels.Patch;
 using System.Windows;
 using System.Windows.Controls;
@@ -8,7 +10,7 @@ namespace RomForge.Controls.Patch;
 
 public partial class VitaTab : UserControl
 {
-    private VitaPatchMainViewModel ViewModel => (VitaPatchMainViewModel)DataContext;
+    private MainViewModel ViewModel => (MainViewModel)DataContext;
 
     public VitaTab()
     {
@@ -24,13 +26,13 @@ public partial class VitaTab : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            ViewModel.SourcePath = dlg.SelectedPath;
+            ViewModel.PatchVM.VitaVM.SourcePath = dlg.SelectedPath;
     }
 
     private void SourceDrop_Drop(object sender, DragEventArgs e)
     {
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
-            ViewModel.SourcePath = files[0];
+            ViewModel.PatchVM.VitaVM.SourcePath = files[0];
     }
 
     private void PatchDrop_Click(object sender, MouseButtonEventArgs e)
@@ -43,7 +45,7 @@ public partial class VitaTab : UserControl
 
         if (dlg.ShowDialog() == true)
         {
-            ViewModel.PatchPath = dlg.SelectedPath;
+            ViewModel.PatchVM.VitaVM.PatchPath = dlg.SelectedPath;
             return;
         }
 
@@ -54,13 +56,13 @@ public partial class VitaTab : UserControl
         };
 
         if (fileDlg.ShowDialog() == true)
-            ViewModel.PatchPath = fileDlg.FileName;
+            ViewModel.PatchVM.VitaVM.PatchPath = fileDlg.FileName;
     }
 
     private void PatchDrop_Drop(object sender, DragEventArgs e)
     {
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
-            ViewModel.PatchPath = files[0];
+            ViewModel.PatchVM.VitaVM.PatchPath = files[0];
     }
 
     private void BtnBrowseOutput_Click(object sender, RoutedEventArgs e)
@@ -72,6 +74,6 @@ public partial class VitaTab : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            ViewModel.OutputPath = dlg.SelectedPath;
+            ViewModel.PatchVM.VitaVM.OutputPath = dlg.SelectedPath;
     }
 }

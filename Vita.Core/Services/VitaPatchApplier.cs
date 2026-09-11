@@ -5,17 +5,14 @@ namespace Vita.Core.Services;
 
 public sealed class VitaPatchApplier
 {
-    private static readonly HashSet<string> PatchExtensions = new(StringComparer.OrdinalIgnoreCase)
-        { ".xdelta", ".xdelta3", ".ips", ".ups", ".bps", ".ppf", ".aps" };
+    private static readonly HashSet<string> PatchExtensions = new(StringComparer.OrdinalIgnoreCase) { ".xdelta", ".xdelta3", ".ips", ".ups", ".bps", ".ppf", ".aps" };
 
     public static List<VitaPatchMatch> Match(string decryptedRoot, string patchDir)
     {
         var sourceFiles = Directory.EnumerateFiles(decryptedRoot, "*", SearchOption.AllDirectories)
             .ToDictionary(Path.GetFileNameWithoutExtension, f => f, StringComparer.OrdinalIgnoreCase);
-
         var patchFiles = Directory.EnumerateFiles(patchDir, "*", SearchOption.AllDirectories)
             .Where(f => PatchExtensions.Contains(Path.GetExtension(f)));
-
         var matches = new List<VitaPatchMatch>();
 
         foreach (var patchFile in patchFiles)
@@ -23,9 +20,7 @@ public sealed class VitaPatchApplier
             string baseName = Path.GetFileNameWithoutExtension(patchFile);
 
             if (sourceFiles.TryGetValue(baseName, out var sourceFile))
-            {
                 matches.Add(new VitaPatchMatch { SourceFile = sourceFile, PatchFile = patchFile });
-            }
         }
 
         return matches;

@@ -37,7 +37,7 @@
                         <TextBlock Text="PS Vita" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
-                <controls:VitaTab DataContext="{Binding VitaVM}" Margin="0,-5,0,0"/>
+                <controls:VitaTab Margin="0,-5,0,0"/>
             </TabItem>
 
             <TabItem IsEnabled="{Binding IsIdle}">

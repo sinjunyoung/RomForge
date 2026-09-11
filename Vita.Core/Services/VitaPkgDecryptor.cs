@@ -104,7 +104,6 @@ public sealed class VitaPkgDecryptor
             ctr.XorAt(nameOffset / 16, nameBytes);
 
             string name = System.Text.Encoding.UTF8.GetString(nameBytes);
-
             bool isDirectory = flags is 4 or 18;
             string outPath = Path.Combine(outputDir, name.Replace('/', Path.DirectorySeparatorChar));
 

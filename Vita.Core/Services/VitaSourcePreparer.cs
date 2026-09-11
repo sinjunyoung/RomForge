@@ -1,62 +1,58 @@
 ﻿using Vita.Core.Models;
-using Vita.Core.Services;
 
 namespace Vita.Core.Services;
 
 public sealed class VitaSourcePreparer
 {
-    private readonly WorkBinReader _workBinReader = new();
-    private readonly VitaNoNpDrmDecryptor _decryptor = new();
-
     public static List<VitaSourceItem> DiscoverItems(string extractedRoot)
     {
-        var items = new List<VitaSourceItem>();
-        string appDir = Path.Combine(extractedRoot, "app");
+        using var accessor = new FolderSourceAccessor(extractedRoot);
 
-        if (Directory.Exists(appDir))
+        return DiscoverItems(accessor);
+    }
+
+    public static List<VitaSourceItem> DiscoverItems(IVitaSourceAccessor accessor)
+    {
+        var items = new List<VitaSourceItem>();
+
+        if (accessor.DirectoryExists("app"))
         {
-            foreach (var titleDir in Directory.EnumerateDirectories(appDir))
+            foreach (var titleId in accessor.EnumerateDirectoryNames("app"))
             {
                 items.Add(new VitaSourceItem
                 {
                     Category = VitaContentCategory.App,
-                    TitleId = Path.GetFileName(titleDir),
-                    SourcePath = titleDir
+                    TitleId = titleId,
+                    SourcePath = $"app/{titleId}"
                 });
             }
         }
 
-        string patchDir = Path.Combine(extractedRoot, "patch");
-
-        if (Directory.Exists(patchDir))
+        if (accessor.DirectoryExists("patch"))
         {
-            foreach (var titleDir in Directory.EnumerateDirectories(patchDir))
+            foreach (var titleId in accessor.EnumerateDirectoryNames("patch"))
             {
                 items.Add(new VitaSourceItem
                 {
                     Category = VitaContentCategory.Patch,
-                    TitleId = Path.GetFileName(titleDir),
-                    SourcePath = titleDir
+                    TitleId = titleId,
+                    SourcePath = $"patch/{titleId}"
                 });
             }
         }
 
-        string addcontDir = Path.Combine(extractedRoot, "addcont");
-
-        if (Directory.Exists(addcontDir))
+        if (accessor.DirectoryExists("addcont"))
         {
-            foreach (var titleDir in Directory.EnumerateDirectories(addcontDir))
+            foreach (var titleId in accessor.EnumerateDirectoryNames("addcont"))
             {
-                string titleId = Path.GetFileName(titleDir);
-
-                foreach (var contentDir in Directory.EnumerateDirectories(titleDir))
+                foreach (var contentId in accessor.EnumerateDirectoryNames($"addcont/{titleId}"))
                 {
                     items.Add(new VitaSourceItem
                     {
                         Category = VitaContentCategory.Addcont,
                         TitleId = titleId,
-                        ContentIdSuffix = Path.GetFileName(contentDir),
-                        SourcePath = contentDir
+                        ContentIdSuffix = contentId,
+                        SourcePath = $"addcont/{titleId}/{contentId}"
                     });
                 }
             }
@@ -65,7 +61,7 @@ public sealed class VitaSourcePreparer
         return items;
     }
 
-    public VitaPrepareResult PrepareOne(VitaSourceItem item, string outputRoot)
+    public static VitaPrepareResult PrepareOne(VitaSourceItem item, string outputRoot)
     {
         string categoryFolder = item.Category switch
         {
@@ -80,9 +76,9 @@ public sealed class VitaSourcePreparer
         try
         {
             string workBinPath = Path.Combine(item.SourcePath, "sce_sys", "package", "work.bin");
-            var license = _workBinReader.Read(workBinPath);
+            var license = WorkBinReader.Read(workBinPath);
 
-            _decryptor.Decrypt(item.SourcePath, outputPath, license.Klicensee);
+            VitaNoNpDrmDecryptor.Decrypt(item.SourcePath, outputPath, license.Klicensee);
             VitaLicenseInstaller.Install(license, workBinPath, outputRoot);
 
             return new VitaPrepareResult { Item = item, OutputPath = outputPath };
@@ -93,7 +89,7 @@ public sealed class VitaSourcePreparer
         }
     }
 
-    public List<VitaPrepareResult> PrepareAll(string extractedRoot, string outputRoot)
+    public static List<VitaPrepareResult> PrepareAll(string extractedRoot, string outputRoot)
     {
         var items = DiscoverItems(extractedRoot);
         var results = new List<VitaPrepareResult>();
