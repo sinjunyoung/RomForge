@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Buffers.Binary;
+using System.Text;
 using Vita.Core.Models;
 
 namespace Vita.Core.Services;
@@ -15,7 +16,6 @@ public sealed class PfsFilesDbParser
         using var reader = new BinaryReader(stream);
 
         var magic = reader.ReadBytes(8);
-
         if (Encoding.ASCII.GetString(magic) != "SCENGPFS")
             throw new InvalidDataException("files.db magic가 올바르지 않습니다.");
 
@@ -30,44 +30,34 @@ public sealed class PfsFilesDbParser
 
             reader.ReadUInt32();
             reader.ReadUInt32();
-
             uint nFiles = reader.ReadUInt32();
-
             reader.ReadUInt32();
 
             if (nFiles > MaxFilesInBlock)
                 nFiles = 0;
 
             var names = new (uint ParentIndex, string Name)[MaxFilesInBlock];
-
             for (int i = 0; i < nFiles; i++)
             {
                 uint parentIndex = reader.ReadUInt32();
                 var nameBytes = reader.ReadBytes(FileNameSize);
                 int nul = Array.IndexOf(nameBytes, (byte)0);
                 string name = Encoding.ASCII.GetString(nameBytes, 0, nul < 0 ? nameBytes.Length : nul);
-
                 names[i] = (parentIndex, name);
             }
 
             int unusedFileHeaderBytes = (MaxFilesInBlock - (int)nFiles) * (4 + FileNameSize);
-
             if (unusedFileHeaderBytes > 0)
                 reader.ReadBytes(unusedFileHeaderBytes);
 
             var infos = new (uint Idx, PfsFileType Type, uint Size)[10];
-
             for (int i = 0; i < 10; i++)
             {
                 uint idx = reader.ReadUInt32();
                 ushort typeVal = reader.ReadUInt16();
-
                 reader.ReadUInt16();
-
                 uint size = reader.ReadUInt32();
-
                 reader.ReadUInt32();
-
                 infos[i] = (idx, (PfsFileType)typeVal, size);
             }
 
@@ -94,7 +84,7 @@ public sealed class PfsFilesDbParser
         }
 
         ResolvePaths(flat);
-
+        flat.Sort((a, b) => a.Index.CompareTo(b.Index));
         return flat;
     }
 
@@ -136,7 +126,6 @@ public sealed class PfsFilesDbParser
 
             dirChain.Reverse();
             dirChain.Add(entry.Name);
-
             entry.RelativePath = Path.Combine([.. dirChain]);
         }
     }

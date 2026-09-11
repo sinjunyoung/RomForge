@@ -1,4 +1,5 @@
 ﻿using Vita.Core.Models;
+using Vita.Core.Services;
 
 namespace Vita.Core.Services;
 
@@ -78,9 +79,11 @@ public sealed class VitaSourcePreparer
 
         try
         {
-            var license = _workBinReader.ReadFromTitlePath(item.SourcePath);
+            string workBinPath = Path.Combine(item.SourcePath, "sce_sys", "package", "work.bin");
+            var license = _workBinReader.Read(workBinPath);
 
             _decryptor.Decrypt(item.SourcePath, outputPath, license.Klicensee);
+            VitaLicenseInstaller.Install(license, workBinPath, outputRoot);
 
             return new VitaPrepareResult { Item = item, OutputPath = outputPath };
         }

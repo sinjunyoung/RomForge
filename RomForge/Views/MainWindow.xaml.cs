@@ -1,4 +1,5 @@
-﻿using NSW.WPF.UI;
+﻿using LibHac.Tools.Fs;
+using NSW.WPF.UI;
 using RomForge.Core;
 using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;
@@ -23,12 +24,9 @@ public partial class MainWindow : Window
 
         RestoreWindowState();
 
+        var p = new VitaSourcePreparer();
+        var results = p.PrepareAll(@"D:\Vita\PCSG00494", @"D:\Vita\PCSG00494_out");
 
-        var preparer = new VitaSourcePreparer();
-
-        var results = preparer.PrepareAll(
-            extractedRoot: @"D:\Vita\PCSG00495",
-            outputRoot: @"D:\Vita\PCSG00495_out");
     }
 
     private void RestoreWindowState()
