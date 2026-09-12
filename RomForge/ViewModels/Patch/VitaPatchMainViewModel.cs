@@ -96,10 +96,7 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                     Log("에뮬용 패치 생성 중...");
 
                     string emuZip = Path.Combine(OutputPath, $"{baseName}_emu.zip");
-                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, emuZip, VitaOutputTarget.Emu, progress, _cts.Token);
-
-                    foreach (var m in result.Messages)
-                        Log(m);
+                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, emuZip, VitaOutputTarget.Emu, msg => Log(msg), progress, _cts.Token);
 
                     Log($"에뮬용 완료: 매칭 {result.MatchedCandidates}개 중 {result.PatchedSuccessfully}개 성공 -> {emuZip}", LogLevel.Ok);
                 }
@@ -109,10 +106,7 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                     Log("실기용 패치 생성 중...");
 
                     string retailZip = Path.Combine(OutputPath, $"{baseName}_retail.zip");
-                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, retailZip, VitaOutputTarget.Retail, progress, _cts.Token);
-
-                    foreach (var m in result.Messages)
-                        Log(m);
+                    var result = await VitaPatchOnlyBuilder.BuildAsync(SourcePath, PatchPath, retailZip, VitaOutputTarget.Retail, msg => Log(msg), progress, _cts.Token);
 
                     Log($"실기용 완료: 매칭 {result.MatchedCandidates}개 중 {result.PatchedSuccessfully}개 성공 -> {retailZip}", LogLevel.Ok);
                 }
