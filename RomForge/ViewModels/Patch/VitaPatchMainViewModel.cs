@@ -1,5 +1,6 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
+using NSW.WPF.Services;
 using RomForge.Core.Models;
 using RomForge.Core.Services.Patch;
 using RomForge.Core.UI.Command;
@@ -23,6 +24,7 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     private string? _outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output", "vita");
     private bool _buildEmu = true;
     private bool _buildRetail;
+    private bool _mergePatchIntoGame = false;
     private int _progressPct;
     private string _progressLabel = string.Empty;
 
@@ -31,14 +33,34 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     public string? SourcePath
     {
         get => _sourcePath;
-        set { _sourcePath = value; OnPropertyChanged(); }
+        set
+        {
+            if (_sourcePath != value)
+            {
+                _sourcePath = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SourceLabel));
+            }
+        }
     }
 
     public string? PatchPath
     {
         get => _patchPath;
-        set { _patchPath = value; OnPropertyChanged(); }
+        set
+        {
+            if (_patchPath != value)
+            {
+                _patchPath = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PatchLabel));
+            }
+        }
     }
+
+    public string SourceLabel => string.IsNullOrEmpty(SourcePath) ? "원본(PKG/ZIP/폴더)을 드래그&드롭하세요" : Path.GetFileName(SourcePath);
+
+    public string PatchLabel => string.IsNullOrEmpty(PatchPath) ? "패치(ZIP/폴더)를 드래그&드롭하세요" : Path.GetFileName(PatchPath);
 
     public string? OutputPath
     {
@@ -68,6 +90,12 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     {
         get => _progressLabel;
         set { _progressLabel = value; OnPropertyChanged(); }
+    }
+
+    public bool MergePatchIntoGame
+    {
+        get => _mergePatchIntoGame;
+        set { _mergePatchIntoGame = value; OnPropertyChanged(); }
     }
 
     public ICommand RunCommand { get; }
@@ -112,6 +140,8 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                 }
 
                 Log($"전체 완료 ({_totalSw.Elapsed:mm\\:ss})", LogLevel.Ok);
+
+                OutputPath.OpenFolder();
             }
             catch (OperationCanceledException)
             {

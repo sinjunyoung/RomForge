@@ -9,7 +9,7 @@
         <ToggleButton Grid.Row="0" Style="{StaticResource ToggleStyle}"
                       IsChecked="{Binding AutoCompress}">
             <StackPanel Orientation="Horizontal">
-                <Image Width="18" Margin="0,0,10,0" Source="{Binding AutoCompress, Converter={StaticResource BoolToImageConverter}}"/>
+                <Image Width="18" Margin="10,0,10,0" Source="{Binding AutoCompress, Converter={StaticResource BoolToImageConverter}}"/>
                 <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center"  Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
 
                 <Grid VerticalAlignment="Center">

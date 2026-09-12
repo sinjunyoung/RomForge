@@ -164,7 +164,7 @@
         <StackPanel Grid.Row="6">
             <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,3" Height="30">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
+                    <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
                     <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -244,7 +244,7 @@
 
             <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,2" Height="30">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <Image Width="18" Margin="0,0,10,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
+                    <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
                     <TextBlock Text="결과 파일명에 버전/날짜 자동 표기" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                     <TextBlock Text="패치 파일명에서 버전과 날짜를 읽어와 결과 파일명에 표시합니다" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
                 </StackPanel>

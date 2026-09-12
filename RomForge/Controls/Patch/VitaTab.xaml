@@ -17,7 +17,8 @@
                 <ColumnDefinition Width="2"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="SourceDrop_Drop" MouseLeftButtonDown="SourceDrop_Click">
+
+            <Border Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="SourceDrop_Drop">
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -25,12 +26,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.SourcePath}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding PatchVM.VitaVM.SourcePath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.SourcePath}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PatchVM.VitaVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.SourcePath}"/>
                     </Grid>
-                    <TextBlock Text="원본 (app/patch/addcont 폴더)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
+                    <TextBlock Text="원본 (PKG/ZIP/폴더)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
                 </Grid>
             </Border>
-            <Border Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="PatchDrop_Drop" MouseLeftButtonDown="PatchDrop_Click">
+            <Border Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="PatchDrop_Drop">
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -38,9 +39,9 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.PatchPath}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding PatchVM.VitaVM.PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.PatchPath}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding PatchVM.VitaVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.VitaVM.PatchPath}"/>
                     </Grid>
-                    <TextBlock Text="xdelta 패치 (폴더/ZIP, 선택)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
+                    <TextBlock Text="패치 (폴더/ZIP)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8"/>
                 </Grid>
             </Border>
         </Grid>
@@ -56,18 +57,21 @@
             </Button>
         </Grid>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6">
-            <CheckBox Content="에뮬용 생성 (patch를 app에 병합)" IsChecked="{Binding PatchVM.VitaVM.BuildEmu}" Margin="0,0,16,0" Foreground="#CCCCCC"/>
-            <CheckBox Content="실기용 생성 (app/rePatch/reAddcont 분리)" IsChecked="{Binding PatchVM.VitaVM.BuildRetail}" Foreground="#CCCCCC"/>
-        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Vertical" Margin="0,0,0,6">
+            <StackPanel Orientation="Horizontal" Margin="0,2,0,6">
+                <TextBlock Text="출력 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <RadioButton Content="에뮬 (app, addcont)" GroupName="VitaOutputTargetGroup" IsChecked="{Binding PatchVM.VitaVM.BuildEmu}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,15,0" IsEnabled="{Binding PatchVM.IsIdle}"/>
+                <RadioButton Content="실기 (rePatch, reAddcont)" GroupName="VitaOutputTargetGroup" IsChecked="{Binding PatchVM.VitaVM.BuildRetail}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,15,0" IsEnabled="{Binding PatchVM.IsIdle}"/>
+            </StackPanel>
 
-        <ListBox Grid.Row="4" ItemsSource="{Binding PatchVM.VitaVM.LogEntries}" Background="Transparent" BorderThickness="0" Margin="0,2,0,2">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding PatchVM.VitaVM.Message}" Foreground="#AAAAAA" FontSize="11" TextWrapping="Wrap"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+            <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.VitaVM.MergePatchIntoGame}" Margin="0,2,0,2" Height="30">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.VitaVM.MergePatchIntoGame, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
+                    <TextBlock Text="게임에 패치 병합" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <TextBlock Text="에뮬: 복호화 후 app, addcont를 덮어씌우고 압축 / 실기: rePatch, reAddcont를 추가 후 압축" VerticalAlignment="Center" Foreground="#D4AF37" FontWeight="Bold" />
+                </StackPanel>
+            </ToggleButton>
+        </StackPanel>
 
         <Border Grid.Row="5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">
             <Grid Height="28">

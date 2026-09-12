@@ -82,7 +82,7 @@
                 </Border>
                 <ToggleButton Margin="5,0,5,5" Grid.Row="4" Style="{StaticResource ToggleStyle}" IsChecked="{Binding SwitchIsValidationEnabled}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Width="18" Margin="0,0,10,0" Source="{Binding SwitchIsValidationEnabled, Converter={StaticResource BoolToImageConverter}}"/>
+                        <Image Width="18" Margin="10,0,5,0" Source="{Binding SwitchIsValidationEnabled, Converter={StaticResource BoolToImageConverter}}"/>
                         <TextBlock Text="압축 무결성 검증 : 압축 후 원본과 해시 비교 검증" VerticalAlignment="Center" FontSize="12"/>
                     </StackPanel>
                 </ToggleButton>

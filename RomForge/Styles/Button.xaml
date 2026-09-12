@@ -166,7 +166,7 @@
         <Setter Property="BorderBrush" Value="#3F3F46"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Height" Value="44"/>
-        <Setter Property="Padding" Value="12,0"/>
+        <Setter Property="Padding" Value="5,0"/>
         <Setter Property="Cursor" Value="Hand"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
