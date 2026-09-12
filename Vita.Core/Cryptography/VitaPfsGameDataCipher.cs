@@ -4,7 +4,7 @@ namespace Vita.Core.Cryptography;
 
 public sealed class VitaPfsGameDataCipher
 {
-    private static readonly byte[] HmacKey0 =
+    internal static readonly byte[] HmacKey0 =
     [
         0xE4, 0x62, 0x25, 0x8B, 0x1F, 0x31, 0x21, 0x56, 0x07, 0x45,
         0xDB, 0x62, 0xB1, 0x43, 0x67, 0x23, 0xD2, 0xBF, 0x80, 0xFE
@@ -20,13 +20,31 @@ public sealed class VitaPfsGameDataCipher
             throw new ArgumentException("klicensee must be 16 bytes", nameof(klicensee));
 
         _drvKey = f00d.EncryptKey(klicensee);
+        _tweakEncKey = ComputeTweakEncKeyFromDbSeed(dbSeed);
+        _blockSize = blockSize;
+    }
 
+    private VitaPfsGameDataCipher(byte[] drvKey, byte[] tweakEncKey, int blockSize)
+    {
+        _drvKey = drvKey;
+        _tweakEncKey = tweakEncKey;
+        _blockSize = blockSize;
+    }
+
+    public static VitaPfsGameDataCipher FromPrecomputedTweakKey(VitaF00DEmulator f00d, ReadOnlySpan<byte> klicensee, byte[] precomputedTweakEncKey, int blockSize)
+    {
+        if (klicensee.Length != 16)
+            throw new ArgumentException("klicensee must be 16 bytes", nameof(klicensee));
+
+        return new VitaPfsGameDataCipher(f00d.EncryptKey(klicensee), precomputedTweakEncKey, blockSize);
+    }
+
+    private static byte[] ComputeTweakEncKeyFromDbSeed(ReadOnlySpan<byte> dbSeed)
+    {
         using var hmac = new HMACSHA1(HmacKey0);
         byte[] digest = hmac.ComputeHash(dbSeed.ToArray());
 
-        _tweakEncKey = digest.AsSpan(0, 16).ToArray();
-
-        _blockSize = blockSize;
+        return digest.AsSpan(0, 16).ToArray();
     }
 
     public void DecryptRange(long absoluteOffset, Span<byte> buffer)

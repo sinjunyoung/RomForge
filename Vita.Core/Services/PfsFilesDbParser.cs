@@ -9,20 +9,28 @@ public sealed class PfsFilesDbParser
     private const int MaxFilesInBlock = 9;
     private const int FileNameSize = 68;
 
-    public static List<PfsFlatEntry> Parse(string filesDbPath)
+    public static List<PfsFlatEntry> Parse(string filesDbPath, out uint filesSalt)
     {
         using var stream = File.OpenRead(filesDbPath);
 
-        return Parse(stream);
+        return Parse(stream, out filesSalt);
     }
 
-    public static List<PfsFlatEntry> Parse(Stream stream)
+    public static List<PfsFlatEntry> Parse(Stream stream, out uint filesSalt)
     {
         using var reader = new BinaryReader(stream, System.Text.Encoding.UTF8, leaveOpen: true);
         var magic = reader.ReadBytes(8);
 
         if (Encoding.ASCII.GetString(magic) != "SCENGPFS")
             throw new InvalidDataException("files.db magic가 올바르지 않습니다.");
+
+        reader.ReadUInt32();
+        reader.ReadUInt16();
+        reader.ReadUInt16();
+        reader.ReadUInt32();
+        reader.ReadUInt32();
+        reader.ReadUInt32();
+        filesSalt = reader.ReadUInt32();
 
         stream.Seek(PageSize, SeekOrigin.Begin);
 

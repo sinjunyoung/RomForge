@@ -24,21 +24,21 @@ public static class VitaNoNpDrmDecryptor
             throw new FileNotFoundException("unicv.db를 찾을 수 없습니다.", unicvDbRel);
 
         using var filesDbStream = new MemoryStream(accessor.ReadAllBytes(filesDbRel));
-        var flat = PfsFilesDbParser.Parse(filesDbStream);
+        var flat = PfsFilesDbParser.Parse(filesDbStream, out uint filesSalt);
         using var unicvDbStream = new MemoryStream(accessor.ReadAllBytes(unicvDbRel));
         var unicv = PfsUnicvDbParser.Parse(unicvDbStream, flat.Count);
 
-        return new VitaPfsFileTable { Entries = flat, UnicvEntries = unicv };
+        return new VitaPfsFileTable { Entries = flat, UnicvEntries = unicv, FilesSalt = filesSalt };
     }
 
-    public static byte[] DecryptEntry(string titleIdPath, byte[] klicensee, PfsFlatEntry entry, PfsUnicvEntry unicvEntry, out string? warning)
+    public static byte[] DecryptEntry(string titleIdPath, byte[] klicensee, PfsFlatEntry entry, PfsUnicvEntry unicvEntry, uint filesSalt, out string? warning)
     {
         using var accessor = new FolderSourceAccessor(titleIdPath);
 
-        return DecryptEntry(accessor, string.Empty, klicensee, entry, unicvEntry, out warning);
+        return DecryptEntry(accessor, string.Empty, klicensee, entry, unicvEntry, filesSalt, out warning);
     }
 
-    public static byte[] DecryptEntry(IVitaSourceAccessor accessor, string titleRelPath, byte[] klicensee, PfsFlatEntry entry, PfsUnicvEntry unicvEntry, out string? warning)
+    public static byte[] DecryptEntry(IVitaSourceAccessor accessor, string titleRelPath, byte[] klicensee, PfsFlatEntry entry, PfsUnicvEntry unicvEntry, uint filesSalt, out string? warning)
     {
         warning = null;
 
@@ -51,15 +51,21 @@ public static class VitaNoNpDrmDecryptor
 
         if (unicvEntry.NSectors > 0 && data.Length > 0)
         {
+            var f00d = new VitaF00DEmulator();
+
             if (unicvEntry.HasDbSeed)
             {
-                var f00d = new VitaF00DEmulator();
                 var cipher = new VitaPfsGameDataCipher(f00d, klicensee, unicvEntry.DbSeed, (int)unicvEntry.FileSectorSize);
 
                 cipher.DecryptRange(0, data);
             }
-            else
-                warning = $"{relativePath} (table={unicvEntry.TableMagic}, dbseed 없음 - 레거시 키 유도 미구현, 원본 그대로 복사됨)";
+            else if (unicvEntry.TableMagic == "SCEIFTBL")
+            {
+                byte[] tweakEncKey = VitaPfsLegacyKeyDerivation.ComputeTweakEncKey(filesSalt, (uint)unicvEntry.PageNumber);
+                var cipher = VitaPfsGameDataCipher.FromPrecomputedTweakKey(f00d, klicensee, tweakEncKey, (int)unicvEntry.FileSectorSize);
+
+                cipher.DecryptRange(0, data);
+            }
         }
 
         return data;
@@ -95,7 +101,7 @@ public static class VitaNoNpDrmDecryptor
                 continue;
             }
 
-            byte[] data = DecryptEntry(titleIdPath, klicensee, entry, table.UnicvEntries[i], out string? warning);
+            byte[] data = DecryptEntry(titleIdPath, klicensee, entry, table.UnicvEntries[i], table.FilesSalt, out string? warning);
 
             if (warning != null)
                 warnings.Add(warning);

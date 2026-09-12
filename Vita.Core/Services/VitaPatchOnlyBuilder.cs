@@ -100,7 +100,7 @@ public static class VitaPatchOnlyBuilder
         return set;
     }
 
-    private static async Task<(int matched, int success)> ProcessItemAsync(IVitaSourceAccessor source, IVitaSourceAccessor patch, VitaSourceItem item, Dictionary<string, string> patchFiles, VitaOutputTarget target, 
+    private static async Task<(int matched, int success)> ProcessItemAsync(IVitaSourceAccessor source, IVitaSourceAccessor patch, VitaSourceItem item, Dictionary<string, string> patchFiles, VitaOutputTarget target,
         ZipArchive zip, HashSet<string>? skipRelativePaths, string? fallbackWorkBinRel, Action<string> log, CancellationToken ct, IProgress<double>? progress)
     {
         string workBinRel = $"{item.SourcePath}/sce_sys/package/work.bin";
@@ -152,7 +152,7 @@ public static class VitaPatchOnlyBuilder
 
             try
             {
-                byte[] sourceBytes = VitaNoNpDrmDecryptor.DecryptEntry(source, item.SourcePath, license.Klicensee, entry, table.UnicvEntries[i], out string? warning);
+                byte[] sourceBytes = VitaNoNpDrmDecryptor.DecryptEntry(source, item.SourcePath, license.Klicensee, entry, table.UnicvEntries[i], table.FilesSalt, out string? warning);
 
                 if (warning != null)
                     log($"[{item.Category}] {warning}");

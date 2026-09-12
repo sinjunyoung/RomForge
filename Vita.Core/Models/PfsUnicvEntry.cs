@@ -11,4 +11,6 @@ public sealed class PfsUnicvEntry
     public required bool HasDbSeed { get; init; }
 
     public required string TableMagic { get; init; }
+
+    public required long PageNumber { get; init; }
 }

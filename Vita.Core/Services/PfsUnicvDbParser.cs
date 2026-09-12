@@ -29,7 +29,9 @@ public sealed class PfsUnicvDbParser
 
         for (int i = 0; i < entryCount; i++)
         {
-            stream.Seek(page * PageSize, SeekOrigin.Begin);
+            long entryPage = page;
+
+            stream.Seek(entryPage * PageSize, SeekOrigin.Begin);
 
             var tableMagic = reader.ReadBytes(8);
             string magicStr = Encoding.ASCII.GetString(tableMagic);
@@ -81,7 +83,7 @@ public sealed class PfsUnicvDbParser
                 maxSignaturesPerTable = MaxSignaturesPerTableIftbl;
             }
             else
-                throw new InvalidDataException($"unicv.db 항목 {i}의 magic이 올바르지 않습니다 (page {page}): {magicStr}");
+                throw new InvalidDataException($"unicv.db 항목 {i}의 magic이 올바르지 않습니다 (page {entryPage}): {magicStr}");
 
             entries.Add(new PfsUnicvEntry
             {
@@ -89,7 +91,8 @@ public sealed class PfsUnicvDbParser
                 DbSeed = dbSeed,
                 NSectors = nSectors,
                 HasDbSeed = hasDbSeed,
-                TableMagic = magicStr
+                TableMagic = magicStr,
+                PageNumber = entryPage
             });
 
             int nSigTables = nSectors == 0 ? 0 : (int)((nSectors + maxSignaturesPerTable - 1) / maxSignaturesPerTable);
