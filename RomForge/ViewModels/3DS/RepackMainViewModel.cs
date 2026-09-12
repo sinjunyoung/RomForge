@@ -183,9 +183,7 @@ public class RepackMainViewModel : ToolTabViewModel
     {
         _service = new RepackService(Log, () => PatchPath);
 
-        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath)
-            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
-            : AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath;
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath;
         BrowseInputCommand = new RelayCommand(async _ => await BrowseInput());
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 

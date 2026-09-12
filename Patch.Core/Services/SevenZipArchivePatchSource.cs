@@ -9,8 +9,6 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
     private readonly string _tempDir;
     private readonly Dictionary<string, ArchiveFileInfo> _byKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _extractedPaths = new(StringComparer.OrdinalIgnoreCase);
-    private readonly object _extractLock = new();
-    private bool _tempDirCreated;
 
     public IReadOnlyList<string> EntryPaths { get; }
 
@@ -35,41 +33,38 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
 
                 _byKey[info.FileName.Replace('\\', '/')] = info;
             }
+
+            if (_byKey.Count == 0)
+                throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
+
+            Directory.CreateDirectory(_tempDir);
+
+            int[] allIndexes = [.. _byKey.Values.Select(info => (int)info.Index)];
+            extractor.ExtractFiles(_tempDir, allIndexes);
+
+            foreach (var kvp in _byKey)
+            {
+                string relativePath = kvp.Key.Replace('/', Path.DirectorySeparatorChar);
+                string destPath = Path.Combine(_tempDir, relativePath);
+
+                if (File.Exists(destPath))
+                    _extractedPaths[kvp.Key] = destPath;
+            }
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is not InvalidOperationException && ex is not ArchivePasswordRequiredException)
         {
             throw new ArchivePasswordRequiredException(path);
         }
 
-        if (_byKey.Count == 0)
-            throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
-
         EntryPaths = [.. _byKey.Keys];
     }
 
-    private string ExtractToDisk(string key, ArchiveFileInfo info)
+    private string ExtractToDisk(string key)
     {
-        lock (_extractLock)
-        {
-            if (_extractedPaths.TryGetValue(key, out var cached))
-                return cached;
+        if (_extractedPaths.TryGetValue(key, out var cached))
+            return cached;
 
-            if (!_tempDirCreated)
-            {
-                Directory.CreateDirectory(_tempDir);
-                _tempDirCreated = true;
-            }
-
-            var destPath = Path.Combine(_tempDir, Guid.NewGuid().ToString("N"));
-
-            using var extractor = string.IsNullOrEmpty(_password) ? new SevenZipExtractor(_archivePath) : new SevenZipExtractor(_archivePath, _password);
-
-            using (var fileStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None))
-                extractor.ExtractFile(info.Index, fileStream);
-
-            _extractedPaths[key] = destPath;
-            return destPath;
-        }
+        throw new FileNotFoundException($"압축 파일 내에서 경로를 찾을 수 없습니다: {key}");
     }
 
     public IArchivePatchEntry? FindEntry(string path)
@@ -102,7 +97,8 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
 
         public Stream Open()
         {
-            var diskPath = owner.ExtractToDisk(fullPath, info);
+            var diskPath = owner.ExtractToDisk(fullPath);
+
             return new FileStream(diskPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         }
     }
