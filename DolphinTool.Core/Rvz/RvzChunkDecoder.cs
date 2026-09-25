@@ -3,14 +3,14 @@ using System.Buffers.Binary;
 
 namespace DolphinTool.Core.Rvz;
 
-internal sealed class RvzChunkDecoder(RvzCompressionType compression) : IDisposable
+internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] compressorData) : IDisposable
 {
     private const int HashExceptionSize = 2 + WiiLayout.HashSize;
     private const int MaxExceptionListBytes = 52 * 64 * HashExceptionSize + 2;
 
     private static readonly List<HashException> EmptyList = [];
 
-    private readonly RvzDecompressor _decompressor = RvzDecompressor.Create(compression);
+    private readonly RvzDecompressor _decompressor = RvzDecompressor.Create(compression, compressorData);
     private readonly LaggedFibonacciGenerator _generator = new();
     private readonly DecodedChunk _chunk = new();
     private byte[] _scratch = [];

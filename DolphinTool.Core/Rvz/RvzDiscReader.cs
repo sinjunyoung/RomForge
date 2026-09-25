@@ -30,7 +30,7 @@ internal sealed class RvzDiscReader : IDisposable
         {
             _file = RvzFile.Open(_handle);
 
-            using var probe = RvzDecompressor.Create(_file.Compression);
+            using var probe = RvzDecompressor.Create(_file.Compression, _file.CompressorData);
         }
         catch
         {
@@ -201,7 +201,7 @@ internal sealed class RvzDiscReader : IDisposable
 
                 if (idle.Count == 0 && contexts.Count < window)
                 {
-                    var created = new RvzWorkerContext(_file.Compression);
+                    var created = new RvzWorkerContext(_file.Compression, _file.CompressorData);
 
                     contexts.Add(created);
                     idle.Push(created);

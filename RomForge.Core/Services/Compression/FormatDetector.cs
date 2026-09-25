@@ -1,4 +1,6 @@
 ﻿using CHD.Core.Models;
+using DolphinTool.Core.Models;
+using DolphinTool.Core.Rvz;
 using RomForge.Core.Models.Compression;
 using System.IO;
 using System.Text;
@@ -43,30 +45,18 @@ public static class FormatDetector
                 return DetectChdResult(filePath);
             }
 
-            if (MatchBytes(header, 0, (byte)'R', (byte)'V', (byte)'Z', 0x01))
-            {
-                fs.Seek(0, SeekOrigin.Begin);
-                var scanBuffer = br.ReadBytes(256);
+            var container = DiscImageInspector.DetectContainer(filePath);
 
-                for (int i = 0; i <= scanBuffer.Length - 4; i++)
-                {
-                    if (scanBuffer[i] == 0x5D && scanBuffer[i + 1] == 0x1C && scanBuffer[i + 2] == 0x9E && scanBuffer[i + 3] == 0xA3)
-                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
-
-                    if (scanBuffer[i] == 0xC2 && scanBuffer[i + 1] == 0x33 && scanBuffer[i + 2] == 0x9F && scanBuffer[i + 3] == 0x3D)
-                        return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
-                }
-
+            if (container == DiscContainerFormat.Rvz)
                 return Result(RomFormat.Rvz, ConvertDirection.Decompress, "iso");
-            }
 
-            if (MatchBytes(header, 0, 0x01, 0xC0, 0x0B, 0xB1))
+            if (container == DiscContainerFormat.Gcz)
                 return Result(RomFormat.Gcz, ConvertDirection.Compress, "rvz");
 
-            if (MatchBytes(header, 0, (byte)'W', (byte)'I', (byte)'A', 0x01))
+            if (container == DiscContainerFormat.Wia)
                 return Result(RomFormat.Wia, ConvertDirection.Compress, "rvz");
 
-            if (MatchMagic(header, "WBFS"))
+            if (container == DiscContainerFormat.Wbfs)
                 return Result(RomFormat.Wbfs, ConvertDirection.Compress, "rvz");
 
             if (fs.Length > 0x104)
@@ -77,14 +67,12 @@ public static class FormatDetector
                     return Result(RomFormat.Cci, ConvertDirection.Compress, "zcci");
             }
 
-            fs.Seek(0x18, SeekOrigin.Begin);
-            var wiiMagic = br.ReadBytes(4);
-            if (MatchBytes(wiiMagic, 0, 0x5D, 0x1C, 0x9E, 0xA3))
+            var platform = DiscImageInspector.Detect(filePath);
+
+            if (platform == DiscPlatform.Wii)
                 return Result(RomFormat.Wii, ConvertDirection.Compress, "rvz");
 
-            fs.Seek(0x1C, SeekOrigin.Begin);
-            var gcMagic = br.ReadBytes(4);
-            if (MatchBytes(gcMagic, 0, 0xC2, 0x33, 0x9F, 0x3D))
+            if (platform == DiscPlatform.GameCube)
                 return Result(RomFormat.Gcm, ConvertDirection.Compress, "rvz");
 
             fs.Seek(0x8001, SeekOrigin.Begin);
@@ -146,14 +134,6 @@ public static class FormatDetector
         if (data.Length < bytes.Length) return false;
         for (int i = 0; i < bytes.Length; i++)
             if (data[i] != bytes[i]) return false;
-        return true;
-    }
-
-    private static bool MatchBytes(byte[] data, int offset, params byte[] expected)
-    {
-        if (data.Length < offset + expected.Length) return false;
-        for (int i = 0; i < expected.Length; i++)
-            if (data[offset + i] != expected[i]) return false;
         return true;
     }
 }

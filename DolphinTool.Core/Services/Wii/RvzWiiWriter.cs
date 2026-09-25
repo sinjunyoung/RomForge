@@ -384,7 +384,9 @@ internal sealed class RvzWiiWriter
             GroupResult result;
             if (compressedSize < combinedUnaligned.Length)
             {
-                result = new GroupResult(context.Compressed, compressedSize, (uint)compressedSize | 0x80000000u, packedSize);
+                byte[] compressedCopy = new byte[compressedSize];
+                context.Compressed.AsSpan(0, compressedSize).CopyTo(compressedCopy);
+                result = new GroupResult(compressedCopy, compressedSize, (uint)compressedSize | 0x80000000u, packedSize);
             }
             else
             {

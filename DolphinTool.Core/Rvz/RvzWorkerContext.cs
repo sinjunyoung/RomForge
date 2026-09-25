@@ -2,13 +2,13 @@ using DolphinTool.Core.Models;
 
 namespace DolphinTool.Core.Rvz;
 
-internal sealed class RvzWorkerContext(RvzCompressionType compression) : IDisposable
+internal sealed class RvzWorkerContext(RvzCompressionType compression, byte[] compressorData) : IDisposable
 {
     private byte[]? _decrypted;
     private byte[]? _encrypted;
     private WiiGroupEncryptor? _encryptor;
 
-    public RvzChunkDecoder Decoder { get; } = new(compression);
+    public RvzChunkDecoder Decoder { get; } = new(compression, compressorData);
 
     public List<HashException> Exceptions { get; } = [];
 

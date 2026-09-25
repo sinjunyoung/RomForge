@@ -1,4 +1,6 @@
 ﻿using DolphinTool.Core.Models;
+using DolphinTool.Core.Services.GameCube;
+using DolphinTool.Core.Services.Wbfs;
 using System.Buffers.Binary;
 
 namespace DolphinTool.Core.Rvz;
@@ -22,5 +24,30 @@ public static class DiscImageInspector
             return DiscPlatform.GameCube;
 
         return DiscPlatform.Unknown;
+    }
+
+    public static DiscContainerFormat DetectContainer(string path)
+    {
+        using var handle = File.OpenHandle(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+        if (RandomAccess.GetLength(handle) < 4)
+            return DiscContainerFormat.Unknown;
+
+        if (GczSource.IsGcz(handle))
+            return DiscContainerFormat.Gcz;
+
+        if (WbfsSource.IsWbfs(handle))
+            return DiscContainerFormat.Wbfs;
+
+        Span<byte> header = stackalloc byte[4];
+        RandomAccess.Read(handle, header, 0);
+
+        if (RvzMagic.IsRvz(header))
+            return DiscContainerFormat.Rvz;
+
+        if (RvzMagic.IsWia(header))
+            return DiscContainerFormat.Wia;
+
+        return DiscContainerFormat.PlainDisc;
     }
 }

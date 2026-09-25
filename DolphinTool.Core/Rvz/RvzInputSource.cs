@@ -1,4 +1,5 @@
 using DolphinTool.Core.Services.GameCube;
+using DolphinTool.Core.Services.Wbfs;
 
 namespace DolphinTool.Core.Rvz;
 
@@ -12,6 +13,9 @@ internal static class RvzInputSource
         {
             if (GczSource.IsGcz(handle))
                 return new GczSource(handle);
+
+            if (WbfsSource.IsWbfs(handle))
+                return WbfsSource.Open(path, handle);
 
             return new PlainFileSource(handle);
         }
