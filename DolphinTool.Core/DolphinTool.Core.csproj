@@ -30,9 +30,6 @@
   </ItemGroup>
 
 <ItemGroup>
-    <None Update="dolphintool.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="dolphin_rvz_wrapper.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>false</ExcludeFromSingleFile>

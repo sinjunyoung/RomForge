@@ -2,32 +2,11 @@
 using DolphinTool.Core.Models;
 using DolphinTool.Core.Rvz;
 using DolphinTool.Core.Services.GameCube;
-using System.Runtime.InteropServices;
 
 namespace DolphinTool.Core.Services;
 
 public class DolphinService
 {
-    private const string DllName = "dolphintool.dll";
-
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate bool ProgressCallbackDelegate([MarshalAs(UnmanagedType.LPStr)] string text, float percent);
-
-    [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    private delegate void LogCallbackDelegate([MarshalAs(UnmanagedType.LPStr)] string message);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int rvz_convert_to_rvz([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string compression, int compressionLevel, int blockSize, ProgressCallbackDelegate? progress, LogCallbackDelegate? log);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int rvz_convert_to_iso([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string format, ProgressCallbackDelegate? progress, LogCallbackDelegate? log);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int rvz_convert_to_gcz([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, int blockSize, ProgressCallbackDelegate? progress, LogCallbackDelegate? log);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void rvz_cancel();
-
     public event EventHandler<(string Message, LogLevel Level)>? LogMessage;
     public event EventHandler<ProgressEventArgs>? ProgressChanged;
 
@@ -57,44 +36,18 @@ public class DolphinService
 
             outputPath = Utils.GetUniqueFilePath(outputPath);
 
-            ProgressCallbackDelegate progressCb = (text, pct) =>
-            {
-                ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(pct * 100)));
-                return !ct.IsCancellationRequested;
-            };
-
-            LogCallbackDelegate logCb = msg => LogMessage?.Invoke(this, (msg, LogLevel.Info));
-
-            using var reg = ct.Register(() => rvz_cancel());
-
             LogMessage?.Invoke(this, ( $"{Path.GetFileName(inputPath)} {workType} 시작", LogLevel.Highlight ));
 
-            int result;
-
-            try
+            int result = format switch
             {
-                result = format switch
-                {
-                    "wbfs" or "wia" =>
-                        rvz_convert_to_rvz(inputPath, outputPath, "zstd", compressionLevel, 131072, progressCb, logCb),
+                "gcm" or "gcz" or "wii" or "wbfs" or "wia" =>
+                    ConvertIsoToRvz(inputPath, outputPath, compressionLevel, ct),
 
-                    "gcm" or "wii" =>
-                        ConvertIsoToRvz(inputPath, outputPath, compressionLevel, ct),
+                "rvz" =>
+                    ConvertRvzToIso(inputPath, outputPath, ct),
 
-                    "gcz" when DiscImageInspector.Detect(inputPath) == DiscPlatform.GameCube =>
-                        ConvertIsoToRvz(inputPath, outputPath, compressionLevel, ct),                   
-
-                    "rvz" =>
-                        ConvertRvzToIso(inputPath, outputPath, ct),
-
-                    _ => -2
-                };
-            }
-            finally
-            {
-                GC.KeepAlive(progressCb);
-                GC.KeepAlive(logCb);
-            }
+                _ => -2
+            };
 
             if (result == -1 || ct.IsCancellationRequested)
             {
