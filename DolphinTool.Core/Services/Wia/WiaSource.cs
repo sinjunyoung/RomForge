@@ -8,14 +8,9 @@ internal sealed class WiaSource : IRvzInputSource
 {
     private readonly record struct Region(long Start, long End, int RawIndex, int PartitionIndex, int DataIndex);
 
-    private sealed class Context : IDisposable
+    private sealed class Context(RvzCompressionType compression, byte[] compressorData) : IDisposable
     {
-        public Context(RvzCompressionType compression, byte[] compressorData)
-        {
-            Decoder = new RvzChunkDecoder(compression, compressorData);
-        }
-
-        public RvzChunkDecoder Decoder { get; }
+        public RvzChunkDecoder Decoder { get; } = new RvzChunkDecoder(compression, compressorData);
 
         public WiiGroupEncryptor Encryptor { get; } = new();
 
@@ -133,7 +128,7 @@ internal sealed class WiaSource : IRvzInputSource
 
         regions.Sort((a, b) => a.Start.CompareTo(b.Start));
 
-        return regions.ToArray();
+        return [.. regions];
     }
 
     public void Read(long offset, Span<byte> destination)
@@ -164,9 +159,7 @@ internal sealed class WiaSource : IRvzInputSource
 
             var region = FindRegion(current);
 
-            written += region.PartitionIndex < 0
-                ? ReadRaw(context, region, current, destination[written..])
-                : ReadPartition(context, region, current, destination[written..]);
+            written += region.PartitionIndex < 0 ? ReadRaw(context, region, current, destination[written..]) : ReadPartition(context, region, current, destination[written..]);
         }
     }
 
@@ -354,7 +347,8 @@ internal sealed class WiaSource : IRvzInputSource
         context.EnsureInput(compressedSize);
         RvzIo.ReadExactly(_handle, context.Input.AsSpan(0, compressedSize), fileOffset);
 
-        var chunk = context.Decoder.Decode(context.Input.AsSpan(0, compressedSize), group.IsCompressed, exceptionLists, dataSize, group.RvzPackedSize, junkOffset);
+        var chunk = context.Decoder.Decode(context.Input.AsSpan(0, compressedSize), _file.Compression != RvzCompressionType.None, exceptionLists, dataSize, 0, junkOffset); 
+
         context.CachedChunk = chunk;
         context.CachedGroupIndex = totalGroupIndex;
 
