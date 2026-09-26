@@ -10,14 +10,15 @@ internal static class WiiPartitionTable
     {
         var offsets = new SortedSet<long>();
         var candidates = new List<(long Offset, uint Type)>();
+        Span<byte> header = stackalloc byte[8];
 
         for (int group = 0; group < 4; group++)
         {
             long groupHeaderOffset = 0x40000 + group * 8;
+
             if (groupHeaderOffset + 8 > isoSize)
                 break;
 
-            Span<byte> header = stackalloc byte[8];
             input.Read(groupHeaderOffset, header);
 
             uint count = BinaryPrimitives.ReadUInt32BigEndian(header);
@@ -27,6 +28,7 @@ internal static class WiiPartitionTable
                 continue;
 
             byte[] table = new byte[count * 8];
+
             input.Read(tableOffset, table);
 
             for (int i = 0; i < count; i++)
@@ -45,9 +47,11 @@ internal static class WiiPartitionTable
         candidates.Sort((a, b) => a.Offset.CompareTo(b.Offset));
 
         var result = new List<WiiPartitionSpec>();
+
         foreach (var (offset, _) in candidates)
         {
             var spec = TryRead(input, isoSize, offset);
+
             if (spec != null)
                 result.Add(spec);
         }
@@ -61,15 +65,18 @@ internal static class WiiPartitionTable
             return null;
 
         Span<byte> magic = stackalloc byte[4];
+
         input.Read(offset, magic);
+
         if (BinaryPrimitives.ReadUInt32BigEndian(magic) != PartitionMagic)
             return null;
 
         Span<byte> pointers = stackalloc byte[8];
+
         input.Read(offset + 0x2B8, pointers);
+
         long dataOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(pointers) << 2;
         long dataSize = (long)BinaryPrimitives.ReadUInt32BigEndian(pointers[4..]) << 2;
-
         long dataStart = offset + dataOffset;
         long dataEnd = dataStart + dataSize;
 
@@ -86,6 +93,7 @@ internal static class WiiPartitionTable
             return null;
 
         byte[] ticket = new byte[WiiTicket.Size];
+
         input.Read(offset, ticket);
 
         byte[] key = WiiTicket.DecryptTitleKey(ticket);

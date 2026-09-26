@@ -60,6 +60,7 @@ internal sealed class LaggedFibonacciGenerator
             {
                 Step();
                 Refresh();
+
                 _positionBytes = 0;
             }
         }
@@ -123,6 +124,7 @@ internal sealed class LaggedFibonacciGenerator
             Step();
 
         _dirty = true;
+
         return true;
     }
 

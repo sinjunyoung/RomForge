@@ -55,10 +55,8 @@ internal sealed class RvzFile
 
         bool isRvz = RvzMagic.IsRvz(h1);
         int groupEntrySize = isRvz ? RvzGroupEntrySize : WiaGroupEntrySize;
-
         uint version = BinaryPrimitives.ReadUInt32BigEndian(h1.AsSpan(4));
         uint versionCompatible = BinaryPrimitives.ReadUInt32BigEndian(h1.AsSpan(8));
-
         uint expectedVersion = isRvz ? RvzVersion : WiaVersion;
         uint expectedVersionReadCompatible = isRvz ? RvzVersionReadCompatible : WiaVersionReadCompatible;
 
@@ -66,6 +64,7 @@ internal sealed class RvzFile
             throw new NotSupportedException($"지원하지 않는 {(isRvz ? "RVZ" : "WIA")} 버전입니다: 0x{version:X8}");
 
         Span<byte> digest = stackalloc byte[20];
+
         SHA1.HashData(h1.AsSpan(0, Header1Size - 20), digest);
 
         if (!digest.SequenceEqual(h1.AsSpan(Header1Size - 20, 20)))
@@ -114,7 +113,6 @@ internal sealed class RvzFile
             throw new InvalidDataException("RVZ/WIA 압축기 데이터 크기가 올바르지 않습니다.");
 
         byte[] compressorData = h2.AsSpan(213, compressorDataSize).ToArray();
-
         bool powerOfTwo = (chunkSize & (chunkSize - 1)) == 0;
 
         if ((chunkSize < WiiLayout.BlockTotalSize || !powerOfTwo) && chunkSize % WiiLayout.GroupTotalSize != 0)
@@ -137,6 +135,7 @@ internal sealed class RvzFile
             throw new InvalidDataException("RVZ 파티션 테이블 위치가 올바르지 않습니다.");
 
         byte[] partitionRaw = new byte[partitionBytes];
+
         RvzIo.ReadExactly(handle, partitionRaw, partitionOffset);
         SHA1.HashData(partitionRaw, digest);
 

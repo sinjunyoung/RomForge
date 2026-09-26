@@ -14,6 +14,7 @@ internal static class Adler32
         while (index < data.Length)
         {
             int count = Math.Min(MaxBlock, data.Length - index);
+
             for (int i = 0; i < count; i++)
             {
                 a += data[index + i];

@@ -15,6 +15,7 @@ public static class DiscImageInspector
             return DiscPlatform.Unknown;
 
         Span<byte> header = stackalloc byte[0x20];
+
         source.Read(0, header);
 
         if (BinaryPrimitives.ReadUInt32BigEndian(header[0x18..]) == 0x5D1C9EA3)
@@ -40,6 +41,7 @@ public static class DiscImageInspector
             return DiscContainerFormat.Wbfs;
 
         Span<byte> header = stackalloc byte[4];
+
         RandomAccess.Read(handle, header, 0);
 
         if (RvzMagic.IsRvz(header))

@@ -69,6 +69,7 @@ internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] com
                     byte[] hash = stream.Slice(entryPosition + sizeof(ushort), WiiLayout.HashSize).ToArray();
 
                     list.Add(new HashException(offset, hash));
+
                     entryPosition += HashExceptionSize;
                 }
 

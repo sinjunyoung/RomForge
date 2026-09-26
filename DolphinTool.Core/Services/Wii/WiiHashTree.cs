@@ -33,6 +33,7 @@ internal static class WiiHashTree
         }
 
         var h2 = hashesOut.AsSpan(WiiLayout.H2Offset, WiiLayout.H2Bytes);
+
         for (int i = 1; i < WiiLayout.BlocksPerGroup; i++)
             h2.CopyTo(hashesOut.AsSpan(i * WiiLayout.BlockHeaderSize + WiiLayout.H2Offset, WiiLayout.H2Bytes));
     }
@@ -41,14 +42,19 @@ internal static class WiiHashTree
     {
         foreach (int slot in Slots(0, 31 * WiiLayout.HashSize))
             yield return slot;
+
         foreach (int slot in Slots(0x26C, 20))
             yield return slot;
+
         foreach (int slot in Slots(WiiLayout.H1Offset, WiiLayout.H1Bytes))
             yield return slot;
+
         foreach (int slot in Slots(0x320, 32))
             yield return slot;
+
         foreach (int slot in Slots(WiiLayout.H2Offset, WiiLayout.H2Bytes))
             yield return slot;
+
         foreach (int slot in Slots(0x3E0, 32))
             yield return slot;
     }

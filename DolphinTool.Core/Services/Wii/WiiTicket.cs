@@ -18,17 +18,22 @@ internal static class WiiTicket
             throw new InvalidDataException("Wii 티켓 크기가 올바르지 않습니다.");
 
         int index = ticket[CommonKeyIndexOffset];
+
         if (index >= WiiKeys.CommonKeys.Length)
             index = 0;
 
         Span<byte> iv = stackalloc byte[16];
+
         ticket.Slice(TitleIdOffset, 8).CopyTo(iv);
 
         using var aes = Aes.Create();
+
         aes.Key = WiiKeys.CommonKeys[index];
 
         byte[] titleKey = new byte[16];
+
         aes.DecryptCbc(ticket.Slice(TitleKeyOffset, 16), iv, titleKey, PaddingMode.None);
+
         return titleKey;
     }
 
