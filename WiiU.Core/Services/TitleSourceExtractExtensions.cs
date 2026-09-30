@@ -4,11 +4,15 @@ public static class TitleSourceExtractExtensions
 {
     private const int BufferSize = 1024 * 1024;
 
-    public static void ExtractTo(this ITitleSource source, string destinationFolder, Action<int, int, string>? onFileProgress = null, CancellationToken cancellationToken = default)
+    public static void ExtractTo(this ITitleSource source, string destinationFolder, Action<long, long, string>? onProgress = null, CancellationToken cancellationToken = default)
     {
         var paths = source.EnumerateFiles().ToList();
-        int total = paths.Count;
-        int done = 0;
+        long total = 0;
+
+        foreach (string path in paths)
+            total += source.GetFileSize(path);
+
+        var progress = new ByteProgress(total, onProgress);
         var buffer = new byte[BufferSize];
 
         foreach (string path in paths)
@@ -18,17 +22,20 @@ public static class TitleSourceExtractExtensions
             string destPath = Path.Combine(destinationFolder, path.Replace('/', Path.DirectorySeparatorChar));
 
             Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+            progress.Advance(0, path);
 
-            using (var outStream = File.Create(destPath))
-            using (var inStream = source.OpenRead(path))
+            using var outStream = File.Create(destPath);
+            using var inStream = source.OpenRead(path);
+            int read;
+
+            while ((read = inStream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                int read;
-                while ((read = inStream.Read(buffer, 0, buffer.Length)) > 0)
-                    outStream.Write(buffer, 0, read);
+                cancellationToken.ThrowIfCancellationRequested();
+                outStream.Write(buffer, 0, read);
+                progress.Advance(read, path);
             }
-
-            done++;
-            onFileProgress?.Invoke(done, total, path);
         }
+
+        progress.Complete(paths.Count > 0 ? paths[^1] : string.Empty);
     }
 }

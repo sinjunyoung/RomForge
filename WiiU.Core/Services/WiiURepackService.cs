@@ -10,12 +10,10 @@ public sealed class WiiURepackService
     private const int BufferSize = 1024 * 1024;
     private static readonly string[] PatchAnchors = ["content", "meta", "code"];
 
-    public static void Repack(ITitleSource source, string outputWuaPath, string? patchFolder = null, string? titleIdHexOverride = null, int? titleVersionOverride = null, Action<int, int, string>? onFileProgress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
-    {
-        RepackMultiple([new RepackEntry(source, patchFolder, titleIdHexOverride, titleVersionOverride)], outputWuaPath, onFileProgress, log, ct);
-    }
+    public static void Repack(ITitleSource source, string outputWuaPath, string? patchFolder = null, string? titleIdHexOverride = null, int? titleVersionOverride = null, Action<long, long, string>? onProgress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+        => RepackMultiple([new RepackEntry(source, patchFolder, titleIdHexOverride, titleVersionOverride)], outputWuaPath, onProgress, log, ct);
 
-    public static void RepackMultiple(IReadOnlyList<RepackEntry> entries, string outputWuaPath, Action<int, int, string>? onFileProgress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+    public static void RepackMultiple(IReadOnlyList<RepackEntry> entries, string outputWuaPath, Action<long, long, string>? onProgress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         if (entries.Count == 0)
             throw new ArgumentException("At least one entry is required.", nameof(entries));
@@ -91,12 +89,15 @@ public sealed class WiiURepackService
                 resolved.Add((titleFolder, entry.Source, overwriteFiles, binaryPatches, new List<string>(paths)));
             }
 
-            int total = 0;
+            long total = 0;
 
-            foreach (var (TitleFolder, Source, OverwriteFiles, BinaryPatches, Paths) in resolved)
-                total += Paths.Count;
+            foreach (var (_, source, overwriteFiles, _, paths) in resolved)
+            {
+                foreach (string path in paths)
+                    total += overwriteFiles.TryGetValue(path, out var overwriteRef) ? overwriteRef.Length : source.GetFileSize(path);
+            }
 
-            int done = 0;
+            var progress = new ByteProgress(total, onProgress);
             using var outStream = File.Create(outputWuaPath);
             using var writer = new WuaWriter(outStream);
             var buffer = new byte[BufferSize];
@@ -110,25 +111,28 @@ public sealed class WiiURepackService
                 foreach (string path in paths)
                 {
                     ct.ThrowIfCancellationRequested();
-
                     EnsureDirWritten(writer, titleFolder, GetDirectoryPart(path), writtenDirs);
-                    writer.StartNewFile($"{titleFolder}/{path}");
 
-                    using (Stream srcStream = ResolveEntryStream(path, source, overwriteFiles, binaryPatches, log, ct))
+                    string label = $"{titleFolder}/{path}";
+
+                    writer.StartNewFile(label);
+                    progress.Advance(0, label);
+
+                    using Stream srcStream = ResolveEntryStream(path, source, overwriteFiles, binaryPatches, log, ct);
+                    int read;
+
+                    while ((read = srcStream.Read(buffer, 0, buffer.Length)) > 0)
                     {
-                        int read;
+                        ct.ThrowIfCancellationRequested();
 
-                        while ((read = srcStream.Read(buffer, 0, buffer.Length)) > 0)
-                            writer.AppendData(buffer.AsSpan(0, read));
+                        writer.AppendData(buffer.AsSpan(0, read));
+                        progress.Advance(read, label);
                     }
-
-                    done++;
-
-                    onFileProgress?.Invoke(done, total, $"{titleFolder}/{path}");
                 }
             }
 
             writer.FinalizeArchive();
+            progress.Complete(string.Empty);
         }
         finally
         {
@@ -150,7 +154,6 @@ public sealed class WiiURepackService
         {
             byte[] originalData;
             long expectedSize = source.GetFileSize(path);
-
             using (var srcStream = source.OpenRead(path))
             using (var ms = new MemoryStream(checked((int)expectedSize)))
             {

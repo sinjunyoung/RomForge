@@ -16,6 +16,8 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 
     public int FileCount { get; init; }
 
+    public long TotalBytes { get; init; }
+
     public string? TitleName { get; init; }
 
     public ImageSource? Icon { get; init; }
@@ -47,10 +49,10 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
     public string? PatchPath
     {
         get => _patchPath;
-        set 
-        { 
-            _patchPath = value; 
-            OnPropertyChanged(); 
+        set
+        {
+            _patchPath = value;
+            OnPropertyChanged();
             OnPropertyChanged(nameof(PatchDisplay));
             OnPropertyChanged(nameof(PatchIconSource));
         }
@@ -62,9 +64,7 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 
     public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
 
-    public string PatchIconSource => string.IsNullOrEmpty(PatchPath)
-        ? "/Assets/Images/NoPatch.png"
-        : "/Assets/Images/Patch.png";
+    public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
     public static TitleRole GuessRole(string titleIdHex)
     {
@@ -83,7 +83,6 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
     public ulong GetRoleCorrectedTitleId()
     {
         ulong titleId = Convert.ToUInt64(TitleIdHex, 16);
-
         uint category = Role switch
         {
             TitleRole.Base => 0x00050000u,
@@ -119,9 +118,7 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
         {
             try
             {
-                long size = IsFolder
-                    ? GetDirectorySize(new DirectoryInfo(FilePath))
-                    : new FileInfo(FilePath).Length;
+                long size = IsFolder ? GetDirectorySize(new DirectoryInfo(FilePath)) : new FileInfo(FilePath).Length;
 
                 return PickPack.Disk.ETC.FileSize.FormatSize(size);
             }
@@ -135,6 +132,7 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
     private static long GetDirectorySize(DirectoryInfo directoryInfo)
     {
         long size = 0;
+
         foreach (FileInfo file in directoryInfo.EnumerateFiles("*", SearchOption.AllDirectories))
             size += file.Length;
 

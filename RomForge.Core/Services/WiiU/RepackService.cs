@@ -81,7 +81,9 @@ public sealed class RepackService()
 
     private static async Task<TitleInputEntry> BuildRowAsync(string path, string keysTxtPath, bool isFolder, int subTitleIndex, ITitleSource source)
     {
-        int fileCount = source.EnumerateFiles().Count();
+        var paths = source.EnumerateFiles().ToList();
+        int fileCount = paths.Count;
+        long totalBytes = paths.Sum(p => source.GetFileSize(p));
         string? titleName = null;
         ImageSource? icon = null;
 
@@ -107,6 +109,7 @@ public sealed class RepackService()
             SubTitleIndex = subTitleIndex,
             TitleVersion = source.TitleVersion,
             FileCount = fileCount,
+            TotalBytes = totalBytes,
             TitleName = titleName,
             Icon = icon,
         };
@@ -114,7 +117,9 @@ public sealed class RepackService()
 
     private static TitleInputEntry BuildRowFromFolder(string folderPath, ITitleSource source)
     {
-        int fileCount = source.EnumerateFiles().Count();
+        var paths = source.EnumerateFiles().ToList();
+        int fileCount = paths.Count;
+        long totalBytes = paths.Sum(p => source.GetFileSize(p));
         string? titleName = null;
         ImageSource? icon = null;
 
@@ -140,6 +145,7 @@ public sealed class RepackService()
             SubTitleIndex = 0,
             TitleVersion = source.TitleVersion,
             FileCount = fileCount,
+            TotalBytes = totalBytes,
             TitleName = titleName,
             Icon = icon,
         };
@@ -185,7 +191,6 @@ public sealed class RepackService()
         var result = new List<WupFileEntry>();
         var overwriteFiles = new Dictionary<string, PatchFileRef>(StringComparer.Ordinal);
         var binaryPatches = new Dictionary<string, PatchFileRef>(StringComparer.Ordinal);
-
         IArchivePatchSource? archive = null;
 
         if (patchPath is not null)
@@ -242,7 +247,6 @@ public sealed class RepackService()
             if (overwriteFiles.TryGetValue(relPath, out var overwriteRef))
             {
                 log?.Invoke($"교체: {overwriteRef.DisplayName} → {relPath}", LogLevel.Ok);
-
                 result.Add(new WupFileEntry(relPath, overwriteRef.OpenRead, overwriteRef.Length));
                 continue;
             }
@@ -251,19 +255,16 @@ public sealed class RepackService()
             {
                 byte[] originalData;
                 long expectedSize = source.GetFileSize(relPath);
-
                 using (var srcStream = source.OpenRead(relPath))
                 using (var ms = new MemoryStream(checked((int)expectedSize)))
                 {
                     srcStream.CopyTo(ms);
                     originalData = ms.Length == ms.Capacity ? ms.GetBuffer() : ms.ToArray();
                 }
-
                 byte[] patchData = patchRef.ReadSmallFileBytes();
                 byte[] patchedData = UniversalPatcher.ApplyPatchAsync(originalData, patchData, null).GetAwaiter().GetResult();
 
                 log?.Invoke($"패치 완료: {patchRef.DisplayName} → {relPath}", LogLevel.Info);
-
                 result.Add(new WupFileEntry(relPath, () => new MemoryStream(patchedData), patchedData.Length));
                 continue;
             }
@@ -282,6 +283,9 @@ public sealed class RepackService()
             var sw = Stopwatch.StartNew();
 
             log?.Invoke("언팩 시작...", LogLevel.Highlight);
+
+            long grandTotal = entries.Sum(e => e.TotalBytes);
+            long offset = 0;
 
             foreach (var entry in entries)
             {
@@ -302,19 +306,26 @@ public sealed class RepackService()
 
                 Directory.CreateDirectory(destFolder);
 
+                long entryOffset = offset;
+
                 source.ExtractTo(destFolder,
-                    onFileProgress: (done, total, filePath) =>
+                    onProgress: (done, total, filePath) =>
                     {
                         ct.ThrowIfCancellationRequested();
+
+                        long overall = Math.Min(entryOffset + done, grandTotal);
+
                         progress?.Invoke(new ProgressInfo
                         {
-                            Percent = total > 0 ? (int)(done * 100.0 / total) : 100,
+                            Percent = grandTotal > 0 ? (int)(overall * 100.0 / grandTotal) : 100,
                             Label = $"[{entry.Kind}] {filePath}",
                             TimeInfo = $"{sw.Elapsed:mm\\:ss} 경과",
                             Speed = string.Empty,
                         });
                     },
                     cancellationToken: ct);
+
+                offset += entry.TotalBytes;
             }
         }, ct);
     }
@@ -327,6 +338,7 @@ public sealed class RepackService()
         await Task.Run(() =>
         {
             Directory.CreateDirectory(outputPath);
+
             var sources = entries.Select(e => ReopenSource(e, keysTxtPath)).ToList();
 
             log?.Invoke("리팩 시작...", LogLevel.Highlight);
@@ -351,7 +363,7 @@ public sealed class RepackService()
                 try
                 {
                     WiiURepackService.RepackMultiple(repackEntries, outputWuaPath,
-                        onFileProgress: (done, total, path) =>
+                        onProgress: (done, total, path) =>
                         {
                             progress?.Invoke(new ProgressInfo
                             {
@@ -363,7 +375,6 @@ public sealed class RepackService()
                         },
                         log: log,
                         ct: ct);
-
                     log?.Invoke($"완료: {outputWuaPath}", LogLevel.Ok);
                 }
                 catch
@@ -412,12 +423,16 @@ public sealed class RepackService()
     private static void RepackToWup(List<RepackEntry> repackEntries, List<ITitleSource> sources, IReadOnlyList<TitleInputEntry> entries, string outputPath, Action<ProgressInfo>? progress, Action<string, LogLevel>? log, CancellationToken ct)
     {
         var sw = Stopwatch.StartNew();
+        long grandTotal = entries.Sum(e => e.TotalBytes);
+        long offset = 0;
 
         for (int i = 0; i < sources.Count; i++)
         {
             ct.ThrowIfCancellationRequested();
 
             var source = sources[i];
+            long entryTotal = entries[i].TotalBytes;
+            long entryOffset = offset;
             string? patchPath = repackEntries[i].PatchFolder;
             var (files, patchZipHandle) = BuildFileEntries(source, patchPath, log);
             using var _ = patchZipHandle;
@@ -433,9 +448,12 @@ public sealed class RepackService()
                 WupPacker.Pack(wupFolder, titleId, titleVersion, files,
                     onProgress: (done, total, label) =>
                     {
+                        double fraction = total > 0 ? (double)done / total : 1.0;
+                        long overall = entryOffset + (long)(fraction * entryTotal);
+
                         progress?.Invoke(new ProgressInfo
                         {
-                            Percent = total > 0 ? (int)(done * 100.0 / total) : 100,
+                            Percent = grandTotal > 0 ? (int)(overall * 100.0 / grandTotal) : 100,
                             Label = $"[{i + 1}/{sources.Count}] {label}",
                             TimeInfo = $"{sw.Elapsed:mm\\:ss} 경과",
                             Speed = string.Empty,
@@ -452,14 +470,15 @@ public sealed class RepackService()
                 throw;
             }
 
+            offset += entryTotal;
+
             progress?.Invoke(new ProgressInfo
             {
-                Percent = (int)((i + 1) * 100.0 / sources.Count),
+                Percent = grandTotal > 0 ? (int)(offset * 100.0 / grandTotal) : 100,
                 Label = $"WUP 생성 완료: {titleId:x16}_v{titleVersion}",
                 TimeInfo = string.Empty,
                 Speed = string.Empty,
             });
-
             log?.Invoke($"완료: {wupFolder}", LogLevel.Ok);
         }
     }
@@ -468,7 +487,6 @@ public sealed class RepackService()
     {
         string safeName = NspNameBuilder.SafeFileName(entry.TitleName ?? entry.DisplayName);
         string titleIdHex = entry.TitleIdHex.ToUpper();
-
         string roleTag = entry.Role switch
         {
             TitleRole.Update => "Update",
