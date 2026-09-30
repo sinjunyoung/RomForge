@@ -113,7 +113,37 @@
             </Grid>
         </Grid>
 
-        <Border Grid.Row="2" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,0" VerticalAlignment="Top" Height="30">
+        <Border Grid.Row="2" Visibility="{Binding PatchVM.NormalVM.HasSource, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,4" Margin="0,5,0,0" VerticalAlignment="Top" MinHeight="30">
+            <WrapPanel DataContext="{Binding PatchVM.NormalVM.SourceHash}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <WrapPanel.Resources>
+                    <Style x:Key="HashValueBox" TargetType="TextBox">
+                        <Setter Property="IsReadOnly" Value="True"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Foreground" Value="#DCDCDC"/>
+                        <Setter Property="FontFamily" Value="Consolas"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Margin" Value="0,0,14,0"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+                </WrapPanel.Resources>
+                <TextBlock Text="{Binding TargetName}" Visibility="{Binding HasTargetName, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding CalculatingText}" Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" VerticalAlignment="Center"/>
+                <TextBlock Text="패치 시작으로 해시 계산이 취소되었습니다" Visibility="{Binding IsCancelled, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" VerticalAlignment="Center"/>
+                <TextBlock Text="해시 계산 실패" Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#E06C75" FontSize="12" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" Visibility="{Binding HasResult, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="CRC32" Foreground="#888888" FontWeight="Bold" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding Crc32, Mode=OneWay}" Style="{StaticResource HashValueBox}"/>
+                    <TextBlock Text="MD5" Foreground="#888888" FontWeight="Bold" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding Md5, Mode=OneWay}" Style="{StaticResource HashValueBox}"/>
+                    <TextBlock Text="SHA-1" Foreground="#888888" FontWeight="Bold" FontSize="12" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                    <TextBox Text="{Binding Sha1, Mode=OneWay}" Style="{StaticResource HashValueBox}"/>
+                </StackPanel>
+            </WrapPanel>
+        </Border>
+
+        <Border Grid.Row="2" Visibility="{Binding PatchVM.NormalVM.SourceHintVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,0" VerticalAlignment="Top" Height="30">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="원본 자동 압축해제 지원 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>

@@ -20,7 +20,7 @@ public class HashMainViewModel : ToolTabViewModel
     private HashAlgorithmType _selectedAlgorithm = HashAlgorithmType.MD5;
     private CancellationTokenSource _cts = new();
 
-    private bool _useUpperCase = true;
+    private bool _useUpperCase = false;
 
     public bool UseUpperCase
     {

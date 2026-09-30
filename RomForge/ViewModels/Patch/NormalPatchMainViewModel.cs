@@ -2,6 +2,7 @@
 using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
+using Patch.Core;
 using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
@@ -39,11 +40,21 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(SourceLabel));
             OnPropertyChanged(nameof(NamingPreview));
+            OnPropertyChanged(nameof(HasSource));
+            OnPropertyChanged(nameof(SourceHintVisible));
             CommandManager.InvalidateRequerySuggested();
+
+            _ = SourceHash.StartAsync(value);
         }
     }
 
-    public const int MaxPatchCount = 5;
+    public SourceHashViewModel SourceHash { get; } = new();
+
+    public bool HasSource => !string.IsNullOrEmpty(SourcePath);
+
+    public bool SourceHintVisible => HintsVisible && !HasSource;
+
+    public const int MaxPatchCount = 4;
 
     public System.Collections.ObjectModel.ObservableCollection<PatchSlotViewModel> PatchSlots { get; } = [];
 
@@ -55,7 +66,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public IReadOnlyList<string> PatchPaths => [.. PatchSlots.Select(s => s.FilePath).OfType<string>().Where(p => p.Length > 0)];
 
-    private string? NamingPatchPath => PatchPaths.Count > 0 ? PatchPaths[PatchPaths.Count - 1] : null;
+    private string? NamingPatchPath => PatchPaths.LastOrDefault();
 
     public bool AutoCompress
     {
@@ -235,6 +246,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         OnPropertyChanged(nameof(CanAddPatch));
         OnPropertyChanged(nameof(HintsVisible));
         OnPropertyChanged(nameof(IsMultiPatch));
+        OnPropertyChanged(nameof(SourceHintVisible));
     }
 
     private PatchSlotViewModel CreateSlot()
@@ -266,6 +278,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         OnPropertyChanged(nameof(CanAddPatch));
         OnPropertyChanged(nameof(HintsVisible));
         OnPropertyChanged(nameof(IsMultiPatch));
+        OnPropertyChanged(nameof(SourceHintVisible));
     }
 
     public void Log(string message, LogLevel level)
@@ -280,7 +293,9 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         if (SourcePath is null || patchPaths.Count == 0)
             return;
 
-        string namingPatchPath = patchPaths[patchPaths.Count - 1];
+        SourceHash.Cancel();
+
+        string namingPatchPath = patchPaths.Last();
 
         _runCts = new CancellationTokenSource();
 

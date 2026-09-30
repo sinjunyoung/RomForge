@@ -40,6 +40,8 @@ public static class SourceArchiveExtractor
 
     private static readonly string[] IgnoredExtensions = [".txt", ".nfo", ".diz", ".url", ".ini", ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".md5", ".sfv", ".log", ".pdf", ".doc", ".docx"];
 
+    private static readonly string[] HashExcludedExtensions = [".cue", ".gdi", ".ccd", ".sub", ".mds", ".toc"];
+
     public static bool IsArchivePath(string? path) => !string.IsNullOrEmpty(path) && SupportedExtensions.Contains(Path.GetExtension(path), StringComparer.OrdinalIgnoreCase);
 
     public static Task<ArchiveExtractResult> AnalyzeAndExtractAsync(string archivePath, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct) =>
@@ -154,6 +156,33 @@ public static class SourceArchiveExtractor
             return extracted[entry.Key];
         }, ct);
 
+    public static Task<(string EntryName, RomHashResult Hashes)> ComputeHashAsync(string archivePath, IProgress<double>? progress, CancellationToken ct) =>
+        Task.Run(() =>
+        {
+            using var session = OpenSession(archivePath);
+
+            var target = PickHashTarget(session.Entries);
+
+            return (EntryName: target.Key, Hashes: session.ComputeHash(target.Key, progress, ct));
+        }, ct);
+
+    private static ArchiveEntryInfo PickHashTarget(IReadOnlyList<ArchiveEntryInfo> entries)
+    {
+        var dataFiles = entries
+            .Where(e => !e.IsDirectory)
+            .Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
+            .Where(e => !HashExcludedExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
+            .ToList();
+
+        var romLike = dataFiles.Where(e => RomLikeExtensions.Contains(Path.GetExtension(e.Key))).ToList();
+        var pool = romLike.Count > 0 ? romLike : dataFiles;
+
+        if (pool.Count == 0)
+            throw new InvalidOperationException("압축 안에서 해시를 계산할 파일을 찾을 수 없습니다.");
+
+        return pool.OrderByDescending(e => e.Size).First();
+    }
+
     private static ArchiveExtractResult ResolveCue(IArchiveSession session, ArchiveEntryInfo cueEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
     {
         var cueExtracted = ExtractEntries(session, [cueEntry], extractDir, progress, ct);
@@ -248,6 +277,8 @@ public static class SourceArchiveExtractor
         IReadOnlyList<ArchiveEntryInfo> Entries { get; }
 
         Dictionary<string, string> Extract(List<string> keys, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct);
+
+        RomHashResult ComputeHash(string key, IProgress<double>? progress, CancellationToken ct);
     }
 
     private sealed class SharpCompressSession : IArchiveSession
@@ -322,6 +353,15 @@ public static class SourceArchiveExtractor
             return result;
         }
 
+        public RomHashResult ComputeHash(string key, IProgress<double>? progress, CancellationToken ct)
+        {
+            var entry = _byKey[key];
+
+            using var entryStream = entry.OpenEntryStream();
+
+            return RomHasher.HashStream(entryStream, entry.Size, progress, ct);
+        }
+
         public void Dispose() => _archive.Dispose();
     }
 
@@ -389,6 +429,17 @@ public static class SourceArchiveExtractor
             }
 
             return result;
+        }
+
+        public RomHashResult ComputeHash(string key, IProgress<double>? progress, CancellationToken ct)
+        {
+            var info = _byKey[key];
+
+            using var sink = new RomHashSink((long)info.Size, progress, ct);
+
+            _extractor.ExtractFile((int)info.Index, sink);
+
+            return sink.Complete();
         }
 
         public void Dispose() => _extractor.Dispose();
