@@ -294,7 +294,7 @@
                             <Run Text="ISO, CUE+BIN, GDI+BIN+RAW" Foreground="#CCCCCC"/>                            
                         </TextBlock>
                         
-                         <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,4">
+                        <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": ISO(GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
@@ -302,6 +302,14 @@
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
                             <Run Text="ISO(GC/Wii)" Foreground="#CCCCCC"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="ISO(Wii)" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="ISO(Wii)" Foreground="#CCCCCC"/>
                         </TextBlock>
                 
                         <TextBlock Grid.Row="7" Grid.Column="2" Margin="0,0,0,4">
