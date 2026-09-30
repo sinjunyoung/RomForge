@@ -71,7 +71,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border x:Name="borderCover" Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="15" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
+            <Border x:Name="borderCover" Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0" CornerRadius="15" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
                 <Border.OpacityMask>
                     <VisualBrush>
                         <VisualBrush.Visual>
@@ -81,10 +81,10 @@
                 </Border.OpacityMask>
 
                 <Grid>
-                    <StackPanel VerticalAlignment="Center" ZIndex="1">
-                        <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8" Visibility="{Binding CoverHintVisibility}"/>
-                        <TextBlock Text="이미지 파일을" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
-                        <TextBlock Text="드래그&amp;드롭 하세요" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False" Visibility="{Binding CoverHintVisibility}"/>
+                    <StackPanel VerticalAlignment="Center" ZIndex="1" Visibility="{Binding CoverHintVisibility}">
+                        <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
+                        <TextBlock Text="이미지 파일을" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
+                        <TextBlock Text="드래그&amp;드롭 하세요" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         <ItemsControl HorizontalAlignment="Center">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -133,6 +133,7 @@
 
                     <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="UniformToFill" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
                 </Grid>
+                
             </Border>
 
             <StackPanel Grid.Column="1" Margin="15,0,0,0">

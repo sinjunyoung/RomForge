@@ -346,7 +346,7 @@
                 </StackPanel>
             </ToggleButton>
 
-            <StackPanel>
+            <StackPanel Visibility="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>

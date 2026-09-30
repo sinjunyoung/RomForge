@@ -30,8 +30,7 @@ namespace RomForge.ViewModels.Switch
         private bool _wideScreen = false;
         private string _selectedSoundVolume = "100%";
 
-        public ObservableCollection<string> SoundVolumeItems { get; } =
-            ["60%", "80%", "100%", "120%"];
+        public ObservableCollection<string> SoundVolumeItems { get; } = ["60%", "80%", "100%", "120%"];
 
         private string _cuePath = string.Empty;
         private string _nspPath = string.Empty;
@@ -122,7 +121,7 @@ namespace RomForge.ViewModels.Switch
         private void SetCover(byte[] bytes)
         {
             _coverBytes = bytes;
-            CoverImageSource = bytes.ToBitmapImage();
+            CoverImageSource = bytes?.ToBitmapImage();
         }
 
         public bool IsConverting { get => _isConverting; set { _isConverting = value; OnPropertyChanged(); } }
@@ -226,6 +225,7 @@ namespace RomForge.ViewModels.Switch
                         if (line.StartsWith("FILE", StringComparison.OrdinalIgnoreCase))
                         {
                             var parts = line.Split('"');
+
                             if (parts.Length > 1)
                             {
                                 binPath = Path.Combine(Path.GetDirectoryName(cuePath)!, parts[1]);
@@ -242,6 +242,7 @@ namespace RomForge.ViewModels.Switch
                         return;
 
                     header = new byte[0x90];
+
                     await fs.ReadAsync(header.AsMemory(0, 0x90));
                 }
 
@@ -263,9 +264,6 @@ namespace RomForge.ViewModels.Switch
         {
             var bytes = await SaturnCoverArtFetcher.TryDownloadCoverPngAsync(gameId);
 
-            if (bytes == null)
-                return;
-
             SetCover(bytes);
         }
 
@@ -278,6 +276,7 @@ namespace RomForge.ViewModels.Switch
             }
 
             IsConverting = true;
+
             _totalSw.Restart();
 
             using (BeginWork())
@@ -385,10 +384,12 @@ namespace RomForge.ViewModels.Switch
                 }
 
                 var targetBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(finalCuePath);
+
                 if (targetBins.Count == 0 || !File.Exists(targetBins[0]))
                     throw new FileNotFoundException("참조하는 BIN 파일을 찾을 수 없습니다.");
 
                 IniHandler ini = new($"{targetDir}\\{Path.GetFileNameWithoutExtension(cueFileName)}_Switch.ini");
+
                 await ini.LoadAsync();
                 ini.SetValue("Screen", "WideScreen", WideScreen ? "1" : "0");
 
@@ -401,14 +402,14 @@ namespace RomForge.ViewModels.Switch
                 await ini.SaveAsync();
                 
                 var metadata = MetadataService.GetGameMetadataFromUnpacked(unpackedDir);
-                var koLang = metadata?.Languages.FirstOrDefault(l => l.Language == ApplicationControlProperty.Language.Korean)
-                           ?? metadata?.Languages.First();
+                var koLang = metadata?.Languages.FirstOrDefault(l => l.Language == ApplicationControlProperty.Language.Korean) ?? metadata?.Languages.First();
 
                 if (koLang != null)
                 {
                     koLang.TitleName = GameTitle;
                     koLang.Publisher = Publisher;
                     koLang.Flag = true;
+
                     if (_coverBytes != null)
                         koLang.LogoData = _coverBytes;
                 }
@@ -416,6 +417,7 @@ namespace RomForge.ViewModels.Switch
                 token.ThrowIfCancellationRequested();
 
                 Log("리팩 중...");
+
                 var rebuildReq = new BuildRequest(string.Empty, string.Empty, [], string.Empty, WorkPath)
                 {
                     UserMetadata = metadata,
@@ -439,7 +441,6 @@ namespace RomForge.ViewModels.Switch
         {
             using var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var destStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.None);
-
             var buffer = new byte[81920];
             int bytesRead;
 
