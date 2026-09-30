@@ -22,23 +22,23 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadeSourceDrop_Drop">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadeSourceDrop_Drop" Height="50">
                 <Grid Margin="14,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/ZipFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                         <TextBlock Text="{Binding PatchVM.ArcadeVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                     </StackPanel>
-                    <TextBlock Text="원본 ZIP" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
+                    <TextBlock Text="원본 ZIP" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                 </Grid>
             </Border>
 
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadePatchDrop_Drop">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadePatchDrop_Drop" Height="50">
                 <Grid Margin="14,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/ZipFolder.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                         <TextBlock Text="{Binding PatchVM.ArcadeVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                     </StackPanel>
-                    <TextBlock Text="패치(IPS/폴더/ZIP)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
+                    <TextBlock Text="패치(IPS/폴더/ZIP)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -20,14 +20,17 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
     private readonly ZipCompressor _zipCompressor = new(log, progress);
     private readonly CompressKnownConverter _compressKnownConverter = new(log, progress, dolphinCompressLevel);
 
-    public async Task PatchAsync(string sourcePath, string patchPath, DetectResult detected, string outputDir, string outputPath, bool sourceIsTemporary, CancellationToken ct)
+    public async Task PatchAsync(string sourcePath, IReadOnlyList<string> patchPaths, DetectResult detected, string outputDir, string outputPath, bool sourceIsTemporary, CancellationToken ct)
     {
         _outputCuePath = null;
         _outputCcdPath = null;
         _outputGdiPath = null;
         _copiedTrackPaths = [];
 
+        PatchChain.Validate(patchPaths);
+
         bool isZipTarget = detected.Format is not (RomFormat.Bin or RomFormat.Iso or RomFormat.Gcm or RomFormat.Wii or RomFormat.Wbfs or RomFormat.Ccd or RomFormat.Cci or RomFormat.Cia or RomFormat.Gdi);
+        string patchPath = patchPaths[0];
         bool isDcpPatch = Path.GetExtension(patchPath).Equals(".dcp", StringComparison.OrdinalIgnoreCase);
         bool skipCompress;
 
@@ -42,8 +45,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
             {
                 var sourceDir = Path.GetDirectoryName(sourcePath)!;
 
-                gdiPath = Directory.GetFiles(sourceDir, "*.gdi").FirstOrDefault()
-                    ?? throw new InvalidOperationException("DCP 패치 대상 .gdi 파일을 찾을 수 없습니다.");
+                gdiPath = Directory.GetFiles(sourceDir, "*.gdi").FirstOrDefault() ?? throw new InvalidOperationException("DCP 패치 대상 .gdi 파일을 찾을 수 없습니다.");
             }
 
             string workDir = Path.GetDirectoryName(gdiPath)!;
@@ -51,10 +53,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
 
             if (sourceIsTemporary)
             {
-                await DcpGdRomApplier.ApplyAsync(gdiPath, patchPath, workDir,
-                    (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }),
-                    msg => log(msg, LogLevel.Info), ct);
-
+                await DcpGdRomApplier.ApplyAsync(gdiPath, patchPath, workDir, (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log(msg, LogLevel.Info), ct);
                 progress.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
                 log($"패치 완료: {gdiPath}", LogLevel.Ok);
 
@@ -75,7 +74,6 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
                     string finalChdPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, titleName + ".chd"));
 
                     File.Move(chdResult.OutputFile!, finalChdPath);
-
                     log($"CHD 변환 완료: {finalChdPath}", LogLevel.Ok);
                 }
                 else
@@ -83,7 +81,6 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
                     string finalDir = Utils.GetUniqueFolderPath(Path.Combine(outputDir, titleName));
 
                     Directory.Move(workDir, finalDir);
-
                     log($"결과물 저장 완료: {finalDir}", LogLevel.Ok);
                 }
             }
@@ -92,10 +89,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
                 string dcpOutputDir = Utils.GetUniqueFolderPath(Path.Combine(outputDir, titleName));
 
                 Directory.CreateDirectory(dcpOutputDir);
-
-                await DcpGdRomApplier.ApplyAsync(gdiPath, patchPath, dcpOutputDir,
-                    (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }),
-                    msg => log(msg, LogLevel.Info), ct);
+                await DcpGdRomApplier.ApplyAsync(gdiPath, patchPath, dcpOutputDir, (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log(msg, LogLevel.Info), ct);
 
                 _outputGdiPath = Path.Combine(dcpOutputDir, Path.GetFileName(gdiPath));
 
@@ -122,8 +116,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
             return;
         }
 
-        await UniversalPatcher.ApplyPatchAsync(sourcePath, patchPath, outputPath, progress, ct);
-
+        await PatchChain.ApplyAsync(sourcePath, patchPaths, outputPath, outputDir, log, progress, ct);
         progress.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
         log($"패치 완료: {outputPath}", LogLevel.Ok);
 

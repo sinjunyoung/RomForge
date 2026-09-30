@@ -4,9 +4,9 @@
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="0"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="5"/>
+            <RowDefinition Height="0"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -19,7 +19,18 @@
                 <ColumnDefinition Width="2"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalSourceDrop_Drop" MouseLeftButtonDown="NormalSourceDrop_Click">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" AllowDrop="True" Drop="NormalSourceDrop_Drop" MouseLeftButtonDown="NormalSourceDrop_Click">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource DropZone}">
+                        <Setter Property="Height" Value="50"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PatchVM.NormalVM.IsMultiPatch}" Value="True">
+                                <Setter Property="Height" Value="Auto"/>
+                                <Setter Property="MinHeight" Value="38"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -29,25 +40,80 @@
                         <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                         <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                     </Grid>
-                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
+                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                 </Grid>
             </Border>
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
-                <Grid Margin="14,0">
-                    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchPath}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchPath}"/>
+            <Grid Grid.Column="2" IsEnabled="{Binding IsIdle}">
+                <Border Height="50" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
+                    <Grid Margin="14,0">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.PatchSlots[0].Label}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
+                        </Grid>
+                        <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
                     </Grid>
-                    <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,8" ToolTip="{Binding PatchVM.NormalVM.PatchPath}"/>
-                </Grid>
-            </Border>
+                </Border>
+                <ItemsControl Visibility="{Binding PatchVM.NormalVM.IsMultiPatch, Converter={StaticResource BooleanToVisibilityConverter}}" ItemsSource="{Binding PatchVM.NormalVM.PatchSlots}" Margin="0,0,0,-3">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource DropZone}" Height="38" Margin="0,0,0,3" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
+                                <Grid Margin="10,0,36,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding FilePath}"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Label}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding FilePath}"/>
+                                    </Grid>
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}" Foreground="#888" FontSize="11" VerticalAlignment="Center" Margin="8,0,0,0" ToolTip="{Binding FilePath}"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button Width="26" Height="26" Padding="0" HorizontalAlignment="Right" IsEnabled="{Binding PatchVM.NormalVM.CanAddPatch}" ToolTip="연속으로 적용할 패치 추가" Cursor="Hand" Click="AddPatch_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="Transparent">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.8"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="VerticalAlignment" Value="Bottom"/>
+                            <Setter Property="Margin" Value="0,0,6,6"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding PatchVM.NormalVM.IsMultiPatch}" Value="True">
+                                    <Setter Property="VerticalAlignment" Value="Top"/>
+                                    <Setter Property="Margin" Value="0,6,6,0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                    <Image Source="/Assets/Images/Insert.png" Width="24" Height="24" VerticalAlignment="Center"/>
+                </Button>
+            </Grid>
         </Grid>
 
-        <Border Grid.Row="2" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,0,0,0" VerticalAlignment="Top" Height="30">
+        <Border Grid.Row="2" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,0" VerticalAlignment="Top" Height="30">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="원본 자동 압축해제 지원 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -103,7 +169,7 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Row="4" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,0,0,2" VerticalAlignment="Top" Height="30">
+        <Border Grid.Row="4" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,2" VerticalAlignment="Top" Height="30">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
                 <TextBlock Text="지원 패치 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
@@ -283,9 +349,9 @@
                         <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                     </StackPanel>
                 </Border>
-                
+
             </StackPanel>
-            
+
         </StackPanel>
 
         <Border Grid.Row="7" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">

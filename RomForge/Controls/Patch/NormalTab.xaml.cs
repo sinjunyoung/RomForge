@@ -4,6 +4,7 @@ using RomForge.Core.Models.Patch;
 using RomForge.Core.Services.Patch;
 using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;
+using RomForge.ViewModels.Patch;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -212,7 +213,7 @@ public partial class NormalTab : UserControl
             var sourceFiles = files.Except(patchFiles).ToList();
 
             if (patchFiles.Count > 0)
-                ViewModel.PatchVM.NormalVM.PatchPath = patchFiles[0];
+                ViewModel.PatchVM.NormalVM.PatchSlots[0].FilePath = patchFiles[0];
 
             if (sourceFiles.Count > 0)
                 ViewModel.PatchVM.NormalVM.SourcePath = sourceFiles[0];
@@ -221,6 +222,8 @@ public partial class NormalTab : UserControl
 
     private void NormalPatchDrop_Click(object sender, MouseButtonEventArgs e)
     {
+        var slot = GetPatchSlot(sender);
+
         var dlg = new OpenFileDialog
         {
             Title = "패치 파일 선택",
@@ -228,11 +231,13 @@ public partial class NormalTab : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            ViewModel.PatchVM.NormalVM.PatchPath = dlg.FileName;
+            slot.FilePath = dlg.FileName;
     }
 
     private void NormalPatchDrop_Drop(object sender, DragEventArgs e)
     {
+        var slot = GetPatchSlot(sender);
+
         if (e.Data.GetData(DataFormats.FileDrop) is string[] files && files.Length > 0)
         {
             var patchFiles = files
@@ -242,11 +247,24 @@ public partial class NormalTab : UserControl
             var sourceFiles = files.Except(patchFiles).ToList();
 
             if (patchFiles.Count > 0)
-                ViewModel.PatchVM.NormalVM.PatchPath = patchFiles[0];
+                slot.FilePath = patchFiles[0];
 
             if (sourceFiles.Count > 0)
                 ViewModel.PatchVM.NormalVM.SourcePath = sourceFiles[0];
         }
+    }
+
+    private PatchSlotViewModel GetPatchSlot(object sender)
+    {
+        if (sender is FrameworkElement { DataContext: PatchSlotViewModel slot })
+            return slot;
+
+        return ViewModel.PatchVM.NormalVM.PatchSlots[0];
+    }
+
+    private void AddPatch_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.PatchVM.NormalVM.AddPatchSlot();
     }
 
     private void ResetNamingFormat_Click(object sender, RoutedEventArgs e)

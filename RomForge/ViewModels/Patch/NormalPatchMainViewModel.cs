@@ -2,7 +2,6 @@
 using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
-using Patch.Core;
 using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
@@ -22,7 +21,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 {
     private CancellationTokenSource? _runCts;
     private string? _sourcePath;
-    private string? _patchPath;
+    private bool _patchAdded;
     private int _progressPct;
     private string _progressLabel = string.Empty;
     private string _progressPercent = "0%";
@@ -44,18 +43,19 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         }
     }
 
-    public string? PatchPath
-    {
-        get => _patchPath;
-        set
-        {
-            _patchPath = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchLabel));
-            OnPropertyChanged(nameof(NamingPreview));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
+    public const int MaxPatchCount = 5;
+
+    public System.Collections.ObjectModel.ObservableCollection<PatchSlotViewModel> PatchSlots { get; } = [];
+
+    public bool CanAddPatch => PatchSlots.Count < MaxPatchCount;
+
+    public bool HintsVisible => !_patchAdded;
+
+    public bool IsMultiPatch => _patchAdded;
+
+    public IReadOnlyList<string> PatchPaths => [.. PatchSlots.Select(s => s.FilePath).OfType<string>().Where(p => p.Length > 0)];
+
+    private string? NamingPatchPath => PatchPaths.Count > 0 ? PatchPaths[PatchPaths.Count - 1] : null;
 
     public bool AutoCompress
     {
@@ -102,10 +102,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             string? version;
             string date;
 
-            if (PatchPath is not null && File.Exists(PatchPath))
+            string? namingPatchPath = NamingPatchPath;
+
+            if (namingPatchPath is not null && File.Exists(namingPatchPath))
             {
-                (version, string? extractedDate) = PatchVersionInfoExtractor.Extract(Path.GetFileName(PatchPath));
-                date = extractedDate ?? File.GetLastWriteTime(PatchPath).ToString("yyMMdd");
+                (version, string? extractedDate) = PatchVersionInfoExtractor.Extract(Path.GetFileName(namingPatchPath));
+                date = extractedDate ?? File.GetLastWriteTime(namingPatchPath).ToString("yyMMdd");
             }
             else
             {
@@ -151,8 +153,6 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 파일을 드래그하거나 클릭하세요";
 
-    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 파일을 드래그하거나 클릭하세요";
-
     public int ProgressPct
     {
         get => _progressPct;
@@ -185,6 +185,8 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public NormalPatchMainViewModel()
     {
+        PatchSlots.Add(CreateSlot());
+
         AppConfig.Instance.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(AppConfig.Patch))
@@ -218,6 +220,54 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         };
     }
 
+    public void AddPatchSlot()
+    {
+        if (!CanAddPatch)
+            return;
+
+        PatchSlots.Add(CreateSlot());
+
+        _patchAdded = true;
+
+        for (int i = 0; i < PatchSlots.Count; i++)
+            PatchSlots[i].Title = $"패치 {i + 1}";
+
+        OnPropertyChanged(nameof(CanAddPatch));
+        OnPropertyChanged(nameof(HintsVisible));
+        OnPropertyChanged(nameof(IsMultiPatch));
+    }
+
+    private PatchSlotViewModel CreateSlot()
+    {
+        var slot = new PatchSlotViewModel();
+
+        slot.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(PatchSlotViewModel.FilePath))
+            {
+                OnPropertyChanged(nameof(NamingPreview));
+                CommandManager.InvalidateRequerySuggested();
+            }
+        };
+
+        return slot;
+    }
+
+    private void ResetPatchSlots()
+    {
+        while (PatchSlots.Count > 1)
+            PatchSlots.RemoveAt(PatchSlots.Count - 1);
+
+        PatchSlots[0].FilePath = null;
+        PatchSlots[0].Title = "패치";
+
+        _patchAdded = false;
+
+        OnPropertyChanged(nameof(CanAddPatch));
+        OnPropertyChanged(nameof(HintsVisible));
+        OnPropertyChanged(nameof(IsMultiPatch));
+    }
+
     public void Log(string message, LogLevel level)
     {
         Application.Current?.Dispatcher?.Invoke(() => LogEntries.Add(new LogEntry { Message = message, Level = level }));
@@ -225,8 +275,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public async Task RunAsync()
     {
-        if (SourcePath is null || PatchPath is null)
+        var patchPaths = PatchPaths;
+
+        if (SourcePath is null || patchPaths.Count == 0)
             return;
+
+        string namingPatchPath = patchPaths[patchPaths.Count - 1];
 
         _runCts = new CancellationTokenSource();
 
@@ -239,6 +293,8 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
         try
         {
+            PatchChain.Validate(patchPaths);
+
             Directory.CreateDirectory(outputDir);
 
             string actualSourcePath = SourcePath;
@@ -247,7 +303,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             {
                 Log($"원본 압축 확인 중: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
 
-                extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath));                Directory.CreateDirectory(extractDir);
+                extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath)); Directory.CreateDirectory(extractDir);
 
                 var extractResult = await SourceArchiveExtractor.AnalyzeAndExtractAsync(SourcePath, extractDir, BuildProgressReporter(), ct);
 
@@ -270,16 +326,16 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             extractDir ??= Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(actualSourcePath));
 
-            if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && XdeltaAppHeaderReader.TargetsCompressedContainer(PatchPath!))
+            if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && patchPaths.All(XdeltaAppHeaderReader.TargetsCompressedContainer))
             {
-                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), PatchPath!, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
+                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
 
                 Log("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);
 
                 try
                 {
-                    await UniversalPatcher.ApplyPatchAsync(actualSourcePath, PatchPath, directOutputPath, BuildProgressReporter(), ct);
+                    await PatchChain.ApplyAsync(actualSourcePath, patchPaths, directOutputPath, outputDir, Log, BuildProgressReporter(), ct);
                     stopwatch.Stop();
 
                     outputPath = directOutputPath;
@@ -308,14 +364,14 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
-            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), PatchPath!, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
+            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
 
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
 
             Log($"패치 시작: {Path.GetFileName(actualSourcePath)}", LogLevel.Highlight);
 
-            await orchestrator.PatchAsync(actualSourcePath, PatchPath, detected, outputDir, outputPath, sourceIsTemporary, ct);
+            await orchestrator.PatchAsync(actualSourcePath, patchPaths, detected, outputDir, outputPath, sourceIsTemporary, ct);
             stopwatch.Stop();
             Log($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
             outputDir.OpenFolder();
@@ -400,7 +456,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         return sourceMainFileName;
     }
 
-    public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && !string.IsNullOrEmpty(PatchPath);
+    public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && PatchPaths.Count > 0;
 
     public void Cancel() => _runCts?.Cancel();
 
@@ -409,7 +465,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         _runCts?.Cancel();
 
         SourcePath = null;
-        PatchPath = null;
+        ResetPatchSlots();
         AutoCompress = false;
 
         CleanupTask();
