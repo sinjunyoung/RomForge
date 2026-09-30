@@ -21,6 +21,10 @@ internal sealed class WbfsSource : IRvzInputSource
     private readonly ushort[] _wlbaTable;
     private long _length;
 
+    public int BlockSize => (int)_wbfsSectorSize;
+
+    public bool IsBlockMapped(long blockIndex) => blockIndex >= 0 && blockIndex < _blocksPerDisc && _wlbaTable[blockIndex] != 0;
+
     private WbfsSource(List<FileEntry> files, long wbfsSectorSize, int wbfsSectorShift, long blocksPerDisc, ushort[] wlbaTable, long length)
     {
         _files = files;

@@ -2,8 +2,6 @@
 
 public static class WbfsToIsoConverter
 {
-    private const int ChunkSize = 1 << 20;
-
     public static void Convert(string inputPath, string outputPath, Action<double>? progress = null, CancellationToken ct = default)
     {
         bool succeeded = false;
@@ -12,33 +10,35 @@ public static class WbfsToIsoConverter
         {
             using var input = RvzInputSource.Open(inputPath);
 
-            if (input is not WbfsSource)
+            if (input is not WbfsSource wbfs)
                 throw new InvalidDataException("WBFS 파일이 아닙니다.");
 
-            long length = input.Length;
-
+            long length = wbfs.Length;
+            int blockSize = wbfs.BlockSize;
+            long blockCount = (length + blockSize - 1) / blockSize;            
             using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, length);
 
             RandomAccess.SetLength(output, length);
 
-            byte[] buffer = new byte[ChunkSize];
-            long offset = 0;
+            byte[] buffer = new byte[blockSize];
 
-            while (offset < length)
+            for (long block = 0; block < blockCount; block++)
             {
                 ct.ThrowIfCancellationRequested();
 
-                int size = (int)Math.Min(ChunkSize, length - offset);
-                var span = buffer.AsSpan(0, size);
+                if (wbfs.IsBlockMapped(block))
+                {
+                    long offset = block * blockSize;
+                    int size = (int)Math.Min(blockSize, length - offset);
+                    var span = buffer.AsSpan(0, size);
 
-                input.Read(offset, span);
+                    wbfs.Read(offset, span);
 
-                if (span.ContainsAnyExcept((byte)0))
-                    RandomAccess.Write(output, span, offset);
+                    if (span.ContainsAnyExcept((byte)0))
+                        RandomAccess.Write(output, span, offset);
+                }
 
-                offset += size;
-
-                progress?.Invoke(Math.Min(1.0, (double)offset / length));
+                progress?.Invoke(Math.Min(1.0, (double)(block + 1) / blockCount));
             }
 
             succeeded = true;
