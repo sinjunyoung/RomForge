@@ -2,6 +2,8 @@
 
 public class SettingsMainViewModel : MultiToolTabViewModel
 {
+    public GeneralSettingsMainViewModel General { get; } = new();
+
     public PatchSettingsMainViewModel Patch { get; } = new();
 
     public CompressSettingsMainViewModel Compress { get; } = new();
@@ -10,6 +12,7 @@ public class SettingsMainViewModel : MultiToolTabViewModel
 
     public SettingsMainViewModel()
     {
+        Tools.Add(General);
         Tools.Add(Patch);
         Tools.Add(Compress);
         Tools.Add(PS1);

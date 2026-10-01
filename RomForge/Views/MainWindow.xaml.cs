@@ -27,6 +27,13 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
 
         RestoreWindowState();
+
+        Topmost = AppConfig.Instance.Common.Topmost;
+        AppConfig.Instance.Common.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(CommonConfig.Topmost))
+                Topmost = AppConfig.Instance.Common.Topmost;
+        };
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

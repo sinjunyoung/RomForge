@@ -54,7 +54,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public bool SourceHintVisible => HintsVisible && !HasSource;
 
-    public const int MaxPatchCount = 4;
+    public const int MaxPatchCount = 5;
 
     public System.Collections.ObjectModel.ObservableCollection<PatchSlotViewModel> PatchSlots { get; } = [];
 

@@ -14,6 +14,13 @@ public class CommonConfig : ViewModelBase
         get => _logBoxHeight;
         set { SetProperty(ref _logBoxHeight, value); }
     }
+
+    private bool _topmost;
+    public bool Topmost
+    {
+        get => _topmost;
+        set { SetProperty(ref _topmost, value); }
+    }
 }
 
 public class WindowConfig : ViewModelBase
