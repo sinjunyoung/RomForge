@@ -1,32 +1,34 @@
 ﻿using Common.WPF.ViewModels;
 using RomForge.Core.Services.Patch;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace RomForge.ViewModels.Patch;
+
+public sealed record HashEntryItem(string Name, string Crc32, string Md5, string Sha1);
 
 public class SourceHashViewModel : ViewModelBase
 {
     private CancellationTokenSource? _cts;
     private bool _isCalculating;
-    private bool _hasResult;
     private bool _hasError;
     private bool _isCancelled;
     private int _progressPercent;
-    private string? _targetName;
-    private string _crc32 = string.Empty;
-    private string _md5 = string.Empty;
-    private string _sha1 = string.Empty;
+    private int _skippedCount;
+
+    public SourceHashViewModel()
+    {
+        Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEntries));
+    }
+
+    public ObservableCollection<HashEntryItem> Entries { get; } = [];
+
+    public bool HasEntries => Entries.Count > 0;
 
     public bool IsCalculating
     {
         get => _isCalculating;
         private set => SetProperty(ref _isCalculating, value);
-    }
-
-    public bool HasResult
-    {
-        get => _hasResult;
-        private set => SetProperty(ref _hasResult, value);
     }
 
     public bool HasError
@@ -53,35 +55,22 @@ public class SourceHashViewModel : ViewModelBase
 
     public string CalculatingText => $"해시 계산 중... {ProgressPercent}%";
 
-    public string? TargetName
+    public int SkippedCount
     {
-        get => _targetName;
+        get => _skippedCount;
         private set
         {
-            if (SetProperty(ref _targetName, value))
-                OnPropertyChanged(nameof(HasTargetName));
+            if (SetProperty(ref _skippedCount, value))
+            {
+                OnPropertyChanged(nameof(HasSkipped));
+                OnPropertyChanged(nameof(SkippedText));
+            }
         }
     }
 
-    public bool HasTargetName => !string.IsNullOrEmpty(TargetName);
+    public bool HasSkipped => SkippedCount > 0;
 
-    public string Crc32
-    {
-        get => _crc32;
-        private set => SetProperty(ref _crc32, value);
-    }
-
-    public string Md5
-    {
-        get => _md5;
-        private set => SetProperty(ref _md5, value);
-    }
-
-    public string Sha1
-    {
-        get => _sha1;
-        private set => SetProperty(ref _sha1, value);
-    }
+    public string SkippedText => $"용량이 작은 {SkippedCount}개 파일은 표시하지 않았습니다";
 
     public async Task StartAsync(string? path)
     {
@@ -107,31 +96,36 @@ public class SourceHashViewModel : ViewModelBase
                 ProgressPercent = (int)(value * 100);
         });
 
+        var entryProgress = new Progress<(string Name, RomHashResult Hashes)>(entry =>
+        {
+            if (!ct.IsCancellationRequested)
+                AddEntry(entry.Name, entry.Hashes);
+        });
+
         try
         {
-            string? targetName = null;
-            RomHashResult hashes;
-
             if (SourceArchiveExtractor.IsArchivePath(path))
             {
-                var (EntryName, Hashes) = await SourceArchiveExtractor.ComputeHashAsync(path, progress, ct);
+                int skipped = await SourceArchiveExtractor.ComputeHashesAsync(
+                    path,
+                    (name, hashes) => ((IProgress<(string Name, RomHashResult Hashes)>)entryProgress).Report((Path.GetFileName(name), hashes)),
+                    progress,
+                    ct);
 
-                targetName = Path.GetFileName(EntryName);
-                hashes = Hashes;
+                if (ct.IsCancellationRequested)
+                    return;
+
+                SkippedCount = skipped;
             }
             else
             {
-                hashes = await RomHasher.HashFileAsync(path, progress, ct);
+                var hashes = await RomHasher.HashFileAsync(path, progress, ct);
+
+                if (ct.IsCancellationRequested)
+                    return;
+
+                AddEntry(Path.GetFileName(path), hashes);
             }
-
-            if (ct.IsCancellationRequested)
-                return;
-
-            TargetName = targetName;
-            Crc32 = hashes.Crc32;
-            Md5 = hashes.Md5;
-            Sha1 = hashes.Sha1;
-            HasResult = true;
         }
         catch (Exception) when (ct.IsCancellationRequested)
         {
@@ -159,15 +153,15 @@ public class SourceHashViewModel : ViewModelBase
         IsCancelled = true;
     }
 
+    private void AddEntry(string name, RomHashResult hashes) =>
+        Entries.Add(new HashEntryItem(name, hashes.Crc32, hashes.Md5, hashes.Sha1));
+
     private void ClearResult()
     {
         IsCancelled = false;
         IsCalculating = false;
-        HasResult = false;
         HasError = false;
-        TargetName = null;
-        Crc32 = string.Empty;
-        Md5 = string.Empty;
-        Sha1 = string.Empty;
+        SkippedCount = 0;
+        Entries.Clear();
     }
 }

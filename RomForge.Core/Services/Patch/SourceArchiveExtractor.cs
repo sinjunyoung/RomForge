@@ -156,17 +156,40 @@ public static class SourceArchiveExtractor
             return extracted[entry.Key];
         }, ct);
 
-    public static Task<(string EntryName, RomHashResult Hashes)> ComputeHashAsync(string archivePath, IProgress<double>? progress, CancellationToken ct) =>
+    public const int MaxHashEntries = 5;
+
+    public static Task<int> ComputeHashesAsync(string archivePath, Action<string, RomHashResult> onEntry, IProgress<double>? progress, CancellationToken ct) =>
         Task.Run(() =>
         {
             using var session = OpenSession(archivePath);
 
-            var target = PickHashTarget(session.Entries);
+            var targets = PickHashTargets(session.Entries, out int skipped);
 
-            return (EntryName: target.Key, Hashes: session.ComputeHash(target.Key, progress, ct));
+            long totalBytes = Math.Max(1, targets.Sum(e => e.Size));
+            long doneBytes = 0;
+
+            foreach (var target in targets)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                long baseBytes = doneBytes;
+                long entrySize = target.Size;
+
+                var entryProgress = progress is null
+                    ? null
+                    : new DirectProgress(value => progress.Report((baseBytes + value * entrySize) / totalBytes));
+
+                var result = session.ComputeHash(target.Key, entryProgress, ct);
+
+                doneBytes += entrySize;
+
+                onEntry(target.Key, result);
+            }
+
+            return skipped;
         }, ct);
 
-    private static ArchiveEntryInfo PickHashTarget(IReadOnlyList<ArchiveEntryInfo> entries)
+    private static List<ArchiveEntryInfo> PickHashTargets(IReadOnlyList<ArchiveEntryInfo> entries, out int skipped)
     {
         var dataFiles = entries
             .Where(e => !e.IsDirectory)
@@ -180,7 +203,16 @@ public static class SourceArchiveExtractor
         if (pool.Count == 0)
             throw new InvalidOperationException("압축 안에서 해시를 계산할 파일을 찾을 수 없습니다.");
 
-        return pool.OrderByDescending(e => e.Size).First();
+        var ordered = pool.OrderByDescending(e => e.Size).ToList();
+
+        skipped = Math.Max(0, ordered.Count - MaxHashEntries);
+
+        return ordered.Take(MaxHashEntries).ToList();
+    }
+
+    private sealed class DirectProgress(Action<double> handler) : IProgress<double>
+    {
+        public void Report(double value) => handler(value);
     }
 
     private static ArchiveExtractResult ResolveCue(IArchiveSession session, ArchiveEntryInfo cueEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
