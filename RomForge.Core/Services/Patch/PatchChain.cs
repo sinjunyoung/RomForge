@@ -9,7 +9,7 @@ public static class PatchChain
     public static void Validate(IReadOnlyList<string> patchPaths)
     {
         if (patchPaths.Count > 1 && patchPaths.Any(p => Path.GetExtension(p).Equals(".dcp", StringComparison.OrdinalIgnoreCase)))
-            throw new InvalidOperationException("DCP 패치는 다중 패치로 연속 적용할 수 없습니다.");
+            throw new InvalidOperationException("DCP 패치는 연속 패치를 적용할 수 없습니다.");
     }
 
     public static async Task ApplyAsync(string sourcePath, IReadOnlyList<string> patchPaths, string outputPath, string workDir, Action<string, LogLevel> log, IProgress<ProgressInfo> progress, CancellationToken ct)
@@ -47,7 +47,7 @@ public static class PatchChain
                     Label = $"[{step + 1}/{total}] {info.Label}"
                 }));
 
-                log($"다중 패치 {i + 1}/{total} 적용 중: {Path.GetFileName(patchPaths[i])}", LogLevel.Highlight);
+                log($"연속 패치 {i + 1}/{total} 적용 중: {Path.GetFileName(patchPaths[i])}", LogLevel.Highlight);
 
                 await UniversalPatcher.ApplyPatchAsync(current, patchPaths[i], target, stepProgress, ct);
 
