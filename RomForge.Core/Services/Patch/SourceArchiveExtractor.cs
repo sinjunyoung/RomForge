@@ -92,17 +92,7 @@ public static class SourceArchiveExtractor
                 };
             }
 
-            var candidates = entries.Where(e => RomLikeExtensions.Contains(Path.GetExtension(e.Key))).ToList();
-
-            if (candidates.Count == 0)
-            {
-                candidates = [.. entries
-                    .Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
-                    .Where(e => e.Size >= TinySizeThresholdBytes)];
-            }
-
-            if (candidates.Count == 0)
-                candidates = [.. entries.Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))];
+            var candidates = SelectCandidates(entries);
 
             if (candidates.Count == 0)
                 throw new InvalidOperationException("압축 안에서 패치 대상으로 볼 만한 파일을 찾을 수 없습니다.");
@@ -163,7 +153,7 @@ public static class SourceArchiveExtractor
         {
             using var session = OpenSession(archivePath);
 
-            var targets = PickHashTargets(session.Entries, out int skipped);
+            var targets = PickHashTargets(session, ct, out int skipped);
 
             long totalBytes = Math.Max(1, targets.Sum(e => e.Size));
             long doneBytes = 0;
@@ -189,10 +179,81 @@ public static class SourceArchiveExtractor
             return skipped;
         }, ct);
 
-    private static List<ArchiveEntryInfo> PickHashTargets(IReadOnlyList<ArchiveEntryInfo> entries, out int skipped)
+    private static List<ArchiveEntryInfo> PickHashTargets(IArchiveSession session, CancellationToken ct, out int skipped)
+    {
+        var entries = session.Entries.Where(e => !e.IsDirectory).ToList();
+
+        if (entries.Count == 0)
+            throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
+
+        skipped = 0;
+
+        ArchiveEntryInfo? auto = null;
+        string tempDir = Path.Combine(Path.GetTempPath(), "RomForge_hash_" + Guid.NewGuid().ToString("N"));
+
+        try
+        {
+            auto = ResolveAutoTarget(session, entries, tempDir, ct);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            auto = null;
+        }
+        finally
+        {
+            TryDeleteDirectory(tempDir);
+        }
+
+        if (auto is { } target)
+            return [target];
+
+        return PickLargestTargets(entries, out skipped);
+    }
+
+    private static ArchiveEntryInfo? ResolveAutoTarget(IArchiveSession session, List<ArchiveEntryInfo> entries, string tempDir, CancellationToken ct)
+    {
+        var cueEntries = FindByExtension(entries, ".cue");
+
+        if (cueEntries.Count == 1)
+        {
+            string cuePath = ExtractControlFile(session, cueEntries[0], tempDir, ct);
+            string key = SelectCueTracks(cuePath, cueEntries[0], entries).ResolvedKey;
+
+            return entries.First(e => e.Key == key);
+        }
+
+        if (cueEntries.Count > 1)
+            return null;
+
+        var gdiEntries = FindByExtension(entries, ".gdi");
+
+        if (gdiEntries.Count == 1)
+        {
+            string gdiPath = ExtractControlFile(session, gdiEntries[0], tempDir, ct);
+            string key = SelectGdiTracks(gdiPath, gdiEntries[0], entries).ResolvedKey;
+
+            return entries.First(e => e.Key == key);
+        }
+
+        if (gdiEntries.Count > 1)
+            return null;
+
+        var ccdEntries = FindByExtension(entries, ".ccd");
+
+        if (ccdEntries.Count == 1)
+            return SelectCcdEntries(ccdEntries[0], entries).Img;
+
+        if (ccdEntries.Count > 1)
+            return null;
+
+        var candidates = SelectCandidates(entries);
+
+        return candidates.Count == 1 ? candidates[0] : null;
+    }
+
+    private static List<ArchiveEntryInfo> PickLargestTargets(List<ArchiveEntryInfo> entries, out int skipped)
     {
         var dataFiles = entries
-            .Where(e => !e.IsDirectory)
             .Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
             .Where(e => !HashExcludedExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
             .ToList();
@@ -210,6 +271,45 @@ public static class SourceArchiveExtractor
         return ordered.Take(MaxHashEntries).ToList();
     }
 
+    private static string ExtractControlFile(IArchiveSession session, ArchiveEntryInfo entry, string tempDir, CancellationToken ct)
+    {
+        Directory.CreateDirectory(tempDir);
+
+        return ExtractEntries(session, [entry], tempDir, new Progress<ProgressInfo>(), ct)[entry.Key];
+    }
+
+    private static void TryDeleteDirectory(string path)
+    {
+        try
+        {
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+        }
+        catch
+        {
+        }
+    }
+
+    private static List<ArchiveEntryInfo> FindByExtension(List<ArchiveEntryInfo> entries, string extension) =>
+        [.. entries.Where(e => string.Equals(Path.GetExtension(e.Key), extension, StringComparison.OrdinalIgnoreCase))];
+
+    private static List<ArchiveEntryInfo> SelectCandidates(List<ArchiveEntryInfo> entries)
+    {
+        var candidates = entries.Where(e => RomLikeExtensions.Contains(Path.GetExtension(e.Key))).ToList();
+
+        if (candidates.Count == 0)
+        {
+            candidates = [.. entries
+                .Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))
+                .Where(e => e.Size >= TinySizeThresholdBytes)];
+        }
+
+        if (candidates.Count == 0)
+            candidates = [.. entries.Where(e => !IgnoredExtensions.Contains(Path.GetExtension(e.Key), StringComparer.OrdinalIgnoreCase))];
+
+        return candidates;
+    }
+
     private sealed class DirectProgress(Action<double> handler) : IProgress<double>
     {
         public void Report(double value) => handler(value);
@@ -218,7 +318,14 @@ public static class SourceArchiveExtractor
     private static ArchiveExtractResult ResolveCue(IArchiveSession session, ArchiveEntryInfo cueEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
     {
         var cueExtracted = ExtractEntries(session, [cueEntry], extractDir, progress, ct);
-        string cuePath = cueExtracted[cueEntry.Key];
+        var (binEntries, resolvedKey) = SelectCueTracks(cueExtracted[cueEntry.Key], cueEntry, entries);
+        var binExtracted = ExtractEntries(session, binEntries, extractDir, progress, ct);
+
+        return new ArchiveExtractResult { ResolvedPath = binExtracted[resolvedKey] };
+    }
+
+    private static (List<ArchiveEntryInfo> Tracks, string ResolvedKey) SelectCueTracks(string cuePath, ArchiveEntryInfo cueEntry, List<ArchiveEntryInfo> entries)
+    {
         var referencedBins = ConversionSource.ParseBinsFromCue(cuePath);
         string cueDir = GetEntryDirectory(cueEntry.Key);
         var binEntries = new List<ArchiveEntryInfo>();
@@ -235,19 +342,24 @@ public static class SourceArchiveExtractor
         if (binEntries.Count == 0)
             throw new InvalidOperationException("CUE 파일이 참조하는 BIN 파일을 압축 안에서 찾을 수 없습니다.");
 
-        var binExtracted = ExtractEntries(session, binEntries, extractDir, progress, ct);
         int mainIndex = ConversionSource.ResolveMainDataTrackIndex(cuePath);
         string? mainBinFileName = mainIndex >= 0 && mainIndex < referencedBins.Count ? Path.GetFileName(referencedBins[mainIndex]) : null;
         var mainEntry = binEntries.FirstOrDefault(e => string.Equals(Path.GetFileName(e.Key), mainBinFileName, StringComparison.OrdinalIgnoreCase));
-        string resolvedKey = mainEntry.Key ?? binEntries[0].Key;
 
-        return new ArchiveExtractResult { ResolvedPath = binExtracted[resolvedKey] };
+        return (binEntries, mainEntry.Key ?? binEntries[0].Key);
     }
 
     private static ArchiveExtractResult ResolveGdi(IArchiveSession session, ArchiveEntryInfo gdiEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
     {
         var gdiExtracted = ExtractEntries(session, [gdiEntry], extractDir, progress, ct);
-        string gdiPath = gdiExtracted[gdiEntry.Key];
+        var (trackEntries, resolvedKey) = SelectGdiTracks(gdiExtracted[gdiEntry.Key], gdiEntry, entries);
+        var trackExtracted = ExtractEntries(session, trackEntries, extractDir, progress, ct);
+
+        return new ArchiveExtractResult { ResolvedPath = trackExtracted[resolvedKey] };
+    }
+
+    private static (List<ArchiveEntryInfo> Tracks, string ResolvedKey) SelectGdiTracks(string gdiPath, ArchiveEntryInfo gdiEntry, List<ArchiveEntryInfo> entries)
+    {
         var gdi = GdiFile.Parse(gdiPath);
         string gdiDir = GetEntryDirectory(gdiEntry.Key);
         var trackEntries = new List<ArchiveEntryInfo>();
@@ -263,15 +375,21 @@ public static class SourceArchiveExtractor
         if (trackEntries.Count == 0)
             throw new InvalidOperationException("GDI 파일이 참조하는 트랙 파일을 압축 안에서 찾을 수 없습니다.");
 
-        var trackExtracted = ExtractEntries(session, trackEntries, extractDir, progress, ct);
         string mainTrackFileName = gdi.DataTrack.FileName;
         var mainEntry = trackEntries.FirstOrDefault(e => string.Equals(Path.GetFileName(e.Key), mainTrackFileName, StringComparison.OrdinalIgnoreCase));
-        string resolvedKey = mainEntry.Key ?? trackEntries[0].Key;
 
-        return new ArchiveExtractResult { ResolvedPath = trackExtracted[resolvedKey] };
+        return (trackEntries, mainEntry.Key ?? trackEntries[0].Key);
     }
 
     private static ArchiveExtractResult ResolveCcd(IArchiveSession session, ArchiveEntryInfo ccdEntry, List<ArchiveEntryInfo> entries, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
+    {
+        var (companionEntries, imgEntry) = SelectCcdEntries(ccdEntry, entries);
+        var extracted = ExtractEntries(session, companionEntries, extractDir, progress, ct);
+
+        return new ArchiveExtractResult { ResolvedPath = extracted[imgEntry.Key] };
+    }
+
+    private static (List<ArchiveEntryInfo> Companions, ArchiveEntryInfo Img) SelectCcdEntries(ArchiveEntryInfo ccdEntry, List<ArchiveEntryInfo> entries)
     {
         string ccdDir = GetEntryDirectory(ccdEntry.Key);
         string ccdBaseName = Path.GetFileNameWithoutExtension(ccdEntry.Key);
@@ -285,9 +403,7 @@ public static class SourceArchiveExtractor
         if (imgEntry.Key is null)
             throw new InvalidOperationException("CCD 파일과 짝을 이루는 IMG 파일을 압축 안에서 찾을 수 없습니다.");
 
-        var extracted = ExtractEntries(session, companionEntries, extractDir, progress, ct);
-
-        return new ArchiveExtractResult { ResolvedPath = extracted[imgEntry.Key] };
+        return (companionEntries, imgEntry);
     }
 
     private static string GetEntryDirectory(string key)
