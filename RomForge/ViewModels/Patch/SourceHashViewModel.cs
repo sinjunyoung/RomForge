@@ -1,11 +1,10 @@
 ﻿using Common.WPF.ViewModels;
+using RomForge.Core.Models.Patch;
 using RomForge.Core.Services.Patch;
 using System.Collections.ObjectModel;
 using System.IO;
 
 namespace RomForge.ViewModels.Patch;
-
-public sealed record HashEntryItem(string Name, string Crc32, string Md5, string Sha1);
 
 public class SourceHashViewModel : ViewModelBase
 {
@@ -88,7 +87,6 @@ public class SourceHashViewModel : ViewModelBase
         var ct = cts.Token;
 
         _cts = cts;
-
         ProgressPercent = 0;
         IsCalculating = true;
 

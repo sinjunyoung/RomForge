@@ -2,15 +2,10 @@
 using CHD.Core.Interop.Enums;
 using CHD.Core.Models;
 using CHD.Core.Services;
+using RomForge.Core.Models.Patch;
 using System.IO;
 
 namespace RomForge.Core.Services.Patch;
-
-public enum GdRomHashLayout
-{
-    Gdi,
-    Cue
-}
 
 public static class ChdHasher
 {
@@ -43,9 +38,7 @@ public static class ChdHasher
             throw new NotSupportedException("부모 CHD가 필요한 파일은 해시를 계산할 수 없습니다.");
 
         string baseName = Path.GetFileNameWithoutExtension(chdPath);
-
         using var chd = new LibChdrWrapper();
-
         var error = chd.Open(chdPath);
 
         if (error != ChdrError.CHDERR_NONE)
@@ -96,7 +89,6 @@ public static class ChdHasher
         int hunkBytes = (int)chd.Header!.Value.hunkbytes;
         var hunk = new byte[hunkBytes];
         uint cachedHunk = uint.MaxValue;
-
         using var sink = new RomHashSink(frameCount * dataSize, progress, ct);
 
         for (long frame = 0; frame < frameCount; frame++)
@@ -188,9 +180,7 @@ public static class ChdHasher
                         tracks[i].HasPregapData = true;
                     }
                     else
-                    {
                         tracks[i - 1].Frames -= 75;
-                    }
                 }
             }
             else
@@ -209,20 +199,17 @@ public static class ChdHasher
         return tracks;
     }
 
-    private static bool IsRedumpLayoutDifferent(RestoreTrack restored, TrackInfo original) =>
-        restored.SplitFrames != 0 || restored.PadFrames != original.PadFrames || restored.Frames != original.Frames;
+    private static bool IsRedumpLayoutDifferent(RestoreTrack restored, TrackInfo original) => restored.SplitFrames != 0 || restored.PadFrames != original.PadFrames || restored.Frames != original.Frames;
 
     private static (string Name, RomHashResult Hashes) HashRedumpTrack(LibChdrWrapper chd, ChdInfo info, List<RestoreTrack> layout, int index, int trackNumber, IProgress<double>? progress, CancellationToken ct)
     {
         var target = layout[index];
         long frameCount = Math.Max(0, target.Frames - target.PadFrames + target.SplitFrames);
-
         using var sink = new RomHashSink(frameCount * target.DataSize, progress, ct);
 
         StreamRestoredTrack(chd, layout, index, span => sink.Write(span), ct);
 
         var result = sink.Complete();
-
         string baseName = Path.GetFileNameWithoutExtension(info.FileName);
         string number = layout.Count >= 10 ? trackNumber.ToString("00") : trackNumber.ToString();
 
@@ -274,9 +261,7 @@ public static class ChdHasher
                 write(new ReadOnlySpan<byte>(swapped, 0, source.DataSize));
             }
             else
-            {
                 write(new ReadOnlySpan<byte>(hunk, offsetInHunk, source.DataSize));
-            }
         }
     }
 
@@ -301,9 +286,7 @@ public static class ChdHasher
         int hunkBytes = (int)header.hunkbytes;
         long totalBytes = (long)header.logicalbytes;
         var hunk = new byte[hunkBytes];
-
         using var sink = new RomHashSink(totalBytes, progress, ct);
-
         long remaining = totalBytes;
 
         for (uint hunkIndex = 0; remaining > 0; hunkIndex++)
