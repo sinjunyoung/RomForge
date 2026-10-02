@@ -260,7 +260,11 @@ public static class NspBuildService
             if (!Directory.Exists(legalDir) || Directory.GetFileSystemEntries(legalDir).Length == 0)
                 continue;
 
-            var settings = settingsList.FirstOrDefault(s => s.IdOffset == idOffset) ?? settingsList[0];
+            var settings = settingsList.FirstOrDefault(s => s.SourceIdOffset == idOffset);
+
+            if (settings == null)
+                continue;
+
             string type = idOffset == 0 ? "legal" : $"legal{idOffset}";
 
             log($"[{type}] 매뉴얼 빌드 시작...", LogLevel.Info);
