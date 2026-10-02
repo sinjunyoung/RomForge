@@ -83,7 +83,6 @@ public class TistoryMainViewModel : ToolTabViewModel
             FileItems.Remove(item);
 
         Renumber();
-
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();
     }
@@ -91,7 +90,6 @@ public class TistoryMainViewModel : ToolTabViewModel
     public void ClearItems()
     {
         FileItems.Clear();
-
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();
     }
@@ -103,6 +101,7 @@ public class TistoryMainViewModel : ToolTabViewModel
         IsBusy = true;
 
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
 
         using (BeginWork())
@@ -188,6 +187,7 @@ public class TistoryMainViewModel : ToolTabViewModel
         IsBusy = true;
 
         _cts.Dispose();
+
         _cts = new CancellationTokenSource();
 
         using (BeginWork())
