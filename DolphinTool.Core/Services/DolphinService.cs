@@ -18,8 +18,9 @@ public class DolphinService
         {
             bool wbfsToIso = format == "wbfs" && outputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase);
             bool isoToWbfs = format == "wii" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
+            bool rvzToWbfs = format == "rvz" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
 
-            string workType = wbfsToIso ? "해제" : format switch
+            string workType = rvzToWbfs ? "변환" : wbfsToIso ? "해제" : format switch
             {
                 "wii" or "gcm" => "압축",
                 "gcz" or "wbfs" or "wia" => "재압축",
@@ -41,20 +42,15 @@ public class DolphinService
 
             LogMessage?.Invoke(this, ($"{Path.GetFileName(inputPath)} {workType} 시작", LogLevel.Highlight));
 
-            int result = wbfsToIso
-                ? ConvertWbfsToIso(inputPath, outputPath, ct)
-                : isoToWbfs
-                    ? ConvertIsoToWbfs(inputPath, outputPath, ct)
-                    : format switch
-                    {
-                        "gcm" or "gcz" or "wii" or "wbfs" or "wia" =>
-                            ConvertIsoToRvz(inputPath, outputPath, compressionLevel, ct),
-
-                        "rvz" =>
-                            ConvertRvzToIso(inputPath, outputPath, ct),
-
-                        _ => -2
-                    };
+            int result = rvzToWbfs ? ConvertRvzToWbfs(inputPath, outputPath, ct) : wbfsToIso ? ConvertWbfsToIso(inputPath, outputPath, ct) : isoToWbfs ? ConvertIsoToWbfs(inputPath, outputPath, ct) 
+            : format switch
+            {
+                "gcm" or "gcz" or "wii" or "wbfs" or "wia" =>
+                ConvertIsoToRvz(inputPath, outputPath, compressionLevel, ct),
+                "rvz" =>
+                ConvertRvzToIso(inputPath, outputPath, ct),
+                _ => -2
+            };
 
             if (result == -1 || ct.IsCancellationRequested)
             {
@@ -68,7 +64,6 @@ public class DolphinService
                     try { File.Delete(outputPath); } catch { }
 
                 LogMessage?.Invoke(this, ($"{workType} 실패 (에러 코드: {result})", LogLevel.Error));
-
                 throw new InvalidOperationException($"{workType} 실패 (에러 코드: {result})");
             }
 
@@ -89,6 +84,24 @@ public class DolphinService
         try
         {
             WbfsToIsoConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
+            return 0;
+        }
+        catch (OperationCanceledException)
+        {
+            return -1;
+        }
+        catch (Exception ex)
+        {
+            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
+            return -3;
+        }
+    }
+
+    private int ConvertRvzToWbfs(string inputPath, string outputPath, CancellationToken ct)
+    {
+        try
+        {
+            RvzToWbfsConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
             return 0;
         }
         catch (OperationCanceledException)

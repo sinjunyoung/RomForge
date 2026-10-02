@@ -1,4 +1,5 @@
 ﻿using Common.WPF.ViewModels;
+using DolphinTool.Core.Services;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services.Compression;
 using System.Windows.Media;
@@ -57,6 +58,9 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
             return [defaultTarget, "ISO"];
 
         if (detected.Format == RomFormat.Wii)
+            return [defaultTarget, "WBFS"];
+
+        if (detected.Format == RomFormat.Rvz && DiscImageInspector.IsWiiRvz(FilePath))
             return [defaultTarget, "WBFS"];
 
         if (extension.Equals("chd", StringComparison.OrdinalIgnoreCase) || detected.Format == RomFormat.Chd)

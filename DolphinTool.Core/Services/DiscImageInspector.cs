@@ -27,6 +27,20 @@ public static class DiscImageInspector
         return DiscPlatform.Unknown;
     }
 
+    public static bool IsWiiRvz(string path)
+    {
+        try
+        {
+            using var reader = new RvzDiscReader(path);
+
+            return reader.DiscType == 2;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static DiscContainerFormat DetectContainer(string path)
     {
         using var handle = File.OpenHandle(path, FileMode.Open, FileAccess.Read, FileShare.Read);
