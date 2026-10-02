@@ -21,6 +21,8 @@ public class SourceHashViewModel : ViewModelBase
         Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEntries));
     }
 
+    public Func<Task<GdRomHashLayout>>? RequestGdRomLayoutAsync { get; set; }
+
     public ObservableCollection<HashEntryItem> Entries { get; } = [];
 
     public bool HasEntries => Entries.Count > 0;
@@ -115,7 +117,17 @@ public class SourceHashViewModel : ViewModelBase
             }
             else if (string.Equals(Path.GetExtension(path), ".chd", StringComparison.OrdinalIgnoreCase))
             {
-                var (Name, Hashes) = await ChdHasher.HashAsync(path, progress, ct);
+                var gdRomLayout = GdRomHashLayout.Gdi;
+
+                if (RequestGdRomLayoutAsync is not null && await ChdHasher.NeedsGdRomLayoutChoiceAsync(path, ct))
+                {
+                    gdRomLayout = await RequestGdRomLayoutAsync();
+
+                    if (ct.IsCancellationRequested)
+                        return;
+                }
+
+                var (Name, Hashes) = await ChdHasher.HashAsync(path, gdRomLayout, progress, ct);
 
                 if (ct.IsCancellationRequested)
                     return;
