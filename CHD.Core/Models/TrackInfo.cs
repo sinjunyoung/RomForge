@@ -12,6 +12,8 @@ public class TrackInfo
 
     public int ExtraFrames { get; set; }
 
+    public int PadFrames { get; set; }
+
     public int PreGap { get; set; }
 
     public int PostGap { get; set; }

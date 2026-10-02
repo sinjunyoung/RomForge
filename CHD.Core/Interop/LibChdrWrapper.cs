@@ -8,6 +8,8 @@ namespace CHD.Core.Interop;
 public class LibChdrWrapper : IDisposable
 {
     private IntPtr _chdHandle = IntPtr.Zero;
+    private IntPtr _hunkBuffer = IntPtr.Zero;
+    private int _hunkBufferSize;
     private bool _disposed = false;
 
     public ChdrHeader? Header { get; private set; }
@@ -45,6 +47,13 @@ public class LibChdrWrapper : IDisposable
             LibChdr.chd_close(_chdHandle);
             _chdHandle = IntPtr.Zero;
             Header = null;
+        }
+
+        if (_hunkBuffer != IntPtr.Zero)
+        {
+            Marshal.FreeHGlobal(_hunkBuffer);
+            _hunkBuffer = IntPtr.Zero;
+            _hunkBufferSize = 0;
         }
     }
 
@@ -90,6 +99,33 @@ public class LibChdrWrapper : IDisposable
         {
             Marshal.FreeHGlobal(bufferPtr);
         }
+    }
+
+    public void ReadHunkInto(uint hunkIndex, byte[] destination)
+    {
+        if (!Header.HasValue)
+            throw new InvalidOperationException("CHD not opened");
+
+        int size = (int)Header.Value.hunkbytes;
+
+        if (destination.Length < size)
+            throw new ArgumentException("Destination buffer is smaller than the hunk size", nameof(destination));
+
+        if (_hunkBuffer == IntPtr.Zero || _hunkBufferSize != size)
+        {
+            if (_hunkBuffer != IntPtr.Zero)
+                Marshal.FreeHGlobal(_hunkBuffer);
+
+            _hunkBuffer = Marshal.AllocHGlobal(size);
+            _hunkBufferSize = size;
+        }
+
+        var result = LibChdr.chd_read(_chdHandle, hunkIndex, _hunkBuffer);
+
+        if (result != ChdrError.CHDERR_NONE)
+            throw new Exception($"Read error: {GetErrorString(result)}");
+
+        Marshal.Copy(_hunkBuffer, destination, 0, size);
     }
 
     public string GetMetadata(uint tag, uint index = 0)

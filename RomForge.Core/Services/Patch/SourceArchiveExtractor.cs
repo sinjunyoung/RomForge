@@ -268,7 +268,7 @@ public static class SourceArchiveExtractor
 
         skipped = Math.Max(0, ordered.Count - MaxHashEntries);
 
-        return ordered.Take(MaxHashEntries).ToList();
+        return [.. ordered.Take(MaxHashEntries)];
     }
 
     private static string ExtractControlFile(IArchiveSession session, ArchiveEntryInfo entry, string tempDir, CancellationToken ct)

@@ -117,6 +117,15 @@ public class SourceHashViewModel : ViewModelBase
 
                 SkippedCount = skipped;
             }
+            else if (string.Equals(Path.GetExtension(path), ".chd", StringComparison.OrdinalIgnoreCase))
+            {
+                var (Name, Hashes) = await ChdHasher.HashAsync(path, progress, ct);
+
+                if (ct.IsCancellationRequested)
+                    return;
+
+                AddEntry(Name, Hashes);
+            }
             else
             {
                 var hashes = await RomHasher.HashFileAsync(path, progress, ct);

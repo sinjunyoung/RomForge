@@ -165,6 +165,10 @@ public class ChdInfoReader
                     _ = int.TryParse(kv[1], out int frames);
                     track.Frames = frames;
                     break;
+                case "PAD":
+                    _ = int.TryParse(kv[1], out int padFrames);
+                    track.PadFrames = padFrames;
+                    break;
                 case "PREGAP":
                     _ = int.TryParse(kv[1], out int pregap);
                     track.PreGap = pregap;
