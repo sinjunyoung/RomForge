@@ -13,6 +13,7 @@ public static class TistoryArchiveExtractor
 
     private static readonly Regex SevenZipVolumeRegex = new(@"^(?<base>.+\.7z)\.(?<part>\d{3,})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex RarVolumeRegex = new(@"^(?<base>.+)\.part(?<part>\d+)\.rar$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex ZipVolumeRegex = new(@"^(?<base>.+\.zip)\.(?<part>\d{3,})$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public static bool IsArchiveFile(string? path)
     {
@@ -25,19 +26,24 @@ public static class TistoryArchiveExtractor
         return IsVolumePart(Path.GetFileName(path));
     }
 
-    public static bool IsVolumePart(string fileName) => SevenZipVolumeRegex.IsMatch(fileName) || RarVolumeRegex.IsMatch(fileName);
+    public static bool IsVolumePart(string fileName) =>
+        SevenZipVolumeRegex.IsMatch(fileName) ||
+        RarVolumeRegex.IsMatch(fileName) ||
+        ZipVolumeRegex.IsMatch(fileName);
 
     public static bool IsFirstVolumePart(string fileName)
     {
         var sevenZipMatch = SevenZipVolumeRegex.Match(fileName);
-
         if (sevenZipMatch.Success)
             return int.Parse(sevenZipMatch.Groups["part"].Value) == 1;
 
         var rarMatch = RarVolumeRegex.Match(fileName);
-
         if (rarMatch.Success)
             return int.Parse(rarMatch.Groups["part"].Value) == 1;
+
+        var zipMatch = ZipVolumeRegex.Match(fileName);
+        if (zipMatch.Success)
+            return int.Parse(zipMatch.Groups["part"].Value) == 1;
 
         return true;
     }
@@ -45,14 +51,16 @@ public static class TistoryArchiveExtractor
     public static string GetGroupKey(string fileName)
     {
         var sevenZipMatch = SevenZipVolumeRegex.Match(fileName);
-
         if (sevenZipMatch.Success)
             return sevenZipMatch.Groups["base"].Value.ToLowerInvariant();
 
         var rarMatch = RarVolumeRegex.Match(fileName);
-
         if (rarMatch.Success)
             return (rarMatch.Groups["base"].Value + ".rar").ToLowerInvariant();
+
+        var zipMatch = ZipVolumeRegex.Match(fileName);
+        if (zipMatch.Success)
+            return zipMatch.Groups["base"].Value.ToLowerInvariant();
 
         return fileName.ToLowerInvariant();
     }
@@ -95,31 +103,37 @@ public static class TistoryArchiveExtractor
     private static int GetPartNumber(string fileName)
     {
         var sevenZipMatch = SevenZipVolumeRegex.Match(fileName);
-
         if (sevenZipMatch.Success)
             return int.Parse(sevenZipMatch.Groups["part"].Value);
 
         var rarMatch = RarVolumeRegex.Match(fileName);
-
         if (rarMatch.Success)
             return int.Parse(rarMatch.Groups["part"].Value);
+
+        var zipMatch = ZipVolumeRegex.Match(fileName);
+        if (zipMatch.Success)
+            return int.Parse(zipMatch.Groups["part"].Value);
 
         return 0;
     }
 
-    private static bool IsSevenZipFormat(string fileName) => string.Equals(Path.GetExtension(fileName), ".7z", StringComparison.OrdinalIgnoreCase) || SevenZipVolumeRegex.IsMatch(fileName);
+    private static bool IsSevenZipFormat(string fileName) =>
+        string.Equals(Path.GetExtension(fileName), ".7z", StringComparison.OrdinalIgnoreCase) ||
+        SevenZipVolumeRegex.IsMatch(fileName);
 
     private static string GetDisplayName(string fileName)
     {
         var sevenZipMatch = SevenZipVolumeRegex.Match(fileName);
-
         if (sevenZipMatch.Success)
             return Path.GetFileNameWithoutExtension(sevenZipMatch.Groups["base"].Value);
 
         var rarMatch = RarVolumeRegex.Match(fileName);
-
         if (rarMatch.Success)
             return rarMatch.Groups["base"].Value;
+
+        var zipMatch = ZipVolumeRegex.Match(fileName);
+        if (zipMatch.Success)
+            return Path.GetFileNameWithoutExtension(zipMatch.Groups["base"].Value);
 
         return Path.GetFileNameWithoutExtension(fileName);
     }
