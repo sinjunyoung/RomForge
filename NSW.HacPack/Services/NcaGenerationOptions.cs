@@ -40,6 +40,7 @@ public class NcaGenerationOptions
     public Language Language = Language.None;
     public uint SdkVersion;
     public byte IdOffset = 0;
+    public byte SourceIdOffset = 0;
 
 
     public string SdkVersionString
@@ -110,5 +111,6 @@ public class NcaGenerationOptions
         NcaDistType = NcaDistType,
         UserMetadata = UserMetadata,
         IdOffset = IdOffset,
+        SourceIdOffset = SourceIdOffset,
     };
 }

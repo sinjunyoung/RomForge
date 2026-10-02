@@ -61,7 +61,7 @@ public static class NspBuildService
         if (req.OverrideTitleId.HasValue)
         {
             foreach (var s in settingsList)
-                s.TitleId = req.OverrideTitleId.Value + s.IdOffset;
+                s.TitleId = req.OverrideTitleId.Value;
 
             unpackResult.TitleId = req.OverrideTitleId.Value;
 
@@ -92,7 +92,7 @@ public static class NspBuildService
 
         foreach (var settings in settingsList)
         {
-            if (unpackResult.RawProgramNcaPaths.TryGetValue(settings.IdOffset, out var rawPath))
+            if (unpackResult.RawProgramNcaPaths.TryGetValue(settings.SourceIdOffset, out var rawPath))
             {
                 byte[] hash;
                 using (var fs = File.OpenRead(rawPath))
@@ -164,6 +164,7 @@ public static class NspBuildService
             var settings = new NcaGenerationOptions
             {
                 IdOffset = idOffset,
+                SourceIdOffset = idOffset,
                 TitleId = result.TitleId,
                 TempDirectory = dirs.Temp,
                 OutDirectory = dirs.BuildNca,
@@ -234,7 +235,11 @@ public static class NspBuildService
             if (!Directory.Exists(htmlDir) || Directory.GetFileSystemEntries(htmlDir).Length == 0)
                 continue;
 
-            var settings = settingsList.FirstOrDefault(s => s.IdOffset == idOffset) ?? settingsList[0];
+            var settings = settingsList.FirstOrDefault(s => s.SourceIdOffset == idOffset);
+
+            if (settings == null)
+                continue;
+
             string type = idOffset == 0 ? "htmldoc" : $"htmldoc{idOffset}";
 
             log($"[{type}] 매뉴얼 빌드 시작...", LogLevel.Info);
@@ -281,7 +286,7 @@ public static class NspBuildService
         log($"━━ 6단계(6/9): Control NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
         progress.Report((0, "Control NCA 생성 중..."));
 
-        if (!unpackResult.ControlDirs.TryGetValue(settings.IdOffset, out var controlDir))
+        if (!unpackResult.ControlDirs.TryGetValue(settings.SourceIdOffset, out var controlDir))
             return;
 
         var controlSettings = settings.WithRomfs(controlDir, LibHac.FsSystem.NcaHeader.ContentType.Control);
