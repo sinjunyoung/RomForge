@@ -43,10 +43,13 @@ public class ChdInfoReader
 
         if (header.compression0 != 0)
             compressions.Add(LibChdrWrapper.GetCompressionName(header.compression0));
+
         if (header.compression1 != 0)
             compressions.Add(LibChdrWrapper.GetCompressionName(header.compression1));
+
         if (header.compression2 != 0)
             compressions.Add(LibChdrWrapper.GetCompressionName(header.compression2));
+
         if (header.compression3 != 0)
             compressions.Add(LibChdrWrapper.GetCompressionName(header.compression3));
 
@@ -68,12 +71,15 @@ public class ChdInfoReader
         }
 
         var gdromMetadata = wrapper.GetMetadata(GDROM_TRACK_METADATA, 0);
+
         gdromMetadata ??= wrapper.GetMetadata(GDROM_OLD_METADATA, 0);
 
         if (!string.IsNullOrEmpty(gdromMetadata))
         {
             ParseCdromMetadata(wrapper, info);
+
             info.SourceType = ChdSourceType.GdRom;
+
             return;
         }
 
@@ -101,6 +107,7 @@ public class ChdInfoReader
         while (true)
         {
             var metadata = wrapper.GetMetadata(CDROM_TRACK_METADATA2, trackIndex);
+
             metadata ??= wrapper.GetMetadata(CDROM_TRACK_METADATA, trackIndex);
             metadata ??= wrapper.GetMetadata(GDROM_TRACK_METADATA, trackIndex);
             metadata ??= wrapper.GetMetadata(GDROM_OLD_METADATA, trackIndex);
@@ -109,12 +116,16 @@ public class ChdInfoReader
                 break;
 
             var track = ParseTrackMetadata(metadata, trackIndex);
-            if (track == null) break;
+
+            if (track == null)
+                break;
 
             int padded = (track.Frames + 4 - 1) / 4 * 4;
+
             track.ExtraFrames = padded - track.Frames;
 
             track.LogFrameOfs = 0;
+
             if (track.PgDataSize == 0)
                 logofs += track.PreGap;
             else
@@ -124,13 +135,13 @@ public class ChdInfoReader
             track.ChdFrameOfs = chdofs;
             track.LogFrameOfs += logofs;
             track.LogFrames = track.Frames - track.PreGap;
-
             logofs += track.PostGap;
             physofs += track.Frames;
             chdofs += track.Frames + track.ExtraFrames;
             logofs += track.Frames;
 
             tracks.Add(track);
+
             trackIndex++;
         }
 
@@ -151,7 +162,9 @@ public class ChdInfoReader
         foreach (var part in parts)
         {
             var kv = part.Split(':');
-            if (kv.Length != 2) continue;
+
+            if (kv.Length != 2) 
+                continue;
 
             switch (kv[0].ToUpperInvariant())
             {
@@ -189,6 +202,7 @@ public class ChdInfoReader
             return string.Empty;
 
         var sb = new StringBuilder(bytes.Length * 2);
+
         foreach (byte b in bytes)
             sb.AppendFormat("{0:x2}", b);
 

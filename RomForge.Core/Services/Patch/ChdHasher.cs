@@ -10,8 +10,7 @@ public static class ChdHasher
 {
     private const int CdFrameSize = 2448;
 
-    public static Task<(string Name, RomHashResult Hashes)> HashAsync(string chdPath, IProgress<double>? progress, CancellationToken ct) =>
-        Task.Run(() => Hash(chdPath, progress, ct), ct);
+    public static Task<(string Name, RomHashResult Hashes)> HashAsync(string chdPath, IProgress<double>? progress, CancellationToken ct) => Task.Run(() => Hash(chdPath, progress, ct), ct);
 
     private static (string Name, RomHashResult Hashes) Hash(string chdPath, IProgress<double>? progress, CancellationToken ct)
     {
@@ -21,9 +20,7 @@ public static class ChdHasher
             throw new NotSupportedException("부모 CHD가 필요한 파일은 해시를 계산할 수 없습니다.");
 
         string baseName = Path.GetFileNameWithoutExtension(chdPath);
-
         using var chd = new LibChdrWrapper();
-
         var error = chd.Open(chdPath);
 
         if (error != ChdrError.CHDERR_NONE)
@@ -56,7 +53,6 @@ public static class ChdHasher
         int hunkBytes = (int)chd.Header!.Value.hunkbytes;
         var hunk = new byte[hunkBytes];
         uint cachedHunk = uint.MaxValue;
-
         using var sink = new RomHashSink(frameCount * dataSize, progress, ct);
 
         for (long frame = 0; frame < frameCount; frame++)
@@ -103,9 +99,7 @@ public static class ChdHasher
         int hunkBytes = (int)header.hunkbytes;
         long totalBytes = (long)header.logicalbytes;
         var hunk = new byte[hunkBytes];
-
         using var sink = new RomHashSink(totalBytes, progress, ct);
-
         long remaining = totalBytes;
 
         for (uint hunkIndex = 0; remaining > 0; hunkIndex++)

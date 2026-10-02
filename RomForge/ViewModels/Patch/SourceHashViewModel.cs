@@ -106,11 +106,7 @@ public class SourceHashViewModel : ViewModelBase
         {
             if (SourceArchiveExtractor.IsArchivePath(path))
             {
-                int skipped = await SourceArchiveExtractor.ComputeHashesAsync(
-                    path,
-                    (name, hashes) => ((IProgress<(string Name, RomHashResult Hashes)>)entryProgress).Report((Path.GetFileName(name), hashes)),
-                    progress,
-                    ct);
+                int skipped = await SourceArchiveExtractor.ComputeHashesAsync(path, (name, hashes) => ((IProgress<(string Name, RomHashResult Hashes)>)entryProgress).Report((Path.GetFileName(name), hashes)), progress, ct);
 
                 if (ct.IsCancellationRequested)
                     return;
@@ -156,14 +152,13 @@ public class SourceHashViewModel : ViewModelBase
             return;
 
         _cts?.Cancel();
-        _cts = null;
 
+        _cts = null;
         IsCalculating = false;
         IsCancelled = true;
     }
 
-    private void AddEntry(string name, RomHashResult hashes) =>
-        Entries.Add(new HashEntryItem(name, hashes.Crc32, hashes.Md5, hashes.Sha1));
+    private void AddEntry(string name, RomHashResult hashes) => Entries.Add(new HashEntryItem(name, hashes.Crc32, hashes.Md5, hashes.Sha1));
 
     private void ClearResult()
     {
@@ -171,6 +166,7 @@ public class SourceHashViewModel : ViewModelBase
         IsCalculating = false;
         HasError = false;
         SkippedCount = 0;
+
         Entries.Clear();
     }
 }
