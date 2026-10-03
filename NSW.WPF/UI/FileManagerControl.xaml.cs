@@ -1,6 +1,8 @@
 ﻿using Common.WPF;
+using LibHac.Ncm;
 using Microsoft.Win32;
 using NSW.Core;
+using NSW.Core.Models;
 using NSW.WPF.Services;
 using NSW.WPF.ViewModels;
 using System.Collections.ObjectModel;
@@ -35,8 +37,6 @@ public partial class FileManagerControl : UserControl
         lvFiles.ItemsSource = GameFiles;
 
         UpdateDropHint();
-
-
     }
 
     public static bool KeyExists() => KeySetProvider.Instance.KeySet != null;
@@ -162,17 +162,18 @@ public partial class FileManagerControl : UserControl
     private async Task AddFilesAsync(IEnumerable<string> paths)
     {
         var keySet = KeySetProvider.Instance.KeySet;
-        var existing = GameFiles.Select(f => f.FilePath)
-                                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingPaths = GameFiles.Select(f => f.FilePath)
+                                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var newPaths = await Task.Run(() =>
             paths.Where(p => SupportedExtensions.Contains(Path.GetExtension(p)))
-                 .Where(p => existing.Add(p))
+                 .Where(p => existingPaths.Add(p))
                  .ToList()
         );
 
         foreach (var path in newPaths)
         {
-            var vm = new GameFile(path) { FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing };
+            string titleName = Path.GetFileNameWithoutExtension(path);
+            System.Windows.Media.Imaging.BitmapImage? icon = null;
 
             if (keySet != null)
             {
@@ -180,18 +181,91 @@ public partial class FileManagerControl : UserControl
 
                 if (info != null)
                 {
-                    vm.TitleName = info.TitleName;
-                    vm.TitleID = info.TitleId;
-                    vm.Version = info.DisplayVersion;
-                    vm.FileType = info.Type;
-
+                    if (!string.IsNullOrEmpty(info.TitleName))
+                        titleName = info.TitleName;
                     if (info.IconData != null)
-                        vm.Icon = info.IconData.ToBitmapImage();
+                        icon = info.IconData.ToBitmapImage();
+                }
+
+                List<MetadataResult> allMeta;
+
+                try { allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); }
+                catch { allMeta = []; }
+
+                if (allMeta.Count > 0)
+                {
+                    var appMetas = allMeta.Where(m => m.Type == ContentMetaType.Application).ToList();
+
+                    foreach (var app in appMetas)
+                    {
+                        GameFiles.Add(new GameFile(path)
+                        {
+                            FileType = "B",
+                            TitleID = app.TitleId,
+                            Version = app.GetEffectiveDisplayVersion(),
+                            TitleName = titleName,
+                            Icon = icon
+                        });
+                    }
+
+                    var patchMetas = allMeta.Where(m => m.Type == ContentMetaType.Patch).ToList();
+
+                    foreach (var patch in patchMetas)
+                    {
+                        GameFiles.Add(new GameFile(path)
+                        {
+                            FileType = "U",
+                            TitleID = patch.TitleId,
+                            Version = patch.GetEffectiveDisplayVersion(),
+                            TitleName = titleName,
+                            Icon = icon
+                        });
+                    }
+
+                    var dlcResults = allMeta
+                        .Where(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta)
+                        .GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    foreach (var dlc in dlcResults)
+                    {
+                        GameFiles.Add(new GameFile(path)
+                        {
+                            FileType = "D",
+                            TitleID = dlc.TitleId,
+                            Version = dlc.GetEffectiveDisplayVersion(),
+                            TitleName = string.IsNullOrEmpty(titleName) ? dlc.TitleId : $"{titleName} (DLC {dlc.TitleId[^4..]})",
+                            Icon = icon
+                        });
+                    }
+
+                    if (appMetas.Count > 0 || patchMetas.Count > 0 || dlcResults.Count > 0)
+                    {
+                        UpdateDropHint();
+                        continue;
+                    }
                 }
             }
 
-            if (string.IsNullOrEmpty(vm.TitleName))
-                vm.TitleName = Path.GetFileNameWithoutExtension(path);
+            var vm = new GameFile(path)
+            {
+                FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing,
+                TitleName = titleName,
+                Icon = icon
+            };
+
+            if (keySet != null)
+            {
+                var info = MetadataReader.GetGameFileInfo(keySet, path);
+
+                if (info != null)
+                {
+                    vm.TitleID = info.TitleId;
+                    vm.Version = info.DisplayVersion;
+                    vm.FileType = info.Type;
+                }
+            }
 
             GameFiles.Add(vm);
             UpdateDropHint();

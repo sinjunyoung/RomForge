@@ -22,21 +22,18 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
 
         foreach (var path in newPaths)
         {
-            var vm = new GameFile(path) { FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing };
+            string titleName = Path.GetFileNameWithoutExtension(path);
+            System.Windows.Media.Imaging.BitmapImage? icon = null;
 
             if (keySet != null)
             {
                 var info = MetadataReader.GetGameFileInfo(keySet, path);
-
                 if (info != null)
                 {
-                    vm.TitleName = info.TitleName;
-                    vm.TitleID = info.TitleId;
-                    vm.Version = info.DisplayVersion;
-                    vm.FileType = info.Type;
-
-                    if (info.IconData != null) 
-                        vm.Icon = info.IconData.ToBitmapImage();
+                    if (!string.IsNullOrEmpty(info.TitleName))
+                        titleName = info.TitleName;
+                    if (info.IconData != null)
+                        icon = info.IconData.ToBitmapImage();
                 }
 
                 List<MetadataResult> allMeta;
@@ -44,17 +41,45 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
                 try { allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); }
                 catch { allMeta = []; }
 
-                var dlcResults = allMeta
-                    .Where(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta)
-                    .GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase)
-                    .Select(g => g.First())
-                    .ToList();
-
-                if (dlcResults.Count > 0)
+                if (allMeta.Count > 0)
                 {
-                    bool hasBaseOrUpdate = vm.FileType.Contains('B') || vm.FileType.Contains('U');
+                    var appMetas = allMeta.Where(m => m.Type == ContentMetaType.Application).ToList();
 
-                    vm.FileType = string.Concat(vm.FileType.Where(c => c != 'D'));
+                    foreach (var app in appMetas)
+                    {
+                        var baseVm = new GameFile(path)
+                        {
+                            FileType = "B",
+                            TitleID = app.TitleId,
+                            Version = app.GetEffectiveDisplayVersion(),
+                            TitleName = titleName,
+                            Icon = icon
+                        };
+
+                        AssignOrReplace(baseVm);
+                    }
+
+                    var patchMetas = allMeta.Where(m => m.Type == ContentMetaType.Patch).ToList();
+
+                    foreach (var patch in patchMetas)
+                    {
+                        var updateVm = new GameFile(path)
+                        {
+                            FileType = "U",
+                            TitleID = patch.TitleId,
+                            Version = patch.GetEffectiveDisplayVersion(),
+                            TitleName = titleName,
+                            Icon = icon
+                        };
+
+                        AssignOrReplace(updateVm);
+                    }
+
+                    var dlcResults = allMeta
+                        .Where(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta)
+                        .GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase)
+                        .Select(g => g.First())
+                        .ToList();
 
                     foreach (var dlc in dlcResults)
                     {
@@ -63,14 +88,14 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
                             FileType = "D",
                             TitleID = dlc.TitleId,
                             Version = dlc.GetEffectiveDisplayVersion(),
-                            TitleName = string.IsNullOrEmpty(vm.TitleName) ? dlc.TitleId : $"{vm.TitleName} (DLC {dlc.TitleId[^4..]})",
-                            Icon = vm.Icon,
+                            TitleName = string.IsNullOrEmpty(titleName) ? dlc.TitleId : $"{titleName} (DLC {dlc.TitleId[^4..]})",
+                            Icon = icon
                         };
 
                         AssignOrReplace(dlcVm);
                     }
 
-                    if (!hasBaseOrUpdate)
+                    if (appMetas.Count > 0 || patchMetas.Count > 0 || dlcResults.Count > 0)
                     {
                         onFileAdded();
                         continue;
@@ -78,8 +103,24 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
                 }
             }
 
-            if (string.IsNullOrEmpty(vm.TitleName))
-                vm.TitleName = Path.GetFileNameWithoutExtension(path);
+            var vm = new GameFile(path)
+            {
+                FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing,
+                TitleName = titleName,
+                Icon = icon
+            };
+
+            if (keySet != null)
+            {
+                var info = MetadataReader.GetGameFileInfo(keySet, path);
+
+                if (info != null)
+                {
+                    vm.TitleID = info.TitleId;
+                    vm.Version = info.DisplayVersion;
+                    vm.FileType = info.Type;
+                }
+            }
 
             AssignOrReplace(vm);
             onFileAdded();
@@ -93,7 +134,7 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
     {
         if (vm.FileType.Contains('B'))
         {
-            var existingBase = gameFiles.FirstOrDefault(f => f.FileType.Contains('B'));
+            var existingBase = gameFiles.FirstOrDefault(f => f.FileType.Contains('B') && !string.Equals(f.FilePath, vm.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (existingBase != null)
             {
@@ -106,11 +147,14 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
                 patchSync.Detach(existingBase);
                 gameFiles.Remove(existingBase);
             }
+
+            if (gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.FileType.Contains('B')))
+                return;
         }
 
         if (vm.FileType.Contains('U'))
         {
-            var existingUpdate = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'));
+            var existingUpdate = gameFiles.FirstOrDefault(f => f.FileType.Contains('U') && !string.Equals(f.FilePath, vm.FilePath, StringComparison.OrdinalIgnoreCase));
 
             if (existingUpdate != null)
             {
@@ -123,6 +167,15 @@ public sealed class SwitchGameFileImporter(ObservableCollection<GameFile> gameFi
                 patchSync.Detach(existingUpdate);
                 gameFiles.Remove(existingUpdate);
             }
+
+            if (gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.FileType.Contains('U')))
+                return;
+        }
+
+        if (vm.FileType.Contains('D'))
+        {
+            if (gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.TitleID == vm.TitleID))
+                return;
         }
 
         gameFiles.Add(vm);

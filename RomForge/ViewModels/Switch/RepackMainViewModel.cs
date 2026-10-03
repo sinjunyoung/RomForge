@@ -85,9 +85,7 @@ namespace RomForge.ViewModels.Switch
 
         public RepackMainViewModel()
         {
-            OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchRepackOutputPath)
-                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
-                : AppConfig.Instance.OutputFolders.SwitchRepackOutputPath;
+            OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchRepackOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.SwitchRepackOutputPath;
             BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 
             PropertyChanged += (_, e) =>
