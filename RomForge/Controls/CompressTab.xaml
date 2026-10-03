@@ -220,7 +220,7 @@
             <ToggleButton DockPanel.Dock="Left" Style="{StaticResource ToggleStyle}" Margin="0,0,5,0" IsChecked="{Binding CompressVM.UseCustomOutputPath}">
                 <StackPanel Orientation="Horizontal">
                     <Image Width="18" Margin="10,0,10,0" Source="{Binding CompressVM.UseCustomOutputPath, Converter={StaticResource BoolToImageConverter}}"/>
-                    <TextBlock Text="출력 폴더 지정" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
+                    <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
                 </StackPanel>
             </ToggleButton>
             <Button DockPanel.Dock="Right" BorderThickness="1" Command="{Binding CompressVM.BrowseOutputCommand}" IsEnabled="{Binding CompressVM.UseCustomOutputPath}" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">

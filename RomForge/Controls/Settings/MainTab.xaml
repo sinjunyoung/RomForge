@@ -22,7 +22,7 @@
                         <TextBlock Text="패치" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
-                <local:PatchSettingsTab DataContext="{Binding Patch}"/>
+                <local:PatchSettingsTab DataContext="{Binding Patch}" Margin="0,-5,0,0"/>
             </TabItem>
 
             <TabItem>
