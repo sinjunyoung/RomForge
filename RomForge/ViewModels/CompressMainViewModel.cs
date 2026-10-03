@@ -183,7 +183,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                     chdFromCcd.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-                                    var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progressHandler, _cts.Token);
+                                    var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progressHandler, null, _cts.Token);
 
                                     if (!chdFromCcdResult.Success)
                                         throw new InvalidOperationException(chdFromCcdResult.Message);
@@ -207,7 +207,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                 chdConverter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, null, progressHandler, _cts.Token);
+                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, null, progressHandler, null, _cts.Token);
 
                                 if (!chdResult.Success)
                                     throw new InvalidOperationException(chdResult.Message);

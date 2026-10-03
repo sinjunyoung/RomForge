@@ -66,7 +66,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
                     converter.LogMessage += (_, e) => log(e.Message, e.Level);
 
-                    var chdResult = await converter.ConvertFileAsync(gdiPath, null, progress, ct);
+                    var chdResult = await converter.ConvertFileAsync(gdiPath, null, progress, null, ct);
 
                     if (!chdResult.Success)
                         throw new Exception($"CHD 변환 실패: {chdResult.Message}");

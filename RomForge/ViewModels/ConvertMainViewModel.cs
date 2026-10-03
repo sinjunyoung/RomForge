@@ -499,7 +499,7 @@ public class ConvertMainViewModel : ToolTabViewModel
 
             chdFromCcd.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-            var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progress, ct);
+            var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progress, null, ct);
 
             if (!chdFromCcdResult.Success)
                 throw new InvalidOperationException(chdFromCcdResult.Message);
@@ -603,7 +603,7 @@ public class ConvertMainViewModel : ToolTabViewModel
 
         converter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-        var result = await converter.ConvertFileAsync(item.FilePath, null, progress, ct);
+        var result = await converter.ConvertFileAsync(item.FilePath, null, progress, item.SelectedTargetFormat, ct);
 
         if (!result.Success)
             throw new InvalidOperationException(result.Message);

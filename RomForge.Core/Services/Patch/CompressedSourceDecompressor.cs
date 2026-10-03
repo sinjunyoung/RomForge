@@ -68,7 +68,7 @@ public static class CompressedSourceDecompressor
 
         converter.LogMessage += (_, e) => log(e.Message, e.Level);
 
-        var result = await converter.ConvertFileAsync(chdPath, outputDir, progress, ct);
+        var result = await converter.ConvertFileAsync(chdPath, outputDir, progress, null, ct);
 
         if (!result.Success)
             throw new Exception($"CHD 압축 해제 실패: {result.Message}");

@@ -24,7 +24,7 @@ public class FileConverter : IDisposable
 
     }
 
-    public async Task<ConversionResult> ConvertFileAsync(string filePath, string? outputDir = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public async Task<ConversionResult> ConvertFileAsync(string filePath, string? outputDir = null, IProgress<ProgressInfo>? progress = null, string? targetFormat = null, CancellationToken ct = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
@@ -42,7 +42,7 @@ public class FileConverter : IDisposable
 
         return source.Format switch
         {
-            InputFormat.Chd => await ConvertFromChdAsync(source, outputDir, progress, ct),
+            InputFormat.Chd => await ConvertFromChdAsync(source, outputDir, progress, targetFormat, ct),
             InputFormat.Iso => await ConvertIsoChdAsync(source, progress, ct),
             InputFormat.BinCue => await ConvertToChdAsync(source, progress, ct),
             InputFormat.Gdi => await ConvertToChdAsync(source, progress, ct),
@@ -51,7 +51,7 @@ public class FileConverter : IDisposable
         };
     }
 
-    private async Task<ConversionResult> ConvertFromChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertFromChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, string? targetFormat = null, CancellationToken ct = default)
     {
         var chdPath = source.PrimaryFile;
         var dir = outputDir ?? Path.GetDirectoryName(chdPath)!;
@@ -61,7 +61,7 @@ public class FileConverter : IDisposable
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
             var info = ChdInfoReader.ReadChdInfo(chdPath);
 
@@ -73,7 +73,7 @@ public class FileConverter : IDisposable
 
                 Log("ISO 추출 중...");
 
-                bool extracted = await _chdman.ExtractRawAsync(chdPath, isoPath, progress, cancellationToken);
+                bool extracted = await _chdman.ExtractRawAsync(chdPath, isoPath, progress, ct);
 
                 if (!extracted || !File.Exists(isoPath))
                     return ConversionResult.Fail("ISO 추출 실패");
@@ -95,31 +95,32 @@ public class FileConverter : IDisposable
             }
             else if (info.SourceType == ChdSourceType.GdRom)
             {
-                var gdiPath = Path.Combine(dir, name + ".gdi");
-                CurrentOutputPath = gdiPath;
+                bool asCue = string.Equals(targetFormat, "CUE", StringComparison.OrdinalIgnoreCase);
+                var label = asCue ? "CUE" : "GDI";
+                var tocPath = Path.Combine(dir, name + (asCue ? ".cue" : ".gdi"));
+                CurrentOutputPath = tocPath;
 
-                Log("GDI 추출 중...");
+                Log($"{label} 추출 중...");
 
-                bool extracted = await _chdman.ExtractCdAsync(chdPath, gdiPath, progress, cancellationToken);
+                bool extracted = await _chdman.ExtractCdAsync(chdPath, tocPath, progress, ct);
 
                 if (!extracted)
                     return ConversionResult.Fail("CHD 추출 실패");
 
-                cancellationToken.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
-                if (!File.Exists(gdiPath))
-                    return ConversionResult.Fail("GDI 파일 생성 실패");
+                if (!File.Exists(tocPath))
+                    return ConversionResult.Fail($"{label} 파일 생성 실패");
 
-                var extractedTrackFiles = ConversionSource.ParseFilesFromGdi(gdiPath)
-                    .Select(f => Path.IsPathRooted(f) ? f : Path.Combine(dir, f))
-                    .ToList();
-
+                var extractedTrackFiles = asCue ? [.. ConversionSource.ParseBinsFromCue(tocPath)] : ConversionSource.ParseFilesFromGdi(tocPath)
+                        .Select(f => Path.IsPathRooted(f) ? f : Path.Combine(dir, f))
+                        .ToList();
                 var missingTrackFile = extractedTrackFiles.FirstOrDefault(f => !File.Exists(f));
 
                 if (missingTrackFile != null)
                     return ConversionResult.Fail($"트랙 파일 생성 실패: {Path.GetFileName(missingTrackFile)}");
 
-                Log($"GDI 추출 완료 ({extractedTrackFiles.Count}개 트랙 파일)", LogLevel.Ok);
+                Log($"{label} 추출 완료 ({extractedTrackFiles.Count}개 트랙 파일)", LogLevel.Ok);
 
                 CurrentOutputPath = null;
 
@@ -128,9 +129,9 @@ public class FileConverter : IDisposable
                 return new ConversionResult
                 {
                     Success = true,
-                    Message = $"추출 성공 (GDI, {extractedTrackFiles.Count}개 트랙 파일)",
-                    OutputFile = gdiPath,
-                    OutputFiles = [gdiPath, .. extractedTrackFiles],
+                    Message = $"추출 성공 ({label}, {extractedTrackFiles.Count}개 트랙 파일)",
+                    OutputFile = tocPath,
+                    OutputFiles = [tocPath, .. extractedTrackFiles],
                     VerificationPerformed = false
                 };
             }
@@ -141,12 +142,12 @@ public class FileConverter : IDisposable
 
                 Log("BIN/CUE 추출 중...");
 
-                bool extracted = await _chdman.ExtractCdAsync(chdPath, cuePath, progress, cancellationToken);
+                bool extracted = await _chdman.ExtractCdAsync(chdPath, cuePath, progress, ct);
 
                 if (!extracted)
                     return ConversionResult.Fail("CHD 추출 실패");
 
-                cancellationToken.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
 
                 if (!File.Exists(cuePath))
                     return ConversionResult.Fail("CUE 파일 생성 실패");
