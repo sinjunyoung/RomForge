@@ -54,6 +54,9 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
 
         var defaultTarget = detected.OutputExtension.ToUpperInvariant();
 
+        if(defaultTarget == "GDI")
+            return [defaultTarget, "CUE"];
+
         if (detected.Format == RomFormat.Wbfs)
             return [defaultTarget, "ISO"];
 

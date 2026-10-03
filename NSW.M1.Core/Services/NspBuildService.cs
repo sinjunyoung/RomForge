@@ -78,6 +78,7 @@ public static class NspBuildService
             var s = settingsList[0];
             s.TitleId += req.TargetIdOffset.Value;
             s.IdOffset = 0;
+            unpackResult.TitleId = s.TitleId;
         }
 
         foreach (var settings in settingsList)

@@ -301,7 +301,7 @@
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="ISO(GC/Wii)" Foreground="#CCCCCC"/>
+                            <Run Text="ISO(GC/Wii), WBFS" Foreground="#CCCCCC"/>
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="ISO(Wii)" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
