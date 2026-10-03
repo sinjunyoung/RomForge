@@ -209,18 +209,18 @@ public class ConverterMainViewModel : ToolTabViewModel
 
         return (source, target) switch
         {
-            ("nsp", "xci") => NspXciConvertService.NspToXciAsync(item.FilePath, progress, log, ct),
+            ("nsp", "xci") => NspXciConvertService.NspToXciAsync(item.FilePath, progress, log, null, ct),
             ("nsp", "nsz") => NspCompressService.CompressAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
-            ("nsp", "xcz") => NspXciConvertService.NspToXczAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, ct),
-            ("xci", "nsp") => NspXciConvertService.XciToNspAsync(item.FilePath, progress, log, ct),
+            ("nsp", "xcz") => NspXciConvertService.NspToXczAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
+            ("xci", "nsp") => NspXciConvertService.XciToNspAsync(item.FilePath, progress, log, null, ct),
             ("xci", "xcz") => XciCompressService.CompressAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
-            ("xci", "nsz") => NspXciConvertService.XciToNszAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, ct),
+            ("xci", "nsz") => NspXciConvertService.XciToNszAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
             ("nsz", "nsp") => NspCompressService.DecompressAsync(item.FilePath, progress, log, null, ct),
-            ("nsz", "xci") => NspXciConvertService.NszToXciAsync(item.FilePath, progress, log, ct),
-            ("nsz", "xcz") => NspXciConvertService.NszToXczAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, ct),
+            ("nsz", "xci") => NspXciConvertService.NszToXciAsync(item.FilePath, progress, log, null, ct),
+            ("nsz", "xcz") => NspXciConvertService.NszToXczAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
             ("xcz", "xci") => XciCompressService.DecompressAsync(item.FilePath, progress, log, null, ct),
-            ("xcz", "nsp") => NspXciConvertService.XczToNspAsync(item.FilePath, progress, log, ct),
-            ("xcz", "nsz") => NspXciConvertService.XczToNszAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, ct),
+            ("xcz", "nsp") => NspXciConvertService.XczToNspAsync(item.FilePath, progress, log, null, ct),
+            ("xcz", "nsz") => NspXciConvertService.XczToNszAsync(item.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, log, null, ct),
             _ => Task.FromException(new NotSupportedException($"{source} → {target}: 지원하지 않는 변환입니다."))
         };
     }

@@ -16,7 +16,7 @@ namespace PickPack.Disk
     {
         #region Field
         readonly ProgressReporter _progressReporter;
-        CancellationToken _cancellationToken;
+        CancellationToken _ct;
         #endregion
 
         #region Property
@@ -43,7 +43,7 @@ namespace PickPack.Disk
         public async Task WriteImageAsync(string imagePath, int physicalDriveNumber, long diskSize, CancellationToken ct)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-            _cancellationToken = ct;
+            _ct = ct;
             _progressReporter.Initialize(ct);
 
             await WriteImageAsyncInternal(imagePath, physicalDriveNumber, diskSize, ct);

@@ -133,7 +133,15 @@ public class CompressMainViewModel : ToolTabViewModel
             OutputPath = dlg.SelectedPath;
     }
 
-    private string? ResolveOutputDir() => UseCustomOutputPath && !string.IsNullOrWhiteSpace(OutputPath) ? OutputPath : null;
+    private string? ResolveOutputDir()
+    {
+        if (!UseCustomOutputPath || string.IsNullOrWhiteSpace(OutputPath))
+            return null;
+
+        Directory.CreateDirectory(OutputPath);
+
+        return OutputPath;
+    }
 
     private async Task RunAsync()
     {

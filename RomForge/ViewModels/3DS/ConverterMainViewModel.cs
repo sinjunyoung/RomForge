@@ -177,7 +177,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                                     KeyStore key = new();
                                     CciToCiaConverter c = new(key);
 
-                                    await c.ConvertAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
+                                    await c.ConvertAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
                                 }
                                 break;
 
@@ -199,7 +199,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                                         KeyStore key = new();
                                         var ciaToCci = new CiaToCciConverter(key);
 
-                                        await ciaToCci.ConvertAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
+                                        await ciaToCci.ConvertAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
                                     }
                                 }
                                 break;

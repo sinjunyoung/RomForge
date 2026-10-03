@@ -229,7 +229,7 @@ public class FileConverter : IDisposable
         };
     }
 
-    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var inputPath = source.PrimaryFile;
         var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
@@ -242,11 +242,11 @@ public class FileConverter : IDisposable
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, cancellationToken);
+            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, ct);
 
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
             if (!success || !File.Exists(chdPath))
                 return ConversionResult.Fail("CHD 생성 실패");
@@ -326,7 +326,7 @@ public class FileConverter : IDisposable
         }
     }
 
-    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var inputPath = source.PrimaryFile;
         var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
@@ -336,15 +336,15 @@ public class FileConverter : IDisposable
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
             var rawSectorMode = CdRawSectorDetector.Detect(inputPath);
 
             bool success = rawSectorMode != CdRawSectorMode.None
-                ? await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, cancellationToken)
-                : await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, cancellationToken);
+                ? await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, ct)
+                : await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, ct);
 
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
             if (!success || !File.Exists(chdPath))
                 return ConversionResult.Fail("CHD 생성 실패");

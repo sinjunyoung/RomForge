@@ -4,7 +4,7 @@ public static class TitleSourceExtractExtensions
 {
     private const int BufferSize = 1024 * 1024;
 
-    public static void ExtractTo(this ITitleSource source, string destinationFolder, Action<long, long, string>? onProgress = null, CancellationToken cancellationToken = default)
+    public static void ExtractTo(this ITitleSource source, string destinationFolder, Action<long, long, string>? onProgress = null, CancellationToken ct = default)
     {
         var paths = source.EnumerateFiles().ToList();
         long total = 0;
@@ -17,7 +17,7 @@ public static class TitleSourceExtractExtensions
 
         foreach (string path in paths)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            ct.ThrowIfCancellationRequested();
 
             string destPath = Path.Combine(destinationFolder, path.Replace('/', Path.DirectorySeparatorChar));
 
@@ -30,7 +30,7 @@ public static class TitleSourceExtractExtensions
 
             while ((read = inStream.Read(buffer, 0, buffer.Length)) > 0)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                ct.ThrowIfCancellationRequested();
                 outStream.Write(buffer, 0, read);
                 progress.Advance(read, path);
             }

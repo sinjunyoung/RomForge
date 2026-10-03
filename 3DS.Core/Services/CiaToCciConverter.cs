@@ -7,7 +7,7 @@ public class CiaToCciConverter(KeyStore keyStore)
 {
     private const string OutputExtension = ".cci";
 
-    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;
@@ -30,7 +30,8 @@ public class CiaToCciConverter(KeyStore keyStore)
                 throw new NotSupportedException($"{typeDescription} 파일은 CCI 복원이 불가능합니다. (본편만 가능)");
             }
 
-            outputPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, OutputExtension));
+            outputPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, OutputExtension, outputDir));
+            
             using var outputStream = File.Open(outputPath, FileMode.Create, FileAccess.ReadWrite);
 
             log?.Invoke($"{Path.GetFileName(inputPath)} → CCI 변환 시작", LogLevel.Highlight);
@@ -48,6 +49,7 @@ public class CiaToCciConverter(KeyStore keyStore)
             await NcsdBuilder.BuildAsync(ctx, outputStream, reporter, ct);
 
             isCompleted = true;
+
             log?.Invoke($"변환 완료: {outputPath}", LogLevel.Ok);
         }
         finally

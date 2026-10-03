@@ -15,7 +15,7 @@ public class SwitchMainViewModel : MultiToolTabViewModel
 
     public KeygenMainViewModel KeygenVM { get; } = new();
 
-    public bool KeysAvailable => KeySetProvider.Instance.KeySet != null;
+    public static bool KeysAvailable => KeySetProvider.Instance.KeySet != null;
 
     public static string KeysMissingMessage => Res.Main_Err_NoKeys;
 

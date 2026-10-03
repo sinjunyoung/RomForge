@@ -11,7 +11,7 @@ namespace PickPack.Disk
         private readonly object _progressLock = new();
         private Stopwatch? _stopwatch;
         private readonly List<Tuple<double, long>> _progressHistory = [];
-        private CancellationToken _cancellationToken;
+        private CancellationToken _ct;
         private DateTime _lastProgressReport = DateTime.MinValue;
 
         #endregion
@@ -42,7 +42,7 @@ namespace PickPack.Disk
 
         public void Initialize(CancellationToken ct)
         {
-            _cancellationToken = ct;
+            _ct = ct;
             _stopwatch = Stopwatch.StartNew();
             _progressHistory.Clear();
         }
@@ -57,7 +57,7 @@ namespace PickPack.Disk
                     return;
 
                 _lastProgressReport = now;
-                _cancellationToken.ThrowIfCancellationRequested();
+                _ct.ThrowIfCancellationRequested();
 
                 if (_stopwatch == null)
                     throw new InvalidOperationException("ProgressReporter가 초기화되지 않았습니다.");
@@ -84,7 +84,7 @@ namespace PickPack.Disk
                 if (_stopwatch == null)
                     throw new InvalidOperationException("ProgressReporter가 초기화되지 않았습니다.");
 
-                _cancellationToken.ThrowIfCancellationRequested();
+                _ct.ThrowIfCancellationRequested();
 
                 double now = _stopwatch.Elapsed.TotalSeconds;
 

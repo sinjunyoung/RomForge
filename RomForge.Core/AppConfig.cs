@@ -164,6 +164,12 @@ public class OutputFoldersConfig : ViewModelBase
 
     private string? _compressOutputPath;
     public string? CompressOutputPath { get => _compressOutputPath; set => SetProperty(ref _compressOutputPath, value); }
+
+    private bool _useConvertCustomOutputPath;
+    public bool UseConvertCustomOutputPath { get => _useConvertCustomOutputPath; set => SetProperty(ref _useConvertCustomOutputPath, value); }
+
+    private string? _convertOutputPath;
+    public string? ConvertOutputPath { get => _convertOutputPath; set => SetProperty(ref _convertOutputPath, value); }
 }
 
 public class AppConfig : ViewModelBase

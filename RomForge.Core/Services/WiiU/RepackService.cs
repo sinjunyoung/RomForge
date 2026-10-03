@@ -323,7 +323,7 @@ public sealed class RepackService()
                             Speed = string.Empty,
                         });
                     },
-                    cancellationToken: ct);
+                    ct: ct);
 
                 offset += entry.TotalBytes;
             }

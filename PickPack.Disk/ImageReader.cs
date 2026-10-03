@@ -8,7 +8,7 @@ namespace PickPack.Disk
         #region Field
 
         readonly ProgressReporter _progressReporter;
-        CancellationToken _cancellationToken;
+        CancellationToken _ct;
 
         #endregion
 
@@ -48,7 +48,7 @@ namespace PickPack.Disk
         {
             try
             {
-                _cancellationToken = ct;
+                _ct = ct;
                 _progressReporter.Initialize(ct);
 
                 string extension = Path.GetExtension(outputPath).ToLowerInvariant();

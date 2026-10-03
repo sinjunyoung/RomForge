@@ -45,9 +45,9 @@ namespace PickPack.Disk
                 return read;
             }
 
-            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
             {
-                int read = await baseStream.ReadAsync(buffer.AsMemory(offset, count), cancellationToken);
+                int read = await baseStream.ReadAsync(buffer.AsMemory(offset, count), ct);
 
                 ReportProgress(read);
 

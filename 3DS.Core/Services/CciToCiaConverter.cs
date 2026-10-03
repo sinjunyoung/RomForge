@@ -17,26 +17,31 @@ public class CciToCiaConverter(KeyStore keyStore)
     private const int TmdBaseSize = 0x140 + 0xC4 + (0x24 * 64);
     private const int TmdChunkSize = 0x30;
 
-    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
+    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;
 
         try
         {
-            outputPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, ".cia"));
+            outputPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".cia", outputDir));
+            
             log?.Invoke($"{Path.GetFileName(inputPath)} → CIA 변환 시작", LogLevel.Highlight);
 
             Stream inputStream = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             byte[] magic = new byte[4];
+
             await inputStream.ReadExactlyAsync(magic, ct);
+
             inputStream.Position = 0;
 
             if (magic.AsSpan().SequenceEqual("Z3DS"u8))
             {
                 log?.Invoke("ZCCI 압축 감지, 스트리밍 압축 해제로 변환 진행", LogLevel.Info);
+
                 var z3dsHeader = Z3dsFormat.ParseZ3dsHeader(inputStream);
+
                 inputStream = new ZcciDecompressStream(inputStream, z3dsHeader);
             }
 
@@ -46,6 +51,7 @@ public class CciToCiaConverter(KeyStore keyStore)
                 await ConvertAsync(inputStream, outputStream, progress, log, ct);
 
             isCompleted = true;
+
             log?.Invoke($"변환 완료: {outputPath}", LogLevel.Ok);
         }
         finally
@@ -74,6 +80,7 @@ public class CciToCiaConverter(KeyStore keyStore)
             byte[] ncchBuf = new byte[0x200];
 
             input.Position = byteOffset;
+
             await input.ReadExactlyAsync(ncchBuf, ct);
 
             var ncch = NcchHeader.Parse(ncchBuf, 0);
@@ -85,6 +92,7 @@ public class CciToCiaConverter(KeyStore keyStore)
                 if (!ncch.NoCrypto)
                 {
                     log?.Invoke("암호화된 롬 감지, 복호화 파이프라인 구동...", LogLevel.Info);
+
                     exhdrStream = new NcchDecryptionStream(exhdrStream, 0, keyStore);
                 }
 
@@ -92,7 +100,9 @@ public class CciToCiaConverter(KeyStore keyStore)
                 {
                     exheader = new byte[0x400];
                     exhdrStream.Position = 0x200;
+
                     await exhdrStream.ReadExactlyAsync(exheader, ct);
+
                     saveSize = BinaryPrimitives.ReadUInt32LittleEndian(exheader.AsSpan(0x1C0));
                 }
             }
@@ -156,8 +166,10 @@ public class CciToCiaConverter(KeyStore keyStore)
                             break;
 
                         sha.AppendData(buf, 0, read);
+
                         remaining -= read;
                         totalProcessedBytes += read;
+
                         progress?.Report(new ProgressInfo
                         {
                             Percent = (int)((double)totalProcessedBytes / totalBytesToProcess * 100)
@@ -176,7 +188,6 @@ public class CciToCiaConverter(KeyStore keyStore)
             throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
-
         uint certChainSize = (uint)certChain.Length;
         uint ticketSize = TicketSize;
         uint tmdSize = (uint)(TmdBaseSize + TmdChunkSize * contentCount);
@@ -187,11 +198,13 @@ public class CciToCiaConverter(KeyStore keyStore)
         long certOffset = AlignUp(0x2020, CiaAlign);
 
         output.Position = certOffset;
+
         await output.WriteAsync(certChain, ct);
 
         long ticketOffset = AlignUp(certOffset + certChainSize, CiaAlign);
 
         output.Position = ticketOffset;
+
         await output.WriteAsync(BuildTicket(titleId, titleKey, partitions), ct);
 
         long tmdOffset = AlignUp(ticketOffset + ticketSize, CiaAlign);
@@ -222,6 +235,7 @@ public class CciToCiaConverter(KeyStore keyStore)
                 await CopyWithProgressAsync(ncchStream, output, actualSize, bytesWritten =>
                 {
                     totalProcessedBytes += bytesWritten;
+
                     progress?.Report(new ProgressInfo
                     {
                         Percent = (int)((double)totalProcessedBytes / totalBytesToProcess * 100)
@@ -237,6 +251,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         }
 
         byte[] meta = BuildMeta(smdhData, exheader);
+
         await output.WriteAsync(meta, ct);
 
         progress?.Report(new ProgressInfo { Percent = 100 });
@@ -305,6 +320,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         BinaryPrimitives.WriteUInt32BigEndian(buf.AsSpan(idxHdr + 0x24), 0x00030000);
 
         int idxData = idxHdr + 0x28;
+
         BinaryPrimitives.WriteUInt32BigEndian(buf.AsSpan(idxData + 0x00), 0x00000000);
 
         int contentCount = partitions.Count;
@@ -372,6 +388,7 @@ public class CciToCiaConverter(KeyStore keyStore)
             BinaryPrimitives.WriteUInt16BigEndian(buf.AsSpan(off + 0x04), (ushort)index);
             BinaryPrimitives.WriteUInt16BigEndian(buf.AsSpan(off + 0x06), 0x0000);
             BinaryPrimitives.WriteUInt64BigEndian(buf.AsSpan(off + 0x08), (ulong)actualSize);
+
             contentHashes[i].CopyTo(buf, off + 0x10);
         }
 
@@ -388,6 +405,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         byte[] buf = new byte[0x200];
 
         input.Position = 0;
+
         await input.ReadExactlyAsync(buf, ct);
 
         if (!buf.AsSpan(0x100, 4).SequenceEqual("NCSD"u8))
@@ -399,6 +417,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         for (int i = 0; i < 8; i++)
         {
             int off = 0x120 + i * 8;
+
             partitionMap[i] = (BinaryPrimitives.ReadUInt32LittleEndian(buf.AsSpan(off)), BinaryPrimitives.ReadUInt32LittleEndian(buf.AsSpan(off + 4)));
         }
 
@@ -439,6 +458,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         if (exheader != null)
         {
             exheader.AsSpan(0x40, 0x180).CopyTo(buf.AsSpan(0x000));
+
             BinaryPrimitives.WriteUInt32LittleEndian(buf.AsSpan(0x300), BinaryPrimitives.ReadUInt32LittleEndian(exheader.AsSpan(0x320)));
         }
 
@@ -455,6 +475,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         byte[] exefsHeader = new byte[0x200];
 
         ncchStream.Position = exefsStart;
+
         await ncchStream.ReadExactlyAsync(exefsHeader, ct);
 
         for (int i = 0; i < 8; i++)
@@ -467,8 +488,11 @@ public class CciToCiaConverter(KeyStore keyStore)
             if (name == "icon" && sectionSize > 0)
             {
                 byte[] iconData = new byte[sectionSize];
+
                 ncchStream.Position = exefsStart + 0x200 + sectionOffset;
+
                 await ncchStream.ReadExactlyAsync(iconData, ct);
+
                 return iconData;
             }
         }
@@ -477,5 +501,6 @@ public class CciToCiaConverter(KeyStore keyStore)
     }
 
     private static long AlignUp(long value, long alignment) => (value + alignment - 1) & ~(alignment - 1);
+
     private static long AlignUp(uint value, long alignment) => AlignUp((long)value, alignment);
 }
