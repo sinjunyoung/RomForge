@@ -2,7 +2,6 @@
 using Common;
 using Common.WPF.ViewModels;
 using NSW.WPF.Services;
-using Patch.Core;
 using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
@@ -286,6 +285,16 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         Application.Current?.Dispatcher?.Invoke(() => LogEntries.Add(new LogEntry { Message = message, Level = level }));
     }
 
+    private static string ResolveOutputDir(string sourcePath)
+    {
+        var patch = AppConfig.Instance.Patch;
+
+        if (patch.UseNormalPatchCustomOutputPath && !string.IsNullOrWhiteSpace(patch.OutputPath))
+            return patch.OutputPath;
+
+        return Path.Combine(Path.GetDirectoryName(sourcePath)!, "output");
+    }
+
     public async Task RunAsync()
     {
         var patchPaths = PatchPaths;
@@ -300,7 +309,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         _runCts = new CancellationTokenSource();
 
         var ct = _runCts.Token;
-        string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
+        string outputDir = ResolveOutputDir(SourcePath);
         string? extractDir = null;
         string? outputPath = null;
         var orchestrator = new PatchOrchestrator(Log, BuildProgressReporter(), AutoCompress, AppConfig.Instance.Dolphin.CompressLevel);

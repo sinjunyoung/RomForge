@@ -5,6 +5,8 @@
     <Grid Margin="5,0,5,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <ToggleButton Grid.Row="0" Style="{StaticResource ToggleStyle}"
                       IsChecked="{Binding AutoCompress}">
@@ -97,5 +99,29 @@
                 </Grid>
             </StackPanel>
         </ToggleButton>
+        <ToggleButton Grid.Row="1" Style="{StaticResource ToggleStyle}" Margin="0,5,0,0"
+                      IsChecked="{Binding UseCustomOutputPath}">
+            <StackPanel Orientation="Horizontal">
+                <Image Width="18" Margin="10,0,10,0" Source="{Binding UseCustomOutputPath, Converter={StaticResource BoolToImageConverter}}"/>
+                <TextBlock Text="패치 일반 출력 경로 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                <TextBlock Text="해제 시 원본 ROM 폴더 안의 output 폴더에 저장" FontSize="11" Foreground="#D4AF37" VerticalAlignment="Center"/>
+            </StackPanel>
+        </ToggleButton>
+
+        <Grid Grid.Row="2" Margin="0,2,0,5" Visibility="{Binding OutputPathVisibility}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Grid.Column="0" Height="36">
+                <Grid>
+                    <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"/>
+                    <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="출력 폴더를 선택하세요" VerticalAlignment="Center" Visibility="{Binding OutputHintVisibility}"/>
+                </Grid>
+            </Border>
+            <Button BorderThickness="1" Command="{Binding BrowseOutputCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
+                <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30"/>
+            </Button>
+        </Grid>
     </Grid>
 </UserControl>

@@ -63,6 +63,20 @@ public class PatchConfig : ViewModelBase
         get => _namingFormat;
         set { SetProperty(ref _namingFormat, value); }
     }
+
+    private bool _useNormalPatchCustomOutputPath;
+    public bool UseNormalPatchCustomOutputPath
+    {
+        get => _useNormalPatchCustomOutputPath;
+        set { SetProperty(ref _useNormalPatchCustomOutputPath, value); }
+    }
+
+    private string? _outputPath;
+    public string? OutputPath
+    {
+        get => _outputPath;
+        set { SetProperty(ref _outputPath, value); }
+    }
 }
 
 public class ChdmanConfig : ViewModelBase
