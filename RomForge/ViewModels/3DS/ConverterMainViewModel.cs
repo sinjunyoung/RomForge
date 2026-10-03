@@ -184,16 +184,16 @@ public class ConverterMainViewModel : ToolTabViewModel
                             case "ZCCI":
                                 {
                                     if (inputExt == "cia")
-                                        await Z3dsArchiveService.CompressFromCiaAsync(item.FilePath, 18, progressHandler, AppendLog, _cts.Token);
+                                        await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, 18, progressHandler, AppendLog, null, _cts.Token);
                                     else
-                                        await Z3dsArchiveService.CompressAsync(item.FilePath, 18, progressHandler, AppendLog, _cts.Token);
+                                        await Z3dsCompressor.CompressAsync(item.FilePath, 18, progressHandler, AppendLog, null, _cts.Token);
                                 }
                                 break;
 
                             case "CCI":
                                 {
                                     if (inputExt == "zcci")
-                                        await Z3dsArchiveService.DecompressAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
+                                        await Z3dsDecompressor.DecompressAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
                                     else if (inputExt == "cia")
                                     {
                                         KeyStore key = new();

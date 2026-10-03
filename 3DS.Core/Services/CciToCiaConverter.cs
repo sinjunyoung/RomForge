@@ -36,7 +36,7 @@ public class CciToCiaConverter(KeyStore keyStore)
             if (magic.AsSpan().SequenceEqual("Z3DS"u8))
             {
                 log?.Invoke("ZCCI 압축 감지, 스트리밍 압축 해제로 변환 진행", LogLevel.Info);
-                var z3dsHeader = Z3dsArchiveService.ParseZ3dsHeader(inputStream);
+                var z3dsHeader = Z3dsFormat.ParseZ3dsHeader(inputStream);
                 inputStream = new ZcciDecompressStream(inputStream, z3dsHeader);
             }
 

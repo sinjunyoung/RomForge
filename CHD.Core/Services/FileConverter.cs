@@ -43,9 +43,9 @@ public class FileConverter : IDisposable
         return source.Format switch
         {
             InputFormat.Chd => await ConvertFromChdAsync(source, outputDir, progress, targetFormat, ct),
-            InputFormat.Iso => await ConvertIsoChdAsync(source, progress, ct),
-            InputFormat.BinCue => await ConvertToChdAsync(source, progress, ct),
-            InputFormat.Gdi => await ConvertToChdAsync(source, progress, ct),
+            InputFormat.Iso => await ConvertIsoChdAsync(source, outputDir, progress, ct),
+            InputFormat.BinCue => await ConvertToChdAsync(source, outputDir, progress, ct),
+            InputFormat.Gdi => await ConvertToChdAsync(source, outputDir, progress, ct),
 
             _ => ConversionResult.Fail($"지원하지 않는 형식: {source.Format}")
         };
@@ -229,10 +229,11 @@ public class FileConverter : IDisposable
         };
     }
 
-    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
     {
         var inputPath = source.PrimaryFile;
-        var chdPath = Path.ChangeExtension(inputPath, ".chd");
+        var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
+
         chdPath = Utils.GetUniqueFilePath(chdPath);
 
         Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
@@ -325,10 +326,10 @@ public class FileConverter : IDisposable
         }
     }
 
-    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
+    private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken cancellationToken)
     {
         var inputPath = source.PrimaryFile;
-        var chdPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, ".chd"));
+        var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
 
         Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
         CurrentOutputPath = chdPath;

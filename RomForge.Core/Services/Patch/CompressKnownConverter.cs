@@ -121,7 +121,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
 
-                    await Z3dsArchiveService.CompressAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
+                    await Z3dsCompressor.CompressAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, null, ct);
 
                     File.Delete(outputPath);
 
@@ -131,7 +131,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
 
-                    await Z3dsArchiveService.CompressFromCiaAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
+                    await Z3dsCompressor.CompressFromCiaAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, null, ct);
 
                     File.Delete(outputPath);
 

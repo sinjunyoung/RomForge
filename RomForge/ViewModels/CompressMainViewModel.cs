@@ -38,11 +38,38 @@ public class CompressMainViewModel : ToolTabViewModel
 
     public ICommand RunCommand { get; }
 
+    public ICommand BrowseOutputCommand { get; }
+
     public event Action<CompressFileItem>? ScrollToItemRequested;
+
+    public bool UseCustomOutputPath
+    {
+        get => AppConfig.Instance.OutputFolders.UseCompressCustomOutputPath;
+        set
+        {
+            if (value && string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.CompressOutputPath))
+                AppConfig.Instance.OutputFolders.CompressOutputPath = AppDomain.CurrentDomain.BaseDirectory;
+
+            AppConfig.Instance.OutputFolders.UseCompressCustomOutputPath = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(OutputPath));
+        }
+    }
+
+    public string? OutputPath
+    {
+        get => AppConfig.Instance.OutputFolders.CompressOutputPath;
+        set
+        {
+            AppConfig.Instance.OutputFolders.CompressOutputPath = value;
+            OnPropertyChanged();
+        }
+    }
 
     public CompressMainViewModel()
     {
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsLocked && FileItems.Count > 0);
+        BrowseOutputCommand = new RelayCommand(_ => BrowseOutput());
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsLocked);
     }
 
@@ -94,6 +121,20 @@ public class CompressMainViewModel : ToolTabViewModel
         OnPropertyChanged(nameof(HintVisibility));
     }
 
+    private void BrowseOutput()
+    {
+        var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+        {
+            Description = "출력 폴더 선택",
+            UseDescriptionForTitle = true
+        };
+
+        if (dlg.ShowDialog() == true)
+            OutputPath = dlg.SelectedPath;
+    }
+
+    private string? ResolveOutputDir() => UseCustomOutputPath && !string.IsNullOrWhiteSpace(OutputPath) ? OutputPath : null;
+
     private async Task RunAsync()
     {
         _cts.Dispose();
@@ -101,6 +142,8 @@ public class CompressMainViewModel : ToolTabViewModel
         _cts = new CancellationTokenSource();
 
         ClearLog();
+
+        string? outputDir = ResolveOutputDir();
 
         using (BeginWork())
         {
@@ -146,25 +189,25 @@ public class CompressMainViewModel : ToolTabViewModel
                     switch (detected.Format)
                     {
                         case RomFormat.Nsp:
-                            await NspCompressService.CompressAsync(item.FilePath, AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progressHandler, AppendLog, _cts.Token);
+                            await NspCompressService.CompressAsync(item.FilePath, AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progressHandler, AppendLog, outputDir, _cts.Token);
                             break;
                         case RomFormat.Xci:
-                            await XciCompressService.CompressAsync(item.FilePath, AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progressHandler, AppendLog, _cts.Token);
+                            await XciCompressService.CompressAsync(item.FilePath, AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progressHandler, AppendLog, outputDir, _cts.Token);
                             break;
                         case RomFormat.Nsz:
-                            await NspCompressService.DecompressAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
+                            await NspCompressService.DecompressAsync(item.FilePath, progressHandler, AppendLog, outputDir, _cts.Token);
                             break;
                         case RomFormat.Xcz:
-                            await XciCompressService.DecompressAsync(item.FilePath, progressHandler, AppendLog, _cts.Token);
+                            await XciCompressService.DecompressAsync(item.FilePath, progressHandler, AppendLog, outputDir, _cts.Token);
                             break;
                         case RomFormat.Cci:
-                            await Z3dsArchiveService.CompressAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, logWrapper, _cts.Token);
+                            await Z3dsCompressor.CompressAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, logWrapper, outputDir, _cts.Token);
                             break;
                         case RomFormat.Cia:
-                            await Z3dsArchiveService.CompressFromCiaAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, logWrapper, _cts.Token);
+                            await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, logWrapper, outputDir, _cts.Token);
                             break;
                         case RomFormat.ZCci:
-                            await Z3dsArchiveService.DecompressAsync(item.FilePath, progressHandler, logWrapper, _cts.Token);
+                            await Z3dsDecompressor.DecompressAsync(item.FilePath, progressHandler, logWrapper, outputDir, _cts.Token);
                             break;
                         case RomFormat.Ccd:
                             {
@@ -172,7 +215,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                 var discReader = DiscImageReaderFactory.Resolve(item.FilePath);
                                 var discImage = discReader.Read(item.FilePath);
-                                var tempCuePath = await BinCueWriter.WriteAsync(discImage, item.Directory, item.FileName, progressHandler, _cts.Token);
+                                var tempCuePath = await BinCueWriter.WriteAsync(discImage, outputDir ?? item.Directory, item.FileName, progressHandler, _cts.Token);
                                 var tempBinPath = Path.ChangeExtension(tempCuePath, ".bin");
 
                                 try
@@ -183,7 +226,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                     chdFromCcd.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-                                    var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, null, progressHandler, null, _cts.Token);
+                                    var chdFromCcdResult = await chdFromCcd.ConvertFileAsync(tempCuePath, outputDir, progressHandler, null, _cts.Token);
 
                                     if (!chdFromCcdResult.Success)
                                         throw new InvalidOperationException(chdFromCcdResult.Message);
@@ -207,7 +250,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                 chdConverter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
 
-                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, null, progressHandler, null, _cts.Token);
+                                var chdResult = await chdConverter.ConvertFileAsync(item.FilePath, outputDir, progressHandler, null, _cts.Token);
 
                                 if (!chdResult.Success)
                                     throw new InvalidOperationException(chdResult.Message);
@@ -225,7 +268,7 @@ public class CompressMainViewModel : ToolTabViewModel
                                 dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
                                 dolphin.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
 
-                                await dolphin.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.Dolphin.CompressLevel, null, _cts.Token);
+                                await dolphin.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.Dolphin.CompressLevel, outputDir, _cts.Token);
                             }
                             break;
                         case RomFormat.Unknown:

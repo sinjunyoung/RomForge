@@ -23,7 +23,7 @@ public class ZcciDecompressStream : Stream
 
         long compressedDataOffset = header.HeaderSize + header.MetadataSize;
         long compressedDataLength = header.CompressedSize;
-        var entries = Z3dsArchiveService.ParseSeekTable(_base, compressedDataOffset, compressedDataLength);
+        var entries = Z3dsFormat.ParseSeekTable(_base, compressedDataOffset, compressedDataLength);
 
         _blocks = new List<(long, int, int)>(entries.Count);
 

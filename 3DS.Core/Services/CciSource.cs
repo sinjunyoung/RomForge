@@ -41,7 +41,7 @@ public class CciSource : IInstallSource
 
             if (magic.AsSpan().SequenceEqual("Z3DS"u8))
             {
-                var z3dsHeader = Z3dsArchiveService.ParseZ3dsHeader(stream);
+                var z3dsHeader = Z3dsFormat.ParseZ3dsHeader(stream);
                 stream = new ZcciDecompressStream(stream, z3dsHeader);
             }
 

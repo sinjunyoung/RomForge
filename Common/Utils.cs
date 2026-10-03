@@ -35,6 +35,18 @@ public static class Utils
         return $"{bytes / 1024.0:F1} KB";
     }
 
+    public static string ResolveOutputFilePath(string inputPath, string extension, string? outputDir)
+    {
+        string path = Path.ChangeExtension(inputPath, extension);
+
+        if (string.IsNullOrWhiteSpace(outputDir))
+            return path;
+
+        Directory.CreateDirectory(outputDir);
+
+        return Path.Combine(outputDir, Path.GetFileName(path));
+    }
+
     public static string GetUniqueFilePath(string filePath)
     {
         string directory = Path.GetDirectoryName(filePath);

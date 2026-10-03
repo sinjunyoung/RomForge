@@ -27,21 +27,21 @@ public static class XciCompressService
     private const ulong MediaSize = 0x200;
     private const int CopyBufferSize = 1024 * 1024;
 
-    public static Task<string> CompressAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> CompressAsync(string inputPath, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string? outputDir = null, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
 
-        return RunAsync(inputPath, true, compressionLevel, validation, useBlockMode, false, keySet?.Clone(), progress, log, ct);
+        return RunCoreAsync(inputPath, true, compressionLevel, validation, useBlockMode, false, keySet?.Clone(), progress, log, outputDir, ct);
     }
 
-    public static Task<string> DecompressAsync(string inputPath, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static Task<string> DecompressAsync(string inputPath, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string? outputDir = null, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
 
-        return RunAsync(inputPath, false, 0, false, false, false, keySet?.Clone(), progress, log, ct);
+        return RunCoreAsync(inputPath, false, 0, false, false, false, keySet?.Clone(), progress, log, outputDir, ct);
     }
 
-    private static async Task<string> RunAsync(string inputPath, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, bool forceKeyGen0, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+    private static async Task<string> RunCoreAsync(string inputPath, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, bool forceKeyGen0, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string? outputDir, CancellationToken ct)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
@@ -86,7 +86,7 @@ public static class XciCompressService
 
             string outputExt = isCompressMode ? ".xcz" : ".xci";
 
-            finalPath = Utils.GetUniqueFilePath(Path.ChangeExtension(inputPath, outputExt));
+            finalPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, outputExt, outputDir));
 
             string displayName = $"{(isCompressMode ? Res.Log_StatusCompressing : Res.Log_StatusDecompressing)} {NspNameBuilder.CompressDisplayNameBuild(meta.KrTitle, meta.TitleId, meta.DisplayVersion)}";
             var rootEntries = rootPartition.EnumerateEntries("/", "*").ToList();

@@ -372,7 +372,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.NspToXciAsync(sw.FilePath, progress, Log, _cts.Token);
                             break;
                         case ("nsp", "NSZ"):
-                            await NspCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            await NspCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, null, _cts.Token);
                             break;
                         case ("nsp", "XCZ"):
                             await NspXciConvertService.NspToXczAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
@@ -381,13 +381,13 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.XciToNspAsync(sw.FilePath, progress, Log, _cts.Token);
                             break;
                         case ("xci", "XCZ"):
-                            await XciCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
+                            await XciCompressService.CompressAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, null,_cts.Token);
                             break;
                         case ("xci", "NSZ"):
                             await NspXciConvertService.XciToNszAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "NSP"):
-                            await NspCompressService.DecompressAsync(sw.FilePath, progress, Log, _cts.Token);
+                            await NspCompressService.DecompressAsync(sw.FilePath, progress, Log, null, _cts.Token);
                             break;
                         case ("nsz", "XCI"):
                             await NspXciConvertService.NszToXciAsync(sw.FilePath, progress, Log, _cts.Token);
@@ -396,7 +396,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.NszToXczAsync(sw.FilePath, compressLevel, AppConfig.Instance.Switch.VerifyCompress, AppConfig.Instance.Switch.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "XCI"):
-                            await XciCompressService.DecompressAsync(sw.FilePath, progress, Log, _cts.Token);
+                            await XciCompressService.DecompressAsync(sw.FilePath, progress, Log, null, _cts.Token);
                             break;
                         case ("xcz", "NSP"):
                             await NspXciConvertService.XczToNspAsync(sw.FilePath, progress, Log, _cts.Token);
@@ -423,13 +423,13 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await new CiaToCciConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _cts.Token);
                             break;
                         case ("cci", "ZCCI") or ("3ds", "ZCCI"):
-                            await Z3dsArchiveService.CompressAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
+                            await Z3dsCompressor.CompressAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, null, _cts.Token);
                             break;
                         case ("cia", "ZCCI"):
-                            await Z3dsArchiveService.CompressFromCiaAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
+                            await Z3dsCompressor.CompressFromCiaAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, null, _cts.Token);
                             break;
                         case ("zcci", "CCI"):
-                            await Z3dsArchiveService.DecompressAsync(ds.FilePath, progress, AppendLog, _cts.Token);
+                            await Z3dsDecompressor.DecompressAsync(ds.FilePath, progress, AppendLog, null, _cts.Token);
                             break;
                         case ("zcci", "CIA"):
                             await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _cts.Token);

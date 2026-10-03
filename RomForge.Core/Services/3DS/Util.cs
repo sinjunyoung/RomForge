@@ -54,7 +54,7 @@ public static class Util
             case ".zcci":
                 {
                     await using var fileStream = File.OpenRead(path);
-                    var z3dsHeader = Z3dsArchiveService.ParseZ3dsHeader(fileStream);
+                    var z3dsHeader = Z3dsFormat.ParseZ3dsHeader(fileStream);
                     await using var decompStream = new ZcciDecompressStream(fileStream, z3dsHeader);
 
                     (ncchHeader, smdhInfo) = await ParseNcchFromCciStreamAsync(decompStream, keyStore);
