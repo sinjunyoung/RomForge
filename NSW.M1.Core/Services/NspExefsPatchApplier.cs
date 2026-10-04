@@ -127,8 +127,8 @@ public static class NspExefsPatchApplier
             uint originalFlags = BitConverter.ToUInt32(nso, 0x0C);
             bool wasCompressed = NsoTool.IsCompressed(nso);
             byte[] plain = wasCompressed ? NsoTool.DecompressToPlain(nso) : nso;
-            byte[] patched = UniversalPatcher.ApplyPatchAsync(plain, readIps()).GetAwaiter().GetResult();
-            byte[] final = wasCompressed ? NsoTool.RecompressFromPlain(patched, originalFlags) : patched;
+            byte[] patched = NsoMemoryImage.Apply(plain, image => UniversalPatcher.ApplyPatchAsync(image, readIps()).GetAwaiter().GetResult());
+            byte[] final = NsoTool.RecompressFromPlain(patched, originalFlags);
 
             File.WriteAllBytes(targetNso, final);
 
