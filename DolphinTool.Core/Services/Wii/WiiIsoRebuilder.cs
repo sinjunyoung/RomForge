@@ -12,6 +12,41 @@ public static class WiiIsoRebuilder
     private const int BootPointerStart = 0x424;
     private const int BootPointerEnd = 0x430;
 
+    public static IReadOnlyList<string> RebuildWithRiivolution(string inputPath, string outputPath, string xmlOrFolder, IReadOnlyDictionary<string, int>? choices = null, Action<double>? progress = null, CancellationToken ct = default)
+    {
+        var patch = RiivolutionParser.Parse(xmlOrFolder, choices);
+
+        EnsureGameMatches(inputPath, patch);
+
+        RebuildWithReplacements(inputPath, outputPath, patch.Replacements, progress, ct);
+
+        return patch.Warnings;
+    }
+
+    public static bool VerifyRiivolution(string originalPath, string xmlOrFolder, string rebuiltPath, string reportPath, IReadOnlyDictionary<string, int>? choices = null, CancellationToken ct = default)
+    {
+        var patch = RiivolutionParser.Parse(xmlOrFolder, choices);
+
+        return VerifyAgainstOriginal(originalPath, patch.Replacements, rebuiltPath, reportPath, ct);
+    }
+
+    private static void EnsureGameMatches(string inputPath, RiivolutionPatchSet patch)
+    {
+        using var input = RvzInputSource.Open(inputPath);
+
+        if (input.Length < 6)
+            throw new InvalidDataException("Wii 디스크가 아닙니다.");
+
+        byte[] id = new byte[6];
+
+        input.Read(0, id);
+
+        string discId = Encoding.ASCII.GetString(id);
+
+        if (!patch.MatchesDisc(discId))
+            throw new InvalidDataException($"패치 대상 게임({string.Join(", ", patch.GameIds)})과 디스크({discId})가 다릅니다.");
+    }
+
     public static bool Verify(string inputPath, string reportPath, Action<double>? progress = null, CancellationToken ct = default)
     {
         using var input = RvzInputSource.Open(inputPath);
@@ -404,26 +439,23 @@ public static class WiiIsoRebuilder
 
 
 
-    public static bool VerifyAgainstOriginal(string originalPath, string folder, string rebuiltPath, string reportPath, CancellationToken ct = default)
+    public static bool VerifyAgainstOriginal(string originalPath, string folder, string rebuiltPath, string reportPath, CancellationToken ct = default) => VerifyAgainstOriginal(originalPath, CollectFolder(folder), rebuiltPath, reportPath, ct);
+
+    public static bool VerifyAgainstOriginal(string originalPath, IReadOnlyDictionary<string, string> overlay, string rebuiltPath, string reportPath, CancellationToken ct = default)
     {
         using var originalInput = RvzInputSource.Open(originalPath);
         using var rebuiltInput = RvzInputSource.Open(rebuiltPath);
-
         var originalTarget = FindTargets(originalInput, ReadSpecs(originalInput)).FirstOrDefault() ?? throw new InvalidDataException("원본의 게임 파티션을 찾을 수 없습니다.");
         var rebuiltTarget = FindTargets(rebuiltInput, ReadSpecs(rebuiltInput)).FirstOrDefault() ?? throw new InvalidDataException("결과물의 게임 파티션을 찾을 수 없습니다.");
-
         using var original = new WiiPartitionReader(originalInput, originalTarget);
         using var rebuilt = new WiiPartitionReader(rebuiltInput, rebuiltTarget);
-
         var originalFiles = WiiFileSystem.Read(original).Files;
         var rebuiltFiles = WiiFileSystem.Read(rebuilt).Files;
-        var overlay = CollectFolder(folder);
-
         using var writer = new StreamWriter(reportPath, false, new UTF8Encoding(false));
 
         writer.WriteLine($"original: {originalPath}");
         writer.WriteLine($"rebuilt: {rebuiltPath}");
-        writer.WriteLine($"overlay folder: {folder} ({overlay.Count} files)");
+        writer.WriteLine($"overlay: {overlay.Count} files");
 
         var rebuiltByPath = new Dictionary<string, WiiFileEntry>(StringComparer.OrdinalIgnoreCase);
 
