@@ -324,20 +324,44 @@
             </StackPanel>
         </Border>
 
-        <DockPanel Grid.Row="1" Margin="5,5,5,5" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}">
-            <ToggleButton DockPanel.Dock="Left" Style="{StaticResource ToggleStyle}" Margin="0,0,5,0" IsChecked="{Binding UnifiedConvertVM.UseCustomOutputPath}">
-                <StackPanel Orientation="Horizontal">
-                    <Image Width="18" Margin="10,0,10,0" Source="{Binding UnifiedConvertVM.UseCustomOutputPath, Converter={StaticResource BoolToImageConverter}}"/>
-                    <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
-                </StackPanel>
-            </ToggleButton>
-            <Button DockPanel.Dock="Right" BorderThickness="1" Command="{Binding UnifiedConvertVM.BrowseOutputCommand}" IsEnabled="{Binding UnifiedConvertVM.UseCustomOutputPath}" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
-                <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30"/>
-            </Button>
-            <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Height="36">
-                <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding UnifiedConvertVM.OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UnifiedConvertVM.UseCustomOutputPath}" VerticalContentAlignment="Center"/>
-            </Border>
-        </DockPanel>
+        <Border Grid.Row="1" Margin="5" CornerRadius="6" Height="36" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Background" Value="#12FFFFFF"/>
+                    <Setter Property="BorderBrush" Value="#30FFFFFF"/>
+
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding UnifiedConvertVM.UseCustomOutputPath}" Value="False">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderBrush" Value="Transparent"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ToggleButton Grid.Column="0" Style="{StaticResource ToggleStyle}" Background="Transparent" BorderThickness="0" IsChecked="{Binding UnifiedConvertVM.UseCustomOutputPath}" VerticalAlignment="Center" Height="36" Margin="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Width="18" Margin="10,0,10,0" Source="{Binding UnifiedConvertVM.UseCustomOutputPath, Converter={StaticResource BoolToImageConverter}}"/>
+                        <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
+                    </StackPanel>
+                </ToggleButton>
+
+                <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" VerticalContentAlignment="Center"
+                         Text="{Binding UnifiedConvertVM.OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding UnifiedConvertVM.UseCustomOutputPath}"/>
+
+                <Button Grid.Column="2" Style="{StaticResource GrayButton}" Command="{Binding UnifiedConvertVM.BrowseOutputCommand}" IsEnabled="{Binding UnifiedConvertVM.UseCustomOutputPath}" 
+                        Width="30" Height="30" Margin="0,0,3,0" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30"/>
+                </Button>
+            </Grid>
+        </Border>
 
         <Border Grid.Row="2" Margin="5,0,5,5" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0" CornerRadius="5">
             <DockPanel>
