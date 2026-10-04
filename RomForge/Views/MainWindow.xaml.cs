@@ -34,9 +34,6 @@ public partial class MainWindow : Window
             if (e.PropertyName == nameof(CommonConfig.Topmost))
                 Topmost = AppConfig.Instance.Common.Topmost;
         };
-
-        DolphinTool.Core.Services.Wii.WiiIsoRebuilder.RebuildWithRiivolution(@"D:\Wii\PokePark.iso", @"D:\PokePark_KOR2.iso", @"D:\PokePark_Wii_KOR_Riivolution_v1_0");
-        DolphinTool.Core.Services.Wii.WiiIsoRebuilder.VerifyRiivolution(@"D:\Wii\PokePark.iso", @"D:\PokePark_Wii_KOR_Riivolution_v1_0", @"D:\PokePark_KOR2.iso", @"D:\compare2.txt");
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

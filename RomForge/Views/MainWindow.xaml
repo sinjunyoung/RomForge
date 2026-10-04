@@ -7,6 +7,7 @@
         xmlns:switch="clr-namespace:RomForge.Controls.Switch"
         xmlns:wiiu="clr-namespace:RomForge.Controls.WiiU"
         xmlns:_3ds="clr-namespace:RomForge.Controls._3DS"
+        xmlns:wii="clr-namespace:RomForge.Controls.Wii"
         xmlns:ps="clr-namespace:RomForge.Controls.PS"
         xmlns:util="clr-namespace:RomForge.Controls.Util"
         xmlns:settings="clr-namespace:RomForge.Controls.Settings"
@@ -86,6 +87,16 @@
                     </StackPanel>
                 </TabItem.Header>
                 <_3ds:MainTab DataContext="{Binding Main3DsVM}" Margin="0,-5,0,0"/>
+            </TabItem>
+
+            <TabItem IsEnabled="{Binding IsIdle}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Wii.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Wii" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <wii:MainTab DataContext="{Binding WiiMainVM}" Margin="0,-5,0,0"/>
             </TabItem>
 
             <TabItem IsEnabled="{Binding IsIdle}">

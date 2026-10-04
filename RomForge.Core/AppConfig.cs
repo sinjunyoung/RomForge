@@ -170,6 +170,9 @@ public class OutputFoldersConfig : ViewModelBase
 
     private string? _convertOutputPath;
     public string? ConvertOutputPath { get => _convertOutputPath; set => SetProperty(ref _convertOutputPath, value); }
+
+    private string? _wiiOutputPath;
+    public string? WiiOutputPath { get => _wiiOutputPath; set => SetProperty(ref _wiiOutputPath, value); }
 }
 
 public class AppConfig : ViewModelBase

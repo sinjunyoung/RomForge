@@ -53,6 +53,7 @@
     <None Remove="Assets\Images\Version.png" />
     <None Remove="Assets\Images\Vita.png" />
     <None Remove="Assets\Images\VitaGray.png" />
+    <None Remove="Assets\Images\Wii.png" />
     <None Remove="Assets\Images\WiiU.png" />
     <None Remove="Assets\Images\WorkSpace.png" />
     <None Remove="Assets\Images\zRIF.png" />
@@ -96,6 +97,7 @@
     <Resource Include="Assets\Images\UpperA.png" />
     <Resource Include="Assets\Images\Vita.png" />
     <Resource Include="Assets\Images\VitaGray.png" />
+    <Resource Include="Assets\Images\Wii.png" />
     <Resource Include="Assets\Images\WiiU.png" />
     <Resource Include="Assets\Images\WorkSpace.png" />
     <Resource Include="Assets\Images\WriteTab.png" />

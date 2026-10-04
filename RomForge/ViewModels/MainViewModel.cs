@@ -8,6 +8,7 @@ using RomForge.ViewModels.PS;
 using RomForge.ViewModels.Settings;
 using RomForge.ViewModels.Switch;
 using RomForge.ViewModels.Util;
+using RomForge.ViewModels.Wii;
 using RomForge.ViewModels.WiiU;
 using System.Collections.ObjectModel;
 
@@ -29,11 +30,13 @@ public class MainViewModel : ToolTabViewModel
 
     public ConvertMainViewModel UnifiedConvertVM { get; } = new();
 
-    public SwitchMainViewModel SwitchMainVM { get; } = new();
+    public SwitchMainViewModel SwitchMainVM { get; } = new();    
 
     public WiiUMainViewModel WiiUMainVM { get; } = new();
 
     public _3DSMainViewModel Main3DsVM { get; } = new();
+
+    public WiiMainViewModel WiiMainVM { get; } = new();
 
     public PS1MainViewModel PSMainVM { get; } = new();
 
@@ -72,10 +75,11 @@ public class MainViewModel : ToolTabViewModel
         1 => CompressVM.LogEntries,
         2 => UnifiedConvertVM.LogEntries,
         3 => SwitchMainVM.LogEntries,
-        4 => WiiUMainVM.LogEntries,
+        4 => WiiUMainVM.LogEntries,        
         5 => Main3DsVM.LogEntries,
-        6 => PSMainVM.LogEntries,
-        7 => UtilMainVM.LogEntries,
+        6 => WiiMainVM.LogEntries,
+        7 => PSMainVM.LogEntries,
+        8 => UtilMainVM.LogEntries,
         _ => PatchVM.LogEntries
     };
 
@@ -95,6 +99,7 @@ public class MainViewModel : ToolTabViewModel
         Tools.Add(SwitchMainVM);
         Tools.Add(WiiUMainVM);
         Tools.Add(Main3DsVM);
+        Tools.Add(WiiMainVM);
         Tools.Add(PSMainVM);
         Tools.Add(UtilMainVM);
         Tools.Add(Settings);
