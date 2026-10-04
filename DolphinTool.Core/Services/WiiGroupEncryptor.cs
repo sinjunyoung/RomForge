@@ -14,6 +14,8 @@ internal sealed class WiiGroupEncryptor : IDisposable
     private readonly Aes _aes = Aes.Create();
     private byte[]? _key;
 
+    public ReadOnlySpan<byte> H2Table => _hashes.AsSpan(WiiLayout.H2Offset, WiiLayout.H2Bytes);
+
     public void Encrypt(byte[] key, byte[] decrypted, IReadOnlyList<HashException> exceptions, byte[] output)
     {
         if (decrypted.Length != WiiLayout.GroupDataSize || output.Length != WiiLayout.GroupTotalSize)

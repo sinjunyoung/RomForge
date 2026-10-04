@@ -34,8 +34,6 @@ public partial class MainWindow : Window
             if (e.PropertyName == nameof(CommonConfig.Topmost))
                 Topmost = AppConfig.Instance.Common.Topmost;
         };
-
-        //DolphinTool.Core.Services.Wii.WiiIsoInspector.Dump(@"D:\Wii\PokePark Wii - Pikachu no Daibouken (Japan).iso", @"D:\R8AJ_files.txt");
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)

@@ -3,7 +3,7 @@ using DolphinTool.Core.Models;
 
 namespace DolphinTool.Core.Services.Wii;
 
-internal sealed class WiiPartitionReader : IDisposable
+internal sealed class WiiPartitionReader : IWiiPartitionData, IDisposable
 {
     private const int IvOffset = 0x3D0;
     private const int IvSize = 16;
