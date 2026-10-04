@@ -34,6 +34,11 @@ public partial class MainWindow : Window
             if (e.PropertyName == nameof(CommonConfig.Topmost))
                 Topmost = AppConfig.Instance.Common.Topmost;
         };
+
+        //DolphinTool.Core.Services.Wii.WiiIsoRebuilder.RebuildWithFolder(@"D:\Wii\PokePark.iso", @"D:\PokePark_KOR.iso", @"D:\PokePark_KOR");
+        //DolphinTool.Core.Services.Wii.WiiIsoRebuilder.VerifyFolder(@"D:\PokePark_KOR.iso", @"D:\PokePark_KOR", @"D:\verifyfolder.txt");
+        //DolphinTool.Core.Services.Wii.WiiIsoRebuilder.Verify(@"D:\PokePark_KOR.iso", @"D:\verify2.txt");
+        //DolphinTool.Core.Services.Wii.WiiIsoRebuilder.VerifyAgainstOriginal(@"D:\Wii\PokePark.iso", @"D:\PokePark_KOR", @"D:\PokePark_KOR.iso", @"D:\compare.txt");
     }
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
