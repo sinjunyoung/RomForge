@@ -14,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 using WiiGC.Core.Services;
 
 namespace RomForge.ViewModels;
@@ -85,7 +84,7 @@ public class CompressMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in Common.Utils.ExpandPaths(paths))
+        foreach (var path in Utils.ExpandPaths(paths))
         {
             if (!SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;
@@ -304,6 +303,7 @@ public class CompressMainViewModel : ToolTabViewModel
                 catch (Exception ex)
                 {
                     AppendLog($"오류 ([{item.FileName}]): {ex.Message}", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                     item.Status = "실패";
                 }

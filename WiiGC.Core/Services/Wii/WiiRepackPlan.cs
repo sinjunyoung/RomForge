@@ -57,7 +57,9 @@ internal static class WiiPartitionPlanner
         }
 
         if (missing.Count > 0)
+        {
             throw new InvalidDataException($"디스크에 없는 파일 {missing.Count}개: {string.Join(", ", missing.Take(5))}");
+        }
 
         byte[] head = new byte[dolOffset];
 

@@ -17,8 +17,13 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
     private readonly WiiPartitionEncoder _encoder = new();
     private readonly byte[] _scratch = new byte[WiiLayout.HashSize];
     private readonly object _gate = new();
+    private readonly bool _ownsInput;
 
-    private WiiRebuiltIsoSource(IRvzInputSource input) => _input = input;
+    private WiiRebuiltIsoSource(IRvzInputSource input, bool ownsInput = false)
+    {
+        _input = input;
+        _ownsInput = ownsInput;
+    }
 
     public long Length => _input.Length;
 
@@ -39,6 +44,36 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
         catch
         {
             source.Dispose();
+
+            throw;
+        }
+    }
+
+    public static WiiRebuiltIsoSource CreateFromFolder(string folder, IReadOnlyDictionary<string, string>? overlay, Action<double>? progress, CancellationToken ct)
+    {
+        var info = WiiFolderInfo.Read(folder);
+        var plan = WiiFolderPlanner.Plan(folder, overlay);
+        WiiFolderBaseSource? baseSource = null;
+        WiiRebuiltIsoSource? source = null;
+
+        try
+        {
+            baseSource = WiiFolderBaseSource.Create(folder, info, plan.DataSize);
+            source = new WiiRebuiltIsoSource(baseSource, true);
+            source._targets.Add(new Target(0, baseSource.CreateSpec(plan.DataSize), plan));
+            source.Prepare(progress, ct);
+
+            return source;
+        }
+        catch
+        {
+            if (source != null)
+                source.Dispose();
+            else
+            {
+                plan.Data.Dispose();
+                baseSource?.Dispose();
+            }
 
             throw;
         }
@@ -84,6 +119,9 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
         foreach (var reader in _readers)
             reader.Dispose();
+
+        if (_ownsInput)
+            _input.Dispose();
     }
 
     private void Plan(IReadOnlyDictionary<string, string> replacements)
@@ -137,7 +175,6 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
             for (long group = 0; group < groups; group++)
             {
                 ct.ThrowIfCancellationRequested();
-
                 _encoder.EncodeGroup(target.Spec.Key, data, group, h3.AsSpan((int)(group * WiiLayout.HashSize), WiiLayout.HashSize));
 
                 done++;

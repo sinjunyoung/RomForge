@@ -36,7 +36,12 @@ namespace RomForge.ViewModels.Switch
         public int ProgressPct
         {
             get => _progressPct;
-            set { _progressPct = value; OnPropertyChanged(); }
+            set 
+            { 
+                _progressPct = value; 
+                OnPropertyChanged();
+                MainViewModel.SetTaskbarProgress(_progressPct);
+            }
         }
 
         public string ProgressLabel
@@ -185,6 +190,7 @@ namespace RomForge.ViewModels.Switch
                 catch (OperationCanceledException)
                 {
                     Log($"작업이 취소되었습니다.", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(0);
 
                     try
                     {
@@ -201,10 +207,12 @@ namespace RomForge.ViewModels.Switch
                 catch (UnpackMetadataNotFoundException bex)
                 {
                     Log($"실패: {bex.Message}", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
                 catch (Exception ex)
                 {
                     Log($"오류: {ex.Message}", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
                 finally
                 {

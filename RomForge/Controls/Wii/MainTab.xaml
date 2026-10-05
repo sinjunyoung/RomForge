@@ -27,7 +27,7 @@
                 <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtRom_Drop">
                     <Grid>
                         <TextBox Text="{Binding InputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
-                        <TextBlock Text="Wii 디스크(.iso)를 드래그&amp;드롭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                        <TextBlock Text="Wii 디스크(.iso, .wbfs, .rvz, .wia)를 드래그&amp;드롭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseInputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">

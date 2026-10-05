@@ -31,7 +31,7 @@ public partial class MainTab : UserControl
             return;
 
         var items = (string[]?)e.Data.GetData(DataFormats.FileDrop);
-        var path = items?.FirstOrDefault(p => File.Exists(p) && string.Equals(Path.GetExtension(p), ".iso", StringComparison.OrdinalIgnoreCase));
+        var path = items?.FirstOrDefault(WiiMainViewModel.IsSupportedDisc);
 
         if (path != null)
             ViewModel.InputPath = path;

@@ -153,10 +153,18 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                     item.Status = "변환중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
 
                     ScrollToItemRequested?.Invoke(item);
 
-                    var progress = new Progress<ProgressInfo>(p => { if (p.Percent > item.Progress) item.Progress = p.Percent; });
+                    var progress = new Progress<ProgressInfo>(p => 
+                    {
+                        if (p.Percent > item.Progress)
+                        {
+                            item.Progress = p.Percent;
+                            MainViewModel.SetTaskbarProgress(item.Progress);
+                        }
+                    });
                     void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
 
                     try
@@ -188,12 +196,16 @@ public class ConverterMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
+
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";
             }

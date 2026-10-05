@@ -134,7 +134,16 @@ namespace RomForge.ViewModels.Switch
 
         public string ProgressTime { get => _progressTime; set { _progressTime = value; OnPropertyChanged(); } }
 
-        public double ProgressPct { get => _progressPct; set { _progressPct = value; OnPropertyChanged(); } }
+        public double ProgressPct
+        {
+            get => _progressPct;
+            set
+            {
+                _progressPct = value;
+                OnPropertyChanged();
+                MainViewModel.SetTaskbarProgress(_progressPct);
+            }
+        }
 
         public Visibility CueHintVisibility => string.IsNullOrEmpty(CuePath) ? Visibility.Visible : Visibility.Collapsed;
 
@@ -291,10 +300,12 @@ namespace RomForge.ViewModels.Switch
                 catch (OperationCanceledException)
                 {
                     Log($"작업이 취소되었습니다.", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(0);
                 }
                 catch (Exception ex)
                 {
                     Log($"오류: {ex.Message}", LogLevel.Error);
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
                 finally
                 {
@@ -486,6 +497,7 @@ namespace RomForge.ViewModels.Switch
             }
 
             string ext = Path.GetExtension(CuePath).ToLowerInvariant();
+
             if (ext != ".cue" && ext != ".chd")
             {
                 errorMsg = "CUE 또는 CHD 파일만 지원합니다.";

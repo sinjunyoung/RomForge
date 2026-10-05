@@ -18,6 +18,7 @@ internal sealed class RvzFile
     private const int RawDataEntrySize = 0x18;
     private const int RvzGroupEntrySize = 0x0C;
     private const int WiaGroupEntrySize = 0x08;
+    public required bool IsRvz { get; init; }
 
     public required RvzCompressionType Compression { get; init; }
 
@@ -184,6 +185,7 @@ internal sealed class RvzFile
 
         return new RvzFile
         {
+            IsRvz = isRvz,
             Compression = compressionType,
             DiscType = discType,
             ChunkSize = chunkSize,
