@@ -373,6 +373,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         AppendLog(e.Message, LogLevel.Error);
                         RunNavigateCerts?.Invoke(this, EventArgs.Empty);
                         tracker.Status = "실패";
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                     }
                     catch (OperationCanceledException)
                     {
@@ -383,7 +384,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         AppendLog($"[{GetDisplayName(item)}] 변환 실패: {ex.Message}", LogLevel.Error);
                         tracker.Status = "실패";
                         tracker.Progress = 0;
-                        MainViewModel.SetTaskbarProgress(0);
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                     }
                 }
 
@@ -407,7 +408,11 @@ public class ConvertMainViewModel : ToolTabViewModel
 
     private async Task ConvertOneAsync(object item)
     {
-        var progress = new Progress<ProgressInfo>(p => ((IProgressTrackable)item).Progress = p.Percent);
+        var progress = new Progress<ProgressInfo>(p => 
+        {
+            ((IProgressTrackable)item).Progress = p.Percent;
+            MainViewModel.SetTaskbarProgress(p.Percent);
+        });
         void Log(string msg, LogLevel level, string id = "") => AppendLog(msg, level);
 
         switch (item)

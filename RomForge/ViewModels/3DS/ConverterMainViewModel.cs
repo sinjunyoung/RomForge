@@ -161,11 +161,12 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                     item.Status = "대기중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
 
-                    var progressHandler = new Progress<ProgressInfo>(p => { item.Progress = p.Percent; });
+                    var progressHandler = new Progress<ProgressInfo>(p => { item.Progress = p.Percent; MainViewModel.SetTaskbarProgress(p.Percent); });
                     string inputExt = item.Extension;
 
                     try
@@ -209,6 +210,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                         }
 
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
@@ -216,6 +218,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                     {
                         AppendLog(e.Message, LogLevel.Error);
                         RunNavigateCerts?.Invoke(this, EventArgs.Empty);
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                     }
                     catch (OperationCanceledException)
                     {
@@ -227,6 +230,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                         item.Status = "실패";
                         item.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                     }
                 }
 
@@ -236,6 +240,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
                     item.Status = "취소";
@@ -243,6 +248,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";

@@ -175,11 +175,13 @@ public class InstallerMainViewModel : ToolTabViewModel
         catch (OperationCanceledException)
         {
             StatusMessage = "취소되었습니다.";
+            MainViewModel.SetTaskbarProgress(0);
             AppendLog("추출이 취소되었습니다.", LogLevel.Error);
         }
         catch (Exception ex)
         {
             StatusMessage = $"오류: {ex.Message}";
+            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             AppendLog($"오류: {ex.Message}", LogLevel.Error);
             throw;
         }
@@ -208,6 +210,7 @@ public class InstallerMainViewModel : ToolTabViewModel
                     (current, total) =>
                     {
                         Progress = (double)current / total * 100;
+                        MainViewModel.SetTaskbarProgress(Progress);
                         ProgressText = $"로딩 중... {current} / {total}";
                         onProgress?.Invoke(current, total);
                     }, ct);
@@ -217,6 +220,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 StatusMessage = $"오류: {ex.Message}";
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
                 throw;
             }
@@ -252,6 +256,7 @@ public class InstallerMainViewModel : ToolTabViewModel
                 {
                     Progress = p.total == 0 ? 0 : (double)p.current / p.total * 100;
                     ProgressText = $"스캔 중... {p.current} / {p.total}";
+                    MainViewModel.SetTaskbarProgress(Progress);
                 });
 
                 void Report(int current, int total) => ((IProgress<(int, int)>)scanProgress).Report((current, total));
@@ -269,11 +274,13 @@ public class InstallerMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 StatusMessage = "취소되었습니다.";
+                MainViewModel.SetTaskbarProgress(0);
                 AppendLog("복구가 취소되었습니다.", LogLevel.Error);
             }
             catch (Exception ex)
             {
                 StatusMessage = $"오류: {ex.Message}";
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
             }
         }
@@ -296,6 +303,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             var extractProgress = new Progress<ProgressInfo>(p =>
             {
                 Progress = p.Percent;
+                MainViewModel.SetTaskbarProgress(Progress);
                 ProgressText = $"{p.Percent}%";
                 ProgressTime = p.TimeInfo;
                 ProgressSpeed = p.Speed;
@@ -319,6 +327,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             }
             catch (CertsBinNotFoundException)
             {
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 RunNavigateCerts?.Invoke(this, EventArgs.Empty);
             }
             finally
@@ -376,6 +385,7 @@ public class InstallerMainViewModel : ToolTabViewModel
                 var installProgress = new Progress<ProgressInfo>(p =>
                 {
                     Progress = p.Percent;
+                    MainViewModel.SetTaskbarProgress(Progress);
                     selected.Progress = p.Percent;
                     ProgressText = $"{p.Percent}%";
                     ProgressTime = p.TimeInfo;
@@ -424,6 +434,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             {
                 StatusMessage = "취소되었습니다.";
                 AppendLog("설치가 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
                 if (Directory.Exists(titleRoot))
                     try { Directory.Delete(titleRoot, true); } catch { }
                 throw;
@@ -431,6 +442,7 @@ public class InstallerMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 StatusMessage = $"오류: {ex.Message}";
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
                 throw;
             }

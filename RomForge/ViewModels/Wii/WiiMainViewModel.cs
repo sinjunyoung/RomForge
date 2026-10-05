@@ -228,10 +228,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
     public WiiMainViewModel()
     {
-        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiOutputPath)
-            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
-            : AppConfig.Instance.OutputFolders.WiiOutputPath;
-
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.WiiOutputPath;
         BrowseInputCommand = new RelayCommand(_ => BrowseInput());
         BrowsePatchFolderCommand = new RelayCommand(_ => BrowsePatchFolder());
         BrowsePatchFileCommand = new RelayCommand(_ => BrowsePatchFile());
@@ -310,7 +307,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
                 SetProgress(0, $"언팩 중: {Path.GetFileName(source)}", sw);
 
-                Log($"언팩을 시작합니다. → {unpackedPath}", LogLevel.Info);
+                Log($"언팩을 시작합니다. → {unpackedPath}", LogLevel.Highlight);
 
                 int count = await Task.Run(() => WiiIsoUnpacker.Unpack(source, unpackedPath, progress, ct), ct);
 
@@ -373,7 +370,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
         SetProgress(0, prepareLabel, sw);
 
-        Log($"빌드를 시작합니다. → {target}", LogLevel.Info);
+        Log($"빌드를 시작합니다. → {target}", LogLevel.Highlight);
 
         if (fromFolder)
         {

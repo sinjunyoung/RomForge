@@ -166,6 +166,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     }
 
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "복호화중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -178,13 +179,14 @@ public class DecryptorMainViewModel : ToolTabViewModel
                         await DecryptAsync(item, outputPath, _cts.Token);
 
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
                     catch (OperationCanceledException)
                     {
                         DeletePartialOutput(outputPath);
-
+                        MainViewModel.SetTaskbarProgress(0);
                         throw;
                     }
                     catch (Exception ex)
@@ -193,6 +195,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
 
                         item.Status = "실패";
                         item.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                         DeletePartialOutput(outputPath);
                     }
@@ -310,6 +313,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                         remaining -= toRead;
                         written += toRead;
                         item.Progress = totalBytes > 0 ? (int)(written * 100 / totalBytes) : 0;
+                        MainViewModel.SetTaskbarProgress(item.Progress);
                     }
                 }
 
@@ -325,6 +329,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
 
                     written += bytesRead;
                     item.Progress = totalBytes > 0 ? (int)(written * 100 / totalBytes) : 0;
+                    MainViewModel.SetTaskbarProgress(item.Progress);
                 }
             }
         }
@@ -358,6 +363,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                         written += bytesRead;
                         remaining -= bytesRead;
                         item.Progress = totalBytes > 0 ? (int)(written * 100 / totalBytes) : 0;
+                        MainViewModel.SetTaskbarProgress(item.Progress);
                     }
                 }
             }

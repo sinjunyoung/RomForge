@@ -153,9 +153,7 @@ public class MergeMainViewModel : ToolTabViewModel
 
     public MergeMainViewModel()
     {
-        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchMergeOutputPath)
-            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
-            : AppConfig.Instance.OutputFolders.SwitchMergeOutputPath;
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.SwitchMergeOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.SwitchMergeOutputPath;
         OpenWorkSpaceCommand = new RelayCommand(_ => ExecuteOpenWorkSpace());
 
         PropertyChanged += (_, e) =>

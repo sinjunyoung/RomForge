@@ -172,6 +172,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                         await ConvertItemAsync(item, progress, Log, _cts.Token);
 
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
