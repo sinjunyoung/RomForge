@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Patch;
 
@@ -441,6 +442,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             ProgressPercent = $"{info.Percent}%";
             ProgressTime = info.TimeInfo;
             ProgressSpeed = info.Speed;
+
+            if (MainViewModel.Current != null)
+            {
+                MainViewModel.Current.TaskbarProgressState = TaskbarItemProgressState.Normal;
+                MainViewModel.Current.TaskbarProgressValue = info.Percent / 100.0;
+            }
         });
 
     private void CleanupTask()
@@ -450,6 +457,9 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         ProgressPercent = "0%";
         ProgressTime = string.Empty;
         ProgressSpeed = string.Empty;
+
+        MainViewModel.Current.TaskbarProgressState = TaskbarItemProgressState.None;
+        MainViewModel.Current.TaskbarProgressValue = 0;
     }
 
     private static string ResolveOutputBaseFileName(string actualSourcePath)

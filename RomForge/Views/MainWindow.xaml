@@ -20,6 +20,11 @@
         AllowDrop="True"
         FontFamily="Segoe UI">
 
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo ProgressValue="{Binding TaskbarProgressValue}" 
+                         ProgressState="{Binding TaskbarProgressState}" />
+    </Window.TaskbarItemInfo>
+    
     <Grid Cursor="">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="340"/>

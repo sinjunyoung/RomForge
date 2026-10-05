@@ -11,6 +11,7 @@ using RomForge.ViewModels.Util;
 using RomForge.ViewModels.Wii;
 using RomForge.ViewModels.WiiU;
 using System.Collections.ObjectModel;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels;
 
@@ -85,8 +86,34 @@ public class MainViewModel : ToolTabViewModel
 
     public static string AppVersion => $"{AppDomain.CurrentDomain.FriendlyName} - Ver {Utils.ToAppVersionString()}";
 
+    private double _taskbarProgressValue;
+    public double TaskbarProgressValue
+    {
+        get => _taskbarProgressValue;
+        set
+        {
+            _taskbarProgressValue = value;
+            OnPropertyChanged(nameof(TaskbarProgressValue));
+        }
+    }
+
+    private TaskbarItemProgressState _taskbarProgressState = TaskbarItemProgressState.None;
+    public TaskbarItemProgressState TaskbarProgressState
+    {
+        get => _taskbarProgressState;
+        set
+        {
+            _taskbarProgressState = value;
+            OnPropertyChanged(nameof(TaskbarProgressState));
+        }
+    }
+
+    public static MainViewModel Current { get; private set; }
+
     public MainViewModel()
     {
+        Current = this;
+
         PatchVM = new PatchMainViewModel(async (file) => await MapsToHashAndProcess(file));
         SwitchMainVM.MergeVM.SettingsClicked += async (s, e) => await NavigateSwitchCompressSettings();
         Main3DsVM.RunNavigateCerts += MainVM_RunNavigateCerts;
