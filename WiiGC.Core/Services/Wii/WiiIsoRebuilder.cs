@@ -220,6 +220,9 @@ public static class WiiIsoRebuilder
     public static void RebuildWithFolder(string inputPath, string outputPath, string folder, Action<double>? progress = null, CancellationToken ct = default) => RebuildWithReplacements(inputPath, outputPath, CollectFolder(folder), progress, ct);
 
     public static void RebuildWithFolderAndReplacements(string inputPath, string outputPath, string folder, IReadOnlyDictionary<string, string>? replacements, Action<double>? progress = null, CancellationToken ct = default)
+        => RebuildWithReplacements(inputPath, outputPath, MergeFolderReplacements(folder, replacements), progress, ct);
+
+    public static Dictionary<string, string> MergeFolderReplacements(string folder, IReadOnlyDictionary<string, string>? replacements)
     {
         var merged = CollectFolder(folder);
 
@@ -229,7 +232,7 @@ public static class WiiIsoRebuilder
                 merged[disc] = file;
         }
 
-        RebuildWithReplacements(inputPath, outputPath, merged, progress, ct);
+        return merged;
     }
 
     public static void RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, CancellationToken ct = default)
@@ -266,9 +269,10 @@ public static class WiiIsoRebuilder
 
             plans.Sort((a, b) => a.Spec.DataStart.CompareTo(b.Spec.DataStart));
 
-            using var handle = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, length);
+            using var handle = SparseFile.Create(outputPath, length);
             var sink = new FileIsoSink(handle);
 
+            SparseFile.TryMark(handle);
             sink.SetLength(length);
 
             long rawBytes = length - plans.Sum(p => p.Spec.DataSize);
@@ -411,6 +415,13 @@ public static class WiiIsoRebuilder
 
     private static void PatchHeader(IRvzInputSource input, IIsoSink sink, WiiPartitionSpec spec, byte[] h3, long? dataSize)
     {
+        foreach (var (offset, data) in BuildHeaderPatches(input, spec, h3, dataSize))
+            sink.Write(offset, data);
+    }
+
+    internal static List<(long Offset, byte[] Data)> BuildHeaderPatches(IRvzInputSource input, WiiPartitionSpec spec, byte[] h3, long? dataSize)
+    {
+        var patches = new List<(long Offset, byte[] Data)>();
         var header = WiiPartitionHeader.Read(input, spec.ContainerOffset);
         byte[] originalH3 = new byte[WiiPartitionHeader.H3TableSize];
 
@@ -422,20 +433,22 @@ public static class WiiIsoRebuilder
 
             BinaryPrimitives.WriteUInt32BigEndian(size, (uint)(dataSize.Value >> 2));
 
-            sink.Write(spec.ContainerOffset + 0x2BC, size);
+            patches.Add((spec.ContainerOffset + 0x2BC, size));
         }
 
         if (h3.AsSpan().SequenceEqual(originalH3))
-            return;
+            return patches;
 
-        sink.Write(header.H3Offset, h3);
+        patches.Add((header.H3Offset, h3));
 
         byte[] tmd = new byte[header.TmdSize];
 
         input.Read(header.TmdOffset, tmd);
         WiiTmd.SetContentHash(tmd, SHA1.HashData(h3));
         WiiTmd.FakeSign(tmd);
-        sink.Write(header.TmdOffset, tmd);
+        patches.Add((header.TmdOffset, tmd));
+
+        return patches;
     }
 
     private static void DeleteIfFailed(string outputPath, bool succeeded)

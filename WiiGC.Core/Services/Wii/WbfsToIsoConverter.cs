@@ -17,8 +17,8 @@ public static class WbfsToIsoConverter
 
             long length = wbfs.Length;
             int blockSize = wbfs.BlockSize;
-            long blockCount = (length + blockSize - 1) / blockSize;            
-            using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, length);
+            long blockCount = (length + blockSize - 1) / blockSize;
+            using var output = SparseFile.Create(outputPath, length);
 
             RandomAccess.SetLength(output, length);
 

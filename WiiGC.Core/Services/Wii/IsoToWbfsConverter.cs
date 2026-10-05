@@ -19,12 +19,17 @@ public static class IsoToWbfsConverter
 
     public static void Convert(string inputPath, string outputPath, Action<double>? progress = null, CancellationToken ct = default)
     {
+        using var input = RvzInputSource.Open(inputPath);
+
+        Convert(input, outputPath, progress, ct);
+    }
+
+    internal static void Convert(IRvzInputSource input, string outputPath, Action<double>? progress = null, CancellationToken ct = default)
+    {
         bool succeeded = false;
 
         try
         {
-            using var input = RvzInputSource.Open(inputPath);
-
             Span<byte> header = stackalloc byte[0x20];
 
             if (input is WbfsSource || input.Length < DiscHeaderSize)

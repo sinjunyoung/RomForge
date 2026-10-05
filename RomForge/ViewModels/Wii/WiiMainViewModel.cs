@@ -352,43 +352,68 @@ public class WiiMainViewModel : ToolTabViewModel
     {
         string baseName = Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(InputPath) + "_Repack");
         string finalPath = Utils.GetUniqueFilePath(baseName + GetExtension(OutputFormat));
-        bool convert = OutputFormat != WiiOutputFormat.Iso;
-        string isoPath = convert ? Utils.GetUniqueFilePath(baseName + ".tmp.iso") : finalPath;
-        double rebuildWeight = convert ? 0.5 : 1.0;
         string source = InputPath;
-        var replacements = _patch?.Replacements;
         var format = OutputFormat;
+        IReadOnlyDictionary<string, string> replacements;
+
+        if (mode == BuildMode.FullProcess)
+            replacements = _patch!.Replacements;
+        else
+            replacements = WiiIsoRebuilder.MergeFolderReplacements(unpackedPath, _patch?.Replacements);
 
         tempOutputs.Add(finalPath);
-
-        if (convert)
-            tempOutputs.Add(isoPath);
-
-        void rebuildProgress(double value) => SetProgress(value * rebuildWeight, $"리빌드 중: {Path.GetFileName(source)}", sw);
 
         SetProgress(0, $"리빌드 중: {Path.GetFileName(source)}", sw);
 
         Log($"빌드를 시작합니다. → {Path.GetFileName(finalPath)}", LogLevel.Info);
 
-        if (mode == BuildMode.FullProcess)
-            await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, isoPath, replacements!, rebuildProgress, ct), ct);
-        else
-            await Task.Run(() => WiiIsoRebuilder.RebuildWithFolderAndReplacements(source, isoPath, unpackedPath, replacements, rebuildProgress, ct), ct);
-
-        if (convert)
+        if (format == WiiOutputFormat.Iso)
         {
-            string label = format == WiiOutputFormat.Wbfs ? "WBFS 변환 중..." : "RVZ 압축 중...";
-            void convertProgress(double value) => SetProgress(0.5 + value * 0.5, label, sw);
+            bool reached99 = false;
+            bool reached999 = false;
+            bool reached100 = false;
+
+            void rebuildProgress(double value)
+            {
+                SetProgress(value, $"리빌드 중: {Path.GetFileName(source)}", sw);
+
+                if (!reached99 && value >= 0.99)
+                {
+                    reached99 = true;
+                    Log($"[진단] 99.0% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
+                }
+
+                if (!reached999 && value >= 0.999)
+                {
+                    reached999 = true;
+                    Log($"[진단] 99.9% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
+                }
+
+                if (!reached100 && value >= 1.0)
+                {
+                    reached100 = true;
+                    Log($"[진단] 100% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
+                }
+            }
+
+            await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
+
+            Log($"[진단] 코어 반환: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
+        }
+        else
+        {
+            string convertLabel = format == WiiOutputFormat.Wbfs ? $"WBFS 압축 중: {Path.GetFileName(source)}" : $"RVZ 압축 중: {Path.GetFileName(source)}";
+
+            void prepareProgress(double value) => SetProgress(value, $"패치 적용 중: {Path.GetFileName(source)}", sw);
+            void convertProgress(double value) => SetProgress(value, convertLabel, sw);
 
             await Task.Run(() =>
             {
                 if (format == WiiOutputFormat.Wbfs)
-                    IsoToWbfsConverter.Convert(isoPath, finalPath, convertProgress, ct);
+                    WiiIsoStreamConverter.RebuildToWbfs(source, finalPath, replacements, prepareProgress, convertProgress, ct);
                 else
-                    IsoToRvzConverter.Convert(isoPath, finalPath, RvzCompressionLevel, RvzChunkSize, convertProgress, ct);
+                    WiiIsoStreamConverter.RebuildToRvz(source, finalPath, replacements, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct);
             }, ct);
-
-            try { File.Delete(isoPath); } catch { }
         }
 
         if (_patch != null)

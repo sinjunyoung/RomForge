@@ -19,7 +19,7 @@ public static class GczToIsoConverter
             if (input is not GczSource source)
                 throw new InvalidDataException("GCZ 파일이 아닙니다.");
 
-            using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, source.Length);
+            using var output = SparseFile.Create(outputPath, source.Length);
 
             RandomAccess.SetLength(output, source.Length);
             Run(source, output, progress, ct);
