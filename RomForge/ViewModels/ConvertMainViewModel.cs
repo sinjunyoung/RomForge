@@ -262,16 +262,12 @@ public class ConvertMainViewModel : ToolTabViewModel
                     {
                         if (Directory.Exists(wu.FilePath))
                         {
-                            using ITitleSource source = wu.Extension == "wup"
-                                ? new WupTitleSource(wu.FilePath)
-                                : new FolderTitleSource(wu.FilePath);
+                            using ITitleSource source = wu.Extension == "wup" ? new WupTitleSource(wu.FilePath) : new FolderTitleSource(wu.FilePath);
 
                             wu.TitleIdHex = source.TitleIdHex;
                             wu.TitleVersion = source.TitleVersion;
 
-                            var folderMeta = wu.Extension == "wup"
-                                ? WiiUMetadataExtractor.ExtractFromTitleSource(source)
-                                : WiiUMetadataExtractor.ExtractFromFolder(wu.FilePath);
+                            var folderMeta = wu.Extension == "wup" ? WiiUMetadataExtractor.ExtractFromTitleSource(source) : WiiUMetadataExtractor.ExtractFromFolder(wu.FilePath);
 
                             if (folderMeta is not null)
                                 wu.TitleName = folderMeta.Title;
@@ -358,6 +354,7 @@ public class ConvertMainViewModel : ToolTabViewModel
 
                     tracker.Status = "대기중";
                     tracker.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     tracker.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -367,6 +364,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         await ConvertOneAsync(item);
 
                         tracker.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         tracker.Status = "완료";
                         cnt++;
                     }
@@ -385,6 +383,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         AppendLog($"[{GetDisplayName(item)}] 변환 실패: {ex.Message}", LogLevel.Error);
                         tracker.Status = "실패";
                         tracker.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(0);
                     }
                 }
 
@@ -402,9 +401,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         tracker.Status = "취소";
                 }
             }
-            finally
-            {
-            }
+            finally { }
         }
     }
 

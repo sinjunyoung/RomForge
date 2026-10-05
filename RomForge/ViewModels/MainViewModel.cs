@@ -108,7 +108,7 @@ public class MainViewModel : ToolTabViewModel
         }
     }
 
-    public static MainViewModel Current { get; private set; }
+    private static MainViewModel Current { get; set; }
 
     public MainViewModel()
     {
@@ -186,5 +186,21 @@ public class MainViewModel : ToolTabViewModel
         }
 
         return false;
+    }
+
+    public static void SetTaskbarProgress(double value, TaskbarItemProgressState state = TaskbarItemProgressState.Normal)
+    {
+        if (Current == null) return;
+
+        if (value <= 0 || state == TaskbarItemProgressState.None)
+        {
+            Current.TaskbarProgressState = TaskbarItemProgressState.None;
+            Current.TaskbarProgressValue = 0;
+        }
+        else
+        {
+            Current.TaskbarProgressState = state;
+            Current.TaskbarProgressValue = value / 100.0;
+        }
     }
 }

@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 using Vita.Core.Models;
 using Vita.Core.Services;
 
@@ -70,7 +71,12 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set { _progressPct = value; OnPropertyChanged(); }
+        set 
+        { 
+            _progressPct = value; 
+            OnPropertyChanged();
+            MainViewModel.SetTaskbarProgress(_progressPct);
+        }
     }
 
     public string ProgressLabel
@@ -449,13 +455,15 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             }
             catch (OperationCanceledException)
             {
-                Log("작업이 취소되었습니다.", LogLevel.Error);
+                Log("작업이 취소되었습니다.", LogLevel.Error);                
                 SafeDeleteFile(zipFileName);
+                MainViewModel.SetTaskbarProgress(0);
             }
             catch (Exception ex)
             {
                 Log($"오류: {ex.Message}", LogLevel.Error);
                 SafeDeleteFile(zipFileName);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {

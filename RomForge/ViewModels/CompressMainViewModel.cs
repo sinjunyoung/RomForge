@@ -14,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 using WiiGC.Core.Services;
 
 namespace RomForge.ViewModels;
@@ -176,6 +177,7 @@ public class CompressMainViewModel : ToolTabViewModel
                 {
                     item.Status = "대기중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
 
                     var detected = FormatDetector.Detect(item.FilePath);
 
@@ -186,6 +188,7 @@ public class CompressMainViewModel : ToolTabViewModel
                     var progressHandler = new Progress<ProgressInfo>(p =>
                     {
                         item.Progress = p.Percent;
+                        MainViewModel.SetTaskbarProgress(item.Progress);
                     });
 
                     void logWrapper(string msg, LogLevel level) => AppendLog(msg, level);
@@ -319,6 +322,7 @@ public class CompressMainViewModel : ToolTabViewModel
         {
             remainingItem.Status = "취소";
             remainingItem.Progress = 0;
+            MainViewModel.SetTaskbarProgress(0);
         }
     }
 

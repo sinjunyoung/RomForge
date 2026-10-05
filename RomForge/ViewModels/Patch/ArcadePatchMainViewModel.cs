@@ -79,6 +79,12 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         set 
         { 
             _totalProgress = value; 
+
+            if(value>0) 
+                MainViewModel.SetTaskbarProgress(value);
+            else
+                MainViewModel.SetTaskbarProgress(0);
+
             OnPropertyChanged();
             OnPropertyChanged(nameof(TotalProgressText));
 
@@ -173,11 +179,13 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         catch (OperationCanceledException)
         {
             TryDeleteIncompleteOutput(outputZipPath);
+            MainViewModel.SetTaskbarProgress(0);
             Log($"패치 취소: {Path.GetFileName(SourcePath)}", LogLevel.Error);
         }
         catch (Exception ex)
         {
             TryDeleteIncompleteOutput(outputZipPath);
+            MainViewModel.SetTaskbarProgress(TotalProgress, System.Windows.Shell.TaskbarItemProgressState.Error);
             Log($"패치 실패: {ex.Message}", LogLevel.Error);
         }
     }
@@ -334,6 +342,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         try
         {
             MatchPlan plan;
+
             try
             {
                 plan = await Task.Run(() => BuildMatchPlan(sourcePath, patchPath, package, token), token);

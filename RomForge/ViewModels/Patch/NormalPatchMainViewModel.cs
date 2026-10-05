@@ -167,7 +167,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set { _progressPct = value; OnPropertyChanged(); }
+        set 
+        { 
+            _progressPct = value; 
+            OnPropertyChanged();
+            MainViewModel.SetTaskbarProgress(_progressPct);
+        }
     }
 
     public string ProgressLabel
@@ -405,6 +410,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             Log($"패치 취소: {SourcePath}", LogLevel.Error);
             CleanupTask();
+            MainViewModel.SetTaskbarProgress(0);
 
             if (outputPath is not null)
                 orchestrator.Cleanup(outputPath);
@@ -413,6 +419,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             Log($"패치 실패: {ex.Message}", LogLevel.Error);
             CleanupTask();
+            MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
 
             if (outputPath is not null)
                 orchestrator.Cleanup(outputPath);
@@ -442,12 +449,6 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             ProgressPercent = $"{info.Percent}%";
             ProgressTime = info.TimeInfo;
             ProgressSpeed = info.Speed;
-
-            if (MainViewModel.Current != null)
-            {
-                MainViewModel.Current.TaskbarProgressState = TaskbarItemProgressState.Normal;
-                MainViewModel.Current.TaskbarProgressValue = info.Percent / 100.0;
-            }
         });
 
     private void CleanupTask()
@@ -457,9 +458,6 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         ProgressPercent = "0%";
         ProgressTime = string.Empty;
         ProgressSpeed = string.Empty;
-
-        MainViewModel.Current.TaskbarProgressState = TaskbarItemProgressState.None;
-        MainViewModel.Current.TaskbarProgressValue = 0;
     }
 
     private static string ResolveOutputBaseFileName(string actualSourcePath)
