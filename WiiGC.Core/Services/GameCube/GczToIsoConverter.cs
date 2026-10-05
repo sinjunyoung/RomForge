@@ -21,7 +21,6 @@ public static class GczToIsoConverter
 
             using var output = SparseFile.Create(outputPath, source.Length);
 
-            RandomAccess.SetLength(output, source.Length);
             Run(source, output, progress, ct);
             progress?.Invoke(1.0);
 

@@ -182,7 +182,7 @@ public static class WiiIsoRebuilder
             using var input = RvzInputSource.Open(inputPath);
             var specs = ReadSpecs(input).OrderBy(s => s.DataStart).ToList();
             long length = input.Length;
-            using var handle = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None, length);
+            using var handle = SparseFile.Create(outputPath, length);
             var sink = new FileIsoSink(handle);
 
             sink.SetLength(length);

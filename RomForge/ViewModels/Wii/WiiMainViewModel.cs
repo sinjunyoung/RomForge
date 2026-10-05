@@ -369,36 +369,9 @@ public class WiiMainViewModel : ToolTabViewModel
 
         if (format == WiiOutputFormat.Iso)
         {
-            bool reached99 = false;
-            bool reached999 = false;
-            bool reached100 = false;
-
-            void rebuildProgress(double value)
-            {
-                SetProgress(value, $"리빌드 중: {Path.GetFileName(source)}", sw);
-
-                if (!reached99 && value >= 0.99)
-                {
-                    reached99 = true;
-                    Log($"[진단] 99.0% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
-                }
-
-                if (!reached999 && value >= 0.999)
-                {
-                    reached999 = true;
-                    Log($"[진단] 99.9% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
-                }
-
-                if (!reached100 && value >= 1.0)
-                {
-                    reached100 = true;
-                    Log($"[진단] 100% 도달: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
-                }
-            }
+            void rebuildProgress(double value) => SetProgress(value, $"리빌드 중: {Path.GetFileName(source)}", sw);
 
             await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
-
-            Log($"[진단] 코어 반환: {sw.Elapsed:mm\\:ss\\.f}", LogLevel.Info);
         }
         else
         {
