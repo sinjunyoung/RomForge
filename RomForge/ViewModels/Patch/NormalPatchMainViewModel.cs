@@ -312,7 +312,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         string outputDir = ResolveOutputDir(SourcePath);
         string? extractDir = null;
         string? outputPath = null;
-        var orchestrator = new PatchOrchestrator(Log, BuildProgressReporter(), AutoCompress, AppConfig.Instance.Dolphin.CompressLevel);
+        var orchestrator = new PatchOrchestrator(Log, BuildProgressReporter(), AutoCompress, AppConfig.Instance.WiiGC.CompressLevel);
         var stopwatch = Stopwatch.StartNew();
 
         try

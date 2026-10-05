@@ -147,7 +147,7 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <Image Grid.Column="0" Source="/Assets/Images/Level.png" Width="24" Margin="0,0,10,0"/>
-                            <Slider Grid.Column="1" x:Name="sliderDolphin" Style="{StaticResource SliderStyle}" Minimum="3" Maximum="18" Value="{Binding DolphinCompressLevel}" SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center"/>
+                            <Slider Grid.Column="1" x:Name="sliderDolphin" Style="{StaticResource SliderStyle}" Minimum="3" Maximum="18" Value="{Binding WiiGCCompressLevel}" SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="2" Text="{Binding ElementName=sliderDolphin, Path=Value}" Foreground="{Binding ElementName=sliderDolphin, Path=Value, Converter={StaticResource LevelToColorConverter}}" FontWeight="Bold" VerticalAlignment="Center" Width="30" TextAlignment="Center" Margin="10,0,0,0"/>
                         </Grid>
                     </StackPanel>

@@ -271,12 +271,12 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Wbfs:
                         case RomFormat.Wia:
                             {
-                                DiscImageConverter dolphin = new();
+                                DiscImageConverter converter = new();
 
-                                dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
-                                dolphin.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
+                                converter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
+                                converter.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
 
-                                await dolphin.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.Dolphin.CompressLevel, outputDir, _cts.Token);
+                                await converter.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.WiiGC.CompressLevel, outputDir, _cts.Token);
                             }
                             break;
                         case RomFormat.Unknown:

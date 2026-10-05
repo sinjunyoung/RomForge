@@ -109,7 +109,7 @@ public class AzaharConfig : ViewModelBase
     public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
 }
 
-public class DolphinConfig : ViewModelBase
+public class WiiGCConfig : ViewModelBase
 {
     private int _compressLevel = 18;
     public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
@@ -201,8 +201,8 @@ public class AppConfig : ViewModelBase
     private AzaharConfig _azahar = new();
     public AzaharConfig Azahar { get => _azahar; set => SetProperty(ref _azahar, value); }
 
-    private DolphinConfig _dolphin = new();
-    public DolphinConfig Dolphin { get => _dolphin; set => SetProperty(ref _dolphin, value); }
+    private WiiGCConfig _wiigc = new();
+    public WiiGCConfig WiiGC { get => _wiigc; set => SetProperty(ref _wiigc, value); }
 
     private PS1Config _ps1 = new();
     public PS1Config PS1 { get => _ps1; set => SetProperty(ref _ps1, value); }
@@ -238,7 +238,7 @@ public class AppConfig : ViewModelBase
                 Chdman = loaded.Chdman ?? new();
                 Switch = loaded.Switch ?? new();
                 Azahar = loaded.Azahar ?? new();
-                Dolphin = loaded.Dolphin ?? new();
+                WiiGC = loaded.WiiGC ?? new();
                 PS1 = loaded.PS1 ?? new();
                 Tistory = loaded.Tistory ?? new();
                 OutputFolders = loaded.OutputFolders ?? new();
@@ -262,7 +262,7 @@ public class AppConfig : ViewModelBase
         Chdman.PropertyChanged += AutoSave;
         Switch.PropertyChanged += AutoSave;
         Azahar.PropertyChanged += AutoSave;
-        Dolphin.PropertyChanged += AutoSave;
+        WiiGC.PropertyChanged += AutoSave;
         Patch.PropertyChanged += AutoSave;
         PS1.PropertyChanged += AutoSave;
         Tistory.PropertyChanged += AutoSave;

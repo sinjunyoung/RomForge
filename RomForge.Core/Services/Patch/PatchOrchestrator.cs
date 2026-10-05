@@ -8,7 +8,7 @@ using System.IO;
 
 namespace RomForge.Core.Services.Patch;
 
-public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> progress, bool autoCompress, int dolphinCompressLevel)
+public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> progress, bool autoCompress, int wiiGcCompressLevel)
 {
     private string? _outputCuePath;
     private string? _outputCcdPath;
@@ -18,7 +18,7 @@ public class PatchOrchestrator(Action<string, LogLevel> log, IProgress<ProgressI
     private readonly CcdCompanionCopier _ccdCompanionCopier = new(log);
     private readonly GdiTrackCopier _gdiTrackCopier = new(log);
     private readonly ZipCompressor _zipCompressor = new(log, progress);
-    private readonly CompressKnownConverter _compressKnownConverter = new(log, progress, dolphinCompressLevel);
+    private readonly CompressKnownConverter _compressKnownConverter = new(log, progress, wiiGcCompressLevel);
 
     public async Task PatchAsync(string sourcePath, IReadOnlyList<string> patchPaths, DetectResult detected, string outputDir, string outputPath, bool sourceIsTemporary, CancellationToken ct)
     {

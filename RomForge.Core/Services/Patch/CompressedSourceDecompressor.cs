@@ -102,12 +102,12 @@ public static class CompressedSourceDecompressor
 
     private static async Task<(string ActualSourcePath, DetectResult Detected)> DecompressRvzAsync(string rvzPath, string outputDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        var dolphin = new DiscImageConverter();
+        var converter = new DiscImageConverter();
 
-        dolphin.LogMessage += (_, e) => log(e.Message, e.Level);
-        dolphin.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "압축 해제 중...", Percent = e.Progress });
+        converter.LogMessage += (_, e) => log(e.Message, e.Level);
+        converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "압축 해제 중...", Percent = e.Progress });
 
-        await dolphin.ConvertFileAsync(rvzPath, "rvz", "iso", 0, outputDir, ct);
+        await converter.ConvertFileAsync(rvzPath, "rvz", "iso", 0, outputDir, ct);
 
         var isoPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(rvzPath) + ".iso");
 

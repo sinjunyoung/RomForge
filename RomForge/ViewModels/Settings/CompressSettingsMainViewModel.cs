@@ -79,9 +79,9 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
         set { AppConfig.Instance.Azahar.CompressLevel = (int)value; OnPropertyChanged(); }
     }
 
-    public double DolphinCompressLevel
+    public double WiiGCCompressLevel
     {
-        get => AppConfig.Instance.Dolphin.CompressLevel;
-        set { AppConfig.Instance.Dolphin.CompressLevel = (int)value; OnPropertyChanged(); }
+        get => AppConfig.Instance.WiiGC.CompressLevel;
+        set { AppConfig.Instance.WiiGC.CompressLevel = (int)value; OnPropertyChanged(); }
     }
 }

@@ -206,7 +206,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="3DS"       Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>                                                                
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="PS"        Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
                         <TextBlock Grid.Row="5" Grid.Column="1" Text="CHDMAN"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="Dolphin"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="GC/Wii"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
                         <TextBlock Grid.Row="7" Grid.Column="1" Text="CD Image"  Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">

@@ -9,7 +9,7 @@ using WiiGC.Core.Services;
 
 namespace RomForge.Core.Services.Patch;
 
-public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<ProgressInfo> progress, int dolphinCompressLevel)
+public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<ProgressInfo> progress, int wiiGcCompressLevel)
 {
     public async Task ConvertAsync(DetectResult detected, string outputPath, string? outputCuePath, List<string> copiedTrackPaths, string? outputCcdPath, string? outputGdiPath, string outputDir, CancellationToken ct)
     {
@@ -143,11 +143,11 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = 0 });
 
-                    DiscImageConverter dolphin = new();
-                    dolphin.LogMessage += (_, e) => log(e.Message, e.Level);
-                    dolphin.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = e.Progress });
+                    DiscImageConverter converter = new();
+                    converter.LogMessage += (_, e) => log(e.Message, e.Level);
+                    converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = e.Progress });
 
-                    await dolphin.ConvertFileAsync(outputPath, detected.Format.ToString(), detected.OutputExtension, dolphinCompressLevel, null, ct);
+                    await converter.ConvertFileAsync(outputPath, detected.Format.ToString(), detected.OutputExtension, wiiGcCompressLevel, null, ct);
                     File.Delete(outputPath);
 
                     break;
