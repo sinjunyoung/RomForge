@@ -3,9 +3,9 @@ using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
-using DolphinTool.Core.Services;
 using RomForge.Core.Models.Compression;
 using System.IO;
+using WiiGC.Core.Services;
 
 namespace RomForge.Core.Services.Patch;
 
@@ -143,7 +143,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = 0 });
 
-                    DolphinService dolphin = new();
+                    DiscImageConverter dolphin = new();
                     dolphin.LogMessage += (_, e) => log(e.Message, e.Level);
                     dolphin.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = e.Progress });
 

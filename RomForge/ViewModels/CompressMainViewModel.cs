@@ -4,7 +4,6 @@ using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
 using Common.WPF.ViewModels;
-using DolphinTool.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models.Compression;
@@ -15,6 +14,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using WiiGC.Core.Services;
 
 namespace RomForge.ViewModels;
 
@@ -271,7 +271,7 @@ public class CompressMainViewModel : ToolTabViewModel
                         case RomFormat.Wbfs:
                         case RomFormat.Wia:
                             {
-                                DolphinService dolphin = new();
+                                DiscImageConverter dolphin = new();
 
                                 dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
                                 dolphin.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);

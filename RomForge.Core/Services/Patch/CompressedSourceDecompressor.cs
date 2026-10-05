@@ -1,10 +1,10 @@
 ﻿using CHD.Core.Services;
 using Common;
-using DolphinTool.Core.Services;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services.Compression;
 using System.IO;
+using WiiGC.Core.Services;
 
 namespace RomForge.Core.Services.Patch;
 
@@ -102,7 +102,7 @@ public static class CompressedSourceDecompressor
 
     private static async Task<(string ActualSourcePath, DetectResult Detected)> DecompressRvzAsync(string rvzPath, string outputDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        var dolphin = new DolphinService();
+        var dolphin = new DiscImageConverter();
 
         dolphin.LogMessage += (_, e) => log(e.Message, e.Level);
         dolphin.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "압축 해제 중...", Percent = e.Progress });

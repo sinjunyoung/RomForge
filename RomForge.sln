@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CHD.Core", "CHD.Core\CHD.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{E15E491A-E872-91D8-DF7A-CA59C792F064}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DolphinTool.Core", "DolphinTool.Core\DolphinTool.Core.csproj", "{54449F14-12B9-7CE6-7409-114D38C1572D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WiiGC.Core", "WiiGC.Core\WiiGC.Core.csproj", "{54449F14-12B9-7CE6-7409-114D38C1572D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Patch.Core", "Patch.Core\Patch.Core.csproj", "{3116C9D1-ECF5-D0BA-1139-2194346BE4BC}"
 EndProject

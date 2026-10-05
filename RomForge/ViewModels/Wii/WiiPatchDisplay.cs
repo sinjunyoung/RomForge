@@ -1,7 +1,6 @@
-﻿using DolphinTool.Core.Services.Wii;
-using RomForge.Core.Models.Wii;
-using RomForge.Core.Services.Wii;
+﻿using RomForge.Core.Models.Wii;
 using System.IO;
+using WiiGC.Core.Services.Wii;
 
 namespace RomForge.ViewModels.Wii;
 

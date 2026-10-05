@@ -6,7 +6,6 @@ using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
 using Common.WPF.ViewModels;
-using DolphinTool.Core.Services;
 using PBP.Core.Enums;
 using PBP.Core.Services;
 using PSP.Core.Models;
@@ -29,6 +28,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using WiiGC.Core.Services;
 using WiiU.Core.Services;
 
 namespace RomForge.ViewModels;
@@ -576,7 +576,7 @@ public class ConvertMainViewModel : ToolTabViewModel
         {
             var detected = FormatDetector.Detect(item.FilePath);
 
-            DolphinService dolphin = new();
+            DiscImageConverter dolphin = new();
 
             dolphin.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
             dolphin.ProgressChanged += (_, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);

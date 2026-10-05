@@ -1,8 +1,8 @@
 ﻿using Common.WPF.ViewModels;
-using DolphinTool.Core.Services;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services.Compression;
 using System.Windows.Media;
+using WiiGC.Core.Services;
 
 namespace RomForge.Core.Models.CD;
 

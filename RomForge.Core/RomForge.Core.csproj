@@ -22,11 +22,11 @@
     <ProjectReference Include="..\CD.Core\CD.Core.csproj" />
     <ProjectReference Include="..\CHD.Core\CHD.Core.csproj" />
     <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
-    <ProjectReference Include="..\DolphinTool.Core\DolphinTool.Core.csproj" />
     <ProjectReference Include="..\NSW.WPF\NSW.WPF.csproj" />
     <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
     <ProjectReference Include="..\PBP.Core\PBP.Core.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
+    <ProjectReference Include="..\WiiGC.Core\WiiGC.Core.csproj" />
     <ProjectReference Include="..\WiiU.Core\WiiU.Core.csproj" />
   </ItemGroup>
 </Project>

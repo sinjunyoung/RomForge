@@ -1,10 +1,11 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
-using DolphinTool.Core.Models;
-using DolphinTool.Core.Services.Wii;
+using NSW.Core.Enums;
 using NSW.WPF.Services;
+using NSW.WPF.UI;
 using RomForge.Core;
 using RomForge.Core.Models;
+using RomForge.Core.Models.Wii;
 using RomForge.Core.Services.Wii;
 using RomForge.Core.UI.Command;
 using RomForge.Views;
@@ -13,18 +14,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using WiiGC.Core.Models;
+using WiiGC.Core.Services;
+using WiiGC.Core.Services.Wii;
 
 namespace RomForge.ViewModels.Wii;
 
 public class WiiMainViewModel : ToolTabViewModel
 {
+    private const int RvzCompressionLevel = 5;
+    private const int RvzChunkSize = 131072;
+
     private CancellationTokenSource _cts = new();
     private CancellationTokenSource _patchCts = new();
+    private BuildMode? _currentMode;
+    private bool _patchLoading;
     private RiivolutionWorkspace? _workspace;
     private RiivolutionPatchSet? _patch;
     private WiiDiscInfo? _disc;
-    private WiiDiscDisplay? _discDisplay;
-    private WiiPatchDisplay? _patchDisplay;
+    private WiiGameDisplay? _gameInfo;
+    private ImageSource? _gameIcon;
+    private WiiPatchDisplay? _patchInfo;
     private int _discVersion;
     private int _patchVersion;
     private string _inputPath = string.Empty;
@@ -34,8 +46,53 @@ public class WiiMainViewModel : ToolTabViewModel
     private string _progressLabel = "대기 중...";
     private string _progressPercent = string.Empty;
     private string _progressTime = "00:00 경과";
+    private WiiOutputFormat _outputFormat = WiiOutputFormat.Iso;
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
+
+    public WiiOutputFormat OutputFormat
+    {
+        get => _outputFormat;
+        set
+        {
+            _outputFormat = value;
+
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsIsoFormat));
+            OnPropertyChanged(nameof(IsWbfsFormat));
+            OnPropertyChanged(nameof(IsRvzFormat));
+        }
+    }
+
+    public bool IsIsoFormat
+    {
+        get => OutputFormat == WiiOutputFormat.Iso;
+        set
+        {
+            if (value)
+                OutputFormat = WiiOutputFormat.Iso;
+        }
+    }
+
+    public bool IsWbfsFormat
+    {
+        get => OutputFormat == WiiOutputFormat.Wbfs;
+        set
+        {
+            if (value)
+                OutputFormat = WiiOutputFormat.Wbfs;
+        }
+    }
+
+    public bool IsRvzFormat
+    {
+        get => OutputFormat == WiiOutputFormat.Rvz;
+        set
+        {
+            if (value)
+                OutputFormat = WiiOutputFormat.Rvz;
+        }
+    }
 
     public string InputPath
     {
@@ -82,24 +139,30 @@ public class WiiMainViewModel : ToolTabViewModel
         }
     }
 
-    public WiiDiscDisplay? DiscInfo
+    public WiiGameDisplay? GameInfo
     {
-        get => _discDisplay;
+        get => _gameInfo;
         private set
         {
-            _discDisplay = value;
+            _gameInfo = value;
 
             OnPropertyChanged();
-            OnPropertyChanged(nameof(DiscInfoVisibility));
+            OnPropertyChanged(nameof(GameInfoVisibility));
         }
+    }
+
+    public ImageSource? GameIcon
+    {
+        get => _gameIcon;
+        private set { _gameIcon = value; OnPropertyChanged(); }
     }
 
     public WiiPatchDisplay? PatchInfo
     {
-        get => _patchDisplay;
+        get => _patchInfo;
         private set
         {
-            _patchDisplay = value;
+            _patchInfo = value;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(PatchInfoVisibility));
@@ -136,9 +199,21 @@ public class WiiMainViewModel : ToolTabViewModel
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
-    public Visibility DiscInfoVisibility => DiscInfo != null ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility GameInfoVisibility => GameInfo != null ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility PatchInfoVisibility => PatchInfo != null ? Visibility.Visible : Visibility.Collapsed;
+
+    public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
+
+    public bool IsRebuildRunning => IsLocked && _currentMode == BuildMode.RebuildOnly;
+
+    public bool IsFullRunning => IsLocked && (_currentMode == BuildMode.FullProcess || _patchLoading);
+
+    public bool UnpackEnabled => !IsLocked || _currentMode == BuildMode.UnpackOnly;
+
+    public bool RebuildEnabled => !IsLocked || _currentMode == BuildMode.RebuildOnly;
+
+    public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess || _patchLoading;
 
     public ICommand BrowseInputCommand { get; }
 
@@ -160,6 +235,12 @@ public class WiiMainViewModel : ToolTabViewModel
         BrowseOutputCommand = new RelayCommand(_ => BrowseOutput());
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => _workspace?.Dispose();
+
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(IsLocked))
+                NotifyButtonStates();
+        };
     }
 
     public void Cancel()
@@ -168,45 +249,74 @@ public class WiiMainViewModel : ToolTabViewModel
         _patchCts.Cancel();
     }
 
-    public async Task RunAsync()
+    public async Task StartAsync(BuildMode mode)
     {
-        if (!Validate(out string error))
+        if (!Validate(mode, out string error))
         {
             Log(error, LogLevel.Error);
             return;
         }
 
+        _currentMode = mode;
+        NotifyButtonStates();
+
         using (BeginWork())
         {
-            _cts.Dispose();
+            try
+            {
+                _cts.Dispose();
 
-            _cts = new CancellationTokenSource();
+                _cts = new CancellationTokenSource();
 
-            await ExecuteAsync(_cts.Token);
+                await ExecuteAsync(mode, _cts.Token);
+            }
+            finally
+            {
+                ProgressPct = 0;
+                ProgressLabel = "대기 중...";
+                _currentMode = null;
+                NotifyButtonStates();
+            }
         }
     }
 
-    private async Task ExecuteAsync(CancellationToken ct)
+    private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {
-        string source = InputPath;
-        string patchRoot = _workspace!.RootPath;
-        string output = Utils.GetUniqueFilePath(Path.Combine(OutputPath, $"{Path.GetFileNameWithoutExtension(source)}_Riivolution.iso"));
-        var sw = Stopwatch.StartNew();
-        void progress(double value) => SetProgress(value, $"패치 적용 중: {Path.GetFileName(source)}", sw);
-        bool isCompleted = false;
+        string unpackedPath = Path.Combine(OutputPath, "unpacked");
 
-        SetProgress(0, $"패치 적용 중: {Path.GetFileName(source)}", sw);
+        if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
+        {
+            if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
+                return;
+
+            Directory.Delete(unpackedPath, true);
+        }
+
+        var sw = Stopwatch.StartNew();
+        var tempOutputs = new List<string>();
+        bool isCompleted = false;
 
         try
         {
             Directory.CreateDirectory(OutputPath);
 
-            Log($"Riivolution 패치 적용을 시작합니다. → {Path.GetFileName(output)}", LogLevel.Info);
+            if (mode == BuildMode.UnpackOnly)
+            {
+                string source = InputPath;
+                void progress(double value) => SetProgress(value, $"언팩 중: {Path.GetFileName(source)}", sw);
 
-            var warnings = await Task.Run(() => WiiIsoRebuilder.RebuildWithRiivolution(source, output, patchRoot, null, progress, ct), ct);
+                SetProgress(0, $"언팩 중: {Path.GetFileName(source)}", sw);
 
-            foreach (string warning in warnings)
-                Log($"경고: {warning}", LogLevel.Highlight);
+                Log($"언팩을 시작합니다. → {unpackedPath}", LogLevel.Info);
+
+                int count = await Task.Run(() => WiiIsoUnpacker.Unpack(source, unpackedPath, progress, ct), ct);
+
+                Log($"파일 {count:N0}개를 풀었습니다.", LogLevel.Info);
+            }
+            else
+            {
+                await ProduceAsync(mode, unpackedPath, sw, tempOutputs, ct);
+            }
 
             isCompleted = true;
             ProgressPercent = "100%";
@@ -224,13 +334,67 @@ public class WiiMainViewModel : ToolTabViewModel
         }
         finally
         {
-            if (!isCompleted && File.Exists(output))
+            if (!isCompleted)
             {
-                try { File.Delete(output); } catch { }
-            }
+                foreach (string path in tempOutputs.Distinct())
+                {
+                    if (File.Exists(path))
+                        try { File.Delete(path); } catch { }
+                }
 
-            ProgressPct = 0;
-            ProgressLabel = "대기 중...";
+                if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
+                    try { Directory.Delete(unpackedPath, true); } catch { }
+            }
+        }
+    }
+
+    private async Task ProduceAsync(BuildMode mode, string unpackedPath, Stopwatch sw, List<string> tempOutputs, CancellationToken ct)
+    {
+        string baseName = Path.Combine(OutputPath, Path.GetFileNameWithoutExtension(InputPath) + "_Repack");
+        string finalPath = Utils.GetUniqueFilePath(baseName + GetExtension(OutputFormat));
+        bool convert = OutputFormat != WiiOutputFormat.Iso;
+        string isoPath = convert ? Utils.GetUniqueFilePath(baseName + ".tmp.iso") : finalPath;
+        double rebuildWeight = convert ? 0.5 : 1.0;
+        string source = InputPath;
+        var replacements = _patch?.Replacements;
+        var format = OutputFormat;
+
+        tempOutputs.Add(finalPath);
+
+        if (convert)
+            tempOutputs.Add(isoPath);
+
+        void rebuildProgress(double value) => SetProgress(value * rebuildWeight, $"리빌드 중: {Path.GetFileName(source)}", sw);
+
+        SetProgress(0, $"리빌드 중: {Path.GetFileName(source)}", sw);
+
+        Log($"빌드를 시작합니다. → {Path.GetFileName(finalPath)}", LogLevel.Info);
+
+        if (mode == BuildMode.FullProcess)
+            await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, isoPath, replacements!, rebuildProgress, ct), ct);
+        else
+            await Task.Run(() => WiiIsoRebuilder.RebuildWithFolderAndReplacements(source, isoPath, unpackedPath, replacements, rebuildProgress, ct), ct);
+
+        if (convert)
+        {
+            string label = format == WiiOutputFormat.Wbfs ? "WBFS 변환 중..." : "RVZ 압축 중...";
+            void convertProgress(double value) => SetProgress(0.5 + value * 0.5, label, sw);
+
+            await Task.Run(() =>
+            {
+                if (format == WiiOutputFormat.Wbfs)
+                    IsoToWbfsConverter.Convert(isoPath, finalPath, convertProgress, ct);
+                else
+                    IsoToRvzConverter.Convert(isoPath, finalPath, RvzCompressionLevel, RvzChunkSize, convertProgress, ct);
+            }, ct);
+
+            try { File.Delete(isoPath); } catch { }
+        }
+
+        if (_patch != null)
+        {
+            foreach (string warning in _patch.Warnings)
+                Log($"경고: {warning}", LogLevel.Highlight);
         }
     }
 
@@ -242,14 +406,21 @@ public class WiiMainViewModel : ToolTabViewModel
 
         if (File.Exists(path))
         {
-            try
+            if (!string.Equals(Path.GetExtension(path), ".iso", StringComparison.OrdinalIgnoreCase))
             {
-                info = await Task.Run(() => WiiDiscInfoReader.Read(path));
+                Log("현재는 ISO 파일만 지원합니다 (WBFS/RVZ/WIA는 차후 지원 예정).", LogLevel.Error);
             }
-            catch (Exception ex)
+            else
             {
-                if (version == _discVersion)
-                    Log($"디스크 정보를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                try
+                {
+                    info = await Task.Run(() => WiiDiscInfoReader.Read(path));
+                }
+                catch (Exception ex)
+                {
+                    if (version == _discVersion)
+                        Log($"디스크 정보를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                }
             }
         }
 
@@ -258,9 +429,56 @@ public class WiiMainViewModel : ToolTabViewModel
 
         _disc = info;
 
-        DiscInfo = info == null ? null : WiiDiscDisplay.From(info);
+        GameInfo = info == null ? null : WiiGameDisplay.From(info);
+        GameIcon = null;
 
         RebuildPatchDisplay();
+
+        if (info != null)
+            _ = LoadIconAsync(info.GameId, version);
+    }
+
+    private async Task LoadIconAsync(string gameId, int version)
+    {
+        byte[]? bytes;
+
+        try
+        {
+            bytes = await WiiCoverArtFetcher.TryGetDiscPngAsync(gameId);
+        }
+        catch
+        {
+            return;
+        }
+
+        if (bytes == null || version != _discVersion)
+            return;
+
+        var image = CreateImage(bytes);
+
+        if (image != null)
+            GameIcon = image;
+    }
+
+    private static BitmapImage? CreateImage(byte[] bytes)
+    {
+        try
+        {
+            using var stream = new MemoryStream(bytes);
+            var image = new BitmapImage();
+
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = stream;
+            image.EndInit();
+            image.Freeze();
+
+            return image;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private async Task RefreshPatchAsync()
@@ -292,6 +510,8 @@ public class WiiMainViewModel : ToolTabViewModel
 
         var ct = _patchCts.Token;
         var sw = Stopwatch.StartNew();
+
+        _patchLoading = true;
 
         using (BeginWork())
         {
@@ -353,12 +573,16 @@ public class WiiMainViewModel : ToolTabViewModel
             }
             finally
             {
+                _patchLoading = false;
+
                 if (version == _patchVersion)
                 {
                     ProgressPct = 0;
                     ProgressPercent = string.Empty;
                     ProgressLabel = "대기 중...";
                 }
+
+                NotifyButtonStates();
             }
         }
     }
@@ -413,7 +637,7 @@ public class WiiMainViewModel : ToolTabViewModel
         });
     }
 
-    private bool Validate(out string error)
+    private bool Validate(BuildMode mode, out string error)
     {
         error = string.Empty;
 
@@ -425,35 +649,66 @@ public class WiiMainViewModel : ToolTabViewModel
 
         if (_disc == null)
         {
-            error = "Wii 디스크 정보를 읽지 못했습니다. 원본 파일을 확인하세요.";
-            return false;
-        }
-
-        if (string.IsNullOrWhiteSpace(PatchPath))
-        {
-            error = "Riivolution 패치(폴더, zip, 7z, xml)를 지정하세요.";
-            return false;
-        }
-
-        if (_workspace == null || _patch == null)
-        {
-            error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
-            return false;
-        }
-
-        if (!_patch.MatchesDisc(_disc.GameId))
-        {
-            error = $"패치 대상 게임 ID({string.Join(", ", _patch.GameIds)})와 원본 디스크({_disc.GameId})가 맞지 않습니다.";
+            error = "Wii 디스크 정보를 읽지 못했습니다. 원본 ISO를 확인하세요.";
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(OutputPath))
         {
-            error = "출력 폴더를 선택하세요.";
+            error = "작업 폴더를 선택하세요.";
+            return false;
+        }
+
+        if (mode == BuildMode.UnpackOnly)
+            return true;
+
+        if (mode == BuildMode.RebuildOnly && !Directory.Exists(Path.Combine(OutputPath, "unpacked")))
+        {
+            error = "언팩된 데이터가 없습니다.";
+            return false;
+        }
+
+        bool hasPatchPath = !string.IsNullOrWhiteSpace(PatchPath);
+
+        if (mode == BuildMode.FullProcess && !hasPatchPath)
+        {
+            error = "Riivolution 패치(폴더, zip, 7z, xml)를 지정하세요.";
+            return false;
+        }
+
+        if (hasPatchPath && (_workspace == null || _patch == null))
+        {
+            error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
+            return false;
+        }
+
+        if (_patch != null && !_patch.MatchesDisc(_disc.GameId))
+        {
+            error = $"패치 대상 게임 ID({string.Join(", ", _patch.GameIds)})와 원본 디스크({_disc.GameId})가 맞지 않습니다.";
             return false;
         }
 
         return true;
+    }
+
+    private static string GetExtension(WiiOutputFormat format) => format switch
+    {
+        WiiOutputFormat.Wbfs => ".wbfs",
+        WiiOutputFormat.Rvz => ".rvz",
+        _ => ".iso"
+    };
+
+    private void NotifyButtonStates()
+    {
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            OnPropertyChanged(nameof(IsUnpackRunning));
+            OnPropertyChanged(nameof(IsRebuildRunning));
+            OnPropertyChanged(nameof(IsFullRunning));
+            OnPropertyChanged(nameof(UnpackEnabled));
+            OnPropertyChanged(nameof(RebuildEnabled));
+            OnPropertyChanged(nameof(StartEnabled));
+        });
     }
 
     private void BrowseInput()
@@ -461,7 +716,7 @@ public class WiiMainViewModel : ToolTabViewModel
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
             Title = "원본 Wii 디스크 선택",
-            Filter = "Wii 디스크|*.iso;*.wbfs;*.rvz;*.wia"
+            Filter = "Wii 디스크|*.iso"
         };
 
         if (dlg.ShowDialog() == true)
@@ -490,7 +745,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
     private void BrowseOutput()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "출력 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
 
         if (dlg.ShowDialog() == true)
             OutputPath = dlg.FolderName;

@@ -1,9 +1,9 @@
 ﻿using CHD.Core.Models;
-using DolphinTool.Core.Models;
-using DolphinTool.Core.Services;
 using RomForge.Core.Models.Compression;
 using System.IO;
 using System.Text;
+using WiiGC.Core.Models;
+using WiiGC.Core.Services;
 
 namespace RomForge.Core.Services.Compression;
 
