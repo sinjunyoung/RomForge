@@ -46,7 +46,7 @@ internal static class WiiFolderPlanner
             throw new InvalidDataException("apploader가 DOL 위치와 겹치거나 boot.bin의 DOL 위치가 올바르지 않습니다.");
 
         var files = CollectFiles(filesRoot);
-        var entries = new List<WiiPatchEntry>();
+        var resolved = new List<(string Path, bool Found)>();
 
         if (overlay != null)
         {
@@ -57,11 +57,11 @@ internal static class WiiFolderPlanner
                 if (found)
                     files[discPath] = filePath;
 
-                entries.Add(new WiiPatchEntry(discPath, found));
+                resolved.Add((discPath, found));
             }
 
-            if (entries.Count > 0 && entries.All(e => !e.Applied))
-                throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {entries.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", entries.Take(3).Select(e => e.Path))}");
+            if (resolved.Count > 0 && resolved.All(r => !r.Found))
+                throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {resolved.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", resolved.Take(3).Select(r => r.Path))}");
         }
 
         if (files.Count == 0)
@@ -69,6 +69,7 @@ internal static class WiiFolderPlanner
 
         var tree = new WiiFstTree();
         var sources = new Dictionary<WiiFstNode, string>();
+        var nodes = new Dictionary<string, WiiFstNode>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var (discPath, filePath) in files)
         {
@@ -94,6 +95,7 @@ internal static class WiiFolderPlanner
 
             parent.Children.Add(file);
             sources[file] = filePath;
+            nodes[discPath] = file;
         }
 
         SortChildren(tree.Root);
@@ -136,6 +138,7 @@ internal static class WiiFolderPlanner
         extents.Add(WiiRepackedPartition.Extent.FromMemory(newFstOffset, tree.Serialize()));
 
         long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
+        var entries = resolved.Select(r => new WiiPatchEntry(r.Path, r.Found, r.Found ? nodes[r.Path].Offset : 0)).ToList();
 
         return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, entries);
     }

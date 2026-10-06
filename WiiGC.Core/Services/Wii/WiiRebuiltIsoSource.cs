@@ -29,7 +29,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
     public WiiPatchResult Result { get; private set; } = WiiPatchResult.Empty;
 
-    public static WiiRebuiltIsoSource Create(IRvzInputSource input, IReadOnlyDictionary<string, string> replacements, Action<double>? progress, CancellationToken ct)
+    public static WiiRebuiltIsoSource Create(IRvzInputSource input, IReadOnlyDictionary<string, string> replacements, Action<double>? progress, Action<WiiPatchEntry>? entryLog, CancellationToken ct)
     {
         if (replacements.Count == 0)
             throw new InvalidDataException("교체할 파일이 없습니다.");
@@ -42,7 +42,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
             source.Result = new WiiPatchResult(source._targets[0].Plan.Entries);
 
-            source.Prepare(progress, ct);
+            source.Prepare(progress, entryLog, ct);
 
             return source;
         }
@@ -54,7 +54,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
         }
     }
 
-    public static WiiRebuiltIsoSource CreateFromFolder(string folder, IReadOnlyDictionary<string, string>? overlay, Action<double>? progress, CancellationToken ct)
+    public static WiiRebuiltIsoSource CreateFromFolder(string folder, IReadOnlyDictionary<string, string>? overlay, Action<double>? progress, Action<WiiPatchEntry>? entryLog, CancellationToken ct)
     {
         var info = WiiFolderInfo.Read(folder);
         var plan = WiiFolderPlanner.Plan(folder, overlay);
@@ -70,7 +70,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
             source.Result = new WiiPatchResult(plan.Entries);
 
-            source.Prepare(progress, ct);
+            source.Prepare(progress, entryLog, ct);
 
             return source;
         }
@@ -165,7 +165,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
             throw new InvalidDataException("게임 파티션을 찾을 수 없습니다.");
     }
 
-    private void Prepare(Action<double>? progress, CancellationToken ct)
+    private void Prepare(Action<double>? progress, Action<WiiPatchEntry>? entryLog, CancellationToken ct)
     {
         long total = _targets.Sum(t => WiiPartitionEncoder.GetGroupCount(t.Plan.Data));
         long done = 0;
@@ -180,10 +180,12 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
                 throw new InvalidDataException("파티션이 H3 테이블 용량을 초과합니다.");
 
             byte[] h3 = new byte[WiiPartitionHeader.H3TableSize];
+            var logger = target.Index == 0 ? new WiiPatchLogger(target.Plan.Entries, entryLog) : null;
 
             for (long group = 0; group < groups; group++)
             {
                 ct.ThrowIfCancellationRequested();
+                logger?.Advance((group + 1) * WiiLayout.GroupDataSize);
                 _encoder.EncodeGroup(target.Spec.Key, data, group, h3.AsSpan((int)(group * WiiLayout.HashSize), WiiLayout.HashSize));
 
                 done++;
@@ -198,6 +200,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
                 }
             }
 
+            logger?.Complete();
             _patches.AddRange(WiiIsoRebuilder.BuildHeaderPatches(_input, target.Spec, h3, target.Plan.DataSize));
         }
 

@@ -387,9 +387,9 @@ public class RepackMainViewModel : ToolTabViewModel
             {
                 return format switch
                 {
-                    WiiOutputFormat.Wbfs => WiiIsoStreamConverter.RepackFolderToWbfs(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct),
-                    WiiOutputFormat.Rvz => WiiIsoStreamConverter.RepackFolderToRvz(unpackedPath, finalPath, overlay, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct),
-                    _ => WiiIsoStreamConverter.RepackFolderToIso(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct),
+                    WiiOutputFormat.Wbfs => WiiIsoStreamConverter.RepackFolderToWbfs(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, LogPatchEntry, ct),
+                    WiiOutputFormat.Rvz => WiiIsoStreamConverter.RepackFolderToRvz(unpackedPath, finalPath, overlay, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, LogPatchEntry, ct),
+                    _ => WiiIsoStreamConverter.RepackFolderToIso(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, LogPatchEntry, ct),
                 };
             }, ct);
         }
@@ -402,12 +402,13 @@ public class RepackMainViewModel : ToolTabViewModel
             {
                 void rebuildProgress(double value) => SetProgress(value, $"리팩 중: {Path.GetFileName(source)}", sw);
 
-                result = await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
+                result = await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, LogPatchEntry, ct), ct);
             }
             else
             {
-                result = await Task.Run(() => format == WiiOutputFormat.Wbfs ? WiiIsoStreamConverter.RebuildToWbfs(source, finalPath, replacements, prepareProgress, convertProgress, ct) 
-                : WiiIsoStreamConverter.RebuildToRvz(source, finalPath, replacements, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct), ct);
+                result = await Task.Run(() => format == WiiOutputFormat.Wbfs
+                    ? WiiIsoStreamConverter.RebuildToWbfs(source, finalPath, replacements, prepareProgress, convertProgress, LogPatchEntry, ct)
+                    : WiiIsoStreamConverter.RebuildToRvz(source, finalPath, replacements, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, LogPatchEntry, ct), ct);
             }
         }
 
@@ -420,18 +421,18 @@ public class RepackMainViewModel : ToolTabViewModel
         }
     }
 
+    private void LogPatchEntry(WiiPatchEntry entry)
+    {
+        if (entry.Applied)
+            Log($"교체: {entry.Path}", LogLevel.Info);
+        else
+            Log($"디스크에 없음: {entry.Path}", LogLevel.Error);
+    }
+
     private void LogPatchResult(WiiPatchResult result)
     {
         if (result.Total == 0)
             return;
-
-        foreach (var entry in result.Entries)
-        {
-            if (entry.Applied)
-                Log($"교체: {entry.Path}", LogLevel.Info);
-            else
-                Log($"디스크에 없음: {entry.Path}", LogLevel.Error);
-        }
 
         int failed = result.Total - result.Applied;
 

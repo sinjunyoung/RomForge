@@ -19,7 +19,7 @@ public static class WiiIsoRebuilder
 
         EnsureGameMatches(inputPath, patch);
 
-        RebuildWithReplacements(inputPath, outputPath, patch.Replacements, progress, ct);
+        RebuildWithReplacements(inputPath, outputPath, patch.Replacements, progress, null, ct);
 
         return patch.Warnings;
     }
@@ -217,10 +217,10 @@ public static class WiiIsoRebuilder
         }
     }
 
-    public static WiiPatchResult RebuildWithFolder(string inputPath, string outputPath, string folder, Action<double>? progress = null, CancellationToken ct = default) => RebuildWithReplacements(inputPath, outputPath, CollectFolder(folder), progress, ct);
+    public static WiiPatchResult RebuildWithFolder(string inputPath, string outputPath, string folder, Action<double>? progress = null, CancellationToken ct = default) => RebuildWithReplacements(inputPath, outputPath, CollectFolder(folder), progress, null, ct);
 
     public static WiiPatchResult RebuildWithFolderAndReplacements(string inputPath, string outputPath, string folder, IReadOnlyDictionary<string, string>? replacements, Action<double>? progress = null, CancellationToken ct = default)
-        => RebuildWithReplacements(inputPath, outputPath, MergeFolderReplacements(folder, replacements), progress, ct);
+        => RebuildWithReplacements(inputPath, outputPath, MergeFolderReplacements(folder, replacements), progress, null, ct);
 
     public static Dictionary<string, string> MergeFolderReplacements(string folder, IReadOnlyDictionary<string, string>? replacements)
     {
@@ -235,7 +235,7 @@ public static class WiiIsoRebuilder
         return merged;
     }
 
-    public static WiiPatchResult RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, CancellationToken ct = default)
+    public static WiiPatchResult RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, Action<WiiPatchEntry>? entryLog = null, CancellationToken ct = default)
     {
         if (replacements.Count == 0)
             throw new InvalidDataException("교체할 파일이 없습니다.");
@@ -271,6 +271,7 @@ public static class WiiIsoRebuilder
             plans.Sort((a, b) => a.Spec.DataStart.CompareTo(b.Spec.DataStart));
             result = new WiiPatchResult(plans[0].Plan.Entries);
 
+            var logger = new WiiPatchLogger(plans[0].Plan.Entries, entryLog);
             using var handle = SparseFile.Create(outputPath, length);
             var sink = new FileIsoSink(handle);
 
@@ -289,7 +290,7 @@ public static class WiiIsoRebuilder
 
                 CopyRaw(input, sink, buffer, cursor, spec.DataStart - cursor, reporter, ct);
 
-                byte[] h3 = EncodePartition(plan.Data, spec.Key, spec.DataStart, sink, reporter, ct);
+                byte[] h3 = EncodePartition(plan.Data, spec.Key, spec.DataStart, sink, reporter, ct, ReferenceEquals(plan, plans[0].Plan) ? logger : null);
 
                 PatchHeader(input, sink, spec, h3, plan.DataSize);
 
@@ -392,7 +393,7 @@ public static class WiiIsoRebuilder
         }
     }
 
-    private static byte[] EncodePartition(IWiiPartitionData data, byte[] key, long dataStart, IIsoSink sink, ProgressReporter reporter, CancellationToken ct)
+    private static byte[] EncodePartition(IWiiPartitionData data, byte[] key, long dataStart, IIsoSink sink, ProgressReporter reporter, CancellationToken ct, WiiPatchLogger? logger = null)
     {
         using var encoder = new WiiPartitionEncoder();
 
@@ -406,13 +407,15 @@ public static class WiiIsoRebuilder
         for (long group = 0; group < groups; group++)
         {
             ct.ThrowIfCancellationRequested();
+            logger?.Advance((group + 1) * WiiLayout.GroupDataSize);
 
             int length = encoder.EncodeGroup(key, data, group, h3.AsSpan((int)(group * WiiLayout.HashSize), WiiLayout.HashSize));
 
             sink.Write(dataStart + group * WiiLayout.GroupTotalSize, encoder.Encrypted[..length]);
-
             reporter.Add(length);
         }
+
+        logger?.Complete();
 
         return h3;
     }

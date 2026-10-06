@@ -46,7 +46,7 @@ internal static class WiiPartitionPlanner
             byPath.TryAdd(path, node);
 
         var external = new Dictionary<WiiFstNode, (string Path, long Size)>();
-        var entries = new List<WiiPatchEntry>(replacements.Count);
+        var resolved = new List<(string Path, WiiFstNode? Node)>(replacements.Count);
 
         foreach (var (discPath, filePath) in replacements)
         {
@@ -55,11 +55,11 @@ internal static class WiiPartitionPlanner
             if (found)
                 external[node!] = (filePath, new FileInfo(filePath).Length);
 
-            entries.Add(new WiiPatchEntry(discPath, found));
+            resolved.Add((discPath, found ? node : null));
         }
 
-        if (entries.Count > 0 && entries.All(e => !e.Applied))
-            throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {entries.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", entries.Take(3).Select(e => e.Path))}");
+        if (resolved.Count > 0 && resolved.All(r => r.Node == null))
+            throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {resolved.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", resolved.Take(3).Select(r => r.Path))}");
 
         byte[] head = new byte[dolOffset];
 
@@ -101,6 +101,7 @@ internal static class WiiPartitionPlanner
         extents.Add(WiiRepackedPartition.Extent.FromMemory(newFstOffset, tree.Serialize()));
 
         long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
+        var entries = resolved.Select(r => new WiiPatchEntry(r.Path, r.Node != null, r.Node?.Offset ?? 0)).ToList();
 
         return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, entries);
     }
