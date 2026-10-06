@@ -38,6 +38,9 @@ public partial class MainWindow : Window
 
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
+        if (!AppConfig.Instance.Common.AutoCheckUpdate)
+            return;
+
         try
         {
             var isUpdateAvailable = await VersionHelper.IsUpdateAvailableAsync();

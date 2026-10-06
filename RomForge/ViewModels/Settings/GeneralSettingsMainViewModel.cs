@@ -11,6 +11,8 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         {
             if (e.PropertyName == nameof(CommonConfig.Topmost))
                 OnPropertyChanged(nameof(Topmost));
+            else if (e.PropertyName == nameof(CommonConfig.AutoCheckUpdate))
+                OnPropertyChanged(nameof(AutoCheckUpdate));
         };
     }
 
@@ -20,6 +22,16 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set
         {
             AppConfig.Instance.Common.Topmost = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool AutoCheckUpdate
+    {
+        get => AppConfig.Instance.Common.AutoCheckUpdate;
+        set
+        {
+            AppConfig.Instance.Common.AutoCheckUpdate = value;
             OnPropertyChanged();
         }
     }

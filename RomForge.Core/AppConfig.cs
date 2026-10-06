@@ -21,6 +21,13 @@ public class CommonConfig : ViewModelBase
         get => _topmost;
         set { SetProperty(ref _topmost, value); }
     }
+
+    private bool _autoCheckUpdate = true;
+    public bool AutoCheckUpdate
+    {
+        get => _autoCheckUpdate;
+        set { SetProperty(ref _autoCheckUpdate, value); }
+    }
 }
 
 public class WindowConfig : ViewModelBase

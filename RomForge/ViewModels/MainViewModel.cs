@@ -35,9 +35,9 @@ public class MainViewModel : ToolTabViewModel
 
     public WiiUMainViewModel WiiUMainVM { get; } = new();
 
-    public _3DSMainViewModel Main3DsVM { get; } = new();
-
     public WiiMainViewModel WiiMainVM { get; } = new();
+
+    public _3DSMainViewModel Main3DsVM { get; } = new();    
 
     public PS1MainViewModel PSMainVM { get; } = new();
 
@@ -76,9 +76,9 @@ public class MainViewModel : ToolTabViewModel
         1 => CompressVM.LogEntries,
         2 => UnifiedConvertVM.LogEntries,
         3 => SwitchMainVM.LogEntries,
-        4 => WiiUMainVM.LogEntries,        
-        5 => Main3DsVM.LogEntries,
-        6 => WiiMainVM.LogEntries,
+        4 => WiiUMainVM.LogEntries,
+        5 => WiiMainVM.LogEntries,
+        6 => Main3DsVM.LogEntries,        
         7 => PSMainVM.LogEntries,
         8 => UtilMainVM.LogEntries,
         _ => PatchVM.LogEntries
@@ -125,8 +125,8 @@ public class MainViewModel : ToolTabViewModel
         Tools.Add(UnifiedConvertVM);
         Tools.Add(SwitchMainVM);
         Tools.Add(WiiUMainVM);
-        Tools.Add(Main3DsVM);
         Tools.Add(WiiMainVM);
+        Tools.Add(Main3DsVM);        
         Tools.Add(PSMainVM);
         Tools.Add(UtilMainVM);
         Tools.Add(Settings);

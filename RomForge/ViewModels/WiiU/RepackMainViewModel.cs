@@ -180,7 +180,7 @@ public class RepackMainViewModel : ToolTabViewModel
             {
                 if (!LooksLikeSupportedFolder(path))
                 {
-                    Log($"'{Path.GetFileName(path)}'는 WUP 폴더나 로드라인(code/content/meta) 폴더가 아니라서 자동 추가할 수 없습니다. 언팩 → 패치 → 리빌드 흐름을 이용해주세요.", LogLevel.Error);
+                    Log($"'{Path.GetFileName(path)}'는 WUP 폴더나 로드라인(code/content/meta) 폴더가 아니라서 자동 추가할 수 없습니다. 언팩 → 패치 → 리팩 흐름을 이용해주세요.", LogLevel.Error);
                     return;
                 }
 

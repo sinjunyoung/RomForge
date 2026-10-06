@@ -379,7 +379,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
         SetProgress(0, prepareLabel, sw);
 
-        Log($"빌드를 시작합니다. → {target}", LogLevel.Ok);
+        Log($"리팩을 시작합니다. → {target}", LogLevel.Ok);
 
         if (fromFolder)
         {
@@ -400,7 +400,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
             if (format == WiiOutputFormat.Iso)
             {
-                void rebuildProgress(double value) => SetProgress(value, $"리빌드 중: {Path.GetFileName(source)}", sw);
+                void rebuildProgress(double value) => SetProgress(value, $"리팩 중: {Path.GetFileName(source)}", sw);
 
                 result = await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
             }
