@@ -56,10 +56,10 @@ internal static class WiiPartitionPlanner
                 missing.Add(discPath);
         }
 
-        if (missing.Count > 0)
-        {
-            throw new InvalidDataException($"디스크에 없는 파일 {missing.Count}개: {string.Join(", ", missing.Take(5))}");
-        }
+        if (missing.Count > 0 && missing.Count == replacements.Count)
+            throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {missing.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", missing.Take(3))}");
+
+        missing.Sort(StringComparer.OrdinalIgnoreCase);
 
         byte[] head = new byte[dolOffset];
 
@@ -102,7 +102,7 @@ internal static class WiiPartitionPlanner
 
         long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
 
-        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, external.Count);
+        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, replacements.Count - missing.Count, missing);
     }
 
     private static long ReadOffset(byte[] boot, int position) => (long)BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(position)) << 2;

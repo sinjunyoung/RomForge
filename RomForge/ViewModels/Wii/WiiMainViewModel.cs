@@ -175,7 +175,12 @@ public class WiiMainViewModel : ToolTabViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set { _progressPct = value; OnPropertyChanged(); }
+        set
+        {
+            _progressPct = value;
+            OnPropertyChanged();
+            MainViewModel.SetTaskbarProgress(_progressPct);
+        }
     }
 
     public string ProgressLabel
@@ -273,6 +278,7 @@ public class WiiMainViewModel : ToolTabViewModel
             finally
             {
                 ProgressPct = 0;
+                MainViewModel.SetTaskbarProgress(0);
                 ProgressLabel = "대기 중...";
                 _currentMode = null;
                 NotifyButtonStates();
@@ -311,13 +317,14 @@ public class WiiMainViewModel : ToolTabViewModel
 
                 int count = await Task.Run(() => WiiIsoUnpacker.Unpack(source, unpackedPath, progress, ct), ct);
 
-                Log($"파일 {count:N0}개를 풀었습니다.", LogLevel.Info);
+                Log($"파일 {count:N0}개를 풀었습니다.", LogLevel.Ok);
             }
             else
                 await ProduceAsync(mode, unpackedPath, sw, tempOutputs, ct);
 
             isCompleted = true;
             ProgressPercent = "100%";
+            MainViewModel.SetTaskbarProgress(100);
 
             Log($"완료! 총 소요: {sw.Elapsed:mm\\:ss}", LogLevel.Ok);
             OutputPath.OpenFolder();
@@ -325,10 +332,12 @@ public class WiiMainViewModel : ToolTabViewModel
         catch (OperationCanceledException)
         {
             Log("작업이 취소되었습니다.", LogLevel.Error);
+            MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
             Log($"오류: {ex.Message}", LogLevel.Error);
+            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
         finally
         {
@@ -362,6 +371,7 @@ public class WiiMainViewModel : ToolTabViewModel
             WiiOutputFormat.Rvz => $"RVZ 압축 중: {target}",
             _ => $"ISO 생성 중: {target}"
         };
+        WiiPatchResult result;
 
         void prepareProgress(double value) => SetProgress(value, prepareLabel, sw);
         void convertProgress(double value) => SetProgress(value, convertLabel, sw);
@@ -370,24 +380,18 @@ public class WiiMainViewModel : ToolTabViewModel
 
         SetProgress(0, prepareLabel, sw);
 
-        Log($"빌드를 시작합니다. → {target}", LogLevel.Highlight);
+        Log($"빌드를 시작합니다. → {target}", LogLevel.Ok);
 
         if (fromFolder)
         {
-            await Task.Run(() =>
+            result = await Task.Run(() =>
             {
-                switch (format)
+                return format switch
                 {
-                    case WiiOutputFormat.Wbfs:
-                        WiiIsoStreamConverter.RepackFolderToWbfs(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct);
-                        break;
-                    case WiiOutputFormat.Rvz:
-                        WiiIsoStreamConverter.RepackFolderToRvz(unpackedPath, finalPath, overlay, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct);
-                        break;
-                    default:
-                        WiiIsoStreamConverter.RepackFolderToIso(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct);
-                        break;
-                }
+                    WiiOutputFormat.Wbfs => WiiIsoStreamConverter.RepackFolderToWbfs(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct),
+                    WiiOutputFormat.Rvz => WiiIsoStreamConverter.RepackFolderToRvz(unpackedPath, finalPath, overlay, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct),
+                    _ => WiiIsoStreamConverter.RepackFolderToIso(unpackedPath, finalPath, overlay, prepareProgress, convertProgress, ct),
+                };
             }, ct);
         }
         else
@@ -399,25 +403,35 @@ public class WiiMainViewModel : ToolTabViewModel
             {
                 void rebuildProgress(double value) => SetProgress(value, $"리빌드 중: {Path.GetFileName(source)}", sw);
 
-                await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
+                result = await Task.Run(() => WiiIsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, ct), ct);
             }
             else
             {
-                await Task.Run(() =>
-                {
-                    if (format == WiiOutputFormat.Wbfs)
-                        WiiIsoStreamConverter.RebuildToWbfs(source, finalPath, replacements, prepareProgress, convertProgress, ct);
-                    else
-                        WiiIsoStreamConverter.RebuildToRvz(source, finalPath, replacements, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct);
-                }, ct);
+                result = await Task.Run(() => format == WiiOutputFormat.Wbfs ? WiiIsoStreamConverter.RebuildToWbfs(source, finalPath, replacements, prepareProgress, convertProgress, ct) 
+                : WiiIsoStreamConverter.RebuildToRvz(source, finalPath, replacements, RvzCompressionLevel, RvzChunkSize, prepareProgress, convertProgress, ct), ct);
             }
         }
+
+        LogPatchResult(result);
 
         if (_patch != null)
         {
             foreach (string warning in _patch.Warnings)
-                Log($"경고: {warning}", LogLevel.Highlight);
+                Log($"경고: {warning}", LogLevel.Error);
         }
+    }
+
+    private void LogPatchResult(WiiPatchResult result)
+    {
+        if (result.Total == 0)
+            return;
+
+        int failed = result.Skipped.Count;
+
+        Log($"패치 결과: 총 {result.Total:N0}개 중 {result.Applied:N0}개 완료, {failed:N0}개 실패", failed == 0 ? LogLevel.Ok : LogLevel.Highlight);
+
+        foreach (string path in result.Skipped)
+            Log($"실패(디스크에 없음): {path}", LogLevel.Error);
     }
 
     private async Task RefreshDiscAsync()
@@ -572,6 +586,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
                     PatchInfo = WiiPatchDisplay.Failed("취소되었습니다.");
 
+                    MainViewModel.SetTaskbarProgress(0);
                     Log("패치 읽기가 취소되었습니다.", LogLevel.Error);
                 }
             }
@@ -583,6 +598,7 @@ public class WiiMainViewModel : ToolTabViewModel
 
                     PatchInfo = WiiPatchDisplay.Failed(ex.Message);
 
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                     Log($"패치를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
                 }
             }
@@ -593,6 +609,7 @@ public class WiiMainViewModel : ToolTabViewModel
                 if (version == _patchVersion)
                 {
                     ProgressPct = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     ProgressPercent = string.Empty;
                     ProgressLabel = "대기 중...";
                 }

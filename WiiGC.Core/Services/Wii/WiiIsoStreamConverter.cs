@@ -1,8 +1,10 @@
-﻿namespace WiiGC.Core.Services.Wii;
+﻿using WiiGC.Core.Models;
+
+namespace WiiGC.Core.Services.Wii;
 
 public static class WiiIsoStreamConverter
 {
-    public static void RepackFolderToIso(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, Action<double>? prepareProgress = null, Action<double>? writeProgress = null, CancellationToken ct = default)
+    public static WiiPatchResult RepackFolderToIso(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, Action<double>? prepareProgress = null, Action<double>? writeProgress = null, CancellationToken ct = default)
     {
         using var source = WiiRebuiltIsoSource.CreateFromFolder(folder, overlay, prepareProgress, ct);
 
@@ -46,35 +48,45 @@ public static class WiiIsoStreamConverter
             if (!succeeded && File.Exists(outputPath))
                 try { File.Delete(outputPath); } catch { }
         }
+
+        return source.Result;
     }
 
-    public static void RepackFolderToWbfs(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
+    public static WiiPatchResult RepackFolderToWbfs(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
     {
         using var source = WiiRebuiltIsoSource.CreateFromFolder(folder, overlay, prepareProgress, ct);
 
         IsoToWbfsConverter.Convert(source, outputPath, convertProgress, ct);
+
+        return source.Result;
     }
 
-    public static void RepackFolderToRvz(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, int compressionLevel = 5, int chunkSize = 131072, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
+    public static WiiPatchResult RepackFolderToRvz(string folder, string outputPath, IReadOnlyDictionary<string, string>? overlay, int compressionLevel = 5, int chunkSize = 131072, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
     {
         using var source = WiiRebuiltIsoSource.CreateFromFolder(folder, overlay, prepareProgress, ct);
 
         IsoToRvzConverter.Convert(source, outputPath, compressionLevel, chunkSize, convertProgress, ct);
+
+        return source.Result;
     }
 
-    public static void RebuildToWbfs(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
+    public static WiiPatchResult RebuildToWbfs(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
     {
         using var input = RvzInputSource.Open(inputPath);
         using var source = WiiRebuiltIsoSource.Create(input, replacements, prepareProgress, ct);
 
         IsoToWbfsConverter.Convert(source, outputPath, convertProgress, ct);
+
+        return source.Result;
     }
 
-    public static void RebuildToRvz(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, int compressionLevel = 5, int chunkSize = 131072, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
+    public static WiiPatchResult RebuildToRvz(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, int compressionLevel = 5, int chunkSize = 131072, Action<double>? prepareProgress = null, Action<double>? convertProgress = null, CancellationToken ct = default)
     {
         using var input = RvzInputSource.Open(inputPath);
         using var source = WiiRebuiltIsoSource.Create(input, replacements, prepareProgress, ct);
 
         IsoToRvzConverter.Convert(source, outputPath, compressionLevel, chunkSize, convertProgress, ct);
+
+        return source.Result;
     }
 }

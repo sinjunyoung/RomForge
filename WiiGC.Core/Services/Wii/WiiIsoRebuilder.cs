@@ -217,9 +217,9 @@ public static class WiiIsoRebuilder
         }
     }
 
-    public static void RebuildWithFolder(string inputPath, string outputPath, string folder, Action<double>? progress = null, CancellationToken ct = default) => RebuildWithReplacements(inputPath, outputPath, CollectFolder(folder), progress, ct);
+    public static WiiPatchResult RebuildWithFolder(string inputPath, string outputPath, string folder, Action<double>? progress = null, CancellationToken ct = default) => RebuildWithReplacements(inputPath, outputPath, CollectFolder(folder), progress, ct);
 
-    public static void RebuildWithFolderAndReplacements(string inputPath, string outputPath, string folder, IReadOnlyDictionary<string, string>? replacements, Action<double>? progress = null, CancellationToken ct = default)
+    public static WiiPatchResult RebuildWithFolderAndReplacements(string inputPath, string outputPath, string folder, IReadOnlyDictionary<string, string>? replacements, Action<double>? progress = null, CancellationToken ct = default)
         => RebuildWithReplacements(inputPath, outputPath, MergeFolderReplacements(folder, replacements), progress, ct);
 
     public static Dictionary<string, string> MergeFolderReplacements(string folder, IReadOnlyDictionary<string, string>? replacements)
@@ -235,12 +235,13 @@ public static class WiiIsoRebuilder
         return merged;
     }
 
-    public static void RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, CancellationToken ct = default)
+    public static WiiPatchResult RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, CancellationToken ct = default)
     {
         if (replacements.Count == 0)
             throw new InvalidDataException("교체할 파일이 없습니다.");
 
         bool succeeded = false;
+        WiiPatchResult? result = null;
         var readers = new List<WiiPartitionReader>();
         var plans = new List<(WiiPartitionSpec Spec, WiiRepackPlan Plan)>();
 
@@ -268,6 +269,7 @@ public static class WiiIsoRebuilder
                 throw new InvalidDataException("게임 파티션을 찾을 수 없습니다.");
 
             plans.Sort((a, b) => a.Spec.DataStart.CompareTo(b.Spec.DataStart));
+            result = new WiiPatchResult(replacements.Count, plans[0].Plan.Replaced, plans[0].Plan.Missing);
 
             using var handle = SparseFile.Create(outputPath, length);
             var sink = new FileIsoSink(handle);
@@ -308,6 +310,8 @@ public static class WiiIsoRebuilder
 
             DeleteIfFailed(outputPath, succeeded);
         }
+
+        return result!;
     }
 
     private static Dictionary<string, string> CollectFolder(string folder)

@@ -27,6 +27,8 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
     public long Length => _input.Length;
 
+    public WiiPatchResult Result { get; private set; } = WiiPatchResult.Empty;
+
     public static WiiRebuiltIsoSource Create(IRvzInputSource input, IReadOnlyDictionary<string, string> replacements, Action<double>? progress, CancellationToken ct)
     {
         if (replacements.Count == 0)
@@ -37,6 +39,9 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
         try
         {
             source.Plan(replacements);
+
+            source.Result = new WiiPatchResult(replacements.Count, source._targets[0].Plan.Replaced, source._targets[0].Plan.Missing);
+
             source.Prepare(progress, ct);
 
             return source;
@@ -61,6 +66,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
             baseSource = WiiFolderBaseSource.Create(folder, info, plan.DataSize);
             source = new WiiRebuiltIsoSource(baseSource, true);
             source._targets.Add(new Target(0, baseSource.CreateSpec(plan.DataSize), plan));
+            source.Result = new WiiPatchResult(overlay?.Count ?? 0, plan.Replaced, plan.Missing);
             source.Prepare(progress, ct);
 
             return source;

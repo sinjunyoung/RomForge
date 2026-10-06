@@ -2,4 +2,4 @@
 
 namespace WiiGC.Core.Models;
 
-internal sealed record WiiRepackPlan(WiiRepackedPartition Data, long DataSize, int Replaced);
+internal sealed record WiiRepackPlan(WiiRepackedPartition Data, long DataSize, int Replaced, IReadOnlyList<string> Missing);

@@ -47,11 +47,10 @@ internal static class WiiFolderPlanner
 
         var files = CollectFiles(filesRoot);
         int replaced = 0;
+        var missing = new List<string>();
 
         if (overlay != null)
         {
-            var missing = new List<string>();
-
             foreach (var (discPath, filePath) in overlay)
             {
                 if (files.ContainsKey(discPath))
@@ -63,8 +62,10 @@ internal static class WiiFolderPlanner
                     missing.Add(discPath);
             }
 
-            if (missing.Count > 0)
-                throw new InvalidDataException($"디스크에 없는 파일 {missing.Count}개: {string.Join(", ", missing.Take(5))}");
+            if (missing.Count > 0 && missing.Count == overlay.Count)
+                throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {missing.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", missing.Take(3))}");
+
+            missing.Sort(StringComparer.OrdinalIgnoreCase);
         }
 
         if (files.Count == 0)
@@ -140,7 +141,7 @@ internal static class WiiFolderPlanner
 
         long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
 
-        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, replaced);
+        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, replaced, missing);
     }
 
     private static Dictionary<string, string> CollectFiles(string filesRoot)
