@@ -176,7 +176,6 @@ public class CompressMainViewModel : ToolTabViewModel
                 {
                     item.Status = "대기중";
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
 
                     var detected = FormatDetector.Detect(item.FilePath);
 
@@ -322,7 +321,6 @@ public class CompressMainViewModel : ToolTabViewModel
         {
             remainingItem.Status = "취소";
             remainingItem.Progress = 0;
-            MainViewModel.SetTaskbarProgress(0);
         }
     }
 

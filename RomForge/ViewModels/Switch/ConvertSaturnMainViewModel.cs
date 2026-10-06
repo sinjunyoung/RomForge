@@ -44,7 +44,7 @@ namespace RomForge.ViewModels.Switch
         private string _progressPercent = "0%";
         private string _progressSpeed = string.Empty;
         private string _progressTime = "00:00 경과";
-        private double _progressPct;
+        private int _progressPct;
 
         private readonly Stopwatch _totalSw = new();
 
@@ -134,14 +134,14 @@ namespace RomForge.ViewModels.Switch
 
         public string ProgressTime { get => _progressTime; set { _progressTime = value; OnPropertyChanged(); } }
 
-        public double ProgressPct
+        public int ProgressPct
         {
             get => _progressPct;
             set
             {
                 _progressPct = value;
-                OnPropertyChanged();
                 MainViewModel.SetTaskbarProgress(_progressPct);
+                OnPropertyChanged();
             }
         }
 
@@ -300,7 +300,7 @@ namespace RomForge.ViewModels.Switch
                 catch (OperationCanceledException)
                 {
                     Log($"작업이 취소되었습니다.", LogLevel.Error);
-                    MainViewModel.SetTaskbarProgress(0);
+                    ProgressPct = 0;
                 }
                 catch (Exception ex)
                 {
@@ -311,8 +311,7 @@ namespace RomForge.ViewModels.Switch
                 {
                     _cts?.Dispose();
                     _cts = null;
-                    IsConverting = false;
-                    ProgressPct = 0;
+                    IsConverting = false;                    
                 }
             }
         }

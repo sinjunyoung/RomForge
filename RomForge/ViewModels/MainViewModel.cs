@@ -203,4 +203,6 @@ public class MainViewModel : ToolTabViewModel
             Current.TaskbarProgressValue = value / 100.0;
         }
     }
+
+    public void ClearLog() => ActiveLogEntries.Clear();
 }

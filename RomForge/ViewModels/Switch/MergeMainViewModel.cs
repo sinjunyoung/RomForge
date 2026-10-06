@@ -42,8 +42,8 @@ public class MergeMainViewModel : ToolTabViewModel
         set
         {
             _progressPct = value;
-            OnPropertyChanged();
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();
         }
     }
 
@@ -213,7 +213,7 @@ public class MergeMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 Log($"병합이 취소되었습니다.", LogLevel.Error);
-                MainViewModel.SetTaskbarProgress(0);
+                ProgressPct = 0;
             }
             catch (Exception ex)
             {
@@ -224,7 +224,7 @@ public class MergeMainViewModel : ToolTabViewModel
             {
                 _cts?.Dispose();
                 _cts = null;
-                ProgressPct = 0;
+                
             }
         }
 

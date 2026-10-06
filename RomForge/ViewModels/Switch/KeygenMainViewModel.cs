@@ -32,8 +32,8 @@ public class KeygenMainViewModel : ToolTabViewModel
         set
         {
             _progressPct = value;
-            OnPropertyChanged();
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();
         }
     }
 
@@ -109,7 +109,7 @@ public class KeygenMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 Log($"작업이 취소되었습니다.", LogLevel.Error);
-                MainViewModel.SetTaskbarProgress(0);
+                ProgressPct = 0;                
             }
             catch (Exception ex)
             {
@@ -143,7 +143,6 @@ public class KeygenMainViewModel : ToolTabViewModel
     {
         _cts?.Dispose();
         _cts = null;
-        ProgressPct = 0;
         ProgressLabel = string.Empty;
         ProgressPercent = "0%";
         ProgressTime = string.Empty;

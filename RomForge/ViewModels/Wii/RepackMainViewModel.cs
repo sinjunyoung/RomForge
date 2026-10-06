@@ -178,8 +178,8 @@ public class RepackMainViewModel : ToolTabViewModel
         set
         {
             _progressPct = value;
-            OnPropertyChanged();
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();
         }
     }
 
@@ -278,7 +278,6 @@ public class RepackMainViewModel : ToolTabViewModel
             finally
             {
                 ProgressPct = 0;
-                MainViewModel.SetTaskbarProgress(0);
                 ProgressLabel = "대기 중...";
                 _currentMode = null;
                 NotifyButtonStates();
@@ -591,7 +590,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
                     PatchInfo = WiiPatchDisplay.Failed("취소되었습니다.");
 
-                    MainViewModel.SetTaskbarProgress(0);
+                    ProgressPct = 0;                    
                     Log("패치 읽기가 취소되었습니다.", LogLevel.Error);
                 }
             }
@@ -613,8 +612,6 @@ public class RepackMainViewModel : ToolTabViewModel
 
                 if (version == _patchVersion)
                 {
-                    ProgressPct = 0;
-                    MainViewModel.SetTaskbarProgress(0);
                     ProgressPercent = string.Empty;
                     ProgressLabel = "대기 중...";
                 }

@@ -38,9 +38,9 @@ namespace RomForge.ViewModels.Switch
             get => _progressPct;
             set 
             { 
-                _progressPct = value; 
-                OnPropertyChanged();
+                _progressPct = value;
                 MainViewModel.SetTaskbarProgress(_progressPct);
+                OnPropertyChanged();
             }
         }
 

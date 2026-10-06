@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
@@ -171,6 +172,7 @@ public class TistoryMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"[분석 실패] {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {
@@ -216,6 +218,7 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                     item.Status = "다운로드중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -229,6 +232,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                         item.FileName = Path.GetFileName(savedPath);
                         item.FileSizeBytes = sizeBytes;
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
 
                         lock (lockObj)
@@ -242,6 +246,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                     {
                         item.Progress = 0;
                         item.Status = "실패";
+                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
                     }
                 });
 
@@ -265,6 +270,7 @@ public class TistoryMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "다운로드중"))
                 {
@@ -318,6 +324,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                 foreach (var item in items)
                 {
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "압축해제중";
                 }
 
@@ -337,6 +344,7 @@ public class TistoryMainViewModel : ToolTabViewModel
                     item.SavedPath = extractDir;
                     item.FileName = displayName;
                     item.Progress = 100;
+                    MainViewModel.SetTaskbarProgress(100);
                     item.Status = "압축해제완료";
                 }
 
@@ -350,7 +358,9 @@ public class TistoryMainViewModel : ToolTabViewModel
                     item.Progress = 0;
                     item.Status = "압축해제실패";
                 }
+
                 AppendLog($"[압축해제 실패] {representative.FileName}: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
         }
 

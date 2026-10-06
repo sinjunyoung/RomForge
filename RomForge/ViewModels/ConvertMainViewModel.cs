@@ -354,7 +354,6 @@ public class ConvertMainViewModel : ToolTabViewModel
 
                     tracker.Status = "대기중";
                     tracker.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
                     tracker.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -362,18 +361,18 @@ public class ConvertMainViewModel : ToolTabViewModel
                     try
                     {
                         await ConvertOneAsync(item);
+                        MainViewModel.SetTaskbarProgress(100);
 
                         tracker.Progress = 100;
-                        MainViewModel.SetTaskbarProgress(100);
                         tracker.Status = "완료";
                         cnt++;
                     }
                     catch (CertsBinNotFoundException e)
                     {
                         AppendLog(e.Message, LogLevel.Error);
-                        RunNavigateCerts?.Invoke(this, EventArgs.Empty);
-                        tracker.Status = "실패";
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                        RunNavigateCerts?.Invoke(this, EventArgs.Empty);
+                        tracker.Status = "실패";                        
                     }
                     catch (OperationCanceledException)
                     {
@@ -382,9 +381,9 @@ public class ConvertMainViewModel : ToolTabViewModel
                     catch (Exception ex)
                     {
                         AppendLog($"[{GetDisplayName(item)}] 변환 실패: {ex.Message}", LogLevel.Error);
-                        tracker.Status = "실패";
-                        tracker.Progress = 0;
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                        tracker.Status = "실패";
+                        tracker.Progress = 0;                        
                     }
                 }
 
@@ -393,6 +392,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems)
                 {

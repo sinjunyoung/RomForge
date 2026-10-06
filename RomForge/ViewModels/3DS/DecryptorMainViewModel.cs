@@ -166,7 +166,6 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     }
 
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "복호화중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -177,9 +176,9 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     try
                     {
                         await DecryptAsync(item, outputPath, _cts.Token);
+                        MainViewModel.SetTaskbarProgress(100);
 
                         item.Progress = 100;
-                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
@@ -192,17 +191,20 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     catch (Exception ex)
                     {
                         AppendLog($"[{item.FileName}] 복호화 실패: {ex.Message}", LogLevel.Error);
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                         item.Status = "실패";
-                        item.Progress = 0;
-                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                        item.Progress = 0;                        
 
                         DeletePartialOutput(outputPath);
                     }
                 }
 
                 if (cnt > 0)
+                {
                     AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    MainViewModel.SetTaskbarProgress(100);
+                }
                 else
                     AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
             }

@@ -14,6 +14,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
@@ -66,7 +67,12 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     public int Progress
     {
         get => _progress;
-        set { _progress = value; OnPropertyChanged(); }
+        set 
+        { 
+            _progress = value; 
+            MainViewModel.SetTaskbarProgress(value);
+            OnPropertyChanged();
+        }
     }
 
     #endregion
@@ -161,6 +167,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     }
 
     #endregion
+
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
     #region Commands
@@ -304,10 +311,13 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             catch (Win32Exception ex)
             {
                 AppendLog(ex.Message, LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+
             }
             catch (Exception ex)
             {
                 AppendLog(ex.Message, LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {
@@ -359,6 +369,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
         }
 
         ulong freeSpace = 0;
+
         try
         {
             freeSpace = DiskUtil.GetAvailableFreeSpace(Path.GetPathRoot(ReadImagePath));
@@ -403,10 +414,12 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             catch (Win32Exception ex)
             {
                 AppendLog(ex.Message, LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             catch (Exception ex)
             {
                 AppendLog(ex.Message, LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {
@@ -516,9 +529,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
         if (Application.Current?.Dispatcher == null) 
             return;
 
-        Application.Current.Dispatcher.Invoke(() =>
-            LogEntries.Add(new LogEntry { Message = msg, Level = level })
-        );
+        Application.Current.Dispatcher.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
     }
 
     #endregion

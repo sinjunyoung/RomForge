@@ -139,6 +139,7 @@ public class PSPConverterViewModel : ToolTabViewModel
 
                     item.Status = "대기중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -213,6 +214,7 @@ public class PSPConverterViewModel : ToolTabViewModel
                         }
 
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
@@ -235,6 +237,7 @@ public class PSPConverterViewModel : ToolTabViewModel
 
                         item.Status = "실패";
                         item.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(0);
                     }
                 }
 
@@ -243,6 +246,7 @@ public class PSPConverterViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status is "대기중" or "변환중"))
                     item.Status = "취소";
@@ -250,6 +254,7 @@ public class PSPConverterViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";

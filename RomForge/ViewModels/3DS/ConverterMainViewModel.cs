@@ -161,7 +161,6 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                     item.Status = "대기중";
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -217,8 +216,8 @@ public class ConverterMainViewModel : ToolTabViewModel
                     catch (CertsBinNotFoundException e)
                     {
                         AppendLog(e.Message, LogLevel.Error);
-                        RunNavigateCerts?.Invoke(this, EventArgs.Empty);
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                        RunNavigateCerts?.Invoke(this, EventArgs.Empty);                        
                     }
                     catch (OperationCanceledException)
                     {
@@ -227,10 +226,10 @@ public class ConverterMainViewModel : ToolTabViewModel
                     catch (Exception ex)
                     {
                         AppendLog($"[{item.FileName}.{item.Extension}] 변환 실패: {ex.Message}", LogLevel.Error);
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                         item.Status = "실패";
-                        item.Progress = 0;
-                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                        item.Progress = 0;                        
                     }
                 }
 

@@ -215,16 +215,10 @@ public class ConverterMainViewModel : ToolTabViewModel
             {
                 await Task.Run(() =>
                 {
-                    using ITitleSource source = item.Extension == "wup"
-                        ? new WupTitleSource(item.FilePath)
-                        : new FolderTitleSource(item.FilePath);
-
+                    using ITitleSource source = item.Extension == "wup" ? new WupTitleSource(item.FilePath) : new FolderTitleSource(item.FilePath);
                     item.TitleIdHex = source.TitleIdHex;
                     item.TitleVersion = source.TitleVersion;
-
-                    var meta = item.Extension == "wup"
-                        ? WiiUMetadataExtractor.ExtractFromTitleSource(source)
-                        : WiiUMetadataExtractor.ExtractFromFolder(item.FilePath);
+                    var meta = item.Extension == "wup" ? WiiUMetadataExtractor.ExtractFromTitleSource(source) : WiiUMetadataExtractor.ExtractFromFolder(item.FilePath);
 
                     ApplyMetadata(item, meta);
                 });
@@ -328,6 +322,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                         item.Status = "대기중";
                         item.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(0);
                         item.Status = "변환중";
 
                         ScrollToItemRequested?.Invoke(item);
@@ -337,6 +332,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                             ConvertOne(item, _cts.Token);
 
                             item.Progress = 100;
+                            MainViewModel.SetTaskbarProgress(100);
                             item.Status = "완료";
                             cnt++;
                         }
@@ -347,9 +343,9 @@ public class ConverterMainViewModel : ToolTabViewModel
                         catch (Exception ex)
                         {
                             AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
-
+                            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                             item.Status = "실패";
-                            item.Progress = 0;
+                            item.Progress = 0;                            
                         }
                     }
 
@@ -359,13 +355,14 @@ public class ConverterMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
-
+                MainViewModel.SetTaskbarProgress(0);
                 foreach (var item in FileItems.Where(i => i.Status is "대기중" or "변환중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";

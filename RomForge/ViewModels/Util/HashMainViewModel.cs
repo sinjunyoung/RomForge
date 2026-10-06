@@ -1,8 +1,8 @@
 ﻿using Common;
 using Common.WPF.ViewModels;
-using RomForge.Core.UI.Command;
 using RomForge.Core.Models;
 using RomForge.Core.Models.Util;
+using RomForge.Core.UI.Command;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 using System.Windows.Threading;
 
 namespace RomForge.ViewModels.Util;
@@ -169,6 +170,7 @@ public class HashMainViewModel : ToolTabViewModel
                     {
                         item.Status = "변환중";
                         item.Progress = 0;
+                        MainViewModel.SetTaskbarProgress(0);
                         item.HashResult = string.Empty;
                     });
 
@@ -190,6 +192,7 @@ public class HashMainViewModel : ToolTabViewModel
                         {
                             item.HashResult = formatted;
                             item.Progress = 100;
+                            MainViewModel.SetTaskbarProgress(100);
                             item.Status = "완료";
                         });
 
@@ -202,18 +205,20 @@ public class HashMainViewModel : ToolTabViewModel
                         PostUi(() => item.Status = "실패");
 
                         AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
+                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
                     }
                 });
 
                 FlushUiQueue();
 
                 AppendLog($"작업 완료 (성공: {successCount} / 전체: {FileItems.Count})", LogLevel.Highlight);
+                MainViewModel.SetTaskbarProgress(100);
             }
             catch (OperationCanceledException)
             {
                 FlushUiQueue();
-
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중" || i.Status == "대기중"))
                 {
@@ -224,8 +229,8 @@ public class HashMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 FlushUiQueue();
-
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {

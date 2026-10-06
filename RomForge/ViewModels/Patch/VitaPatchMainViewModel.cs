@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 using Vita.Core.Models;
 using Vita.Core.Services;
 
@@ -73,9 +72,9 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         get => _progressPct;
         set 
         { 
-            _progressPct = value; 
-            OnPropertyChanged();
+            _progressPct = value;
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();            
         }
     }
 
@@ -463,7 +462,7 @@ public class VitaPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             {
                 Log($"오류: {ex.Message}", LogLevel.Error);
                 SafeDeleteFile(zipFileName);
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }
             finally
             {

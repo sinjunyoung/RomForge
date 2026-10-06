@@ -75,7 +75,12 @@ public class RepackMainViewModel : ToolTabViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set { _progressPct = value; OnPropertyChanged(); }
+        set
+        {
+            _progressPct = value;
+            MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();
+        }
     }
 
     public string ProgressLabel
@@ -130,10 +135,7 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public RepackMainViewModel()
     {
-        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiURepackOutputPath)
-            ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output")
-            : AppConfig.Instance.OutputFolders.WiiURepackOutputPath;
-
+        OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.WiiURepackOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.WiiURepackOutputPath;
         RemoveSelectedCommand = new RelayCommand(_ => RemoveSelected(), _ => HasSelection);
         RemoveAllCommand = new RelayCommand(_ => Entries.Clear(), _ => Entries.Count > 0);
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
@@ -327,10 +329,12 @@ public class RepackMainViewModel : ToolTabViewModel
         catch (OperationCanceledException)
         {
             Log("작업이 취소되었습니다.", LogLevel.Error);
+            MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
             Log($"오류: {ex.Message}", LogLevel.Error);
+            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
         finally
         {

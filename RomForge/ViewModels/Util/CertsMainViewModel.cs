@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
@@ -183,6 +184,7 @@ public class CertsMainViewModel : ToolTabViewModel
             {
                 SelectedFile.Status = "추출중";
                 SelectedFile.Progress = 0;
+                MainViewModel.SetTaskbarProgress(0);
 
                 AppendLog($"certs.bin 추출 시작: {SelectedFile.FileName}", LogLevel.Highlight);
                 AppendLog($"오프셋: 0x{CertOffset:X4} / 크기: 0x{CertSize:X3} bytes");
@@ -193,6 +195,7 @@ public class CertsMainViewModel : ToolTabViewModel
                 if (success)
                 {
                     SelectedFile.Progress = 100;
+                    MainViewModel.SetTaskbarProgress(100);
                     SelectedFile.Status = "완료";
 
                     OnPropertyChanged(nameof(ProgressText));
@@ -201,6 +204,7 @@ public class CertsMainViewModel : ToolTabViewModel
                 else
                 {
                     SelectedFile.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
                     if (SelectedFile.Status == "추출중")
                         SelectedFile.Status = "실패";
                 }
@@ -208,6 +212,7 @@ public class CertsMainViewModel : ToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 if (SelectedFile.Status == "추출중")
                 {
@@ -218,6 +223,7 @@ public class CertsMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
 
                 SelectedFile.Status = "실패";
             }
@@ -241,6 +247,7 @@ public class CertsMainViewModel : ToolTabViewModel
             {
                 AppendLog($"[실패] 파일 크기가 너무 작습니다. (필요: 0x{CertOffset + CertSize:X}바이트, 실제: 0x{fs.Length:X}바이트)", LogLevel.Error);
                 item.Status = "실패";
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
 
                 return false;
             }
@@ -265,7 +272,8 @@ public class CertsMainViewModel : ToolTabViewModel
             if (totalRead != CertSize)
             {
                 AppendLog($"[실패] 읽기 불완전: 예상 0x{CertSize:X}바이트, 실제 0x{totalRead:X}바이트", LogLevel.Error);
-                item.Status = "실패";
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                item.Status = "실패";                
 
                 return false;
             }
@@ -274,6 +282,7 @@ public class CertsMainViewModel : ToolTabViewModel
 
             File.WriteAllBytes(OutputPath, buffer);
             AppendLog($"[성공] {totalRead:N0} bytes → {OutputFileName}");
+            MainViewModel.SetTaskbarProgress(100);
 
             return true;
         }
@@ -284,6 +293,7 @@ public class CertsMainViewModel : ToolTabViewModel
         catch (Exception ex)
         {
             AppendLog($"[실패] 추출 중 에러: {ex.Message}", LogLevel.Error);
+            MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
 
             return false;
         }

@@ -14,7 +14,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Patch;
 
@@ -169,9 +168,9 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         get => _progressPct;
         set 
         { 
-            _progressPct = value; 
-            OnPropertyChanged();
+            _progressPct = value;
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();            
         }
     }
 
@@ -410,7 +409,6 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             Log($"패치 취소: {SourcePath}", LogLevel.Error);
             CleanupTask();
-            MainViewModel.SetTaskbarProgress(0);
 
             if (outputPath is not null)
                 orchestrator.Cleanup(outputPath);
@@ -419,7 +417,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             Log($"패치 실패: {ex.Message}", LogLevel.Error);
             CleanupTask();
-            MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
             if (outputPath is not null)
                 orchestrator.Cleanup(outputPath);

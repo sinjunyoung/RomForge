@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
@@ -144,6 +145,7 @@ public class CueMainViewModel : ToolTabViewModel
 
                     item.Status = "대기중";
                     item.Progress = 0;
+                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "변환중";
 
                     ScrollToItemRequested?.Invoke(item);
@@ -153,23 +155,26 @@ public class CueMainViewModel : ToolTabViewModel
                     if (success)
                     {
                         item.Progress = 100;
+                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         successCount++;
                     }
                     else
                     {
                         item.Progress = 0;
-
+                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
                         if (item.Status == "변환중")
                             item.Status = "실패";
                     }
                 }
 
                 AppendLog($"작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Highlight);
+                MainViewModel.SetTaskbarProgress(100);
             }
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
                 {
@@ -180,6 +185,7 @@ public class CueMainViewModel : ToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";

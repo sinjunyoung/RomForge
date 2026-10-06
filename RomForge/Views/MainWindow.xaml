@@ -164,7 +164,12 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="복사" Click="CopyLog_Click">
+                        <MenuItem Header="로그 비우기" Click="ClearLog_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="로그 복사" Click="CopyLog_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Copy.png" Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </MenuItem.Icon>

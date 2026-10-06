@@ -125,8 +125,8 @@ public class RepackMainViewModel : ToolTabViewModel
         set
         {
             _progressPct = value;
-            OnPropertyChanged();
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();            
         }
     }
 

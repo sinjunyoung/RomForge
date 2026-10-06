@@ -62,7 +62,12 @@ public class PackingMainViewModel : ToolTabViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set { _progressPct = value; OnPropertyChanged(); }
+        set
+        {
+            _progressPct = value;
+            MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();
+        }
     }
 
     public string ProgressLabel
@@ -437,11 +442,13 @@ public class PackingMainViewModel : ToolTabViewModel
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 CleanupTask();
+                MainViewModel.SetTaskbarProgress(0);
                 TryDeleteFileAndFolder(plan.TargetOutputPath, plan.GameDirectory);
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: [{gameTitle}] {ex.Message}", LogLevel.Error);
+                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 CleanupTask();
                 TryDeleteFileAndFolder(plan.TargetOutputPath, plan.GameDirectory);
             }
@@ -460,7 +467,6 @@ public class PackingMainViewModel : ToolTabViewModel
 
     private void CleanupTask()
     {
-        ProgressPct = 0;
         ProgressLabel = string.Empty;
         ProgressPercent = "0%";
         ProgressTime = string.Empty;

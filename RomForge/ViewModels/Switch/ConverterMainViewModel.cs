@@ -153,7 +153,6 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                     item.Status = "변환중";
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -170,9 +169,9 @@ public class ConverterMainViewModel : ToolTabViewModel
                     try
                     {
                         await ConvertItemAsync(item, progress, Log, _cts.Token);
+                        MainViewModel.SetTaskbarProgress(100);
 
                         item.Progress = 100;
-                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
                         cnt++;
                     }
@@ -183,16 +182,13 @@ public class ConverterMainViewModel : ToolTabViewModel
                     catch (Exception ex)
                     {
                         AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
+                        MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                         item.Status = "실패";
-                        item.Progress = 0;
+                        item.Progress = 0;                        
                     }
                 }
 
-                AppendLog(
-                    cnt > 0
-                        ? $"총 {cnt}개의 작업을 성공적으로 완료했습니다."
-                        : "성공한 작업이 없습니다.",
-                    cnt > 0 ? LogLevel.Ok : LogLevel.Error);
+                AppendLog(cnt > 0 ? $"총 {cnt}개의 작업을 성공적으로 완료했습니다." : "성공한 작업이 없습니다.", cnt > 0 ? LogLevel.Ok : LogLevel.Error);
             }
             catch (OperationCanceledException)
             {

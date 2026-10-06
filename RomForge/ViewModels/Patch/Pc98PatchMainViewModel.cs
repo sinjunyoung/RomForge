@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Patch;
 
@@ -57,8 +56,8 @@ public class Pc98PatchMainViewModel : ToolTabViewModel, IPatchViewModel
         set
         {
             _progressPct = value;
-            OnPropertyChanged();
             MainViewModel.SetTaskbarProgress(_progressPct);
+            OnPropertyChanged();            
         }
     }
 
@@ -120,7 +119,7 @@ public class Pc98PatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             TryDeleteIncompleteOutput(outputPath);
             Log($"패치 실패: {ex.Message}", LogLevel.Error);
-            MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+            MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
         finally
         {
