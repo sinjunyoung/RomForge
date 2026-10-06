@@ -269,7 +269,7 @@ public static class WiiIsoRebuilder
                 throw new InvalidDataException("게임 파티션을 찾을 수 없습니다.");
 
             plans.Sort((a, b) => a.Spec.DataStart.CompareTo(b.Spec.DataStart));
-            result = new WiiPatchResult(replacements.Count, plans[0].Plan.Replaced, plans[0].Plan.Missing);
+            result = new WiiPatchResult(plans[0].Plan.Entries);
 
             using var handle = SparseFile.Create(outputPath, length);
             var sink = new FileIsoSink(handle);

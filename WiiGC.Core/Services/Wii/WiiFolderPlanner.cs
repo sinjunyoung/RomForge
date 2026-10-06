@@ -46,26 +46,22 @@ internal static class WiiFolderPlanner
             throw new InvalidDataException("apploader가 DOL 위치와 겹치거나 boot.bin의 DOL 위치가 올바르지 않습니다.");
 
         var files = CollectFiles(filesRoot);
-        int replaced = 0;
-        var missing = new List<string>();
+        var entries = new List<WiiPatchEntry>();
 
         if (overlay != null)
         {
             foreach (var (discPath, filePath) in overlay)
             {
-                if (files.ContainsKey(discPath))
-                {
+                bool found = files.ContainsKey(discPath);
+
+                if (found)
                     files[discPath] = filePath;
-                    replaced++;
-                }
-                else
-                    missing.Add(discPath);
+
+                entries.Add(new WiiPatchEntry(discPath, found));
             }
 
-            if (missing.Count > 0 && missing.Count == overlay.Count)
-                throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {missing.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", missing.Take(3))}");
-
-            missing.Sort(StringComparer.OrdinalIgnoreCase);
+            if (entries.Count > 0 && entries.All(e => !e.Applied))
+                throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {entries.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", entries.Take(3).Select(e => e.Path))}");
         }
 
         if (files.Count == 0)
@@ -141,7 +137,7 @@ internal static class WiiFolderPlanner
 
         long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
 
-        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, replaced, missing);
+        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, entries);
     }
 
     private static Dictionary<string, string> CollectFiles(string filesRoot)

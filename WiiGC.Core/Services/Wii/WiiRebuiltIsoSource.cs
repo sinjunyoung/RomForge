@@ -40,7 +40,7 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
         {
             source.Plan(replacements);
 
-            source.Result = new WiiPatchResult(replacements.Count, source._targets[0].Plan.Replaced, source._targets[0].Plan.Missing);
+            source.Result = new WiiPatchResult(source._targets[0].Plan.Entries);
 
             source.Prepare(progress, ct);
 
@@ -65,8 +65,11 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
         {
             baseSource = WiiFolderBaseSource.Create(folder, info, plan.DataSize);
             source = new WiiRebuiltIsoSource(baseSource, true);
+
             source._targets.Add(new Target(0, baseSource.CreateSpec(plan.DataSize), plan));
-            source.Result = new WiiPatchResult(overlay?.Count ?? 0, plan.Replaced, plan.Missing);
+
+            source.Result = new WiiPatchResult(plan.Entries);
+
             source.Prepare(progress, ct);
 
             return source;

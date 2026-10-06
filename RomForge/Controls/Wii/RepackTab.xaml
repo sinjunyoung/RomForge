@@ -1,0 +1,193 @@
+﻿<UserControl x:Class="RomForge.Controls.Wii.RepackTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
+             mc:Ignorable="d" 
+             d:DesignHeight="580" d:DesignWidth="800">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="5,5,5,10">
+            <TextBlock Text="원본 디스크" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+            <Grid Height="36">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtRom_Drop">
+                    <Grid>
+                        <TextBox Text="{Binding InputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                        <TextBlock Text="Wii 디스크(.iso, .wbfs, .rvz, .wia)를 드래그&amp;드롭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                    </Grid>
+                </Border>
+                <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseInputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">
+                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                </Button>
+            </Grid>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="5,0,0,0">
+                <TextBlock Text="Riivolution 패치 (폴더 or zip,7z,xml)" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                <Grid Height="36">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" AllowDrop="True" PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtPatch_Drop">
+                        <Grid>
+                            <TextBox x:Name="txtPatch" Text="{Binding PatchPath, UpdateSourceTrigger=LostFocus}" IsEnabled="{Binding IsIdle}" KeyDown="TxtPatch_KeyDown" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                            <TextBlock Text="패치 폴더 또는 zip/7z/xml을 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0" IsHitTestVisible="False"/>
+                        </Grid>
+                    </Border>
+                    <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchFolderCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" ToolTip="패치 폴더 선택">
+                        <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                    <Button Grid.Column="2" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowsePatchFileCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,5,0" ToolTip="zip / 7z / xml 선택">
+                        <Image Source="/Assets/Images/ZipFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Margin="5,0,5,0">
+                <TextBlock Text="작업 폴더" FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,0,5"/>
+                <Grid Height="36">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Margin="0,0,5,0">
+                        <Grid>
+                            <TextBox Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"/>
+                            <TextBlock Text="작업 폴더를 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+                    <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}">
+                        <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" Margin="5,0,5,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <core:IconButton Grid.Column="0" DefaultText="언팩" DefaultIcon="/Assets/Images/Unpack.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
+            <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="리팩 (폴더 기반)" DefaultIcon="/Assets/Images/Repack.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
+            <core:IconButton Grid.Column="2" Margin="5,0,0,0" DefaultText="언팩 + 리팩 (스트리밍 기반)" DefaultIcon="/Assets/Images/Run.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
+        </Grid>
+
+        <Grid Grid.Row="3" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Margin="5,0,0,0" VerticalAlignment="Top" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding GameInfoVisibility}">
+                <Grid Margin="12,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Image Grid.Column="0" Width="56" Height="56" Margin="0,0,12,0" VerticalAlignment="Center" Source="{Binding GameIcon}" RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding GameInfo.Title}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding GameInfo.Publisher}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding GameInfo.IdText}" Foreground="#555570" FontSize="11" Margin="0,3,0,0"/>
+                    </StackPanel>
+
+                    <Image Grid.Column="2" Width="24" Height="24" Margin="12,0,0,0" VerticalAlignment="Center" Source="{Binding GameInfo.RegionKey, Converter={StaticResource RegionToImageConverter}}" ToolTip="{Binding GameInfo.Region}"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Margin="5,0,5,0" VerticalAlignment="Top" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding PatchInfoVisibility}">
+                <StackPanel Margin="12,10">
+                    <TextBlock Text="패치 정보" Foreground="#8888A8" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,6"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="4" Padding="8,2" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding PatchInfo.KindText}" Foreground="#8FA3FF" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="{Binding PatchInfo.XmlName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+
+                    <TextBlock Text="{Binding PatchInfo.TargetText}" Foreground="#8888A8" FontSize="11" Margin="0,6,0,0"/>
+                    <TextBlock Text="{Binding PatchInfo.FileCountText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
+                    <TextBlock Text="{Binding PatchInfo.WarningText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
+
+                    <TextBlock Text="{Binding PatchInfo.StatusText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#4CAF50"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PatchInfo.IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="#FF6B6B"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="4" Orientation="Horizontal" Margin="10,0,5,5">
+            <TextBlock Text="출력 포맷:" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
+            <RadioButton Content="ISO" GroupName="WiiOutputFormat" IsChecked="{Binding IsIsoFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
+            <RadioButton Content="WBFS ( USB 로더 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsWbfsFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
+            <RadioButton Content="RVZ ( Dolphin 전용 압축 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsRvzFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
+        </StackPanel>
+
+        <Border Grid.Row="5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
+            <Grid Height="28">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="140"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding ProgressPercent}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Margin="0,0,10,0" Text="{Binding ProgressTime}" Foreground="#4CAF50" FontSize="11" VerticalAlignment="Center"/>
+
+                <Grid Grid.Column="3" Height="10" VerticalAlignment="Center">
+                    <Border Background="#25FFFFFF" CornerRadius="5"/>
+                    <Border x:Name="barTrack" CornerRadius="5" ClipToBounds="True">
+                        <Border Background="#4CAF50" CornerRadius="5" HorizontalAlignment="Left">
+                            <Border.Width>
+                                <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
+                                    <Binding Path="ActualWidth" ElementName="barTrack"/>
+                                    <Binding Path="ProgressPct"/>
+                                </MultiBinding>
+                            </Border.Width>
+                        </Border>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

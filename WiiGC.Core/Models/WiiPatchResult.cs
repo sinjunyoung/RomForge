@@ -1,6 +1,12 @@
 ﻿namespace WiiGC.Core.Models;
 
-public sealed record WiiPatchResult(int Total, int Applied, IReadOnlyList<string> Skipped)
+public sealed record WiiPatchResult(IReadOnlyList<WiiPatchEntry> Entries)
 {
-    public static WiiPatchResult Empty { get; } = new(0, 0, []);
+    public static WiiPatchResult Empty { get; } = new([]);
+
+    public int Total => Entries.Count;
+
+    public int Applied => Entries.Count(e => e.Applied);
+
+    public IReadOnlyList<string> Skipped => [.. Entries.Where(e => !e.Applied).Select(e => e.Path)];
 }
