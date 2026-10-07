@@ -40,6 +40,8 @@ internal sealed class RvzFile
 
     public required GroupEntry[] Groups { get; init; }
 
+    public bool IsGroupCompressed(GroupEntry group) => IsRvz ? group.IsCompressed : Compression != RvzCompressionType.None;
+
     public static RvzFile Open(SafeFileHandle handle)
     {
         long fileLength = RandomAccess.GetLength(handle);

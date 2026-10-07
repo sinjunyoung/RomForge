@@ -521,7 +521,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         context.EnsureInput(compressedSize);
         RvzIo.ReadExactly(_handle, context.Input.AsSpan(0, compressedSize), fileOffset);
 
-        bool compressed = _file.IsRvz ? group.IsCompressed : _file.Compression != RvzCompressionType.None;
+        bool compressed = _file.IsGroupCompressed(group);
         uint packedSize = _file.IsRvz ? group.RvzPackedSize : 0;
 
         return context.Decoder.Decode(context.Input.AsSpan(0, compressedSize), compressed, exceptionLists, dataSize, packedSize, junkOffset);

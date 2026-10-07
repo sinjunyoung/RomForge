@@ -181,7 +181,11 @@ internal sealed class RvzWiiWriter
 
             var context = idle.Pop();
 
-            pending.Enqueue((Task.Run(() => work(context), CancellationToken.None), context, weight));
+            pending.Enqueue((Task.Run(() =>
+            {
+                ct.ThrowIfCancellationRequested();
+                return work(context);
+            }, CancellationToken.None), context, weight));
         }
 
         try
@@ -241,7 +245,7 @@ internal sealed class RvzWiiWriter
             {
                 try
                 {
-                    entry.Task.Wait(ct);
+                    entry.Task.Wait(CancellationToken.None);
                 }
                 catch { }
             }

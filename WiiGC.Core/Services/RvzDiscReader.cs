@@ -119,6 +119,7 @@ internal sealed class RvzDiscReader : IDisposable
         }
 
         regions.Sort((a, b) => a.Start.CompareTo(b.Start));
+
         return regions;
     }
 
@@ -227,7 +228,7 @@ internal sealed class RvzDiscReader : IDisposable
             {
                 try
                 {
-                    entry.Task.Wait(ct);
+                    entry.Task.Wait(CancellationToken.None);
                 }
                 catch { }
             }
@@ -408,7 +409,7 @@ internal sealed class RvzDiscReader : IDisposable
         context.EnsureInput(compressedSize);
         RvzIo.ReadExactly(_handle, context.Input.AsSpan(0, compressedSize), fileOffset);
 
-        context.CachedChunk = context.Decoder.Decode(context.Input.AsSpan(0, compressedSize), group.IsCompressed, exceptionLists, dataSize, group.RvzPackedSize, junkOffset);
+        context.CachedChunk = context.Decoder.Decode(context.Input.AsSpan(0, compressedSize), _file.IsGroupCompressed(group), exceptionLists, dataSize, group.RvzPackedSize, junkOffset);
         context.CachedGroupIndex = totalGroupIndex;
 
         return context.CachedChunk;

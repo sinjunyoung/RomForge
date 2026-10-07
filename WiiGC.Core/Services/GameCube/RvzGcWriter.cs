@@ -155,7 +155,7 @@ internal sealed class RvzGcWriter
             {
                 try
                 {
-                    entry.Task.Wait(ct);
+                    entry.Task.Wait(CancellationToken.None);
                 }
                 catch { }
             }

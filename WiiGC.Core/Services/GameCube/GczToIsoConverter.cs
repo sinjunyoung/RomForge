@@ -95,7 +95,7 @@ public static class GczToIsoConverter
             {
                 try
                 {
-                    entry.Task.Wait(ct);
+                    entry.Task.Wait(CancellationToken.None);
                 }
                 catch { }
             }
