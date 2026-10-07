@@ -21,7 +21,7 @@
             <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" AllowDrop="True" Drop="NormalSourceDrop_Drop" MouseLeftButtonDown="NormalSourceDrop_Click">
                 <Border.Style>
                     <Style TargetType="Border" BasedOn="{StaticResource DropZone}">
-                        <Setter Property="Height" Value="50"/>
+                        <Setter Property="Height" Value="65"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding PatchVM.NormalVM.IsMultiPatch}" Value="True">
                                 <Setter Property="Height" Value="Auto"/>
@@ -43,7 +43,7 @@
                 </Grid>
             </Border>
             <Grid Grid.Column="2" IsEnabled="{Binding IsIdle}">
-                <Border Height="50" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
+                <Border Height="65" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Style="{StaticResource DropZone}" AllowDrop="True" Drop="NormalPatchDrop_Drop" MouseLeftButtonDown="NormalPatchDrop_Click">
                     <Grid Margin="14,0">
                         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                             <Grid.ColumnDefinitions>

@@ -3,7 +3,6 @@ using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services;
 
 namespace WiiGC.Core.Services.Wii;
 

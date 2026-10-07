@@ -53,7 +53,14 @@ internal static class WiiPartitionPlanner
             bool found = byPath.TryGetValue(discPath, out var node);
 
             if (found)
-                external[node!] = (filePath, new FileInfo(filePath).Length);
+            {
+                long length = new FileInfo(filePath).Length;
+
+                if (length > uint.MaxValue)
+                    throw new InvalidDataException($"파일이 너무 큽니다 (4GB 미만이어야 합니다): {filePath}");
+
+                external[node!] = (filePath, length);
+            }
 
             resolved.Add((discPath, found ? node : null));
         }

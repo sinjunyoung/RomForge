@@ -50,16 +50,6 @@ public partial class RepackTab : UserControl
             ViewModel.PatchPath = path;
     }
 
-    private void TxtPatch_KeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key != Key.Enter)
-            return;
-
-        txtPatch.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
-
-        e.Handled = true;
-    }
-
     private async void BtnUnpack_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.IsLocked)
