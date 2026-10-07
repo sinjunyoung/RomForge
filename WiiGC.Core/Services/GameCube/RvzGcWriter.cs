@@ -35,9 +35,7 @@ internal sealed class RvzGcWriter
         if (compressionLevel < ZstdSharp.Compressor.MinCompressionLevel || compressionLevel > ZstdSharp.Compressor.MaxCompressionLevel)
             throw new ArgumentOutOfRangeException(nameof(compressionLevel), "zstd 압축 레벨이 범위를 벗어났습니다.");
 
-        bool powerOfTwo = (chunkSize & (chunkSize - 1)) == 0;
-
-        if ((chunkSize < WiiLayout.BlockTotalSize || !powerOfTwo) && chunkSize % WiiLayout.GroupTotalSize != 0)
+        if (!RvzFile.IsValidChunkSize(chunkSize))
             throw new ArgumentOutOfRangeException(nameof(chunkSize), "RVZ 청크 크기가 올바르지 않습니다.");
 
         _input = input;

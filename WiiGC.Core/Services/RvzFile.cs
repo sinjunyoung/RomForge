@@ -40,6 +40,16 @@ internal sealed class RvzFile
 
     public required GroupEntry[] Groups { get; init; }
 
+    public static bool IsValidChunkSize(long chunkSize)
+    {
+        if (chunkSize <= 0)
+            return false;
+
+        bool powerOfTwo = (chunkSize & (chunkSize - 1)) == 0;
+
+        return (powerOfTwo && chunkSize >= WiiLayout.BlockTotalSize) || chunkSize % WiiLayout.GroupTotalSize == 0;
+    }
+
     public bool IsGroupCompressed(GroupEntry group) => IsRvz ? group.IsCompressed : Compression != RvzCompressionType.None;
 
     public static RvzFile Open(SafeFileHandle handle)
@@ -116,9 +126,8 @@ internal sealed class RvzFile
             throw new InvalidDataException("RVZ/WIA 압축기 데이터 크기가 올바르지 않습니다.");
 
         byte[] compressorData = h2.AsSpan(213, compressorDataSize).ToArray();
-        bool powerOfTwo = (chunkSize & (chunkSize - 1)) == 0;
 
-        if ((chunkSize < WiiLayout.BlockTotalSize || !powerOfTwo) && chunkSize % WiiLayout.GroupTotalSize != 0)
+        if (!IsValidChunkSize(chunkSize))
             throw new InvalidDataException($"RVZ/WIA 청크 크기가 올바르지 않습니다: {chunkSize}");
 
         if (compression > (uint)RvzCompressionType.Zstd || compression == (uint)RvzCompressionType.Purge)

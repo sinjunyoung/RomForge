@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using WiiGC.Core.Models;
+using WiiGC.Core.Services.Wii;
 
 namespace WiiGC.Core.Services;
 
@@ -27,44 +28,9 @@ internal sealed class WiiGroupEncryptor : IDisposable
             _key = (byte[])key.Clone();
         }
 
-        ComputeHashes(decrypted);
+        WiiHashTree.ComputeHashes(decrypted, _hashes);
         ApplyExceptions(exceptions);
         EncryptBlocks(decrypted, output);
-    }
-
-    private void ComputeHashes(byte[] decrypted)
-    {
-        byte[] hashes = _hashes;
-
-        Array.Clear(hashes);
-
-        for (int i = 0; i < WiiLayout.BlocksPerGroup; i++)
-        {
-            var block = decrypted.AsSpan(i * WiiLayout.BlockDataSize, WiiLayout.BlockDataSize);
-            var header = hashes.AsSpan(i * WiiLayout.BlockHeaderSize, WiiLayout.BlockHeaderSize);
-
-            for (int j = 0; j < WiiLayout.H0Count; j++)
-                SHA1.HashData(block.Slice(j * 0x400, 0x400), header.Slice(j * WiiLayout.HashSize, WiiLayout.HashSize));
-        }
-
-        for (int sub = 0; sub < 8; sub++)
-        {
-            int firstBlock = sub * 8;
-            var h1 = hashes.AsSpan(firstBlock * WiiLayout.BlockHeaderSize + WiiLayout.H1Offset, WiiLayout.H1Bytes);
-
-            for (int k = 0; k < 8; k++)
-                SHA1.HashData(hashes.AsSpan((firstBlock + k) * WiiLayout.BlockHeaderSize, WiiLayout.H0Bytes), h1.Slice(k * WiiLayout.HashSize, WiiLayout.HashSize));
-
-            for (int k = 1; k < 8; k++)
-                h1.CopyTo(hashes.AsSpan((firstBlock + k) * WiiLayout.BlockHeaderSize + WiiLayout.H1Offset, WiiLayout.H1Bytes));
-
-            SHA1.HashData(h1, hashes.AsSpan(WiiLayout.H2Offset + sub * WiiLayout.HashSize, WiiLayout.HashSize));
-        }
-
-        var h2 = hashes.AsSpan(WiiLayout.H2Offset, WiiLayout.H2Bytes);
-
-        for (int i = 1; i < WiiLayout.BlocksPerGroup; i++)
-            h2.CopyTo(hashes.AsSpan(i * WiiLayout.BlockHeaderSize + WiiLayout.H2Offset, WiiLayout.H2Bytes));
     }
 
     private void ApplyExceptions(IReadOnlyList<HashException> exceptions)

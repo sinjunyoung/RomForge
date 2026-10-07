@@ -20,7 +20,7 @@ internal static class WiiTicket
         int index = ticket[CommonKeyIndexOffset];
 
         if (index >= WiiKeys.CommonKeys.Length)
-            index = 0;
+            throw new NotSupportedException($"지원하지 않는 Wii 공용 키 인덱스입니다 ({index}).");
 
         Span<byte> iv = stackalloc byte[16];
 

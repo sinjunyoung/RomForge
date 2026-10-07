@@ -139,6 +139,9 @@ public class RepackMainViewModel : ToolTabViewModel
             OnPropertyChanged(nameof(OutputHintVisibility));
 
             AppConfig.Instance.OutputFolders.WiiOutputPath = value;
+
+            if (string.IsNullOrWhiteSpace(InputPath))
+                _ = RefreshUnpackedFolderAsync();
         }
     }
 
@@ -246,6 +249,9 @@ public class RepackMainViewModel : ToolTabViewModel
             if (e.PropertyName == nameof(IsLocked))
                 NotifyButtonStates();
         };
+
+        if (string.IsNullOrWhiteSpace(InputPath))
+            _ = RefreshUnpackedFolderAsync();
     }
 
     public void Cancel()
@@ -357,7 +363,30 @@ public class RepackMainViewModel : ToolTabViewModel
     private async Task ProduceAsync(BuildMode mode, string unpackedPath, Stopwatch sw, List<string> tempOutputs, CancellationToken ct)
     {
         bool fromFolder = mode == BuildMode.RebuildOnly;
-        string name = !string.IsNullOrWhiteSpace(InputPath) ? Path.GetFileNameWithoutExtension(InputPath) : WiiFolderInfo.Read(unpackedPath).GameId;
+        string title = string.Empty;
+        string gameId = string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(InputPath))
+        {
+            title = _disc?.Title?.Trim() ?? string.Empty;
+            gameId = _disc?.GameId?.Trim() ?? string.Empty;
+        }
+        else
+        {
+            var folderInfo = WiiFolderInfo.TryRead(unpackedPath);
+            title = folderInfo?.Title?.Trim() ?? string.Empty;
+            gameId = folderInfo?.GameId?.Trim() ?? string.Empty;
+        }
+
+        string fallbackName = !string.IsNullOrWhiteSpace(InputPath) ? Path.GetFileNameWithoutExtension(InputPath) : "WiiGame";
+        string name = (!string.IsNullOrEmpty(title), !string.IsNullOrEmpty(gameId)) switch
+        {
+            (true, true) => $"{title} [{gameId}]",
+            (true, false) => title,
+            (false, true) => gameId,
+            _ => fallbackName
+        };
+
         string baseName = Path.Combine(OutputPath, name + "_Repack");
         string finalPath = Utils.GetUniqueFilePath(baseName + GetExtension(OutputFormat));
         string target = Path.GetFileName(finalPath);
@@ -378,11 +407,11 @@ public class RepackMainViewModel : ToolTabViewModel
         tempOutputs.Add(finalPath);
 
         SetProgress(0, prepareLabel, sw);
-
-        Log($"리팩을 시작합니다. → {target}", LogLevel.Ok);
-
+        
         if (fromFolder)
         {
+            Log($"리팩 시작: {target}", LogLevel.Highlight);
+
             result = await Task.Run(() =>
             {
                 return format switch
@@ -395,8 +424,10 @@ public class RepackMainViewModel : ToolTabViewModel
         }
         else
         {
+            Log($"스트리밍 기반 리팩 시작: {target}", LogLevel.Highlight);
+
             string source = InputPath;
-            IReadOnlyDictionary<string, string> replacements = _patch!.Replacements;
+            IReadOnlyDictionary<string, string> replacements = overlay ?? new Dictionary<string, string>();
 
             if (format == WiiOutputFormat.Iso)
             {
@@ -724,25 +755,66 @@ public class RepackMainViewModel : ToolTabViewModel
 
         bool hasPatchPath = !string.IsNullOrWhiteSpace(PatchPath);
 
-        if (mode == BuildMode.FullProcess && !hasPatchPath)
+        if (hasPatchPath)
         {
-            error = "Riivolution 패치(폴더, zip, 7z, xml)를 지정하세요.";
-            return false;
-        }
+            if (_workspace == null || _patch == null)
+            {
+                error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
+                return false;
+            }
 
-        if (hasPatchPath && (_workspace == null || _patch == null))
-        {
-            error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
-            return false;
-        }
-
-        if (_patch != null && gameId != null && !_patch.MatchesDisc(gameId))
-        {
-            error = $"패치 대상 게임 ID({string.Join(", ", _patch.GameIds)})와 디스크({gameId})가 맞지 않습니다.";
-            return false;
+            if (gameId != null && !_patch.MatchesDisc(gameId))
+            {
+                error = $"패치 대상 게임 ID({string.Join(", ", _patch.GameIds)})와 디스크({gameId})가 맞지 않습니다.";
+                return false;
+            }
         }
 
         return true;
+    }
+
+    private async Task RefreshUnpackedFolderAsync()
+    {
+        int version = ++_discVersion;
+        string unpackedPath = Path.Combine(OutputPath, "unpacked");
+
+        if (!Directory.Exists(unpackedPath))
+        {
+            if (string.IsNullOrWhiteSpace(InputPath))
+            {
+                _disc = null;
+                GameInfo = null;
+                GameIcon = null;
+                RebuildPatchDisplay();
+            }
+
+            return;
+        }
+
+        WiiFolderInfo? folderInfo = null;
+
+        try
+        {
+            folderInfo = await Task.Run(() => WiiFolderInfo.TryRead(unpackedPath));
+        }
+        catch (Exception ex)
+        {
+            if (version == _discVersion)
+                Log($"언팩 폴더 정보를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+        }
+
+        if (version != _discVersion || folderInfo == null)
+            return;
+
+        _disc = new WiiDiscInfo(folderInfo.GameId, folderInfo.Title, 0, folderInfo.Version, DiscContainerFormat.PlainDisc, 0, 0);
+
+        GameInfo = WiiGameDisplay.From(_disc);
+        GameIcon = null;
+
+        RebuildPatchDisplay();
+
+        if (!string.IsNullOrEmpty(folderInfo.GameId))
+            _ = LoadIconAsync(folderInfo.GameId, version);
     }
 
     private static string GetExtension(WiiOutputFormat format) => format switch

@@ -12,18 +12,28 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
     private sealed class Context(RvzCompressionType compression, byte[] compressorData) : IDisposable
     {
         public RvzChunkDecoder Decoder { get; } = new RvzChunkDecoder(compression, compressorData);
+
         public WiiGroupEncryptor Encryptor { get; } = new();
+
         public List<HashException> Exceptions { get; } = [];
+
         public byte[] Decrypted { get; } = new byte[WiiLayout.GroupDataSize];
+
         public byte[] Encrypted { get; } = new byte[WiiLayout.GroupTotalSize];
+
         public byte[] Input = [];
+
         public byte[] Output = [];
+
         public long CachedChunkIndex = -1;
+
         public CachedChunkData CachedChunk;
+
         public bool HasCachedChunk;
+
         public int CachedPartitionIndex = -1;
+
         public long CachedHashGroupStart = -1;
-        public int CachedDataEntryIndex = -1;
 
         public void EnsureInput(int size)
         {
@@ -352,7 +362,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         long offset = groupStartSector * WiiLayout.BlockDataSize;
         long remaining = (long)validSectors * WiiLayout.BlockDataSize;
         int position = 0;
-        int startEntry = context.CachedPartitionIndex == partition.GetHashCode() && context.CachedDataEntryIndex >= 0 ? Math.Min(context.CachedDataEntryIndex, partition.DataEntries.Length - 1) : FindPartitionDataEntry(partition, groupStartSector);
+        int startEntry = FindPartitionDataEntry(partition, groupStartSector);
 
         if (startEntry < 0)
             throw new InvalidDataException("WIA 파티션 데이터 엔트리를 찾을 수 없습니다.");
@@ -374,8 +384,6 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
                 throw new InvalidDataException("WIA 데이터 영역 사이에 빈 구간이 있습니다.");
 
             ReadFromGroups(context, ref offset, ref remaining, context.Decrypted, ref position, _partitionChunkSize, WiiLayout.BlockDataSize, dataOffset, dataSize, entry.GroupIndex, entry.GroupCount, _partitionExceptionLists, context.Exceptions);
-
-            context.CachedDataEntryIndex = i;
         }
 
         if (remaining != 0)

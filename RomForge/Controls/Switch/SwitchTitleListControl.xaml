@@ -64,12 +64,6 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="한글패치 취소" Click="MenuItem_RemovePatch_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Assets/Images/Cancel.png" Width="20" Height="20"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <Separator/>
                             <MenuItem Header="선택 삭제" Click="BtnRemoveFile_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
@@ -156,6 +150,11 @@
                                                     <MenuItem Header="압축파일 선택(zip/7z)..." Click="PatchMenu_SelectArchive_Click">
                                                         <MenuItem.Icon>
                                                             <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
+                                                        </MenuItem.Icon>
+                                                    </MenuItem>
+                                                    <MenuItem Header="선택 취소" Click="MenuItem_RemovePatch_Click">
+                                                        <MenuItem.Icon>
+                                                            <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
                                                 </ContextMenu>

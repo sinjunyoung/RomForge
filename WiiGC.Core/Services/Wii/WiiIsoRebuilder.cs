@@ -236,9 +236,6 @@ public static class WiiIsoRebuilder
 
     public static WiiPatchResult RebuildWithReplacements(string inputPath, string outputPath, IReadOnlyDictionary<string, string> replacements, Action<double>? progress = null, Action<WiiPatchEntry>? entryLog = null, CancellationToken ct = default)
     {
-        if (replacements.Count == 0)
-            throw new InvalidDataException("교체할 파일이 없습니다.");
-
         bool succeeded = false;
         WiiPatchResult? result = null;
         var readers = new List<WiiPartitionReader>();
