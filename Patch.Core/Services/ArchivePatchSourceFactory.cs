@@ -20,7 +20,7 @@ public static class ArchivePatchSourceFactory
     {
         int idx = path.IndexOf(ScopeSeparator, StringComparison.Ordinal);
 
-        return idx < 0 ? (path, "") : (path[..idx], path[(idx + ScopeSeparator.Length)..]);
+        return idx < 0 ? (path, string.Empty) : (path[..idx], path[(idx + ScopeSeparator.Length)..]);
     }
 
     public static string CombineScope(string archivePath, string scope) => string.IsNullOrEmpty(scope) ? archivePath : $"{archivePath}{ScopeSeparator}{scope}";

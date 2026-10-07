@@ -79,7 +79,7 @@ public class CertsMainViewModel : ToolTabViewModel
 
     public string ProgressStatus => SelectedFile == null ? "파일을 드래그&드롭하거나 선택하세요" : $"출력: {OutputPath}";
 
-    public string ProgressText => SelectedFile == null ? "" : $"{SelectedFile.Progress}%";
+    public string ProgressText => SelectedFile == null ? string.Empty : $"{SelectedFile.Progress}%";
 
     #endregion
 

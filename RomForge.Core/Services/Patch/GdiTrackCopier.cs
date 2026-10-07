@@ -77,9 +77,7 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
 
             foreach (var track in gdi.Tracks)
             {
-                string fileName = string.Equals(track.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase)
-                    ? newMainFileName
-                    : track.FileName;
+                string fileName = string.Equals(track.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase) ? newMainFileName : track.FileName;
 
                 string quotedFileName = fileName.Contains(' ') ? $"\"{fileName}\"" : fileName;
 

@@ -3,7 +3,7 @@
 public sealed class FstEntry
 {
     public bool IsDirectory;
-    public string Name = "";
+    public string Name = string.Empty;
     public int ParentDirIndex;
     public int DirEndIndex;
     public uint FileOffsetField;

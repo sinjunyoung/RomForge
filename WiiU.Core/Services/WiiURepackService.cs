@@ -46,7 +46,7 @@ public sealed class WiiURepackService
 
                         openArchives.Add(archive);
 
-                        string prefix = ArchivePatchFolderResolver.FindPatchRoot(archive.EntryPaths, PatchAnchors) ?? "";
+                        string prefix = ArchivePatchFolderResolver.FindPatchRoot(archive.EntryPaths, PatchAnchors) ?? string.Empty;
 
                         index = PatchFileIndex.Build(archive, prefix);
                     }
@@ -175,7 +175,7 @@ public sealed class WiiURepackService
     {
         int idx = path.LastIndexOf('/');
 
-        return idx < 0 ? "" : path[..idx];
+        return idx < 0 ? string.Empty : path[..idx];
     }
 
     private static void EnsureDirWritten(WuaWriter writer, string titleFolderName, string dirPath, HashSet<string> writtenDirs)

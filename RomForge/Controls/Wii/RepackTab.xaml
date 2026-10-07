@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" Height="65" Margin="5,0,0,0" AllowDrop="True" PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtRom_Drop">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" Height="65" Margin="5,0,0,0" AllowDrop="True" Cursor="Hand" PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtRom_Drop" PreviewMouseLeftButtonDown="TxtRom_Click">
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -32,7 +32,7 @@
                         <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding InputPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding InputPath}"/>
-                            <TextBlock Text="Wii 디스크(.iso, .wbfs, .rvz, .wia)를 드래그&amp;드롭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
+                            <TextBlock Text="Wii 디스크(.iso, .wbfs, .rvz, .wia)를 클릭하거나 드래그&amp;드롭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
                     <TextBlock Text="원본 디스크" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>

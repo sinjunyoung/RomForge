@@ -42,7 +42,7 @@ public class WiiUFileItem(string filePath) : ConvertibleFileItemBase(filePath, "
                 if (LooksLikeLoadiineFolder(FilePath))
                     return "loadiine";
 
-                return "";
+                return string.Empty;
             }
 
             return base.Extension;

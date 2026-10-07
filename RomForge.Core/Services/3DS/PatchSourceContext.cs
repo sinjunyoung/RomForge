@@ -75,7 +75,7 @@ public sealed class PatchSourceContext : IDisposable
 
         if (_archive != null)
         {
-            combined.Entries.AddRange(PatchFileIndex.BuildTopLevelOnly(_archive, "").Entries);
+            combined.Entries.AddRange(PatchFileIndex.BuildTopLevelOnly(_archive, string.Empty).Entries);
 
             string? exefsPrefix = ArchivePatchFolderResolver.FindSubDir(_archive.EntryPaths, "exefs");
 
@@ -126,7 +126,7 @@ public sealed class PatchSourceContext : IDisposable
         string trimmed = subDirPrefix.TrimEnd('/');
         int lastSlash = trimmed.LastIndexOf('/');
 
-        return lastSlash < 0 ? "" : trimmed[..(lastSlash + 1)];
+        return lastSlash < 0 ? string.Empty : trimmed[..(lastSlash + 1)];
     }
 
     private static string? FindFileParentPrefix(IReadOnlyList<string> entryPaths, string fileName)
@@ -142,7 +142,7 @@ public sealed class PatchSourceContext : IDisposable
             if (!string.Equals(name, fileName, StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            string parent = lastSlash < 0 ? "" : path[..(lastSlash + 1)];
+            string parent = lastSlash < 0 ? string.Empty : path[..(lastSlash + 1)];
             int depth = parent.Count(c => c == '/');
 
             if (depth < bestDepth)

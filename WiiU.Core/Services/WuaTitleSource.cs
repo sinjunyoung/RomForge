@@ -59,7 +59,7 @@ public sealed class WuaTitleSource : ITitleSource
 
     public IEnumerable<string> EnumerateFiles()
     {
-        string prefix = _rootPrefix.Length == 0 ? "" : _rootPrefix + "/";
+        string prefix = _rootPrefix.Length == 0 ? string.Empty : _rootPrefix + "/";
 
         foreach (var (path, _) in _reader.EnumerateFiles())
         {

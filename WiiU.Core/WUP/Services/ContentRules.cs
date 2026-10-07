@@ -36,7 +36,7 @@ namespace WiiU.Core.WUP.Services
 
         private class NestedContentRule : IContentRule
         {
-            private string pattern = "";
+            private string pattern = string.Empty;
             private ContentDetails? details = null;
             private bool contentPerMatch = false;
 

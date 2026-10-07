@@ -201,7 +201,7 @@ public sealed class RepackService()
             {
                 archive = ArchivePatchSourceFactory.Open(patchPath);
 
-                string prefix = ArchivePatchFolderResolver.FindPatchRoot(archive.EntryPaths, PatchAnchors) ?? "";
+                string prefix = ArchivePatchFolderResolver.FindPatchRoot(archive.EntryPaths, PatchAnchors) ?? string.Empty;
 
                 index = PatchFileIndex.Build(archive, prefix);
             }
@@ -299,7 +299,7 @@ public sealed class RepackService()
                 {
                     TitleRole.Update => "_update",
                     TitleRole.Dlc => "_dlc",
-                    _ => "",
+                    _ => string.Empty,
                 };
 
                 string destFolder = Utils.GetUniqueFilePath(Path.Combine(unpackedRoot, $"{source.TitleIdHex}_v{source.TitleVersion}{roleSuffix}"));

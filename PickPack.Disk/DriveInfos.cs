@@ -49,7 +49,7 @@ namespace PickPack.Disk
             foreach (ManagementObject disk in searcher.Get().Cast<ManagementObject>())
             {
                 int diskNumber = Convert.ToInt32(disk["Index"]);
-                string deviceId = disk["DeviceID"]?.ToString() ?? "";
+                string deviceId = disk["DeviceID"]?.ToString() ?? string.Empty;
                 string model = disk[nameof(Model)]?.ToString() ?? "Unknown";
                 long size = Convert.ToInt64(disk["Size"] ?? 0);
 
@@ -62,7 +62,7 @@ namespace PickPack.Disk
 
                     foreach (ManagementObject logical in logicalDisks.Cast<ManagementObject>())
                     {
-                        string letter = logical["DeviceID"]?.ToString() ?? "";
+                        string letter = logical["DeviceID"]?.ToString() ?? string.Empty;
 
                         if (removableLetters.Contains(letter))
                         {

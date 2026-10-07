@@ -213,7 +213,7 @@ public class Iso9660Builder(byte[] originalPvd, Iso9660Entry root)
 
     private static int DirRecordSize(string name, bool isSelf, bool isDir)
     {
-        int nameLen = isSelf ? 1 : Encoding.ASCII.GetByteCount(name + (isDir ? "" : ";1"));
+        int nameLen = isSelf ? 1 : Encoding.ASCII.GetByteCount(name + (isDir ? string.Empty : ";1"));
         int len = 33 + nameLen;
 
         if (len % 2 != 0)
@@ -249,7 +249,7 @@ public class Iso9660Builder(byte[] originalPvd, Iso9660Entry root)
 
     private static int WriteDirRecord(byte[] buffer, int pos, string name, uint lba, uint size, bool isDir)
     {
-        var nameBytes = name is "." or ".." ? [(byte)(name == "." ? 0x00 : 0x01)] : Encoding.ASCII.GetBytes(name + (isDir ? "" : ";1"));
+        var nameBytes = name is "." or ".." ? [(byte)(name == "." ? 0x00 : 0x01)] : Encoding.ASCII.GetBytes(name + (isDir ? string.Empty : ";1"));
         int recordLen = 33 + nameBytes.Length;
 
         if (recordLen % 2 != 0)

@@ -177,7 +177,7 @@ public class ConvertMainViewModel : ToolTabViewModel
 
     private static object? CreateItem(string path)
     {
-        var ext = Directory.Exists(path) ? "" : Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
+        var ext = Directory.Exists(path) ? string.Empty : Path.GetExtension(path).TrimStart('.').ToLowerInvariant();
 
         switch (ext)
         {
@@ -186,7 +186,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             case "nsz":
             case "xcz":
                 var sw = new ConverterFileItem(path);
-                return sw.SelectedTargetFormat == "" ? null : sw;
+                return sw.SelectedTargetFormat == string.Empty ? null : sw;
 
             case "cci":
             case "3ds":

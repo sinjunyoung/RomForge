@@ -50,6 +50,18 @@ public partial class RepackTab : UserControl
             ViewModel.PatchPath = path;
     }
 
+    private void TxtRom_Click(object sender, MouseButtonEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Filter = "Wii 디스크 파일|*.iso;*.wbfs;*.rvz;*.wia|모든 파일|*.*",
+            Title = "Wii 디스크 파일 선택"
+        };
+
+        if (dlg.ShowDialog() == true)
+            ViewModel.InputPath = dlg.FileName;
+    }
+
     private async void BtnUnpack_Click(object sender, RoutedEventArgs e)
     {
         if (ViewModel.IsLocked)

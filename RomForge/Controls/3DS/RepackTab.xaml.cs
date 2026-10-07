@@ -4,6 +4,7 @@ using RomForge.ViewModels._3DS;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace RomForge.Controls._3DS
 {
@@ -58,6 +59,18 @@ namespace RomForge.Controls._3DS
                 ViewModel.PatchPath = path;
 
             e.Handled = true;
+        }
+
+        private void TxtRom_Click(object sender, MouseButtonEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "3DS 롬 파일|*.3ds;*.cci;*.zcci;*.cia|모든 파일|*.*",
+                Title = "3DS 롬 파일 선택"
+            };
+
+            if (dlg.ShowDialog() == true)
+                ViewModel.InputPath = dlg.FileName;
         }
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)

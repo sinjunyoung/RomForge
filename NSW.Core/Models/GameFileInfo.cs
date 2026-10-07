@@ -4,7 +4,7 @@ public class GameFileInfo
 {
     public string Path { get; set; } = string.Empty;
 
-    public string TitleName { get; set; } = "";
+    public string TitleName { get; set; } = string.Empty;
 
     public string TitleId { get; set; } = "0000000000000000";
 
@@ -12,7 +12,7 @@ public class GameFileInfo
 
     public string Type { get; set; } = "?";
 
-    public string Developer { get; set; } = "";
+    public string Developer { get; set; } = string.Empty;
 
     public byte[]? IconData { get; set; }
 }

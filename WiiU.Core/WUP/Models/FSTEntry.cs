@@ -21,7 +21,7 @@ namespace WiiU.Core.WUP.Models
 
         private readonly string? file;
 
-        private string filename = "";
+        private string filename = string.Empty;
         private FSTEntry? parent = null;
         private List<FSTEntry>? children = null;
         private int nameOffset = 0;

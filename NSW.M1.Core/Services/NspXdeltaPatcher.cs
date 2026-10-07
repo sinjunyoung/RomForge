@@ -152,7 +152,7 @@ public static class NspXdeltaPatcher
         {
             var (entryName, targetFileName) = ParseArchiveXdeltaKey(key);
             int lastSlash = key.LastIndexOf('/');
-            string relDir = lastSlash < 0 ? "" : key[..lastSlash];
+            string relDir = lastSlash < 0 ? string.Empty : key[..lastSlash];
             string relativeTargetKey = relDir.Length == 0 ? targetFileName : $"{relDir}/{targetFileName}";
             string absoluteExactPath = Path.Combine(unpackedRoot, relativeTargetKey.Replace('/', Path.DirectorySeparatorChar));
             var entry = archive.FindEntry(key);

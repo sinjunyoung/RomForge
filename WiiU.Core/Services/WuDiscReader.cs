@@ -22,7 +22,7 @@ public sealed class WuDiscReader
 
     public int GmPartitionIndex { get; private set; }
 
-    public string GmPartitionName { get; private set; } = "";
+    public string GmPartitionName { get; private set; } = string.Empty;
 
     private WuDiscReader(WudReader wud, byte[] discKey)
     {

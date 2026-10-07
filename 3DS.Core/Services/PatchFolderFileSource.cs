@@ -27,7 +27,7 @@ public class PatchFolderFileSource : IRomFsFileSource
         _archivePrefix = archivePrefix;
     }
 
-    public static PatchFolderFileSource ForFolder(string patchFolder) => new(patchFolder, null, "");
+    public static PatchFolderFileSource ForFolder(string patchFolder) => new(patchFolder, null, string.Empty);
 
     public static PatchFolderFileSource ForArchive(IArchivePatchSource archive, string prefix) => new(null, archive, prefix);
 

@@ -4,7 +4,7 @@ namespace WiiU.Core.WUP.Services
 {
     public class ContentRule
     {
-        private string pattern = "";
+        private string pattern = string.Empty;
         private ContentDetails? details = null;
         private bool contentPerMatch = false;
 

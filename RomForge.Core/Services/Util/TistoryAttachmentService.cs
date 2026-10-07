@@ -69,7 +69,7 @@ public static class TistoryAttachmentService
                                 var targetSourceText = containerText.Contains(sizeMatch.Value) ? containerText : text;
                                 var rawName = targetSourceText[..sizeMatch.Index].Trim();
 
-                                rawName = Regex.Replace(rawName, @"[\-\|]+$", "").Trim();
+                                rawName = Regex.Replace(rawName, @"[\-\|]+$", string.Empty).Trim();
                                 rawName = rawName.Trim('[', ']', '(', ')', '{', '}').Trim();
 
                                 if (!string.IsNullOrWhiteSpace(rawName) && !rawName.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -92,8 +92,8 @@ public static class TistoryAttachmentService
                             }
                             else
                             {
-                                var cleaned = Regex.Replace(text, @"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", "", RegexOptions.IgnoreCase);
-                                cleaned = cleaned.Replace("다운로드", "").Trim();
+                                var cleaned = Regex.Replace(text, @"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", string.Empty, RegexOptions.IgnoreCase);
+                                cleaned = cleaned.Replace("다운로드", string.Empty).Trim();
 
                                 if (!string.IsNullOrWhiteSpace(cleaned) && !cleaned.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                                     FileNameCache[href] = cleaned;

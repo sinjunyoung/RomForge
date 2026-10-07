@@ -36,7 +36,7 @@ public class PatchFileIndex
     public static PatchFileIndex Build(IArchivePatchSource archive, string prefix)
     {
         var index = new PatchFileIndex();
-        string normalizedPrefix = prefix.Length == 0 ? "" : prefix.TrimEnd('/') + "/";
+        string normalizedPrefix = prefix.Length == 0 ? string.Empty : prefix.TrimEnd('/') + "/";
 
         foreach (string key in archive.EntryPaths)
         {
@@ -51,7 +51,7 @@ public class PatchFileIndex
             string ext = Path.GetExtension(rel);
             bool isPatch = PatchExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
             int lastSlash = rel.LastIndexOf('/');
-            string relDir = lastSlash < 0 ? "" : rel[..lastSlash];
+            string relDir = lastSlash < 0 ? string.Empty : rel[..lastSlash];
             string fileName = lastSlash < 0 ? rel : rel[(lastSlash + 1)..];
             string baseName = isPatch ? Path.GetFileNameWithoutExtension(fileName) : fileName;
             var entry = archive.FindEntry(key) ?? throw new InvalidOperationException($"아카이브 엔트리를 다시 찾을 수 없습니다: {key}");
@@ -77,7 +77,7 @@ public class PatchFileIndex
             string fileName = Path.GetFileName(file);
             string baseName = isPatch ? Path.GetFileNameWithoutExtension(fileName) : fileName;
 
-            index.Entries.Add(new PatchFileEntry(PatchFileRef.FromDisk(file), "", baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));
+            index.Entries.Add(new PatchFileEntry(PatchFileRef.FromDisk(file), string.Empty, baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));
         }
 
         return index;
@@ -86,7 +86,7 @@ public class PatchFileIndex
     public static PatchFileIndex BuildTopLevelOnly(IArchivePatchSource archive, string prefix)
     {
         var index = new PatchFileIndex();
-        string normalizedPrefix = prefix.Length == 0 ? "" : prefix.TrimEnd('/') + "/";
+        string normalizedPrefix = prefix.Length == 0 ? string.Empty : prefix.TrimEnd('/') + "/";
 
         foreach (string key in archive.EntryPaths)
         {
@@ -104,7 +104,7 @@ public class PatchFileIndex
             var entry = archive.FindEntry(key) ?? throw new InvalidOperationException($"아카이브 엔트리를 다시 찾을 수 없습니다: {key}");
             var fileRef = PatchFileRef.FromArchiveEntry(entry);
 
-            index.Entries.Add(new PatchFileEntry(fileRef, "", baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));
+            index.Entries.Add(new PatchFileEntry(fileRef, string.Empty, baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));
         }
 
         return index;

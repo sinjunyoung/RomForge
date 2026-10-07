@@ -48,7 +48,7 @@ public static class ArchivePatchFolderResolver
             if (depth < bestDepth)
             {
                 bestDepth = depth;
-                best = dir.Length == 0 ? "" : dir + "/";
+                best = dir.Length == 0 ? string.Empty : dir + "/";
             }
         }
 
@@ -57,12 +57,12 @@ public static class ArchivePatchFolderResolver
 
     private static HashSet<string> CollectDirs(IReadOnlyList<string> entryPaths)
     {
-        var dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "" };
+        var dirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { string.Empty };
 
         foreach (string path in entryPaths)
         {
             int idx = path.LastIndexOf('/');
-            string dir = idx < 0 ? "" : path[..idx];
+            string dir = idx < 0 ? string.Empty : path[..idx];
 
             while (true)
             {
@@ -72,7 +72,7 @@ public static class ArchivePatchFolderResolver
                     break;
 
                 int i = dir.LastIndexOf('/');
-                dir = i < 0 ? "" : dir[..i];
+                dir = i < 0 ? string.Empty : dir[..i];
             }
         }
 

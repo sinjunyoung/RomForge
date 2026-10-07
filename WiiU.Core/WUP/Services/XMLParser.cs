@@ -51,18 +51,18 @@ namespace WiiU.Core.WUP.Services
             if (document == null)
             {
                 Debug.WriteLine("Please load the document first.");
-                return "";
+                return string.Empty;
             }
 
             XmlNodeList list = document.GetElementsByTagName(element);
 
             if (list == null || index >= list.Count)
-                return "";
+                return string.Empty;
 
             XmlNode? node = list.Item(index);
 
             if (node == null)
-                return "";
+                return string.Empty;
 
             return node.InnerText;
         }

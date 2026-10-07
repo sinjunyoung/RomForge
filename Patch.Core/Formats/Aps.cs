@@ -72,7 +72,7 @@ public static class Aps
                     pos += length;
 
                     if (progress != null && pos % Math.Max(1, patch.Length / 100) == 0)
-                        progress.Report(new ProgressInfo((int)((double)pos / patch.Length * 100), "", "", "", ""));
+                        progress.Report(new ProgressInfo((int)((double)pos / patch.Length * 100), string.Empty, string.Empty, string.Empty, string.Empty));
                 }
             }
 
@@ -123,7 +123,7 @@ public static class Aps
                 else i++;
 
                 if (progress != null && i % 1000 == 0)
-                    progress.Report(new ProgressInfo((int)((double)i / maxLen * 100), "", "", "", ""));
+                    progress.Report(new ProgressInfo((int)((double)i / maxLen * 100), string.Empty, string.Empty, string.Empty, string.Empty));
             }
         }
 

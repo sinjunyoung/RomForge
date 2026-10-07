@@ -31,7 +31,7 @@ public static class WupPacker
 
             root.SetContent(contents.GetFSTContent());
 
-            var dirsByPath = new Dictionary<string, FSTEntry>(StringComparer.Ordinal) { [""] = root };
+            var dirsByPath = new Dictionary<string, FSTEntry>(StringComparer.Ordinal) { [string.Empty] = root };
             var seenFilePaths = new HashSet<string>(StringComparer.Ordinal);
 
             FSTEntry GetOrCreateDir(string dirPath)
@@ -40,7 +40,7 @@ public static class WupPacker
                     return existing;
 
                 int slash = dirPath.LastIndexOf('/');
-                string parentPath = slash < 0 ? "" : dirPath[..slash];
+                string parentPath = slash < 0 ? string.Empty : dirPath[..slash];
                 string name = slash < 0 ? dirPath : dirPath[(slash + 1)..];
                 FSTEntry parent = GetOrCreateDir(parentPath);
                 var dir = new FSTEntry(false);
