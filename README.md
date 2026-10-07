@@ -17,6 +17,7 @@ RomForge incorporates modified versions of the following open-source software:
 | Component | License           |
 | --------- | ----------------- |
 | CHDMan    | GPL-2.0-or-later  |
+| libchdr   | BSD-3-Clause      |
 | xdelta3   | GPL-2.0           |
 | LibHac    | MIT               |
 | 7-Zip     | LGPL-2.1-or-later |
@@ -31,9 +32,12 @@ RomForge also contains independent C# implementations of functionality and file 
 
 These projects were used as references for file formats, interoperability, algorithms, and/or expected behavior. Their source code is not incorporated into RomForge unless explicitly listed under `Third-Party Components` above.
 
+* hacPack
+* Cemu
 * DolphinTool
 * WIT (Wiimms ISO Tools)
-* Project_CTR
+* Azahar
+* Project_CTR (ctrtool / makerom)
 * custom-install
 * save3ds
 * Vita3K
@@ -41,4 +45,3 @@ These projects were used as references for file formats, interoperability, algor
 * PSX2PSP
 * pop-fe (pop-fe-ui)
 * maxcso
-* hacPack
