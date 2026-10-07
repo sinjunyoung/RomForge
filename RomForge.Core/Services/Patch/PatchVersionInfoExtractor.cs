@@ -29,11 +29,52 @@ public static class PatchVersionInfoExtractor
         ["Europe"] = ("E", "Eur", "Europe"),
         ["Korea"] = ("K", "Kor", "Korea"),
         ["Korean"] = ("K", "Kor", "Korea"),
-        ["Asia"] = ("A", "Asi", "Asia"),
         ["World"] = ("W", "Wld", "World"),
-        ["En"] = ("E", "Eng", "English"),
+        ["China"] = ("C", "Chn", "China"),
+        ["Taiwan"] = ("T", "Twn", "Taiwan"),
+        ["Australia"] = ("A", "Aus", "Australia"),
+        ["Aus"] = ("A", "Aus", "Australia"),
+
+        ["Ko"] = ("K", "Kor", "Korean"),
         ["Ja"] = ("J", "Jap", "Japanese"),
-        ["Ko"] = ("K", "Kor", "Korean")
+        ["En"] = ("E", "Eng", "English"),
+        ["Us"] = ("U", "Usa", "English (US)"),
+        ["Au"] = ("A", "Aus", "English (Australia)"),
+
+        ["Zh"] = ("C", "Chn", "Chinese"),
+        ["Zh-Hans"] = ("C", "Zhs", "Simplified Chinese"),
+        ["Zh-Hant"] = ("T", "Zht", "Traditional Chinese"),
+        ["Chs"] = ("C", "Zhs", "Simplified Chinese"),
+        ["Cht"] = ("T", "Zht", "Traditional Chinese"),
+        ["Cn"] = ("C", "Chn", "Chinese"),
+        ["Tw"] = ("T", "Twn", "Taiwanese"),
+
+        ["Fr"] = ("F", "Fra", "French"),
+        ["De"] = ("D", "Deu", "German"),
+        ["Es"] = ("S", "Spa", "Spanish"),
+        ["It"] = ("I", "Ita", "Italian"),
+        ["Nl"] = ("N", "Nld", "Dutch"),
+        ["Pt"] = ("P", "Por", "Portuguese"),
+        ["Ru"] = ("R", "Rus", "Russian"),
+
+        ["Pl"] = ("P", "Pol", "Polish"),
+        ["Tr"] = ("T", "Tur", "Turkish"),
+        ["Ar"] = ("A", "Ara", "Arabic"),
+        ["Pt-BR"] = ("P", "Pbr", "Brazilian Portuguese"),
+        ["Es-MX"] = ("S", "Smx", "Latin American Spanish"),
+
+        ["Japanese"] = ("J", "Jap", "Japanese"),
+        ["English"] = ("E", "Eng", "English"),
+        ["Chinese"] = ("C", "Chn", "Chinese"),
+        ["SimplifiedChinese"] = ("C", "Zhs", "Simplified Chinese"),
+        ["TraditionalChinese"] = ("T", "Zht", "Traditional Chinese"),
+        ["French"] = ("F", "Fra", "French"),
+        ["German"] = ("D", "Deu", "German"),
+        ["Spanish"] = ("S", "Spa", "Spanish"),
+        ["Italian"] = ("I", "Ita", "Italian"),
+        ["Dutch"] = ("N", "Nld", "Dutch"),
+        ["Portuguese"] = ("P", "Por", "Portuguese"),
+        ["Russian"] = ("R", "Rus", "Russian")
     };
 
     public static (string? Version, string? Date, string? Language) Extract(string patchFileName)
