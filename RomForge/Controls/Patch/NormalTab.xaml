@@ -380,11 +380,10 @@
                     </StackPanel>
                 </ToggleButton>
 
-                <StackPanel Visibility="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=StackPanel}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Visibility="{Binding  PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid Grid.Column="0">
@@ -400,7 +399,6 @@
                                     </StackPanel>
                                 </Button>
                             </Grid>
-                            <TextBlock Grid.Column="1" Text="{}{fileName}, {Version}, {Date:yyMMdd} 형식이 올바르지 않으면 기본값으로 대체됩니다" Foreground="#D4AF37" FontSize="10" FontWeight="Bold" TextWrapping="Wrap" VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </Grid>
                     </StackPanel>
 

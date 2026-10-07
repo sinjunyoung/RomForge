@@ -20,6 +20,8 @@ namespace RomForge.ViewModels.Patch;
 public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 {
     private CancellationTokenSource? _runCts;
+    private CancellationTokenSource? _previewCts;
+
     private string? _sourcePath;
     private bool _patchAdded;
     private int _progressPct;
@@ -27,6 +29,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     private string _progressPercent = "0%";
     private string _progressTime = string.Empty;
     private string _progressSpeed = string.Empty;
+    private string _namingPreview = string.Empty;
+
+    private string? _cachedPatchVersion;
+    private string? _cachedPatchDate;
+    private string? _cachedPatchLanguage;
+    private string? _lastProcessedPatchPath;
 
     public System.Collections.ObjectModel.ObservableCollection<LogEntry> LogEntries { get; } = [];
 
@@ -38,10 +46,12 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             _sourcePath = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(SourceLabel));
-            OnPropertyChanged(nameof(NamingPreview));
             OnPropertyChanged(nameof(HasSource));
             OnPropertyChanged(nameof(SourceHintVisible));
             CommandManager.InvalidateRequerySuggested();
+
+            _lastProcessedPatchPath = null;
+            TriggerPreviewUpdate();
 
             _ = SourceHash.StartAsync(value);
         }
@@ -74,7 +84,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             AppConfig.Instance.Patch.AutoCompress = value;
             OnPropertyChanged(nameof(AutoCompress));
-            OnPropertyChanged(nameof(NamingPreview));
+            TriggerPreviewUpdate();
         }
     }
 
@@ -85,7 +95,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             AppConfig.Instance.Patch.NamingEnabled = value;
             OnPropertyChanged(nameof(NamingEnabled));
-            OnPropertyChanged(nameof(NamingPreview));
+            TriggerPreviewUpdate();
         }
     }
 
@@ -96,37 +106,75 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             AppConfig.Instance.Patch.NamingFormat = value;
             OnPropertyChanged(nameof(NamingFormat));
-            OnPropertyChanged(nameof(NamingPreview));
+            TriggerPreviewUpdate();
         }
     }
 
     public string NamingPreview
     {
-        get
+        get => _namingPreview;
+        private set
         {
+            _namingPreview = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private void TriggerPreviewUpdate()
+    {
+        _previewCts?.Cancel();
+        _previewCts = new CancellationTokenSource();
+        var token = _previewCts.Token;
+
+        Task.Delay(100, token).ContinueWith(t =>
+        {
+            if (t.IsCanceled) return;
+
             string baseFileName = ResolvePreviewBaseFileName();
 
             if (!NamingEnabled)
-                return baseFileName;
-
-            string? version;
-            string date;
+            {
+                NamingPreview = baseFileName;
+                return;
+            }
 
             string? namingPatchPath = NamingPatchPath;
 
-            if (namingPatchPath is not null && File.Exists(namingPatchPath))
+            if (namingPatchPath != _lastProcessedPatchPath)
             {
-                (version, string? extractedDate) = PatchVersionInfoExtractor.Extract(Path.GetFileName(namingPatchPath));
-                date = extractedDate ?? File.GetLastWriteTime(namingPatchPath).ToString("yyMMdd");
-            }
-            else
-            {
-                version = "1.0";
-                date = DateTime.Now.ToString("yyMMdd");
+                _lastProcessedPatchPath = namingPatchPath;
+
+                if (namingPatchPath is not null && File.Exists(namingPatchPath))
+                {
+                    var (v, d, l) = PatchVersionInfoExtractor.Extract(Path.GetFileName(namingPatchPath));
+                    _cachedPatchVersion = v;
+                    _cachedPatchDate = d ?? File.GetLastWriteTime(namingPatchPath).ToString("yyMMdd");
+                    _cachedPatchLanguage = l;
+                }
+                else
+                {
+                    _cachedPatchVersion = null;
+                    _cachedPatchDate = null;
+                    _cachedPatchLanguage = null;
+                }
             }
 
-            return PatchVersionInfoExtractor.ApplyFormat(baseFileName, version, date, NamingFormat);
-        }
+            string version = _cachedPatchVersion ?? "1.0";
+            string date = _cachedPatchDate ?? DateTime.Now.ToString("yyMMdd");
+            string? language = _cachedPatchLanguage;
+
+            string result = PatchVersionInfoExtractor.ApplyFormat(
+                baseFileName,
+                version,
+                date,
+                language,
+                NamingFormat,
+                AppConfig.Instance.Common.Language
+            );
+
+            NamingPreview = result;
+
+        }, TaskScheduler.FromCurrentSynchronizationContext());
     }
 
     private string ResolvePreviewBaseFileName()
@@ -166,11 +214,11 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
     public int ProgressPct
     {
         get => _progressPct;
-        set 
-        { 
+        set
+        {
             _progressPct = value;
             MainViewModel.SetTaskbarProgress(_progressPct);
-            OnPropertyChanged();            
+            OnPropertyChanged();
         }
     }
 
@@ -209,7 +257,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
                 OnPropertyChanged(nameof(AutoCompress));
                 OnPropertyChanged(nameof(NamingEnabled));
                 OnPropertyChanged(nameof(NamingFormat));
-                OnPropertyChanged(nameof(NamingPreview));
+                TriggerPreviewUpdate();
             }
         };
 
@@ -218,21 +266,23 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
             if (e.PropertyName == nameof(PatchConfig.AutoCompress))
             {
                 OnPropertyChanged(nameof(AutoCompress));
-                OnPropertyChanged(nameof(NamingPreview));
+                TriggerPreviewUpdate();
             }
 
             if (e.PropertyName == nameof(PatchConfig.NamingEnabled))
             {
                 OnPropertyChanged(nameof(NamingEnabled));
-                OnPropertyChanged(nameof(NamingPreview));
+                TriggerPreviewUpdate();
             }
 
             if (e.PropertyName == nameof(PatchConfig.NamingFormat))
             {
                 OnPropertyChanged(nameof(NamingFormat));
-                OnPropertyChanged(nameof(NamingPreview));
+                TriggerPreviewUpdate();
             }
         };
+
+        TriggerPreviewUpdate();
     }
 
     public void AddPatchSlot()
@@ -251,6 +301,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         OnPropertyChanged(nameof(HintsVisible));
         OnPropertyChanged(nameof(IsMultiPatch));
         OnPropertyChanged(nameof(SourceHintVisible));
+        TriggerPreviewUpdate();
     }
 
     private PatchSlotViewModel CreateSlot()
@@ -261,7 +312,8 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         {
             if (e.PropertyName == nameof(PatchSlotViewModel.FilePath))
             {
-                OnPropertyChanged(nameof(NamingPreview));
+                _lastProcessedPatchPath = null;
+                TriggerPreviewUpdate();
                 CommandManager.InvalidateRequerySuggested();
             }
         };
@@ -283,6 +335,8 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
         OnPropertyChanged(nameof(HintsVisible));
         OnPropertyChanged(nameof(IsMultiPatch));
         OnPropertyChanged(nameof(SourceHintVisible));
+        _lastProcessedPatchPath = null;
+        TriggerPreviewUpdate();
     }
 
     public void Log(string message, LogLevel level)
@@ -357,7 +411,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && patchPaths.All(XdeltaAppHeaderReader.TargetsCompressedContainer))
             {
-                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
+                string directOutputName = PatchVersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, AppConfig.Instance.Common.Language);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
 
                 Log("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);
@@ -393,7 +447,7 @@ public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
-            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
+            string outputFileName = PatchVersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, AppConfig.Instance.Common.Language);
 
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);

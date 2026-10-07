@@ -28,6 +28,13 @@ public class CommonConfig : ViewModelBase
         get => _autoCheckUpdate;
         set { SetProperty(ref _autoCheckUpdate, value); }
     }
+
+    private string? _language = "Korean"; 
+    public string? Language
+    {
+        get => _language;
+        set { SetProperty(ref _language, value); }
+    }
 }
 
 public class WindowConfig : ViewModelBase
