@@ -5,8 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RomForge.Controls.Patch"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    
+             d:DesignHeight="450" d:DesignWidth="800">    
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -14,14 +13,12 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="5"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
             <Border IsEnabled="{Binding IsIdle}" Grid.Column="0" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadeSourceDrop_Drop" Height="50">
                 <Grid Margin="14,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -31,7 +28,6 @@
                     <TextBlock Text="원본 ZIP" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                 </Grid>
             </Border>
-
             <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" AllowDrop="True" Drop="ArcadePatchDrop_Drop" Height="50">
                 <Grid Margin="14,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -48,14 +44,9 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
             <TextBlock Grid.Column="0" Text="패치 선택:" Foreground="#DCDCDC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
-
-            <ComboBox Grid.Column="1" Height="22" Padding="2,0" FontSize="11" VerticalAlignment="Center" 
-                                  ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AvailablePatchPackages, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
-                                  DisplayMemberPath="DisplayName" 
-                                  SelectedItem="{Binding DataContext.PatchVM.ArcadeVM.SelectedPatchPackage, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                  SelectionChanged="PatchPicker_SelectionChanged"  Tag="{Binding}" ToolTip="다른 패치 패키지로 변경">
+            <ComboBox Grid.Column="1" Height="22" Padding="2,0" FontSize="11" VerticalAlignment="Center" ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AvailablePatchPackages, RelativeSource={RelativeSource AncestorType=ItemsControl}}" DisplayMemberPath="DisplayName" 
+                                  SelectedItem="{Binding DataContext.PatchVM.ArcadeVM.SelectedPatchPackage, RelativeSource={RelativeSource AncestorType=ItemsControl}}" SelectionChanged="PatchPicker_SelectionChanged"  Tag="{Binding}" ToolTip="다른 패치 패키지로 변경">
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Foreground" Value="White"/>
@@ -73,7 +64,6 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-
                                 <Grid Grid.Row="0">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -84,13 +74,10 @@
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="100"/>
                                     </Grid.ColumnDefinitions>
-
                                     <Border Grid.Column="0" Background="#1E1E1E" BorderBrush="#3F3F46" BorderThickness="1" CornerRadius="3" Padding="8,4" VerticalAlignment="Center">
                                         <TextBlock Text="{Binding SourceFileName}" Foreground="#DCDCDC" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding SourceFileName}"/>
                                     </Border>
-
                                     <TextBlock Grid.Column="1" Text="→" Foreground="#555555" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
                                     <Border Grid.Column="2" AllowDrop="True" Drop="MatchCard_PatchDrop" DragOver="MatchCard_DragOver" Tag="{Binding}" CornerRadius="3" Padding="8,4" BorderThickness="1">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -118,9 +105,7 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
-
-                                    <ComboBox Grid.Column="3" Width="140" Height="22" Margin="4,0,0,0" Padding="2,0" FontSize="11" VerticalAlignment="Center" 
-                                                          ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AllPatchEntries, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
+                                    <ComboBox Grid.Column="3" Width="140" Height="22" Margin="4,0,0,0" Padding="2,0" FontSize="11" VerticalAlignment="Center" ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AllPatchEntries, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
                                                           DisplayMemberPath="DisplayName" SelectedItem="{Binding PatchEntry, Mode=OneWay}" SelectionChanged="PatchPicker_SelectionChanged" Tag="{Binding}" ToolTip="다른 패치 파일로 변경">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
@@ -128,7 +113,6 @@
                                             </Style>
                                         </ComboBox.ItemContainerStyle>
                                     </ComboBox>
-
                                     <Border Grid.Column="4" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,0">
                                         <Border.Style>
                                             <Style TargetType="Border">
@@ -155,7 +139,6 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
-
                                     <TextBlock Grid.Column="5" Text="{Binding MismatchReason}" Visibility="{Binding MismatchVisibility}" FontSize="10" VerticalAlignment="Center" Margin="5,0,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding MismatchReason}">
                                         <TextBlock.Style>
                                             <Style TargetType="TextBlock">
@@ -168,7 +151,6 @@
                                             </Style>
                                         </TextBlock.Style>
                                     </TextBlock>
-
                                     <Grid Grid.Column="6" Margin="6,0,0,0">
                                         <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="20"/>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -202,11 +184,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="140"/>
                 </Grid.ColumnDefinitions>
-
                 <TextBlock Grid.Column="0" Text="{Binding PatchVM.ArcadeVM.ProgressSummary}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-
                 <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding PatchVM.ArcadeVM.TotalProgressText}" Foreground="#4CAF50" FontSize="12" FontWeight="Bold" VerticalAlignment="Center"/>
-
                 <Grid Grid.Column="2" Height="10" VerticalAlignment="Center">
                     <Border Background="#25FFFFFF" CornerRadius="5"/>
                     <Border CornerRadius="5" ClipToBounds="True">
@@ -219,6 +198,5 @@
                 </Grid>
             </Grid>
         </Border>
-    </Grid>
-    
+    </Grid>    
 </UserControl>

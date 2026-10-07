@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:RomForge.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1100">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -15,11 +14,7 @@
         </Grid.RowDefinitions>
 
         <ListView x:Name="lvFiles" Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding UnifiedConvertVM.FileItems}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" SelectionMode="Extended" AllowDrop="True"
-                  KeyUp="LvFiles_KeyUp"                  
-                  Drop="LvFiles_Drop"
-                  DragOver="LvFiles_DragOver"
-                  GridViewColumnHeader.Click="GridViewColumnHeader_Click"
-                  ContextMenuOpening="LvFiles_ContextMenuOpening">
+                  KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -112,9 +107,7 @@
                         </GridViewColumn.HeaderTemplate>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <ComboBox Margin="4,0"
-                                          ItemsSource="{Binding AvailableFormats}"
-                                          SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay}"/>
+                                <ComboBox Margin="4,0" ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay}"/>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -195,18 +188,18 @@
                                     
                         <Image Grid.Row="0" Grid.Column="0" Source="/Assets/Images/Switch.png" Width="16" Height="16" Margin="0,0,6,4"/>
                         <Image Grid.Row="1" Grid.Column="0" Source="/Assets/Images/WiiU.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                        <Image Grid.Row="2" Grid.Column="0" Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                        <Image Grid.Row="3" Grid.Column="0" Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                        <Image Grid.Row="5" Grid.Column="0" Source="/Assets/Images/Mame.png" Width="16" Height="16" Margin="0,0,6,4"/>
-                        <Image Grid.Row="6" Grid.Column="0" Source="/Assets/Images/Dolphin.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="2" Grid.Column="0" Source="/Assets/Images/Dolphin.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="3" Grid.Column="0" Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="5" Grid.Column="0" Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="6" Grid.Column="0" Source="/Assets/Images/Mame.png" Width="16" Height="16" Margin="0,0,6,4"/>                        
                         <Image Grid.Row="7" Grid.Column="0" Source="/Assets/Images/CUE.png" Width="16" Height="16" Margin="0,0,6,4"/>
                         
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Switch"    Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="Wii U"     Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="3DS"       Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>                                                                
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="PS"        Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                        <TextBlock Grid.Row="5" Grid.Column="1" Text="CHDMAN"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
-                        <TextBlock Grid.Row="6" Grid.Column="1" Text="GC/Wii"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="GC/Wii"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="3DS"       Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>                                                                
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="PS"        Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
+                        <TextBlock Grid.Row="6" Grid.Column="1" Text="CHDMAN"   Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>                        
                         <TextBlock Grid.Row="7" Grid.Column="1" Text="CD Image"  Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
@@ -244,8 +237,26 @@
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
                             <Run Text="WUP, Loadiine" Foreground="#FFFFFF" FontWeight="Bold"/>
                         </TextBlock>
-                
+                        
                         <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
+                            <Run Text=": ISO(GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="ISO(GC/Wii), WBFS" Foreground="#CCCCCC"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="ISO(Wii)" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
+                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="  |  " Foreground="#555555"/>
+                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
+                            <Run Text="ISO(Wii)" Foreground="#CCCCCC"/>
+                        </TextBlock>
+                
+                        <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": 3DS(CCI와 같은 포맷)" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
                             <Run Text="CIA, ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
@@ -263,7 +274,7 @@
                             <Run Text="CCI, CIA" Foreground="#FFFFFF" FontWeight="Bold"/>
                         </TextBlock>
 
-                        <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
+                        <TextBlock Grid.Row="5" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": ISO" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="CSO, ZSO, CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
@@ -285,7 +296,7 @@
                             <Run Text="CUE+BIN" Foreground="#FFFFFF" FontWeight="Bold"/>
                         </TextBlock>
                         
-                        <TextBlock Grid.Row="5" Grid.Column="2" Margin="0,0,0,4">
+                        <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": ISO(표준), CUE+BIN, GDI+BIN+RAW, CCD+IMG+SUB" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
@@ -293,26 +304,8 @@
                             <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
                             <Run Text="ISO, CUE+BIN, GDI+BIN+RAW" Foreground="#CCCCCC"/>                            
-                        </TextBlock>
+                        </TextBlock> 
                         
-                        <TextBlock Grid.Row="6" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": ISO(GC/Wii), GCM, WBFS, WIA, GCZ" Foreground="#CCCCCC"/>
-                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
-                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
-                            <Run Text="  |  " Foreground="#555555"/>
-                            <Run Text="RVZ" Foreground="#FFFFFF" FontWeight="Bold"/>
-                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="ISO(GC/Wii), WBFS" Foreground="#CCCCCC"/>
-                            <Run Text="  |  " Foreground="#555555"/>
-                            <Run Text="ISO(Wii)" Foreground="#FFFFFF" FontWeight="Bold"/>
-                            <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
-                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
-                            <Run Text="  |  " Foreground="#555555"/>
-                            <Run Text="WBFS" Foreground="#FFFFFF" FontWeight="Bold"/>
-                            <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                            <Run Text="ISO(Wii)" Foreground="#CCCCCC"/>
-                        </TextBlock>
-                
                         <TextBlock Grid.Row="7" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": MDF+MDS, CCD+IMG+SUB" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
@@ -329,7 +322,6 @@
                 <Style TargetType="Border">
                     <Setter Property="Background" Value="#12FFFFFF"/>
                     <Setter Property="BorderBrush" Value="#30FFFFFF"/>
-
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding UnifiedConvertVM.UseCustomOutputPath}" Value="False">
                             <Setter Property="Background" Value="Transparent"/>

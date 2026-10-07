@@ -7,9 +7,7 @@
              xmlns:l="clr-namespace:NSW.Core.Properties;assembly=NSW.Core"
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="800">
-
     <UserControl.Resources>
-
         <Style TargetType="Button">
             <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="18,0"/>
@@ -18,7 +16,6 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-
         <Style x:Key="GrayButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="#2D2D30"/>
             <Setter Property="Foreground" Value="#DCDCDC"/>
@@ -41,28 +38,16 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
-
-    <Border BorderBrush="#33FFFFFF" 
-            BorderThickness="1" 
-            CornerRadius="8" 
-            Background="#12FFFFFF" 
-            Padding="10">
-
+    
+    <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#12FFFFFF" Padding="10">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
             <Grid Grid.Column="0">
-                <StackPanel x:Name="dropHint"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        Opacity="0.80"
-                        IsHitTestVisible="False"
-                        Panel.ZIndex="1">
+                <StackPanel x:Name="dropHint" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.80" IsHitTestVisible="False" Panel.ZIndex="1">
                     <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                     <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                     <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
@@ -104,8 +89,7 @@
                     </ItemsControl>
                 </StackPanel>
 
-                <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening"
-                          GridViewColumnHeader.Click="GridViewColumnHeader_Click">
+                <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -145,6 +129,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
+                            
                             <GridViewColumn Width="380">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="TitleName">

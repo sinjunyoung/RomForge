@@ -7,10 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
-        <TabControl x:Name="MasterTabControl" 
-                    SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}"
-                    Background="Transparent" 
-                    BorderThickness="0">
+        <TabControl x:Name="MasterTabControl" SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
 
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>

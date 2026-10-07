@@ -4,7 +4,6 @@
              xmlns:local="clr-namespace:RomForge.Controls.Settings">
     <Grid>
         <TabControl SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
-
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -14,7 +13,6 @@
                 </TabItem.Header>
                 <local:GeneralSettingsTab DataContext="{Binding General}"/>
             </TabItem>
-
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -24,7 +22,6 @@
                 </TabItem.Header>
                 <local:PatchSettingsTab DataContext="{Binding Patch}" Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -34,7 +31,6 @@
                 </TabItem.Header>
                 <local:CompressSettingsTab DataContext="{Binding Compress}" Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -44,7 +40,6 @@
                 </TabItem.Header>
                 <local:PSSettingsTab DataContext="{Binding PS1}" Margin="0,-5,0,0"/>
             </TabItem>
-
         </TabControl>
     </Grid>
 </UserControl>

@@ -7,11 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
-        <TabControl x:Name="MasterTabControl" 
-                    SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}"
-                    Background="Transparent" 
-                    BorderThickness="0">
-
+        <TabControl x:Name="MasterTabControl" SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -21,7 +17,6 @@
                 </TabItem.Header>
                 <local:RepackTab DataContext="{Binding RepackVM}" Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -31,7 +26,6 @@
                 </TabItem.Header>
                 <local:MergeTab DataContext="{Binding MergeVM}"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -41,7 +35,6 @@
                 </TabItem.Header>
                 <local:ConverterTab DataContext="{Binding ConverterVM}"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -51,7 +44,6 @@
                 </TabItem.Header>
                 <local:ConvertSaturnTab DataContext="{Binding ConvertSaturnVM}"  Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -61,16 +53,12 @@
                 </TabItem.Header>
                 <local:KeygenTab DataContext="{Binding KeygenVM}"/>
             </TabItem>
-
         </TabControl>
-
         <Border Background="#DD1E1E1E" Visibility="{Binding KeysAvailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" d:IsHidden="True">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
                 <Image Source="/Assets/Images/Switch.png" Width="48" Height="48" Margin="0,0,0,16" HorizontalAlignment="Center"/>
-                <TextBlock Text="prod.keys 파일이 없습니다" FontSize="18" FontWeight="Bold" Foreground="White"
-                           HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                <TextBlock Text="{Binding KeysMissingMessage}" Foreground="#CCCCCC" TextWrapping="Wrap"
-                           TextAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock Text="prod.keys 파일이 없습니다" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                <TextBlock Text="{Binding KeysMissingMessage}" Foreground="#CCCCCC" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

@@ -6,7 +6,6 @@
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="800">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -106,7 +105,6 @@
                     <TextBlock Text="{Binding PatchInfo.TargetText}" Foreground="#8888A8" FontSize="11" Margin="0,6,0,0"/>
                     <TextBlock Text="{Binding PatchInfo.FileCountText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
                     <TextBlock Text="{Binding PatchInfo.WarningText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
-
                     <TextBlock Text="{Binding PatchInfo.StatusText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">

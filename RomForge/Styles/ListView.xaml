@@ -7,10 +7,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListView">
-                    <Border x:Name="Bd"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                         <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
                             <ItemsPresenter />
                         </ScrollViewer>
@@ -25,33 +22,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="GridViewColumnHeader">
                     <Grid>
-                        <Border x:Name="HeaderBorder"
-                                        Background="#252526"
-                                        BorderBrush="#2D2D30"
-                                        BorderThickness="0,0,1,1"
-                                        Padding="10,8">
-                            <ContentPresenter x:Name="HeaderContent"
-                                              HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              TextBlock.Foreground="#BBBBBB"
-                                              TextBlock.FontSize="12"
-                                              TextBlock.FontWeight="Bold"/>
+                        <Border x:Name="HeaderBorder" Background="#252526" BorderBrush="#2D2D30" BorderThickness="0,0,1,1" Padding="10,8">
+                            <ContentPresenter x:Name="HeaderContent" HorizontalAlignment="Center" VerticalAlignment="Center" TextBlock.Foreground="#BBBBBB" TextBlock.FontSize="12" TextBlock.FontWeight="Bold"/>
                         </Border>
-
-                        <Thumb x:Name="PART_HeaderGripper"
-                                       HorizontalAlignment="Right"
-                                       Width="8"
-                                       Cursor="SizeWE"
-                                       Background="Transparent">
+                        <Thumb x:Name="PART_HeaderGripper" HorizontalAlignment="Right" Width="8" Cursor="SizeWE" Background="Transparent">
                             <Thumb.Template>
                                 <ControlTemplate TargetType="Thumb">
                                     <Border Background="Transparent">
-                                        <Rectangle x:Name="GripperLine" 
-                                                   Width="1" 
-                                                   Fill="#3D3D40" 
-                                                   VerticalAlignment="Stretch" 
-                                                   HorizontalAlignment="Right" 
-                                                   Margin="0,4,3,4"/>
+                                        <Rectangle x:Name="GripperLine" Width="1" Fill="#3D3D40" VerticalAlignment="Stretch" HorizontalAlignment="Right" Margin="0,4,3,4"/>
                                     </Border>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsMouseOver" Value="True">
@@ -63,7 +41,6 @@
                             </Thumb.Template>
                         </Thumb>
                     </Grid>
-
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="HeaderBorder" Property="Background" Value="#2D2D30"/>
@@ -89,15 +66,9 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListViewItem">
-                    <Border x:Name="ListItemBorder"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="3"
-                        Padding="{TemplateBinding Padding}">
+                    <Border x:Name="ListItemBorder" Background="Transparent" BorderBrush="Transparent" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3" Padding="{TemplateBinding Padding}">
                         <GridViewRowPresenter VerticalAlignment="Center"/>
                     </Border>
-
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ListItemBorder" Property="Background" Value="#252526"/>
@@ -115,5 +86,5 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
 </ResourceDictionary>

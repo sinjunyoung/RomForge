@@ -6,7 +6,6 @@
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="800">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -15,7 +14,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <StackPanel Grid.Row="0" Margin="5,5,5,0">
             <Grid Height="36">
                 <Grid.ColumnDefinitions>
@@ -62,7 +60,6 @@
                     <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
                 </Button>
             </Grid>
-
         </StackPanel>
 
         <Grid Grid.Row="1" Margin="5,0,5,5">
@@ -70,7 +67,6 @@
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
             <Border x:Name="borderCover" Grid.Column="0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0" CornerRadius="15" AllowDrop="True" PreviewDrop="Cover_Drop" PreviewDragOver="OnPreviewDragOver" IsEnabled="{Binding IsIdle}">
                 <Border.OpacityMask>
                     <VisualBrush>
@@ -79,7 +75,6 @@
                         </VisualBrush.Visual>
                     </VisualBrush>
                 </Border.OpacityMask>
-
                 <Grid>
                     <StackPanel VerticalAlignment="Center" ZIndex="1" Visibility="{Binding CoverHintVisibility}">
                         <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
@@ -130,10 +125,8 @@
                             </ItemsControl.Items>
                         </ItemsControl>
                     </StackPanel>
-
                     <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="UniformToFill" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
-                </Grid>
-                
+                </Grid>                
             </Border>
 
             <StackPanel Grid.Column="1" Margin="15,0,0,0">
@@ -182,7 +175,6 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="설정" Foreground="#D4AF37" FontSize="12" FontWeight="Bold" Margin="0,0,15,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <CheckBox Content="와이드 스크린" IsChecked="{Binding WideScreen}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,15,0"/>
-
                 <TextBlock Text="사운드 볼륨:" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,5,0"/>
                 <ComboBox Width="90" Height="26" ItemsSource="{Binding SoundVolumeItems}" SelectedItem="{Binding SelectedSoundVolume}" VerticalContentAlignment="Center" FontSize="11">
                     <ComboBox.ItemContainerStyle>
@@ -207,7 +199,6 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="140"/>
                 </Grid.ColumnDefinitions>
-
                 <TextBlock Grid.Column="0" x:Name="progressLabel" Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Grid.Column="1" x:Name="progressPercent" Margin="0,0,10,0" Text="{Binding ProgressPercent}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="2" x:Name="progressSpeed" Margin="0,0,10,0" Text="{Binding ProgressSpeed}" Foreground="Gray" FontSize="11" VerticalAlignment="Center"/>

@@ -17,13 +17,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-
-                    <ToggleButton Grid.Row="0" Style="{StaticResource ToggleStyle}"
-                                  IsChecked="{Binding AutoCompress}">
+                    <ToggleButton Grid.Row="0" Style="{StaticResource ToggleStyle}" IsChecked="{Binding AutoCompress}">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="18" Margin="10,0,10,0" Source="{Binding AutoCompress, Converter={StaticResource BoolToImageConverter}}"/>
                             <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center"  Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
-
                             <Grid VerticalAlignment="Center">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -34,7 +31,6 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
-
                                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                                     <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                         <TextBlock Text="BIN / IMG / ISO" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
@@ -52,7 +48,6 @@
                                         </TextBlock>
                                     </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                                     <Border Background="#1AFFCE73" BorderBrush="#4DFFCE73" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                         <TextBlock Text="3DS / CCI / CIA" Foreground="#FFCE73" FontWeight="Bold" VerticalAlignment="Center">
@@ -70,7 +65,6 @@
                                         </TextBlock>
                                     </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                                     <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                         <TextBlock Text="GCM / Wii / WBFS" Foreground="#FF73C9" FontWeight="Bold" VerticalAlignment="Center">
@@ -88,7 +82,6 @@
                                         </TextBlock>
                                     </Border>
                                 </StackPanel>
-
                                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                                     <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                         <TextBlock Text="이외 기타" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
@@ -109,16 +102,13 @@
                             </Grid>
                         </StackPanel>
                     </ToggleButton>
-
-                    <ToggleButton Grid.Row="1" Style="{StaticResource ToggleStyle}" Margin="0,5,0,0"
-                                  IsChecked="{Binding UseCustomOutputPath}">
+                    <ToggleButton Grid.Row="1" Style="{StaticResource ToggleStyle}" Margin="0,5,0,0" IsChecked="{Binding UseCustomOutputPath}">
                         <StackPanel Orientation="Horizontal">
                             <Image Width="18" Margin="10,0,10,0" Source="{Binding UseCustomOutputPath, Converter={StaticResource BoolToImageConverter}}"/>
                             <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                             <TextBlock Text="해제 시 원본 ROM 폴더 안의 output 폴더에 저장" FontSize="11" Foreground="#D4AF37" VerticalAlignment="Center"/>
                         </StackPanel>
                     </ToggleButton>
-
                     <Grid Grid.Row="2" Margin="0,2,0,5" Visibility="{Binding OutputPathVisibility}">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

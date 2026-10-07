@@ -5,20 +5,18 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="800">
-
+    
     <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#12FFFFFF" Padding="10">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
             <Grid Grid.Column="0">
                 <StackPanel x:Name="dropHint" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.80" IsHitTestVisible="False" Panel.ZIndex="1">
                     <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                     <TextBlock Text="게임 파일 / 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                     <TextBlock Text="본편/업데이트는 자동 교체, DLC는 계속 추가됩니다" Foreground="#D4AF37" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center"/>
-
                     <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -56,9 +54,7 @@
                             </Border>
                         </ItemsControl.Items>
                     </ItemsControl>
-
                 </StackPanel>
-
                 <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening">
                     <ListView.ContextMenu>
                         <ContextMenu>
@@ -149,10 +145,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Width="32" Height="32" CornerRadius="4" Background="#3A3A40" BorderBrush="#5A5A62" BorderThickness="1" ToolTip="{Binding PatchDisplay}" AllowDrop="True" Cursor="Hand" Tag="{Binding}"
-                                                DragEnter="PatchDropTarget_DragEnter" 
-                                                DragLeave="PatchDropTarget_DragLeave" 
-                                                Drop="PatchDropTarget_Drop"
-                                                MouseLeftButtonUp="PatchDropTarget_Click">
+                                                DragEnter="PatchDropTarget_DragEnter" DragLeave="PatchDropTarget_DragLeave" Drop="PatchDropTarget_Drop" MouseLeftButtonUp="PatchDropTarget_Click">
                                             <Border.ContextMenu>
                                                 <ContextMenu>
                                                     <MenuItem Header="폴더 선택..." Click="PatchMenu_SelectFolder_Click">

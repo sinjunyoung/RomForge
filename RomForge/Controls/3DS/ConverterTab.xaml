@@ -8,25 +8,18 @@
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
              Background="#1E1E1E">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="300"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <Grid Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
             <ListView x:Name="lvFiles" Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding FileItems}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" SelectionMode="Extended" AllowDrop="True"
-                      KeyUp="LvFiles_KeyUp"                      
-                      Drop="LvFiles_Drop"
-                      DragOver="LvFiles_DragOver" 
-                      GridViewColumnHeader.Click="GridViewColumnHeader_Click"
-                      ContextMenuOpening="LvFiles_ContextMenuOpening">
+                      KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
                         <Style.Triggers>
@@ -63,7 +56,6 @@
                         </MenuItem>
                     </ContextMenu>
                 </ListView.ContextMenu>
-
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Width="50">
@@ -163,12 +155,7 @@
                             </GridViewColumn.HeaderTemplate>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding AvailableFormats}" 
-                                              SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"                                              
-                                              Width="65" 
-                                              Height="26"
-                                              HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center">
+                                    <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="65" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Foreground" Value="White"/>
@@ -256,10 +243,7 @@
                 </ListView.View>
             </ListView>
 
-            <Border Grid.Row="0" IsHitTestVisible="False"
-                    Visibility="{Binding HintVisibility}"
-                    BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15"
-                    CornerRadius="6">
+            <Border Grid.Row="0" IsHitTestVisible="False" Visibility="{Binding HintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15" CornerRadius="6">
                 <Border.Background>
                     <SolidColorBrush Color="#181818" Opacity="0.95"/>
                 </Border.Background>
@@ -319,7 +303,6 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
                     <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting}" Command="{Binding CancelCommand}">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -339,7 +322,6 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
                     <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnAddFolder_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -348,7 +330,6 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
                     <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -357,7 +338,6 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-
                     <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Click="BtnClear_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

@@ -7,9 +7,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <TabControl Grid.Row="0" SelectedIndex="{Binding PatchVM.SubTabIndex}" Background="Transparent" BorderThickness="0">
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -19,7 +17,6 @@
                 </TabItem.Header>
                 <controls:NormalTab Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -29,7 +26,6 @@
                 </TabItem.Header>
                 <controls:ArcadeTab Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -69,7 +65,6 @@
                 </TabItem.Header>
                 <controls:VitaTab Margin="0,-5,0,0"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -79,9 +74,7 @@
                 </TabItem.Header>
                 <controls:Pc98Tab Margin="0,-5,0,0"/>
             </TabItem>
-
          </TabControl>
-
         <Border Grid.Row="1" Margin="5,0,5,5" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0" CornerRadius="5">
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">

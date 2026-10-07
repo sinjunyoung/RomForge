@@ -11,7 +11,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <Border Grid.Row="0" Margin="5,5,5,0" Grid.ColumnSpan="2">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -19,53 +18,46 @@
                     <ColumnDefinition Width="5"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-
                 <Border Grid.Column="0" Background="#1E1E1E" BorderBrush="#2A2A3A" BorderThickness="1" CornerRadius="6">
                     <Grid>
                         <TextBlock Text="🔍   게임 검색..." Foreground="#8888A8" FontSize="13" Margin="5,0,5,0" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="{Binding InstalledTitles.SearchHintVisibility}"/>
                         <TextBox x:Name="SearchBox" Background="Transparent" Foreground="#E8E8F0" BorderThickness="0" Padding="12,8" FontSize="13" CaretBrush="#4F8EF7" TextChanged="Search_TextChanged"/>
                     </Grid>
                 </Border>
-
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Height="30">
                     <ToggleButton x:Name="FilterAll"    Content="전체"    IsChecked="True" Tag="All"    Style="{StaticResource FilterToggle}" Click="Filter_Click" IsEnabled="{Binding IsUnlocked}"/>
                     <ToggleButton x:Name="FilterGame"   Content="본편"    Foreground="#4F8EF7" Tag="Game"   Style="{StaticResource FilterToggle}" Click="Filter_Click" IsEnabled="{Binding IsUnlocked}"/>
                     <ToggleButton x:Name="FilterUpdate" Content="업데이트" Foreground="#3DD68C" Tag="Update" Style="{StaticResource FilterToggle}" Click="Filter_Click" IsEnabled="{Binding IsUnlocked}"/>
                     <ToggleButton x:Name="FilterDlc"    Content="DLC"     Foreground="#C97BF7" Tag="Dlc"    Style="{StaticResource FilterToggle}" Click="Filter_Click" Margin="0" IsEnabled="{Binding IsUnlocked}"/>
-
-                    <Button x:Name="RecoverButton" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Padding="5" IsEnabled="{Binding CanLoad}" Click="RecoverTitleDb_Click" ToolTipService.ShowOnDisabled="True" ToolTip="3DS 실기에서 title.db 오류로 설치한 게임이 HOME 메뉴에 나타나지 않거나 인식되지 않을 때 사용합니다.&#10;&#10;SD 카드에 설치된 타이틀을 기준으로 title.db와 import.db를 새로 만듭니다.&#10;기존 title.db / import.db는 삭제되며, 게임 파일은 변경되지 않습니다.&#10;정상적으로 인식되고 있다면 누를 필요가 없습니다.">
+                    <Button x:Name="RecoverButton" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Padding="5" IsEnabled="{Binding CanLoad}" Click="RecoverTitleDb_Click" ToolTipService.ShowOnDisabled="True" 
+                            ToolTip="3DS 실기에서 title.db 오류로 설치한 게임이 HOME 메뉴에 나타나지 않거나 인식되지 않을 때 사용합니다.&#10;&#10;SD 카드에 설치된 타이틀을 기준으로 title.db와 import.db를 새로 만듭니다.&#10;기존 title.db / import.db는 삭제되며, 게임 파일은 변경되지 않습니다.&#10;정상적으로 인식되고 있다면 누를 필요가 없습니다.">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Recover.png" Width="24" Height="24" Margin="0,0,8,0" VerticalAlignment="Center"/>
                             <TextBlock Text="title.db 복구" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                         </StackPanel>
                     </Button>
-
                     <Button x:Name="LoadButton" Style="{StaticResource PrimaryButton}" Margin="8,0,0,0" Padding="5" IsEnabled="{Binding CanLoad}" Click="LoadTitles_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Loading.png" Width="24" Height="24" Margin="0,0,8,0" VerticalAlignment="Center"/>
                             <TextBlock Text="게임목록 불러오기" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                         </StackPanel>
                     </Button>
-
                 </StackPanel>
             </Grid>
         </Border>
 
         <Grid Margin="5,55,5,5" Grid.ColumnSpan="2" Grid.RowSpan="2">
-
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding InstalledTitles.LoadingVisibility}">
                 <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center"/>
                 <TextBlock x:Name="LoadingText" Text="로딩 중..." Foreground="#8888A8" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
                 <ProgressBar x:Name="LoadingProgress" Width="240" Height="3" Margin="0,16,0,0" Background="#2A2A3A" Foreground="#4F8EF7" BorderThickness="0"/>
             </StackPanel>
-
             <Border HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85" BorderThickness="1" Margin="15,45,15,15" CornerRadius="6" Visibility="{Binding InstalledTitles.EmptyVisibility}">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                     <Image Source="/Assets/Images/SdCard.png" Width="48" Height="48" Margin="0,0,0,8"/>
                     <TextBlock Text="SD 카드를 선택하고 설치 목록을 불러오세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
-
             <ListView x:Name="TitleListView" SelectionMode="Extended" Visibility="{Binding InstalledTitles.ListVisibility}" ContextMenuOpening="ContextMenu_Opening" IsEnabled="{Binding IsUnlocked}">
                 <ListView.ContextMenu>
                     <ContextMenu>
@@ -109,6 +101,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        
                         <GridViewColumn Width="90">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="TypeLabel">
@@ -126,6 +119,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        
                         <GridViewColumn Header="제품 코드" Width="140">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
@@ -136,6 +130,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
+                        
                         <GridViewColumn Width="60">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="RegionSortKey">

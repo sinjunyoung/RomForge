@@ -6,14 +6,12 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <DockPanel>
-
         <Grid DockPanel.Dock="Bottom" Height="32" Background="#1E1E1E">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-
             <TextBlock Grid.Column="0" Text="{Binding StatusText1}" VerticalAlignment="Center" Margin="8,0"/>
             <TextBlock Grid.Column="1" Text="{Binding StatusText2}" VerticalAlignment="Center" Margin="8,0"/>
             <ProgressBar Grid.Column="2" Width="150" Height="4" Value="{Binding Progress}" Minimum="0" Maximum="100" Margin="8,0" VerticalAlignment="Center" Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -34,14 +32,11 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
-            <!-- USB 드라이브 선택 -->
             <Grid Grid.Row="0" Margin="0,0,0,6">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-
                 <Image Grid.Column="0" Source="/Assets/Images/Usb.png" Width="32" Height="32" Margin="5,0,15,0" VerticalAlignment="Center"/>
                 <ComboBox Grid.Column="1" ItemsSource="{Binding UsbDrives}" SelectedItem="{Binding SelectedDrive}" DisplayMemberPath="DisplayName" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center" Height="28">
                     <ComboBox.ItemContainerStyle>
@@ -54,10 +49,7 @@
                 </ComboBox>
             </Grid>
 
-            <!-- 탭 -->
             <TabControl Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}" Background="Transparent" BorderThickness="0">
-
-                <!-- 굽기 탭 -->
                 <TabItem IsEnabled="{Binding IsIdle}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -71,19 +63,14 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
-                        <!-- 파일 경로 -->
                         <Grid Grid.Row="0" Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <Image Grid.Column="0" Source="{Binding WriteFileIcon}" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
-
                             <TextBox IsEnabled="{Binding IsIdle}" Grid.Column="1" Text="{Binding WriteImagePath, UpdateSourceTrigger=PropertyChanged}" FontSize="12" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-
                             <Button Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsIdle}" Command="{Binding OpenWriteFileCommand}" Margin="6,0,6,0">
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="/Assets/Images/ReadOpen.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -91,10 +78,7 @@
                                 </StackPanel>
                             </Button>
                         </Grid>
-
-                        <!-- 가운데 빈 공간 -->
                         <Grid Grid.Row="1"/>
-
                         <Button Grid.Row="2" Style="{StaticResource GrayButton}" Command="{Binding WriteCommand}" HorizontalAlignment="Right" Margin="6,0,6,6">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="/Assets/Images/SD.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -103,8 +87,6 @@
                         </Button>
                     </Grid>
                 </TabItem>
-
-                <!-- 저장 탭 -->
                 <TabItem IsEnabled="{Binding IsIdle}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -120,19 +102,14 @@
                             <RowDefinition Height="*"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-
-                        <!-- 파일 경로 -->
                         <Grid Grid.Row="0" Margin="0,0,0,6">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <Image Grid.Column="0" Source="{Binding ReadFileIcon}" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
-
                             <TextBox IsEnabled="{Binding IsIdle}" Grid.Column="1" Text="{Binding ReadImagePath, UpdateSourceTrigger=PropertyChanged}" FontSize="12" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-
                             <Button Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsIdle}" Command="{Binding OpenReadFileCommand}" Margin="6,0,6,0">
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="/Assets/Images/WriteOpen.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -140,16 +117,12 @@
                                 </StackPanel>
                             </Button>
                         </Grid>
-
-                        <!-- 분할 크기 -->
                         <Grid Grid.Row="1" Margin="0,0,0,6" Visibility="{Binding SegmentOptionsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
                             <Image Grid.Column="0" Source="/Assets/Images/Size.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
-
                             <ComboBox Grid.Column="1" ItemsSource="{Binding SegmentSizeOptions}" SelectedIndex="{Binding SelectedSegmentIndex}" FontSize="13.3" IsEnabled="{Binding IsIdle}" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
@@ -159,16 +132,12 @@
                                 </ComboBox.ItemContainerStyle>
                             </ComboBox>
                         </Grid>
-
-                        <!-- 압축 레벨 -->
                         <Grid Grid.Row="2" Margin="0,0,0,6" Visibility="{Binding SegmentOptionsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-
                             <Image Grid.Column="0" Source="/Assets/Images/Compress.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
-
                             <ComboBox Grid.Column="1" ItemsSource="{Binding CompressionLevelOptions}" SelectedIndex="{Binding SelectedCompressionIndex}" FontSize="13.3" IsEnabled="{Binding IsIdle}" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">
@@ -179,10 +148,7 @@
                                 </ComboBox.ItemContainerStyle>
                             </ComboBox>
                         </Grid>
-
-                        <!-- 빈 공간 -->
                         <Grid Grid.Row="3"/>
-
                         <Button Grid.Row="4" Style="{StaticResource GrayButton}" Command="{Binding ReadCommand}" HorizontalAlignment="Right" Margin="6,0,6,6">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="/Assets/Images/HDD.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
@@ -191,9 +157,7 @@
                         </Button>
                     </Grid>
                 </TabItem>
-
             </TabControl>
         </Grid>
     </DockPanel>
-
 </UserControl>

@@ -16,7 +16,6 @@
                     <RowDefinition Height="5"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
                 <Border Margin="5,0,5,0" Grid.Row="0" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -33,19 +32,13 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-
                             <Image Grid.Column="0" Source="/Assets/Images/Level.png" Width="24" Margin="0,0,5,0"/>
-                            <Slider Grid.Column="1" x:Name="sliderPS1" Style="{StaticResource SliderStyle}"
-                                    Minimum="0" Maximum="9" Value="{Binding CompressLevel}"
-                                    SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="2"
-                                       Text="{Binding ElementName=sliderPS1, Path=Value}"
-                                       Foreground="{Binding ElementName=sliderPS1, Path=Value, Converter={StaticResource LevelToColorConverter}}"
+                            <Slider Grid.Column="1" x:Name="sliderPS1" Style="{StaticResource SliderStyle}" Minimum="0" Maximum="9" Value="{Binding CompressLevel}" SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Text="{Binding ElementName=sliderPS1, Path=Value}" Foreground="{Binding ElementName=sliderPS1, Path=Value, Converter={StaticResource LevelToColorConverter}}" 
                                        FontWeight="Bold" VerticalAlignment="Center" Width="30" TextAlignment="Center" Margin="5,0,0,0" MinWidth="45"/>
                         </Grid>
                     </StackPanel>
                 </Border>
-
                 <Border Margin="5,0,5,0" Grid.Row="2" Style="{StaticResource OptionBorder}" Height="Auto" Padding="8">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -54,11 +47,9 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-
                         <Image Grid.Column="0" Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="출력 옵션" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,4"/>
-
                         <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="8,4">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                                 <RadioButton GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" VerticalAlignment="Center">
@@ -68,9 +59,7 @@
                                         <TextBlock Text=" )" FontSize="11" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </RadioButton>
-
                                 <Border Width="1" Background="#3F3F46" Margin="12,2" Height="14" VerticalAlignment="Center"/>
-
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding UseFileNameMode}">
                                     <RadioButton IsChecked="{Binding UseUpperCase, Converter={StaticResource InverseBool}, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -86,12 +75,10 @@
                                     </RadioButton>                                    
                                 </StackPanel>
                             </StackPanel>
-
                             <RadioButton Content="실기 ( 타이틀ID / EBOOT.PBP )" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Border>
-
             </Grid>
         </TabItem>
     </TabControl>

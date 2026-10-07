@@ -12,7 +12,6 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <Border Grid.Row="0" Background="#1E1E1E" BorderBrush="#2A2A3A" BorderThickness="0,1">
             <DockPanel Margin="20,12">
                 <Grid>
@@ -21,7 +20,6 @@
                         <ColumnDefinition Width="24"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-
                     <DockPanel Grid.Column="0">
                         <Image DockPanel.Dock="Left" Source="/Assets/Images/SdCard.png" Width="32" Height="32" VerticalAlignment="Center" Margin="0,0,15,0"/>
                         <ComboBox x:Name="SdDriveComboBox" VerticalAlignment="Center" SelectionChanged="SdDriveComboBox_SelectionChanged" IsEnabled="{Binding IsIdle}">
@@ -36,7 +34,7 @@
                     </DockPanel>
 
                     <DockPanel Grid.Column="2">
-                        <Image DockPanel.Dock="Left" Source="/Assets/Images/Seed.png" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,6,0"
+                        <Image DockPanel.Dock="Left" Source="/Assets/Images/Seed.png" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,6,0" 
                                ToolTip="1. GodMode9 실행 ( START + POWER )&#x0a;2. SYSNAND CTRNAND → private → movable.sed 선택&#x0a;3. 가장 하단 Copy to 0:/gm9/out 실행"/>
                         <TextBlock DockPanel.Dock="Left" Text="movable.sed" Foreground="#8888A8" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,15,0" 
                                    ToolTip="1. GodMode9 실행 ( START + POWER )&#x0a;2. SYSNAND CTRNAND → private → movable.sed 선택&#x0a;3. 가장 하단 Copy to 0:/gm9/out 실행"/>
@@ -64,7 +62,6 @@
                     </Grid>
                 </ControlTemplate>
             </TabControl.Template>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -74,7 +71,6 @@
                 </TabItem.Header>
                 <local:InstalledTitlesTab x:Name="InstalledTitlesTab"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -95,12 +91,10 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="140"/>
                 </Grid.ColumnDefinitions>
-
                 <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding ProgressSpeed}" Foreground="Gray" FontSize="11" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}"/>
                 <TextBlock Grid.Column="2" Margin="0,0,10,0" Text="{Binding ProgressTime}" Foreground="#4CAF50" FontSize="11" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}"/>
                 <Button Grid.Column="3" Content="취소" Style="{StaticResource SecondaryButton}" Visibility="{Binding CancelButtonVisibility}" Margin="0,0,10,0" Padding="8,2" Click="Cancel_Click" VerticalAlignment="Center"/>
-
                 <Grid Grid.Column="4" Height="10" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}">
                     <Border Background="#25FFFFFF" CornerRadius="5"/>
                     <Border CornerRadius="5" ClipToBounds="True">

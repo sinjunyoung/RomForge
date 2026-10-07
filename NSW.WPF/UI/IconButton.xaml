@@ -4,12 +4,9 @@
              xmlns:local="clr-namespace:NSW.WPF.UI"
              xmlns:conv="clr-namespace:NSW.WPF.Converters"
              x:Name="Root">
-
     <UserControl.Resources>
-        
         <conv:IconConverter x:Key="IconConverter"/>
         <conv:TextToggleConverter x:Key="TextToggleConverter"/>
-
         <Style TargetType="Button">
             <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="18,0"/>
@@ -18,7 +15,6 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-
         <Style x:Key="GrayButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="#2D2D30"/>
             <Setter Property="Foreground" Value="#DCDCDC"/>
@@ -41,26 +37,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
-    <Button x:Name="InnerButton"
-            Style="{StaticResource GrayButton}"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            HorizontalContentAlignment="Center"
-            VerticalContentAlignment="Center"
-            Height="44" Padding="10,0"
-            Click="InnerButton_Click">
-
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
-
-            <Image Width="32" Height="32"
-                   Margin="0,0,10,0"
-                   VerticalAlignment="Center"
-                   RenderOptions.BitmapScalingMode="HighQuality">
+    <Button x:Name="InnerButton" Style="{StaticResource GrayButton}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="44" Padding="10,0" Click="InnerButton_Click">
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Image Width="32" Height="32" Margin="0,0,10,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality">
                 <Image.Source>
                     <MultiBinding Converter="{StaticResource IconConverter}">
                         <Binding ElementName="Root" Path="IsRunning"/>
@@ -69,7 +50,6 @@
                     </MultiBinding>
                 </Image.Source>
             </Image>
-
             <TextBlock VerticalAlignment="Center" FontSize="12">
                 <TextBlock.Text>
                     <MultiBinding Converter="{StaticResource TextToggleConverter}">
@@ -79,7 +59,6 @@
                     </MultiBinding>
                 </TextBlock.Text>
             </TextBlock>
-
         </StackPanel>
     </Button>
 </UserControl>

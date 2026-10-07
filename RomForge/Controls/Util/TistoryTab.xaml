@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -26,12 +25,8 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="티스토리 URL" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" Margin="0,4,10,6"/>
-                <TextBox x:Name="txtUrl" Grid.Row="0" Grid.Column="1" Text="{Binding PageUrls, UpdateSourceTrigger=PropertyChanged}"
-                         IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
-                         AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap"
-                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                         Height="70" Margin="0,0,10,6" Padding="6,4" VerticalContentAlignment="Top"
-                         PreviewKeyDown="TxtUrl_PreviewKeyDown"
+                <TextBox x:Name="txtUrl" Grid.Row="0" Grid.Column="1" Text="{Binding PageUrls, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" 
+                         AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="70" Margin="0,0,10,6" Padding="6,4" VerticalContentAlignment="Top" PreviewKeyDown="TxtUrl_PreviewKeyDown" 
                          ToolTip="티스토리 게시글 URL을 한 줄에 하나씩 입력하세요 (여러 개 입력 가능, Ctrl+Enter로 분석 실행)"/>
                 <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource RunButton}" Command="{Binding AnalyzeCommand}" Height="70" Margin="0,0,0,6">
                     <StackPanel Orientation="Horizontal">
@@ -52,9 +47,7 @@
         </Border>
 
         <ListView x:Name="lvFiles" Grid.Row="1" Margin="5,5,5,5" ItemsSource="{Binding FileItems}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" SelectionMode="Extended"
-                  KeyUp="LvFiles_KeyUp"
-                  GridViewColumnHeader.Click="GridViewColumnHeader_Click"
-                  ContextMenuOpening="LvFiles_ContextMenuOpening">
+                  KeyUp="LvFiles_KeyUp" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -218,9 +211,7 @@
                     </Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox Content="압축 자동 해제 (완료 후 원본 삭제)" IsChecked="{Binding AutoExtractAfterDownload}"
-                              IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}"
-                              Foreground="#BBBBBB" VerticalAlignment="Center" Margin="0,0,20,0"
+                    <CheckBox Content="압축 자동 해제 (완료 후 원본 삭제)" IsChecked="{Binding AutoExtractAfterDownload}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Foreground="#BBBBBB" VerticalAlignment="Center" Margin="0,0,20,0"
                               ToolTip="다운로드한 파일이 압축파일(zip/7z/rar)이면 자동으로 압축을 풀고 원본 압축파일을 삭제합니다"/>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">

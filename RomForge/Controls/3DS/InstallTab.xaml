@@ -11,12 +11,8 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <ListView x:Name="InstallListView" Grid.Row="0" Margin="5,5,5,0" Grid.ColumnSpan="2" SelectionMode="Extended" AllowDrop="True" HorizontalContentAlignment="Stretch" IsEnabled="{Binding Install.IsNotInstalling}" Visibility="{Binding Install.ListVisibility}" 
-                  Drop="InstallList_Drop"
-                  DragOver="InstallList_DragOver"
-                  KeyUp="InstallList_KeyUp"                  
-                  ContextMenuOpening="LvFiles_ContextMenuOpening">
+                  Drop="InstallList_Drop" DragOver="InstallList_DragOver" KeyUp="InstallList_KeyUp" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -37,20 +33,15 @@
                     </MenuItem>
                 </ContextMenu>
             </ListView.ContextMenu>
-
             <ListView.Template>
                 <ControlTemplate TargetType="ListView">
                     <Grid>
-                        <Border x:Name="Bd" Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
                             <ScrollViewer Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
                                 <ItemsPresenter/>
                             </ScrollViewer>
                         </Border>
-                        <Border x:Name="DropHint" IsHitTestVisible="False"
-                                Margin="15,45,15,15"
-                                Visibility="{Binding Install.HintVisibility}">
+                        <Border x:Name="DropHint" IsHitTestVisible="False" Margin="15,45,15,15" Visibility="{Binding Install.HintVisibility}">
                             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                                 <Image Source="/Assets/Images/drag.png" Width="40" Height="40" Margin="0,0,0,8"/>
                                 <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
@@ -97,7 +88,6 @@
                     </Grid>
                 </ControlTemplate>
             </ListView.Template>
-
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="220">
@@ -126,6 +116,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="90">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="TypeLabel">
@@ -153,6 +144,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="60">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="RegionSortKey">
@@ -168,6 +160,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Header="언어 고정" Width="100">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -184,6 +177,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="60">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Crypto">
@@ -198,6 +192,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="90">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="FileSizeBytes"/>
@@ -216,6 +211,7 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
+                    
                     <GridViewColumn Width="100">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Progress"/>

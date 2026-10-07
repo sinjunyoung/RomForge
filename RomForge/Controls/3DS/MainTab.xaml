@@ -7,11 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
-        <TabControl x:Name="MasterTabControl" 
-                    SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}"
-                    Background="Transparent" 
-                    BorderThickness="0">
-
+        <TabControl x:Name="MasterTabControl" SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -21,7 +17,6 @@
                 </TabItem.Header>
                 <local:RepackTab DataContext="{Binding RepackVM}"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -31,7 +26,6 @@
                 </TabItem.Header>
                 <local:InstallMainTab DataContext="{Binding InstallerVM}"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -41,7 +35,6 @@
                 </TabItem.Header>
                 <local:ConverterTab DataContext="{Binding ConverterVM}"/>
             </TabItem>
-
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -51,7 +44,6 @@
                 </TabItem.Header>
                 <local:DecryptorTab DataContext="{Binding DecryptorVM}"/>
             </TabItem>
-
         </TabControl>
     </Grid>
 </UserControl>

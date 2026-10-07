@@ -3,9 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
-
     <UserControl.Resources>
-
         <Style TargetType="Button">
             <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="18,0"/>
@@ -14,7 +12,6 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
-
         <Style x:Key="GrayButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="#12FFFFFF"/>
             <Setter Property="Foreground" Value="#DCDCDC"/>
@@ -37,7 +34,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="TextBox">
             <Setter Property="Background"      Value="#1E1E1E"/>
             <Setter Property="Foreground"      Value="#E8E8F0"/>
@@ -62,7 +58,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="ListBox">
             <Setter Property="Background" Value="#1E1E1E"/>
             <Setter Property="Foreground" Value="#DCDCDC"/>
@@ -81,7 +76,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
         <Style TargetType="ListBoxItem">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Foreground" Value="#DCDCDC"/>
@@ -89,12 +83,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="Bd" 
-                        Background="{TemplateBinding Background}" 
-                        BorderThickness="0" 
-                        CornerRadius="4" 
-                        Padding="{TemplateBinding Padding}"
-                        Margin="2,1">
+                        <Border x:Name="Bd" Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="4" Padding="{TemplateBinding Padding}" Margin="2,1">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -137,7 +126,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
     <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12">
@@ -148,7 +136,6 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- 언어 목록 -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -188,7 +175,6 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-
                         <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
                         <TextBlock Text="이미지 파일을 드래그&amp;드롭하세요" FontSize="11" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
                         <ItemsControl HorizontalAlignment="Center">
@@ -247,21 +233,17 @@
                         <TextBlock Text="게임명" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBox x:Name="txtGameName" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch"/>
-
                     <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
                         <TextBlock Text="ID" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBox x:Name="txtOverrideTitleId" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch" MaxLength="16" CharacterCasing="Upper" ToolTip="16자리 16진수 (예: 0100000000010000). 비워두면 원본 Title ID 유지."/>
-
                     <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
                         <TextBlock Text="배급사" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBox x:Name="txtPublisher" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch"/>
-
                     <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
                         <TextBlock Text="멀티롬 인덱스" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-
                     <ComboBox x:Name="cbxMultiRom" Grid.Column="1" FontSize="11" Margin="10,5,0,0" Height ="25" VerticalAlignment="Center">
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">

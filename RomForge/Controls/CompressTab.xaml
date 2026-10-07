@@ -6,7 +6,6 @@
              xmlns:local="clr-namespace:RomForge.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -15,11 +14,7 @@
         </Grid.RowDefinitions>
 
         <ListView x:Name="lvFiles" Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding CompressVM.FileItems}" IsEnabled="{Binding CompressVM.IsLocked, Converter={StaticResource InverseBool}}" SelectionMode="Extended" AllowDrop="True"
-                  KeyUp="LvFiles_KeyUp"                  
-                  Drop="LvFiles_Drop"
-                  DragOver="LvFiles_DragOver"
-                  GridViewColumnHeader.Click="GridViewColumnHeader_Click"
-                  ContextMenuOpening="LvFiles_ContextMenuOpening">
+                  KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">

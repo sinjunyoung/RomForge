@@ -7,7 +7,6 @@
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
              Background="#1E1E1E">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="300"/>
@@ -21,8 +20,8 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListView x:Name="lvFiles" Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding FileItems}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" SelectionMode="Extended" AllowDrop="True" 
-          KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" ContextMenuOpening="LvFiles_ContextMenuOpening">
+            <ListView x:Name="lvFiles" Grid.Row="0" Margin="5,0,5,0" ItemsSource="{Binding FileItems}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" SelectionMode="Extended" AllowDrop="True"
+                      KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" ContextMenuOpening="LvFiles_ContextMenuOpening">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem" BasedOn="{StaticResource {x:Type ListViewItem}}">
                         <Style.Triggers>

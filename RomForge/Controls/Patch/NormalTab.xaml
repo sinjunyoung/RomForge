@@ -12,7 +12,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -186,7 +185,6 @@
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.Items>
-
                         <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="ZIP" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -194,7 +192,6 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-
                         <Border Background="#1A9E5B24" BorderBrush="#559E5B24" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="RAR" Foreground="#FFA254" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -202,7 +199,6 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-
                         <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="7Z" Foreground="#FF73C9" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -210,7 +206,6 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-
                         <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="CHD" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -218,7 +213,6 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-
                         <Border Background="#1A6C5CE5" BorderBrush="#556C5CE5" BorderThickness="1" CornerRadius="6" Padding="8,3" Margin="3,0">
                             <TextBlock Text="RVZ" Foreground="#A29BFE" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
                                 <TextBlock.Effect>
@@ -301,7 +295,6 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-
                         <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                             <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                 <TextBlock Text="BIN / IMG / ISO" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
@@ -317,7 +310,6 @@
                                     </TextBlock.Effect></TextBlock>
                             </Border>
                         </StackPanel>
-
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                             <Border Background="#1AFFCE73" BorderBrush="#4DFFCE73" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                 <TextBlock Text="3DS / CCI / CIA" Foreground="#FFCE73" FontWeight="Bold" VerticalAlignment="Center">
@@ -333,7 +325,6 @@
                                     </TextBlock.Effect></TextBlock>
                             </Border>
                         </StackPanel>
-
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
                             <Border Background="#1A9E2469" BorderBrush="#559E2469" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                 <TextBlock Text="GCM / Wii / WBFS" Foreground="#FF73C9" FontWeight="Bold" VerticalAlignment="Center">
@@ -349,7 +340,6 @@
                                     </TextBlock.Effect></TextBlock>
                             </Border>
                         </StackPanel>
-
                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
                                 <TextBlock Text="이외 기타" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
@@ -358,7 +348,6 @@
                                     </TextBlock.Effect></TextBlock>
                             </Border>
                             <TextBlock Text="➔" Foreground="#FF9800" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" Margin="2,0,4,0"/>
-
                             <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="5" Padding="6,2">
                                 <TextBlock Text="ZIP" Foreground="#8FA3FF" FontWeight="Bold" VerticalAlignment="Center">
                                     <TextBlock.Effect>
@@ -370,8 +359,7 @@
                 </StackPanel>
             </ToggleButton>
 
-            <StackPanel Background="Transparent">
-                
+            <StackPanel Background="Transparent">                
                 <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,2" Height="30">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
@@ -379,7 +367,6 @@
                         <TextBlock Text="패치 파일명에서 버전과 날짜를 읽어와 결과 파일명에 표시합니다" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
                     </StackPanel>
                 </ToggleButton>
-
                 <StackPanel Visibility="{Binding  PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel>
                         <Grid>
@@ -401,7 +388,6 @@
                             </Grid>
                         </Grid>
                     </StackPanel>
-
                     <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,2,0,3">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="예상 파일명: " Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
@@ -410,9 +396,7 @@
                     </Border>
                 </StackPanel>
             </StackPanel>
-
         </StackPanel>
-
         <Border Grid.Row="7" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="0,2,0,0" Padding="8,0">
             <Grid x:Name="progressArea" Height="28">
                 <Grid.ColumnDefinitions>

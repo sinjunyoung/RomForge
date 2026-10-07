@@ -7,7 +7,6 @@
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="640" d:DesignWidth="800">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -26,11 +25,7 @@
 
                 <Grid Grid.Column="0">
                     <ListView ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}" Background="Transparent" BorderThickness="0" Margin="5" AllowDrop="True" 
-                              KeyUp="LvFiles_KeyUp"
-                              ContextMenuOpening="LvFiles_ContextMenuOpening"
-                              DragEnter="Root_DragEnter" 
-                              DragOver="Root_DragEnter" 
-                              Drop="Root_Drop">
+                              KeyUp="LvFiles_KeyUp" ContextMenuOpening="LvFiles_ContextMenuOpening" DragEnter="Root_DragEnter" DragOver="Root_DragEnter" Drop="Root_Drop">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">

@@ -6,6 +6,7 @@
              xmlns:wpfconverters="clr-namespace:NSW.WPF.Converters;assembly=NSW.WPF"
              xmlns:cmnconverters="clr-namespace:Common.WPF.Converters;assembly=Common.WPF"
              StartupUri="Views/MainWindow.xaml">
+
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -39,11 +40,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="TabControl">
-                            <Border BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10"
-                            Background="{TemplateBinding Background}"
-                            ClipToBounds="True">
+                            <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Background="{TemplateBinding Background}" ClipToBounds="True">
                                 <DockPanel>
                                     <TabPanel DockPanel.Dock="Top" IsItemsHost="True" Background="#252526" Margin="{TemplateBinding Padding}"/>
                                     <ContentPresenter ContentSource="SelectedContent"/>
@@ -63,13 +60,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="TabItem">
-                            <Border x:Name="Bd"
-                            Background="Transparent"
-                            BorderBrush="#333333"
-                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6,6,0,0" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter ContentSource="Header"
-                                          HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
+                            <Border x:Name="Bd" Background="Transparent" BorderBrush="#333333" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6,6,0,0" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsSelected" Value="True">
@@ -105,14 +97,13 @@
                 <Setter Property="MinHeight" Value="24"/>
                 <Setter Property="HorizontalContentAlignment" Value="Center"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
-
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ComboBox">
                             <Grid>
                                 <ToggleButton Name="ToggleButton" 
-                                   BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" Grid.Column="2"  Focusable="false" IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
-                                   ClickMode="Press">
+                                   BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}" Grid.Column="2"  Focusable="false" 
+                                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press">
                                     <ToggleButton.Template>
                                         <ControlTemplate TargetType="ToggleButton">
                                             <Border x:Name="Border" Grid.Column="0" CornerRadius="4" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
@@ -130,10 +121,8 @@
                                         </ControlTemplate>
                                     </ToggleButton.Template>
                                 </ToggleButton>
-
                                 <ContentPresenter Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
                                                   Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" TextElement.Foreground="{TemplateBinding Foreground}"/>
-
                                 <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
                                     <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                         <Border Name="DropDownBorder" Background="#1E1E1C" BorderThickness="1" BorderBrush="#434346" CornerRadius="0,0,4,4"/>
@@ -172,7 +161,6 @@
                 </Setter>
             </Style>
 
-
             <Style x:Key="ProgressBarStyle" TargetType="ProgressBar">
                 <Setter Property="Height" Value="18"/>
                 <Setter Property="Background" Value="#2D2D30"/>
@@ -201,7 +189,6 @@
                 <Setter Property="BorderThickness" Value="0"/>
             </Style>
 
-
             <Style x:Key="DropZone" TargetType="Border">
                 <Setter Property="Background" Value="#252526"/>
                 <Setter Property="BorderBrush" Value="#3F3F46"/>
@@ -219,7 +206,6 @@
                 <Setter Property="Height" Value="44"/>
                 <Setter Property="Padding" Value="12,0"/>
             </Style>
-
 
             <Style x:Key="SliderStyle" TargetType="Slider">
                 <Setter Property="IsMoveToPointEnabled" Value="True"/>
@@ -291,7 +277,6 @@
                 </Setter>
             </Style>
 
-
             <Style TargetType="ContextMenu">
                 <Setter Property="OverridesDefaultStyle" Value="True"/>
                 <Setter Property="Background"      Value="#1C1C26"/>
@@ -301,11 +286,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="ContextMenu">
-                            <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8"
-                            Padding="{TemplateBinding Padding}">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                                 <ItemsPresenter/>
                             </Border>
                         </ControlTemplate>
@@ -319,18 +300,10 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="MenuItem">
-                            <Border x:Name="Root"
-                                    Background="Transparent"
-                                    CornerRadius="5"
-                                    Padding="8,6">
+                            <Border x:Name="Root" Background="Transparent" CornerRadius="5" Padding="8,6">
                                 <StackPanel Orientation="Horizontal">
-                                    <ContentPresenter Content="{TemplateBinding Icon}"
-                                                      Width="24"
-                                                      Height="24"
-                                                      Margin="0,0,8,0"
-                                                      VerticalAlignment="Center"/>
-                                    <ContentPresenter ContentSource="Header"
-                                                      VerticalAlignment="Center"/>
+                                    <ContentPresenter Content="{TemplateBinding Icon}" Width="24" Height="24" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <ContentPresenter ContentSource="Header" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                             <ControlTemplate.Triggers>
@@ -353,14 +326,11 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Separator">
-                            <Border Background="{TemplateBinding Background}"
-                                    Height="{TemplateBinding Height}"
-                                    Margin="{TemplateBinding Margin}"/>
+                            <Border Background="{TemplateBinding Background}" Height="{TemplateBinding Height}" Margin="{TemplateBinding Margin}"/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
-
 
             <Style x:Key="LogBoxItemContainer" TargetType="ListBoxItem">
                 <Setter Property="Focusable" Value="False"/>
@@ -421,13 +391,11 @@
                                 <Trigger Property="IsFocused" Value="True">
                                     <Setter Property="BorderBrush" Value="#4F8EF7"/>
                                 </Trigger>
-
                                 <Trigger Property="IsReadOnly" Value="True">
                                     <Setter Property="Background" Value="#121212"/>
                                     <Setter Property="Foreground" Value="#656565"/>
                                     <Setter Property="BorderBrush" Value="#1A1A1A"/>
                                 </Trigger>
-
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Background" Value="#121212"/>
                                     <Setter Property="Foreground" Value="#656565"/>
@@ -452,24 +420,11 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-
-                                <Border Grid.RowSpan="2" 
-                                Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="1" 
-                                CornerRadius="8"/>
-                                <Border Background="#3D3D3D" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="0,0,0,1" 
-                                CornerRadius="8,8,0,0" 
-                                Padding="10,5">
-                                    <ContentPresenter ContentSource="Header" 
-                                              TextBlock.FontWeight="Bold" 
-                                              TextBlock.Foreground="{TemplateBinding Foreground}"/>
+                                <Border Grid.RowSpan="2"  Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="8"/>
+                                <Border Background="#3D3D3D" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0,0,0,1" CornerRadius="8,8,0,0" Padding="10,5">
+                                    <ContentPresenter ContentSource="Header" TextBlock.FontWeight="Bold" TextBlock.Foreground="{TemplateBinding Foreground}"/>
                                 </Border>
-
-                                <ContentPresenter Grid.Row="1" 
-                                          Margin="{TemplateBinding Padding}"/>
+                                <ContentPresenter Grid.Row="1" Margin="{TemplateBinding Padding}"/>
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>
@@ -507,51 +462,25 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="DatePicker">
-                            <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="6">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="26"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <DatePickerTextBox x:Name="PART_TextBox"
-                                           Grid.Column="0"
-                                           Style="{StaticResource DatePickerTextBoxStyle}"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"/>
-
-                                    <Button x:Name="PART_Button"
-                                Grid.Column="1"
-                                Focusable="False"
-                                Width="20" Height="20"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="Transparent"
-                                BorderThickness="0">
+                                    <DatePickerTextBox Grid.Column="0" x:Name="PART_TextBox" Style="{StaticResource DatePickerTextBoxStyle}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                    <Button Grid.Column="1" x:Name="PART_Button" Focusable="False" Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Transparent" BorderThickness="0">
                                         <Button.Template>
                                             <ControlTemplate TargetType="Button">
                                                 <Border Background="Transparent">
-                                                    <Path Stretch="Uniform"
-                                              Width="14" Height="14"
-                                              Stroke="#8AB4F8"
-                                              StrokeThickness="1.3"
-                                              Data="M1,3 L15,3 M1,3 L1,15 L15,15 L15,3 M4,1 L4,4 M12,1 L12,4"/>
+                                                    <Path Stretch="Uniform" Width="14" Height="14" Stroke="#8AB4F8" StrokeThickness="1.3" Data="M1,3 L15,3 M1,3 L1,15 L15,15 L15,3 M4,1 L4,4 M12,1 L12,4"/>
                                                 </Border>
                                             </ControlTemplate>
                                         </Button.Template>
                                     </Button>
-
-                                    <Popup x:Name="PART_Popup"
-                               Grid.ColumnSpan="2"
-                               Placement="Bottom"
-                               StaysOpen="False"
-                               AllowsTransparency="True"/>
+                                    <Popup Grid.ColumnSpan="2" x:Name="PART_Popup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True"/>
                                 </Grid>
                             </Border>
-
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsKeyboardFocusWithin" Value="True">
                                     <Setter Property="BorderBrush" Value="#4F8EF7"/>
@@ -580,10 +509,8 @@
                                     <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="2"/>
                                     <Path x:Name="checkMark" Data="M 2 6 L 5 9 L 12 2" Stroke="White" StrokeThickness="2" Visibility="Collapsed" Margin="1,2,0,0"/>
                                 </Grid>
-
                                 <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                             </StackPanel>
-
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter TargetName="border" Property="BorderBrush" Value="#888888"/>

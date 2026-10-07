@@ -6,7 +6,6 @@
              xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
              mc:Ignorable="d" 
              d:DesignHeight="640" d:DesignWidth="800">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -14,17 +13,15 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Grid.Row="0" IsEnabled="{Binding PatchVM.IsIdle}" Margin="5">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="50"/>
                 </Grid.ColumnDefinitions>
-
                 <Grid Grid.Column="0">
-                    <ListView AllowDrop="True" Background="Transparent" BorderThickness="0" ContextMenuOpening="LvPkg_ContextMenuOpening" DragEnter="Root_DragEnter" Drop="Root_Drop" ItemsSource="{Binding PatchVM.VitaVM.SourceRows}" KeyUp="LvPkg_KeyUp" Margin="5" SelectedItem="{Binding PatchVM.VitaVM.SelectedRow}">
-
+                    <ListView AllowDrop="True" Background="Transparent" BorderThickness="0" ContextMenuOpening="LvPkg_ContextMenuOpening" ItemsSource="{Binding PatchVM.VitaVM.SourceRows}" Margin="5" SelectedItem="{Binding PatchVM.VitaVM.SelectedRow}"
+                              KeyUp="LvPkg_KeyUp" DragEnter="Root_DragEnter" Drop="Root_Drop">
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
@@ -51,10 +48,8 @@
                                 </MenuItem>
                             </ContextMenu>
                         </ListView.ContextMenu>
-
                         <ListView.View>
                             <GridView>
-
                                 <GridViewColumn Width="80">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -117,10 +112,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Width="32" Height="32" CornerRadius="4" Background="#3A3A40" BorderBrush="#5A5A62" BorderThickness="1" ToolTip="{Binding PatchPath}" AllowDrop="True" Cursor="Hand" Tag="{Binding}"
-                                                    DragEnter="PatchDropTarget_DragEnter" 
-                                                    DragLeave="PatchDropTarget_DragLeave" 
-                                                    Drop="PatchDropTarget_Drop"
-                                                    MouseLeftButtonUp="PatchDropTarget_Click">
+                                                    DragEnter="PatchDropTarget_DragEnter" DragLeave="PatchDropTarget_DragLeave" Drop="PatchDropTarget_Drop" MouseLeftButtonUp="PatchDropTarget_Click">
                                                 <Border.ContextMenu>
                                                     <ContextMenu>
                                                         <MenuItem Header="폴더 선택..." Click="PatchMenu_SelectFolder_Click">
@@ -264,5 +256,4 @@
             </Grid>
         </Border>
     </Grid>
-
 </UserControl>
