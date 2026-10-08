@@ -19,11 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RomForge\Patch.Core\Patch.Core.csproj" />
     <ProjectReference Include="..\LibHac\LibHac.csproj" />
     <ProjectReference Include="..\NSW.Core\NSW.Core.csproj" />
     <ProjectReference Include="..\NSW.HacPack\NSW.HacPack.csproj" />
     <ProjectReference Include="..\NSW.Utils\NSW.Utils.csproj" />
+    <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
   </ItemGroup>
 
 </Project>

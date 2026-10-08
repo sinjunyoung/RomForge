@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\RomForge\Common.WPF\Common.WPF.csproj" />
+    <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
     <ProjectReference Include="..\LibHac\LibHac.csproj" />
     <ProjectReference Include="..\NSW.Core\NSW.Core.csproj" />
     <ProjectReference Include="..\NSW.HacPack\NSW.HacPack.csproj" />
