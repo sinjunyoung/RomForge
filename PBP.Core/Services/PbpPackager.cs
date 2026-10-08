@@ -56,6 +56,7 @@ public static class PbpPackager
         outputStream.WriteResource(assets.Icon0Png);
         outputStream.WriteResource(assets.Pic0Png);
         outputStream.WriteResource(assets.Pic1Png);
+        outputStream.WriteResource(assets.Snd0At3);
         outputStream.WriteResource(assets.DataPsp);
 
         var pos = (uint)outputStream.Position;

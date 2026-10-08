@@ -6,10 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />

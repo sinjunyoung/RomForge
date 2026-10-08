@@ -125,6 +125,7 @@
             </Grid>
 
             <TabControl Grid.Column="1" IsEnabled="{Binding IsUnlocked}" Background="Transparent" BorderThickness="0">
+                
                 <TabItem Header="기본 이미지">
                     <StackPanel>
                         <Viewbox Stretch="Uniform">
@@ -168,6 +169,7 @@
                         <Button Style="{StaticResource CancelButton}" Content="비우기" Click="BaseImage_Reset_Click" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
                     </StackPanel>
                 </TabItem>
+                
                 <TabItem Header="부트 로고">
                     <StackPanel>
                         <Viewbox Stretch="Uniform">
@@ -245,6 +247,47 @@
                         <Button Style="{StaticResource CancelButton}" Content="비우기" Click="BootLogo_Reset_Click" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
                     </StackPanel>
                 </TabItem>
+
+                <TabItem Header="배경음">
+                    <StackPanel>
+                        <Viewbox Stretch="Uniform">
+                            <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" Background="#10FFFFFF" AllowDrop="True" Drop="Bgm_Drop" MouseLeftButtonDown="Bgm_MouseLeftButtonDown" Cursor="Hand">
+                                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <Image Source="/Assets/Images/Drag.png" Width="36" Height="36" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding BgmFileName, FallbackValue='오디오 파일을 드래그&amp;드롭하거나 클릭하세요'}" FontSize="13" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#E0E0E0" Margin="0,0,0,6"/>
+                                        <!--<TextBlock Text="* WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="11" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>-->
+                                        <ItemsControl HorizontalAlignment="Center">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel Orientation="Horizontal" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.Items>
+                                                <!--<Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="6" Padding="12,4" Margin="4,0">
+                                                    <TextBlock Text="WAV" Foreground="#8FA3FF" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#8FA3FF" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>-->
+                                                <Border Background="#1A1B8A5A" BorderBrush="#551B8A5A" BorderThickness="1" CornerRadius="6" Padding="12,4" Margin="4,0">
+                                                    <TextBlock Text="AT3" Foreground="#54FFB5" FontWeight="Bold" FontSize="11" VerticalAlignment="Center">
+                                                        <TextBlock.Effect>
+                                                            <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#54FFB5" Opacity="0.4"/>
+                                                        </TextBlock.Effect>
+                                                    </TextBlock>
+                                                </Border>
+                                            </ItemsControl.Items>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Viewbox>
+                        <Button Style="{StaticResource CancelButton}" Content="비우기" Click="Bgm_Reset_Click" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
+                    </StackPanel>
+                </TabItem>
+
             </TabControl>
         </Grid>
 

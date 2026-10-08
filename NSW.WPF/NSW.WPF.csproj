@@ -98,11 +98,11 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;SYSLIB1045;CS8600;CS8601;CS8603;CS8618;CS8625</NoWarn>
+    <NoWarn>1701;1702;SYSLIB1045;CS8600;CS8601;CS8603;CS8618;CS8625;NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;SYSLIB1045;CS8600;CS8601;CS8603;CS8618;CS8625</NoWarn>
+    <NoWarn>1701;1702;SYSLIB1045;CS8600;CS8601;CS8603;CS8618;CS8625;NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
 </Project>

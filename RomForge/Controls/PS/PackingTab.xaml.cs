@@ -12,6 +12,7 @@ namespace RomForge.Controls.PS;
 public partial class PackingTab : UserControl
 {
     private readonly string[] _imgExts = [".jpg", ".jpeg", ".png", ".bmp", ".webp"];
+    private readonly string[] _audioExts = [".wav", ".at3"];
 
     private PackingMainViewModel? ViewModel => DataContext as PackingMainViewModel;
 
@@ -91,10 +92,9 @@ public partial class PackingTab : UserControl
         ViewModel?.SetPic1FromBytes(rawBytes);
     }
 
-
     private void Icon0_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        ExportImage(ViewModel?.Icon0Image,  "Cover.PNG");
+        ExportImage(ViewModel?.Icon0Image, "Cover.PNG");
     }
 
     private void Pic0_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -127,6 +127,7 @@ public partial class PackingTab : UserControl
             return;
 
         byte[] rawBytes = File.ReadAllBytes(files[0]);
+
         ViewModel?.SetBootLogoFromBytes(rawBytes);
     }
 
@@ -135,24 +136,59 @@ public partial class PackingTab : UserControl
         if (ViewModel?.BootLogoImage != null)
             ExportImage(ViewModel.BootLogoImage, "BootLogo.PNG");
     }
-    
+
     private void BootLogo_Reset_Click(object sender, RoutedEventArgs e)
     {
         ViewModel?.ResetBootLogo();
     }
 
-    private void ExportImage(BitmapImage bmp, string fileNameBase)
+    private void Bgm_Drop(object sender, DragEventArgs e)
     {
+        e.Handled = true;
+
+        var files = (string[]?)e.Data.GetData(DataFormats.FileDrop);
+
+        if (files is not { Length: > 0 })
+            return;
+
+        ProcessAudioFile(files[0]);
+    }
+
+    private void Bgm_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            //Filter = "Audio Files (*.wav;*.at3)|*.wav;*.at3|WAV Files (*.wav)|*.wav|AT3 Files (*.at3)|*.at3"
+            Filter = "AT3 Files (*.at3)|*.at3"
+        };
+
+        if (dialog.ShowDialog() == true)
+            ProcessAudioFile(dialog.FileName);
+    }
+
+    private void Bgm_Reset_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel?.ResetBgm();
+    }
+
+    private void ProcessAudioFile(string filePath)
+    {
+        string ext = Path.GetExtension(filePath).ToLowerInvariant();
+
+        if (!_audioExts.Contains(ext))
+            return;
+
+        ViewModel?.SetBgmPath(filePath);
+    }
+
+    private void ExportImage(BitmapImage? bmp, string fileNameBase)
+    {
+        if (bmp == null)
+            return;
+
         char[] invalidChars = Path.GetInvalidFileNameChars();
-
-        string safeGameTitle = !string.IsNullOrEmpty(ViewModel?.GameTitle)
-            ? string.Join("_", ViewModel.GameTitle.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries))
-            : string.Empty;
-
-        string fileName = !string.IsNullOrEmpty(safeGameTitle)
-            ? $"{safeGameTitle}_{fileNameBase}"
-            : fileNameBase;
-
+        string safeGameTitle = !string.IsNullOrEmpty(ViewModel?.GameTitle) ? string.Join("_", ViewModel.GameTitle.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries)) : string.Empty;
+        string fileName = !string.IsNullOrEmpty(safeGameTitle) ? $"{safeGameTitle}_{fileNameBase}" : fileNameBase;
         string tempFilePath = Path.Combine(Path.GetTempPath(), fileName);
 
         using (var fs = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
@@ -165,6 +201,7 @@ public partial class PackingTab : UserControl
         try
         {
             var dataObject = new DataObject();
+
             dataObject.SetFileDropList([tempFilePath]);
             DragDrop.DoDragDrop(this, dataObject, DragDropEffects.Copy);
         }
@@ -204,6 +241,7 @@ public partial class PackingTab : UserControl
     private void BtnRemove_Click(object sender, RoutedEventArgs e)
     {
         var selected = lvFiles.SelectedItems.Cast<DiscFileItem>().ToList();
+
         ViewModel?.RemoveItems(selected);
     }
 

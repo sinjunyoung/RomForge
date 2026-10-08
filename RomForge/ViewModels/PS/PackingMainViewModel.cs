@@ -53,6 +53,24 @@ public class PackingMainViewModel : ToolTabViewModel
 
     public byte[]? BootLogoBytes { get; set; }
 
+    public byte[]? BgmBytes { get; set; }
+
+    private string? _bgmFilePath;
+    public string? BgmFilePath
+    {
+        get => _bgmFilePath;
+        set
+        {
+            SetProperty(ref _bgmFilePath, value);
+            OnPropertyChanged(nameof(BgmFileName));
+            OnPropertyChanged(nameof(HasBgm));
+        }
+    }
+
+    public string BgmFileName => !string.IsNullOrEmpty(BgmFilePath) ? Path.GetFileName(BgmFilePath) : string.Empty;
+
+    public bool HasBgm => !string.IsNullOrEmpty(BgmFilePath);
+
     public string GameTitle
     {
         get => _gameTitle;
@@ -299,9 +317,10 @@ public class PackingMainViewModel : ToolTabViewModel
     {
         FileItems.Clear();
         OnPropertyChanged(nameof(HintVisibility));
-        _lastIconGameId = null;        
+        _lastIconGameId = null;
         ResetBaseImages();
         ResetBootLogo();
+        ResetBgm();
         OnPropertyChanged(nameof(HasPresetConfig));
         OnPropertyChanged(nameof(CanEditPopsConfig));
     }
@@ -334,8 +353,28 @@ public class PackingMainViewModel : ToolTabViewModel
         BootLogoImage = img;
     }
 
+    public void SetBgmPath(string filePath)
+    {
+        try
+        {
+            byte[] bytes = File.ReadAllBytes(filePath);
+            string ext = Path.GetExtension(filePath).ToLowerInvariant();
+
+            if (ext == ".wav")
+                BgmBytes = At3Encoder.ConvertWavToAt3(bytes);
+            else
+                BgmBytes = bytes;
+
+            BgmFilePath = filePath;
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"배경음 처리 중 오류 발생: {ex.Message}", LogLevel.Error);
+        }
+    }
+
     public void ResetBaseImages()
-    {        
+    {
         Icon0Bytes = EmbeddedAssetProvider.GetDefaultIcon0();
         Icon0Image = Icon0Bytes.ToBitmapImage();
         Pic0Bytes = EmbeddedAssetProvider.GetDefaultPic0();
@@ -348,6 +387,12 @@ public class PackingMainViewModel : ToolTabViewModel
     {
         BootLogoBytes = null;
         BootLogoImage = null;
+    }
+
+    public void ResetBgm()
+    {
+        BgmBytes = null;
+        BgmFilePath = null;
     }
 
     private async Task UpdateImageAsync()
@@ -407,18 +452,16 @@ public class PackingMainViewModel : ToolTabViewModel
             var orderedItems = FileItems.OrderBy(i => i.No).ToList();
             var gameTitle = string.IsNullOrWhiteSpace(GameTitle) ? DiscListSorter.GuessTitle(orderedItems[0].FilePath) : GameTitle;
             var mainGameId = orderedItems[0].GameId;
-
             var assets = new PbpAssets
             {
                 Icon0Png = Icon0Bytes.ResizePng(80, 80),
                 Pic0Png = Pic0Bytes.ResizePng(480, 272),
                 Pic1Png = Pic1Bytes.ResizePng(480, 272),
                 BootPng = BootLogoBytes?.ResizePng(480, 272),
+                Snd0At3 = BgmBytes,
                 DataPsp = EmbeddedAssetProvider.GetDefaultData()
             };
-
             var plan = PackingJobRunner.PlanOutput(orderedItems[0].FilePath, gameTitle, mainGameId);
-
             byte[]? popsConfig = orderedItems[0].PresetConfigBytes;
 
             if (popsConfig == null && (UseFmvFix || UseCdTimingFix))
