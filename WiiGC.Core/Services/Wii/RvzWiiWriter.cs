@@ -3,8 +3,6 @@ using static WiiGC.Core.Services.RvzHeaderWriter;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services;
-using ZstdSharp.Unsafe;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -116,7 +114,6 @@ internal sealed class RvzWiiWriter
         AddRaw(lastEnd, isoSize - lastEnd);
 
         var groups = new GroupEntry[totalGroups];
-
         long groupTableBytes = (long)totalGroups * 12;
         long partitionTableBytes = (long)partitionEntries.Count * PartitionEntrySize;
         long upperBound = EstimateUpperBound(partitionTableBytes, groupTableBytes);
@@ -131,8 +128,10 @@ internal sealed class RvzWiiWriter
         if (_input is WiaSource wiaSource)
         {
             int groupsPerChunk = (int)Math.Ceiling(wiaSource.ChunkSize / (double)WiiLayout.GroupDataSize);
+
             window = Math.Clamp(Environment.ProcessorCount * groupsPerChunk, window, 512);
         }
+
         using var compressors = new ThreadLocal<ZstdSharp.Compressor>(() => CreateCompressor(_compressionLevel), trackAllValues: true);
 
         void Complete((uint Index, GroupResult Result)[] results, long weight)

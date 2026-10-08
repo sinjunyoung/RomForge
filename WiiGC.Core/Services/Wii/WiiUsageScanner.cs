@@ -113,19 +113,17 @@ internal static class WiiUsageScanner
         if (h3Offset != 0)
             MarkRaw(used, spec.ContainerOffset + h3Offset, 0x18000);
 
-        var reader = new PartitionReader(input, used, spec);
-
+        using var reader = new WiiPartitionReader(input, spec);
         byte[] boot = new byte[BootSize];
 
-        reader.Read(0, boot, true);
+        reader.Read(0, boot, used);
 
         uint dolOffset4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x420));
         uint fstOffset4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x424));
         uint fstSize4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x428));
-
         byte[] dol = new byte[0x100];
 
-        reader.Read((long)dolOffset4 << 2, dol, false);
+        reader.Read((long)dolOffset4 << 2, dol);
 
         long dolSize = 0;
 
@@ -140,21 +138,21 @@ internal static class WiiUsageScanner
         if (dolSize > ((long)fstOffset4 - dolOffset4) << 2)
             throw new InvalidDataException("MAIN.DOL 크기가 올바르지 않습니다.");
 
-        reader.MarkPart(dolOffset4, dolSize);
+        MarkPart(used, spec, dolOffset4, dolSize);
 
         byte[] apploader = new byte[0x20];
 
-        reader.Read(ApploaderOffset, apploader, false);
+        reader.Read(ApploaderOffset, apploader);
 
         long apploaderSize = 0x20L + BinaryPrimitives.ReadUInt32BigEndian(apploader.AsSpan(0x14)) + BinaryPrimitives.ReadUInt32BigEndian(apploader.AsSpan(0x18));
 
-        reader.MarkPart(ApploaderOffset >> 2, apploaderSize);
+        MarkPart(used, spec, ApploaderOffset >> 2, apploaderSize);
 
         long userOffset = (ApploaderOffset + apploaderSize + 3) & ~3L;
         byte[] userHeader = new byte[0x10];
 
-        if (reader.TryRead(userOffset, userHeader, false) && userHeader.AsSpan(0, 8).SequenceEqual("USER.BIN"u8))
-            reader.MarkPart((userOffset + 0x10) >> 2, BinaryPrimitives.ReadUInt32BigEndian(userHeader.AsSpan(0x0C)));
+        if (TryRead(reader, userOffset, userHeader) && userHeader.AsSpan(0, 8).SequenceEqual("USER.BIN"u8))
+            MarkPart(used, spec, (userOffset + 0x10) >> 2, BinaryPrimitives.ReadUInt32BigEndian(userHeader.AsSpan(0x0C)));
 
         long fstSize = (long)fstSize4 << 2;
 
@@ -163,7 +161,7 @@ internal static class WiiUsageScanner
 
         byte[] fst = new byte[fstSize];
 
-        reader.Read((long)fstOffset4 << 2, fst, true);
+        reader.Read((long)fstOffset4 << 2, fst, used);
 
         long entryCount = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(8));
 
@@ -174,101 +172,34 @@ internal static class WiiUsageScanner
             if (entry[0] != 0)
                 continue;
 
-            reader.MarkPart(BinaryPrimitives.ReadUInt32BigEndian(entry[4..]), BinaryPrimitives.ReadUInt32BigEndian(entry[8..]));
+            MarkPart(used, spec, BinaryPrimitives.ReadUInt32BigEndian(entry[4..]), BinaryPrimitives.ReadUInt32BigEndian(entry[8..]));
         }
     }
 
-    private sealed class PartitionReader
+    private static bool TryRead(WiiPartitionReader reader, long offset, byte[] destination)
     {
-        private readonly IRvzInputSource _input;
-        private readonly bool[] _used;
-        private readonly WiiPartitionSpec _spec;
-        private readonly long _delta;
-        private readonly byte[] _encrypted = new byte[SectorSize];
-        private readonly byte[] _plain = new byte[SectorDataSize];
-        private readonly Aes _aes;
-        private long _cached = -1;
-
-        public PartitionReader(IRvzInputSource input, bool[] used, WiiPartitionSpec spec)
+        try
         {
-            _input = input;
-            _used = used;
-            _spec = spec;
-            _delta = spec.DataStart / SectorSize;
-            _aes = Aes.Create();
-            _aes.Key = spec.Key;
-        }
+            reader.Read(offset, destination);
 
-        public bool TryRead(long offset, byte[] destination, bool mark)
+            return true;
+        }
+        catch (EndOfStreamException)
         {
-            try
-            {
-                Read(offset, destination, mark);
-
-                return true;
-            }
-            catch (EndOfStreamException)
-            {
-                return false;
-            }
+            return false;
         }
+    }
 
-        public void Read(long offset, byte[] destination, bool mark)
-        {
-            int written = 0;
+    private static void MarkPart(bool[] used, WiiPartitionSpec spec, long offset4, long size)
+    {
+        long delta = spec.DataStart / SectorSize;
+        long first = offset4 / SectorDataSize4 + delta;
+        long end = (((size + SectorDataSize - 1) >> 2) + offset4) / SectorDataSize4 + delta;
 
-            while (written < destination.Length)
-            {
-                long cluster = offset / SectorDataSize;
-                int inner = (int)(offset % SectorDataSize);
-                int chunk = Math.Min(SectorDataSize - inner, destination.Length - written);
+        if (end > MaxSectors)
+            end = MaxSectors;
 
-                LoadCluster(cluster);
-
-                if (mark)
-                {
-                    long sector = _delta + cluster;
-
-                    if (sector < MaxSectors)
-                        _used[sector] = true;
-                }
-
-                Array.Copy(_plain, inner, destination, written, chunk);
-
-                written += chunk;
-                offset += chunk;
-            }
-        }
-
-        public void MarkPart(long offset4, long size)
-        {
-            long first = offset4 / SectorDataSize4 + _delta;
-            long end = (((size + SectorDataSize - 1) >> 2) + offset4) / SectorDataSize4 + _delta;
-
-            if (end > MaxSectors)
-                end = MaxSectors;
-
-            for (long s = first; s < end; s++)
-                _used[s] = true;
-        }
-
-        private void LoadCluster(long cluster)
-        {
-            if (_cached == cluster)
-                return;
-
-            long position = _spec.DataStart + cluster * SectorSize;
-
-            if (position + SectorSize > _input.Length || cluster * SectorSize >= _spec.DataSize)
-                throw new EndOfStreamException("파티션 범위를 벗어난 읽기입니다.");
-
-            _input.Read(position, _encrypted);
-
-            var iv = _encrypted.AsSpan(0x3D0, 16).ToArray();
-
-            _aes.DecryptCbc(_encrypted.AsSpan(WiiLayout.BlockHeaderSize, SectorDataSize), iv, _plain, PaddingMode.None);
-
-            _cached = cluster;
-        }
+        for (long s = first; s < end; s++)
+            used[s] = true;
     }
 }

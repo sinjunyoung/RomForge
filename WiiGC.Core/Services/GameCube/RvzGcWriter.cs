@@ -100,8 +100,8 @@ internal sealed class RvzGcWriter
                 var entryValue = new GroupEntry((uint)(bytesWritten >> 2), result.DataSizeField, result.PackedSize);
 
                 RandomAccess.Write(_output, result.Buffer.AsSpan(0, result.Length), bytesWritten);
-                bytesWritten = Align4(bytesWritten + result.Length);
 
+                bytesWritten = Align4(bytesWritten + result.Length);
                 groups[index] = entryValue;
 
                 if (result.ReuseValue >= 0)
@@ -133,7 +133,6 @@ internal sealed class RvzGcWriter
         }
 
         ct.ThrowIfCancellationRequested();
-
         Finish(_output, 1, discHeader, isoSize, _compressionLevel, _chunkSize, groups, [new RvzRawEntry(DiscHeaderSize, rawSize, 0, (uint)groups.Length)], [], upperBound);
         progress?.Invoke(1.0);
     }
@@ -191,5 +190,4 @@ internal sealed class RvzGcWriter
         if (gameCube != GameCubeMagic)
             throw new InvalidDataException("GameCube 디스크 이미지가 아닙니다.");
     }
-
 }

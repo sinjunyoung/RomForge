@@ -26,7 +26,9 @@ internal sealed class WiiPartitionReader : IWiiPartitionData, IDisposable
 
     public long Length => _spec.DataSize / WiiLayout.BlockTotalSize * WiiLayout.BlockDataSize;
 
-    public void Read(long offset, Span<byte> destination)
+    public void Read(long offset, Span<byte> destination) => Read(offset, destination, null);
+
+    public void Read(long offset, Span<byte> destination, bool[]? used)
     {
         if (offset < 0)
             throw new EndOfStreamException("파티션 범위를 벗어난 읽기입니다.");
@@ -40,6 +42,14 @@ internal sealed class WiiPartitionReader : IWiiPartitionData, IDisposable
             int chunk = Math.Min(WiiLayout.BlockDataSize - inner, destination.Length - written);
 
             LoadCluster(cluster);
+
+            if (used != null)
+            {
+                long sector = _spec.DataStart / WiiLayout.BlockTotalSize + cluster;
+
+                if (sector < used.Length)
+                    used[sector] = true;
+            }
 
             _plain.AsSpan(inner, chunk).CopyTo(destination.Slice(written, chunk));
 
@@ -61,9 +71,7 @@ internal sealed class WiiPartitionReader : IWiiPartitionData, IDisposable
 
         _input.Read(position, _encrypted);
 
-        byte[] iv = _encrypted.AsSpan(IvOffset, IvSize).ToArray();
-
-        _aes.DecryptCbc(_encrypted.AsSpan(WiiLayout.BlockHeaderSize, WiiLayout.BlockDataSize), iv, _plain, PaddingMode.None);
+        _aes.DecryptCbc(_encrypted.AsSpan(WiiLayout.BlockHeaderSize, WiiLayout.BlockDataSize), _encrypted.AsSpan(IvOffset, IvSize), _plain, PaddingMode.None);
 
         _cached = cluster;
     }
