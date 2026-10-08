@@ -192,7 +192,7 @@
                         <Image Grid.Row="3" Grid.Column="0" Source="/Assets/Images/3DS.png" Width="16" Height="16" Margin="0,0,6,4"/>
                         <Image Grid.Row="5" Grid.Column="0" Source="/Assets/Images/PS1.png" Width="16" Height="16" Margin="0,0,6,4"/>
                         <Image Grid.Row="6" Grid.Column="0" Source="/Assets/Images/Mame.png" Width="16" Height="16" Margin="0,0,6,4"/>                        
-                        <Image Grid.Row="7" Grid.Column="0" Source="/Assets/Images/CUE.png" Width="16" Height="16" Margin="0,0,6,4"/>
+                        <Image Grid.Row="7" Grid.Column="0" Source="/Assets/Images/CD.png" Width="16" Height="16" Margin="0,0,6,4"/>
                         
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Switch"    Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="Wii U"     Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
