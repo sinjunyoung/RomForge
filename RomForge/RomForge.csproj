@@ -19,6 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\Images\Arcade.png" />
+    <None Remove="Assets\Images\Blu-ray.png" />
     <None Remove="Assets\Images\Categories.png" />
     <None Remove="Assets\Images\CD.png" />
     <None Remove="Assets\Images\Certs.png" />
@@ -27,6 +28,7 @@
     <None Remove="Assets\Images\Copy.png" />
     <None Remove="Assets\Images\CUE.png" />
     <None Remove="Assets\Images\Dreamcast.png" />
+    <None Remove="Assets\Images\DVD.png" />
     <None Remove="Assets\Images\Excel.png" />
     <None Remove="Assets\Images\FontSize.png" />
     <None Remove="Assets\Images\Hash.png" />
@@ -56,6 +58,7 @@
     <None Remove="Assets\Images\UpperA.png" />
     <None Remove="Assets\Images\Version.png" />
     <None Remove="Assets\Images\Vita.png" />
+    <None Remove="Assets\Images\VitaCartridge.png" />
     <None Remove="Assets\Images\VitaGray.png" />
     <None Remove="Assets\Images\Wii.png" />
     <None Remove="Assets\Images\WiiU.png" />
@@ -68,6 +71,7 @@
   <ItemGroup>
     <Resource Include="Assets\Images\3DS.png" />
     <Resource Include="Assets\Images\Arcade.png" />
+    <Resource Include="Assets\Images\Blu-ray.png" />
     <Resource Include="Assets\Images\Cartridge.png" />
     <Resource Include="Assets\Images\CD.png" />
     <Resource Include="Assets\Images\Certs.png" />
@@ -77,6 +81,7 @@
     <Resource Include="Assets\Images\Copy.png" />
     <Resource Include="Assets\Images\CUE.png" />
     <Resource Include="Assets\Images\Dreamcast.png" />
+    <Resource Include="Assets\Images\DVD.png" />
     <Resource Include="Assets\Images\Excel.png" />
     <Resource Include="Assets\Images\FontSize.png" />
     <Resource Include="Assets\Images\Hash.png" />
@@ -104,6 +109,7 @@
     <Resource Include="Assets\Images\Unpack.png" />
     <Resource Include="Assets\Images\UpperA.png" />
     <Resource Include="Assets\Images\Vita.png" />
+    <Resource Include="Assets\Images\VitaCartridge.png" />
     <Resource Include="Assets\Images\Wii.png" />
     <Resource Include="Assets\Images\WiiU.png" />
     <Resource Include="Assets\Images\WorkSpace.png" />

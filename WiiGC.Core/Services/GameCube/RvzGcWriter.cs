@@ -133,6 +133,7 @@ internal sealed class RvzGcWriter
         }
 
         ct.ThrowIfCancellationRequested();
+
         Finish(_output, 1, discHeader, isoSize, _compressionLevel, _chunkSize, groups, [new RvzRawEntry(DiscHeaderSize, rawSize, 0, (uint)groups.Length)], [], upperBound);
         progress?.Invoke(1.0);
     }

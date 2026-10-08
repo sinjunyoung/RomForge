@@ -63,7 +63,7 @@
                                 <GridViewColumn Width="260">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Image Height="24" Margin="0,0,4,0" Source="/Common.WPF;component/Assets/Images/Title.png" Width="24"/>
+                                            <Image Height="24" Width="24" Margin="0,0,4,0" Source="/Assets/Images/VitaCartridge.png"/>
                                             <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="타이틀" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>

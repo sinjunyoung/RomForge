@@ -28,51 +28,7 @@ internal static class WiiFileSystem
 
         reader.Read(fstOffset, fst);
 
-        uint entryCount = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(8));
-        long tableEnd = (long)entryCount * 12;
-
-        if (entryCount < 1 || tableEnd > fstSize)
-            throw new InvalidDataException("FST 엔트리 수가 올바르지 않습니다.");
-
-        var files = new List<WiiFileEntry>();
-        var dirNames = new List<string>();
-        var dirEnds = new List<uint>();
-
-        for (uint i = 1; i < entryCount; i++)
-        {
-            while (dirEnds.Count > 0 && i >= dirEnds[^1])
-            {
-                dirEnds.RemoveAt(dirEnds.Count - 1);
-                dirNames.RemoveAt(dirNames.Count - 1);
-            }
-
-            var entry = fst.AsSpan((int)(i * 12), 12);
-            bool isDirectory = entry[0] != 0;
-            int nameOffset = (entry[1] << 16) | (entry[2] << 8) | entry[3];
-            uint first = BinaryPrimitives.ReadUInt32BigEndian(entry[4..]);
-            uint second = BinaryPrimitives.ReadUInt32BigEndian(entry[8..]);
-            long nameStart = tableEnd + nameOffset;
-
-            if (nameStart >= fstSize)
-                throw new InvalidDataException("FST 이름 오프셋이 올바르지 않습니다.");
-
-            string name = ReadString(fst, (int)nameStart, (int)(fstSize - nameStart));
-
-            if (isDirectory)
-            {
-                if (second <= i || second > entryCount)
-                    throw new InvalidDataException("FST 디렉터리 범위가 올바르지 않습니다.");
-
-                dirNames.Add(name);
-                dirEnds.Add(second);
-
-                continue;
-            }
-
-            string path = "/" + string.Join('/', dirNames.Append(name));
-
-            files.Add(new WiiFileEntry(path, (long)first << 2, second));
-        }
+        var files = WiiFstTree.Parse(fst).EnumerateFiles().Select(static file => new WiiFileEntry(file.Path, file.Node.Offset, file.Node.Size)).ToList();
 
         return new WiiPartitionInfo(gameId, title, dolOffset, fstOffset, fstSize, files);
     }

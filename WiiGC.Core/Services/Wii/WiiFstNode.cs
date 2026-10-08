@@ -5,6 +5,9 @@ namespace WiiGC.Core.Services.Wii;
 
 internal sealed class WiiFstTree
 {
+    private const int MaximumDepth = 256;
+    private const int MaximumNameOffset = 0xFFFFFF;
+
     public WiiFstNode Root { get; } = new([], true);
 
     public static WiiFstTree Parse(byte[] fst)
@@ -20,7 +23,7 @@ internal sealed class WiiFstTree
         var tree = new WiiFstTree();
         int index = 1;
 
-        ParseChildren(fst, (long)entryCount * 12, ref index, (int)entryCount, tree.Root);
+        ParseChildren(fst, (long)entryCount * 12, ref index, (int)entryCount, tree.Root, 0);
 
         return tree;
     }
@@ -54,7 +57,7 @@ internal sealed class WiiFstTree
         return fst;
     }
 
-    private static void ParseChildren(byte[] fst, long tableEnd, ref int index, int end, WiiFstNode parent)
+    private static void ParseChildren(byte[] fst, long tableEnd, ref int index, int end, WiiFstNode parent, int depth)
     {
         while (index < end)
         {
@@ -85,7 +88,10 @@ internal sealed class WiiFstTree
                 if (second <= current || second > end)
                     throw new InvalidDataException("FST 디렉터리 범위가 올바르지 않습니다.");
 
-                ParseChildren(fst, tableEnd, ref index, (int)second, node);
+                if (depth >= MaximumDepth)
+                    throw new InvalidDataException("FST 디렉터리 중첩이 너무 깊습니다.");
+
+                ParseChildren(fst, tableEnd, ref index, (int)second, node, depth + 1);
 
                 if (index != second)
                     throw new InvalidDataException("FST 디렉터리 구조가 올바르지 않습니다.");
@@ -140,6 +146,9 @@ internal sealed class WiiFstTree
         {
             int current = index++;
             int entryOffset = current * 12;
+
+            if (nameCursor > MaximumNameOffset)
+                throw new InvalidDataException("FST 이름 영역이 너무 큽니다.");
 
             fst[entryOffset] = child.IsDirectory ? (byte)1 : (byte)0;
             fst[entryOffset + 1] = (byte)(nameCursor >> 16);

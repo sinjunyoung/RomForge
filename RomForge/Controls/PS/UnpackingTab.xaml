@@ -82,7 +82,7 @@
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Common.WPF;component/Assets/Images/Title.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <Image Source="/Assets/Images/CD.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DataTemplate>
@@ -111,7 +111,7 @@
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Common.WPF;component/Assets/Images/Title.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                        <Image Source="/Assets/Images/CD.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="로컬 타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </DataTemplate>

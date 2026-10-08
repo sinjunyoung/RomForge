@@ -29,7 +29,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/Assets/Images/CD.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
+                        <Image Grid.Column="0" Source="/Assets/Images/DVD.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding InputPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                             <TextBlock Text="Wii 디스크(.iso, .wbfs, .wia, .rvz)를 드래그하거나 클릭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
