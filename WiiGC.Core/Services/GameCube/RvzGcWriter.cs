@@ -79,15 +79,10 @@ internal sealed class RvzGcWriter
             window = Math.Clamp(Environment.ProcessorCount * groupsPerChunk, window, 4096);
         }
 
-        var contexts = new List<Context>();
-        var idle = new Stack<Context>();
-        var pending = new Queue<(Task<GroupResult> Task, Context Context, long Index)>();
         using var compressors = new ThreadLocal<ZstdSharp.Compressor>(CreateCompressor, trackAllValues: true);
 
-        void Complete((Task<GroupResult> Task, Context Context, long Index) entry)
+        void Complete(GroupResult result, long index)
         {
-            var result = entry.Task.GetAwaiter().GetResult();
-            long index = entry.Index;
             long chunkLength = result.InputLength;
 
             if (result.ReuseValue >= 0 && reusable.TryGetValue((chunkLength, result.ReuseValue), out var existing))
@@ -118,46 +113,23 @@ internal sealed class RvzGcWriter
             processed += chunkLength;
 
             progress?.Invoke(Math.Min(1.0, (double)processed / isoSize) * 0.99);
-            idle.Push(entry.Context);
         }
 
         try
         {
+            using var pipeline = new OrderedPipeline<Context, GroupResult, long>(window, () => new Context(), Complete, ct);
+
             for (long index = 0; index < groupCount; index++)
             {
-                ct.ThrowIfCancellationRequested();
-
-                if (idle.Count == 0 && contexts.Count < window)
-                {
-                    var created = new Context();
-
-                    contexts.Add(created);
-                    idle.Push(created);
-                }
-
-                if (idle.Count == 0)
-                    Complete(pending.Dequeue());
-
-                var context = idle.Pop();
                 long groupIndex = index;
 
-                pending.Enqueue((Task.Run(() => Process(context, groupIndex, isoSize, compressors.Value!, ct), CancellationToken.None), context, index));
+                pipeline.Submit(index, context => Process(context, groupIndex, isoSize, compressors.Value!));
             }
 
-            while (pending.Count > 0)
-                Complete(pending.Dequeue());
+            pipeline.Drain();
         }
         finally
         {
-            foreach (var entry in pending)
-            {
-                try
-                {
-                    entry.Task.Wait(CancellationToken.None);
-                }
-                catch { }
-            }
-
             foreach (var compressor in compressors.Values)
                 compressor.Dispose();
         }
@@ -175,10 +147,8 @@ internal sealed class RvzGcWriter
         return compressor;
     }
 
-    private GroupResult Process(Context context, long index, long isoSize, ZstdSharp.Compressor compressor, CancellationToken ct)
+    private GroupResult Process(Context context, long index, long isoSize, ZstdSharp.Compressor compressor)
     {
-        ct.ThrowIfCancellationRequested();
-
         long offset = index * _chunkSize;
         int length = (int)Math.Min(_chunkSize, isoSize - offset);
 

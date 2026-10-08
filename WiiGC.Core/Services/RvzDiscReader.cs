@@ -181,69 +181,27 @@ internal sealed class RvzDiscReader : IDisposable
     private void RunPipeline(List<WorkItem> items, IIsoSink output, ProgressReporter reporter, CancellationToken ct)
     {
         int window = Math.Clamp(Environment.ProcessorCount, 2, 8);
-        var contexts = new List<RvzWorkerContext>();
-        var idle = new Stack<RvzWorkerContext>();
-        var pending = new Queue<(Task<WorkResult> Task, RvzWorkerContext Context)>();
 
-        void Complete((Task<WorkResult> Task, RvzWorkerContext Context) entry)
-        {
-            var result = entry.Task.GetAwaiter().GetResult();
-
-            if (result.Buffer != null)
-                output.Write(result.FileOffset, result.Buffer.AsSpan(0, result.Length));
-
-            reporter.Add(result.Length);
-            idle.Push(entry.Context);
-        }
-
-        try
-        {
-            foreach (var item in items)
+        using var pipeline = new OrderedPipeline<RvzWorkerContext, WorkResult, int>(
+            window,
+            () => new RvzWorkerContext(_file.Compression, _file.CompressorData),
+            (result, _) =>
             {
-                ct.ThrowIfCancellationRequested();
+                if (result.Buffer != null)
+                    output.Write(result.FileOffset, result.Buffer.AsSpan(0, result.Length));
 
-                if (idle.Count == 0 && contexts.Count < window)
-                {
-                    var created = new RvzWorkerContext(_file.Compression, _file.CompressorData);
+                reporter.Add(result.Length);
+            },
+            ct);
 
-                    contexts.Add(created);
-                    idle.Push(created);
-                }
+        foreach (var item in items)
+            pipeline.Submit(context => Process(context, item));
 
-                if (idle.Count == 0)
-                    Complete(pending.Dequeue());
-
-                var context = idle.Pop();
-                var work = item;
-
-                pending.Enqueue((Task.Run(() => Process(context, work, ct), CancellationToken.None), context));
-            }
-
-            while (pending.Count > 0)
-                Complete(pending.Dequeue());
-        }
-        finally
-        {
-            foreach (var entry in pending)
-            {
-                try
-                {
-                    entry.Task.Wait(CancellationToken.None);
-                }
-                catch { }
-            }
-
-            foreach (var context in contexts)
-                context.Dispose();
-        }
+        pipeline.Drain();
     }
 
-    private WorkResult Process(RvzWorkerContext context, WorkItem item, CancellationToken ct)
-    {
-        ct.ThrowIfCancellationRequested();
-
-        return item.Kind == WorkKind.Raw ? ProcessRaw(context, item) : ProcessPartition(context, item);
-    }
+    private WorkResult Process(RvzWorkerContext context, WorkItem item) =>
+        item.Kind == WorkKind.Raw ? ProcessRaw(context, item) : ProcessPartition(context, item);
 
     private WorkResult ProcessRaw(RvzWorkerContext context, WorkItem item)
     {

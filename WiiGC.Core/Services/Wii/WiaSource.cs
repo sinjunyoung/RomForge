@@ -12,27 +12,16 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
     private sealed class Context(RvzCompressionType compression, byte[] compressorData) : IDisposable
     {
         public RvzChunkDecoder Decoder { get; } = new RvzChunkDecoder(compression, compressorData);
-
         public WiiGroupEncryptor Encryptor { get; } = new();
-
         public List<HashException> Exceptions { get; } = [];
-
         public byte[] Decrypted { get; } = new byte[WiiLayout.GroupDataSize];
-
         public byte[] Encrypted { get; } = new byte[WiiLayout.GroupTotalSize];
-
         public byte[] Input = [];
-
         public byte[] Output = [];
-
         public long CachedChunkIndex = -1;
-
         public CachedChunkData CachedChunk;
-
         public bool HasCachedChunk;
-
         public int CachedPartitionIndex = -1;
-
         public long CachedHashGroupStart = -1;
 
         public void EnsureInput(int size)

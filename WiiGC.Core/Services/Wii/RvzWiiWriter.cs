@@ -133,15 +133,10 @@ internal sealed class RvzWiiWriter
             int groupsPerChunk = (int)Math.Ceiling(wiaSource.ChunkSize / (double)WiiLayout.GroupDataSize);
             window = Math.Clamp(Environment.ProcessorCount * groupsPerChunk, window, 512);
         }
-        var contexts = new List<Context>();
-        var idle = new Stack<Context>();
-        var pending = new Queue<(Task<(uint Index, GroupResult Result)[]> Task, Context Context, long Weight)>();
         using var compressors = new ThreadLocal<ZstdSharp.Compressor>(CreateCompressor, trackAllValues: true);
 
-        void Complete((Task<(uint Index, GroupResult Result)[]> Task, Context Context, long Weight) entry)
+        void Complete((uint Index, GroupResult Result)[] results, long weight)
         {
-            var results = entry.Task.GetAwaiter().GetResult();
-
             foreach (var (index, result) in results)
             {
                 if (result.Buffer == null)
@@ -160,36 +155,15 @@ internal sealed class RvzWiiWriter
                 bytesWritten = Align4(bytesWritten + result.Length);
             }
 
-            processed += entry.Weight;
+            processed += weight;
 
             progress?.Invoke(Math.Min(1.0, (double)processed / totalWork) * 0.99);
-            idle.Push(entry.Context);
-        }
-
-        void Enqueue(Func<Context, (uint, GroupResult)[]> work, long weight)
-        {
-            if (idle.Count == 0 && contexts.Count < window)
-            {
-                var created = new Context();
-
-                contexts.Add(created);
-                idle.Push(created);
-            }
-
-            if (idle.Count == 0)
-                Complete(pending.Dequeue());
-
-            var context = idle.Pop();
-
-            pending.Enqueue((Task.Run(() =>
-            {
-                ct.ThrowIfCancellationRequested();
-                return work(context);
-            }, CancellationToken.None), context, weight));
         }
 
         try
         {
+            using var pipeline = new OrderedPipeline<Context, (uint Index, GroupResult Result)[], long>(window, () => new Context(), Complete, ct);
+
             for (int r = 0; r < rawRegions.Count; r++)
             {
                 var region = rawRegions[r];
@@ -197,18 +171,16 @@ internal sealed class RvzWiiWriter
 
                 for (uint g = 0; g < groupCount; g++)
                 {
-                    ct.ThrowIfCancellationRequested();
-
                     long offset = region.RewoundBase + (long)g * _chunkSize;
                     int length = (int)Math.Min(_chunkSize, region.RewoundBase + region.ExtendedSize - offset);
                     uint globalIndex = groupIndex + g;
                     var compressorRef = compressors;
 
-                    Enqueue(context =>
+                    pipeline.Submit(length, context =>
                     {
                         var result = ProcessRaw(context, compressorRef.Value!, offset, length);
                         return [(globalIndex, result)];
-                    }, length);
+                    });
                 }
             }
 
@@ -219,8 +191,6 @@ internal sealed class RvzWiiWriter
 
                 for (long hg = 0; hg < numHashGroups; hg++)
                 {
-                    ct.ThrowIfCancellationRequested();
-
                     long hashGroupBlockStart = hg * WiiLayout.BlocksPerGroup;
                     int blocksInThisGroup = (int)Math.Min(WiiLayout.BlocksPerGroup, totalBlocks - hashGroupBlockStart);
                     long readOffset = spec.DataStart + hashGroupBlockStart * WiiLayout.BlockTotalSize;
@@ -232,24 +202,14 @@ internal sealed class RvzWiiWriter
                     int blocksInThisGroupRef = blocksInThisGroup;
                     var compressorRef = compressors;
 
-                    Enqueue(context => ProcessPartitionHashGroup(context, compressorRef.Value!, specRef, readOffset, hashGroupBlockStartRef, blocksInThisGroupRef, totalBlocks, groupIndexRef, groupCountRef), weight);
+                    pipeline.Submit(weight, context => ProcessPartitionHashGroup(context, compressorRef.Value!, specRef, readOffset, hashGroupBlockStartRef, blocksInThisGroupRef, totalBlocks, groupIndexRef, groupCountRef));
                 }
             }
 
-            while (pending.Count > 0)
-                Complete(pending.Dequeue());
+            pipeline.Drain();
         }
         finally
         {
-            foreach (var entry in pending)
-            {
-                try
-                {
-                    entry.Task.Wait(CancellationToken.None);
-                }
-                catch { }
-            }
-
             foreach (var compressor in compressors.Values)
                 compressor.Dispose();
         }

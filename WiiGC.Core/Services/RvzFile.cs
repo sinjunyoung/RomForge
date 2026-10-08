@@ -126,7 +126,6 @@ internal sealed class RvzFile
             throw new InvalidDataException("RVZ/WIA 압축기 데이터 크기가 올바르지 않습니다.");
 
         byte[] compressorData = h2.AsSpan(213, compressorDataSize).ToArray();
-
         if (!IsValidChunkSize(chunkSize))
             throw new InvalidDataException($"RVZ/WIA 청크 크기가 올바르지 않습니다: {chunkSize}");
 

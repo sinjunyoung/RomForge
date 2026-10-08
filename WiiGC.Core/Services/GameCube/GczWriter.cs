@@ -26,14 +26,13 @@ internal sealed class GczWriter : IDisposable
     private readonly long _dataOffset;
     private readonly ulong[] _pointers;
     private readonly uint[] _hashes;
-    private readonly Queue<Task<BlockResult>> _pending = new();
-    private readonly int _window;
+    private readonly OrderedPipeline<object, BlockResult, int> _pipeline;
     private byte[]? _current;
     private int _currentLength;
     private long _appended;
     private int _completed;
     private long _dataPosition;
-    private Task<BlockResult>? _zeroBlock;
+    private BlockResult? _zeroBlock;
 
     public GczWriter(SafeFileHandle output, long discSize, int blockSize, uint subType)
     {
@@ -56,7 +55,7 @@ internal sealed class GczWriter : IDisposable
         _dataOffset = HeaderSize + (long)_blockCount * (sizeof(ulong) + sizeof(uint));
         _pointers = new ulong[_blockCount];
         _hashes = new uint[_blockCount];
-        _window = Math.Clamp(Environment.ProcessorCount * 4, 4, 64);
+        _pipeline = new OrderedPipeline<object, BlockResult, int>(Math.Clamp(Environment.ProcessorCount * 4, 4, 64), () => new object(), CompleteBlock, CancellationToken.None);
     }
 
     public void Append(ReadOnlySpan<byte> data)
@@ -90,7 +89,7 @@ internal sealed class GczWriter : IDisposable
         {
             if (_currentLength == 0 && count >= _blockSize)
             {
-                Enqueue(GetZeroBlock());
+                _pipeline.Submit(_ => GetZeroBlock());
 
                 _appended += _blockSize;
                 count -= _blockSize;
@@ -127,8 +126,7 @@ internal sealed class GczWriter : IDisposable
         if (_appended != _discSize)
             throw new InvalidDataException("GCZ에 전달된 데이터가 디스크 크기보다 적습니다.");
 
-        while (_pending.Count > 0)
-            CompleteOldest();
+        _pipeline.Drain();
 
         if (_completed != _blockCount)
             throw new InvalidDataException("GCZ 블록 수가 올바르지 않습니다.");
@@ -163,38 +161,24 @@ internal sealed class GczWriter : IDisposable
         if (block.AsSpan(0, _blockSize).IndexOfAnyExcept((byte)0) < 0)
         {
             ArrayPool<byte>.Shared.Return(block);
-            Enqueue(GetZeroBlock());
+            _pipeline.Submit(_ => GetZeroBlock());
             return;
         }
 
         int blockSize = _blockSize;
 
-        Enqueue(Task.Run(() => CompressBlock(block, blockSize, true)));
+        _pipeline.Submit(_ => CompressBlock(block, blockSize, true));
     }
 
-    private Task<BlockResult> GetZeroBlock()
+    private BlockResult GetZeroBlock()
     {
-        if (_zeroBlock == null)
-        {
-            byte[] zero = new byte[_blockSize];
+        _zeroBlock ??= CompressBlock(new byte[_blockSize], _blockSize, false);
 
-            _zeroBlock = Task.FromResult(CompressBlock(zero, _blockSize, false));
-        }
-
-        return _zeroBlock;
+        return _zeroBlock.Value;
     }
 
-    private void Enqueue(Task<BlockResult> task)
+    private void CompleteBlock(BlockResult result, int _)
     {
-        _pending.Enqueue(task);
-
-        if (_pending.Count >= _window)
-            CompleteOldest();
-    }
-
-    private void CompleteOldest()
-    {
-        var result = _pending.Dequeue().GetAwaiter().GetResult();
         int index = _completed++;
 
         _pointers[index] = (ulong)_dataPosition | (result.Stored ? UncompressedFlag : 0);
@@ -234,15 +218,6 @@ internal sealed class GczWriter : IDisposable
 
     public void Dispose()
     {
-        foreach (var task in _pending)
-        {
-            try
-            {
-                task.Wait();
-            }
-            catch { }
-        }
-
-        _pending.Clear();
+        _pipeline.Dispose();
     }
 }
