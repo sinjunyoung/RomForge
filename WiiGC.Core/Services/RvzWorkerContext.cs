@@ -2,7 +2,7 @@ using WiiGC.Core.Models;
 
 namespace WiiGC.Core.Services;
 
-internal sealed class RvzWorkerContext(RvzCompressionType compression, byte[] compressorData) : IDisposable
+internal class RvzWorkerContext(RvzCompressionType compression, byte[] compressorData) : IDisposable
 {
     private byte[]? _decrypted;
     private byte[]? _encrypted;
