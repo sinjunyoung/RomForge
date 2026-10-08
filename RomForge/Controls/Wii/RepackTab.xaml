@@ -29,13 +29,13 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/Assets/Images/CD.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}"/>
+                        <Image Grid.Column="0" Source="/Assets/Images/CD.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding InputPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding InputPath}"/>
+                            <TextBlock Text="{Binding InputPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                             <TextBlock Text="Wii 디스크(.iso, .wbfs, .wia, .rvz)를 드래그하거나 클릭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>
+                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
 
@@ -46,13 +46,13 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchPath}"/>
+                        <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchPath}"/>
+                            <TextBlock Text="{Binding PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                             <TextBlock Text="Riivolution 패치 폴더 또는 zip/7z/xml을 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="한글패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}"/>
+                    <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -20,7 +20,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/FBNeo.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Arcade.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="아케이드" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
@@ -29,38 +29,8 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Grid VerticalAlignment="Center">
-                            <Image Source="/Assets/Images/VitaGray.png" VerticalAlignment="Center" Width="60">
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=TabItem}}" Value="True">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=TabItem}}" Value="True">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
-                            <Image Source="/Assets/Images/Vita.png" VerticalAlignment="Center" Width="60">
-                                <Image.Style>
-                                    <Style TargetType="Image">
-                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=TabItem}}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=TabItem}}" Value="True">
-                                                <Setter Property="Visibility" Value="Visible"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Image.Style>
-                            </Image>
-                        </Grid>
+                        <Image Source="/Assets/Images/Vita.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="PS Vita" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:VitaTab Margin="0,-5,0,0"/>
@@ -68,7 +38,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Desktop.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/PC98.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="PC98" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
