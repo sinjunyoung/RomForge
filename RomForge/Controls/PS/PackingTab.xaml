@@ -126,7 +126,13 @@
 
             <TabControl Grid.Column="1" IsEnabled="{Binding IsUnlocked}" Background="Transparent" BorderThickness="0">
                 
-                <TabItem Header="기본 이미지">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Assets/Images/Image.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="기본 이미지" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <StackPanel>
                         <Viewbox Stretch="Uniform">
                             <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="0" AllowDrop="True" Drop="Pic1_Drop">
@@ -170,7 +176,13 @@
                     </StackPanel>
                 </TabItem>
                 
-                <TabItem Header="부트 로고">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Assets/Images/Image.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="부트 로고" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <StackPanel>
                         <Viewbox Stretch="Uniform">
                             <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" Background="Transparent" AllowDrop="True" Drop="BootLogo_Drop">
@@ -248,15 +260,22 @@
                     </StackPanel>
                 </TabItem>
 
-                <TabItem Header="배경음">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Source="/Assets/Images/Sound.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="배경음" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <StackPanel>
                         <Viewbox Stretch="Uniform">
                             <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" Background="#10FFFFFF" AllowDrop="True" Drop="Bgm_Drop" MouseLeftButtonDown="Bgm_MouseLeftButtonDown" Cursor="Hand">
                                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Image Source="/Assets/Images/Drag.png" Width="36" Height="36" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="{Binding BgmFileName, FallbackValue='오디오 파일을 드래그&amp;드롭하거나 클릭하세요'}" FontSize="13" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#E0E0E0" Margin="0,0,0,6"/>
-                                        <!--<TextBlock Text="* WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="11" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>-->
+                                        <TextBlock Text="오디오 파일을 드래그&amp;드롭하거나 클릭하세요" FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                        <!--<TextBlock Text="{Binding BgmFileName, FallbackValue='오디오 파일을 드래그&amp;드롭하거나 클릭하세요'}" FontSize="12" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
+                                        <TextBlock Text="* WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>-->
                                         <ItemsControl HorizontalAlignment="Center">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>

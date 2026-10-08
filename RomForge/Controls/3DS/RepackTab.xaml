@@ -36,7 +36,7 @@
                             <TextBlock Text="롬파일(.3ds, .cci, .zcci, .cia)을 드래그하거나 클릭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="원본 롬" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>
+                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>
                 </Grid>
             </Border>
 
@@ -53,7 +53,7 @@
                             <TextBlock Text="한글패치 폴더 또는 zip/7z파일을 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="한글패치 (폴더/ZIP)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}"/>
+                    <TextBlock Text="한글패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}"/>
                 </Grid>
             </Border>
         </Grid>

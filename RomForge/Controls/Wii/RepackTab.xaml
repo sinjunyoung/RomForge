@@ -35,7 +35,7 @@
                             <TextBlock Text="Wii 디스크(.iso, .wbfs, .wia, .rvz)를 드래그하거나 클릭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="원본 디스크" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>
+                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}"/>
                 </Grid>
             </Border>
 
@@ -52,7 +52,7 @@
                             <TextBlock Text="Riivolution 패치 폴더 또는 zip/7z/xml을 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="한글패치 (Riivolution)" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}"/>
+                    <TextBlock Text="한글패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}"/>
                 </Grid>
             </Border>
         </Grid>

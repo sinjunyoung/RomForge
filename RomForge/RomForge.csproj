@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.8.0.5</VersionPrefix>
+    <VersionPrefix>1.8.0.6</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -30,6 +30,7 @@
     <None Remove="Assets\Images\FontSize.png" />
     <None Remove="Assets\Images\Hash.png" />
     <None Remove="Assets\Images\Help.png" />
+    <None Remove="Assets\Images\Image.png" />
     <None Remove="Assets\Images\Insert.png" />
     <None Remove="Assets\Images\Keygen.png" />
     <None Remove="Assets\Images\Left.png" />
@@ -46,6 +47,7 @@
     <None Remove="Assets\Images\Right.png" />
     <None Remove="Assets\Images\Saturn.png" />
     <None Remove="Assets\Images\Search.png" />
+    <None Remove="Assets\Images\Sound.png" />
     <None Remove="Assets\Images\Split.png" />
     <None Remove="Assets\Images\Tistory.png" />
     <None Remove="Assets\Images\Unpack.png" />
@@ -77,6 +79,7 @@
     <Resource Include="Assets\Images\Hash.png" />
     <Resource Include="Assets\Images\HDD.png" />
     <Resource Include="Assets\Images\Help.png" />
+    <Resource Include="Assets\Images\Image.png" />
     <Resource Include="Assets\Images\Insert.png" />
     <Resource Include="Assets\Images\Keygen.png" />
     <Resource Include="Assets\Images\Left.png" />
@@ -91,6 +94,7 @@
     <Resource Include="Assets\Images\Saturn.png" />
     <Resource Include="Assets\Images\SD.png" />
     <Resource Include="Assets\Images\Search.png" />
+    <Resource Include="Assets\Images\Sound.png" />
     <Resource Include="Assets\Images\Split.png" />
     <Resource Include="Assets\Images\Tistory.png" />
     <Resource Include="Assets\Images\Unpack.png" />
