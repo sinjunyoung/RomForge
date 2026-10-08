@@ -20,8 +20,13 @@ namespace RomForge.ViewModels._3DS;
 public class RepackMainViewModel : ToolTabViewModel
 {
     private CancellationTokenSource _cts = new();
+    private CancellationTokenSource _patchCts = new();
     private BuildMode? _currentMode;
+    private bool _patchLoading;
+    private int _romVersion;
+    private int _patchVersion;
     private readonly RepackService _service;
+
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
     private string _inputPath = string.Empty;
@@ -33,7 +38,8 @@ public class RepackMainViewModel : ToolTabViewModel
     private string _progressTime = "00:00 경과";
     private string _progressSpeed = string.Empty;
     private TitleViewModel? _romInfo;
-
+    private ThreeDsPatchDisplay? _patchInfo;
+    private ThreeDsPatchSet? _patch;
     private RepackOutputFormat _outputFormat = RepackOutputFormat.Cci;
 
     public RepackOutputFormat OutputFormat
@@ -97,8 +103,13 @@ public class RepackMainViewModel : ToolTabViewModel
         get => _patchPath;
         set
         {
-            _patchPath = value; OnPropertyChanged();
+            if (_patchPath == value)
+                return;
+
+            _patchPath = value;
+            OnPropertyChanged();
             OnPropertyChanged(nameof(PatchHintVisibility));
+            _ = RefreshPatchAsync();
         }
     }
 
@@ -126,7 +137,7 @@ public class RepackMainViewModel : ToolTabViewModel
         {
             _progressPct = value;
             MainViewModel.SetTaskbarProgress(_progressPct);
-            OnPropertyChanged();            
+            OnPropertyChanged();
         }
     }
 
@@ -160,6 +171,17 @@ public class RepackMainViewModel : ToolTabViewModel
         set { _romInfo = value; OnPropertyChanged(); OnPropertyChanged(nameof(RomInfoVisibility)); }
     }
 
+    public ThreeDsPatchDisplay? PatchInfo
+    {
+        get => _patchInfo;
+        private set
+        {
+            _patchInfo = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(PatchInfoVisibility));
+        }
+    }
+
     public Visibility InputHintVisibility => string.IsNullOrEmpty(InputPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility PatchHintVisibility => string.IsNullOrEmpty(PatchPath) ? Visibility.Visible : Visibility.Collapsed;
@@ -168,27 +190,32 @@ public class RepackMainViewModel : ToolTabViewModel
 
     public Visibility RomInfoVisibility => RomInfo != null ? Visibility.Visible : Visibility.Collapsed;
 
+    public Visibility PatchInfoVisibility => PatchInfo != null ? Visibility.Visible : Visibility.Collapsed;
+
     public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
 
     public bool IsRebuildRunning => IsLocked && _currentMode == BuildMode.RebuildOnly;
 
-    public bool IsFullRunning => IsLocked && _currentMode == BuildMode.FullProcess;
+    public bool IsFullRunning => IsLocked && (_currentMode == BuildMode.FullProcess || _patchLoading);
 
     public bool UnpackEnabled => !IsLocked || _currentMode == BuildMode.UnpackOnly;
 
     public bool RebuildEnabled => !IsLocked || _currentMode == BuildMode.RebuildOnly;
 
-    public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess;
+    public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess || _patchLoading;
 
     public ICommand BrowseInputCommand { get; }
+    public ICommand BrowsePatchFolderCommand { get; }
+    public ICommand BrowsePatchFileCommand { get; }
     public ICommand BrowseOutputCommand { get; }
 
     public RepackMainViewModel()
     {
         _service = new RepackService(Log, () => PatchPath);
-
         OutputPath = string.IsNullOrWhiteSpace(AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output") : AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath;
         BrowseInputCommand = new RelayCommand(async _ => await BrowseInput());
+        BrowsePatchFolderCommand = new RelayCommand(_ => BrowsePatchFolder());
+        BrowsePatchFileCommand = new RelayCommand(_ => BrowsePatchFile());
         BrowseOutputCommand = new RelayCommand(async _ => await BrowseOutput());
 
         _ = RefreshRomInfoAsync();
@@ -209,6 +236,7 @@ public class RepackMainViewModel : ToolTabViewModel
         }
 
         _currentMode = mode;
+
         NotifyButtonStates();
 
         using (BeginWork())
@@ -216,19 +244,26 @@ public class RepackMainViewModel : ToolTabViewModel
             try
             {
                 _cts.Dispose();
+
                 _cts = new CancellationTokenSource();
+
                 await ExecuteAsync(mode, _cts.Token);
             }
             finally
             {
                 ProgressPct = 0;
                 _currentMode = null;
+
                 NotifyButtonStates();
             }
         }
     }
 
-    public void Cancel() => _cts.Cancel();
+    public void Cancel()
+    {
+        _cts.Cancel();
+        _patchCts.Cancel();
+    }
 
     private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {
@@ -328,10 +363,101 @@ public class RepackMainViewModel : ToolTabViewModel
 
     private async Task RefreshRomInfoAsync()
     {
+        int version = ++_romVersion;
+        TitleViewModel? info;
+
         if (!string.IsNullOrEmpty(InputPath) && File.Exists(InputPath))
-            RomInfo = await RomInfoParser.ParseFromFileAsync(InputPath);
+            info = await RomInfoParser.ParseFromFileAsync(InputPath);
         else
-            RomInfo = await RomInfoParser.ParseFromUnpackedAsync(OutputPath);
+            info = await RomInfoParser.ParseFromUnpackedAsync(OutputPath);
+
+        if (version != _romVersion)
+            return;
+
+        RomInfo = info;
+
+        RebuildPatchDisplay();
+    }
+
+    private async Task RefreshPatchAsync()
+    {
+        int version = ++_patchVersion;
+
+        _patchCts.Cancel();
+
+        _patch = null;
+        PatchInfo = null;
+
+        string path = PatchPath.Trim();
+
+        if (path.Length == 0)
+            return;
+
+        _patchCts = new CancellationTokenSource();
+
+        var ct = _patchCts.Token;
+
+        _patchLoading = true;
+
+        using (BeginWork())
+        {
+            try
+            {
+                ProgressLabel = "패치 정보 분석 중...";
+
+                var patch = await Task.Run(() => ThreeDsPatchParser.Parse(path, ct), ct);
+
+                if (version != _patchVersion)
+                    return;
+
+                _patch = patch;
+
+                RebuildPatchDisplay();
+                Log($"패치 정보를 읽었습니다: {patch.FileCount}개 파일", LogLevel.Info);
+            }
+            catch (OperationCanceledException)
+            {
+                if (version == _patchVersion)
+                {
+                    PatchInfo = ThreeDsPatchDisplay.Failed("취소되었습니다.");
+                    ProgressPct = 0;
+
+                    Log("패치 읽기가 취소되었습니다.", LogLevel.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (version == _patchVersion)
+                {
+                    PatchInfo = ThreeDsPatchDisplay.Failed(ex.Message);
+                    MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                    Log($"패치를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                }
+            }
+            finally
+            {
+                _patchLoading = false;
+
+                if (version == _patchVersion)
+                {
+                    ProgressPercent = string.Empty;
+                    ProgressLabel = "대기 중...";
+                }
+
+                NotifyButtonStates();
+            }
+        }
+    }
+
+    private void RebuildPatchDisplay()
+    {
+        if (_patch == null)
+            return;
+
+        string? titleId = _romInfo?.TitleId;
+        string? productCode = _romInfo?.ProductCode;
+
+        PatchInfo = ThreeDsPatchDisplay.From(_patch, titleId, productCode);
     }
 
     private bool Validate(BuildMode mode, out string error)
@@ -341,14 +467,12 @@ public class RepackMainViewModel : ToolTabViewModel
         if (mode != BuildMode.RebuildOnly && string.IsNullOrEmpty(InputPath))
         {
             error = "원본 파일을 선택하세요.";
-
             return false;
         }
 
         if (string.IsNullOrEmpty(OutputPath))
         {
             error = "작업 폴더를 선택하세요.";
-
             return false;
         }
 
@@ -359,7 +483,24 @@ public class RepackMainViewModel : ToolTabViewModel
             if (!Directory.Exists(unpackedPath))
             {
                 error = "언팩된 데이터가 없습니다.";
+                return false;
+            }
+        }
 
+        if (!string.IsNullOrWhiteSpace(PatchPath))
+        {
+            if (_patch == null)
+            {
+                error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
+                return false;
+            }
+
+            string? titleId = _romInfo?.TitleId;
+            string? productCode = _romInfo?.ProductCode;
+
+            if ((titleId != null || productCode != null) && !_patch.MatchesRom(titleId, productCode))
+            {
+                error = $"패치 대상 타겟과 선택한 롬({titleId ?? productCode})이 맞지 않습니다.";
                 return false;
             }
         }
@@ -392,6 +533,26 @@ public class RepackMainViewModel : ToolTabViewModel
 
         if (dlg.ShowDialog() == true)
             InputPath = dlg.FileName;
+    }
+
+    private void BrowsePatchFolder()
+    {
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "한글패치 폴더 선택" };
+
+        if (dlg.ShowDialog() == true)
+            PatchPath = dlg.FolderName;
+    }
+
+    private void BrowsePatchFile()
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "한글패치 선택",
+            Filter = "한글패치 압축파일|*.zip;*.7z"
+        };
+
+        if (dlg.ShowDialog() == true)
+            PatchPath = dlg.FileName;
     }
 
     private async Task BrowseOutput()

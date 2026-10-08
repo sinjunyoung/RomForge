@@ -83,15 +83,12 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-
                     <Image Grid.Column="0" Width="56" Height="56" Margin="0,0,12,0" VerticalAlignment="Center" Source="{Binding GameIcon}" RenderOptions.BitmapScalingMode="HighQuality"/>
-
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock Text="{Binding GameInfo.Title}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
                         <TextBlock Text="{Binding GameInfo.Publisher}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0"/>
                         <TextBlock Text="{Binding GameInfo.IdText}" Foreground="#555570" FontSize="11" Margin="0,3,0,0"/>
                     </StackPanel>
-
                     <Image Grid.Column="2" Width="24" Height="24" Margin="12,0,0,0" VerticalAlignment="Center" Source="{Binding GameInfo.RegionKey, Converter={StaticResource RegionToImageConverter}}" ToolTip="{Binding GameInfo.Region}"/>
                 </Grid>
             </Border>
@@ -99,14 +96,12 @@
             <Border Grid.Column="1" Margin="5,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding PatchInfoVisibility}">
                 <StackPanel Margin="12,10">
                     <TextBlock Text="패치 정보" Foreground="#8888A8" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,6"/>
-
                     <StackPanel Orientation="Horizontal">
                         <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="4" Padding="8,2" Margin="0,0,8,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding PatchInfo.KindText}" Foreground="#8FA3FF" FontSize="11" FontWeight="Bold"/>
                         </Border>
                         <TextBlock Text="{Binding PatchInfo.XmlName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </StackPanel>
-
                     <TextBlock Text="{Binding PatchInfo.TargetText}" Foreground="#8888A8" FontSize="11" Margin="0,6,0,0"/>
                     <TextBlock Text="{Binding PatchInfo.FileCountText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
                     <TextBlock Text="{Binding PatchInfo.WarningText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>

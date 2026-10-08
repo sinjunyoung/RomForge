@@ -70,36 +70,66 @@
             <Border Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="#30FFFFFF" VerticalAlignment="Bottom" Margin="0,0,0,-5"/>
         </Grid>
 
-        <Border Grid.Row="2" Margin="5,0,5,5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding RomInfoVisibility}">
-            <Grid Margin="12,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="2" Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8" Margin="0,0,12,0">
-                    <Border.Background>
-                        <ImageBrush ImageSource="{Binding RomInfo.Icon}" Stretch="UniformToFill"/>
-                    </Border.Background>
-                </Border>
-
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBox Text="{Binding RomInfo.ShortDescription, UpdateSourceTrigger=PropertyChanged}" MaxLength="63" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="1" Padding="0" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" VerticalContentAlignment="Center" ToolTip="게임명 (최대 63자)"/>
-                    <TextBox Text="{Binding RomInfo.Publisher, UpdateSourceTrigger=PropertyChanged}" MaxLength="63" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="1" Padding="0" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0" VerticalContentAlignment="Center" ToolTip="배급사 (최대 63자)"/>
-                    <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                        <TextBlock Text="{Binding RomInfo.ProductCode}" Foreground="#8888A8" FontSize="11"/>
-                        <TextBlock Text=" · " Foreground="#555570" FontSize="11"/>
-                        <TextBlock Text="{Binding RomInfo.TitleId}" Foreground="#555570" FontSize="11"/>
+            <Border Grid.Column="0" Margin="5,0,0,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding RomInfoVisibility}">
+                <Grid Margin="12,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="8" Margin="0,0,12,0">
+                        <Border.Background>
+                            <ImageBrush ImageSource="{Binding RomInfo.Icon}" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBox Text="{Binding RomInfo.ShortDescription, UpdateSourceTrigger=PropertyChanged}" MaxLength="63" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="1" Padding="0" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" VerticalContentAlignment="Center" ToolTip="게임명 (최대 63자)"/>
+                        <TextBox Text="{Binding RomInfo.Publisher, UpdateSourceTrigger=PropertyChanged}" MaxLength="63" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="1" Padding="0" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0" VerticalContentAlignment="Center" ToolTip="배급사 (최대 63자)"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="{Binding RomInfo.ProductCode}" Foreground="#8888A8" FontSize="11"/>
+                            <TextBlock Text=" · " Foreground="#555570" FontSize="11"/>
+                            <TextBlock Text="{Binding RomInfo.TitleId}" Foreground="#555570" FontSize="11"/>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <Image Width="24" Height="24" Margin="0,0,8,0" Source="{Binding RomInfo.ProductCode, Converter={StaticResource RegionToImageConverter}}" ToolTip="{Binding RomInfo.Region}"/>
+                        <Image Width="24" Height="24" Source="{Binding RomInfo.Crypto, Converter={StaticResource LockIconConverter}}"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
 
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                    <Image Width="24" Height="24" Margin="0,0,8,0" Source="{Binding RomInfo.ProductCode, Converter={StaticResource RegionToImageConverter}}" ToolTip="{Binding RomInfo.Region}"/>
-                    <Image Width="24" Height="24" Source="{Binding RomInfo.Crypto, Converter={StaticResource LockIconConverter}}"/>
+            <Border Grid.Column="1" Margin="5,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding PatchInfoVisibility}">
+                <StackPanel Margin="12,10">
+                    <TextBlock Text="패치 정보" Foreground="#8888A8" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="4" Padding="8,2" Margin="0,0,8,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding PatchInfo.KindText}" Foreground="#8FA3FF" FontSize="11" FontWeight="Bold"/>
+                        </Border>
+                        <TextBlock Text="{Binding PatchInfo.Name}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <TextBlock Text="{Binding PatchInfo.TargetText}" Foreground="#8888A8" FontSize="11" Margin="0,6,0,0"/>
+                    <TextBlock Text="{Binding PatchInfo.FileCountText}" Foreground="#8888A8" FontSize="11" Margin="0,3,0,0"/>
+                    <TextBlock Text="{Binding PatchInfo.StatusText}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="#4CAF50"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding PatchInfo.IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="#FF6B6B"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </StackPanel>
-            </Grid>
-        </Border>
+            </Border>
+        </Grid>
 
         <Grid Grid.Row="3" Margin="0,0,5,5">
             <Grid.ColumnDefinitions>

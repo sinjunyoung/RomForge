@@ -493,7 +493,6 @@ public class RepackMainViewModel : ToolTabViewModel
             return;
 
         _disc = info;
-
         GameInfo = info == null ? null : WiiGameDisplay.From(info);
         GameIcon = null;
 
@@ -551,7 +550,6 @@ public class RepackMainViewModel : ToolTabViewModel
         int version = ++_patchVersion;
 
         _patchCts.Cancel();
-
         ReleaseWorkspace();
 
         _patch = null;
@@ -600,7 +598,6 @@ public class RepackMainViewModel : ToolTabViewModel
                 }
 
                 _workspace = workspace;
-
                 ProgressLabel = "패치 정보 분석 중...";
 
                 var patch = await Task.Run(() => RiivolutionParser.Parse(workspace.RootPath), ct);
@@ -611,7 +608,6 @@ public class RepackMainViewModel : ToolTabViewModel
                 _patch = patch;
 
                 RebuildPatchDisplay();
-
                 Log($"패치 정보를 읽었습니다: {patch.Replacements.Count}개 파일 교체, 경고 {patch.Warnings.Count}건", LogLevel.Info);
             }
             catch (OperationCanceledException)
@@ -621,8 +617,8 @@ public class RepackMainViewModel : ToolTabViewModel
                     ReleaseWorkspace();
 
                     PatchInfo = WiiPatchDisplay.Failed("취소되었습니다.");
+                    ProgressPct = 0;
 
-                    ProgressPct = 0;                    
                     Log("패치 읽기가 취소되었습니다.", LogLevel.Error);
                 }
             }
@@ -785,6 +781,7 @@ public class RepackMainViewModel : ToolTabViewModel
                 _disc = null;
                 GameInfo = null;
                 GameIcon = null;
+
                 RebuildPatchDisplay();
             }
 
