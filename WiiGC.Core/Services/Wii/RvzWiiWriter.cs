@@ -1,20 +1,13 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using static WiiGC.Core.Services.RvzHeaderWriter;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services;
-using ZstdSharp.Unsafe;
 
 namespace WiiGC.Core.Services.Wii;
 
 internal sealed class RvzWiiWriter
 {
-    private const int DiscHeaderSize = 0x80;
-    private const int Header1Size = 0x48;
-    private const int Header2Size = 0xDC;
-    private const int PartitionEntrySize = 0x30;
-    private const uint RvzVersion = 0x01000000;
-    private const uint RvzVersionWriteCompatible = 0x00030000;
     private const uint WiiMagic = 0x5D1C9EA3;
 
     private readonly record struct RawRegion(long Offset, long Size, long RewoundBase, long ExtendedSize);
@@ -24,11 +17,17 @@ internal sealed class RvzWiiWriter
     private sealed class Context
     {
         public byte[] Raw = [];
+
         public byte[] Decrypted = [];
+
         public byte[] Hashes = [];
+
         public byte[] Fresh = [];
+
         public byte[] Compressed = [];
+
         public RvzPacker Packer { get; } = new();
+
         public List<HashException> Exceptions { get; } = new(64);
     }
 
@@ -41,8 +40,7 @@ internal sealed class RvzWiiWriter
 
     public RvzWiiWriter(IRvzInputSource input, SafeFileHandle output, int compressionLevel, int chunkSize)
     {
-        if (compressionLevel < ZstdSharp.Compressor.MinCompressionLevel || compressionLevel > ZstdSharp.Compressor.MaxCompressionLevel)
-            throw new ArgumentOutOfRangeException(nameof(compressionLevel), "zstd 압축 레벨이 범위를 벗어났습니다.");
+        ValidateCompressionLevel(compressionLevel);
 
         bool powerOfTwo = chunkSize > 0 && (chunkSize & (chunkSize - 1)) == 0;
 
@@ -108,8 +106,8 @@ internal sealed class RvzWiiWriter
             uint groupCount = (uint)((alignedBlocks + _blocksPerChunk - 1) / _blocksPerChunk);
 
             partitionEntries.Add((spec, totalGroups, groupCount));
-            totalGroups += groupCount;
 
+            totalGroups += groupCount;
             lastEnd = spec.DataStart + spec.DataSize;
         }
 
@@ -119,7 +117,7 @@ internal sealed class RvzWiiWriter
 
         long groupTableBytes = (long)totalGroups * 12;
         long partitionTableBytes = (long)partitionEntries.Count * PartitionEntrySize;
-        long upperBound = Header1Size + Header2Size + partitionTableBytes + 24 + 0x100 + groupTableBytes * 9 / 16;
+        long upperBound = EstimateUpperBound(partitionTableBytes, groupTableBytes);
 
         upperBound = (upperBound + WiiLayout.BlockTotalSize - 1) / WiiLayout.BlockTotalSize * WiiLayout.BlockTotalSize;
 
@@ -131,9 +129,11 @@ internal sealed class RvzWiiWriter
         if (_input is WiaSource wiaSource)
         {
             int groupsPerChunk = (int)Math.Ceiling(wiaSource.ChunkSize / (double)WiiLayout.GroupDataSize);
+
             window = Math.Clamp(Environment.ProcessorCount * groupsPerChunk, window, 512);
         }
-        using var compressors = new ThreadLocal<ZstdSharp.Compressor>(CreateCompressor, trackAllValues: true);
+
+        using var compressors = new ThreadLocal<ZstdSharp.Compressor>(() => CreateCompressor(_compressionLevel), trackAllValues: true);
 
         void Complete((uint Index, GroupResult Result)[] results, long weight)
         {
@@ -216,15 +216,6 @@ internal sealed class RvzWiiWriter
 
         FinishHeaders(discHeader, isoSize, groups, rawRegions, regionGroupInfo, partitionEntries, upperBound, ct);
         progress?.Invoke(1.0);
-    }
-
-    private ZstdSharp.Compressor CreateCompressor()
-    {
-        var compressor = new ZstdSharp.Compressor(_compressionLevel);
-
-        compressor.SetParameter(ZSTD_cParameter.ZSTD_c_contentSizeFlag, 0);
-
-        return compressor;
     }
 
     private static GroupResult Compress(Context context, ZstdSharp.Compressor compressor, ReadOnlySpan<byte> main, uint packedSize)
@@ -438,30 +429,10 @@ internal sealed class RvzWiiWriter
     {
         ct.ThrowIfCancellationRequested();
 
-        byte[] rawTable = new byte[rawRegions.Count * 24];
+        var rawEntries = new RvzRawEntry[rawRegions.Count];
 
         for (int i = 0; i < rawRegions.Count; i++)
-        {
-            var region = rawRegions[i];
-            var (groupIndex, groupCount) = regionGroupInfo[i];
-            var span = rawTable.AsSpan(i * 24, 24);
-
-            BinaryPrimitives.WriteUInt64BigEndian(span, (ulong)region.Offset);
-            BinaryPrimitives.WriteUInt64BigEndian(span[8..], (ulong)region.Size);
-            BinaryPrimitives.WriteUInt32BigEndian(span[16..], groupIndex);
-            BinaryPrimitives.WriteUInt32BigEndian(span[20..], groupCount);
-        }
-
-        byte[] groupTable = new byte[groups.Length * 12];
-
-        for (int i = 0; i < groups.Length; i++)
-        {
-            var span = groupTable.AsSpan(i * 12, 12);
-
-            BinaryPrimitives.WriteUInt32BigEndian(span, groups[i].DataOffset4);
-            BinaryPrimitives.WriteUInt32BigEndian(span[4..], groups[i].DataSizeField);
-            BinaryPrimitives.WriteUInt32BigEndian(span[8..], groups[i].RvzPackedSize);
-        }
+            rawEntries[i] = new RvzRawEntry(rawRegions[i].Offset, rawRegions[i].Size, regionGroupInfo[i].GroupIndex, regionGroupInfo[i].GroupCount);
 
         byte[] partitionTable = new byte[partitionEntries.Count * PartitionEntrySize];
 
@@ -481,75 +452,8 @@ internal sealed class RvzWiiWriter
             BinaryPrimitives.WriteUInt32BigEndian(span[44..], 0);
         }
 
-        using var compressor = CreateCompressor();
-        byte[] compressedRaw = CompressTable(compressor, rawTable);
-        byte[] compressedGroups = CompressTable(compressor, groupTable);
-        long cursor = Header1Size + Header2Size;
-        long partitionOffset = WriteTable(partitionTable, ref cursor, upperBound);
-        long rawOffset = WriteTable(compressedRaw, ref cursor, upperBound);
-        long groupOffset = WriteTable(compressedGroups, ref cursor, upperBound);
-        byte[] header2 = new byte[Header2Size];
-
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(0), 2);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(4), (uint)RvzCompressionType.Zstd);
-        BinaryPrimitives.WriteInt32BigEndian(header2.AsSpan(8), _compressionLevel);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(12), (uint)_chunkSize);
-        discHeader.CopyTo(header2.AsSpan(16));
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(144), (uint)partitionEntries.Count);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(148), PartitionEntrySize);
-        BinaryPrimitives.WriteUInt64BigEndian(header2.AsSpan(152), (ulong)partitionOffset);
-        SHA1.HashData(partitionTable, header2.AsSpan(160, 20));
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(180), (uint)rawRegions.Count);
-        BinaryPrimitives.WriteUInt64BigEndian(header2.AsSpan(184), (ulong)rawOffset);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(192), (uint)compressedRaw.Length);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(196), (uint)groups.Length);
-        BinaryPrimitives.WriteUInt64BigEndian(header2.AsSpan(200), (ulong)groupOffset);
-        BinaryPrimitives.WriteUInt32BigEndian(header2.AsSpan(208), (uint)compressedGroups.Length);
-
-        header2[212] = 0;
-
-        byte[] header1 = new byte[Header1Size];
-
-        header1[0] = (byte)'R';
-        header1[1] = (byte)'V';
-        header1[2] = (byte)'Z';
-        header1[3] = 1;
-
-        BinaryPrimitives.WriteUInt32BigEndian(header1.AsSpan(4), RvzVersion);
-        BinaryPrimitives.WriteUInt32BigEndian(header1.AsSpan(8), RvzVersionWriteCompatible);
-        BinaryPrimitives.WriteUInt32BigEndian(header1.AsSpan(12), Header2Size);
-        SHA1.HashData(header2, header1.AsSpan(16, 20));
-        BinaryPrimitives.WriteUInt64BigEndian(header1.AsSpan(36), (ulong)isoSize);
-        BinaryPrimitives.WriteUInt64BigEndian(header1.AsSpan(44), (ulong)RandomAccess.GetLength(_output));
-        SHA1.HashData(header1.AsSpan(0, Header1Size - 20), header1.AsSpan(Header1Size - 20, 20));
-        RandomAccess.Write(_output, header1, 0);
-        RandomAccess.Write(_output, header2, Header1Size);
+        Finish(_output, 2, discHeader, isoSize, _compressionLevel, _chunkSize, groups, rawEntries, partitionTable, upperBound);
     }
-
-    private static byte[] CompressTable(ZstdSharp.Compressor compressor, byte[] table)
-    {
-        byte[] buffer = new byte[ZstdSharp.Compressor.GetCompressBound(table.Length)];
-
-        int written = compressor.Wrap(table, buffer);
-
-        return buffer.AsSpan(0, written).ToArray();
-    }
-
-    private long WriteTable(byte[] data, ref long cursor, long upperBound)
-    {
-        if (cursor <= upperBound && cursor + data.Length > upperBound)
-            cursor = Align4(RandomAccess.GetLength(_output));
-
-        long offset = cursor;
-
-        RandomAccess.Write(_output, data, cursor);
-
-        cursor = Align4(cursor + data.Length);
-
-        return offset;
-    }
-
-    private static long Align4(long value) => (value + 3) & ~3L;
 
     public static bool IsWii(ReadOnlySpan<byte> discHeader) => BinaryPrimitives.ReadUInt32BigEndian(discHeader[0x18..]) == WiiMagic;
 }
