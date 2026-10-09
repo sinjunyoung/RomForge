@@ -49,15 +49,7 @@ public static class IsoToRvzConverter
         }
         finally
         {
-            if (!succeeded)
-            {
-                try
-                {
-                    if (File.Exists(outputPath))
-                        File.Delete(outputPath);
-                }
-                catch { }
-            }
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
     }
 }

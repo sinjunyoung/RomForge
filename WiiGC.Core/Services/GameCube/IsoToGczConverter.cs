@@ -40,7 +40,7 @@ public static class IsoToGczConverter
         }
         finally
         {
-            DeleteIfFailed(outputPath, succeeded);
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
     }
 
@@ -60,18 +60,5 @@ public static class IsoToGczConverter
             return 0;
 
         return uint.MaxValue;
-    }
-
-    internal static void DeleteIfFailed(string path, bool succeeded)
-    {
-        if (succeeded)
-            return;
-
-        try
-        {
-            if (File.Exists(path))
-                File.Delete(path);
-        }
-        catch { }
     }
 }

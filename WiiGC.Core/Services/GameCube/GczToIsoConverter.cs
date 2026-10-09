@@ -28,7 +28,7 @@ public static class GczToIsoConverter
         }
         finally
         {
-            IsoToGczConverter.DeleteIfFailed(outputPath, succeeded);
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
     }
 

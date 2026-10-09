@@ -59,7 +59,7 @@ public static class WiiIsoRebuilder
             foreach (var reader in readers)
                 reader.Dispose();
 
-            DeleteIfFailed(outputPath, succeeded);
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
 
         return result!;
@@ -223,18 +223,5 @@ public static class WiiIsoRebuilder
         patches.Add((header.TmdOffset, tmd));
 
         return patches;
-    }
-
-    private static void DeleteIfFailed(string outputPath, bool succeeded)
-    {
-        if (succeeded)
-            return;
-
-        try
-        {
-            if (File.Exists(outputPath))
-                File.Delete(outputPath);
-        }
-        catch { }
     }
 }

@@ -45,8 +45,7 @@ public static class WiiIsoStreamConverter
         }
         finally
         {
-            if (!succeeded && File.Exists(outputPath))
-                try { File.Delete(outputPath); } catch { }
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
 
         return source.Result;

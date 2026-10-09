@@ -21,12 +21,7 @@ public static class RvzToWbfsConverter
         }
         finally
         {
-            try
-            {
-                if (File.Exists(tempPath))
-                    File.Delete(tempPath);
-            }
-            catch { }
+            OutputGuard.TryDelete(tempPath);
         }
     }
 }

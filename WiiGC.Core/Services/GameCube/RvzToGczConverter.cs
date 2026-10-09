@@ -26,7 +26,7 @@ public static class RvzToGczConverter
         }
         finally
         {
-            IsoToGczConverter.DeleteIfFailed(outputPath, succeeded);
+            OutputGuard.DeleteIfFailed(outputPath, succeeded);
         }
     }
 

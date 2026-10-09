@@ -60,9 +60,7 @@ public class DiscImageConverter
 
             if (result != 0)
             {
-                if (File.Exists(outputPath))
-                    try { File.Delete(outputPath); } catch { }
-
+                OutputGuard.TryDelete(outputPath);
                 LogMessage?.Invoke(this, ($"{workType} 실패 (에러 코드: {result})", LogLevel.Error));
                 throw new InvalidOperationException($"{workType} 실패 (에러 코드: {result})");
             }
