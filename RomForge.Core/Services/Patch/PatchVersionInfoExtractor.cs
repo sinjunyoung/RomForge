@@ -11,7 +11,7 @@ public static class PatchVersionInfoExtractor
 
     private static readonly Regex VersionRegex = new(@"(?<![A-Za-z0-9])(?:v(?<Version>\d+(?:\.\d+)*[A-Za-z]*)|(?<Version>\d+\.\d+[A-Za-z]*)(?:v)?)(?![A-Za-z0-9])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex DateRegex = new(@"(?<!\d)(?:\d{4}|(\d{2}))(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?!\d)", RegexOptions.Compiled);
-    private static readonly Regex LanguageRegex = new(@"[\(\[]\s*(?<Language>Japan|USA|Europe|Asia|Korea|Korean|World|En|Ja|Ko|Zh|Fr|De|Es|It|J|K|U|E|C|A|W|F|D|S|I)(?:\s*,\s*[^\]\)]+)?\s*[\)\]]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LanguageRegex = new(@"(?<![A-Za-z])(?<Language>Japan|USA|Europe|Asia|Korea|Korean|World|En|Ja|Ko|Zh|Fr|De|Es|It|J|K|U|E|C|A|W|F|D|S|I)(?![A-Za-z])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex FileNameTokenRegex = new(@"\{fileName\}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex VersionTokenRegex = new(@"[ _\-]?\{Version\}[ _\-]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -125,14 +125,16 @@ public static class PatchVersionInfoExtractor
     {
         string rawNameOnly = Path.GetFileNameWithoutExtension(fileName);
 
-        if (string.IsNullOrEmpty(language))
+        string? originalLanguage = null;
+        var origLangMatch = LanguageRegex.Match(rawNameOnly);
+        if (origLangMatch.Success)
         {
-            var origLangMatch = LanguageRegex.Match(rawNameOnly);
-            if (origLangMatch.Success)
-                language = origLangMatch.Groups["Language"].Value;
+            originalLanguage = origLangMatch.Groups["Language"].Value;
         }
 
-        string nameOnly = LanguageRegex.Replace(rawNameOnly, string.Empty).Trim();
+        string patchLanguage = !string.IsNullOrEmpty(language) ? language : appLanguage;
+
+        string nameOnly = Regex.Replace(rawNameOnly, @"[\(\[]\s*(?:Japan|USA|Europe|Asia|Korea|Korean|World|En|Ja|Ko|Zh|Fr|De|Es|It|J|K|U|E|C|A|W|F|D|S|I)\s*[\)\]]", string.Empty, RegexOptions.IgnoreCase).Trim();
         nameOnly = Regex.Replace(nameOnly, @"\s+", " ");
 
         string ext = Path.GetExtension(fileName);
@@ -144,22 +146,22 @@ public static class PatchVersionInfoExtractor
 
         result = Lan1TokenRegex.Replace(result, m =>
         {
-            if (string.IsNullOrEmpty(language))
+            if (string.IsNullOrEmpty(originalLanguage))
                 return string.Empty;
 
             string fmt = m.Groups["Format"].Success ? m.Groups["Format"].Value : "full";
-            string formatted = FormatLanguage(language, fmt);
+            string formatted = FormatLanguage(originalLanguage, fmt);
 
             return Regex.Replace(m.Value, @"\{Lan(?:guage|1)(?::[^{}]+)?\}", formatted, RegexOptions.IgnoreCase);
         });
 
         result = Lan2TokenRegex.Replace(result, m =>
         {
-            if (string.IsNullOrEmpty(appLanguage))
+            if (string.IsNullOrEmpty(patchLanguage))
                 return string.Empty;
 
             string fmt = m.Groups["Format"].Success ? m.Groups["Format"].Value : "full";
-            string formatted = FormatLanguage(appLanguage, fmt);
+            string formatted = FormatLanguage(patchLanguage, fmt);
 
             return Regex.Replace(m.Value, @"\{Lan2(?::[^{}]+)?\}", formatted, RegexOptions.IgnoreCase);
         });
@@ -180,6 +182,7 @@ public static class PatchVersionInfoExtractor
         result = Regex.Replace(result, @"\(\s*[\-_]\s*", "(");
         result = Regex.Replace(result, @"\s*[\-_]\s*\)", ")");
         result = Regex.Replace(result, @"\(\s*\)", string.Empty);
+        result = Regex.Replace(result, @"\[\s*\]", string.Empty);
         result = Regex.Replace(result, @"\s+", " ").Trim();
 
         return result + ext;

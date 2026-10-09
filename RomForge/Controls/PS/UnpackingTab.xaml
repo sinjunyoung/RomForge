@@ -77,16 +77,13 @@
 
                         <GridViewColumn Width="270">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="FileName"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="FileName">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/CD.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
@@ -97,7 +94,7 @@
                                         </Border>
                                         <StackPanel VerticalAlignment="Center">
                                             <TextBlock Text="{Binding TitleName}" Foreground="#E8E8F0" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="260" ToolTip="{Binding FilePath}"/>
-                                            <TextBlock Text="{Binding TitleId}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="260"  ToolTip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding TitleId}" Foreground="#8888A8" FontSize="11" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" MaxWidth="260" ToolTip="{Binding FilePath}"/>
                                         </StackPanel>
                                     </StackPanel>
                                 </DataTemplate>
@@ -106,16 +103,13 @@
 
                         <GridViewColumn Width="270">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="TitleLocalName"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="TitleLocalName">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/CD.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="로컬 타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="8,5" VerticalAlignment="Center">
@@ -139,16 +133,13 @@
 
                         <GridViewColumn Width="90">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="FileSizeBytes"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="FileSizeBytes">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding FileSize}" Padding="6,0" HorizontalAlignment="Right"/>
@@ -158,16 +149,13 @@
 
                         <GridViewColumn Width="120">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Tag="Progress"/>
-                            </GridViewColumn.Header>
-                            <GridViewColumn.HeaderTemplate>
-                                <DataTemplate>
+                                <GridViewColumnHeader Tag="Progress">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                         <TextBlock Text="진행률" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
-                                </DataTemplate>
-                            </GridViewColumn.HeaderTemplate>
+                                </GridViewColumnHeader>
+                            </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid Margin="6,0">

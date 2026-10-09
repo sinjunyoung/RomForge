@@ -44,7 +44,15 @@
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="파일명">
+                            <GridViewColumn Width="150">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="FileName">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="파일명" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FileName}" TextAlignment="Left" ToolTip="{Binding FilePath}"/>
@@ -74,7 +82,15 @@
 
                             <GridViewColumn Header="게임ID" DisplayMemberBinding="{Binding GameId}" Width="80"/>
 
-                            <GridViewColumn Header="용량" Width="70">
+                            <GridViewColumn Width="90">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="FileSizeBytes">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                            <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </GridViewColumnHeader>
+                                </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FileSize}" TextAlignment="Right"/>
@@ -272,10 +288,10 @@
                             <Border Width="480" Height="272" Margin="5" CornerRadius="18" BorderBrush="#40FFFFFF" BorderThickness="1" Background="#10FFFFFF" AllowDrop="True" Drop="Bgm_Drop" MouseLeftButtonDown="Bgm_MouseLeftButtonDown" Cursor="Hand">
                                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                        <Image Source="/Assets/Images/Drag.png" Width="36" Height="36" Margin="0,0,0,10" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="오디오 파일을 드래그&amp;드롭하거나 클릭하세요" FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                                        <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="오디오 파일을 드래그&amp;드롭하거나 클릭하세요" FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,6"/>
                                         <!--<TextBlock Text="{Binding BgmFileName, FallbackValue='오디오 파일을 드래그&amp;드롭하거나 클릭하세요'}" FontSize="12" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
-                                        <TextBlock Text="* WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,12"/>-->
+                                        <TextBlock Text="* WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="12" Foreground="#8A8A8A" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,6"/>-->
                                         <ItemsControl HorizontalAlignment="Center">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
