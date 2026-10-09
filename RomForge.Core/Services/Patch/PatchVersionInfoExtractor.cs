@@ -11,7 +11,7 @@ public static class PatchVersionInfoExtractor
 
     private static readonly Regex VersionRegex = new(@"(?<![A-Za-z0-9])(?:v(?<Version>\d+(?:\.\d+)*[A-Za-z]*)|(?<Version>\d+\.\d+[A-Za-z]*)(?:v)?)(?![A-Za-z0-9])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex DateRegex = new(@"(?<!\d)(?:\d{4}|(\d{2}))(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?!\d)", RegexOptions.Compiled);
-    private static readonly Regex LanguageRegex = new(@"[\(\[]\s*(?<Language>Japan|USA|Europe|Asia|Korea|Korean|World|En|Ja|Ko|Zh|Fr|De|Es|It)(?:\s*,\s*[^\]\)]+)?\s*[\)\]]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex LanguageRegex = new(@"[\(\[]\s*(?<Language>Japan|USA|Europe|Asia|Korea|Korean|World|En|Ja|Ko|Zh|Fr|De|Es|It|J|K|U|E|C|A|W|F|D|S|I)(?:\s*,\s*[^\]\)]+)?\s*[\)\]]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex FileNameTokenRegex = new(@"\{fileName\}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex VersionTokenRegex = new(@"[ _\-]?\{Version\}[ _\-]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -24,6 +24,18 @@ public static class PatchVersionInfoExtractor
 
     private static readonly Dictionary<string, (string Code1, string Code3, string Full)> LanguageMap = new(StringComparer.OrdinalIgnoreCase)
     {
+        ["J"] = ("J", "Jap", "Japan"),
+        ["K"] = ("K", "Kor", "Korea"),
+        ["U"] = ("U", "USA", "USA"),
+        ["E"] = ("E", "Eur", "Europe"),
+        ["C"] = ("C", "Chn", "China"),
+        ["W"] = ("W", "Wld", "World"),
+        ["A"] = ("A", "Aus", "Australia"),
+        ["F"] = ("F", "Fra", "French"),
+        ["D"] = ("D", "Deu", "German"),
+        ["S"] = ("S", "Spa", "Spanish"),
+        ["I"] = ("I", "Ita", "Italian"),
+
         ["Japan"] = ("J", "Jap", "Japan"),
         ["USA"] = ("U", "USA", "USA"),
         ["Europe"] = ("E", "Eur", "Europe"),
