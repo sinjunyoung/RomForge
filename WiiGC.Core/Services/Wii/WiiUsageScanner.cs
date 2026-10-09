@@ -1,7 +1,4 @@
 ﻿using System.Buffers.Binary;
-using System.Security.Cryptography;
-using WiiGC.Core.Models;
-using WiiGC.Core.Services;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -121,6 +118,7 @@ internal static class WiiUsageScanner
         uint dolOffset4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x420));
         uint fstOffset4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x424));
         uint fstSize4 = BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x428));
+
         byte[] dol = new byte[0x100];
 
         reader.Read((long)dolOffset4 << 2, dol);

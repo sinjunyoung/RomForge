@@ -7,7 +7,6 @@ namespace WiiGC.Core.Services.Wii;
 public static class WiiIsoUnpacker
 {
     private const int CopyChunkSize = 0x100000;
-    private const int MaximumHeaderSize = 0x1000000;
     private const int MaximumCertSize = 0x100000;
 
     public static int Unpack(string inputPath, string outputFolder, Action<double>? progress = null, CancellationToken ct = default)
@@ -27,9 +26,9 @@ public static class WiiIsoUnpacker
 
         reader.Read(0, boot);
 
-        long dolOffset = ReadOffset(boot, 0x420);
+        long dolOffset = WiiLayoutBuilder.ReadOffset(boot, 0x420);
 
-        if (dolOffset < WiiFolderLayout.ApploaderOffset + 0x20 || dolOffset > MaximumHeaderSize || dolOffset + WiiDol.HeaderSize > reader.Length)
+        if (dolOffset < WiiFolderLayout.ApploaderOffset + 0x20 || dolOffset > WiiLayoutBuilder.MaximumHeaderSize || dolOffset + WiiDol.HeaderSize > reader.Length)
             throw new InvalidDataException("Wii 파티션 부트 정보가 올바르지 않습니다.");
 
         byte[] bi2 = new byte[WiiFolderLayout.Bi2Size];
@@ -84,7 +83,6 @@ public static class WiiIsoUnpacker
         var files = WiiFileSystem.Read(reader).Files;
         var reporter = new ProgressReporter(files.Sum(f => f.Size) + dolSize, progress);
         byte[] buffer = new byte[CopyChunkSize];
-
         bool rootExisted = Directory.Exists(root);
         bool completed = false;
 
@@ -179,6 +177,4 @@ public static class WiiIsoUnpacker
             reporter.Add(count);
         }
     }
-
-    private static long ReadOffset(byte[] boot, int position) => (long)BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(position)) << 2;
 }

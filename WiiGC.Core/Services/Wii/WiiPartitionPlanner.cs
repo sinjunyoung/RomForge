@@ -1,14 +1,11 @@
-﻿using System.Buffers.Binary;
-using WiiGC.Core.Models;
+﻿using WiiGC.Core.Models;
 
 namespace WiiGC.Core.Services.Wii;
 
 internal static class WiiPartitionPlanner
 {
-    private const int FileAlignment = 0x20;
     private const int BootSize = 0x440;
     private const int MinimumHeaderSize = 0x2440;
-    private const int MaximumHeaderSize = 0x1000000;
     private const int MaximumFstSize = 0x4000000;
 
     public static WiiRepackPlan Plan(WiiPartitionReader original, IReadOnlyDictionary<string, string> replacements)
@@ -17,12 +14,12 @@ internal static class WiiPartitionPlanner
 
         original.Read(0, boot);
 
-        long dolOffset = ReadOffset(boot, 0x420);
-        long fstOffset = ReadOffset(boot, 0x424);
-        long fstSize = ReadOffset(boot, 0x428);
-        long fstMaxSize = ReadOffset(boot, 0x42C);
+        long dolOffset = WiiLayoutBuilder.ReadOffset(boot, 0x420);
+        long fstOffset = WiiLayoutBuilder.ReadOffset(boot, 0x424);
+        long fstSize = WiiLayoutBuilder.ReadOffset(boot, 0x428);
+        long fstMaxSize = WiiLayoutBuilder.ReadOffset(boot, 0x42C);
 
-        if (dolOffset < MinimumHeaderSize || dolOffset > MaximumHeaderSize || fstSize < 12 || fstSize > MaximumFstSize || fstOffset + fstSize > original.Length)
+        if (dolOffset < MinimumHeaderSize || dolOffset > WiiLayoutBuilder.MaximumHeaderSize || fstSize < 12 || fstSize > MaximumFstSize || fstOffset + fstSize > original.Length)
             throw new InvalidDataException("Wii 파티션 부트 정보가 올바르지 않습니다.");
 
         byte[] dolHeader = new byte[WiiDol.HeaderSize];
@@ -56,8 +53,7 @@ internal static class WiiPartitionPlanner
             {
                 long length = new FileInfo(filePath).Length;
 
-                if (length > uint.MaxValue)
-                    throw new InvalidDataException($"파일이 너무 큽니다 (4GB 미만이어야 합니다): {filePath}");
+                WiiLayoutBuilder.EnsureFileSize(length, filePath);
 
                 external[node!] = (filePath, length);
             }
@@ -65,8 +61,7 @@ internal static class WiiPartitionPlanner
             resolved.Add((discPath, found ? node : null));
         }
 
-        if (resolved.Count > 0 && resolved.All(r => r.Node == null))
-            throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {resolved.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", resolved.Take(3).Select(r => r.Path))}");
+        WiiLayoutBuilder.EnsureAnyApplied(resolved.Select(r => (r.Path, r.Node != null)).ToList());
 
         byte[] head = new byte[dolOffset];
 
@@ -74,46 +69,21 @@ internal static class WiiPartitionPlanner
 
         var ordered = files.Select(f => f.Node).OrderBy(n => n.Offset).ToList();
         var oldPlacement = ordered.Select(n => (n.Offset, n.Size)).ToList();
-        long newFstSize = tree.GetSerializedSize();
-        long newFstOffset = Align(dolOffset + dolSize);
-        long cursor = Align(newFstOffset + newFstSize);
-        var extents = new List<WiiRepackedPartition.Extent>();
+        var layout = new WiiLayoutBuilder(tree, dolOffset, dolSize);
 
         for (int i = 0; i < ordered.Count; i++)
         {
             var node = ordered[i];
             var (oldOffset, oldSize) = oldPlacement[i];
-            long size = oldSize;
 
             if (external.TryGetValue(node, out var replacement))
-            {
-                size = replacement.Size;
-
-                if (size > 0)
-                    extents.Add(WiiRepackedPartition.Extent.FromFile(cursor, size, replacement.Path));
-            }
-            else if (size > 0)
-                extents.Add(WiiRepackedPartition.Extent.FromReader(cursor, size, original, oldOffset));
-
-            node.Offset = cursor;
-            node.Size = size;
-            cursor = Align(cursor + size);
+                layout.PlaceFile(node, replacement.Size, replacement.Path);
+            else
+                layout.PlaceFile(node, oldSize, original, oldOffset);
         }
 
-        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(0x424), (uint)(newFstOffset >> 2));
-        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(0x428), (uint)(newFstSize >> 2));
-        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(0x42C), (uint)(Math.Max(fstMaxSize, newFstSize) >> 2));
-        extents.Add(WiiRepackedPartition.Extent.FromMemory(0, head));
-        extents.Add(WiiRepackedPartition.Extent.FromReader(dolOffset, dolSize, original, dolOffset));
-        extents.Add(WiiRepackedPartition.Extent.FromMemory(newFstOffset, tree.Serialize()));
-
-        long clusters = (cursor + WiiLayout.BlockDataSize - 1) / WiiLayout.BlockDataSize;
         var entries = resolved.Select(r => new WiiPatchEntry(r.Path, r.Node != null, r.Node?.Offset ?? 0)).ToList();
 
-        return new WiiRepackPlan(new WiiRepackedPartition(extents, clusters * WiiLayout.BlockDataSize), clusters * WiiLayout.BlockTotalSize, entries);
+        return layout.Build(head, fstMaxSize, WiiRepackedPartition.Extent.FromReader(dolOffset, dolSize, original, dolOffset), entries);
     }
-
-    private static long ReadOffset(byte[] boot, int position) => (long)BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(position)) << 2;
-
-    private static long Align(long value) => (value + FileAlignment - 1) / FileAlignment * FileAlignment;
 }
