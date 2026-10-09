@@ -1,4 +1,5 @@
 ﻿using Common.WPF;
+using Microsoft.Win32;
 using NSW.Core.Enums;
 using RomForge.ViewModels._3DS;
 using System.IO;
@@ -61,9 +62,41 @@ namespace RomForge.Controls._3DS
             e.Handled = true;
         }
 
+        private void TxtPatch_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element && element.ContextMenu != null)
+            {
+                element.ContextMenu.PlacementTarget = element;
+                element.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void SelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFolderDialog
+            {
+                Title = "패치 폴더 선택"
+            };
+
+            if (dialog.ShowDialog() == true)
+                ViewModel.PatchPath = dialog.FolderName;
+        }
+
+        private void SelectFile_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "패치 파일 (*.zip;*.7z)|*.zip;*.7z|ZIP 파일 (*.zip)|*.zip|7Z 파일 (*.7z)|*.7z",
+                Title = "패치 파일 선택"
+            };
+
+            if (dialog.ShowDialog() == true)
+                ViewModel.PatchPath = dialog.FileName;
+        }
+
         private void TxtRom_Click(object sender, MouseButtonEventArgs e)
         {
-            var dlg = new Microsoft.Win32.OpenFileDialog
+            var dlg = new OpenFileDialog
             {
                 Filter = "3DS 롬 파일|*.3ds;*.cci;*.zcci;*.cia|모든 파일|*.*",
                 Title = "3DS 롬 파일 선택"
@@ -75,12 +108,12 @@ namespace RomForge.Controls._3DS
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.IsLocked) 
+            if (ViewModel.IsLocked)
             {
-                ViewModel.Cancel(); 
+                ViewModel.Cancel();
                 return;
             }
-            
+
             await ViewModel.StartAsync(BuildMode.FullProcess);
         }
 
@@ -97,10 +130,10 @@ namespace RomForge.Controls._3DS
 
         private void BtnRebuild_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.IsLocked) 
-            { 
+            if (ViewModel.IsLocked)
+            {
                 ViewModel.Cancel();
-                return; 
+                return;
             }
 
             _ = ViewModel.StartAsync(BuildMode.RebuildOnly);

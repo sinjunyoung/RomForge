@@ -29,7 +29,21 @@
                     <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.Pc98VM.SourcePath}"/>
                 </Grid>
             </Border>
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" Height="65" AllowDrop="True" Drop="PatchDrop_Drop">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" Height="65" AllowDrop="True" Drop="PatchDrop_Drop" MouseLeftButtonDown="PatchDrop_MouseLeftButtonDown" Cursor="Hand">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="폴더 선택..." Click="SelectFolder_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="파일 선택 (*.ips, *.zip)..." Click="SelectFile_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </Border.ContextMenu>
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>

@@ -40,7 +40,22 @@
                 </Grid>
             </Border>
 
-            <Border IsEnabled="{Binding IsIdle}" Grid.Column="1" Style="{StaticResource DropZone}" Height="65" Margin="5,0,5,0" AllowDrop="True" PreviewDragEnter="TxtPatch_DragEnter" PreviewDragOver="TxtPatch_DragOver" PreviewDrop="TxtPatch_Drop">
+            <Border IsEnabled="{Binding IsIdle}" Grid.Column="1" Style="{StaticResource DropZone}" Height="65" Margin="5,0,5,0" AllowDrop="True" Cursor="Hand"
+                    PreviewDragEnter="TxtPatch_DragEnter" PreviewDragOver="TxtPatch_DragOver" PreviewDrop="TxtPatch_Drop" MouseLeftButtonDown="TxtPatch_MouseLeftButtonDown">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="폴더 선택..." Click="SelectFolder_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="파일 선택 (*.zip, *.7z)..." Click="SelectFile_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </Border.ContextMenu>
                 <Grid Margin="14,0">
                     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -50,7 +65,7 @@
                         <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
-                            <TextBlock Text="패치 폴더 또는 zip/7z파일을 드래그&amp;드롭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
+                            <TextBlock Text="패치 폴더 또는 zip/7z파일을 드래그하거나 클릭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
                     <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>

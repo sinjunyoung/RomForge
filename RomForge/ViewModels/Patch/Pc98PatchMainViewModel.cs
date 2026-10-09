@@ -48,7 +48,7 @@ public class Pc98PatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 HDI를 드래그하거나 클릭하세요";
 
-    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 폴더 또는 ZIP를 드래그&드롭하세요";
+    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 폴더 또는 ZIP를 드래그하거나 클릭하세요";
 
     public int ProgressPct
     {
