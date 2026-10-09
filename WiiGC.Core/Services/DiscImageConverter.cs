@@ -1,6 +1,5 @@
 ﻿using Common;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services.GameCube;
 using WiiGC.Core.Services.Wii;
 
 namespace WiiGC.Core.Services;
@@ -82,13 +81,6 @@ public class DiscImageConverter
     private int ConvertRvzToWbfs(string inputPath, string outputPath, CancellationToken ct) => Run(report => RvzToWbfsConverter.Convert(inputPath, outputPath, report, ct));
 
     private int ConvertIsoToWbfs(string inputPath, string outputPath, CancellationToken ct) => Run(report => IsoToWbfsConverter.Convert(inputPath, outputPath, report, ct));
-
-    private int ConvertToGcz(string inputPath, string outputPath, CancellationToken ct) => Run(report =>
-    {
-        Action<string, string, int, Action<double>?, CancellationToken> convert = inputPath.EndsWith(".rvz", StringComparison.OrdinalIgnoreCase) ? RvzToGczConverter.Convert : IsoToGczConverter.Convert;
-
-        convert(inputPath, outputPath, GczWriter.DefaultBlockSize, report, ct);
-    });
 
     private int ConvertRvzToIso(string inputPath, string outputPath, CancellationToken ct) => Run(report => RvzToIsoConverter.Convert(inputPath, outputPath, report, ct));
 

@@ -42,10 +42,4 @@ internal static class DiscHeader
         _ => DiscPlatform.Unknown
     };
 
-    public static uint GczSubType(DiscPlatform platform) => platform switch
-    {
-        DiscPlatform.GameCube => 0,
-        DiscPlatform.Wii => 1,
-        _ => uint.MaxValue
-    };
 }

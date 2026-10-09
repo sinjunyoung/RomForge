@@ -10,7 +10,6 @@ internal static class WiiPartitionTable
     public static List<WiiPartitionSpec> Read(IRvzInputSource input, long isoSize)
     {
         var offsets = new SortedSet<long>();
-        var candidates = new List<(long Offset, uint Type)>();
         Span<byte> header = stackalloc byte[8];
 
         for (int group = 0; group < 4; group++)
@@ -36,20 +35,15 @@ internal static class WiiPartitionTable
             {
                 var entry = table.AsSpan(i * 8, 8);
                 long partitionOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(entry) << 2;
-                uint partitionType = BinaryPrimitives.ReadUInt32BigEndian(entry[4..]);
 
-                if (partitionOffset <= 0 || partitionOffset >= isoSize || !offsets.Add(partitionOffset))
-                    continue;
-
-                candidates.Add((partitionOffset, partitionType));
+                if (partitionOffset > 0 && partitionOffset < isoSize)
+                    offsets.Add(partitionOffset);
             }
         }
 
-        candidates.Sort((a, b) => a.Offset.CompareTo(b.Offset));
-
         var result = new List<WiiPartitionSpec>();
 
-        foreach (var (offset, _) in candidates)
+        foreach (long offset in offsets)
         {
             var spec = TryRead(input, isoSize, offset);
 

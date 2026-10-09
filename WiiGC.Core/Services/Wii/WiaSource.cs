@@ -44,44 +44,6 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
 
     private void ReturnContext(Context context) => _contextPool.Add(context);
 
-    private readonly SemaphoreSlim _prefetchGate = new(Environment.ProcessorCount);
-    private long _prefetchWatermark = -1;
-
-    public void PrefetchAhead(long uptoOffset)
-    {
-        uptoOffset = Math.Min(uptoOffset, Length);
-
-        long previous = Interlocked.Exchange(ref _prefetchWatermark, uptoOffset);
-
-        if (uptoOffset <= previous)
-            return;
-
-        const long step = 4 * 1024 * 1024;
-
-        for (long pos = Math.Max(previous, 0); pos < uptoOffset; pos += step)
-        {
-            if (!_prefetchGate.Wait(0))
-                break;
-
-            long p = pos;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    Span<byte> scratch = stackalloc byte[1];
-
-                    Read(p, scratch);
-                }
-                catch { }
-                finally
-                {
-                    _prefetchGate.Release();
-                }
-            });
-        }
-    }
-
     public static bool IsWiaOrRvz(SafeFileHandle handle)
     {
         if (RandomAccess.GetLength(handle) < 4)

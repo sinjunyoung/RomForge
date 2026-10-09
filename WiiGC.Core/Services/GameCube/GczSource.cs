@@ -76,8 +76,6 @@ internal sealed class GczSource : IRvzInputSource
 
     public long Length => _discSize;
 
-    public int BlockSize => _blockSize;
-
     public static bool IsGcz(SafeFileHandle handle)
     {
         if (RandomAccess.GetLength(handle) < HeaderSize)

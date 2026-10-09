@@ -1,4 +1,3 @@
-using System.Buffers.Binary;
 using System.Security.Cryptography;
 
 namespace WiiGC.Core.Services.Wii;
@@ -36,6 +35,4 @@ internal static class WiiTicket
 
         return titleKey;
     }
-
-    public static ulong ReadTitleId(ReadOnlySpan<byte> ticket) => BinaryPrimitives.ReadUInt64BigEndian(ticket[TitleIdOffset..]);
 }

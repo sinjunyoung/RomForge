@@ -30,11 +30,4 @@
     <ProjectReference Include="..\Common\Common.csproj" />
   </ItemGroup>
 
-<ItemGroup>
-    <None Update="dolphin_rvz_wrapper.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>false</ExcludeFromSingleFile>
-    </None>
-</ItemGroup>
-
 </Project>
