@@ -15,11 +15,10 @@ public static class WiiIsoInspector
 
         input.Read(0, header);
 
-        if (!RvzWiiWriter.IsWii(header))
+        if (!DiscHeader.IsWii(header))
             throw new InvalidDataException("Wii 디스크가 아닙니다.");
 
         var specs = WiiPartitionTable.Read(input, input.Length);
-
         using var writer = new StreamWriter(outputPath, false, new UTF8Encoding(false));
 
         writer.WriteLine($"source: {isoPath}");
@@ -36,7 +35,6 @@ public static class WiiIsoInspector
             try
             {
                 using var reader = new WiiPartitionReader(input, spec);
-
                 var info = WiiFileSystem.Read(reader);
 
                 writer.WriteLine($"gameId: {info.GameId}");

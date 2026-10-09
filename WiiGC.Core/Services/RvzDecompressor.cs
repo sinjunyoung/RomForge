@@ -1,5 +1,4 @@
 using WiiGC.Core.Models;
-using WiiGC.Core.Services.Wii;
 
 namespace WiiGC.Core.Services;
 

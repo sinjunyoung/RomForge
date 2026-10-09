@@ -1,6 +1,5 @@
 using System.Buffers.Binary;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -16,7 +15,7 @@ internal static class WiiPartitionTable
 
         for (int group = 0; group < 4; group++)
         {
-            long groupHeaderOffset = 0x40000 + group * 8;
+            long groupHeaderOffset = WiiLayout.PartitionTableOffset + group * 8;
 
             if (groupHeaderOffset + 8 > isoSize)
                 break;
@@ -75,7 +74,7 @@ internal static class WiiPartitionTable
 
         Span<byte> pointers = stackalloc byte[8];
 
-        input.Read(offset + 0x2B8, pointers);
+        input.Read(offset + WiiPartitionHeader.DataOffsetField, pointers);
 
         long dataOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(pointers) << 2;
         long dataSize = (long)BinaryPrimitives.ReadUInt32BigEndian(pointers[4..]) << 2;

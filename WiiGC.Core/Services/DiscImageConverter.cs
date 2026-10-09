@@ -19,7 +19,6 @@ public class DiscImageConverter
             bool wbfsToIso = format == "wbfs" && outputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase);
             bool isoToWbfs = format == "wii" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
             bool rvzToWbfs = format == "rvz" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
-
             string workType = rvzToWbfs ? "변환" : wbfsToIso ? "해제" : format switch
             {
                 "wii" or "gcm" => "압축",
@@ -61,6 +60,7 @@ public class DiscImageConverter
             if (result != 0)
             {
                 OutputGuard.TryDelete(outputPath);
+
                 LogMessage?.Invoke(this, ($"{workType} 실패 (에러 코드: {result})", LogLevel.Error));
                 throw new InvalidOperationException($"{workType} 실패 (에러 코드: {result})");
             }

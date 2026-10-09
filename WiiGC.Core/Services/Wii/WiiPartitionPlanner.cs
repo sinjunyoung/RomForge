@@ -4,13 +4,12 @@ namespace WiiGC.Core.Services.Wii;
 
 internal static class WiiPartitionPlanner
 {
-    private const int BootSize = 0x440;
     private const int MinimumHeaderSize = 0x2440;
     private const int MaximumFstSize = 0x4000000;
 
     public static WiiRepackPlan Plan(WiiPartitionReader original, IReadOnlyDictionary<string, string> replacements)
     {
-        byte[] boot = new byte[BootSize];
+        byte[] boot = new byte[WiiFolderLayout.BootSize];
 
         original.Read(0, boot);
 

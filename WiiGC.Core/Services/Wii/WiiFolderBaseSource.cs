@@ -5,8 +5,7 @@ namespace WiiGC.Core.Services.Wii;
 
 internal sealed class WiiFolderBaseSource : IRvzInputSource
 {
-    private const int PartitionTableOffset = 0x40000;
-    private const int PartitionEntriesOffset = 0x40020;
+    private const int PartitionEntriesOffset = WiiLayout.PartitionTableOffset + WiiLayout.PartitionTableSize;
     private const int RegionOffset = 0x4E000;
 
     private readonly byte[] _head;
@@ -25,8 +24,8 @@ internal sealed class WiiFolderBaseSource : IRvzInputSource
         ContainerOffset = containerOffset;
         DataOffset = dataOffset;
         Length = length;
-        _tmdOffset = containerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2A8)) << 2);
-        _certOffset = containerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2B0)) << 2);
+        _tmdOffset = containerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.TmdOffsetField)) << 2);
+        _certOffset = containerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.CertOffsetField)) << 2);
     }
 
     public long Length { get; }
@@ -54,21 +53,21 @@ internal sealed class WiiFolderBaseSource : IRvzInputSource
         if (head.Length != WiiFolderLayout.DiscHeadSize || partition.Length != WiiFolderLayout.PartitionHeaderSize)
             throw new InvalidDataException("meta 파일 크기가 올바르지 않습니다.");
 
-        int tmdSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2A4));
-        int certSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2AC));
+        int tmdSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.TmdSizeField));
+        int certSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.CertSizeField));
 
         if (tmd.Length != tmdSize || cert.Length != certSize || tmdSize < WiiPartitionHeader.TmdMinimumSize)
             throw new InvalidDataException("meta의 TMD/인증서 크기가 파티션 헤더와 맞지 않습니다.");
 
-        long dataOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2B8)) << 2;
-        long h3Offset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2B4)) << 2;
+        long dataOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.DataOffsetField)) << 2;
+        long h3Offset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(WiiPartitionHeader.H3OffsetField)) << 2;
 
         if (h3Offset + WiiPartitionHeader.H3TableSize > dataOffset)
             throw new InvalidDataException("meta의 파티션 헤더 위치가 올바르지 않습니다.");
 
-        Array.Clear(head, PartitionTableOffset, RegionOffset - PartitionTableOffset);
-        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(PartitionTableOffset), 1);
-        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(PartitionTableOffset + 4), PartitionEntriesOffset >> 2);
+        Array.Clear(head, WiiLayout.PartitionTableOffset, RegionOffset - WiiLayout.PartitionTableOffset);
+        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(WiiLayout.PartitionTableOffset), 1);
+        BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(WiiLayout.PartitionTableOffset + 4), PartitionEntriesOffset >> 2);
         BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(PartitionEntriesOffset), (uint)(info.ContainerOffset >> 2));
         BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(PartitionEntriesOffset + 4), 0);
 

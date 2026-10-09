@@ -1,5 +1,4 @@
-﻿using System.Buffers.Binary;
-using WiiGC.Core.Models;
+﻿using WiiGC.Core.Models;
 using WiiGC.Core.Services.GameCube;
 using WiiGC.Core.Services.Wii;
 
@@ -11,20 +10,14 @@ public static class DiscImageInspector
     {
         using var source = RvzInputSource.Open(path);
 
-        if (source.Length < 0x20)
+        if (source.Length < DiscHeader.Size)
             return DiscPlatform.Unknown;
 
-        Span<byte> header = stackalloc byte[0x20];
+        Span<byte> header = stackalloc byte[DiscHeader.Size];
 
         source.Read(0, header);
 
-        if (BinaryPrimitives.ReadUInt32BigEndian(header[0x18..]) == 0x5D1C9EA3)
-            return DiscPlatform.Wii;
-
-        if (BinaryPrimitives.ReadUInt32BigEndian(header[0x1C..]) == 0xC2339F3D)
-            return DiscPlatform.GameCube;
-
-        return DiscPlatform.Unknown;
+        return DiscHeader.Detect(header);
     }
 
     public static bool IsWiiRvz(string path)
@@ -33,7 +26,7 @@ public static class DiscImageInspector
         {
             using var reader = new RvzDiscReader(path);
 
-            return reader.DiscType == 2;
+            return DiscHeader.FromRvzType(reader.DiscType) == DiscPlatform.Wii;
         }
         catch
         {

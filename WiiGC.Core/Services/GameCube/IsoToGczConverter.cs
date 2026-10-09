@@ -1,6 +1,4 @@
-﻿using System.Buffers.Binary;
-
-namespace WiiGC.Core.Services.GameCube;
+﻿namespace WiiGC.Core.Services.GameCube;
 
 public static class IsoToGczConverter
 {
@@ -46,19 +44,13 @@ public static class IsoToGczConverter
 
     internal static uint GetSubType(IRvzInputSource source)
     {
-        if (source.Length < 0x20)
+        if (source.Length < DiscHeader.Size)
             return uint.MaxValue;
 
-        Span<byte> header = stackalloc byte[0x20];
+        Span<byte> header = stackalloc byte[DiscHeader.Size];
 
         source.Read(0, header);
 
-        if (BinaryPrimitives.ReadUInt32BigEndian(header[0x18..]) == 0x5D1C9EA3)
-            return 1;
-
-        if (BinaryPrimitives.ReadUInt32BigEndian(header[0x1C..]) == 0xC2339F3D)
-            return 0;
-
-        return uint.MaxValue;
+        return DiscHeader.GczSubType(DiscHeader.Detect(header));
     }
 }

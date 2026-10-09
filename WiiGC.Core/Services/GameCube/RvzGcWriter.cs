@@ -1,17 +1,12 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using static WiiGC.Core.Services.RvzHeaderWriter;
-using System.Buffers.Binary;
-using System.Security.Cryptography;
 using WiiGC.Core.Models;
 using WiiGC.Core.Services.Wii;
-using ZstdSharp.Unsafe;
 
 namespace WiiGC.Core.Services.GameCube;
 
 internal sealed class RvzGcWriter
 {
-    private const uint GameCubeMagic = 0xC2339F3D;
-
     private readonly record struct GroupResult(byte[]? Buffer, int Length, uint DataSizeField, uint PackedSize, long InputLength, int ReuseValue);
 
     private sealed class Context
@@ -133,7 +128,7 @@ internal sealed class RvzGcWriter
         }
 
         ct.ThrowIfCancellationRequested();
-        Finish(_output, 1, discHeader, isoSize, _compressionLevel, _chunkSize, groups, [new RvzRawEntry(DiscHeaderSize, rawSize, 0, (uint)groups.Length)], [], upperBound);
+        Finish(_output, DiscHeader.RvzTypeGameCube, discHeader, isoSize, _compressionLevel, _chunkSize, groups, [new RvzRawEntry(DiscHeaderSize, rawSize, 0, (uint)groups.Length)], [], upperBound);
         progress?.Invoke(1.0);
     }
 
@@ -181,13 +176,12 @@ internal sealed class RvzGcWriter
 
     private static void ValidateGameCube(byte[] discHeader)
     {
-        uint gameCube = BinaryPrimitives.ReadUInt32BigEndian(discHeader.AsSpan(0x1C));
-        uint wii = BinaryPrimitives.ReadUInt32BigEndian(discHeader.AsSpan(0x18));
+        var platform = DiscHeader.Detect(discHeader);
 
-        if (wii == 0x5D1C9EA3)
+        if (platform == DiscPlatform.Wii)
             throw new NotSupportedException("Wii 디스크 압축은 아직 지원하지 않습니다.");
 
-        if (gameCube != GameCubeMagic)
+        if (platform != DiscPlatform.GameCube)
             throw new InvalidDataException("GameCube 디스크 이미지가 아닙니다.");
     }
 }

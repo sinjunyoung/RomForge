@@ -10,12 +10,7 @@ public static class RvzToGczConverter
         {
             using var reader = new RvzDiscReader(inputPath);
             using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None);
-            uint subType = reader.DiscType switch
-            {
-                1 => 0,
-                2 => 1,
-                _ => uint.MaxValue
-            };
+            uint subType = DiscHeader.GczSubType(DiscHeader.FromRvzType(reader.DiscType));
             using var writer = new GczWriter(output, reader.IsoSize, blockSize, subType);
             var sink = new GczIsoSink(writer, reader.IsoSize);
 

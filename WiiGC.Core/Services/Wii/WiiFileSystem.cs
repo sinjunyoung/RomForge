@@ -6,12 +6,11 @@ namespace WiiGC.Core.Services.Wii;
 
 internal static class WiiFileSystem
 {
-    private const int BootSize = 0x440;
     private const int MaxFstSize = 0x4000000;
 
     public static WiiPartitionInfo Read(WiiPartitionReader reader)
     {
-        byte[] boot = new byte[BootSize];
+        byte[] boot = new byte[WiiFolderLayout.BootSize];
 
         reader.Read(0, boot);
 

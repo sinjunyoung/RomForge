@@ -8,8 +8,6 @@ namespace WiiGC.Core.Services.Wii;
 
 internal sealed class RvzWiiWriter
 {
-    private const uint WiiMagic = 0x5D1C9EA3;
-
     private readonly record struct RawRegion(long Offset, long Size, long RewoundBase, long ExtendedSize);
 
     private readonly record struct GroupResult(byte[]? Buffer, int Length, uint DataSizeField, uint PackedSize);
@@ -307,7 +305,7 @@ internal sealed class RvzWiiWriter
             for (int j = 0; j < blocksInThisGroup; j++)
             {
                 var block = context.Raw.AsSpan(j * WiiLayout.BlockTotalSize, WiiLayout.BlockTotalSize);
-                var iv = block.Slice(0x3D0, 16);
+                var iv = block.Slice(WiiLayout.IvOffset, 16);
 
                 aes.DecryptCbc(block[WiiLayout.BlockHeaderSize..], iv, context.Decrypted.AsSpan(j * WiiLayout.BlockDataSize, WiiLayout.BlockDataSize), System.Security.Cryptography.PaddingMode.None);
                 aes.DecryptCbc(block[..WiiLayout.BlockHeaderSize], zeroIv, context.Hashes.AsSpan(j * WiiLayout.BlockHeaderSize, WiiLayout.BlockHeaderSize), System.Security.Cryptography.PaddingMode.None);
@@ -451,8 +449,6 @@ internal sealed class RvzWiiWriter
             BinaryPrimitives.WriteUInt32BigEndian(span[44..], 0);
         }
 
-        Finish(_output, 2, discHeader, isoSize, _compressionLevel, _chunkSize, groups, rawEntries, partitionTable, upperBound);
+        Finish(_output, DiscHeader.RvzTypeWii, discHeader, isoSize, _compressionLevel, _chunkSize, groups, rawEntries, partitionTable, upperBound);
     }
-
-    public static bool IsWii(ReadOnlySpan<byte> discHeader) => BinaryPrimitives.ReadUInt32BigEndian(discHeader[0x18..]) == WiiMagic;
 }

@@ -1,4 +1,5 @@
-﻿using WiiGC.Core.Services.Wii;
+﻿using WiiGC.Core.Models;
+using WiiGC.Core.Services.Wii;
 
 namespace WiiGC.Core.Services;
 
@@ -12,7 +13,7 @@ public static class RvzToWbfsConverter
         {
             using (var reader = new RvzDiscReader(inputPath))
             {
-                if (reader.DiscType != 2)
+                if (DiscHeader.FromRvzType(reader.DiscType) != DiscPlatform.Wii)
                     throw new InvalidDataException("Wii RVZ 파일이 아닙니다. WBFS는 Wii 디스크만 지원합니다.");
             }
 

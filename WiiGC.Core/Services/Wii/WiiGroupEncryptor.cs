@@ -1,12 +1,10 @@
 using System.Security.Cryptography;
 using WiiGC.Core.Models;
-using WiiGC.Core.Services.Wii;
 
-namespace WiiGC.Core.Services;
+namespace WiiGC.Core.Services.Wii;
 
 internal sealed class WiiGroupEncryptor : IDisposable
 {
-    private const int IvOffset = 0x3D0;
     private const int IvSize = 16;
 
     private static readonly byte[] ZeroIv = new byte[IvSize];
@@ -55,7 +53,7 @@ internal sealed class WiiGroupEncryptor : IDisposable
             var block = output.AsSpan(i * WiiLayout.BlockTotalSize, WiiLayout.BlockTotalSize);
 
             _aes.EncryptCbc(_hashes.AsSpan(i * WiiLayout.BlockHeaderSize, WiiLayout.BlockHeaderSize), ZeroIv, block[..WiiLayout.BlockHeaderSize], PaddingMode.None);
-            _aes.EncryptCbc(decrypted.AsSpan(i * WiiLayout.BlockDataSize, WiiLayout.BlockDataSize), block.Slice(IvOffset, IvSize), block[WiiLayout.BlockHeaderSize..], PaddingMode.None);
+            _aes.EncryptCbc(decrypted.AsSpan(i * WiiLayout.BlockDataSize, WiiLayout.BlockDataSize), block.Slice(WiiLayout.IvOffset, IvSize), block[WiiLayout.BlockHeaderSize..], PaddingMode.None);
         }
     }
 

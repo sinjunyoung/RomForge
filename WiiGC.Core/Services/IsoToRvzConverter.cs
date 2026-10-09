@@ -1,4 +1,4 @@
-﻿using System.Buffers.Binary;
+﻿using WiiGC.Core.Models;
 using WiiGC.Core.Services.GameCube;
 using WiiGC.Core.Services.Wii;
 
@@ -23,20 +23,22 @@ public static class IsoToRvzConverter
         try
         {
             using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None);
-            Span<byte> header = stackalloc byte[0x20];
+            Span<byte> header = stackalloc byte[DiscHeader.Size];
 
             if (input.Length < header.Length)
                 throw new InvalidDataException("디스크 이미지가 너무 작습니다.");
 
             input.Read(0, header);
 
-            if (RvzWiiWriter.IsWii(header))
+            var platform = DiscHeader.Detect(header);
+
+            if (platform == DiscPlatform.Wii)
             {
                 var writer = new RvzWiiWriter(input, output, compressionLevel, chunkSize);
 
                 writer.Write(progress, ct);
             }
-            else if (BinaryPrimitives.ReadUInt32BigEndian(header[0x1C..]) == 0xC2339F3D)
+            else if (platform == DiscPlatform.GameCube)
             {
                 var writer = new RvzGcWriter(input, output, compressionLevel, chunkSize);
 

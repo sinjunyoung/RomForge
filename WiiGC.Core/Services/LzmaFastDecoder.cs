@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace WiiGC.Core.Services.Wii;
+namespace WiiGC.Core.Services;
 
 internal sealed unsafe class LzmaFastDecoder
 {

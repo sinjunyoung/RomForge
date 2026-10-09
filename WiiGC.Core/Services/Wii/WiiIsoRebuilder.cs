@@ -147,14 +147,14 @@ public static class WiiIsoRebuilder
 
     internal static List<WiiPartitionSpec> ReadSpecs(IRvzInputSource input)
     {
-        if (input.Length < 0x20)
+        if (input.Length < DiscHeader.Size)
             throw new InvalidDataException("Wii 디스크가 아닙니다.");
 
-        byte[] header = new byte[0x20];
+        byte[] header = new byte[DiscHeader.Size];
 
         input.Read(0, header);
 
-        if (!RvzWiiWriter.IsWii(header))
+        if (!DiscHeader.IsWii(header))
             throw new InvalidDataException("Wii 디스크가 아닙니다.");
 
         var specs = WiiPartitionTable.Read(input, input.Length);
@@ -165,7 +165,7 @@ public static class WiiIsoRebuilder
         return specs;
     }
 
-    private static void CopyRaw(IRvzInputSource input, IIsoSink sink, byte[] buffer, long offset, long count, ProgressReporter reporter, CancellationToken ct)
+    private static void CopyRaw(IRvzInputSource input, FileIsoSink sink, byte[] buffer, long offset, long count, ProgressReporter reporter, CancellationToken ct)
     {
         long end = offset + count;
 
@@ -187,7 +187,7 @@ public static class WiiIsoRebuilder
         }
     }
 
-    private static void PatchHeader(IRvzInputSource input, IIsoSink sink, WiiPartitionSpec spec, byte[] h3, long? dataSize)
+    private static void PatchHeader(IRvzInputSource input, FileIsoSink sink, WiiPartitionSpec spec, byte[] h3, long? dataSize)
     {
         foreach (var (offset, data) in BuildHeaderPatches(input, spec, h3, dataSize))
             sink.Write(offset, data);
@@ -207,7 +207,7 @@ public static class WiiIsoRebuilder
 
             BinaryPrimitives.WriteUInt32BigEndian(size, (uint)(dataSize.Value >> 2));
 
-            patches.Add((spec.ContainerOffset + 0x2BC, size));
+            patches.Add((spec.ContainerOffset + WiiPartitionHeader.DataSizeField, size));
         }
 
         if (h3.AsSpan().SequenceEqual(originalH3))

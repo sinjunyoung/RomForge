@@ -31,4 +31,12 @@ internal static class WiiLayout
     public const int H2Bytes = 8 * HashSize;
 
     public const int LfgBlockSize = 0x8000;
+
+    public const int IvOffset = 0x3D0;
+
+    public const int PartitionTableOffset = 0x40000;
+
+    public const int PartitionTableSize = 0x20;
+
+    public const int DiscSectorCount = 143432 * 2;
 }

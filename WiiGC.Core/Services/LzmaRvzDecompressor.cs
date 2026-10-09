@@ -1,4 +1,4 @@
-namespace WiiGC.Core.Services.Wii;
+namespace WiiGC.Core.Services;
 
 internal sealed class LzmaRvzDecompressor : RvzDecompressor
 {

@@ -1,5 +1,4 @@
-﻿using System.Buffers.Binary;
-using System.Text;
+﻿using System.Text;
 using WiiGC.Core.Models;
 
 namespace WiiGC.Core.Services.Wii;
@@ -7,7 +6,6 @@ namespace WiiGC.Core.Services.Wii;
 public static class WiiDiscInfoReader
 {
     private const int HeaderSize = 0x60;
-    private const uint WiiMagic = 0x5D1C9EA3;
 
     public static WiiDiscInfo Read(string path)
     {
@@ -21,7 +19,7 @@ public static class WiiDiscInfoReader
 
         source.Read(0, header);
 
-        if (BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x18)) != WiiMagic)
+        if (!DiscHeader.IsWii(header))
             throw new InvalidDataException("Wii 디스크가 아닙니다.");
 
         string gameId = Encoding.ASCII.GetString(header, 0, 6);

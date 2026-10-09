@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using WiiGC.Core.Models;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -11,8 +12,7 @@ public static class IsoToWbfsConverter
     private const int WiiSectorSize = 0x8000;
     private const int SectorsPerBlock = WbfsSectorSize / WiiSectorSize;
     private const int DiscHeaderSize = 256;
-    private const long WiiSectorCount = 143432 * 2;
-    private const int BlocksPerDisc = (int)(WiiSectorCount >> (WbfsSectorShift - 15));
+    private const int BlocksPerDisc = (int)(WiiLayout.DiscSectorCount >> (WbfsSectorShift - 15));
     private const int FreeBlockTableOffset = WbfsSectorSize - 1024;
     private const int FreeBlockTableWords = 128;
     private const int FreeBlockTableBlocks = 8191;
@@ -37,7 +37,7 @@ public static class IsoToWbfsConverter
 
             input.Read(0, header);
 
-            if (!RvzWiiWriter.IsWii(header))
+            if (!DiscHeader.IsWii(header))
                 throw new InvalidDataException("Wii ISO 파일이 아닙니다. WBFS는 Wii 디스크만 지원합니다.");
 
             long length = input.Length;
@@ -47,9 +47,7 @@ public static class IsoToWbfsConverter
                 throw new InvalidDataException("Wii 디스크 최대 크기를 초과했습니다.");
 
             bool[]? usage = WiiUsageScanner.Scan(input);
-
             using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None);
-
             var wlbaTable = new ushort[BlocksPerDisc];
             byte[] buffer = new byte[WbfsSectorSize];
             byte[] discHeader = new byte[DiscHeaderSize];
@@ -61,9 +59,7 @@ public static class IsoToWbfsConverter
             {
                 ct.ThrowIfCancellationRequested();
 
-                bool used = usage is null
-                    ? ReadBlock(input, block, length, buffer)
-                    : ReadUsedSectors(input, usage, block, length, buffer);
+                bool used = usage is null ? ReadBlock(input, block, length, buffer) : ReadUsedSectors(input, usage, block, length, buffer);
 
                 if (used)
                 {

@@ -1,16 +1,17 @@
 ﻿using System.Buffers.Binary;
+using WiiGC.Core.Models;
 
 namespace WiiGC.Core.Services.Wii;
 
 internal static class WiiUsageScanner
 {
-    public const int MaxSectors = 143432 * 2;
+    public const int MaxSectors = WiiLayout.DiscSectorCount;
 
     private const int SectorSize = 0x8000;
     private const int SectorDataSize = 0x7C00;
     private const int SectorDataSize4 = SectorDataSize >> 2;
     private const int HeadSectors = 0x50000 / SectorSize;
-    private const int BootSize = 0x440 + 0x2000;
+    private const int BootSize = WiiFolderLayout.ApploaderOffset;
     private const int ApploaderOffset = 0x2440;
 
     public static bool[]? Scan(IRvzInputSource input)
@@ -52,13 +53,13 @@ internal static class WiiUsageScanner
     private static void ScanHead(IRvzInputSource input, bool[] used)
     {
         MarkRaw(used, 0, BootSize);
-        MarkRaw(used, 0x40000, 0x20);
+        MarkRaw(used, WiiLayout.PartitionTableOffset, WiiLayout.PartitionTableSize);
 
         Span<byte> group = stackalloc byte[8];
 
         for (int g = 0; g < 4; g++)
         {
-            input.Read(0x40000 + g * 8, group);
+            input.Read(WiiLayout.PartitionTableOffset + g * 8, group);
 
             uint count = BinaryPrimitives.ReadUInt32BigEndian(group);
             long tableOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(group[4..]) << 2;
@@ -91,15 +92,15 @@ internal static class WiiUsageScanner
 
     private static void ScanPartition(IRvzInputSource input, bool[] used, WiiPartitionSpec spec)
     {
-        byte[] header = new byte[0x2C0];
+        byte[] header = new byte[WiiFolderLayout.PartitionHeaderSize];
 
         input.Read(spec.ContainerOffset, header);
 
-        uint tmdSize = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x2A4));
-        long tmdOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x2A8)) << 2;
-        uint certSize = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x2AC));
-        long certOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x2B0)) << 2;
-        long h3Offset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(0x2B4)) << 2;
+        uint tmdSize = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(WiiPartitionHeader.TmdSizeField));
+        long tmdOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(WiiPartitionHeader.TmdOffsetField)) << 2;
+        uint certSize = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(WiiPartitionHeader.CertSizeField));
+        long certOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(WiiPartitionHeader.CertOffsetField)) << 2;
+        long h3Offset = (long)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(WiiPartitionHeader.H3OffsetField)) << 2;
 
         MarkRaw(used, spec.ContainerOffset, 0x2C0);
         MarkRaw(used, spec.ContainerOffset + tmdOffset, tmdSize);
