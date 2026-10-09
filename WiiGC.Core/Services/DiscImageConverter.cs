@@ -77,103 +77,28 @@ public class DiscImageConverter
         }, ct);
     }
 
-    private int ConvertWbfsToIso(string inputPath, string outputPath, CancellationToken ct)
+    private int ConvertWbfsToIso(string inputPath, string outputPath, CancellationToken ct) => Run(report => WbfsToIsoConverter.Convert(inputPath, outputPath, report, ct));
+
+    private int ConvertRvzToWbfs(string inputPath, string outputPath, CancellationToken ct) => Run(report => RvzToWbfsConverter.Convert(inputPath, outputPath, report, ct));
+
+    private int ConvertIsoToWbfs(string inputPath, string outputPath, CancellationToken ct) => Run(report => IsoToWbfsConverter.Convert(inputPath, outputPath, report, ct));
+
+    private int ConvertToGcz(string inputPath, string outputPath, CancellationToken ct) => Run(report =>
+    {
+        Action<string, string, int, Action<double>?, CancellationToken> convert = inputPath.EndsWith(".rvz", StringComparison.OrdinalIgnoreCase) ? RvzToGczConverter.Convert : IsoToGczConverter.Convert;
+
+        convert(inputPath, outputPath, GczWriter.DefaultBlockSize, report, ct);
+    });
+
+    private int ConvertRvzToIso(string inputPath, string outputPath, CancellationToken ct) => Run(report => RvzToIsoConverter.Convert(inputPath, outputPath, report, ct));
+
+    private int ConvertIsoToRvz(string inputPath, string outputPath, int compressionLevel, CancellationToken ct) => Run(report => IsoToRvzConverter.Convert(inputPath, outputPath, compressionLevel, 131072, report, ct));
+
+    private int Run(Action<Action<double>> convert)
     {
         try
         {
-            WbfsToIsoConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
-            return 0;
-        }
-        catch (OperationCanceledException)
-        {
-            return -1;
-        }
-        catch (Exception ex)
-        {
-            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
-            return -3;
-        }
-    }
-
-    private int ConvertRvzToWbfs(string inputPath, string outputPath, CancellationToken ct)
-    {
-        try
-        {
-            RvzToWbfsConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
-            return 0;
-        }
-        catch (OperationCanceledException)
-        {
-            return -1;
-        }
-        catch (Exception ex)
-        {
-            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
-            return -3;
-        }
-    }
-
-    private int ConvertIsoToWbfs(string inputPath, string outputPath, CancellationToken ct)
-    {
-        try
-        {
-            IsoToWbfsConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
-            return 0;
-        }
-        catch (OperationCanceledException)
-        {
-            return -1;
-        }
-        catch (Exception ex)
-        {
-            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
-            return -3;
-        }
-    }
-
-    private int ConvertToGcz(string inputPath, string outputPath, CancellationToken ct)
-    {
-        try
-        {
-            Action<string, string, int, Action<double>?, CancellationToken> convert = inputPath.EndsWith(".rvz", StringComparison.OrdinalIgnoreCase) ? RvzToGczConverter.Convert : IsoToGczConverter.Convert;
-
-            convert(inputPath, outputPath, GczWriter.DefaultBlockSize, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
-            return 0;
-        }
-        catch (OperationCanceledException)
-        {
-            return -1;
-        }
-        catch (Exception ex)
-        {
-            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
-            return -3;
-        }
-    }
-
-    private int ConvertRvzToIso(string inputPath, string outputPath, CancellationToken ct)
-    {
-        try
-        {
-            RvzToIsoConverter.Convert(inputPath, outputPath, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
-            return 0;
-        }
-        catch (OperationCanceledException)
-        {
-            return -1;
-        }
-        catch (Exception ex)
-        {
-            LogMessage?.Invoke(this, (ex.Message, LogLevel.Error));
-            return -3;
-        }
-    }
-
-    private int ConvertIsoToRvz(string inputPath, string outputPath, int compressionLevel, CancellationToken ct)
-    {
-        try
-        {
-            IsoToRvzConverter.Convert(inputPath, outputPath, compressionLevel, 131072, p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))), ct);
+            convert(p => ProgressChanged?.Invoke(this, new ProgressEventArgs((int)(p * 100))));
             return 0;
         }
         catch (OperationCanceledException)

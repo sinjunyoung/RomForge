@@ -38,7 +38,7 @@ public static class WiiIsoRebuilder
 
             foreach (var target in targets)
             {
-                CopyRaw(input, sink, buffer, cursor, target.Spec.DataStart - cursor, reporter, ct);
+                SparseFile.CopyNonZero(input, sink, buffer, cursor, target.Spec.DataStart - cursor, reporter, ct);
 
                 byte[] h3 = EncodePartition(encoder, target, sink, entryLog, reporter.Add, ct);
 
@@ -47,7 +47,7 @@ public static class WiiIsoRebuilder
                 cursor = target.Spec.DataStart + target.Spec.DataSize;
             }
 
-            CopyRaw(input, sink, buffer, cursor, length - cursor, reporter, ct);
+            SparseFile.CopyNonZero(input, sink, buffer, cursor, length - cursor, reporter, ct);
 
             succeeded = true;
         }
@@ -163,28 +163,6 @@ public static class WiiIsoRebuilder
             throw new InvalidDataException("Wii 파티션을 찾을 수 없습니다.");
 
         return specs;
-    }
-
-    private static void CopyRaw(IRvzInputSource input, FileIsoSink sink, byte[] buffer, long offset, long count, ProgressReporter reporter, CancellationToken ct)
-    {
-        long end = offset + count;
-
-        while (offset < end)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            int size = (int)Math.Min(buffer.Length, end - offset);
-            var span = buffer.AsSpan(0, size);
-
-            input.Read(offset, span);
-
-            if (span.ContainsAnyExcept((byte)0))
-                sink.Write(offset, span);
-
-            offset += size;
-
-            reporter.Add(size);
-        }
     }
 
     private static void PatchHeader(IRvzInputSource input, FileIsoSink sink, WiiPartitionSpec spec, byte[] h3, long? dataSize)

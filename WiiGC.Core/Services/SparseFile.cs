@@ -41,6 +41,28 @@ internal static class SparseFile
         }
     }
 
+    public static void CopyNonZero(IRvzInputSource input, IIsoSink sink, byte[] buffer, long offset, long count, ProgressReporter? reporter, CancellationToken ct)
+    {
+        long end = offset + count;
+
+        while (offset < end)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            int size = (int)Math.Min(buffer.Length, end - offset);
+            var span = buffer.AsSpan(0, size);
+
+            input.Read(offset, span);
+
+            if (span.ContainsAnyExcept((byte)0))
+                sink.Write(offset, span);
+
+            offset += size;
+
+            reporter?.Add(size);
+        }
+    }
+
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool DeviceIoControl(SafeFileHandle device, uint controlCode, IntPtr inBuffer, int inBufferSize, IntPtr outBuffer, int outBufferSize, out int bytesReturned, IntPtr overlapped);
 }

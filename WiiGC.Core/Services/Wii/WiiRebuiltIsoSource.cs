@@ -135,27 +135,11 @@ internal sealed class WiiRebuiltIsoSource : IRvzInputSource
 
     private void Prepare(Action<double>? progress, Action<WiiPatchEntry>? entryLog, CancellationToken ct)
     {
-        long total = _targets.Sum(t => WiiPartitionEncoder.GetGroupCount(t.Plan.Data));
-        long done = 0;
-        int lastPermille = -1;
-
-        void OnGroup(long length)
-        {
-            done++;
-
-            int permille = (int)(done * 1000 / total);
-
-            if (permille != lastPermille)
-            {
-                lastPermille = permille;
-
-                progress?.Invoke(permille / 1000.0);
-            }
-        }
+        var reporter = new ProgressReporter(_targets.Sum(t => WiiPartitionEncoder.GetGroupCount(t.Plan.Data)), progress);
 
         foreach (var target in _targets)
         {
-            byte[] h3 = WiiIsoRebuilder.EncodePartition(_encoder, target, null, entryLog, OnGroup, ct);
+            byte[] h3 = WiiIsoRebuilder.EncodePartition(_encoder, target, null, entryLog, _ => reporter.Add(1), ct);
 
             _patches.AddRange(WiiIsoRebuilder.BuildHeaderPatches(_input, target.Spec, h3, target.Plan.DataSize));
         }

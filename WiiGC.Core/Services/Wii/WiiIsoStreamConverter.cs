@@ -14,31 +14,9 @@ public static class WiiIsoStreamConverter
         {
             using (var output = SparseFile.Create(outputPath, source.Length))
             {
-                byte[] buffer = new byte[0x100000];
-                long length = source.Length;
-                int lastPermille = -1;
+                var reporter = new ProgressReporter(source.Length, writeProgress);
 
-                for (long offset = 0; offset < length; offset += buffer.Length)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    int size = (int)Math.Min(buffer.Length, length - offset);
-                    var span = buffer.AsSpan(0, size);
-
-                    source.Read(offset, span);
-
-                    if (span.ContainsAnyExcept((byte)0))
-                        RandomAccess.Write(output, span, offset);
-
-                    int permille = (int)((offset + size) * 1000 / length);
-
-                    if (permille != lastPermille)
-                    {
-                        lastPermille = permille;
-
-                        writeProgress?.Invoke(permille / 1000.0);
-                    }
-                }
+                SparseFile.CopyNonZero(source, new FileIsoSink(output), new byte[0x100000], 0, source.Length, reporter, ct);
             }
 
             succeeded = true;
