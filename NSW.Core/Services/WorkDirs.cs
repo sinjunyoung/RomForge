@@ -1,4 +1,6 @@
-﻿namespace NSW.Core.Services;
+﻿using System.IO;
+
+namespace NSW.Core.Services;
 
 public sealed class WorkDirs(string outputDir)
 {

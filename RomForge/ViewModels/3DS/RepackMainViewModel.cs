@@ -1,9 +1,9 @@
 ﻿using _3DS.Core.Crypto;
 using Common;
 using NSW.Core.Enums;
+using NSW.Core.Services;
+using NSW.Core.UI;
 using NSW.Core.Utils;
-using NSW.WPF.Services;
-using NSW.WPF.UI;
 using RomForge.Core;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;

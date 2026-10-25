@@ -1,5 +1,6 @@
-﻿using Microsoft.Win32;
-using NSW.WPF.Services;
+﻿using Common;
+using Microsoft.Win32;
+using NSW.Core.Services;
 using RomForge.Core.Models.Util;
 using RomForge.ViewModels.Util;
 using System.IO;

@@ -1,4 +1,4 @@
-﻿using NSW.WPF.UI;
+﻿using NSW.Core.UI;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Services;

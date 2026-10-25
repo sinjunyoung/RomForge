@@ -3,8 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:core="clr-namespace:NSW.WPF.UI;assembly=NSW.WPF"
-             xmlns:l="clr-namespace:NSW.Core.Properties;assembly=NSW.Core"             
+             xmlns:l="clr-namespace:NSW.Core.Properties;assembly=NSW.Core"  
+             xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW.Core"
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
              xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core"
              mc:Ignorable="d" 
@@ -18,7 +18,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <core:FileManagerControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
+            <local:CommonListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
             <Grid Grid.Row="1" Margin="0,0,0,5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

@@ -28,7 +28,7 @@ public static class Win32API
     private const uint FLASHW_STOP = 0;
     private const uint FLASHW_TRAY = 2;
 
-    private static DispatcherTimer _flashTimer;
+    private static DispatcherTimer? _flashTimer;
     private static IntPtr _flashingHwnd;
 
     public static void FlashTaskbarIcon(Window window)
@@ -80,11 +80,8 @@ public static class Win32API
 
     public static void StopFlash()
     {
-        if (_flashTimer != null)
-        {
-            _flashTimer.Stop();
-            _flashTimer = null;
-        }
+        _flashTimer?.Stop();
+        _flashTimer = null;
 
         if (_flashingHwnd != IntPtr.Zero)
         {

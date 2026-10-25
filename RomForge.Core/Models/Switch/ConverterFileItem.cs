@@ -1,6 +1,8 @@
-﻿namespace RomForge.Core.Models.Switch;
+﻿using NSW.Core.ViewModels;
 
-public class ConverterFileItem : NSW.WPF.ViewModels.GameFile, Common.WPF.Interfaces.IConvertible
+namespace RomForge.Core.Models.Switch;
+
+public class ConverterFileItem : GameFile, Common.WPF.Interfaces.IConvertible
 {
     private string _selectedTargetFormat;
 

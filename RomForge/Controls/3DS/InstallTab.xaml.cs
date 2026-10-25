@@ -1,6 +1,6 @@
 ﻿using Common;
 using Microsoft.Win32;
-using NSW.WPF.Services;
+using NSW.Core.Services;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;
 using RomForge.ViewModels._3DS;

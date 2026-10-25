@@ -1,4 +1,4 @@
-﻿using NSW.WPF.UI;
+﻿using NSW.Core.UI;
 using RomForge.Core.Services;
 using RomForge.ViewModels.Switch;
 using System.IO;
@@ -60,7 +60,7 @@ public partial class MergeTab : UserControl
             return;
         }
 
-        if (!FileManagerControl.KeyExists())
+        if (!CommonListControl.KeyExists())
         {
             ViewModel.AppendLog(Res.Main_Err_NoKeys, Common.LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();

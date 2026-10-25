@@ -4,7 +4,7 @@ using _3DS.Core.FileSystem;
 using _3DS.Core.Models;
 using _3DS.Core.Services;
 using Common;
-using NSW.WPF.UI;
+using NSW.Core.UI;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;
 using RomForge.Core.Services._3DS;

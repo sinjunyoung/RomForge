@@ -7,6 +7,7 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core.Models;
 using System.Diagnostics;
+using System.IO;
 using Path = System.IO.Path;
 
 namespace NSW.Core.Services;
@@ -22,9 +23,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
     public string ExtractExeFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         string dir = Path.Combine(outDir, dirName);
-        using var fs = updateProg != null
-            ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Code, IntegrityCheckLevel.None)
-            : baseProg.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
+        using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Code, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "ExeFS", ctx, progress, ct);
 
@@ -54,11 +53,8 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
                 throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
         }
 
-        using var fs = updateProg != null
-            ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
-            : baseProg.IsPatch
-                ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None)
-                : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+        using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
+            : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "RomFS", ctx, progress, ct);
 
@@ -119,9 +115,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
         try
         {
-            using var fs = baseHtml != null && updateHtml != null
-                ? baseHtml.OpenFileSystemWithPatch(updateHtml, NcaSectionType.Data, IntegrityCheckLevel.None)
-                : (baseHtml ?? updateHtml)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+            using var fs = baseHtml != null && updateHtml != null ? baseHtml.OpenFileSystemWithPatch(updateHtml, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseHtml ?? updateHtml)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
             ExtractFileSystem(fs, dir, "HtmlDoc", ctx, progress, ct);
         }
@@ -140,9 +134,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             return null;
 
         string dir = Path.Combine(outDir, dirName);
-        using var fs = baseLegal != null && updateLegal != null
-            ? baseLegal.OpenFileSystemWithPatch(updateLegal, NcaSectionType.Data, IntegrityCheckLevel.None)
-            : (baseLegal ?? updateLegal)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+        using var fs = baseLegal != null && updateLegal != null ? baseLegal.OpenFileSystemWithPatch(updateLegal, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseLegal ?? updateLegal)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "Legal", ctx, progress, ct);
 
@@ -187,9 +179,8 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
         try
         {
-            using var fs = patchNca != null
-                ? nca.OpenFileSystemWithPatch(patchNca, section, IntegrityCheckLevel.None)
-                : nca.OpenFileSystem(section, IntegrityCheckLevel.None);
+            using var fs = patchNca != null ? nca.OpenFileSystemWithPatch(patchNca, section, IntegrityCheckLevel.None) : nca.OpenFileSystem(section, IntegrityCheckLevel.None);
+
             action(fs);
         }
         catch (Exception ex)

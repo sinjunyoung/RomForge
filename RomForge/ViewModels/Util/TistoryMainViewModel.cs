@@ -1,5 +1,5 @@
 using Common;
-using NSW.WPF.Services;
+using NSW.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Util;
 using RomForge.Core.Services;

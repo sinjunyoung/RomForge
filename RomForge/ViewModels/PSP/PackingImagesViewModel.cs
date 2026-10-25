@@ -1,5 +1,6 @@
-﻿using Common.WPF.ViewModels;
-using NSW.WPF.Services;
+﻿using Common.WPF;
+using Common.WPF.ViewModels;
+using NSW.Core.Services;
 using PBP.Core.Models;
 using PBP.Core.Services;
 using RomForge.Core.Services.PSP;

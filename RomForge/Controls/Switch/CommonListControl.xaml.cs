@@ -1,9 +1,9 @@
-﻿using Common.WPF;
+﻿using Common;
+using Common.WPF;
 using Microsoft.Win32;
 using NSW.Core;
 using NSW.Core.Models;
-using NSW.WPF.Services;
-using NSW.WPF.ViewModels;
+using NSW.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -11,9 +11,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Res = NSW.Core.Properties.Resources;
 
-namespace NSW.WPF.UI;
+namespace RomForge.Controls.Switch;
 
-public partial class FileManagerControl : UserControl
+public partial class CommonListControl : UserControl
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
     private readonly ListViewColumnSorter _sorter = new();
@@ -30,7 +30,7 @@ public partial class FileManagerControl : UserControl
 
     public event Action? FileListChanged;
 
-    public FileManagerControl()
+    public CommonListControl()
     {
         InitializeComponent();
 

@@ -1,5 +1,5 @@
-﻿using Microsoft.Win32;
-using NSW.WPF.Services;
+﻿using Common;
+using Microsoft.Win32;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;
@@ -9,11 +9,11 @@ using Res = NSW.Core.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
-public partial class SplitFileListControl : UserControl
+public partial class SplitListControl : UserControl
 {
     private SplitMainViewModel ViewModel => (SplitMainViewModel)DataContext;
 
-    public SplitFileListControl() => InitializeComponent();
+    public SplitListControl() => InitializeComponent();
 
     private void BtnAddFile_Click(object sender, RoutedEventArgs e)
     {

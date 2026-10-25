@@ -1,5 +1,6 @@
 ﻿using LibHac.Common.Keys;
 using System.Diagnostics;
+using System.IO;
 
 namespace NSW.Core;
 

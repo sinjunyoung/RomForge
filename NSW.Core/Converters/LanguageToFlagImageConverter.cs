@@ -3,7 +3,7 @@ using System.Windows.Data;
 using System.Windows.Media.Imaging;
 using static LibHac.Ns.ApplicationControlProperty;
 
-namespace NSW.WPF.Converters
+namespace NSW.Core.Converters
 {
     public class LanguageToFlagImageConverter : IValueConverter
     {
@@ -39,7 +39,7 @@ namespace NSW.WPF.Converters
 
             try
             {
-                string path = $"pack://application:,,,/NSW.WPF;component/Assets/Images/{fileName}";
+                string path = $"pack://application:,,,/NSW.Core;component/Assets/Images/{fileName}";
 
                 return new BitmapImage(new Uri(path, UriKind.Absolute));
             }

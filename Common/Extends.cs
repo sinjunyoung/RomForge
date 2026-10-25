@@ -1,6 +1,5 @@
-﻿using System.IO;
-
-namespace NSW.WPF.Services;
+﻿using System.Diagnostics;
+namespace Common;
 
 public static class ProcessExtensions
 {
@@ -8,7 +7,7 @@ public static class ProcessExtensions
     {
         if (Directory.Exists(folder))
         {
-            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            Process.Start(new ProcessStartInfo
             {
                 FileName = folder,
                 UseShellExecute = true

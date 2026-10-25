@@ -9,6 +9,7 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core.Models;
 using System.Diagnostics;
+using System.IO;
 using ContentType = LibHac.Ncm.ContentType;
 using Path = System.IO.Path;
 

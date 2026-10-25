@@ -2,8 +2,7 @@
 using Common.WPF;
 using Microsoft.Win32;
 using NSW.Core;
-using NSW.WPF.Services;
-using NSW.WPF.ViewModels;
+using NSW.Core.ViewModels;
 using Patch.Core.Services;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
@@ -19,7 +18,7 @@ using Res = NSW.Core.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
-public partial class TitleListControl : UserControl
+public partial class RepackListControl : UserControl
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
 
@@ -33,7 +32,7 @@ public partial class TitleListControl : UserControl
         remove => _viewModel.FileListChanged -= value;
     }
 
-    public TitleListControl()
+    public RepackListControl()
     {
         InitializeComponent();
 

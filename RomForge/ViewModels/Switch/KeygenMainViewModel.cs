@@ -1,5 +1,5 @@
 ﻿using Common;
-using NSW.WPF.ViewModels;
+using NSW.Core.ViewModels;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using System.Diagnostics;

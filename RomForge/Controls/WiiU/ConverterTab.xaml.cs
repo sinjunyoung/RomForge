@@ -1,4 +1,5 @@
-﻿using NSW.WPF.Services;
+﻿using Common;
+using NSW.Core.Services;
 using RomForge.Core.Models.WiiU;
 using RomForge.ViewModels.WiiU;
 using System.IO;

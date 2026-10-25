@@ -1,6 +1,6 @@
 ﻿using CHD.Core.Services;
 using Common;
-using NSW.WPF.Services;
+using NSW.Core.Services;
 using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;

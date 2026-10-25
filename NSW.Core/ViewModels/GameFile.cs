@@ -2,7 +2,7 @@ using Common.WPF.ViewModels;
 using NSW.Core.Models;
 using System.Windows.Media;
 
-namespace NSW.WPF.ViewModels;
+namespace NSW.Core.ViewModels;
 
 public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 {

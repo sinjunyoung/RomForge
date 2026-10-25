@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-namespace NSW.WPF.Converters;
+namespace NSW.Core.Converters;
 
 public class TextToggleConverter : IMultiValueConverter
 {

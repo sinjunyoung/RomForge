@@ -1,9 +1,9 @@
 ﻿using Common;
+using Common.WPF;
 using LibHac.Ns;
 using NSW.Core;
 using NSW.Core.Enums;
 using NSW.Core.Services;
-using NSW.WPF.Services;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;

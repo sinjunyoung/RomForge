@@ -12,6 +12,7 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using LibHac.Tools.Ncm;
 using System.Buffers.Binary;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using static LibHac.Ns.ApplicationControlProperty;
 using Path = System.IO.Path;

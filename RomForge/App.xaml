@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:RomForge"
              xmlns:converters="clr-namespace:RomForge.Converters"
-             xmlns:wpfconverters="clr-namespace:NSW.WPF.Converters;assembly=NSW.WPF"
+             xmlns:wpfconverters="clr-namespace:NSW.Core.Converters;assembly=NSW.Core"
              xmlns:cmnconverters="clr-namespace:Common.WPF.Converters;assembly=Common.WPF"
              StartupUri="Views/MainWindow.xaml">
 

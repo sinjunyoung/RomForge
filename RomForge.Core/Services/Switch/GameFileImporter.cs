@@ -1,8 +1,9 @@
-﻿using LibHac.Ncm;
+﻿using Common.WPF;
+using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
-using NSW.WPF.Services;
-using NSW.WPF.ViewModels;
+using NSW.Core.Services;
+using NSW.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using Res = NSW.Core.Properties.Resources;

@@ -1,5 +1,6 @@
 ﻿using K4os.Compression.LZ4;
 using LibHac.Util;
+using System.IO;
 using System.Security.Cryptography;
 
 namespace NSW.Core.Services;
@@ -88,8 +89,8 @@ public static class NsoTool
         for (int i = 0; i < 3; i++)
         {
             var s = Segs[i];
-            Array.Copy(segData[i], 0, outNso, cursor, segData[i].Length);
 
+            Array.Copy(segData[i], 0, outNso, cursor, segData[i].Length);
             BitConverter.GetBytes(cursor).CopyTo(outNso, s.FileOffField);
             BitConverter.GetBytes(segData[i].Length).CopyTo(outNso, s.FileSizeField);
 

@@ -12,6 +12,8 @@ public class LanguageItem
 
     public string Publisher { get; set; } = string.Empty;
 
+    public List<byte> Indices { get; set; } = [];
+
     public Byte[] Logo { get; set; }
 
     public bool IsSelected { get; set; }

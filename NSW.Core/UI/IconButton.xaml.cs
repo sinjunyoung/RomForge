@@ -1,7 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace NSW.WPF.UI;
+namespace NSW.Core.UI;
 
 public partial class IconButton : UserControl
 {

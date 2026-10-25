@@ -1,10 +1,10 @@
 ﻿using Common;
+using Common.WPF;
 using NSW.Core;
 using NSW.Core.Models;
+using NSW.Core.Services;
 using NSW.Core.Utils;
-using NSW.WPF.Services;
-using NSW.WPF.ViewModels;
-using RomForge.Core.Models;
+using NSW.Core.ViewModels;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;

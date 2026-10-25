@@ -6,7 +6,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 
-namespace NSW.WPF.Services;
+namespace Common.WPF;
 
 public static class Extensions
 {

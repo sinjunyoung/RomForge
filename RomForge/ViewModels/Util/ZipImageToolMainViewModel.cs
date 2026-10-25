@@ -1,7 +1,5 @@
 ﻿using Common;
 using Ionic.Zlib;
-using NSW.WPF.Services;
-using NSW.WPF.UI;
 using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,6 +13,8 @@ using RomForge.Core.Services;
 using PickPack.Disk.Models;
 using PickPack.Disk.Services;
 using PickPack.Disk.Helpers;
+using NSW.Core.Services;
+using NSW.Core.UI;
 
 namespace RomForge.ViewModels.Util;
 

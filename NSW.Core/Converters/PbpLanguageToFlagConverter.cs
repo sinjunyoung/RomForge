@@ -2,7 +2,7 @@
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace NSW.WPF.Converters
+namespace NSW.Core.Converters
 {
     public class PbpLanguageToFlagConverter : IValueConverter
     {
@@ -36,7 +36,7 @@ namespace NSW.WPF.Converters
 
             try
             {
-                string path = $"pack://application:,,,/NSW.WPF;component/Assets/Images/{fileName}";
+                string path = $"pack://application:,,,/NSW.Core;component/Assets/Images/{fileName}";
                 return new BitmapImage(new Uri(path, UriKind.Absolute));
             }
             catch

@@ -1,10 +1,12 @@
-﻿using LibHac.Ns;
+﻿using Common.WPF;
+using LibHac.Ns;
 using NSW.Core;
+using NSW.Core.Converters;
+using NSW.Core.Models;
+using NSW.Core.Services;
+using NSW.Core.UI;
+using NSW.Core.ViewModels;
 using NSW.HacPack.Models;
-using NSW.WPF.Converters;
-using NSW.WPF.Models;
-using NSW.WPF.Services;
-using NSW.WPF.ViewModels;
 using SixLabors.ImageSharp;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -13,7 +15,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 
-namespace NSW.WPF.UI;
+namespace RomForge.Controls.Switch;
 
 public partial class LanguageTabControl : UserControl
 {

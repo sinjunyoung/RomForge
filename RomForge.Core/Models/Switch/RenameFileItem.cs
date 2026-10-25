@@ -1,4 +1,4 @@
-﻿using NSW.WPF.ViewModels;
+﻿using NSW.Core.ViewModels;
 using System.IO;
 
 namespace RomForge.Core.Models.Switch;

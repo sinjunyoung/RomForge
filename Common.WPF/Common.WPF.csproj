@@ -8,12 +8,17 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8603</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8603;;NU1902;NU1903</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8603</NoWarn>
+    <NoWarn>1701;1702;CS8600;CS8603;;NU1902;NU1903</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\Images\AddFile.png" />
@@ -63,10 +68,6 @@
     <None Remove="Assets\Images\Version.png" />
     <None Remove="Assets\Images\vietnamese.png" />
     <None Remove="Assets\Images\world.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>

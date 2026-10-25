@@ -7,6 +7,7 @@ using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core.Models;
+using System.IO;
 using Path = System.IO.Path;
 
 namespace NSW.Core.Services;

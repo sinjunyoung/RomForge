@@ -1,8 +1,8 @@
-<UserControl x:Class="NSW.WPF.UI.IconButton"
+<UserControl x:Class="NSW.Core.UI.IconButton"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:NSW.WPF.UI"
-             xmlns:conv="clr-namespace:NSW.WPF.Converters"
+             xmlns:local="clr-namespace:NSW.Core.UI"
+             xmlns:conv="clr-namespace:NSW.Core.Converters"
              x:Name="Root">
     <UserControl.Resources>
         <conv:IconConverter x:Key="IconConverter"/>

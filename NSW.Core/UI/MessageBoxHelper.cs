@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using Res = NSW.Core.Properties.Resources;
 
-namespace NSW.WPF.UI;
+namespace NSW.Core.UI;
 
 public class MessageBoxHelper
 {

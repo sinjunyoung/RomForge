@@ -1,5 +1,6 @@
 ﻿using NSW.HacPack.Models;
 using Patch.Core.Services;
+using System.IO;
 using static LibHac.Ns.ApplicationControlProperty;
 
 namespace NSW.Core.Models;

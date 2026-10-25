@@ -1,4 +1,4 @@
-﻿using NSW.WPF.ViewModels;
+﻿using NSW.Core.ViewModels;
 using Patch.Core.Interfaces;
 using RomForge.Core.Models.Switch;
 using System.IO;

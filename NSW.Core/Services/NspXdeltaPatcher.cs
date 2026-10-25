@@ -2,6 +2,7 @@
 using Patch.Core.Formats;
 using Patch.Core.Interfaces;
 using Patch.Core.Services;
+using System.IO;
 using Path = System.IO.Path;
 
 namespace NSW.Core.Services;

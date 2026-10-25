@@ -2,7 +2,7 @@
 using System.Windows.Data;
 using static LibHac.Ns.ApplicationControlProperty;
 
-namespace NSW.WPF.Converters
+namespace NSW.Core.Converters
 {
     public class LanguageToFlagConverter : IValueConverter
     {

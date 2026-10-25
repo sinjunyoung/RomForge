@@ -11,6 +11,7 @@ using LibHac.Tools.Ncm;
 using NSW.Core.Models;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using static LibHac.Ns.ApplicationControlProperty;
 
 namespace NSW.Core;
@@ -18,8 +19,6 @@ namespace NSW.Core;
 public static class MetadataReader
 {
     private static readonly string[] sourceArray = ["B", "U", "D"];
-
-    #region Language
 
     public static Language Current
     {
@@ -54,8 +53,6 @@ public static class MetadataReader
             return Language.SimplifiedChinese;
         }
     }
-
-    #endregion
 
     public static string DetectFileType(KeySet keySet, string path)
     {
@@ -365,7 +362,6 @@ public static class MetadataReader
         {
             var nca = new Nca(keySet, ncaStorage);
             using var ctrlFs = nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-
             return ctrlFs.GetIconData(language);
         }
         catch

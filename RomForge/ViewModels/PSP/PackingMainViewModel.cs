@@ -4,9 +4,9 @@ using RomForge.Core.UI.Command;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using NSW.WPF.Services;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;
+using NSW.Core.Services;
 
 namespace RomForge.ViewModels.PSP;
 

@@ -3,6 +3,7 @@ using NSW.Core.Models;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Services;
 using System.Diagnostics;
+using System.IO;
 using Path = System.IO.Path;
 
 namespace NSW.Core.Services;

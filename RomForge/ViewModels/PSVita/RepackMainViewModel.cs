@@ -1,7 +1,7 @@
 ﻿using Common;
 using NSW.Core.Enums;
-using NSW.WPF.Services;
-using NSW.WPF.UI;
+using NSW.Core.Services;
+using NSW.Core.UI;
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Patch;

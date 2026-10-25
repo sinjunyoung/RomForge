@@ -8,13 +8,12 @@ using LibHac.Ns;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
-using NSW.Core;
 using NSW.HacPack.Models;
 using System.IO;
 using static LibHac.Ns.ApplicationControlProperty;
 using Path = System.IO.Path;
 
-namespace NSW.WPF.Services;
+namespace NSW.Core.Services;
 
 public static class MetadataService
 {

@@ -1,7 +1,6 @@
 ﻿using Common;
 using NSW.Core;
 using NSW.Core.Models;
-using NSW.WPF.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services.Switch;
@@ -13,6 +12,8 @@ using System.Windows.Input;
 using Res = NSW.Core.Properties.Resources;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Services;
+using NSW.Core.Services;
+using Common.WPF;
 
 namespace RomForge.ViewModels.Switch;
 
