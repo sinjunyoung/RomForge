@@ -19,7 +19,7 @@ using Vita.Core.Services;
 
 namespace RomForge.ViewModels.PSVita;
 
-public class RepackMainViewModel : ToolTabViewModel
+public class RepackMainViewModel : ProgressToolTabViewModel
 {
     private const string UnpackedFolderName = "unpacked";
 

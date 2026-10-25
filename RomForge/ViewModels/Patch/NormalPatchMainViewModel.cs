@@ -15,7 +15,7 @@ using System.Windows.Input;
 
 namespace RomForge.ViewModels.Patch;
 
-public class NormalPatchMainViewModel : ToolTabViewModel, IPatchViewModel
+public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 {
     private CancellationTokenSource? _previewCts;
 

@@ -15,7 +15,7 @@ using WiiU.Core.Services;
 
 namespace RomForge.ViewModels.WiiU;
 
-public class RepackMainViewModel : ToolTabViewModel
+public class RepackMainViewModel : ProgressToolTabViewModel
 {
     private BuildMode? _currentMode;
     private TitleInputEntry? _selectedEntry;

@@ -15,7 +15,7 @@ using Res = NSW.Core.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
-public class MergeMainViewModel : ToolTabViewModel
+public class MergeMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 

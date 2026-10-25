@@ -4,12 +4,11 @@ using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
 using Res = NSW.Core.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
-public class KeygenMainViewModel : ToolTabViewModel
+public class KeygenMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 

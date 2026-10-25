@@ -16,7 +16,7 @@ using RomForge.Core.Services;
 
 namespace RomForge.ViewModels.Switch;
 
-public class SplitMainViewModel : ToolTabViewModel
+public class SplitMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 

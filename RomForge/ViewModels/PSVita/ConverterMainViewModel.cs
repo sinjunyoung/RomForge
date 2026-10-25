@@ -16,7 +16,7 @@ using Vita.Core.Services;
 
 namespace RomForge.ViewModels.PSVita;
 
-public class ConverterMainViewModel : ToolTabViewModel
+public class ConverterMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
@@ -154,7 +154,7 @@ public class ConverterMainViewModel : ToolTabViewModel
         }
     }
 
-    private void ApplyLicenseFile(SourceRowViewModel row, string pkgPath)
+    private static void ApplyLicenseFile(SourceRowViewModel row, string pkgPath)
     {
         string? dir = Path.GetDirectoryName(pkgPath);
 

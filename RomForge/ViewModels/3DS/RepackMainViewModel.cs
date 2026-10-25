@@ -15,7 +15,7 @@ using System.Windows.Input;
 
 namespace RomForge.ViewModels._3DS;
 
-public class RepackMainViewModel : ToolTabViewModel
+public class RepackMainViewModel : ProgressToolTabViewModel
 {
     private CancellationTokenSource _patchCts = new();
     private BuildMode? _currentMode;

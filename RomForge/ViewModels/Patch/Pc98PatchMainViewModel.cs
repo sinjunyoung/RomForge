@@ -7,7 +7,7 @@ using System.Windows.Input;
 
 namespace RomForge.ViewModels.Patch;
 
-public class Pc98PatchMainViewModel : ToolTabViewModel, IPatchViewModel
+public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 {
     private string? _sourcePath;
     private string? _patchPath;

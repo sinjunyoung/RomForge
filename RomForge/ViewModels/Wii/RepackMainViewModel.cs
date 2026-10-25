@@ -20,7 +20,7 @@ using WiiGC.Core.Services.Wii;
 
 namespace RomForge.ViewModels.Wii;
 
-public class RepackMainViewModel : ToolTabViewModel
+public class RepackMainViewModel : ProgressToolTabViewModel
 {
     private static readonly string[] DiscExtensions = [".iso", ".wbfs", ".rvz", ".wia"];
 

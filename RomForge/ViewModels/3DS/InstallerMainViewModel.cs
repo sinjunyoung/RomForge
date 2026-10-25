@@ -5,17 +5,15 @@ using _3DS.Core.Models;
 using _3DS.Core.Services;
 using Common;
 using NSW.WPF.UI;
-using RomForge.Core.Models;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;
 using RomForge.Core.Services._3DS;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 
 namespace RomForge.ViewModels._3DS;
 
-public class InstallerMainViewModel : ToolTabViewModel
+public class InstallerMainViewModel : ProgressToolTabViewModel
 {
     private string _sdPath = string.Empty;
     private string _movablePath = string.Empty;

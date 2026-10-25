@@ -17,7 +17,7 @@ using System.Windows.Media;
 
 namespace RomForge.ViewModels.Switch
 {
-    public class ConvertSaturnMainViewModel : ToolTabViewModel
+    public class ConvertSaturnMainViewModel : ProgressToolTabViewModel
     {
         private string _gameTitle = string.Empty;
         private string _publisher = "SEGA";

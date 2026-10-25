@@ -18,7 +18,7 @@ using System.Windows.Input;
 
 namespace RomForge.ViewModels.Switch
 {
-    public class RepackMainViewModel : ToolTabViewModel
+    public class RepackMainViewModel : ProgressToolTabViewModel
     {
         private readonly Stopwatch _totalSw = new();
 

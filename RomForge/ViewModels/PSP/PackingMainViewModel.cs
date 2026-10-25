@@ -10,7 +10,7 @@ using RomForge.Core.Services.PSP;
 
 namespace RomForge.ViewModels.PSP;
 
-public class PackingMainViewModel : ToolTabViewModel
+public class PackingMainViewModel : ProgressToolTabViewModel
 {
     private CancellationTokenSource _cts = new();
 
