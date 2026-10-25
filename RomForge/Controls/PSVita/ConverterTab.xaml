@@ -192,7 +192,7 @@
             </Button>
         </Grid>
 
-        <core:IconButton Grid.Row="3" Margin="5,0,5,5" DefaultText="변환" DefaultIcon="/Assets/Images/Convert.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}" Click="BtnStart_Click"/>
+        <core:IconButton Grid.Row="3" Margin="5,0,5,5" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}" Click="BtnStart_Click"/>
 
         <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Grid.Row="4" Margin="5,0,5,5" Padding="8,0">
             <Grid Height="28">

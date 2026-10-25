@@ -1,5 +1,4 @@
 using Common;
-using NSW.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSVita;
@@ -115,6 +114,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
             if (!path.EndsWith(".pkg", StringComparison.OrdinalIgnoreCase))
             {
                 AppendLog($"{Path.GetFileName(path)}: PKG 파일만 추가할 수 있습니다.", LogLevel.Error);
+                await SoundPlayer.PlayErrorAsync();
                 continue;
             }
 
@@ -130,6 +130,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
             catch (Exception ex)
             {
                 AppendLog($"{Path.GetFileName(path)}: 분석 실패 - {ex.Message}", LogLevel.Error);
+                await SoundPlayer.PlayErrorAsync();
                 continue;
             }
 
@@ -214,12 +215,14 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
         if (string.IsNullOrWhiteSpace(OutputPath))
         {
             AppendLog("출력 폴더를 선택하세요.", LogLevel.Error);
+            await SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (SourceRows.Count == 0)
         {
             AppendLog("PKG 파일을 하나 이상 추가하세요.", LogLevel.Error);
+            await SoundPlayer.PlayErrorAsync();
             return;
         }
 

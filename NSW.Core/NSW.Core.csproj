@@ -21,13 +21,9 @@
     <None Remove="Assets\Images\brazilian.png" />
     <None Remove="Assets\Images\british.png" />
     <None Remove="Assets\Images\canadian.png" />
-    <None Remove="Assets\Images\CancelLanguage.png" />
     <None Remove="Assets\Images\chinese.png" />
-    <None Remove="Assets\Images\Clear.png" />
     <None Remove="Assets\Images\czech.png" />
     <None Remove="Assets\Images\danish.png" />
-    <None Remove="Assets\Images\Delete.png" />
-    <None Remove="Assets\Images\Drag.png" />
     <None Remove="Assets\Images\dutch.png" />
     <None Remove="Assets\Images\finnish.png" />
     <None Remove="Assets\Images\french.png" />
@@ -38,7 +34,6 @@
     <None Remove="Assets\Images\italian.png" />
     <None Remove="Assets\Images\japanese.png" />
     <None Remove="Assets\Images\korean.png" />
-    <None Remove="Assets\Images\Language.png" />
     <None Remove="Assets\Images\mexican.png" />
     <None Remove="Assets\Images\norwegian.png" />
     <None Remove="Assets\Images\polish.png" />
@@ -72,13 +67,9 @@
     <Resource Include="Assets\Images\brazilian.png" />
     <Resource Include="Assets\Images\british.png" />
     <Resource Include="Assets\Images\canadian.png" />
-    <Resource Include="Assets\Images\CancelLanguage.png" />
     <Resource Include="Assets\Images\chinese.png" />
-    <Resource Include="Assets\Images\Clear.png" />
     <Resource Include="Assets\Images\czech.png" />
     <Resource Include="Assets\Images\danish.png" />
-    <Resource Include="Assets\Images\Delete.png" />
-    <Resource Include="Assets\Images\Drag.png" />
     <Resource Include="Assets\Images\dutch.png" />
     <Resource Include="Assets\Images\finnish.png" />
     <Resource Include="Assets\Images\french.png" />
@@ -89,7 +80,6 @@
     <Resource Include="Assets\Images\italian.png" />
     <Resource Include="Assets\Images\japanese.png" />
     <Resource Include="Assets\Images\korean.png" />
-    <Resource Include="Assets\Images\Language.png" />
     <Resource Include="Assets\Images\mexican.png" />
     <Resource Include="Assets\Images\norwegian.png" />
     <Resource Include="Assets\Images\polish.png" />

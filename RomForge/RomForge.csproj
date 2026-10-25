@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>1.9.0.5</VersionPrefix>
+    <VersionPrefix>1.9.0.6</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -22,6 +22,7 @@
     <None Remove="Assets\Images\Arcade.png" />
     <None Remove="Assets\Images\ArcadeCartridge.png" />
     <None Remove="Assets\Images\Blu-ray.png" />
+    <None Remove="Assets\Images\CancelLanguage.png" />
     <None Remove="Assets\Images\Categories.png" />
     <None Remove="Assets\Images\CD.png" />
     <None Remove="Assets\Images\Certs.png" />
@@ -38,6 +39,7 @@
     <None Remove="Assets\Images\Image.png" />
     <None Remove="Assets\Images\Insert.png" />
     <None Remove="Assets\Images\Keygen.png" />
+    <None Remove="Assets\Images\Language.png" />
     <None Remove="Assets\Images\Lock.png" />
     <None Remove="Assets\Images\LowerA.png" />
     <None Remove="Assets\Images\movable.sed.png" />
@@ -78,6 +80,8 @@
     <Content Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Assets\Images\CancelLanguage.png" />
+    <Resource Include="Assets\Images\Language.png" />
     <Resource Include="Assets\Images\PS3.png" />
     <Resource Include="Assets\Images\Rename.png" />
     <Resource Include="Assets\Images\UnRepack.png" />
