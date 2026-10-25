@@ -1,6 +1,5 @@
 ﻿using CHD.Core.Models;
 using Common;
-using System.Text.RegularExpressions;
 
 namespace CHD.Core.Services;
 
@@ -13,8 +12,6 @@ public class FileConverter : IDisposable
     public string CurrentOutputPath { get; private set; }
 
     public event EventHandler<(string Message, LogLevel Level)> LogMessage;
-
-    private static readonly Regex TrackMode1Regex = new(@"^TRACK\s+\d+\s+MODE1", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     public FileConverter(string compression = "zlib")
     {
@@ -164,11 +161,16 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = null;
 
-                var result = extractedBins.Count == 1 && IsSingleTrackMode1(cuePath) ? ProduceSingleTrackIso(cuePath, extractedBins[0]) : ProduceMultiTrackBinCue(cuePath, extractedBins);
-
                 progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
 
-                return result;
+                return new ConversionResult
+                {
+                    Success = true,
+                    Message = $"변환 성공 (멀티 트랙 BIN/CUE, {extractedBins.Count}개 BIN)",
+                    OutputFile = cuePath,
+                    OutputFiles = [cuePath, .. extractedBins],
+                    VerificationPerformed = false
+                };
             }
         }
         catch (OperationCanceledException)
@@ -190,49 +192,6 @@ public class FileConverter : IDisposable
         }
     }
 
-    private ConversionResult ProduceSingleTrackIso(string cuePath, string binPath)
-    {
-        Log("단일 트랙 MODE1 감지 - BIN → ISO 변환", LogLevel.Highlight);
-
-        string isoPath = Path.ChangeExtension(binPath, ".iso");
-
-        isoPath = Utils.GetUniqueFilePath(isoPath);
-
-        if (File.Exists(isoPath))
-            File.Delete(isoPath);
-
-        File.Move(binPath, isoPath);
-
-        if (File.Exists(cuePath))
-            File.Delete(cuePath);
-
-        Log($"변환 완료: {isoPath}", LogLevel.Ok);
-
-        return new ConversionResult
-        {
-            Success = true,
-            Message = "변환 성공 (단일 트랙 ISO)",
-            OutputFile = isoPath,
-            OutputFiles = [isoPath],
-            VerificationPerformed = true
-        };
-    }
-
-    private ConversionResult ProduceMultiTrackBinCue(string cuePath, IReadOnlyList<string> binFiles)
-    {
-        Log($"멀티 트랙 감지 ({binFiles.Count}개 BIN) - BIN/CUE 쌍 유지", LogLevel.Highlight);
-        Log($"변환 완료: {cuePath}", LogLevel.Ok);
-
-        return new ConversionResult
-        {
-            Success = true,
-            Message = $"변환 성공 (멀티 트랙 BIN/CUE, {binFiles.Count}개 BIN)",
-            OutputFile = cuePath,
-            OutputFiles = [cuePath, .. binFiles],
-            VerificationPerformed = false
-        };
-    }
-
     private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var inputPath = source.PrimaryFile;
@@ -248,7 +207,7 @@ public class FileConverter : IDisposable
         {
             ct.ThrowIfCancellationRequested();
 
-            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, ct);
+            bool success = await _chdman.CreateCdAsync(inputPath, chdPath, string.Empty, progress, ct);
 
             ct.ThrowIfCancellationRequested();
 
@@ -347,7 +306,7 @@ public class FileConverter : IDisposable
 
             var rawSectorMode = CdRawSectorDetector.Detect(inputPath);
 
-            bool success = rawSectorMode != CdRawSectorMode.None ? await _chdman.CreateCdAsync(inputPath, chdPath, MapToCdCompression(_compression), progress, ct) : await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, ct);
+            bool success = rawSectorMode != CdRawSectorMode.None ? await _chdman.CreateCdAsync(inputPath, chdPath, string.Empty, progress, ct) : await _chdman.CreateDvdAsync(inputPath, chdPath, _compression, progress, ct);
 
             ct.ThrowIfCancellationRequested();
 
@@ -388,35 +347,6 @@ public class FileConverter : IDisposable
 
             CurrentOutputPath = null;
             return ConversionResult.Fail($"오류: {ex.Message}");
-        }
-    }
-
-    public static string MapToCdCompression(string compression) => compression switch
-    {        
-        _ => string.Empty
-    };
-
-    private static bool IsSingleTrackMode1(string cuePath)
-    {
-        try
-        {
-            if (!File.Exists(cuePath))
-                return false;
-
-            var lines = File.ReadAllLines(cuePath);
-            var trackLines = lines
-                .Select(l => l.Trim())
-                .Where(l => TrackMode1Regex.IsMatch(l))
-                .ToList();
-            var totalTrackCount = lines
-                .Select(l => l.Trim())
-                .Count(l => l.StartsWith("TRACK", StringComparison.OrdinalIgnoreCase));
-
-            return totalTrackCount == 1 && trackLines.Count == 1;
-        }
-        catch
-        {
-            return false;
         }
     }
 
