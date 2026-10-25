@@ -1,4 +1,4 @@
-﻿using _3DS.Core.Enums;
+﻿using N3DS.Core.Enums;
 using System.Globalization;
 using System.Windows.Data;
 

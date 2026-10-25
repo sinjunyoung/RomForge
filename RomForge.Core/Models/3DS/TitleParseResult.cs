@@ -1,5 +1,5 @@
-﻿using _3DS.Core.Enums;
-using _3DS.Core.Models;
+﻿using N3DS.Core.Enums;
+using N3DS.Core.Models;
 
 namespace RomForge.Core.Models._3DS;
 

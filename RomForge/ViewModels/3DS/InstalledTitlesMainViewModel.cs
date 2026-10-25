@@ -1,15 +1,15 @@
-﻿using _3DS.Core.Crypto;
-using _3DS.Core.Enums;
-using _3DS.Core.FileSystem;
-using _3DS.Core.IO;
-using _3DS.Core.Models;
-using _3DS.Core.Services;
-using RomForge.Core.Models._3DS;
+﻿using RomForge.Core.Models._3DS;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using N3DS.Core.Enums;
+using N3DS.Core.Models;
+using N3DS.Core.FileSystem;
+using N3DS.Core.Crypto;
+using N3DS.Core.Services;
+using N3DS.Core.IO;
 
 namespace RomForge.ViewModels._3DS;
 

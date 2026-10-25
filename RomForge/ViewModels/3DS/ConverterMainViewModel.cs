@@ -1,7 +1,7 @@
-using _3DS.Core.Crypto;
-using _3DS.Core.Models;
-using _3DS.Core.Services;
 using Common;
+using N3DS.Core.Crypto;
+using N3DS.Core.Models;
+using N3DS.Core.Services;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;

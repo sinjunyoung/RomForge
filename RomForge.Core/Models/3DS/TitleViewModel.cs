@@ -1,6 +1,6 @@
-﻿using _3DS.Core.Enums;
-using _3DS.Core.Models;
-using Common.WPF.ViewModels;
+﻿using Common.WPF.ViewModels;
+using N3DS.Core.Enums;
+using N3DS.Core.Models;
 using PickPack.Disk.Helpers;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;

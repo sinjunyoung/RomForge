@@ -1,6 +1,6 @@
-﻿using _3DS.Core.Enums;
-using _3DS.Core.FileSystem;
-using _3DS.Core.Models;
+﻿using N3DS.Core.Enums;
+using N3DS.Core.FileSystem;
+using N3DS.Core.Models;
 using RomForge.Core.Models._3DS;
 using System.IO;
 using System.Windows.Media;

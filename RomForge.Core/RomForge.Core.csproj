@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -6,10 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
@@ -18,15 +18,15 @@
     <PackageReference Include="System.Management" Version="10.0.12" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\3DS.Core\3DS.Core.csproj" />
-    <ProjectReference Include="..\CD.Core\CD.Core.csproj" />
-    <ProjectReference Include="..\CHD.Core\CHD.Core.csproj" />
+    <ProjectReference Include="..\N3DS\N3DS.csproj" />
+    <ProjectReference Include="..\CD\CD.csproj" />
+    <ProjectReference Include="..\CHD\CHD.csproj" />
     <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
-    <ProjectReference Include="..\NSW.Core\NSW.csproj" />
-    <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
-    <ProjectReference Include="..\PBP.Core\PBP.Core.csproj" />
+    <ProjectReference Include="..\NSW\NSW.csproj" />
+    <ProjectReference Include="..\Patch\Patch.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
-    <ProjectReference Include="..\WiiGC.Core\WiiGC.Core.csproj" />
-    <ProjectReference Include="..\WiiU.Core\WiiU.Core.csproj" />
+    <ProjectReference Include="..\PSP\PSP.csproj" />
+    <ProjectReference Include="..\WiiGC\WiiGC.csproj" />
+    <ProjectReference Include="..\WiiU\WiiU.csproj" />
   </ItemGroup>
 </Project>

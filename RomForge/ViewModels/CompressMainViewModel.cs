@@ -1,8 +1,8 @@
-﻿using _3DS.Core.Services;
-using CD.Core.Services.Readers;
+﻿using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
+using N3DS.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services;

@@ -151,17 +151,16 @@
     <Page Include="App.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\3DS.Core\3DS.Core.csproj" />
-    <ProjectReference Include="..\CD.Core\CD.Core.csproj" />
+    <ProjectReference Include="..\N3DS\N3DS.csproj" />
+    <ProjectReference Include="..\CD\CD.csproj" />
     <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
-    <ProjectReference Include="..\NSW.Core\NSW.csproj" />
-    <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
-    <ProjectReference Include="..\PBP.Core\PBP.Core.csproj" />
+    <ProjectReference Include="..\NSW\NSW.csproj" />
+    <ProjectReference Include="..\Patch\Patch.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
-    <ProjectReference Include="..\PSP.Core\PSP.Core.csproj" />
+    <ProjectReference Include="..\PSP\PSP.csproj" />
     <ProjectReference Include="..\RomForge.Core\RomForge.Core.csproj" />
-    <ProjectReference Include="..\Vita.Core\Vita.Core.csproj" />
-    <ProjectReference Include="..\WiiU.Core\WiiU.Core.csproj" />
+    <ProjectReference Include="..\Vita\Vita.csproj" />
+    <ProjectReference Include="..\WiiU\WiiU.csproj" />
     <!-- RomZip.Core는 기존 프로젝트 경로로 교체 -->
     <!-- <ProjectReference Include="..\..\RomZip\RomZip.Core\RomZip.Core.csproj"/> -->
   </ItemGroup>

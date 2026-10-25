@@ -1,8 +1,7 @@
 ﻿using Common.WPF;
 using Common.WPF.ViewModels;
-using NSW.Core.Services;
-using PBP.Core.Models;
-using PBP.Core.Services;
+using PSP.PBP.Models;
+using PSP.PBP.Services;
 using RomForge.Core.Services.PSP;
 using System.Windows.Media.Imaging;
 

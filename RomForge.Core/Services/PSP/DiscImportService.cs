@@ -1,5 +1,5 @@
-﻿using PBP.Core.Models;
-using PBP.Core.Services;
+﻿using PSP.PBP.Models;
+using PSP.PBP.Services;
 using RomForge.Core.Models.PSP;
 using System.IO;
 

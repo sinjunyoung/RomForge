@@ -1,9 +1,9 @@
-﻿using _3DS.Core.Crypto;
-using _3DS.Core.Enums;
-using _3DS.Core.FileSystem;
-using _3DS.Core.Models;
-using _3DS.Core.Services;
-using Common;
+﻿using Common;
+using N3DS.Core.Crypto;
+using N3DS.Core.Enums;
+using N3DS.Core.FileSystem;
+using N3DS.Core.Models;
+using N3DS.Core.Services;
 using NSW.Core.UI;
 using RomForge.Core.Models._3DS;
 using RomForge.Core.Services;

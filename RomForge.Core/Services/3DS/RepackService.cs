@@ -1,8 +1,8 @@
-﻿using _3DS.Core.Crypto;
-using _3DS.Core.Interfaces;
-using _3DS.Core.Models;
-using _3DS.Core.Services;
-using Common;
+﻿using Common;
+using N3DS.Core.Crypto;
+using N3DS.Core.Interfaces;
+using N3DS.Core.Models;
+using N3DS.Core.Services;
 using NSW.Core.Utils;
 using Patch.Core.Enums;
 using Patch.Core.Services;

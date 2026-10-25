@@ -1,9 +1,5 @@
-﻿using _3DS.Core.Crypto;
-using _3DS.Core.IO;
-using _3DS.Core.Services;
-using Common;
+﻿using Common;
 using RomForge.Core.UI.Command;
-using RomForge.Core.Models;
 using RomForge.Core.Models._3DS;
 using System.Buffers.Binary;
 using System.Collections.ObjectModel;
@@ -13,6 +9,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using RomForge.Core.Services;
+using N3DS.Core.Crypto;
+using N3DS.Core.IO;
+using N3DS.Core.Services;
 
 namespace RomForge.ViewModels._3DS;
 

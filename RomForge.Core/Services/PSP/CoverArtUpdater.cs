@@ -1,4 +1,4 @@
-﻿using PBP.Core.Services;
+﻿using PSP.PBP.Services;
 using RomForge.Core.Models.PSP;
 
 namespace RomForge.Core.Services.PSP;

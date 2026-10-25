@@ -1,5 +1,5 @@
-﻿using _3DS.Core.Services;
-using Common;
+﻿using Common;
+using N3DS.Core.Services;
 using Patch.Core.Interfaces;
 using Patch.Core.Services;
 using System.IO;

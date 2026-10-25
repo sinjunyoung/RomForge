@@ -1,5 +1,5 @@
-﻿using _3DS.Core.Crypto;
-using Common;
+﻿using Common;
+using N3DS.Core.Crypto;
 using NSW.Core.Enums;
 using NSW.Core.Services;
 using NSW.Core.UI;
