@@ -5,6 +5,7 @@ using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
+using Common.WPF;
 using Common.WPF.Interfaces;
 using Common.WPF.ViewModels;
 using PBP.Core.Enums;
@@ -299,17 +300,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         pbp.TitleId = string.Join(", ", reader.Discs.Select(d => d.DiscID));
 
                         if (PbpReader.TryGetResourceStream(ResourceType.ICON0, stream, out var iconStream))
-                        {
-                            var bitmap = new BitmapImage();
-
-                            bitmap.BeginInit();
-                            bitmap.StreamSource = iconStream;
-                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                            bitmap.EndInit();
-                            bitmap.Freeze();
-
-                            pbp.Icon = bitmap;
-                        }
+                            pbp.Icon = iconStream.ToBitmapImage();
                     });
                     break;
             }

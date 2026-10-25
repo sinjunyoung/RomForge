@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using RomForge.Core.Services;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.Services.PSP;
+using Common.WPF;
 
 namespace RomForge.ViewModels.PSP;
 
@@ -60,17 +61,7 @@ public class UnpackingMainViewModel : ToolTabViewModel
                 vm.TitleId = string.Join(", ", reader.Discs.Select(d => d.DiscID));
 
                 if (PbpReader.TryGetResourceStream(ResourceType.ICON0, stream, out var iconStream))
-                {
-                    var bitmap = new BitmapImage();
-
-                    bitmap.BeginInit();
-                    bitmap.StreamSource = iconStream;
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-
-                    vm.Icon = bitmap;
-                }
+                    vm.Icon = iconStream.ToBitmapImage();
 
                 FileItems.Add(vm);
 

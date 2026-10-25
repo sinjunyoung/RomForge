@@ -48,6 +48,7 @@ public partial class PasswordPromptWindow : Window
     private void BtnCancel_Click(object sender, RoutedEventArgs e)
     {
         DialogResult = false;
+
         Close();
     }
 
@@ -55,6 +56,7 @@ public partial class PasswordPromptWindow : Window
     {
         Password = pwBox.Text;
         DialogResult = true;
+
         Close();
     }
 

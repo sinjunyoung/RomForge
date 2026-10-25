@@ -1,4 +1,5 @@
 using Common;
+using Common.WPF;
 using NSW.Core.Utils;
 using Patch.Core.Services;
 using RomForge.Core.Models.WiiU;
@@ -151,18 +152,7 @@ public sealed class RepackService()
     {
         try
         {
-            using var ms = new MemoryStream(pngBytes);
-            var bitmap = new BitmapImage();
-
-            bitmap.BeginInit();
-
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = ms;
-
-            bitmap.EndInit();
-            bitmap.Freeze();
-
-            return bitmap;
+            return pngBytes.ToBitmapImage();
         }
         catch
         {

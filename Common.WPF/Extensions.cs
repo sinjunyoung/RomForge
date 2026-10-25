@@ -15,13 +15,19 @@ public static class Extensions
         if (imageData == null || imageData.Length == 0)
             return null;
 
-        var image = new BitmapImage();
         using var memoryStream = new MemoryStream(imageData);
+
+        return memoryStream.ToBitmapImage();
+    }
+
+    public static BitmapImage? ToBitmapImage(this Stream stream)
+    {
+        var image = new BitmapImage();
 
         image.BeginInit();
 
         image.CacheOption = BitmapCacheOption.OnLoad;
-        image.StreamSource = memoryStream;
+        image.StreamSource = stream;
 
         image.EndInit();
         image.Freeze();

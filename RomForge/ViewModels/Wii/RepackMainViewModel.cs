@@ -1,6 +1,6 @@
 ﻿using Common;
+using Common.WPF;
 using NSW.Core.Enums;
-using NSW.Core.Services;
 using NSW.Core.UI;
 using RomForge.Core;
 using RomForge.Core.Models.Wii;
@@ -108,14 +108,14 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         get => _patchPath;
         set
         {
-            if (_patchPath == value)
-                return;
+            if (_patchPath != value)
+            {
+                _patchPath = value;
 
-            _patchPath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchHintVisibility));
-            _ = RefreshPatchAsync();
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(PatchHintVisibility));
+                _ = RefreshPatchAsync();
+            }
         }
     }
 
@@ -502,18 +502,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         try
         {
-            using var stream = new MemoryStream(bytes);
-            var image = new BitmapImage();
-
-            image.BeginInit();
-
-            image.CacheOption = BitmapCacheOption.OnLoad;
-            image.StreamSource = stream;
-
-            image.EndInit();
-            image.Freeze();
-
-            return image;
+            return bytes.ToBitmapImage();
         }
         catch
         {

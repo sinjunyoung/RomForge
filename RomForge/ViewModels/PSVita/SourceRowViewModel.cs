@@ -1,4 +1,5 @@
-﻿using Common.WPF.ViewModels;
+﻿using Common.WPF;
+using Common.WPF.ViewModels;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -108,19 +109,7 @@ public class SourceRowViewModel : ViewModelBase
             if (_iconBytes == null)
                 return null;
 
-            var bitmap = new BitmapImage();
-
-            using var ms = new MemoryStream(_iconBytes);
-
-            bitmap.BeginInit();
-
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = ms;
-
-            bitmap.EndInit();
-            bitmap.Freeze();
-
-            return bitmap;
+            return _iconBytes.ToBitmapImage();
         }
     }
 

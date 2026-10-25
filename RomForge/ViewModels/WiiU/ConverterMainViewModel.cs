@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.WPF;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services;
@@ -217,18 +218,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     {
         try
         {
-            using var ms = new MemoryStream(pngBytes);
-            var bitmap = new BitmapImage();
-
-            bitmap.BeginInit();
-
-            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.StreamSource = ms;
-
-            bitmap.EndInit();
-            bitmap.Freeze();
-
-            return bitmap;
+            return pngBytes.ToBitmapImage();
         }
         catch
         {

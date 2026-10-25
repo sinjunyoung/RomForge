@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using Common.WPF;
+using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -26,15 +27,7 @@ public static class AssetImageEditor
 
         ms.Position = 0;
 
-        var bitmapImage = new BitmapImage();
-
-        bitmapImage.BeginInit();
-
-        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-        bitmapImage.StreamSource = ms;
-
-        bitmapImage.EndInit();
-        bitmapImage.Freeze();
+        BitmapImage bitmapImage = ms.ToBitmapImage()!;
 
         return (finalBytes, bitmapImage);
     }
