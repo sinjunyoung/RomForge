@@ -7,11 +7,10 @@ using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
-public class CueMainViewModel : ToolTabViewModel
+public class CueMainViewModel : BatchToolTabViewModel
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".bin" };
 
@@ -50,12 +49,20 @@ public class CueMainViewModel : ToolTabViewModel
             if (!existing.Add(path))
                 continue;
 
-            var vm = new CueFileItem(path);
+            try
+            {
+                var vm = new CueFileItem(path);
 
-            FileItems.Add(vm);
+                FileItems.Add(vm);
 
-            for (int i = 0; i < FileItems.Count; i++)
-                FileItems[i].No = i + 1;
+                for (int i = 0; i < FileItems.Count; i++)
+                    FileItems[i].No = i + 1;
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
+                await SoundPlayer.PlayErrorAsync();
+            }
         }
 
         OnPropertyChanged(nameof(HintVisibility));
@@ -95,6 +102,9 @@ public class CueMainViewModel : ToolTabViewModel
 
         ClearLog();
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
@@ -104,17 +114,19 @@ public class CueMainViewModel : ToolTabViewModel
 
                 AppendLog($"총 {totalCount}개의 CUE 파일 검증 및 생성 작업을 시작합니다.", LogLevel.Highlight);
 
-                foreach (var item in FileItems)
+                var targets = FileItems.Where(i => i.Status != "완료").ToList();
+
+                BeginBatch(targets.Count);
+
+                foreach (var item in targets)
                 {
                     _cts.Token.ThrowIfCancellationRequested();
 
-                    if (item.Status == "완료")
-                        continue;
-                                        
                     item.Progress = 0;
                     item.Status = "변환중";
 
-                    MainViewModel.SetTaskbarProgress(0);
+                    StartBatchItem();
+
                     ScrollToItemRequested?.Invoke(item);
 
                     bool success = await Task.Run(() => ProcessSingleFile(item, _cts.Token));
@@ -125,13 +137,13 @@ public class CueMainViewModel : ToolTabViewModel
                         item.Status = "완료";
                         successCount++;
 
-                        MainViewModel.SetTaskbarProgress(100);
+                        CompleteBatchItem();
                     }
                     else
                     {
                         item.Progress = 0;
 
-                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                        CompleteBatchItem(false);
                         await SoundPlayer.PlayErrorAsync();
 
                         if (item.Status == "변환중")
@@ -143,18 +155,17 @@ public class CueMainViewModel : ToolTabViewModel
                 {
                     AppendLog($"작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Highlight);
                     await SoundPlayer.PlayCompleteAsync();
-                    MainViewModel.SetTaskbarProgress(100);
                 }
                 else
                     AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
 
-                MainViewModel.SetTaskbarProgress(100);
             }
             catch (OperationCanceledException)
             {
+                canceled = true;
+
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
-                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
                 {
@@ -166,7 +177,7 @@ public class CueMainViewModel : ToolTabViewModel
             {
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                failed = true;
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중"))
                     item.Status = "실패";
@@ -175,7 +186,7 @@ public class CueMainViewModel : ToolTabViewModel
             {
                 IsConverting = false;
 
-                CleanupTask();
+                EndBatch(canceled, failed);
                 CommandManager.InvalidateRequerySuggested();
             }
         }

@@ -10,12 +10,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 using System.Windows.Threading;
 
 namespace RomForge.ViewModels.Util;
 
-public class HashMainViewModel : ToolTabViewModel
+public class HashMainViewModel : BatchToolTabViewModel
 {
     public static string GetFileDialogFilter() => "모든 파일|*.*";
 
@@ -80,17 +79,25 @@ public class HashMainViewModel : ToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in Common.Utils.ExpandPaths(paths))
+        foreach (var path in Utils.ExpandPaths(paths))
         {
             if (!existing.Add(path))
                 continue;
 
-            var vm = new HashFileItem(path);
+            try
+            {
+                var vm = new HashFileItem(path);
 
-            FileItems.Add(vm);
+                FileItems.Add(vm);
 
-            for (int i = 0; i < FileItems.Count; i++)
-                FileItems[i].No = i + 1;
+                for (int i = 0; i < FileItems.Count; i++)
+                    FileItems[i].No = i + 1;
+            }
+            catch (Exception ex)
+            {
+                AppendLog($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
+                await SoundPlayer.PlayErrorAsync();
+            }
         }
 
         OnPropertyChanged(nameof(HintVisibility));
@@ -128,12 +135,17 @@ public class HashMainViewModel : ToolTabViewModel
 
         AppendLog($"총 {FileItems.Count}개의 파일 해시 계산을 시작합니다. (알고리즘: {algoType})", LogLevel.Highlight);
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
             {
                 int successCount = 0;
                 var token = _cts.Token;
+
+                BeginBatch(FileItems.Count);
 
                 await Parallel.ForEachAsync(FileItems, new ParallelOptions { MaxDegreeOfParallelism = 4, CancellationToken = token }, async (item, ct) =>
                 {
@@ -143,9 +155,10 @@ public class HashMainViewModel : ToolTabViewModel
                     {
                         item.Status = "변환중";
                         item.Progress = 0;
-                        MainViewModel.SetTaskbarProgress(0);
                         item.HashResult = string.Empty;
                     });
+
+                    BatchItemStarted(item);
 
                     RequestScroll(item);
 
@@ -165,11 +178,11 @@ public class HashMainViewModel : ToolTabViewModel
                         {
                             item.HashResult = formatted;
                             item.Progress = 100;
-                            MainViewModel.SetTaskbarProgress(100);
                             item.Status = "완료";
                         });
 
                         Interlocked.Increment(ref successCount);
+                        BatchItemCompleted(item);
                         AppendLog($"[완료] {item.FileName} -> {result}");
                     }
                     else
@@ -178,7 +191,7 @@ public class HashMainViewModel : ToolTabViewModel
 
                         AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
-                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                        BatchItemCompleted(item, false);
                     }
                 });
 
@@ -186,14 +199,14 @@ public class HashMainViewModel : ToolTabViewModel
 
                 AppendLog($"작업 완료 (성공: {successCount} / 전체: {FileItems.Count})", LogLevel.Highlight);
                 await SoundPlayer.PlayCompleteAsync();
-                MainViewModel.SetTaskbarProgress(100);
             }
             catch (OperationCanceledException)
             {
                 FlushUiQueue();
+                canceled = true;
+
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
-                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "변환중" || i.Status == "대기중"))
                 {
@@ -206,13 +219,13 @@ public class HashMainViewModel : ToolTabViewModel
                 FlushUiQueue();
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                failed = true;
             }
             finally
             {
                 IsConverting = false;
 
-                CleanupTask();
+                EndBatch(canceled, failed);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -356,7 +369,11 @@ public class HashMainViewModel : ToolTabViewModel
 
     private const long ProgressMinBytes = 1024 * 1024;
 
-    private void ReportProgress(HashFileItem item, int percent) => PostUi(() => item.Progress = percent);
+    private void ReportProgress(HashFileItem item, int percent)
+    {
+        PostUi(() => item.Progress = percent);
+        BatchItemProgress(item, percent);
+    }
 
     private void PostUi(Action action)
     {

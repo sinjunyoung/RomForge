@@ -7,12 +7,11 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shell;
 using RomForge.Core.Services;
 
 namespace RomForge.ViewModels.Util;
 
-public class CertsMainViewModel : ToolTabViewModel
+public class CertsMainViewModel : BatchToolTabViewModel
 {
     private const long CertOffset = 0x2040;
     private const int CertSize = 0xA00;
@@ -83,14 +82,14 @@ public class CertsMainViewModel : ToolTabViewModel
         if (!SupportedExtensions.Contains(Path.GetExtension(path)))
         {
             AppendLog($"지원하지 않는 파일 형식입니다: {Path.GetExtension(path)}", LogLevel.Error);
-            _= SoundPlayer.PlayErrorAsync();
+            _ = SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (!File.Exists(path))
         {
             AppendLog($"파일을 찾을 수 없습니다: {path}", LogLevel.Error);
-            _= SoundPlayer.PlayErrorAsync();
+            _ = SoundPlayer.PlayErrorAsync();
             return;
         }
 
@@ -155,6 +154,9 @@ public class CertsMainViewModel : ToolTabViewModel
 
         ClearLog();
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
@@ -162,7 +164,8 @@ public class CertsMainViewModel : ToolTabViewModel
                 SelectedFile.Status = "추출중";
                 SelectedFile.Progress = 0;
 
-                MainViewModel.SetTaskbarProgress(0);
+                BeginBatch(1);
+                StartBatchItem();
                 AppendLog($"certs.bin 추출 시작: {SelectedFile.FileName}", LogLevel.Highlight);
                 AppendLog($"오프셋: 0x{CertOffset:X4} / 크기: 0x{CertSize:X3} bytes");
                 AppendLog($"출력 경로: {OutputPath}");
@@ -174,7 +177,7 @@ public class CertsMainViewModel : ToolTabViewModel
                     SelectedFile.Progress = 100;
                     SelectedFile.Status = "완료";
 
-                    MainViewModel.SetTaskbarProgress(100);                    
+                    CompleteBatchItem();
                     await SoundPlayer.PlayCompleteAsync();
                     OnPropertyChanged(nameof(ProgressText));
                     AppendLog($"추출 완료: {OutputFileName}", LogLevel.Highlight);
@@ -183,7 +186,7 @@ public class CertsMainViewModel : ToolTabViewModel
                 {
                     SelectedFile.Progress = 0;
 
-                    MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                    CompleteBatchItem(false);
                     await SoundPlayer.PlayErrorAsync();
 
                     if (SelectedFile.Status == "추출중")
@@ -192,8 +195,9 @@ public class CertsMainViewModel : ToolTabViewModel
             }
             catch (OperationCanceledException)
             {
+                canceled = true;
+
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
-                MainViewModel.SetTaskbarProgress(0);
 
                 if (SelectedFile.Status == "추출중")
                 {
@@ -205,7 +209,7 @@ public class CertsMainViewModel : ToolTabViewModel
             {
                 AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                failed = true;
 
                 SelectedFile.Status = "실패";
             }
@@ -213,7 +217,7 @@ public class CertsMainViewModel : ToolTabViewModel
             {
                 IsExtracting = false;
 
-                CleanupTask();
+                EndBatch(canceled, failed);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -255,7 +259,7 @@ public class CertsMainViewModel : ToolTabViewModel
             if (totalRead != CertSize)
             {
                 AppendLog($"[실패] 읽기 불완전: 예상 0x{CertSize:X}바이트, 실제 0x{totalRead:X}바이트", LogLevel.Error);
-                item.Status = "실패";                
+                item.Status = "실패";
 
                 return false;
             }
@@ -264,8 +268,7 @@ public class CertsMainViewModel : ToolTabViewModel
 
             File.WriteAllBytes(OutputPath, buffer);
             AppendLog($"[성공] {totalRead:N0} bytes → {OutputFileName}");
-            _= SoundPlayer.PlayCompleteAsync();
-            MainViewModel.SetTaskbarProgress(100);
+            _ = SoundPlayer.PlayCompleteAsync();
 
             return true;
         }

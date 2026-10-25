@@ -1,5 +1,4 @@
 using Common;
-using NSW.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Util;
 using RomForge.Core.Services;
@@ -9,11 +8,10 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
 
-public class TistoryMainViewModel : ToolTabViewModel
+public class TistoryMainViewModel : BatchToolTabViewModel
 {
     private static readonly char[] separator = ['\r', '\n'];
     private string _pageUrls = string.Empty;
@@ -30,7 +28,7 @@ public class TistoryMainViewModel : ToolTabViewModel
         set
         {
             SetProperty(ref _pageUrls, value);
-            CommandManager.InvalidateRequerySuggested(); 
+            CommandManager.InvalidateRequerySuggested();
         }
     }
 
@@ -102,10 +100,16 @@ public class TistoryMainViewModel : ToolTabViewModel
 
         _cts = new CancellationTokenSource();
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
             {
+                BeginBatch(1);
+                StartBatchItem();
+
                 var urlsList = PageUrls
                     .Split(separator, StringSplitOptions.RemoveEmptyEntries)
                     .Select(u => u.Trim())
@@ -162,13 +166,15 @@ public class TistoryMainViewModel : ToolTabViewModel
                 {
                     AppendLog($"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다.", LogLevel.Highlight);
                     await SoundPlayer.PlayCompleteAsync();
-                    MainViewModel.SetTaskbarProgress(100);
+                    CompleteBatchItem();
                 }
                 else
                     AppendLog("[분석 완료] 새로 추가된 첨부파일이 없습니다.", LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
+                canceled = true;
+
                 AppendLog("분석이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
@@ -176,11 +182,13 @@ public class TistoryMainViewModel : ToolTabViewModel
             {
                 AppendLog($"[분석 실패] {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                failed = true;
             }
             finally
             {
                 IsBusy = false;
+
+                EndBatch(canceled, failed);
 
                 OnPropertyChanged(nameof(HintVisibility));
                 CommandManager.InvalidateRequerySuggested();
@@ -196,6 +204,9 @@ public class TistoryMainViewModel : ToolTabViewModel
 
         _cts = new CancellationTokenSource();
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
@@ -206,6 +217,8 @@ public class TistoryMainViewModel : ToolTabViewModel
                 object lockObj = new();
 
                 AppendLog($"선택된 총 {totalCount}개의 첨부파일 다운로드를 시작합니다. (최대 5개 병렬)", LogLevel.Highlight);
+
+                BeginBatch(targetItems.Count(i => i.Status != "완료"));
 
                 var options = new ParallelOptions
                 {
@@ -222,11 +235,15 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                     item.Status = "다운로드중";
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
+                    BatchItemStarted(item);
 
                     ScrollToItemRequested?.Invoke(item);
 
-                    var progress = new Progress<int>(p => item.Progress = p);
+                    var progress = new Progress<int>(p =>
+                    {
+                        item.Progress = p;
+                        BatchItemProgress(item, p);
+                    });
 
                     try
                     {
@@ -236,8 +253,8 @@ public class TistoryMainViewModel : ToolTabViewModel
                         item.FileName = Path.GetFileName(savedPath);
                         item.FileSizeBytes = sizeBytes;
                         item.Progress = 100;
-                        MainViewModel.SetTaskbarProgress(100);
                         item.Status = "완료";
+                        BatchItemCompleted(item);
 
                         lock (lockObj)
                             successCount++;
@@ -250,7 +267,8 @@ public class TistoryMainViewModel : ToolTabViewModel
                     {
                         item.Progress = 0;
                         item.Status = "실패";
-                        MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                        failed = true;
+                        BatchItemCompleted(item, false);
                     }
                 });
 
@@ -276,9 +294,10 @@ public class TistoryMainViewModel : ToolTabViewModel
             }
             catch (OperationCanceledException)
             {
+                canceled = true;
+
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
-                MainViewModel.SetTaskbarProgress(0);
 
                 foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "다운로드중"))
                 {
@@ -290,7 +309,7 @@ public class TistoryMainViewModel : ToolTabViewModel
             {
                 IsBusy = false;
 
-                CleanupTask();
+                EndBatch(canceled, failed);
                 CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -303,6 +322,8 @@ public class TistoryMainViewModel : ToolTabViewModel
         var groups = downloaded.GroupBy(i => TistoryArchiveExtractor.GetGroupKey(i.FileName)).ToList();
         int totalGroups = groups.Count;
 
+        BeginBatch(totalGroups);
+
         foreach (var group in groups)
         {
             token.ThrowIfCancellationRequested();
@@ -311,7 +332,10 @@ public class TistoryMainViewModel : ToolTabViewModel
             var representative = items[0];
 
             if (!TistoryArchiveExtractor.IsArchiveFile(representative.SavedPath))
+            {
+                BatchItemCompleted(group);
                 continue;
+            }
 
             bool isMultiVolume = TistoryArchiveExtractor.IsVolumePart(representative.FileName);
 
@@ -321,6 +345,8 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                 foreach (var item in items)
                     item.Status = "압축해제실패";
+
+                BatchItemCompleted(group, false);
 
                 continue;
             }
@@ -334,9 +360,10 @@ public class TistoryMainViewModel : ToolTabViewModel
                 foreach (var item in items)
                 {
                     item.Progress = 0;
-                    MainViewModel.SetTaskbarProgress(0);
                     item.Status = "압축해제중";
                 }
+
+                BatchItemStarted(group);
 
                 ScrollToItemRequested?.Invoke(representative);
 
@@ -344,6 +371,8 @@ public class TistoryMainViewModel : ToolTabViewModel
                 {
                     foreach (var item in items)
                         item.Progress = p;
+
+                    BatchItemProgress(group, p);
                 });
 
                 var extractDir = await Task.Run(() => TistoryArchiveExtractor.ExtractAndDeleteSource(firstItem.SavedPath!, allPaths, extractProgress), token);
@@ -354,11 +383,11 @@ public class TistoryMainViewModel : ToolTabViewModel
                     item.SavedPath = extractDir;
                     item.FileName = displayName;
                     item.Progress = 100;
-                    MainViewModel.SetTaskbarProgress(100);
                     item.Status = "압축해제완료";
                 }
 
                 successCount++;
+                BatchItemCompleted(group);
                 AppendLog($"[압축해제] {displayName} 완료", LogLevel.Ok);
             }
             catch (Exception ex)
@@ -371,7 +400,7 @@ public class TistoryMainViewModel : ToolTabViewModel
 
                 AppendLog($"[압축해제 실패] {representative.FileName}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                BatchItemCompleted(group, false);
             }
         }
 

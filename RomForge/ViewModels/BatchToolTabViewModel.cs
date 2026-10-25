@@ -25,6 +25,12 @@ public abstract class BatchToolTabViewModel : ToolTabViewModel
 
     protected void CompleteBatchItem(bool success = true) => _overall.CompleteItem(success);
 
+    protected void BatchItemStarted(object key) => _overall.StartItem(key);
+
+    protected void BatchItemProgress(object key, int percent) => _overall.Report(key, percent);
+
+    protected void BatchItemCompleted(object key, bool success = true) => _overall.CompleteItem(key, success);
+
     protected void EndBatch(bool canceled = false, bool failed = false)
     {
         if (!canceled && (failed || _overall.HasFailures))

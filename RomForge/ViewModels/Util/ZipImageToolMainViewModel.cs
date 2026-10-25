@@ -1,5 +1,10 @@
 ﻿using Common;
 using Ionic.Zlib;
+using NSW.Core.UI;
+using PickPack.Disk.Helpers;
+using PickPack.Disk.Models;
+using PickPack.Disk.Services;
+using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -9,16 +14,10 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Shell;
-using RomForge.Core.Services;
-using PickPack.Disk.Models;
-using PickPack.Disk.Services;
-using PickPack.Disk.Helpers;
-using NSW.Core.Services;
-using NSW.Core.UI;
 
 namespace RomForge.ViewModels.Util;
 
-public class ZipImageToolMainViewModel : ToolTabViewModel
+public class ZipImageToolMainViewModel : ProgressToolTabViewModel
 {
     private readonly WmiWatchers _wmiWatchers = new();
 
@@ -50,19 +49,6 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     {
         get => _statusText2;
         set { _statusText2 = value; OnPropertyChanged(); }
-    }
-
-    private int _progress;
-    public int Progress
-    {
-        get => _progress;
-        set 
-        { 
-            _progress = value; 
-
-            MainViewModel.SetTaskbarProgress(value);
-            OnPropertyChanged();
-        }
     }
 
     private int _selectedTabIndex;
@@ -174,7 +160,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     }
 
     private void ListRemovableUsbDrives()
-    {        
+    {
         UsbDrives.Clear();
 
         var infos = DriveInfos.GetDriveInfos();
@@ -215,7 +201,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             Filter = "ZIP 파일 (*.zip)|*.zip|gz 파일 (*.gz)|*.gz|디스크 이미지 파일 (*.img)|*.img|모든 파일 (*.*)|*.*"
         };
 
-        if (ofd.ShowDialog() != true) 
+        if (ofd.ShowDialog() != true)
             return;
 
         WriteImagePath = ofd.FileName;
@@ -227,13 +213,13 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
         string name = ext.TrimStart('.').ToUpperInvariant();
         var uri = new Uri($"pack://application:,,,/Assets/Images/{name}.png", UriKind.Absolute);
 
-        try 
-        { 
-            return new BitmapImage(uri); 
-        }
-        catch 
+        try
         {
-            return new BitmapImage(new Uri("pack://application:,,,/Assets/Images/File.png", UriKind.Absolute)); 
+            return new BitmapImage(uri);
+        }
+        catch
+        {
+            return new BitmapImage(new Uri("pack://application:,,,/Assets/Images/File.png", UriKind.Absolute));
         }
     }
 
@@ -273,7 +259,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                Progress = 0;
+                ProgressPct = 0;
                 StatusText1 = "굽기 취소";
 
                 PartitionUtil.RescanDisk(SelectedDrive.DiskNumber);
@@ -297,9 +283,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             {
                 WriteButtonText = "굽기";
 
-                CancellationTokenSource?.Dispose();
-
-                CancellationTokenSource = null;
+                CleanupTask();
             }
         }
     }
@@ -311,7 +295,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             Filter = "디스크 이미지 파일 (*.img)|*.img|ZIP 파일 (*.zip)|*.zip"
         };
 
-        if (sfd.ShowDialog() != true) 
+        if (sfd.ShowDialog() != true)
             return;
 
         string ext = Path.GetExtension(sfd.FileName).TrimStart('.').ToLowerInvariant();
@@ -384,7 +368,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                Progress = 0;
+                ProgressPct = 0;
                 StatusText1 = "저장 취소";
                 DeleteArchiveTempAndPartialFiles(ReadImagePath);
                 AppendLog("저장이 취소되었습니다.", LogLevel.Error);
@@ -415,7 +399,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            Progress = e.Percent;
+            ProgressPct = e.Percent;
             StatusText1 = e.Message1;
 
             if (e.Message2 != null)
@@ -427,7 +411,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     {
         Application.Current.Dispatcher.Invoke(async () =>
         {
-            Progress = 100;
+            ProgressPct = 100;
             StatusText1 = "이미지 굽기 완료";
 
             await SoundPlayer.PlayCompleteAsync();
@@ -441,7 +425,7 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
     {
         Application.Current.Dispatcher.Invoke(async () =>
         {
-            Progress = 100;
+            ProgressPct = 100;
             StatusText1 = "이미지 저장 완료";
 
             await SoundPlayer.PlayCompleteAsync();
@@ -476,12 +460,12 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
         {
             foreach (string file in Directory.GetFiles(directoryPath, "DotNetZip-*.tmp"))
             {
-                try 
-                { 
-                    File.Delete(file); 
+                try
+                {
+                    File.Delete(file);
                 }
-                catch (IOException ex) 
-                { 
+                catch (IOException ex)
+                {
                     Debug.WriteLine($"Could not delete temp file {file}: {ex.Message}");
                 }
             }
@@ -490,12 +474,12 @@ public class ZipImageToolMainViewModel : ToolTabViewModel
 
             foreach (string file in Directory.GetFiles(directoryPath, searchPattern))
             {
-                try 
-                { 
-                    File.Delete(file); 
+                try
+                {
+                    File.Delete(file);
                 }
-                catch (IOException ex) 
-                { 
+                catch (IOException ex)
+                {
                     Debug.WriteLine($"Could not delete partial file {file}: {ex.Message}");
                 }
             }

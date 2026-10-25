@@ -14,7 +14,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Text="{Binding StatusText1}" VerticalAlignment="Center" Margin="8,0"/>
             <TextBlock Grid.Column="1" Text="{Binding StatusText2}" VerticalAlignment="Center" Margin="8,0"/>
-            <ProgressBar Grid.Column="2" Width="150" Height="4" Value="{Binding Progress}" Minimum="0" Maximum="100" Margin="8,0" VerticalAlignment="Center" Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ProgressBar Grid.Column="2" Width="150" Height="4" Value="{Binding ProgressPct}" Minimum="0" Maximum="100" Margin="8,0" VerticalAlignment="Center" Visibility="{Binding IsLocked, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ProgressBar.Template>
                     <ControlTemplate TargetType="ProgressBar">
                         <Grid>
