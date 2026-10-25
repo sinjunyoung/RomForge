@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.IO;
+using System.Security.Cryptography;
 
 namespace NSW.HacPack.Cryptography.Core;
 

@@ -1,6 +1,7 @@
 ﻿using LibHac.Ncm;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
+using System.IO;
 using static LibHac.Ns.ApplicationControlProperty;
 
 namespace NSW.HacPack.Services;

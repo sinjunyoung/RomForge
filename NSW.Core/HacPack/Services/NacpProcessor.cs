@@ -1,5 +1,6 @@
 ﻿using LibHac.Ns;
 using System.Buffers.Binary;
+using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;

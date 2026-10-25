@@ -4,7 +4,7 @@ using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 

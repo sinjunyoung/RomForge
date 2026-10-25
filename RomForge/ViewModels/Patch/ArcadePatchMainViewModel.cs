@@ -1,5 +1,4 @@
 ﻿using Common;
-using NSW.Core.Services;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Patch;
@@ -12,7 +11,7 @@ using System.Windows.Input;
 
 namespace RomForge.ViewModels.Patch;
 
-public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
+public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 {
     public ObservableCollection<ArcadeMatchItem> MatchItems { get; } = [];
 
@@ -78,25 +77,18 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
     public int TotalProgress
     {
         get => _totalProgress;
-        set 
-        { 
-            _totalProgress = value; 
-
-            if(value>0) 
-                MainViewModel.SetTaskbarProgress(value);
-            else
-                MainViewModel.SetTaskbarProgress(0);
+        set
+        {
+            _totalProgress = value;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(TotalProgressText));
-
         }
     }
 
-    public string TotalProgressText
-    {
-        get => $"{_totalProgress}%";
-    }
+    protected override void OnOverallChanged(int percent) => TotalProgress = percent;
+
+    public string TotalProgressText => $"{_totalProgress}%";
 
     private string _progressSummary = "대기 중...";
     public string ProgressSummary
@@ -140,7 +132,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         CancellationTokenSource = new CancellationTokenSource();
 
         var ct = CancellationTokenSource.Token;
-
         string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
         string outputZipPath = Path.Combine(outputDir, Path.GetFileName(SourcePath));
 
@@ -158,16 +149,27 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
             item.Progress = 0;
         }
 
+        var started = new HashSet<ArcadeMatchItem>();
+        var completed = new HashSet<ArcadeMatchItem>();
         var progressReporter = new Progress<ProgressInfo>(p =>
         {
-            if (itemsByEntryName.TryGetValue(p.Label, out var item))
-            {
-                item.Progress = p.Percent;
+            if (!itemsByEntryName.TryGetValue(p.Label, out var item))
+                return;
 
-                UpdateSummary();
-                UpdateTotalProgress();
-            }
+            if (started.Add(item))
+                StartBatchItem();
+
+            ReportBatchItem(item, p.Percent);
+
+            if (p.Percent >= 100 && completed.Add(item))
+                CompleteBatchItem();
+
+            UpdateSummary();
         });
+        bool canceled = false;
+        bool failed = false;
+
+        BeginBatch(matched.Count);
 
         try
         {
@@ -179,20 +181,20 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         catch (OperationCanceledException)
         {
             TryDeleteIncompleteOutput(outputZipPath);
-            MainViewModel.SetTaskbarProgress(0);
+            canceled = true;
             AppendLog($"패치 취소: {Path.GetFileName(SourcePath)}", LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
         }
         catch (Exception ex)
         {
             TryDeleteIncompleteOutput(outputZipPath);
-            MainViewModel.SetTaskbarProgress(TotalProgress, System.Windows.Shell.TaskbarItemProgressState.Error);            
+            failed = true;
             AppendLog($"패치 실패: {ex.Message}", LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
         finally
         {
-            CleanupTask();
+            EndBatch(canceled, failed);
         }
     }
 
@@ -234,19 +236,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
         RefreshUnmatchedPatches();
         UpdateSummary();
-    }
-
-    public void UpdateTotalProgress()
-    {
-        var matchedItems = MatchItems.Where(x => x.IsMatched).ToList();
-
-        if (matchedItems.Count == 0)
-        {
-            TotalProgress = 0;
-            return;
-        }
-
-        TotalProgress = (int)matchedItems.Average(x => x.Progress);
     }
 
     public void UpdateSummary()
@@ -297,6 +286,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         try
         {
             List<Package> packages;
+
             try
             {
                 packages = await Task.Run(() => BuildPatchPackages(patchPath, token), token);
@@ -313,6 +303,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
                 AvailablePatchPackages.Add(package);
 
             OnPropertyChanged(nameof(HasPatchPackages));
+
             SelectedPatchPackage = AvailablePatchPackages.FirstOrDefault();
         }
         finally
@@ -320,6 +311,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
             if (ReferenceEquals(_analyzeCts, cts))
             {
                 _analyzeCts = null;
+
                 cts.Dispose();
             }
         }
@@ -404,6 +396,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
     }
 
     private sealed record PatchMatchResult(string SourceFileName, string FullPath, Entry? PatchEntry, string? PatchFileName, string? MismatchReason);
+
     private sealed record MatchPlan(List<Entry> PatchEntries, List<PatchMatchResult> Results);
 
     private static List<Package> BuildPatchPackages(string patchPath, CancellationToken ct = default)
@@ -433,8 +426,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
         foreach (var p in sortedPatches)
         {
-            bool eligibleForExtensionMatch = package == null ||
-                !allowedPatchNames.Contains(p.FileNameWithoutExtension, StringComparer.OrdinalIgnoreCase);
+            bool eligibleForExtensionMatch = package == null || !allowedPatchNames.Contains(p.FileNameWithoutExtension, StringComparer.OrdinalIgnoreCase);
 
             if (!eligibleForExtensionMatch)
                 continue;
@@ -456,7 +448,6 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
 
             Entry? matched = null;
             string? mismatchReason = null;
-
             var datEntry = package?.Entries.FirstOrDefault(e => string.Equals(e.SourceFileName, fileName, StringComparison.OrdinalIgnoreCase));
 
             if (datEntry is not null)
@@ -472,6 +463,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
             else
             {
                 var ext = Path.GetExtension(fileName).TrimStart('.').ToLower();
+
                 matched = DequeueUnused(extensionBuckets, ext, usedPatches);
             }
 
@@ -550,8 +542,7 @@ public class ArcadePatchMainViewModel : ToolTabViewModel, IPatchViewModel
         }
 
         if (File.Exists(path))
-            return path.EndsWith(".ips", StringComparison.OrdinalIgnoreCase)
-                ? [new Entry { DisplayName = Path.GetFileName(path), EntryPath = path }] : [];
+            return path.EndsWith(".ips", StringComparison.OrdinalIgnoreCase) ? [new Entry { DisplayName = Path.GetFileName(path), EntryPath = path }] : [];
 
         if (Directory.Exists(path))
             return [.. Directory.GetFiles(path, "*.ips", SearchOption.AllDirectories)

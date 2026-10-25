@@ -3,6 +3,7 @@ using K4os.Compression.LZ4;
 using LibHac;
 using LibHac.Fs;
 using LibHac.FsSystem;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 

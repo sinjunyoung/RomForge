@@ -97,7 +97,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
-    public bool IsKeyMissing => FileType == Core.Properties.Resources.Status_NoKey;
+    public bool IsKeyMissing => FileType == Properties.Resources.Status_NoKey;
 
     public Brush TypeBackground
     {

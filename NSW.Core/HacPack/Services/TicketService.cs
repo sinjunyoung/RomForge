@@ -1,5 +1,6 @@
 ﻿using LibHac.Crypto;
 using NSW.HacPack.Models;
+using System.IO;
 
 namespace NSW.HacPack.Services;
 

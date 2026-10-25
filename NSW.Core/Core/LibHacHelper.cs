@@ -16,7 +16,7 @@ using System.IO;
 using System.Text;
 using static LibHac.Ns.ApplicationControlProperty;
 using Path = System.IO.Path;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace NSW.Core;
 

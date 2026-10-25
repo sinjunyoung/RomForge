@@ -2,7 +2,7 @@
 
 namespace RomForge.Core.Models.Patch;
 
-public class ArcadeMatchItem : ViewModelBase
+public class ArcadeMatchItem : ProcessableItemBase
 {
     public string SourceFileName { get; init; } = string.Empty;
     public string SourcePath { get; init; } = string.Empty;
@@ -24,13 +24,6 @@ public class ArcadeMatchItem : ViewModelBase
     {
         get => _patchEntry;
         set { _patchEntry = value; OnPropertyChanged(); }
-    }
-
-    private int _progress;
-    public int Progress
-    {
-        get => _progress;
-        set { _progress = value; OnPropertyChanged(); }
     }
 
     private string? _mismatchReason;

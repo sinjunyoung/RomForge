@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:RomForge.ViewModels._3DS"
-             xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW.Core"
+             xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW"
              mc:Ignorable="d" 
              d:DesignHeight="580" d:DesignWidth="800">
     <Grid>

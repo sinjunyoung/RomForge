@@ -9,10 +9,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Services;
-using NSW.Core.Services;
 using Common.WPF;
 
 namespace RomForge.ViewModels.Switch;

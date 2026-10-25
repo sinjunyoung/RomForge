@@ -1,7 +1,7 @@
 ﻿using Common.WPF.ViewModels;
 using System.IO;
 using System.Windows.Media;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 

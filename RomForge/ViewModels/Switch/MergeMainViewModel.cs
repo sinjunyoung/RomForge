@@ -1,6 +1,5 @@
 ﻿using Common;
 using NSW.Core;
-using NSW.Core.Services;
 using NSW.Core.ViewModels;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
@@ -11,7 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 

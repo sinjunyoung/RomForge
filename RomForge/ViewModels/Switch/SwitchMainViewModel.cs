@@ -1,5 +1,5 @@
 ﻿﻿using NSW.Core;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 

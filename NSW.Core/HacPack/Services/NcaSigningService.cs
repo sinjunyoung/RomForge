@@ -1,6 +1,7 @@
 ﻿using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
+using System.IO;
 
 namespace NSW.HacPack.Services;
 

@@ -11,7 +11,7 @@ using NSW.Core;
 using NSW.Core.Utils;
 using System.IO;
 using Path = System.IO.Path;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 

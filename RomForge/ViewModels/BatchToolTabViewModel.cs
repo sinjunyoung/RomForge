@@ -8,7 +8,7 @@ public abstract class BatchToolTabViewModel : ToolTabViewModel
 {
     private readonly OverallProgressTracker _overall;
 
-    protected BatchToolTabViewModel() => _overall = new OverallProgressTracker(PublishTaskbar);
+    protected BatchToolTabViewModel() => _overall = new OverallProgressTracker(PublishOverall);
 
     protected void BeginBatch(int total) => _overall.Begin(total);
 
@@ -25,9 +25,9 @@ public abstract class BatchToolTabViewModel : ToolTabViewModel
 
     protected void CompleteBatchItem(bool success = true) => _overall.CompleteItem(success);
 
-    protected void EndBatch(bool canceled = false)
+    protected void EndBatch(bool canceled = false, bool failed = false)
     {
-        if (!canceled && _overall.HasFailures)
+        if (!canceled && (failed || _overall.HasFailures))
             MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
         else
             MainViewModel.SetTaskbarProgress(0);
@@ -35,13 +35,21 @@ public abstract class BatchToolTabViewModel : ToolTabViewModel
         base.CleanupTask();
     }
 
-    private static void PublishTaskbar(int percent)
+    protected virtual void OnOverallChanged(int percent) { }
+
+    private void PublishOverall(int percent)
     {
         var dispatcher = Application.Current?.Dispatcher;
 
         if (dispatcher is null || dispatcher.CheckAccess())
-            MainViewModel.SetTaskbarProgress(percent);
+            ApplyOverall(percent);
         else
-            dispatcher.BeginInvoke(new Action(() => MainViewModel.SetTaskbarProgress(percent)));
+            dispatcher.BeginInvoke(new Action(() => ApplyOverall(percent)));
+    }
+
+    private void ApplyOverall(int percent)
+    {
+        MainViewModel.SetTaskbarProgress(percent);
+        OnOverallChanged(percent);
     }
 }

@@ -249,7 +249,7 @@ namespace RomForge.ViewModels.Switch
 
             if (gameFiles.Any(f => f.IsKeyMissing))
             {
-                errorMsg = NSW.Core.Properties.Resources.Main_Err_NoKeys;
+                errorMsg = NSW.Properties.Resources.Main_Err_NoKeys;
                 return false;
             }
 

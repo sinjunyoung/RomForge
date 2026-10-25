@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace NSW.Core.UI;
 

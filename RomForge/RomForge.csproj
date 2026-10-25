@@ -154,7 +154,7 @@
     <ProjectReference Include="..\3DS.Core\3DS.Core.csproj" />
     <ProjectReference Include="..\CD.Core\CD.Core.csproj" />
     <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
-    <ProjectReference Include="..\NSW.Core\NSW.Core.csproj" />
+    <ProjectReference Include="..\NSW.Core\NSW.csproj" />
     <ProjectReference Include="..\Patch.Core\Patch.Core.csproj" />
     <ProjectReference Include="..\PBP.Core\PBP.Core.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />

@@ -16,7 +16,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
 using Path = System.IO.Path;
-using Res = NSW.Core.Properties.Resources;
+using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 

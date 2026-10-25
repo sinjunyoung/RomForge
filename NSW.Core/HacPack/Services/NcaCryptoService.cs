@@ -3,6 +3,7 @@ using LibHac.Crypto;
 using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
+using System.IO;
 using System.IO.MemoryMappedFiles;
 
 namespace NSW.HacPack.Services;
