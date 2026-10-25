@@ -1,13 +1,11 @@
 ﻿using Common;
 using PSP.PBP.AT3.Enums;
 using PSP.PBP.AT3.Models;
-using RomForge.Core;
 using RomForge.Core.Services.PSP;
-using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.Core.ViewModels.PSP;
 
 public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
 {

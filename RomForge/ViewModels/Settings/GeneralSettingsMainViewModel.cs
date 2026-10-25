@@ -2,6 +2,7 @@
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Windows.Input;
 
 namespace RomForge.ViewModels.Settings;

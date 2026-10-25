@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;
+using RomForge.Core.ViewModels.PSP;
 
 namespace RomForge.ViewModels.PSP;
 

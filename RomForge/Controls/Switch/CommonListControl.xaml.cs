@@ -2,8 +2,8 @@
 using Microsoft.Win32;
 using NSW.Core;
 using NSW.Core.Models;
-using NSW.Core.ViewModels;
 using RomForge.Core;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

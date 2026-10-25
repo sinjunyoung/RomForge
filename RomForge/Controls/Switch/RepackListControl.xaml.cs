@@ -1,12 +1,12 @@
 ﻿using Common;
 using Microsoft.Win32;
 using NSW.Core;
-using NSW.Core.ViewModels;
 using Patch.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
-using RomForge.ViewModels.Switch;
+using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using RomForge.Views;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -22,7 +22,7 @@ public partial class RepackListControl : UserControl
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
 
-    private readonly TitleListViewModel _viewModel;
+    private readonly RepackRowViewModel _viewModel;
 
     public ObservableCollection<GameFile> GameFiles => _viewModel.GameFiles;
 
@@ -36,7 +36,7 @@ public partial class RepackListControl : UserControl
     {
         InitializeComponent();
 
-        _viewModel = new TitleListViewModel(SupportedExtensions);
+        _viewModel = new RepackRowViewModel(SupportedExtensions);
         DataContext = _viewModel;
         lvFiles.ItemsSource = _viewModel.GameFiles;
         _viewModel.FileListChanged += UpdateDropHint;

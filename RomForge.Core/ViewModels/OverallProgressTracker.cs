@@ -1,4 +1,4 @@
-﻿namespace RomForge.ViewModels;
+﻿namespace RomForge.Core.ViewModels;
 
 public sealed class OverallProgressTracker(Action<int> onChanged)
 {

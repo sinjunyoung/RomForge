@@ -5,6 +5,7 @@ using N3DS.Core.Services;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

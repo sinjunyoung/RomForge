@@ -1,5 +1,6 @@
 ﻿using RomForge.Core;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;

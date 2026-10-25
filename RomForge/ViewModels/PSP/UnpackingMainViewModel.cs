@@ -10,6 +10,7 @@ using RomForge.Core.Services.PSP;
 using PSP.PBP.Enums;
 using PSP.PBP.Services;
 using RomForge.Core;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.PSP;
 

@@ -1,4 +1,6 @@
-﻿namespace RomForge.ViewModels.N3DS;
+﻿using RomForge.Core.ViewModels;
+
+namespace RomForge.ViewModels.N3DS;
 
 public class N3DSMainViewModel : MultiToolTabViewModel
 {

@@ -2,12 +2,11 @@
 using RomForge.Core.Models.PSP;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;
-using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.Core.ViewModels.PSP;
 
 public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
 {

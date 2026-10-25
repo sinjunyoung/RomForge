@@ -1,4 +1,5 @@
 ﻿﻿using NSW.Core;
+using RomForge.Core.ViewModels;
 using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;

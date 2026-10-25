@@ -1,4 +1,5 @@
 ﻿using RomForge.Core;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.Settings;
 

@@ -1,8 +1,7 @@
-using RomForge.Core.ViewModels;
 using NSW.Core.Models;
 using System.Windows.Media;
 
-namespace NSW.Core.ViewModels;
+namespace RomForge.Core.ViewModels;
 
 public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 {
@@ -97,7 +96,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
-    public bool IsKeyMissing => FileType == Properties.Resources.Status_NoKey;
+    public bool IsKeyMissing => FileType == "키 없음";
 
     public Brush TypeBackground
     {

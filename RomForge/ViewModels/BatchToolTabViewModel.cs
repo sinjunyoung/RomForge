@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.Interfaces;
+using RomForge.Core.ViewModels;
 using System.Windows;
 using System.Windows.Shell;
 

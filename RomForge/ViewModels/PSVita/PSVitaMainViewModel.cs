@@ -1,4 +1,6 @@
-﻿namespace RomForge.ViewModels.PSVita;
+﻿using RomForge.Core.ViewModels;
+
+namespace RomForge.ViewModels.PSVita;
 
 public class PSVitaMainViewModel : MultiToolTabViewModel
 {

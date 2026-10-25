@@ -1,6 +1,7 @@
 ﻿using RomForge.Core.UI.Command;
 using RomForge.Core.Services.Patch;
 using System.Windows.Input;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.Patch;
 

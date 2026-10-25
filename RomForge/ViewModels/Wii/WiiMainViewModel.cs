@@ -1,4 +1,6 @@
-﻿namespace RomForge.ViewModels.Wii;
+﻿using RomForge.Core.ViewModels;
+
+namespace RomForge.ViewModels.Wii;
 
 public class WiiMainViewModel : MultiToolTabViewModel
 {

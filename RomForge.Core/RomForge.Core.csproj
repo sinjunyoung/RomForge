@@ -27,6 +27,7 @@
     <ProjectReference Include="..\Patch\Patch.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
     <ProjectReference Include="..\PSP\PSP.csproj" />
+    <ProjectReference Include="..\Vita\Vita.csproj" />
     <ProjectReference Include="..\WiiGC\WiiGC.csproj" />
     <ProjectReference Include="..\WiiU\WiiU.csproj" />
   </ItemGroup>

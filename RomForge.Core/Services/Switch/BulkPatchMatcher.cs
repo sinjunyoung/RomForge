@@ -1,6 +1,6 @@
-﻿using NSW.Core.ViewModels;
-using Patch.Core.Interfaces;
+﻿using Patch.Core.Interfaces;
 using RomForge.Core.Models.Switch;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Text;
 

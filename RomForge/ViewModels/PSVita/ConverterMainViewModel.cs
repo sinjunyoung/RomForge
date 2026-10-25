@@ -3,6 +3,7 @@ using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSVita;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels.PSVita;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;

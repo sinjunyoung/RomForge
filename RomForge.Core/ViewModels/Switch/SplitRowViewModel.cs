@@ -1,9 +1,8 @@
-﻿using RomForge.Core.ViewModels;
-using System.IO;
+﻿using System.IO;
 using System.Windows.Media;
 using Res = NSW.Properties.Resources;
 
-namespace RomForge.ViewModels.Switch;
+namespace RomForge.Core.ViewModels.Switch;
 
 public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null) : ViewModelBase
 {

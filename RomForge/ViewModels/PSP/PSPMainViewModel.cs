@@ -1,4 +1,6 @@
-﻿namespace RomForge.ViewModels.PSP;
+﻿using RomForge.Core.ViewModels;
+
+namespace RomForge.ViewModels.PSP;
 
 public class PSPMainViewModel : MultiToolTabViewModel
 {

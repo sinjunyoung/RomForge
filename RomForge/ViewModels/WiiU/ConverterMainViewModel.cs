@@ -4,6 +4,7 @@ using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services;
 using RomForge.Core.Services.WiiU;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

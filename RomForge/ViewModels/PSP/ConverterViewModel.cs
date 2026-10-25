@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Input;
 using RomForge.Core.Services;
 using RomForge.Core.Models.PSP;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.PSP;
 

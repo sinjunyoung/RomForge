@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.Models.N3DS;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

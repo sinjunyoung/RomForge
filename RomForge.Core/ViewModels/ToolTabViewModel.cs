@@ -1,11 +1,10 @@
 ﻿using Common;
 using RomForge.Core.Models;
-using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 
-namespace RomForge.ViewModels;
+namespace RomForge.Core.ViewModels;
 
 public abstract class ToolTabViewModel : ViewModelBase
 {

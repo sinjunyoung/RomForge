@@ -12,6 +12,7 @@ using System.Windows.Input;
 using Res = NSW.Properties.Resources;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Services;
+using RomForge.Core.ViewModels.Switch;
 
 namespace RomForge.ViewModels.Switch;
 

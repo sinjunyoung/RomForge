@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using RomForge.Core.ViewModels;
+using System.ComponentModel;
 
 namespace RomForge.ViewModels.Util;
 

@@ -8,6 +8,7 @@ using RomForge.Core;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
 using RomForge.Core.Services.N3DS;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows;
 

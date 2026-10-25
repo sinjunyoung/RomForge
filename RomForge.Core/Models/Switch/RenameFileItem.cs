@@ -1,4 +1,4 @@
-﻿using NSW.Core.ViewModels;
+﻿using RomForge.Core.ViewModels;
 using System.IO;
 
 namespace RomForge.Core.Models.Switch;

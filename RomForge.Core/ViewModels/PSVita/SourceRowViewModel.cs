@@ -6,7 +6,7 @@ using System.Windows.Media;
 using Vita.Core.Models;
 using Vita.Core.Services;
 
-namespace RomForge.ViewModels.PSVita;
+namespace RomForge.Core.ViewModels.PSVita;
 
 public class SourceRowViewModel : ViewModelBase
 {

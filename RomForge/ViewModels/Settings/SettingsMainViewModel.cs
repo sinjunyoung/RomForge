@@ -1,4 +1,6 @@
-﻿namespace RomForge.ViewModels.Settings;
+﻿using RomForge.Core.ViewModels;
+
+namespace RomForge.ViewModels.Settings;
 
 public class SettingsMainViewModel : MultiToolTabViewModel
 {

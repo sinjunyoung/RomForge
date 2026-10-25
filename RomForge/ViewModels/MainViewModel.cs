@@ -1,6 +1,7 @@
 ﻿using Common;
 using RomForge.Core;
 using RomForge.Core.Models;
+using RomForge.Core.ViewModels;
 using RomForge.ViewModels.N3DS;
 using RomForge.ViewModels.Patch;
 using RomForge.ViewModels.PSP;

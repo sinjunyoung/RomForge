@@ -29,7 +29,5 @@ public abstract class ProcessableItemBase(string initialStatus = "") : ViewModel
         }
     }
 
-    protected virtual void OnStatusChanged()
-    {
-    }
+    protected virtual void OnStatusChanged() { }
 }

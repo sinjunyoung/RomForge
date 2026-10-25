@@ -12,6 +12,7 @@ using N3DS.Core.Crypto;
 using N3DS.Core.IO;
 using N3DS.Core.Services;
 using RomForge.Core.Models.N3DS;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.N3DS;
 

@@ -1,11 +1,9 @@
 ﻿using PSP.PBP.Models;
 using PSP.PBP.Services;
-using RomForge.Core;
 using RomForge.Core.Services.PSP;
-using RomForge.Core.ViewModels;
 using System.Windows.Media.Imaging;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.Core.ViewModels.PSP;
 
 public class PackingImagesViewModel : ViewModelBase
 {

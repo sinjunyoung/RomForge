@@ -1,4 +1,5 @@
 ﻿using Common;
+using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels;
 

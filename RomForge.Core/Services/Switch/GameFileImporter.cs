@@ -1,7 +1,7 @@
 ﻿using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
-using NSW.Core.ViewModels;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using Res = NSW.Properties.Resources;

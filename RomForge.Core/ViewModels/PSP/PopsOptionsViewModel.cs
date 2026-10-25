@@ -1,8 +1,7 @@
 ﻿using PSP.PBP.Services;
-using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 
-namespace RomForge.ViewModels.PSP;
+namespace RomForge.Core.ViewModels.PSP;
 
 public record FmvFixOption(string Label, uint Value);
 

@@ -1,6 +1,5 @@
 ﻿using Common;
 using NSW.Core;
-using NSW.Core.ViewModels;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
@@ -8,9 +7,9 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 
-namespace RomForge.ViewModels.Switch;
+namespace RomForge.Core.ViewModels.Switch;
 
-public class TitleListViewModel : ToolTabViewModel
+public class RepackRowViewModel : ToolTabViewModel
 {
     private readonly GameFilePatchSyncManager _patchSync;
     private readonly GameFileImporter _importer;
@@ -22,7 +21,7 @@ public class TitleListViewModel : ToolTabViewModel
 
     public event Action? FileListChanged;
 
-    public TitleListViewModel(HashSet<string> supportedExtensions)
+    public RepackRowViewModel(HashSet<string> supportedExtensions)
     {
         _supportedExtensions = supportedExtensions;
         _patchSync = new GameFilePatchSyncManager(GameFiles);

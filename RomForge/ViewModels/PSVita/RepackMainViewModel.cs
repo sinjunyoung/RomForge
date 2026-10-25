@@ -4,6 +4,7 @@ using RomForge.Core.Services;
 using RomForge.Core.Services.Patch;
 using RomForge.Core.Services.PSVita;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels.PSVita;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;

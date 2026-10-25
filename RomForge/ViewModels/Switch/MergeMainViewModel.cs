@@ -1,11 +1,11 @@
 ﻿using Common;
 using NSW.Core;
-using NSW.Core.ViewModels;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;

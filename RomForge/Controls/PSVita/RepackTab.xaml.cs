@@ -1,5 +1,6 @@
 ﻿using Common;
 using Ookii.Dialogs.Wpf;
+using RomForge.Core.ViewModels.PSVita;
 using RomForge.ViewModels.PSVita;
 using System.IO;
 using System.Windows;

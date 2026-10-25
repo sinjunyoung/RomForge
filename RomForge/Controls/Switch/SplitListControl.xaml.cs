@@ -1,5 +1,6 @@
 ﻿using Common;
 using Microsoft.Win32;
+using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;

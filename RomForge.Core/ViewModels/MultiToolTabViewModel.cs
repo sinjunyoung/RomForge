@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows;
 
-namespace RomForge.ViewModels;
+namespace RomForge.Core.ViewModels;
 
 public abstract class MultiToolTabViewModel : ToolTabViewModel
 {

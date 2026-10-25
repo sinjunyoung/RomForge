@@ -1,4 +1,5 @@
 ﻿using Common;
+using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;
@@ -24,7 +25,7 @@ public partial class RepackTab : UserControl
         if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
             return;
 
-        if (titleList.DataContext is TitleListViewModel vm)
+        if (titleList.DataContext is RepackRowViewModel vm)
             vm.LogAction = (msg, level) => ViewModel.AppendLog(msg, level);
 
         titleList.FileListChanged += SyncAll;

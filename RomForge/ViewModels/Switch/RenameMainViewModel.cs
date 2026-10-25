@@ -2,13 +2,13 @@
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;
-using NSW.Core.ViewModels;
 using RomForge.Core;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
