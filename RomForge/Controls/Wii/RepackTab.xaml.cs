@@ -1,5 +1,5 @@
-﻿using Microsoft.Win32;
-using NSW.Core.Enums;
+﻿using Common;
+using Microsoft.Win32;
 using RomForge.Core.Services.Wii;
 using RomForge.ViewModels.Wii;
 using System.IO;

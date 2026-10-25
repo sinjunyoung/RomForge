@@ -1,4 +1,4 @@
-﻿using Common.WPF.Interfaces;
+﻿using RomForge.Core.Interfaces;
 using System.Windows;
 using System.Windows.Shell;
 

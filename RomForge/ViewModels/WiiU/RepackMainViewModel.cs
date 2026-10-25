@@ -1,6 +1,4 @@
 ﻿using Common;
-using NSW.Core.Enums;
-using NSW.Core.UI;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services;

@@ -7,9 +7,9 @@ using System.Windows.Input;
 using RomForge.Core.Services;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.Services.PSP;
-using Common.WPF;
 using PSP.PBP.Enums;
 using PSP.PBP.Services;
+using RomForge.Core;
 
 namespace RomForge.ViewModels.PSP;
 

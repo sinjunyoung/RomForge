@@ -1,4 +1,4 @@
-﻿using NSW.Core.Enums;
+﻿using Common;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;

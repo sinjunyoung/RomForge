@@ -40,7 +40,7 @@
                          PreviewDragOver="TxtSaveDirectory_PreviewDragOver" Drop="TxtSaveDirectory_Drop" ToolTip="폴더를 이곳에 드래그하여 다운로드 위치를 변경할 수 있습니다."/>
                 <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnChangeFolder_Click">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text=" 변경" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
@@ -90,7 +90,7 @@
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="FileName">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="파일명" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </GridViewColumnHeader>

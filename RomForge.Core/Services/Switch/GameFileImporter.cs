@@ -1,5 +1,4 @@
-﻿using Common.WPF;
-using LibHac.Ncm;
+﻿using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.ViewModels;

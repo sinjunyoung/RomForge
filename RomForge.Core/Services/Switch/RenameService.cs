@@ -33,7 +33,7 @@ public static class RenameService
 
         result = SpacesRegex.Replace(result, " ");
 
-        return NameBuilder.SafeFileName(result).TrimEnd('.', ' ');
+        return Common.Utils.SafeFileName(result).TrimEnd('.', ' ');
     }
 
     public static List<RenamePlan> BuildPlans(IEnumerable<RenameSource> sources, string format, Func<string, bool>? fileExists = null)

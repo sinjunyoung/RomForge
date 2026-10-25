@@ -1,4 +1,4 @@
-﻿using Common.WPF.ViewModels;
+﻿using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Media;
 using Res = NSW.Properties.Resources;

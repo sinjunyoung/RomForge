@@ -6,10 +6,6 @@ namespace NSW.Core.Utils;
 
 public static class NameBuilder
 {
-    private static readonly char[] _invalidChars = [.. Path.GetInvalidFileNameChars()
-        .Concat([':', '*', '?', '"', '<', '>', '|', '\\', '/'])
-        .Distinct()];
-
     public static string FileNameBuild(string suffix, string krName, string enName, string titleId, string displayVersion, uint titleVersion, int dlcCount, ContainerFormat format = ContainerFormat.Nsp)
     {
         string namePart = BuildNamePart(krName, enName);
@@ -89,8 +85,8 @@ public static class NameBuilder
 
     public static string BuildNamePart(string krName, string enName)
     {
-        krName = SafeFileName(krName);
-        enName = SafeFileName(enName);
+        krName = Common.Utils.SafeFileName(krName);
+        enName = Common.Utils.SafeFileName(enName);
 
         if (string.IsNullOrWhiteSpace(krName))
             return enName.Trim();
@@ -145,16 +141,5 @@ public static class NameBuilder
             return version[1..].Trim();
 
         return version;
-    }
-
-    public static string SafeFileName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-
-        foreach (char c in _invalidChars)
-            name = name.Replace(c.ToString(), string.Empty);
-
-        return name.Trim();
     }
 }

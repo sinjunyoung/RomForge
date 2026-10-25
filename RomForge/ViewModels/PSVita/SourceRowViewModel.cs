@@ -1,9 +1,8 @@
-﻿using Common.WPF;
-using Common.WPF.ViewModels;
+﻿using RomForge.Core;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Vita.Core.Models;
 using Vita.Core.Services;
 

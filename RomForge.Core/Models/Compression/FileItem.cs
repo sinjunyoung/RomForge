@@ -1,5 +1,5 @@
-using Common.WPF.ViewModels;
 using RomForge.Core.Services.Compression;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Media;
 

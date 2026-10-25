@@ -1,9 +1,9 @@
 ﻿using Common;
-using Common.WPF;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;
 using NSW.Core.ViewModels;
+using RomForge.Core;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;

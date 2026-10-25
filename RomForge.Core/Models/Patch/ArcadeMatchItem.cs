@@ -1,4 +1,4 @@
-﻿using Common.WPF.ViewModels;
+﻿using RomForge.Core.ViewModels;
 
 namespace RomForge.Core.Models.Patch;
 

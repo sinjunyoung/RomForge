@@ -1,5 +1,4 @@
 using Common;
-using NSW.Core.Services;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Patch;
 using System.IO;

@@ -1,9 +1,9 @@
 ﻿using Common;
-using Common.WPF.ViewModels;
 using PSP.PBP.AT3.Enums;
 using PSP.PBP.AT3.Models;
 using RomForge.Core;
 using RomForge.Core.Services.PSP;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows;
 

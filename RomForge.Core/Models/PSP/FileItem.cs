@@ -1,4 +1,4 @@
-﻿using Common.WPF.ViewModels;
+﻿using RomForge.Core.ViewModels;
 using System.Windows.Media;
 
 namespace RomForge.Core.Models.PSP;

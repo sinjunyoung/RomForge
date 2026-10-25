@@ -1,9 +1,8 @@
 ﻿using Common;
 using Microsoft.Win32;
-using NSW.Core.Services;
+using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Models.Util;
-using RomForge.Core.Services.Util;
 using RomForge.ViewModels.Util;
 using System.IO;
 using System.Windows;

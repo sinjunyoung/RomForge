@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -6,27 +6,77 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8600;CS8602;CS8603;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CA1401;CS8602;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
+    <NoWarn>1701;1702;CA1401;CS8600;CS8602;CS8603;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
     <PackageReference Include="System.Management" Version="10.0.12" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\N3DS\N3DS.csproj" />
     <ProjectReference Include="..\CD\CD.csproj" />
     <ProjectReference Include="..\CHD\CHD.csproj" />
-    <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
     <ProjectReference Include="..\NSW\NSW.csproj" />
     <ProjectReference Include="..\Patch\Patch.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
     <ProjectReference Include="..\PSP\PSP.csproj" />
     <ProjectReference Include="..\WiiGC\WiiGC.csproj" />
     <ProjectReference Include="..\WiiU\WiiU.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Images\AddFile.png" />
+    <Resource Include="Assets\Images\AddFolder.png" />
+    <Resource Include="Assets\Images\american.png" />
+    <Resource Include="Assets\Images\arabic.png" />
+    <Resource Include="Assets\Images\australia.png" />
+    <Resource Include="Assets\Images\brazilian.png" />
+    <Resource Include="Assets\Images\british.png" />
+    <Resource Include="Assets\Images\canadian.png" />
+    <Resource Include="Assets\Images\Categories.png" />
+    <Resource Include="Assets\Images\chinese.png" />
+    <Resource Include="Assets\Images\czech.png" />
+    <Resource Include="Assets\Images\danish.png" />
+    <Resource Include="Assets\Images\dutch.png" />
+    <Resource Include="Assets\Images\european.png" />
+    <Resource Include="Assets\Images\FileSizeBytes.png" />
+    <Resource Include="Assets\Images\finnish.png" />
+    <Resource Include="Assets\Images\french.png" />
+    <Resource Include="Assets\Images\german.png" />
+    <Resource Include="Assets\Images\greek.png" />
+    <Resource Include="Assets\Images\hungarian.png" />
+    <Resource Include="Assets\Images\indonesian.png" />
+    <Resource Include="Assets\Images\Input.png" />
+    <Resource Include="Assets\Images\italian.png" />
+    <Resource Include="Assets\Images\japanese.png" />
+    <Resource Include="Assets\Images\korean.png" />
+    <Resource Include="Assets\Images\Lock.png" />
+    <Resource Include="Assets\Images\mexican.png" />
+    <Resource Include="Assets\Images\netherlands.png" />
+    <Resource Include="Assets\Images\norwegian.png" />
+    <Resource Include="Assets\Images\polish.png" />
+    <Resource Include="Assets\Images\portuguese.png" />
+    <Resource Include="Assets\Images\Region.png" />
+    <Resource Include="Assets\Images\romanian.png" />
+    <Resource Include="Assets\Images\russian.png" />
+    <Resource Include="Assets\Images\Settings.png" />
+    <Resource Include="Assets\Images\slovak.png" />
+    <Resource Include="Assets\Images\spanish.png" />
+    <Resource Include="Assets\Images\swedish.png" />
+    <Resource Include="Assets\Images\taiwanese.png" />
+    <Resource Include="Assets\Images\thai.png" />
+    <Resource Include="Assets\Images\Title.png" />
+    <Resource Include="Assets\Images\ukrainian.png" />
+    <Resource Include="Assets\Images\unknown.png" />
+    <Resource Include="Assets\Images\Unlock.png" />
+    <Resource Include="Assets\Images\Version.png" />
+    <Resource Include="Assets\Images\vietnamese.png" />
+    <Resource Include="Assets\Images\world.png" />
   </ItemGroup>
 </Project>

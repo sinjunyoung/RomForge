@@ -1,12 +1,11 @@
-﻿using Common.WPF;
-using LibHac.Ns;
+﻿using LibHac.Ns;
 using NSW.Core;
 using NSW.Core.Converters;
 using NSW.Core.Models;
 using NSW.Core.Services;
-using NSW.Core.UI;
 using NSW.Core.ViewModels;
 using NSW.HacPack.Models;
+using RomForge.Core;
 using SixLabors.ImageSharp;
 using System.Collections.ObjectModel;
 using System.IO;

@@ -1,5 +1,4 @@
 ﻿using Common;
-using Common.WPF;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
 using RomForge.Core.Services;

@@ -3,7 +3,6 @@ using PSP.Core.Models;
 using PSP.Core.Services;
 using RomForge.Core;
 using RomForge.Core.UI.Command;
-using RomForge.Core.Models;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

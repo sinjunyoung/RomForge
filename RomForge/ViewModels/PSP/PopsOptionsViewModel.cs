@@ -1,5 +1,5 @@
-﻿using Common.WPF.ViewModels;
-using PSP.PBP.Services;
+﻿using PSP.PBP.Services;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 
 namespace RomForge.ViewModels.PSP;

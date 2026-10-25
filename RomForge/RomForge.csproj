@@ -153,7 +153,6 @@
   <ItemGroup>
     <ProjectReference Include="..\N3DS\N3DS.csproj" />
     <ProjectReference Include="..\CD\CD.csproj" />
-    <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
     <ProjectReference Include="..\NSW\NSW.csproj" />
     <ProjectReference Include="..\Patch\Patch.csproj" />
     <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />

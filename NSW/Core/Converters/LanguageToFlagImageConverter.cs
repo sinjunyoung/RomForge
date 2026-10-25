@@ -40,7 +40,6 @@ namespace NSW.Core.Converters
             try
             {
                 string path = $"pack://application:,,,/NSW.Core;component/Assets/Images/{fileName}";
-
                 return new BitmapImage(new Uri(path, UriKind.Absolute));
             }
             catch

@@ -78,7 +78,7 @@
                     <Button.ToolTip>
                         <ToolTip Content="{x:Static l:Resources.ToolTip_BrowseOutput}"/>
                     </Button.ToolTip>
-                    <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Stretch="Uniform"/>
+                    <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Stretch="Uniform"/>
                 </Button>
             </Grid>
 

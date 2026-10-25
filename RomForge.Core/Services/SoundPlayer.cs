@@ -17,11 +17,11 @@ public static class SoundPlayer
             string path = string.IsNullOrWhiteSpace(targetPath) ? defaultFileName : targetPath;
 
             if (File.Exists(path))
-                await Common.WPF.SoundManager.PlayFromFileAsync(path);
+                await SoundManager.PlayFromFileAsync(path);
             else
             {
                 string packUriString = $"pack://application:,,,/Assets/Sounds/{defaultFileName}";
-                await Common.WPF.SoundManager.PlayFromWpfResourceAsync(packUriString);
+                await SoundManager.PlayFromWpfResourceAsync(packUriString);
             }
         }
     }

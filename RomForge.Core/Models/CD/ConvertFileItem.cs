@@ -1,11 +1,11 @@
 using CD.Core.Services.Readers;
-using Common.WPF.ViewModels;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Media;
 
 namespace RomForge.Core.Models.CD;
 
-public class ConvertFileItem(string filePath) : FileItemBase(filePath), Common.WPF.Interfaces.IConvertible
+public class ConvertFileItem(string filePath) : FileItemBase(filePath), Interfaces.IConvertible
 {
     public SourceFormat SourceFormat => Extension switch
     {

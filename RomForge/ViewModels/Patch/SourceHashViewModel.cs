@@ -1,6 +1,6 @@
-﻿using Common.WPF.ViewModels;
-using RomForge.Core.Models.Patch;
+﻿using RomForge.Core.Models.Patch;
 using RomForge.Core.Services.Patch;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 

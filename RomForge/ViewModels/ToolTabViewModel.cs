@@ -1,6 +1,6 @@
 ﻿using Common;
-using Common.WPF.ViewModels;
 using RomForge.Core.Models;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;

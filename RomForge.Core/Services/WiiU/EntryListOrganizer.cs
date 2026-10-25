@@ -1,11 +1,10 @@
 ﻿using RomForge.Core.Models.WiiU;
-using System.Collections.ObjectModel;
 
 namespace RomForge.Core.Services.WiiU;
 
 public static class EntryListOrganizer
 {
-    public static void Reorganize(ObservableCollection<TitleInputEntry> entries)
+    public static void Reorganize(System.Collections.ObjectModel.ObservableCollection<TitleInputEntry> entries)
     {
         var baseRow = entries.FirstOrDefault(e => e.Role == TitleRole.Base);
         var updateRow = entries.FirstOrDefault(e => e.Role == TitleRole.Update);

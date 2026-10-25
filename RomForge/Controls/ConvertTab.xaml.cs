@@ -1,7 +1,7 @@
 ﻿using Common;
-using Common.WPF;
 using Microsoft.Win32;
-using NSW.Core.Services;
+using RomForge.Core;
+using RomForge.Core.ViewModels;
 using RomForge.ViewModels;
 using System.IO;
 using System.Windows;
@@ -93,7 +93,7 @@ public partial class ConvertTab : UserControl
         if (lvFiles.SelectedItems.Count == 0)
             return;
 
-        if (lvFiles.SelectedItems[0] is not Common.WPF.ViewModels.FileItemBase item)
+        if (lvFiles.SelectedItems[0] is not FileItemBase item)
             return;
 
         Path.GetDirectoryName(item.FilePath)?.OpenFolder();

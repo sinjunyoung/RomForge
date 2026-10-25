@@ -1,8 +1,8 @@
 ﻿using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
-using Common.WPF.ViewModels;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services.Compression;
+using RomForge.Core.ViewModels;
 using System.Windows.Media;
 using WiiGC.Core.Services;
 

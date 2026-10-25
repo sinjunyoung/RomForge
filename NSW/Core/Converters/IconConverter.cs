@@ -20,7 +20,6 @@ public class IconConverter : IMultiValueConverter
         try
         {
             var uri = iconPath.StartsWith("pack://") ? new Uri(iconPath, UriKind.Absolute) : new Uri(iconPath, UriKind.RelativeOrAbsolute);
-
             return new BitmapImage(uri);
         }
         catch

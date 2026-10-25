@@ -2,7 +2,7 @@
 
 namespace RomForge.Core.Models.Switch;
 
-public class ConverterFileItem : GameFile, Common.WPF.Interfaces.IConvertible
+public class ConverterFileItem : GameFile, Interfaces.IConvertible
 {
     private string _selectedTargetFormat;
 

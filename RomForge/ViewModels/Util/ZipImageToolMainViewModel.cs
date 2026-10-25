@@ -1,9 +1,9 @@
 ﻿using Common;
 using Ionic.Zlib;
-using NSW.Core.UI;
 using PickPack.Disk.Helpers;
 using PickPack.Disk.Models;
 using PickPack.Disk.Services;
+using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;

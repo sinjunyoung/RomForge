@@ -2,7 +2,6 @@
 using LibHac.Common.Keys;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
-using NSW.Core.Enums;
 using NSW.Core.Models;
 using NSW.Core.Utils;
 using NSW.HacPack.Enums;

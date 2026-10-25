@@ -58,7 +58,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common.WPF\Common.WPF.csproj" />
     <ProjectReference Include="..\LibHac\LibHac.csproj" />
     <ProjectReference Include="..\Patch\Patch.csproj" />
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using Common;
-using Common.WPF;
 using Microsoft.Win32;
+using RomForge.Core;
 using RomForge.Core.Models.Switch;
 using RomForge.ViewModels.Switch;
 using System.IO;

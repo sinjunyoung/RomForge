@@ -1,5 +1,4 @@
 ﻿using Common;
-using Common.WPF;
 using NSW.Core;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;

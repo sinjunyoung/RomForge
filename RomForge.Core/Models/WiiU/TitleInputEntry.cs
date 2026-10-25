@@ -1,5 +1,5 @@
-﻿using Common.WPF.ViewModels;
-using PickPack.Disk.Helpers;
+﻿using PickPack.Disk.Helpers;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Media;
 

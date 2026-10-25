@@ -104,7 +104,7 @@
                     </ToggleButton>
                     <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" Margin="0,5,0,0" IsChecked="{Binding UseCustomOutputPath}">
                         <StackPanel Orientation="Horizontal">
-                            <Image Width="18" Margin="0,0,10,0" Source="/Common.WPF;component/Assets/Images/AddFolder.png"/>
+                            <Image Width="18" Margin="0,0,10,0" Source="/RomForge.Core;component/Assets/Images/AddFolder.png"/>
                             <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                             <TextBlock Text="해제 시 원본 ROM 폴더 안의 output 폴더에 저장" FontSize="11" Foreground="#D4AF37" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -122,7 +122,7 @@
                             </Grid>
                         </Border>
                         <Button BorderThickness="1" Command="{Binding BrowseOutputCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
-                            <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30"/>
+                            <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="30"/>
                         </Button>
                     </Grid>
                 </Grid>

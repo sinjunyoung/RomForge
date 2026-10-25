@@ -1,10 +1,8 @@
 ﻿using Common;
 using LibHac.Ns;
-using NSW.Core.Enums;
 using NSW.Core.Exceptions;
 using NSW.Core.Models;
 using NSW.Core.Services;
-using NSW.Core.UI;
 using NSW.Core.ViewModels;
 using NSW.HacPack.Models;
 using RomForge.Core;

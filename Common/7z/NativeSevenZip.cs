@@ -30,7 +30,7 @@ public static class NativeSevenZip
 
             try
             {
-                GetNumberOfFormats(out _);
+                int result = GetNumberOfFormats(out _);
             }
             catch (DllNotFoundException ex)
             {

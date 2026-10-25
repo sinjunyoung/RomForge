@@ -10,7 +10,6 @@ public class BoolToImageConverter : IValueConverter
     {
         bool isChecked = value is bool b && b;
         string path = isChecked ? "/Assets/Images/Checked.png" : "/Assets/Images/Unchecked.png";
-
         return new BitmapImage(new Uri(path, UriKind.RelativeOrAbsolute));
     }
 

@@ -19,7 +19,7 @@
                 <ContextMenu>
                     <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
                         <MenuItem.Icon>
-                            <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
+                            <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
@@ -57,7 +57,7 @@
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="FileName">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="파일명" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </GridViewColumnHeader>
@@ -337,7 +337,7 @@
 
                 <Button Grid.Column="2" Style="{StaticResource GrayButton}" Command="{Binding UnifiedConvertVM.BrowseOutputCommand}" IsEnabled="{Binding UnifiedConvertVM.UseCustomOutputPath}" 
                         Width="30" Height="30" Margin="0,0,3,0" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="30"/>
+                    <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="30"/>
                 </Button>
             </Grid>
         </Border>
@@ -361,13 +361,13 @@
                 <StackPanel Orientation="Horizontal">
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFiles_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/Common.WPF;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="파일 추가" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFolder_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="/Common.WPF;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="폴더 추가" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>

@@ -1,5 +1,4 @@
 using Common;
-using Common.WPF;
 using NSW.Core.Utils;
 using Patch.Core.Services;
 using RomForge.Core.Models.WiiU;
@@ -350,7 +349,7 @@ public sealed class RepackService()
             parts.Add(dlcCount > 1 ? $"{dlcCount}D" : "D");
 
         string comp = string.Join("+", parts);
-        string safeName = NameBuilder.SafeFileName(titleName);
+        string safeName = Utils.SafeFileName(titleName);
 
         return $"{safeName} [{titleIdHex}] ({comp})";
     }
@@ -424,7 +423,7 @@ public sealed class RepackService()
 
     private static string BuildWupFolderName(TitleInputEntry entry)
     {
-        string safeName = NameBuilder.SafeFileName(entry.TitleName ?? entry.DisplayName);
+        string safeName = Utils.SafeFileName(entry.TitleName ?? entry.DisplayName);
         string titleIdHex = entry.TitleIdHex.ToUpper();
         string roleTag = entry.Role switch
         {

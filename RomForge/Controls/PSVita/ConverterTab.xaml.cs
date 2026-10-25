@@ -1,5 +1,4 @@
 using Common;
-using NSW.Core.Services;
 using RomForge.ViewModels.PSVita;
 using System.IO;
 using System.Windows;

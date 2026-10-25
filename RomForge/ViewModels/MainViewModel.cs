@@ -1,7 +1,7 @@
 ﻿using Common;
 using RomForge.Core;
 using RomForge.Core.Models;
-using RomForge.ViewModels._3DS;
+using RomForge.ViewModels.N3DS;
 using RomForge.ViewModels.Patch;
 using RomForge.ViewModels.PSP;
 using RomForge.ViewModels.PSVita;
@@ -38,7 +38,7 @@ public class MainViewModel : ToolTabViewModel
 
     public WiiMainViewModel WiiMainVM { get; } = new();
 
-    public _3DSMainViewModel Main3DsVM { get; } = new();
+    public N3DSMainViewModel Main3DsVM { get; } = new();
 
     public PSVitaMainViewModel PSVitaMainVM { get; } = new();
 

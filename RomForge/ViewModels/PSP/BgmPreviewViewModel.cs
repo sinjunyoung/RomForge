@@ -1,7 +1,7 @@
 ﻿using Common;
-using Common.WPF.ViewModels;
 using NAudio.Wave;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Input;
 using System.Windows.Threading;

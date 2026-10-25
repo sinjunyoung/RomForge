@@ -2,9 +2,6 @@
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common;
-using Common.WPF;
-using Common.WPF.Interfaces;
-using Common.WPF.ViewModels;
 using N3DS.Core.Crypto;
 using N3DS.Core.Models;
 using N3DS.Core.Services;
@@ -13,6 +10,7 @@ using PSP.Core.Services;
 using PSP.PBP.Enums;
 using PSP.PBP.Services;
 using RomForge.Core;
+using RomForge.Core.Interfaces;
 using RomForge.Core.Models.CD;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Models.PSP;
@@ -23,6 +21,7 @@ using RomForge.Core.Services.PSP;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.Services.WiiU;
 using RomForge.Core.UI.Command;
+using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -192,7 +191,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             case "3ds":
             case "cia":
             case "zcci":
-                var ds = new Core.Models._3DS.FileItem(path);
+                var ds = new Core.Models.N3DS.FileItem(path);
                 return ds.SelectedTargetFormat is "" or "미지원" ? null : ds;
             case "wud":
             case "wux":
@@ -232,9 +231,9 @@ public class ConvertMainViewModel : ToolTabViewModel
         {
             switch (item)
             {
-                case Core.Models._3DS.FileItem ds:
+                case Core.Models.N3DS.FileItem ds:
                     {
-                        var result = await Task.Run(() => Core.Services._3DS.Util.ParseFile(ds.FilePath));
+                        var result = await Task.Run(() => Core.Services.N3DS.Util.ParseFile(ds.FilePath));
 
                         ds.TitleId = result.Title!.TitleId;
                         ds.ProductCode = result.ProductCode;
@@ -463,7 +462,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                     }
                 }
                 break;
-            case Core.Models._3DS.FileItem ds:
+            case Core.Models.N3DS.FileItem ds:
                 {
                     KeyStore key = new();
 

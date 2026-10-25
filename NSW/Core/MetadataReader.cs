@@ -273,9 +273,7 @@ public static class MetadataReader
 
                             calculatedSize += size;
                         }
-                        catch
-                        {
-                        }
+                        catch { }
 
                         var control = allFiles[ctrlName].GetControlProperty(keySet);
 
@@ -300,7 +298,9 @@ public static class MetadataReader
                                     }
                                 }
                             }
-                            if (string.IsNullOrWhiteSpace(enTitle)) enTitle = krTitle;
+
+                            if (string.IsNullOrWhiteSpace(enTitle))
+                                enTitle = krTitle;
 
                             defaultTitle = koreanTitle;
 

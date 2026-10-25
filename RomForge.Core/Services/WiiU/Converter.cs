@@ -1,5 +1,4 @@
-﻿using NSW.Core.Utils;
-using System.IO;
+﻿using System.IO;
 using WiiU.Core.Services;
 
 namespace RomForge.Core.Services.WiiU;
@@ -37,7 +36,7 @@ public static class Converter
 
     public static string BuildOutputName(ITitleSource source, string? titleName)
     {
-        string safeName = NameBuilder.SafeFileName(titleName ?? source.TitleIdHex);
+        string safeName = Common.Utils.SafeFileName(titleName ?? source.TitleIdHex);
         return $"{safeName} [{source.TitleIdHex}_v{source.TitleVersion}]";
     }
 }

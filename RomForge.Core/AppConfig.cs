@@ -1,4 +1,4 @@
-using Common.WPF.ViewModels;
+using RomForge.Core.ViewModels;
 using System.ComponentModel;
 using System.IO;
 using System.Text.Json;

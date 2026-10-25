@@ -1,6 +1,4 @@
 ﻿using Common;
-using NSW.Core.Enums;
-using NSW.Core.Services;
 using Ookii.Dialogs.Wpf;
 using RomForge.ViewModels.PSVita;
 using System.IO;

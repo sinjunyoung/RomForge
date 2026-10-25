@@ -1,6 +1,5 @@
 ﻿using Common;
 using RomForge.Core.UI.Command;
-using RomForge.Core.Models._3DS;
 using RomForge.Core.Models.Util;
 using System.IO;
 using System.Windows;
@@ -8,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using RomForge.Core.Services;
+using RomForge.Core.Models.N3DS;
 
 namespace RomForge.ViewModels.Util;
 
@@ -111,7 +111,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
     {
         try
         {
-            var result = await Task.Run(() => Core.Services._3DS.Util.ParseFile(path));
+            var result = await Task.Run(() => Core.Services.N3DS.Util.ParseFile(path));
 
 
             BitmapSource? icon = null;
