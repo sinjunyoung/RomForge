@@ -43,6 +43,13 @@ public class CommonConfig : ViewModelBase
         set { SetProperty(ref _isMuted, value); }
     }
 
+    private double _soundVolume = 100;
+    public double SoundVolume
+    {
+        get => _soundVolume;
+        set { SetProperty(ref _soundVolume, value); }
+    }
+
     private string _completeSoundPath = "complete.mp3";
     public string CompleteSoundPath
     {

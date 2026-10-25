@@ -37,8 +37,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Source="/Assets/Images/Usb.png" Width="32" Height="32" Margin="5,0,15,0" VerticalAlignment="Center"/>
-                <ComboBox Grid.Column="1" ItemsSource="{Binding UsbDrives}" SelectedItem="{Binding SelectedDrive}" DisplayMemberPath="DisplayName" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center" Height="28">
+                <Image Grid.Column="0" Source="/Assets/Images/Usb.png" Width="24" Height="24" Margin="5,0,15,0" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding UsbDrives}" SelectedItem="{Binding SelectedDrive}" DisplayMemberPath="DisplayName" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center" Height="24">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="ComboBoxItem">
                             <Setter Property="HorizontalContentAlignment" Value="Left"/>
@@ -53,7 +53,7 @@
                 <TabItem IsEnabled="{Binding IsIdle}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Source="/Assets/Images/SD.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/Assets/Images/SD.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="굽기" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
@@ -69,7 +69,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Source="{Binding WriteFileIcon}" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
+                            <Image Grid.Column="0" Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
                             <TextBox IsEnabled="{Binding IsIdle}" Grid.Column="1" Text="{Binding WriteImagePath, UpdateSourceTrigger=PropertyChanged}" FontSize="12" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                             <Button Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsIdle}" Command="{Binding OpenWriteFileCommand}" Margin="6,0,6,0">
                                 <StackPanel Orientation="Horizontal">
@@ -90,7 +90,7 @@
                 <TabItem IsEnabled="{Binding IsIdle}">
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Source="/Assets/Images/HDD.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <Image Source="/Assets/Images/HDD.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
                             <TextBlock Text="저장" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
@@ -108,7 +108,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Source="{Binding ReadFileIcon}" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
+                            <Image Grid.Column="0" Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
                             <TextBox IsEnabled="{Binding IsIdle}" Grid.Column="1" Text="{Binding ReadImagePath, UpdateSourceTrigger=PropertyChanged}" FontSize="12" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
                             <Button Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsIdle}" Command="{Binding OpenReadFileCommand}" Margin="6,0,6,0">
                                 <StackPanel Orientation="Horizontal">

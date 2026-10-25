@@ -19,6 +19,8 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
                 OnPropertyChanged(nameof(AutoCheckUpdate));
             else if (e.PropertyName == nameof(CommonConfig.IsMuted))
                 OnPropertyChanged(nameof(IsMuted));
+            else if (e.PropertyName == nameof(CommonConfig.SoundVolume))
+                OnPropertyChanged(nameof(SoundVolume));
             else if (e.PropertyName == nameof(CommonConfig.CompleteSoundPath))
             {
                 OnPropertyChanged(nameof(CompleteSoundPath));
@@ -68,6 +70,17 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         {
             AppConfig.Instance.Common.IsMuted = value;
             OnPropertyChanged();
+        }
+    }
+
+    public double SoundVolume
+    {
+        get => AppConfig.Instance.Common.SoundVolume;
+        set 
+        { 
+            AppConfig.Instance.Common.SoundVolume = value;
+            _ = SoundPlayer.PlayCompleteAsync();
+            OnPropertyChanged(); 
         }
     }
 

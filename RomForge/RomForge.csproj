@@ -33,7 +33,6 @@
     <None Remove="Assets\Images\Diskette.png" />
     <None Remove="Assets\Images\DVD.png" />
     <None Remove="Assets\Images\FontSize.png" />
-    <None Remove="Assets\Images\Gz.png" />
     <None Remove="Assets\Images\Hash.png" />
     <None Remove="Assets\Images\Help.png" />
     <None Remove="Assets\Images\Image.png" />
@@ -102,7 +101,6 @@
     <Resource Include="Assets\Images\Diskette.png" />
     <Resource Include="Assets\Images\DVD.png" />
     <Resource Include="Assets\Images\FontSize.png" />
-    <Resource Include="Assets\Images\Gz.png" />
     <Resource Include="Assets\Images\Hash.png" />
     <Resource Include="Assets\Images\HDD.png" />
     <Resource Include="Assets\Images\Help.png" />
@@ -133,12 +131,8 @@
     <Resource Include="Assets\Images\Wii.png" />
     <Resource Include="Assets\Images\WiiU.png" />
     <Resource Include="Assets\Images\WorkSpace.png" />
-    <Resource Include="Assets\Images\WriteTab.png" />
     <Resource Include="Assets\Images\DLC.png" />
-    <Resource Include="Assets\Images\file.png" />
     <Resource Include="Assets\Images\Gift.png" />
-    <Resource Include="Assets\Images\img.png" />
-    <Resource Include="Assets\Images\Input.png" />
     <Resource Include="Assets\Images\Install.png" />
     <Resource Include="Assets\Images\Installer.png" />
   </ItemGroup>
@@ -180,16 +174,12 @@
     <Resource Include="Assets\Images\Loading.png" />
     <Resource Include="Assets\Images\Mame.png" />
     <Resource Include="Assets\Images\Merge.png" />
-    <Resource Include="Assets\Images\Output.png" />
     <Resource Include="Assets\Images\Package.png" />
     <Resource Include="Assets\Images\Patch.png" />
     <Resource Include="Assets\Images\Progress.png" />
     <Resource Include="Assets\Images\PS1.png" />
-    <Resource Include="Assets\Images\ReadImage.png" />
     <Resource Include="Assets\Images\ReadOpen.png" />
-    <Resource Include="Assets\Images\refresh.png" />
     <Resource Include="Assets\Images\Run.png" />
-    <Resource Include="Assets\Images\ReadTab.png" />
     <Resource Include="Assets\Images\SdCard.png" />
     <Resource Include="Assets\Images\Seed.png" />
     <Resource Include="Assets\Images\size.png" />
@@ -198,8 +188,6 @@
     <Resource Include="Assets\Images\Usb.png" />
     <Resource Include="Assets\Images\Utility.png" />
     <Resource Include="Assets\Images\WriteOpen.png" />
-    <Resource Include="Assets\Images\zip.png" />
-    <Resource Include="Assets\Images\ZipFile.png" />
     <Resource Include="Assets\Images\ZipFolder.png" />
     <Resource Include="Assets\Images\zRIF.png" />
     <Resource Include="Assets\Sounds\cancel.mp3" />

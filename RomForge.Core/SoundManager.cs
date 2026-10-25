@@ -59,12 +59,15 @@ public static class SoundManager
                     else
                         throw new NotSupportedException($"지원하지 않는 오디오 형식입니다: {extension}");
 
-                    _waveOutDevice = new WaveOutEvent();
+                    _waveOutDevice = new WaveOutEvent
+                    {
+                        Volume = (float)(AppConfig.Instance.Common.SoundVolume / 100)
+                    };
 
                     _waveOutDevice.Init(_audioFileReader);
 
                     _waveOutDevice.PlaybackStopped += (s, e) => {
-                        lock (_lock) 
+                        lock (_lock)
                             DisposeResources();
                     };
 

@@ -12,6 +12,9 @@
     <NoWarn>1701;1702;CA1401;CS8600;CS8602;CS8603;CS8604;SYSLIB1045;SYSLIB1054;NU1902;NU1903;NETSDK1206</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Assets\Images\Output.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
@@ -61,6 +64,7 @@
     <Resource Include="Assets\Images\mexican.png" />
     <Resource Include="Assets\Images\netherlands.png" />
     <Resource Include="Assets\Images\norwegian.png" />
+    <Resource Include="Assets\Images\Output.png" />
     <Resource Include="Assets\Images\polish.png" />
     <Resource Include="Assets\Images\portuguese.png" />
     <Resource Include="Assets\Images\Region.png" />

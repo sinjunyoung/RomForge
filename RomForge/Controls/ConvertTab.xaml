@@ -73,7 +73,7 @@
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Extension">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Image Source="/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="입력" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </GridViewColumnHeader>
@@ -91,7 +91,7 @@
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="SelectedTargetFormat">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="/Assets/Images/Output.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/Output.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                     <TextBlock Text="출력" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </GridViewColumnHeader>

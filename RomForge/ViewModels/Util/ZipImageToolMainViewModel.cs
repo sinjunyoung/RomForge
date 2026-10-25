@@ -65,13 +65,6 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
         set { _writeImagePath = value; OnPropertyChanged(); }
     }
 
-    private BitmapImage _writeFileIcon = new(new Uri("pack://application:,,,/Assets/Images/File.png", UriKind.Absolute));
-    public BitmapImage? WriteFileIcon
-    {
-        get => _writeFileIcon;
-        set { _writeFileIcon = value; OnPropertyChanged(); }
-    }
-
     private string _writeButtonText = "굽기";
     public string WriteButtonText
     {
@@ -90,13 +83,6 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
             OnPropertyChanged();
             UpdateSegmentOptionsVisibility(value);
         }
-    }
-
-    private BitmapImage _readFileIcon = new(new Uri("pack://application:,,,/Assets/Images/File.png", UriKind.Absolute));
-    public BitmapImage? ReadFileIcon
-    {
-        get => _readFileIcon;
-        set { _readFileIcon = value; OnPropertyChanged(); }
     }
 
     private bool _segmentOptionsVisible;
@@ -205,22 +191,6 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
             return;
 
         WriteImagePath = ofd.FileName;
-        WriteFileIcon = GetIconForExtension(Path.GetExtension(ofd.FileName));
-    }
-
-    private static BitmapImage GetIconForExtension(string ext)
-    {
-        string name = ext.TrimStart('.').ToUpperInvariant();
-        var uri = new Uri($"pack://application:,,,/Assets/Images/{name}.png", UriKind.Absolute);
-
-        try
-        {
-            return new BitmapImage(uri);
-        }
-        catch
-        {
-            return new BitmapImage(new Uri("pack://application:,,,/Assets/Images/File.png", UriKind.Absolute));
-        }
     }
 
     private async Task WriteAsync()
@@ -301,7 +271,6 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
         string ext = Path.GetExtension(sfd.FileName).TrimStart('.').ToLowerInvariant();
 
         ReadImagePath = sfd.FileName;
-        ReadFileIcon = GetIconForExtension(Path.GetExtension(sfd.FileName));
 
         if (ext != "img" && ext != "zip")
             AppendLog("지원하지 않는 파일 형식입니다.(.zip 또는 .img)", LogLevel.Error);

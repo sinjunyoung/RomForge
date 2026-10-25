@@ -20,8 +20,8 @@
 
         <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding AutoCheckUpdate}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">
-                <Image Width="18" Margin="0,0,10,0" Source="/Assets/Images/Refresh.png"/>
-                <TextBlock Text="업데이트 확인" Style="{StaticResource SettingTextStyle}"/>
+                <Image Width="18" Margin="0,0,10,0" Source="/Assets/Images/Loading.png"/>
+                <TextBlock Text="앱 구동 시 업데이트 확인" Style="{StaticResource SettingTextStyle}"/>
             </StackPanel>
         </ToggleButton>
 
@@ -29,15 +29,25 @@
             <StackPanel Orientation="Horizontal">
                 <Image Width="18" Margin="0,0,10,0" Source="/Assets/Images/Sound.png"/>
                 <TextBlock Text="효과음" Style="{StaticResource SettingTextStyle}"/>
+                <Border Width="1" Height="18" Background="#444" Margin="10,0,15,0"/>
+                <Grid Margin="0,4,0,4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="650"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Slider Grid.Column="0" x:Name="sliderSoundVolume" Style="{StaticResource SliderStyle}" Minimum="10" Maximum="100" Value="{Binding SoundVolume, UpdateSourceTrigger=PropertyChanged}"
+                            SmallChange="1" LargeChange="10" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Cursor="Hand"/>
+                    <TextBlock Grid.Column="1" Text="{Binding ElementName=sliderSoundVolume, Path=Value, StringFormat={}{0:F0}%}" Foreground="#DCDCDC" FontWeight="Bold" VerticalAlignment="Center" Width="45" TextAlignment="Center" Margin="10,0,0,0"/>
+                </Grid>
             </StackPanel>
         </ToggleButton>
 
         <StackPanel Grid.Row="3" Visibility="{Binding IsMuted, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid Margin="0,2,0,0">
-                <Grid.ColumnDefinitions>                    
+                <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>                
+                </Grid.ColumnDefinitions>
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Grid.Column="0" Height="36">
                     <Grid>
                         <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding CompleteSoundPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" AllowDrop="True" PreviewDragOver="SoundTextBox_PreviewDragOver" Drop="CompleteSoundTextBox_Drop"/>
