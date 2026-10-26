@@ -295,7 +295,7 @@
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
                             <Run Text="BIN+CUE, ISO" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
-                            <Run Text="BIN+CUE(단일 트랙 MODE1,  단일 트랙 MODE2 Form 1)" Foreground="#FFFFFF" />
+                            <Run Text="BIN+CUE(단일 트랙)" Foreground="#FFFFFF" />
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
                             <Run Text="ISO" Foreground="#FFFFFF" FontWeight="Bold"/>
                         </TextBlock>

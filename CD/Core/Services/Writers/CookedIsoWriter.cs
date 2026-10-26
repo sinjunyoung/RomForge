@@ -62,19 +62,7 @@ public static class CookedIsoWriter
             await ReadExactAsync(src, srcBuffer, chunkSectors * sourceSectorSize, ct);
 
             for (var i = 0; i < chunkSectors; i++)
-            {
-                var sectorOffset = i * sourceSectorSize;
-
-                if (sourceSectorSize == 2352 && string.Equals(track.DataType, CueFormatStrings.Mode2_2352, StringComparison.OrdinalIgnoreCase))
-                {
-                    var submode = srcBuffer[sectorOffset + 18];
-
-                    if ((submode & 0x20) != 0)
-                        throw new NotSupportedException($"MODE2 Form 2 섹터가 포함되어 있어 ISO로 변환할 수 없습니다. 섹터 인덱스: {totalSectors - remaining + i}");
-                }
-
-                Buffer.BlockCopy(srcBuffer, sectorOffset + userDataOffset, dstBuffer, i * UserDataSize, UserDataSize);
-            }
+                Buffer.BlockCopy(srcBuffer, i * sourceSectorSize + userDataOffset, dstBuffer, i * UserDataSize, UserDataSize);
 
             await dst.WriteAsync(dstBuffer.AsMemory(0, chunkSectors * UserDataSize), ct);
 
