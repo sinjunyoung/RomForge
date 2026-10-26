@@ -64,7 +64,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
                 zcciProgress = new PercentProgress(compressReporter);
             }
 
-            string outputZcci = await Z3dsCompressor.CompressAsync(tempCci, AppConfig.Instance.Azahar.CompressLevel, zcciProgress, log, null, ct);
+            string outputZcci = await Z3dsCompressor.CompressAsync(tempCci, null, AppConfig.Instance.Azahar.CompressLevel, zcciProgress, log, ct);
 
             onOutputPathKnown?.Invoke(outputZcci);
 

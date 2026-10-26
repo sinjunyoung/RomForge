@@ -203,7 +203,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                 if (vm.PatchPath == null)
                 {
                     vm.PatchPath = existingUpdate.PatchPath;
-                    vm.PatchPassword = existingUpdate.PatchPath;
+                    vm.PatchPassword = existingUpdate.PatchPassword;
                 }
 
                 patchSync.Detach(existingUpdate);

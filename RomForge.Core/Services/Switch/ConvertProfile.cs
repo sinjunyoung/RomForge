@@ -10,13 +10,13 @@ internal sealed record ConvertProfile(string StartLog, string? CopyStatus, strin
     {
         string modeDone = isCompressMode ? Res.Log_ModeCompress : Res.Log_ModeDecompress;
 
-        return new ConvertProfile($"{Path.GetFileName(inputPath)} {modeDone} {Res.Log_ProcessStart}", isCompressMode ? Res.Log_StatusCopying : Res.Log_StatusDecompressing, $"{(isCompressMode ? Res.Log_StatusCompressing : Res.Log_StatusDecompressing)} ",
-            isCompressMode, isCompressMode, Res.Log_StatusValidating, Res.Log_ValidationComplete, (meta, _) => $"{meta.KrTitle ?? meta.EnTitle} [{meta.TitleId}]", finalPath => $"{modeDone} {Res.Log_StatusDone}: {Path.GetFileName(finalPath)}");
+        return new ConvertProfile($"{Path.GetFileName(inputPath)} {modeDone} {Res.Log_ProcessStart}", isCompressMode ? Res.Log_StatusCopying : Res.Log_StatusDecompressing, $"{(isCompressMode ? Res.Log_StatusCompressing : Res.Log_StatusDecompressing)} ", isCompressMode, isCompressMode,
+            Res.Log_StatusValidating, Res.Log_ValidationComplete, (meta, _) => $"{meta.KrTitle ?? meta.EnTitle} [{meta.TitleId}]", finalPath => $"{modeDone} {Res.Log_StatusDone}: {Path.GetFileName(finalPath)}");
     }
 
     public static ConvertProfile ForConversion(string inputPath, OutputContainer output, bool useCompression)
     {
-        return new ConvertProfile($"{Path.GetFileName(inputPath)} → {output.Extension(useCompression).TrimStart('.').ToUpper()} 변환 시작", null, string.Empty, false, false, 
+        return new ConvertProfile($"{Path.GetFileName(inputPath)} → {output.Extension(useCompression).TrimStart('.').ToUpper()} 변환 시작", null, string.Empty, false, false,
             Res.ToolTip_ValidateCompress, "OK", (meta, entryName) => $"{meta.KrTitle ?? meta.EnTitle} [{entryName}]", finalPath => $"변환 완료: {Path.GetFileName(finalPath)}");
     }
 }

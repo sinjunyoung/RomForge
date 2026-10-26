@@ -67,6 +67,7 @@ public class SplitService
             else
             {
                 fs = storage.OpenFileSystem(keySet, sourcePath);
+
                 disposables.Add(fs);
             }
 

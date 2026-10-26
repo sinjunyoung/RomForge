@@ -12,16 +12,19 @@ internal sealed class XciOutput : OutputContainer
 {
     protected override bool IsXci => true;
 
-    public override async Task WriteAsync(SourceSet source, string displayName, string progressId, uint pfsAlignment, List<FileEntry> entries, Stream fout, IProgress<ProgressInfo> progress, List<IDisposable> disposables, CancellationToken ct)
+    public override async Task WriteAsync(SourceSet source, string displayName, string progressId, uint pfsAlignment, List<FileEntry> entries, Stream fout, IProgress<ProgressInfo> progress, List<IDisposable> disposables, CancellationToken ct = default)
     {
         var baseStream = source.OpenXciBaseStream(disposables);
+
         await XciWriter.WriteAsync(displayName, progressId, source.BuildXciPrefix(), source.XciRootEntries, baseStream, entries, fout, progress, ct);
     }
 
     public override IFileSystem OpenForValidation(Stream fout, KeySet keySet)
     {
         fout.Position = 0;
+
         var validationStorage = new StreamStorage(fout, false);
+
         return new Xci(keySet, validationStorage).OpenPartition(XciPartitionType.Secure);
     }
 }

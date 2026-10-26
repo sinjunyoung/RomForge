@@ -15,15 +15,15 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class ContainerConverter
 {
-    public static Task<string> CompressOrDecompressAsync(OutputContainer output, string inputPath, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string? outputDir, CancellationToken ct)
+    public static Task<string> CompressOrDecompressAsync(OutputContainer output, string inputPath, string? outputDir, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
         var profile = ConvertProfile.ForCompression(inputPath, isCompressMode);
-        return ConvertAsync(inputPath, output, isCompressMode, isCompressMode && validation, isCompressMode && useBlockMode, isCompressMode ? compressionLevel : 0, profile, keySet.Clone(), progress, log, outputDir, ct);
+        return ConvertAsync(inputPath, outputDir, output, isCompressMode, isCompressMode && validation, isCompressMode && useBlockMode, isCompressMode ? compressionLevel : 0, profile, keySet.Clone(), progress, log, ct);
     }
 
-    public static async Task<string> ConvertAsync(string inputPath, OutputContainer output, bool useCompression, bool validation, bool useBlockMode, int compressionLevel, ConvertProfile profile, KeySet keySet, 
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string? outputDir, CancellationToken ct)
+    public static async Task<string> ConvertAsync(string inputPath, string? outputDir, OutputContainer output, bool useCompression, bool validation, bool useBlockMode, int compressionLevel, ConvertProfile profile, KeySet keySet, 
+        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);

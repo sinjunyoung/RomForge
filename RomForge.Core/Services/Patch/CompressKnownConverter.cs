@@ -125,7 +125,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
 
-                    await Z3dsCompressor.CompressAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, null, ct);
+                    await Z3dsCompressor.CompressAsync(outputPath, null, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
 
                     File.Delete(outputPath);
 
@@ -135,7 +135,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                 {
                     progress.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
 
-                    await Z3dsCompressor.CompressFromCiaAsync(outputPath, AppConfig.Instance.Azahar.CompressLevel, progress, log, null, ct);
+                    await Z3dsCompressor.CompressFromCiaAsync(outputPath, null, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
 
                     File.Delete(outputPath);
 
@@ -152,7 +152,7 @@ public class CompressKnownConverter(Action<string, LogLevel> log, IProgress<Prog
                     converter.LogMessage += (_, e) => log(e.Message, e.Level);
                     converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = e.Progress });
 
-                    await converter.ConvertFileAsync(outputPath, detected.Format.ToString(), detected.OutputExtension, wiiGcCompressLevel, null, ct);
+                    await converter.ConvertFileAsync(outputPath, null, detected.Format.ToString(), detected.OutputExtension, wiiGcCompressLevel, ct);
                     File.Delete(outputPath);
 
                     break;

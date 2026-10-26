@@ -40,6 +40,7 @@ public static class SaturnCoverArtFetcher
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
                 graphics.Clear(Color.Transparent);
                 graphics.DrawImage(tempBitmap, 0, 0, 256, 256);
             }

@@ -16,7 +16,7 @@ public static class Z3dsCompressor
 
     private const int FrameSize = 32 * 1024 * 1024;
 
-    public static async Task<string> CompressAsync(string inputPath, int compressionLevel = 18, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
+    public static async Task<string> CompressAsync(string inputPath, string? outputDir, int compressionLevel, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;
@@ -82,7 +82,7 @@ public static class Z3dsCompressor
         }
     }
 
-    public static async Task CompressFromCiaAsync(string inputPath, int compressionLevel = 18, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
+    public static async Task CompressFromCiaAsync(string inputPath, string? outputDir, int compressionLevel, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;

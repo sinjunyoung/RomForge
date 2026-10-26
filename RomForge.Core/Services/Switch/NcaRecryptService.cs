@@ -12,7 +12,6 @@ public static class NcaRecryptService
     public static async Task RecryptAsync(Stream inputStream, Stream outputStream, int newKeyGeneration, KeySet keySet, Action<long>? onRead = null, CancellationToken ct = default)
     {
         var inStorage = new StreamStorage(inputStream, true);
-
         var nca = new Nca(keySet, inStorage);
 
         if (nca.Header.KeyGeneration == newKeyGeneration)
@@ -41,9 +40,7 @@ public static class NcaRecryptService
             int readSize = (int)Math.Min(bufSize, remaining);
 
             inStorage.Read(offset, buf.AsSpan(0, readSize)).ThrowIfFailure();
-
             await outputStream.WriteAsync(buf.AsMemory(0, readSize), ct);
-
             onRead?.Invoke(readSize);
 
             offset += readSize;
@@ -60,6 +57,7 @@ public static class NcaRecryptService
         byte[] headerBytes = new byte[0xC00];
 
         nca.OpenDecryptedHeaderStorage().Read(0, headerBytes).ThrowIfFailure();
+        ct.ThrowIfCancellationRequested();
 
         if (newKeyGeneration <= 2)
         {
@@ -86,6 +84,8 @@ public static class NcaRecryptService
 
             for (int k = 0; k < 4; k++)
             {
+                ct.ThrowIfCancellationRequested();
+
                 int keyOffset = 0x300 + k * 0x10;
                 byte[] key = new byte[0x10];
 
@@ -106,7 +106,10 @@ public static class NcaRecryptService
         var transform = new Aes128XtsTransform(key1, key2, false);
 
         for (int sector = 0; sector < 6; sector++)
+        {
+            ct.ThrowIfCancellationRequested();
             transform.TransformBlock(headerBytes, sector * 0x200, 0x200, (ulong)sector);
+        }
 
         return headerBytes;
     }

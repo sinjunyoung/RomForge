@@ -3,13 +3,12 @@ using K4os.Compression.LZ4;
 using LibHac;
 using LibHac.Fs;
 using LibHac.FsSystem;
+using NSW.HacPack.Models;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace NSW.HacPack.Services;
-
-public sealed record CompressedRomfsInfo(long TableOffset, long TableSize, byte[] TableHeader, int EntryCount);
 
 public static class CompressedRomfsWriter
 {

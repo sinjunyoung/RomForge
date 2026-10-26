@@ -7,7 +7,7 @@ public class CiaToCciConverter(KeyStore keyStore)
 {
     private const string OutputExtension = ".cci";
 
-    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
+    public async Task ConvertAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;

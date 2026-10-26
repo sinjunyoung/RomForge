@@ -7,14 +7,14 @@ namespace WiiGC.Core.Services;
 
 public static class IsoToRvzConverter
 {
-    public static void Convert(string inputPath, string outputPath, int compressionLevel = 18, int chunkSize = 131072, Action<double>? progress = null, CancellationToken ct = default)
+    public static void Convert(string inputPath, string outputPath, int compressionLevel, int chunkSize = 131072, Action<double>? progress = null, CancellationToken ct = default)
     {
         using var input = RvzInputSource.Open(inputPath);
 
         Convert(input, outputPath, compressionLevel, chunkSize, progress, ct);
     }
 
-    internal static void Convert(IRvzInputSource input, string outputPath, int compressionLevel = 18, int chunkSize = 131072, Action<double>? progress = null, CancellationToken ct = default)
+    internal static void Convert(IRvzInputSource input, string outputPath, int compressionLevel, int chunkSize = 131072, Action<double>? progress = null, CancellationToken ct = default)
     {
         ThreadPool.GetMinThreads(out int minWorker, out int minIo);
         ThreadPool.SetMinThreads(Math.Max(minWorker, Environment.ProcessorCount * 3), minIo);

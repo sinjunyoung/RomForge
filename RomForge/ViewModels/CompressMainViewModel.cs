@@ -195,25 +195,25 @@ public class CompressMainViewModel : ToolTabViewModel
                         switch (detected.Format)
                         {
                             case RomFormat.Nsp:
-                                await NspCompressService.CompressAsync(item.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, outputDir, CancellationTokenSource.Token);
+                                await NspCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Xci:
-                                await XciCompressService.CompressAsync(item.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, outputDir, CancellationTokenSource.Token);
+                                await XciCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Nsz:
-                                await NspCompressService.DecompressAsync(item.FilePath, progressHandler, Log, outputDir, CancellationTokenSource.Token);
+                                await NspCompressService.DecompressAsync(item.FilePath, outputDir, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Xcz:
-                                await XciCompressService.DecompressAsync(item.FilePath, progressHandler, Log, outputDir, CancellationTokenSource.Token);
+                                await XciCompressService.DecompressAsync(item.FilePath, outputDir, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Cci:
-                                await Z3dsCompressor.CompressAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, outputDir, CancellationTokenSource.Token);
+                                await Z3dsCompressor.CompressAsync(item.FilePath, outputDir, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Cia:
-                                await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, outputDir, CancellationTokenSource.Token);
+                                await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, outputDir, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.ZCci:
-                                await Z3dsDecompressor.DecompressAsync(item.FilePath, progressHandler, AppendLog, outputDir, CancellationTokenSource.Token);
+                                await Z3dsDecompressor.DecompressAsync(item.FilePath, outputDir, progressHandler, AppendLog, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Ccd:
                                 {
@@ -274,7 +274,7 @@ public class CompressMainViewModel : ToolTabViewModel
                                     converter.LogMessage += (_, e) => AppendLog(e.Message, e.Level);
                                     converter.ProgressChanged += (s, e) => Application.Current.Dispatcher.Invoke(() => item.Progress = e.Progress);
 
-                                    await converter.ConvertFileAsync(item.FilePath, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.WiiGC.CompressLevel, outputDir, CancellationTokenSource.Token);
+                                    await converter.ConvertFileAsync(item.FilePath, outputDir, detected.Format.ToString(), detected.OutputExtension, AppConfig.Instance.WiiGC.CompressLevel, CancellationTokenSource.Token);
                                 }
                                 break;
                             case RomFormat.Unknown:

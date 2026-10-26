@@ -2,6 +2,7 @@ using Common;
 using N3DS.Core.Crypto;
 using N3DS.Core.Models;
 using N3DS.Core.Services;
+using RomForge.Core;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
@@ -150,27 +151,27 @@ public class ConverterMainViewModel : ToolTabViewModel
                                     KeyStore key = new();
                                     CciToCiaConverter c = new(key);
 
-                                    await c.ConvertAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
+                                    await c.ConvertAsync(item.FilePath, null, progressHandler, AppendLog, _cts.Token);
                                 }
                                 break;
                             case "ZCCI":
                                 {
                                     if (inputExt == "cia")
-                                        await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, 18, progressHandler, AppendLog, null, _cts.Token);
+                                        await Z3dsCompressor.CompressFromCiaAsync(item.FilePath, null, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, _cts.Token);
                                     else
-                                        await Z3dsCompressor.CompressAsync(item.FilePath, 18, progressHandler, AppendLog, null, _cts.Token);
+                                        await Z3dsCompressor.CompressAsync(item.FilePath, null, AppConfig.Instance.Azahar.CompressLevel, progressHandler, AppendLog, _cts.Token);
                                 }
                                 break;
                             case "CCI":
                                 {
                                     if (inputExt == "zcci")
-                                        await Z3dsDecompressor.DecompressAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
+                                        await Z3dsDecompressor.DecompressAsync(item.FilePath, null, progressHandler, AppendLog, _cts.Token);
                                     else if (inputExt == "cia")
                                     {
                                         KeyStore key = new();
                                         var ciaToCci = new CiaToCciConverter(key);
 
-                                        await ciaToCci.ConvertAsync(item.FilePath, progressHandler, AppendLog, null, _cts.Token);
+                                        await ciaToCci.ConvertAsync(item.FilePath, null, progressHandler, AppendLog, _cts.Token);
                                     }
                                 }
                                 break;

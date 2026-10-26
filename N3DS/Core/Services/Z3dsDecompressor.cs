@@ -7,7 +7,7 @@ public static class Z3dsDecompressor
 {
     private const string DecompressExtension = ".cci";
 
-    public static async Task DecompressAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
+    public static async Task DecompressAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;

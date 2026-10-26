@@ -107,7 +107,7 @@ public static class CompressedSourceDecompressor
         converter.LogMessage += (_, e) => log(e.Message, e.Level);
         converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "압축 해제 중...", Percent = e.Progress });
 
-        await converter.ConvertFileAsync(rvzPath, "rvz", "iso", 0, outputDir, ct);
+        await converter.ConvertFileAsync(rvzPath, outputDir, "rvz", "iso", 0, ct);
 
         var isoPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(rvzPath) + ".iso");
 

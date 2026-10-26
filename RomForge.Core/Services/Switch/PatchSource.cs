@@ -97,7 +97,6 @@ public sealed class PatchSource
         var covered = ids.Where(id => _idDirs.ContainsKey(id)).ToList();
         var missing = ids.Where(id => !_idDirs.ContainsKey(id)).ToList();
         string? path = covered.Count > 0 ? _toPatchPath(_idDirs[covered[0]].Location) : null;
-
         return new PatchMatch(path, covered, missing);
     }
 

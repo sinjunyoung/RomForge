@@ -18,7 +18,7 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class ContainerMerger
 {
-    private static List<MetadataResult> ReadAllMetadata(KeySet keySet, IReadOnlyList<string> inputPaths, Action<string, LogLevel, string> log, CancellationToken ct)
+    private static List<MetadataResult> ReadAllMetadata(KeySet keySet, IReadOnlyList<string> inputPaths, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         log?.Invoke(Res.Log_AnalyzeMetadata, LogLevel.Info, string.Empty);
 
@@ -37,7 +37,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<List<string>> MergeAllAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var groups = MergePlanner.BuildTitleGroups(allMeta);
@@ -83,9 +83,8 @@ internal static class ContainerMerger
                 TargetBaseTitleId = group.BaseTitleId,
                 TargetBaseTitleName = group.BaseTitleName,
                 AllowedNcaIds = allowedNcaIds,
-                ResolvedMeta = new MetadataResult(
-                    baseMeta.TitleId, (latestPatch ?? baseMeta).TitleVersion, (latestPatch ?? baseMeta).DisplayVersion, baseMeta.KrTitle, baseMeta.EnTitle,
-                    group.DlcMetas.GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase).Count(), Type: group.BaseMetas.Count > 0 ? ContentMetaType.Application : baseMeta.Type),
+                ResolvedMeta = new MetadataResult(baseMeta.TitleId, (latestPatch ?? baseMeta).TitleVersion, (latestPatch ?? baseMeta).DisplayVersion, baseMeta.KrTitle, baseMeta.EnTitle, 
+                                                  group.DlcMetas.GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase).Count(), Type: group.BaseMetas.Count > 0 ? ContentMetaType.Application : baseMeta.Type),
             };
 
             log?.Invoke($"{group.BaseTitleName} {Res.Button_MergeStart} ({idx}/{groups.Count})", LogLevel.Highlight, group.BaseTitleId);
@@ -118,7 +117,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<List<string>> MergeSingleAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, useBlockMode);
@@ -144,7 +143,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<string> MergeProcessAsync(OutputContainer output, Models.Switch.BuildRequest req, KeySet keySet, List<MetadataResult> cachedMeta, bool isValidationEnabled, bool forceKeyGen0, int index, int groupCount, bool hasBase, bool hasUpdate,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
@@ -266,7 +265,6 @@ internal static class ContainerMerger
                 var validationFs = output.OpenForValidation(fout, keySet);
 
                 await NczValidator.ValidateAsync(validationFs, converters, fileEntries, req.TargetBaseTitleId, entryName => DescribeNcaEntry(entryName, ncaIdToMeta), Res.ToolTip_ValidateCompress, "OK", progress, log, req.TargetBaseTitleId, ct);
-
                 log?.Invoke($"{req.TargetBaseTitleName} {Res.Log_ValidationComplete} ({index}/{groupCount})", LogLevel.Ok, req.TargetBaseTitleId);
             }
 

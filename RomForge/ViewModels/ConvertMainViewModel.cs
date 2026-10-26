@@ -422,40 +422,40 @@ public class ConvertMainViewModel : ToolTabViewModel
                     switch (sw.Extension.ToLowerInvariant(), sw.SelectedTargetFormat.ToUpperInvariant())
                     {
                         case ("nsp", "XCI"):
-                            await NspXciConvertService.NspToXciAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.NspToXciAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("nsp", "NSZ"):
-                            await NspCompressService.CompressAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await NspCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("nsp", "XCZ"):
-                            await NspXciConvertService.NspToXczAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.NspToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("xci", "NSP"):
-                            await NspXciConvertService.XciToNspAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.XciToNspAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("xci", "XCZ"):
-                            await XciCompressService.CompressAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await XciCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("xci", "NSZ"):
-                            await NspXciConvertService.XciToNszAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.XciToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "NSP"):
-                            await NspCompressService.DecompressAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await NspCompressService.DecompressAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "XCI"):
-                            await NspXciConvertService.NszToXciAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.NszToXciAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "XCZ"):
-                            await NspXciConvertService.NszToXczAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.NszToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "XCI"):
-                            await XciCompressService.DecompressAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await XciCompressService.DecompressAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "NSP"):
-                            await NspXciConvertService.XczToNspAsync(sw.FilePath, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.XczToNspAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "NSZ"):
-                            await NspXciConvertService.XczToNszAsync(sw.FilePath, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _outputDir, _cts.Token);
+                            await NspXciConvertService.XczToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
                             break;
                         default:
                             throw new NotSupportedException($"{sw.Extension} → {sw.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
@@ -469,22 +469,22 @@ public class ConvertMainViewModel : ToolTabViewModel
                     switch (ds.Extension.ToLowerInvariant(), ds.SelectedTargetFormat.ToUpperInvariant())
                     {
                         case ("cci", "CIA") or ("3ds", "CIA"):
-                            await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _outputDir, _cts.Token);
+                            await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, _outputDir, progress, AppendLog, _cts.Token);
                             break;
                         case ("cia", "CCI"):
-                            await new CiaToCciConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _outputDir, _cts.Token);
+                            await new CiaToCciConverter(key).ConvertAsync(ds.FilePath, _outputDir, progress, AppendLog, _cts.Token);
                             break;
                         case ("cci", "ZCCI") or ("3ds", "ZCCI"):
-                            await Z3dsCompressor.CompressAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _outputDir, _cts.Token);
+                            await Z3dsCompressor.CompressAsync(ds.FilePath, _outputDir, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
                             break;
                         case ("cia", "ZCCI"):
-                            await Z3dsCompressor.CompressFromCiaAsync(ds.FilePath, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _outputDir, _cts.Token);
+                            await Z3dsCompressor.CompressFromCiaAsync(ds.FilePath, _outputDir, AppConfig.Instance.Azahar.CompressLevel, progress, AppendLog, _cts.Token);
                             break;
                         case ("zcci", "CCI"):
-                            await Z3dsDecompressor.DecompressAsync(ds.FilePath, progress, AppendLog, _outputDir, _cts.Token);
+                            await Z3dsDecompressor.DecompressAsync(ds.FilePath, _outputDir, progress, AppendLog, _cts.Token);
                             break;
                         case ("zcci", "CIA"):
-                            await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, progress, AppendLog, _outputDir, _cts.Token);
+                            await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, _outputDir, progress, AppendLog, _cts.Token);
                             break;
                         default:
                             throw new NotSupportedException($"{ds.Extension} → {ds.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
@@ -571,7 +571,7 @@ public class ConvertMainViewModel : ToolTabViewModel
 
             string outputExtension = detected.Format is RomFormat.Wbfs or RomFormat.Wii or RomFormat.Rvz && !string.IsNullOrEmpty(item.SelectedTargetFormat) ? item.SelectedTargetFormat.ToLowerInvariant() : detected.OutputExtension;
 
-            await wiiGCConverter.ConvertFileAsync(item.FilePath, detected.Format.ToString(), outputExtension, AppConfig.Instance.WiiGC.CompressLevel, _outputDir, ct);
+            await wiiGCConverter.ConvertFileAsync(item.FilePath, _outputDir, detected.Format.ToString(), outputExtension, AppConfig.Instance.WiiGC.CompressLevel, ct);
 
             return;
         }

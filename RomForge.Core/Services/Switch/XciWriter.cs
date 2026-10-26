@@ -26,7 +26,7 @@ internal static class XciWriter
         0x5B, 0x40, 0x8B, 0x14, 0x5E, 0x27, 0x7E, 0x81, 0xE5, 0xBF, 0x67, 0x7C, 0x94, 0x88, 0x8D, 0x7B, ];
 
     public static async Task WriteAsync(string displayName, string titleId, byte[] xciPrefixBuffer, List<(string Name, ulong AbsOffset, ulong Size, byte[] Hash, uint HashTargetSize)> rootEntriesTemplate, Stream? srcStream, 
-        List<(string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label)> fileEntries, Stream fout, IProgress<ProgressInfo> progress, CancellationToken ct)
+        List<(string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label)> fileEntries, Stream fout, IProgress<ProgressInfo> progress, CancellationToken ct = default)
     {
         await fout.WriteAsync(xciPrefixBuffer, ct);
 

@@ -35,7 +35,7 @@ public class NcaToNczConverter(KeySet keySet)
 
     private static readonly ArrayPool<byte> _chunkPool = ArrayPool<byte>.Shared;
 
-    public async Task ConvertAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, bool useBlockMode, int compressionLevel = 18, Action<long>? onRead = null, CancellationToken ct = default)
+    public async Task ConvertAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, bool useBlockMode, int compressionLevel, Action<long>? onRead = null, CancellationToken ct = default)
     {
         var nca = new Nca(keySet, originalStorage);
 
@@ -62,7 +62,7 @@ public class NcaToNczConverter(KeySet keySet)
             await ConvertBlocklessAsync(headerStream, originalStorage, outputStream, compressionLevel, onRead, ct);
     }
 
-    private async Task ConvertBlocklessAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, int compressionLevel = 18, Action<long>? onRead = null, CancellationToken ct = default)
+    private async Task ConvertBlocklessAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, int compressionLevel, Action<long>? onRead = null, CancellationToken ct = default)
     {
         _originalHash = null;
 
@@ -184,7 +184,7 @@ public class NcaToNczConverter(KeySet keySet)
         }
     }
 
-    private async Task ConvertBlockAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, int compressionLevel = 18, Action<long>? onRead = null, CancellationToken ct = default)
+    private async Task ConvertBlockAsync(MemoryStream headerStream, IStorage originalStorage, Stream outputStream, int compressionLevel, Action<long>? onRead = null, CancellationToken ct = default)
     {
         _originalHash = null;
 

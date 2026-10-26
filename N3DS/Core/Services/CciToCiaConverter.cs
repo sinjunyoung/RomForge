@@ -17,7 +17,7 @@ public class CciToCiaConverter(KeyStore keyStore)
     private const int TmdBaseSize = 0x140 + 0xC4 + (0x24 * 64);
     private const int TmdChunkSize = 0x30;
 
-    public async Task ConvertAsync(string inputPath, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, string? outputDir = null, CancellationToken ct = default)
+    public async Task ConvertAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         string? outputPath = null;
         bool isCompleted = false;

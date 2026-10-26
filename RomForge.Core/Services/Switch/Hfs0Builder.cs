@@ -26,14 +26,12 @@ public class Hfs0Builder
     public ulong RawHeaderSize()
     {
         ulong stringTableSize = (ulong)_files.Sum(f => f.Name.Length + 1);
-
         return (ulong)(HeaderBaseSize + EntrySize * _files.Count) + stringTableSize;
     }
 
     public ulong AlignedHeaderSize(ulong alignment)
     {
         ulong raw = RawHeaderSize();
-
         return alignment > 1 ? AlignUp(raw, alignment) : raw;
     }
 

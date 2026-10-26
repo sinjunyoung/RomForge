@@ -28,9 +28,12 @@ internal static class MergePlanner
 
             switch (meta.Type)
             {
-                case ContentMetaType.Application: group.BaseMetas.Add(meta); break;
-                case ContentMetaType.Patch: group.PatchMetas.Add(meta); break;
-                case ContentMetaType.AddOnContent: group.DlcMetas.Add(meta); break;
+                case ContentMetaType.Application: group.BaseMetas.Add(meta);
+                    break;
+                case ContentMetaType.Patch: group.PatchMetas.Add(meta); 
+                    break;
+                case ContentMetaType.AddOnContent: group.DlcMetas.Add(meta);
+                    break;
             }
         }
 

@@ -10,7 +10,7 @@ public class DiscImageConverter
 
     public event EventHandler<ProgressEventArgs>? ProgressChanged;
 
-    public Task ConvertFileAsync(string inputPath, string format, string outputExtension, int compressionLevel = 18, string? outputDir = null, CancellationToken ct = default)
+    public Task ConvertFileAsync(string inputPath, string? outputDir, string format, string outputExtension, int compressionLevel, CancellationToken ct = default)
     {
         format = format.ToLowerInvariant();
 
