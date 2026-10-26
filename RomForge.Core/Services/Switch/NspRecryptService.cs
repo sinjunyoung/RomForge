@@ -15,7 +15,7 @@ using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 
-public class NspRecryptService : BaseSwitchService
+public class NspRecryptService
 {
     public static async Task<List<string>> Recrypt(IReadOnlyList<string> inputPaths, bool forceKeyGen0, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
     {
@@ -103,7 +103,7 @@ public class NspRecryptService : BaseSwitchService
                         return (e.Name.ToString(), (ulong)absOffset, (ulong)size, hash, hashTargetSize);
                     })];
 
-                xciPrefixBuffer = GetXciPrefix([inputPath]);
+                xciPrefixBuffer = XciWriter.BuildPrefix([inputPath]);
                 srcStream = sourceStorage.AsStream();
             }
             else
@@ -143,7 +143,6 @@ public class NspRecryptService : BaseSwitchService
 
                         fileEntries.Add((entryName, async (s, onRead) => await Common.Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
                     }
-
                     continue;
                 }
 
@@ -152,7 +151,6 @@ public class NspRecryptService : BaseSwitchService
                     var cap = currentStorage;
 
                     fileEntries.Add((entryName, async (s, onRead) => await Common.Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
-
                     continue;
                 }
 
@@ -170,14 +168,13 @@ public class NspRecryptService : BaseSwitchService
             {
                 using var fout = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
 
-                await WriteXciAsync(displayName, meta.TitleId, xciPrefixBuffer!, rootEntriesTemplate!, srcStream, fileEntries, fout, progress, ct);
+                await XciWriter.WriteAsync(displayName, meta.TitleId, xciPrefixBuffer!, rootEntriesTemplate!, srcStream, fileEntries, fout, progress, ct);
             }
             else
             {
                 var fout = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
 
                 disposables.Add(fout);
-
                 await Pfs0Builder.WriteAsync(displayName, Path.GetFileNameWithoutExtension(finalPath), fileEntries, fout, 0x20, progress, ct);
             }
 
@@ -202,7 +199,7 @@ public class NspRecryptService : BaseSwitchService
                 disposables[i]?.Dispose();
 
             if (!isCompleted)
-                CleanupOnFailure(finalPath, log, string.Empty);
+                IncompleteOutput.Delete(finalPath, log, string.Empty);
         }
     }
 }
