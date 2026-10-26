@@ -69,6 +69,10 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set
         {
             AppConfig.Instance.Common.IsMuted = value;
+
+            if (!value)
+                _ = SoundPlayer.PlayCompleteAsync();
+
             OnPropertyChanged();
         }
     }
@@ -79,6 +83,7 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set 
         { 
             AppConfig.Instance.Common.SoundVolume = value;
+
             _ = SoundPlayer.PlayCompleteAsync();
             OnPropertyChanged(); 
         }
@@ -90,6 +95,7 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set
         {
             AppConfig.Instance.Common.CompleteSoundPath = value;
+
             _ = SoundPlayer.PlayAsync(value, "complete.mp3");
             OnPropertyChanged();
             OnPropertyChanged(nameof(CompleteSoundHintVisibility));
@@ -102,6 +108,7 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set
         {
             AppConfig.Instance.Common.CancelSoundPath = value;
+
             _ = SoundPlayer.PlayAsync(value, "cancel.mp3");
             OnPropertyChanged();
             OnPropertyChanged(nameof(CancelSoundHintVisibility));
@@ -114,6 +121,7 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         set
         {
             AppConfig.Instance.Common.ErrorSoundPath = value;
+
             _ = SoundPlayer.PlayAsync(value, "error.mp3");
             OnPropertyChanged();
             OnPropertyChanged(nameof(ErrorSoundHintVisibility));

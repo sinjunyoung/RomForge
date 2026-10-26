@@ -1,49 +1,25 @@
-﻿using Common;
-using Microsoft.Win32;
-using RomForge.Core.ViewModels.Switch;
+﻿using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
-public partial class SplitListControl : UserControl
+public partial class SplitListControl : SwitchListControlBase
 {
     private SplitMainViewModel ViewModel => (SplitMainViewModel)DataContext;
 
     public SplitListControl() => InitializeComponent();
 
-    private void BtnAddFile_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new OpenFileDialog
-        {
-            Title = Res.Dialog_SelectGameFile,
-            Filter = $"{Res.Filter_SwitchFiles} (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|{Res.Filter_AllFiles}|*.*",
-            Multiselect = true
-        };
+    protected override ListView? FileListView => lvFiles;
 
-        if (dlg.ShowDialog() == true && ViewModel != null)
-            _ = ViewModel.AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames));
-    }
+    protected override string? SelectedFilePath => (lvFiles.SelectedItem as SplitRowViewModel)?.FilePath;
 
-    private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
-        {
-            Description = "게임 폴더 선택",
-            UseDescriptionForTitle = true
-        };
+    protected override Task AddPathsAsync(IEnumerable<string> paths) => ViewModel?.AddFilesAsync(paths) ?? Task.CompletedTask;
 
-        if (dlg.ShowDialog() == true && ViewModel != null)
-            _ = ViewModel.AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
-    }
+    protected override void RemoveSelectedItems() => ViewModel?.RemoveRows(GetSelectedItems<SplitRowViewModel>());
 
-    private void BtnRemoveFile_Click(object sender, RoutedEventArgs e) => ViewModel?.RemoveRows([.. lvFiles.SelectedItems.Cast<SplitRowViewModel>()]);
-
-    private void BtnRemoveAllFiles_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearAll();
+    protected override void RemoveAllItems() => ViewModel?.ClearAll();
 
     private void BtnSelectAll_Click(object sender, RoutedEventArgs e) => ViewModel?.SelectAll(true);
 
@@ -67,39 +43,5 @@ public partial class SplitListControl : UserControl
             ViewModel?.ToggleExpand(row);
 
         e.Handled = true;
-    }
-
-    private void LvFiles_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete)
-            BtnRemoveFile_Click(sender, new RoutedEventArgs());
-    }
-
-    private void LvFiles_DragEnter(object sender, DragEventArgs e)
-    {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
-        e.Handled = true;
-    }
-
-    private async void LvFiles_Drop(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths || ViewModel == null)
-            return;
-
-        await ViewModel.AddFilesAsync(Common.Utils.ExpandPaths(paths));
-    }
-
-    private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-        if (lvFiles.SelectedItems.Count == 0)
-            e.Handled = true;
-    }
-
-    private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
-    {
-        if (lvFiles.SelectedItem is not SplitRowViewModel selected)
-            return;
-
-        Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
     }
 }

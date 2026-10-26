@@ -3,25 +3,22 @@ using Microsoft.Win32;
 using NSW.Core;
 using Patch.Core.Services;
 using RomForge.Core;
+using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels;
 using RomForge.Core.ViewModels.Switch;
 using RomForge.Views;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using PatchSource = RomForge.Core.Services.Switch.PatchSource;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
-public partial class RepackListControl : UserControl
+public partial class RepackListControl : SwitchListControlBase
 {
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
-
     private readonly RepackRowViewModel _viewModel;
 
     public ObservableCollection<GameFile> GameFiles => _viewModel.GameFiles;
@@ -36,7 +33,7 @@ public partial class RepackListControl : UserControl
     {
         InitializeComponent();
 
-        _viewModel = new RepackRowViewModel(SupportedExtensions);
+        _viewModel = new RepackRowViewModel(SwitchFileTypes.Extensions);
         DataContext = _viewModel;
         lvFiles.ItemsSource = _viewModel.GameFiles;
         _viewModel.FileListChanged += UpdateDropHint;
@@ -50,26 +47,19 @@ public partial class RepackListControl : UserControl
 
     private void UpdateDropHint() => dropHint.Visibility = _viewModel.GameFiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-    private async void BtnAddFile_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new OpenFileDialog
-        {
-            Title = Res.Dialog_SelectGameFile,
-            Filter = $"{Res.Filter_SwitchFiles} (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|{Res.Filter_AllFiles}|*.*",
-            Multiselect = true
-        };
+    protected override ListView? FileListView => lvFiles;
 
-        if (dlg.ShowDialog() == true)
-            await _viewModel.AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames));
+    protected override string? SelectedFilePath => (lvFiles.SelectedItem as GameFile)?.FilePath;
+
+    protected override Task AddPathsAsync(IEnumerable<string> paths) => _viewModel.AddFilesAsync(paths);
+
+    protected override void RemoveSelectedItems()
+    {
+        foreach (var item in GetSelectedItems<GameFile>())
+            _viewModel.RemoveFile(item);
     }
 
-    private async void BtnAddFolder_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new System.Windows.Forms.FolderBrowserDialog { Description = "게임 폴더 선택", UseDescriptionForTitle = true };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            await _viewModel.AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
-    }
+    protected override void RemoveAllItems() => _viewModel.RemoveAllFiles();
 
     private void BtnBulkPatch_Click(object sender, RoutedEventArgs e)
     {
@@ -149,14 +139,6 @@ public partial class RepackListControl : UserControl
         return targets;
     }
 
-    private void BtnRemoveFile_Click(object sender, RoutedEventArgs e)
-    {
-        foreach (var item in lvFiles.SelectedItems.Cast<GameFile>().ToList())
-            _viewModel.RemoveFile(item);
-    }
-
-    private void BtnRemoveAllFiles_Click(object sender, RoutedEventArgs e) => _viewModel.RemoveAllFiles();
-
     private void BtnHelp_Click(object sender, RoutedEventArgs e)
     {
         var psi = new System.Diagnostics.ProcessStartInfo
@@ -166,40 +148,6 @@ public partial class RepackListControl : UserControl
         };
 
         System.Diagnostics.Process.Start(psi);
-    }
-
-    private void LvFiles_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete)
-            BtnRemoveFile_Click(sender, new RoutedEventArgs());
-    }
-
-    private void LvFiles_DragEnter(object sender, DragEventArgs e)
-    {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
-        e.Handled = true;
-    }
-
-    private async void LvFiles_Drop(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
-            return;
-
-        await _viewModel.AddFilesAsync(Common.Utils.ExpandPaths(paths));
-    }
-
-    private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-        if (lvFiles.SelectedItems.Count == 0)
-            e.Handled = true;
-    }
-
-    private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
-    {
-        if (lvFiles.SelectedItem is not GameFile selected)
-            return;
-
-        Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
     }
 
     private void MenuItem_RemovePatch_Click(object sender, RoutedEventArgs e)

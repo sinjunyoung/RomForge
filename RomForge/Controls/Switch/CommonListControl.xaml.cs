@@ -1,21 +1,18 @@
-﻿using Common;
-using Microsoft.Win32;
-using NSW.Core;
+﻿using NSW.Core;
 using NSW.Core.Models;
 using RomForge.Core;
+using RomForge.Core.Models.Switch;
 using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
-public partial class CommonListControl : UserControl
+public partial class CommonListControl : SwitchListControlBase
 {
-    private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
     private readonly ListViewColumnSorter _sorter = new();
 
     public Button ExtraButton1 => btnExtra1;
@@ -29,6 +26,10 @@ public partial class CommonListControl : UserControl
     public ObservableCollection<GameFile> GameFiles { get; set; } = [];
 
     public event Action? FileListChanged;
+
+    protected override ListView? FileListView => lvFiles;
+
+    protected override string? SelectedFilePath => (lvFiles.SelectedItem as GameFile)?.FilePath;
 
     public CommonListControl()
     {
@@ -84,40 +85,15 @@ public partial class CommonListControl : UserControl
         FileListChanged?.Invoke();
     }
 
-    private void BtnAddFile_Click(object sender, RoutedEventArgs e)
+    protected override void RemoveSelectedItems()
     {
-        var dlg = new OpenFileDialog
-        {
-            Title = Res.Dialog_SelectGameFile,
-            Filter = $"{Res.Filter_SwitchFiles} (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|{Res.Filter_AllFiles}|*.*",
-            Multiselect = true
-        };
-
-        if (dlg.ShowDialog() == true)
-            _ = AddFilesAsync(Common.Utils.ExpandPaths(dlg.FileNames));
-    }
-
-    private void BtnAddFolder_Click(object sender, RoutedEventArgs e)
-    {
-        var dlg = new System.Windows.Forms.FolderBrowserDialog
-        {
-            Description = "게임 폴더 선택",
-            UseDescriptionForTitle = true
-        };
-
-        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            _ = AddFilesAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
-    }
-
-    private void BtnRemoveFile_Click(object sender, RoutedEventArgs e)
-    {
-        foreach (var item in lvFiles.SelectedItems.Cast<GameFile>().ToList())
+        foreach (var item in GetSelectedItems<GameFile>())
             GameFiles.Remove(item);
 
         UpdateDropHint();
     }
 
-    private void BtnRemoveAllFiles_Click(object sender, RoutedEventArgs e)
+    protected override void RemoveAllItems()
     {
         GameFiles.Clear();
         UpdateDropHint();
@@ -127,30 +103,10 @@ public partial class CommonListControl : UserControl
 
     private void BtnExtra2_Click(object sender, RoutedEventArgs e) => ExtraButton2Clicked?.Invoke();
 
-    private void LvFiles_KeyUp(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.Delete)
-            BtnRemoveFile_Click(sender, new RoutedEventArgs());
-    }
-
-    private void LvFiles_DragEnter(object sender, DragEventArgs e)
-    {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
-        e.Handled = true;
-    }
-
-    private async void LvFiles_Drop(object sender, DragEventArgs e)
-    {
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
-            return;
-
-        await AddFilesAsync(Common.Utils.ExpandPaths(paths));
-    }
-
-    private async Task AddFilesAsync(IEnumerable<string> paths)
+    protected override async Task AddPathsAsync(IEnumerable<string> paths)
     {
         var keySet = KeySetProvider.Instance.KeySet;
-        var candidates = await Task.Run(() => paths.Where(p => SupportedExtensions.Contains(Path.GetExtension(p))).ToList());
+        var candidates = await Task.Run(() => paths.Where(p => SwitchFileTypes.Extensions.Contains(Path.GetExtension(p))).ToList());
         var added = new List<GameFile>();
 
         foreach (var path in candidates)
@@ -212,18 +168,4 @@ public partial class CommonListControl : UserControl
     }
 
     private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
-
-    private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
-    {
-        if (lvFiles.SelectedItems.Count == 0)
-            e.Handled = true;
-    }
-
-    private void MenuItem_OpenFolder_Click(object sender, RoutedEventArgs e)
-    {
-        if (lvFiles.SelectedItem is not GameFile selected)
-            return;
-
-        Path.GetDirectoryName(selected.FilePath)?.OpenFolder();
-    }
 }

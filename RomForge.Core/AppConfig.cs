@@ -43,7 +43,7 @@ public class CommonConfig : ViewModelBase
         set { SetProperty(ref _isMuted, value); }
     }
 
-    private double _soundVolume = 100;
+    private double _soundVolume = 50;
     public double SoundVolume
     {
         get => _soundVolume;
