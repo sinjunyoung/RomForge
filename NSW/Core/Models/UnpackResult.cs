@@ -22,21 +22,6 @@ public class UnpackResult
     public HashSet<byte> CompressedRomfs { get; set; } = [];
 
     [JsonIgnore]
-    public Dictionary<byte, Func<Stream>> RomfsImageOpeners { get; } = [];
-
-    [JsonIgnore]
-    public List<IDisposable> SourceResources { get; } = [];
-
-    public void ReleaseSources()
-    {
-        foreach (var resource in SourceResources)
-            resource.Dispose();
-
-        SourceResources.Clear();
-        RomfsImageOpeners.Clear();
-    }
-
-    [JsonIgnore]
     public int DlcCount => Dlcs.Count;
 
     public ulong TitleId { get; set; }

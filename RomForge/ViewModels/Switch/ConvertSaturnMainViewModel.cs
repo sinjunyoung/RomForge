@@ -410,7 +410,6 @@ namespace RomForge.ViewModels.Switch
                     }
 
                     token.ThrowIfCancellationRequested();
-
                     Log("리팩 중...");
                     Application.Current?.Dispatcher.Invoke(() =>
                     {
