@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.IO;
+using System.Threading;
 using LibHac.Common;
 using LibHac.Crypto;
 using LibHac.Fs;
@@ -20,7 +21,7 @@ public class IntegrityVerificationStorage : SectorStorage
     private IntegrityStorageType Type { get; }
 
     private readonly IHash _hash = Sha256.CreateSha256Generator();
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     public IntegrityVerificationStorage(IntegrityVerificationInfo info, IStorage hashStorage,
         IntegrityCheckLevel integrityCheckLevel, bool leaveOpen)

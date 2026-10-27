@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using LibHac.Fs;
 using LibHac.Spl;
 
@@ -7,7 +8,7 @@ namespace LibHac.FsSrv;
 
 public class ExternalKeySet
 {
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     private Dictionary<RightsId, AccessKey> ExternalKeys { get; set; } = new();
 

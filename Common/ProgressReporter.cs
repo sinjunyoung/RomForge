@@ -3,7 +3,7 @@ namespace Common;
 
 public class ProgressReporter(string gameTitle, string gameId, long totalEstimated, IProgress<ProgressInfo>? progress)
 {
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
     private readonly Stopwatch _reportSw = Stopwatch.StartNew();
     private readonly Queue<(long ts, long written)> _window = new();
     private readonly long _startTime = Stopwatch.GetTimestamp();

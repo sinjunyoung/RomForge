@@ -3,7 +3,7 @@
 public sealed class KeyStoreProvider
 {
     private static KeyStoreProvider _instance;
-    private static readonly object _lock = new();
+    private static readonly Lock _lock = new();
 
     private KeyStore _keyStore;
 

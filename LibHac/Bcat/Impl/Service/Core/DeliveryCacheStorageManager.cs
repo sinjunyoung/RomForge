@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using LibHac.Common;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -14,7 +15,7 @@ internal class DeliveryCacheStorageManager
 
     private BcatServer Server { get; }
 
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
     private Entry[] Entries { get; } = new Entry[MaxEntryCount];
     private bool DisableStorage { get; set; }
 

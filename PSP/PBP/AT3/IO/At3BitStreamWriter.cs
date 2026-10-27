@@ -18,7 +18,7 @@ public sealed class At3BitStreamWriter
     private const int BoostNaqEnd = 10;
 
     private static float[]? s_ath;
-    private static readonly object s_athLock = new();
+    private static readonly Lock s_athLock = new();
 
     private readonly Writer _container;
     private readonly ContainerParams _params;

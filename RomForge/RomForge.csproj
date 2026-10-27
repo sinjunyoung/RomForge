@@ -139,7 +139,7 @@
     <Resource Include="Assets\Images\Installer.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="NAudio" Version="3.3.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
     <PackageReference Include="System.IO.Hashing" Version="10.0.14" />
   </ItemGroup>

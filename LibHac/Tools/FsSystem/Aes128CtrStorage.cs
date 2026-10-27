@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Threading;
 using LibHac.Fs;
 
 namespace LibHac.Tools.FsSystem;
@@ -13,7 +14,7 @@ public class Aes128CtrStorage : SectorStorage
     private readonly Aes128CtrTransform _decryptor;
 
     protected readonly byte[] Counter;
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     public Aes128CtrStorage(IStorage baseStorage, byte[] key, byte[] counter, bool leaveOpen)
         : base(baseStorage, BlockSize, leaveOpen)

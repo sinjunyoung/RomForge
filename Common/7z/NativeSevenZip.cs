@@ -6,7 +6,7 @@ namespace Patch.Core.Services;
 
 public static class NativeSevenZip
 {
-    private static readonly object InitLock = new();
+    private static readonly Lock InitLock = new();
     private static bool _initialized;
 
     [DllImport("7z.dll")]

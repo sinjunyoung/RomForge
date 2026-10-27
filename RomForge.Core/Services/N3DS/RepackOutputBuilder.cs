@@ -79,7 +79,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
 
     private sealed class PercentProgress(ProgressReporter reporter) : IProgress<ProgressInfo>
     {
-        private readonly object _lock = new();
+        private readonly Lock _lock = new();
 
         public void Report(ProgressInfo value)
         {

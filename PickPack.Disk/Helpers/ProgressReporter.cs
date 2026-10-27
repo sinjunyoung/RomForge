@@ -8,7 +8,7 @@ namespace PickPack.Disk.Helpers
     {
         private const int HISTORY_WINDOW_SECONDS = 10;
 
-        private readonly object _progressLock = new();
+        private readonly Lock _progressLock = new();
         private readonly List<Tuple<double, long>> _progressHistory = [];
 
         private Stopwatch? _stopwatch;        

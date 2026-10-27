@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 using LibHac.Fs;
 using LibHac.FsSystem;
 
@@ -12,7 +13,7 @@ public class Aes128CtrExStorage : Aes128CtrStorage
 
     private BucketTree Table { get; } = new();
 
-    private readonly object _locker = new();
+    private readonly Lock _locker = new();
 
     [StructLayout(LayoutKind.Sequential, Size = 0x10)]
     public struct Entry

@@ -13,7 +13,7 @@ public class BgmPreviewViewModel : ViewModelBase
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(100) };
 
     private byte[]? _wav;
-    private WaveOutEvent? _waveOut;
+    private WaveOut? _waveOut;
     private WaveStream? _waveStream;
     private bool _isSeeking;
     private bool _isPlaying;
@@ -125,7 +125,7 @@ public class BgmPreviewViewModel : ViewModelBase
         try
         {
             _waveStream = new WaveFileReader(new MemoryStream(_wav));
-            _waveOut = new WaveOutEvent();
+            _waveOut = new WaveOut();
 
             _waveOut.Init(_waveStream);
 

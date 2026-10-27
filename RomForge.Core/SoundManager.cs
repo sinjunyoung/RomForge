@@ -8,8 +8,8 @@ namespace RomForge.Core;
 
 public static class SoundManager
 {
-    private static readonly object _lock = new();
-    private static WaveOutEvent? _waveOutDevice;
+    private static readonly Lock _lock = new();
+    private static WaveOut? _waveOutDevice;
     private static WaveStream? _audioFileReader;
     private static Stream? _audioStream;
 
@@ -59,7 +59,7 @@ public static class SoundManager
                     else
                         throw new NotSupportedException($"지원하지 않는 오디오 형식입니다: {extension}");
 
-                    _waveOutDevice = new WaveOutEvent
+                    _waveOutDevice = new WaveOut
                     {
                         Volume = (float)(AppConfig.Instance.Common.SoundVolume / 100)
                     };

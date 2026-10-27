@@ -11,7 +11,7 @@ public class WmiWatchers
 
     readonly ManagementEventWatcher _arrivalWatcher;
     readonly ManagementEventWatcher _removalWatcher;
-    readonly object _lockObject = new();
+    readonly Lock _lockObject = new();
     DateTime _lastDriveCheckTime = DateTime.MinValue;
 
     #endregion
