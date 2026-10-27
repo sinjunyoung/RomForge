@@ -174,7 +174,7 @@
         <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="설정" Foreground="#D4AF37" FontSize="12" FontWeight="Bold" Margin="0,0,15,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <CheckBox Content="와이드 스크린" IsChecked="{Binding WideScreen}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,15,0"/>
+                <CheckBox Style="{StaticResource SplitCheckBoxStyle}" Content="와이드 스크린" IsChecked="{Binding WideScreen}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,15,0"/>
                 <TextBlock Text="사운드 볼륨:" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,5,0"/>
                 <ComboBox Width="90" Height="26" ItemsSource="{Binding SoundVolumeItems}" SelectedItem="{Binding SelectedSoundVolume}" VerticalContentAlignment="Center" FontSize="11">
                     <ComboBox.ItemContainerStyle>
