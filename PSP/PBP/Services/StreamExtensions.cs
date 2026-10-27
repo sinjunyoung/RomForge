@@ -10,7 +10,7 @@ public static class StreamExtensions
 
         for (var i = 0; i < count; i++)
         {
-            stream.Read(uintBuffer, 0, 4);
+            stream.ReadExactly(uintBuffer, 0, 4);
 
             buffer[i] = BitConverter.ToUInt32(uintBuffer, 0);
         }
@@ -22,7 +22,7 @@ public static class StreamExtensions
 
         for (var i = 0; i < count; i++)
         {
-            stream.Read(intBuffer, 0, 4);
+            stream.ReadExactly(intBuffer, 0, 4);
 
             buffer[i] = BitConverter.ToInt32(intBuffer, 0);
         }
@@ -32,7 +32,7 @@ public static class StreamExtensions
     {
         var buf = new byte[2];
 
-        stream.Read(buf, 0, 2);
+        stream.ReadExactly(buf, 0, 2);
 
         return BitConverter.ToUInt16(buf, 0);
     }
@@ -41,7 +41,7 @@ public static class StreamExtensions
     {
         var buf = new byte[4];
 
-        stream.Read(buf, 0, 4);
+        stream.ReadExactly(buf, 0, 4);
 
         return BitConverter.ToInt32(buf, 0);
     }
@@ -50,7 +50,7 @@ public static class StreamExtensions
     {
         var buf = new byte[4];
 
-        stream.Read(buf, 0, 4);
+        stream.ReadExactly(buf, 0, 4);
 
         return BitConverter.ToUInt32(buf, 0);    
     }

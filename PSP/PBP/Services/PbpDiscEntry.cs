@@ -55,9 +55,9 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
 
         _stream.Seek(_psarOffset + PSAR_GAMEID_OFFSET, SeekOrigin.Begin);
         _stream.ReadByte();
-        _stream.Read(buffer, 0, 4);
+        _stream.ReadExactly(buffer, 0, 4);
         _stream.ReadByte();
-        _stream.Read(buffer, 4, 5);
+        _stream.ReadExactly(buffer, 4, 5);
 
         return System.Text.Encoding.ASCII.GetString(buffer, 0, 9);
     }
@@ -68,21 +68,21 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
         var buffer = new byte[0xA];
 
         _stream.Seek(_psarOffset + PSAR_TOC_OFFSET, SeekOrigin.Begin);
-        _stream.Read(buffer, 0, 0xA);
+        _stream.ReadExactly(buffer, 0, 0xA);
 
         if (buffer[2] != 0xA0)
             throw new Exception("Invalid TOC!");
 
         int startTrack = TocHelper.FromBinaryDecimal(buffer[7]);
 
-        _stream.Read(buffer, 0, 0xA);
+        _stream.ReadExactly(buffer, 0, 0xA);
 
         if (buffer[2] != 0xA1)
             throw new Exception("Invalid TOC!");
 
         int endTrack = TocHelper.FromBinaryDecimal(buffer[7]);
 
-        _stream.Read(buffer, 0, 0xA);
+        _stream.ReadExactly(buffer, 0, 0xA);
 
         if (buffer[2] != 0xA2)
             throw new Exception("Invalid TOC!");
@@ -91,7 +91,7 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
 
         for (var c = startTrack; c <= endTrack; c++)
         {
-            _stream.Read(buffer, 0, 0xA);
+            _stream.ReadExactly(buffer, 0, 0xA);
 
             var trackNo = TocHelper.FromBinaryDecimal(buffer[2]);
 
@@ -154,13 +154,13 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
 
         if (blockLength == 16 * ISO_BLOCK_SIZE)
         {
-            _stream.Read(buffer, 0, 16 * ISO_BLOCK_SIZE);
+            _stream.ReadExactly(buffer, 0, 16 * ISO_BLOCK_SIZE);
 
             return 16 * ISO_BLOCK_SIZE;
         }
         else
         {
-            _stream.Read(_compressionInBuffer, 0, blockLength);
+            _stream.ReadExactly(_compressionInBuffer, 0, blockLength);
 
             var decompressed = Compression.Decompress(_compressionInBuffer, 16 * ISO_BLOCK_SIZE);
 

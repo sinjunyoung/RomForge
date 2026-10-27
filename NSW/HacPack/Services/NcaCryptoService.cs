@@ -46,7 +46,7 @@ public static class NcaCryptoService
 
             int batchLen = (int)Math.Min(batchSize, fileSize - ofs);
             using (var view = mmf.CreateViewStream((long)(startOffset + ofs), batchLen, MemoryMappedFileAccess.Read))
-                view.Read(batch, 0, batchLen);
+                view.ReadExactly(batch, 0, batchLen);
             int chunkCount = (batchLen + chunkSize - 1) / chunkSize;
 
             Parallel.For(0, chunkCount, new ParallelOptions { CancellationToken = ct }, i =>

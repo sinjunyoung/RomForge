@@ -44,9 +44,9 @@
 
   <!-- Packages that are only used when building -->
   <ItemGroup>
-    <PackageReference Include="Blake3" Version="2.2.1" />
+    <PackageReference Include="Blake3" Version="3.0.2" />
     <PackageReference Include="ZstdSharp.Port" Version="0.8.8" />
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4">
+    <PackageReference Include="JetBrains.Annotations" Version="2026.2.0">
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

@@ -15,10 +15,10 @@
     <None Remove="Assets\Images\Output.png" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
-    <PackageReference Include="System.Management" Version="10.0.12" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.14" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
     <PackageReference Include="NAudio" Version="2.2.1" />
   </ItemGroup>
   <ItemGroup>

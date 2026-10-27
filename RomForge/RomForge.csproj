@@ -141,7 +141,7 @@
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.2.1" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.12" />
+    <PackageReference Include="System.IO.Hashing" Version="10.0.14" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="App.xaml" />

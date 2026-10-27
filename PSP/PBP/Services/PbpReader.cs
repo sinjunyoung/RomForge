@@ -26,7 +26,7 @@ public class PbpReader
     {
         var buffer = new byte[16];
 
-        stream.Read(buffer, 0, 4);
+        stream.ReadExactly(buffer, 0, 4);
 
         if (BitConverter.ToUInt32(buffer, 0) != PBPMAGIC)
             throw new Exception("Invalid Header found while reading PBP");
@@ -47,7 +47,7 @@ public class PbpReader
             throw new Exception("Invalid PSAR offset or corrupted file");
 
         stream.Seek(psarOffset, SeekOrigin.Begin);
-        stream.Read(buffer, 0, 12);
+        stream.ReadExactly(buffer, 0, 12);
 
         var header = System.Text.Encoding.ASCII.GetString(buffer, 0, 12);
 
@@ -55,7 +55,7 @@ public class PbpReader
             Discs = [ new PbpDiscEntry(stream, psarOffset, 1) ];
         else
         {
-            stream.Read(buffer, 12, 4);
+            stream.ReadExactly(buffer, 12, 4);
 
             var header16 = System.Text.Encoding.ASCII.GetString(buffer, 0, 16);
 
@@ -123,7 +123,7 @@ public class PbpReader
         {
             var buffer = new byte[length];
 
-            stream.Read(buffer, 0, length);
+            stream.ReadExactly(buffer, 0, length);
             outputStream = new MemoryStream(buffer);
 
             return true;

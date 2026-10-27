@@ -21,7 +21,7 @@ public static class GameIdReader
             var sector = new byte[2048];
 
             stream.Seek(isRaw ? lba * 2352 + 24 : lba * 2048, SeekOrigin.Begin);
-            stream.Read(sector, 0, 2048);
+            stream.ReadExactly(sector, 0, 2048);
 
             return sector;
         }
