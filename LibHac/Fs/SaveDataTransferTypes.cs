@@ -15,7 +15,7 @@ public struct AesKey
     private Array2<ulong> _value;
 
     [UnscopedRef]
-    public Span<byte> Value => MemoryMarshal.Cast<ulong, byte>(_value);
+    public Span<byte> Value => MemoryMarshal.Cast<ulong, byte>(_value.AsSpan());
 }
 
 public struct AesMac

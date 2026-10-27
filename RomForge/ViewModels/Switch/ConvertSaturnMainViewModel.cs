@@ -218,7 +218,7 @@ namespace RomForge.ViewModels.Switch
 
                     header = new byte[0x90];
 
-                    await fs.ReadAsync(header.AsMemory(0, 0x90));
+                    await fs.ReadExactlyAsync(header.AsMemory(0, 0x90));
                 }
 
                 GameId = Encoding.ASCII.GetString(header, 0x30, 10).Trim();

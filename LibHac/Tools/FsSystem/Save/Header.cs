@@ -87,8 +87,7 @@ public class Header
         Span<byte> actualHeaderHash = stackalloc byte[Sha256.DigestSize];
         Sha256.GenerateSha256Hash(Data.AsSpan(0x300, 0x3d00), actualHeaderHash);
 
-        HeaderHashValidity = Utilities.SpansEqual(Layout.Hash, actualHeaderHash) ? Validity.Valid : Validity.Invalid;
-        SignatureValidity = ValidateSignature(keySet);
+        HeaderHashValidity = Utilities.SpansEqual((ReadOnlySpan<byte>)Layout.Hash, (ReadOnlySpan<byte>)actualHeaderHash) ? Validity.Valid : Validity.Invalid; SignatureValidity = ValidateSignature(keySet);
     }
 
     private Validity ValidateSignature(KeySet keySet)

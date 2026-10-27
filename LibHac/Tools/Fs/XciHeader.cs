@@ -192,16 +192,14 @@ public class XciHeader
 
             generator.GetHash(actualHeaderHash);
 
-            PartitionFsHeaderValidity = Utilities.SpansEqual(RootPartitionHeaderHash, actualHeaderHash) ? Validity.Valid : Validity.Invalid;
+            PartitionFsHeaderValidity = Utilities.SpansEqual((ReadOnlySpan<byte>)RootPartitionHeaderHash, (ReadOnlySpan<byte>)actualHeaderHash) ? Validity.Valid : Validity.Invalid;
 
             if (HasInitialData)
             {
                 Span<byte> actualInitialDataHash = stackalloc byte[Sha256.DigestSize];
                 Sha256.GenerateSha256Hash(InitialData, actualInitialDataHash);
 
-                InitialDataValidity = Utilities.SpansEqual(InitialDataHash, actualInitialDataHash)
-                    ? Validity.Valid
-                    : Validity.Invalid;
+                InitialDataValidity = Utilities.SpansEqual((ReadOnlySpan<byte>)InitialDataHash, (ReadOnlySpan<byte>)actualInitialDataHash) ? Validity.Valid : Validity.Invalid;
             }
 
             Span<byte> key = stackalloc byte[0x10];

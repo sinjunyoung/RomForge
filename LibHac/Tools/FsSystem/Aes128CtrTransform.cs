@@ -77,7 +77,7 @@ public class Aes128CtrTransform
         {
             ulong blockOffset = (ulong)(ncaOffset / BlockSizeBytes);
             Array.Copy(_initialCounter, Counter, 16);
-            Span<ulong> bufL = MemoryMarshal.Cast<byte, ulong>(Counter);
+            Span<ulong> bufL = MemoryMarshal.Cast<byte, ulong>(Counter.AsSpan());
             ulong lo = BinaryPrimitives.ReverseEndianness(bufL[1]);
             lo += blockOffset;
             bufL[1] = BinaryPrimitives.ReverseEndianness(lo);
@@ -115,7 +115,7 @@ public class Aes128CtrTransform
         ulong blockOffset = (ulong)(offset / BlockSizeBytes);
         Array.Copy(_initialCounter, Counter, 16);
 
-        Span<ulong> bufL = MemoryMarshal.Cast<byte, ulong>(Counter);
+        Span<ulong> bufL = MemoryMarshal.Cast<byte, ulong>(Counter.AsSpan());
         ulong lo = BinaryPrimitives.ReverseEndianness(bufL[1]);
         lo += blockOffset;
         bufL[1] = BinaryPrimitives.ReverseEndianness(lo);

@@ -1,13 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>1.0.0.1</Version>
     <Company>$(Authors)</Company>
   </PropertyGroup>
 
+  <PropertyGroup>
+	<Authors>YameSoft</Authors>
+	<Copyright>Copyright © 2026 YameSoft</Copyright>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CS8600;CS8602;CS8603;CS8604;CS8618;MSB3825;NU1903;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
   </PropertyGroup>
@@ -31,6 +37,7 @@
   <ItemGroup>
     <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.14" />
     <PackageReference Include="System.Management" Version="10.0.12" />
   </ItemGroup>
 

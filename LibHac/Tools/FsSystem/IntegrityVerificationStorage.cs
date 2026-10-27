@@ -102,8 +102,7 @@ public class IntegrityVerificationStorage : SectorStorage
 
             byte[] hash = DoHash(dataBuffer, 0, bytesToHash);
 
-            Validity validity = Utilities.SpansEqual(hashBuffer, hash) ? Validity.Valid : Validity.Invalid;
-            BlockValidities[blockIndex] = validity;
+            Validity validity = Utilities.SpansEqual((ReadOnlySpan<byte>)hashBuffer, (ReadOnlySpan<byte>)hash) ? Validity.Valid : Validity.Invalid; BlockValidities[blockIndex] = validity;
 
             if (validity == Validity.Invalid && integrityCheckLevel == IntegrityCheckLevel.ErrorOnInvalid)
             {

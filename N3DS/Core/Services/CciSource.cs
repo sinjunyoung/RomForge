@@ -100,7 +100,7 @@ public class CciSource : IInstallSource
 
                             ncchStream.Position = 0x200;
 
-                            ncchStream.Read(exheader, 0, 0x400);
+                            ncchStream.ReadExactly(exheader, 0, 0x400);
 
                             saveSize = BinaryPrimitives.ReadUInt32LittleEndian(exheader.AsSpan(0x1C0));
                         }

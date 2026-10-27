@@ -103,8 +103,10 @@ internal class DeliveryCacheFileMetaAccessor
                 if (bytesRead != sizeof(int) || header != MetaFileHeaderValue)
                     return ResultBcat.InvalidDeliveryCacheStorageFile.Log();
 
+                Span<DeliveryCacheFileMetaEntry> entries = Entries;
+
                 // Read all the file entries
-                Span<byte> buffer = MemoryMarshal.Cast<DeliveryCacheFileMetaEntry, byte>(Entries);
+                Span<byte> buffer = MemoryMarshal.Cast<DeliveryCacheFileMetaEntry, byte>(entries);
                 res = fs.ReadFile(out bytesRead, handle, 4, buffer);
                 if (res.IsFailure()) return res.Miss();
 

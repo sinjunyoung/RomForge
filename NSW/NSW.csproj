@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <VersionPrefix>0.1.0</VersionPrefix>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>

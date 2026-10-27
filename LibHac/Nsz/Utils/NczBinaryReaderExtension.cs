@@ -22,8 +22,9 @@ public static class NczBinaryReaderExtension
             var nczCompressionBlock = reader.ReadStruct<NczBlockCompressionHeaderRaw>();
 
             var compressedBlockSizes = new int[nczCompressionBlock.NumberOfBlocks];
-            var bytes = MemoryMarshal.Cast<int, byte>(compressedBlockSizes);
+            var bytes = MemoryMarshal.Cast<int, byte>(compressedBlockSizes.AsSpan());
             var read = reader.Read(bytes);
+
             if (read != bytes.Length)
                 throw new EndOfStreamException();
 
