@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.IO;
+using System.Text.Json.Serialization;
 
 namespace NSW.Core.Models;
 
@@ -19,6 +20,21 @@ public class UnpackResult
     public List<DlcUnpackInfo> Dlcs { get; set; } = [];
 
     public HashSet<byte> CompressedRomfs { get; set; } = [];
+
+    [JsonIgnore]
+    public Dictionary<byte, Func<Stream>> RomfsImageOpeners { get; } = [];
+
+    [JsonIgnore]
+    public List<IDisposable> SourceResources { get; } = [];
+
+    public void ReleaseSources()
+    {
+        foreach (var resource in SourceResources)
+            resource.Dispose();
+
+        SourceResources.Clear();
+        RomfsImageOpeners.Clear();
+    }
 
     [JsonIgnore]
     public int DlcCount => Dlcs.Count;

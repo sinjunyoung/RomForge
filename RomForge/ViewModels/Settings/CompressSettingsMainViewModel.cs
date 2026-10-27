@@ -37,10 +37,10 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
         set { AppConfig.Instance.Switch.CompressLevel = (int)value; OnPropertyChanged(); }
     }
 
-    public bool SwitchIsValidationEnabled
+    public double SwitchLz4CompressLevel
     {
-        get => AppConfig.Instance.Switch.VerifyCompress;
-        set { AppConfig.Instance.Switch.VerifyCompress = value; OnPropertyChanged(); }
+        get => AppConfig.Instance.Switch.Lz4CompressLevel;
+        set { AppConfig.Instance.Switch.Lz4CompressLevel = (int)value; OnPropertyChanged(); }
     }
 
     public bool SwitchUseBlockMode

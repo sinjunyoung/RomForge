@@ -9,11 +9,13 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="205"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+
         <StackPanel Grid.Row="0" Margin="5,0,5,0">
             <Grid Height="36">
                 <Grid.ColumnDefinitions>
@@ -126,7 +128,7 @@
                         </ItemsControl>
                     </StackPanel>
                     <Image x:Name="imgCover" Source="{Binding CoverImageSource}" Stretch="UniformToFill" MouseLeftButtonDown="ImgCover_MouseLeftButtonDown"/>
-                </Grid>                
+                </Grid>
             </Border>
 
             <StackPanel Grid.Column="1" Margin="15,0,0,0">
@@ -174,23 +176,28 @@
         <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="설정" Foreground="#D4AF37" FontSize="12" FontWeight="Bold" Margin="0,0,15,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <CheckBox Style="{StaticResource SplitCheckBoxStyle}" Content="와이드 스크린" IsChecked="{Binding WideScreen}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,15,0"/>
+                <CheckBox Style="{StaticResource SplitCheckBoxStyle}" IsChecked="{Binding WideScreen}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                <TextBlock Text="와이드 스크린" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center"/>
+                <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
                 <TextBlock Text="사운드 볼륨:" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,5,0"/>
-                <ComboBox Width="90" Height="26" ItemsSource="{Binding SoundVolumeItems}" SelectedItem="{Binding SelectedSoundVolume}" VerticalContentAlignment="Center" FontSize="11">
+                <ComboBox Width="90" Height="26" ItemsSource="{Binding SoundVolumeItems}" SelectedItem="{Binding SelectedSoundVolume}" VerticalContentAlignment="Center" FontSize="11" Margin="0,0,15,0">
                     <ComboBox.ItemContainerStyle>
                         <Style TargetType="ComboBoxItem">
                             <Setter Property="Foreground" Value="White"/>
                         </Style>
                     </ComboBox.ItemContainerStyle>
                 </ComboBox>
+                <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
+                <CheckBox Style="{StaticResource SplitCheckBoxStyle}" IsChecked="{Binding UseLz4Compression}" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center" Margin="5,0,5,0"/>
+                <TextBlock Text="Lz4 압축" Foreground="#DDDDDD" FontSize="11" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
 
-        <Grid Grid.Row="3" Margin="5,0,5,5">
+        <Grid Grid.Row="4" Margin="5,0,5,5">
             <core:IconButton DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsConverting}" Click="BtnStart_Click"/>
         </Grid>
 
-        <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
+        <Border Grid.Row="5" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
             <Grid x:Name="progressArea" Height="28">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

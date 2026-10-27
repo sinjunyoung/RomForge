@@ -78,6 +78,10 @@ public class NcaGenerationOptions
 
     public bool CompressRomfs;
 
+    public Func<Stream>? RomfsImageOpener;
+
+    public bool HasRomfsSource => RomfsImageOpener != null || (!string.IsNullOrEmpty(RomfsDirectory) && Directory.Exists(RomfsDirectory));
+
     public string SdkVersionString
     {
         get

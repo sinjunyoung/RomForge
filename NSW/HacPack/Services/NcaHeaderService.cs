@@ -46,7 +46,7 @@ public static class NcaHeaderService
 
     public static void SetKeygen(ref NcaHeader hdr, NcaGenerationOptions settings)
     {
-        if (settings.KeyGeneration == 1) 
+        if (settings.KeyGeneration == 1)
             return;
 
         hdr.CryptoType = 0x2;
@@ -109,6 +109,23 @@ public static class NcaHeaderService
 
             WriteU64(hdr.FsHeaders[idx].SuperblockRaw, 0x10 + i * 0x18, prev + prevSize);
         }
+    }
+
+    public static void SetIvfcLogicalOffsetsDataFirst(ref NcaHeader hdr, int idx, ulong hashLevelsStart)
+    {
+        byte[] raw = hdr.FsHeaders[idx].SuperblockRaw;
+        ulong offset = hashLevelsStart;
+
+        for (int i = 0; i < 5; i++)
+        {
+            int ofs = 0x10 + i * 0x18;
+
+            WriteU64(raw, ofs, offset);
+
+            offset += ReadU64(raw, ofs + 0x08);
+        }
+
+        WriteU64(raw, 0x10 + 5 * 0x18, 0);
     }
 
     public static void SetPfs0Superblock(ref NcaHeader hdr, int idx, ulong pfs0Size, ulong hashTableSize, ulong pfs0Offset, uint blockSize)

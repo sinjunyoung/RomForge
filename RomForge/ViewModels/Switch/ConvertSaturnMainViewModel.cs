@@ -25,6 +25,7 @@ namespace RomForge.ViewModels.Switch
         private string _nspTitleId = string.Empty;
 
         private bool _wideScreen = false;
+        private bool _useLz4Compression = true;
         private string _selectedSoundVolume = "100%";
 
         public ObservableCollection<string> SoundVolumeItems { get; } = ["60%", "80%", "100%", "120%"];
@@ -59,6 +60,8 @@ namespace RomForge.ViewModels.Switch
         public string NspTitleId { get => _nspTitleId; set { _nspTitleId = value; OnPropertyChanged(); } }
 
         public bool WideScreen { get => _wideScreen; set { _wideScreen = value; OnPropertyChanged(); } }
+
+        public bool UseLz4Compression { get => _useLz4Compression; set { _useLz4Compression = value; OnPropertyChanged(); } }        
 
         public string SelectedSoundVolume
         {
@@ -287,134 +290,157 @@ namespace RomForge.ViewModels.Switch
 
         private async Task RunConversionProcess(CancellationToken token)
         {
-            if (!Directory.Exists(WorkPath))
-                WorkPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
-
-            string unpackedDir = Path.Combine(WorkPath, "unpacked");
-
-            try
+            await Task.Run(async () =>
             {
-                var progress = new Progress<ProgressInfo>(p =>
+                if (!Directory.Exists(WorkPath))
+                    WorkPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
+
+                string unpackedDir = Path.Combine(WorkPath, "unpacked");
+
+                try
                 {
-                    ProgressPct = p.Percent >= 0 ? p.Percent : 0;
-                    ProgressPercent = ProgressPct.ToString("0.00") + "%";
-                    ProgressLabel = p.Percent >= 0 ? $"{p.Label} ({p.Percent}%)" : p.Label;
-                    ProgressSpeed = p.Speed;
-                    ProgressTime = string.IsNullOrEmpty(p.TimeInfo) ? $"{_totalSw.Elapsed:mm\\:ss} 경과" : p.TimeInfo;
-                });
-
-                var progressHandler = new Progress<ProgressInfo>(p =>
-                {
-                    ProgressPct = p.Percent;
-                    ProgressPercent = ProgressPct.ToString("0.00") + "%";
-                    ProgressLabel = p.Percent >= 0 ? $"CHD 압축 해제 중 ({p.Percent}%)" : "CHD 압축 해제 중";
-                });
-
-                AppendLog("원본 NSP 언팩 중...");
-
-                var unpackReq = new NSW.Core.Models.BuildRequest(NspPath, string.Empty, [], string.Empty, WorkPath);
-
-                await NspBuildService.Run(unpackReq, BuildMode.UnpackOnly, progress, (msg, lvl) => AppendLog(msg), token);
-
-                token.ThrowIfCancellationRequested();
-
-                string? baseProgramDir = LibHacHelper.FindBaseProgramDir(unpackedDir) ?? throw new DirectoryNotFoundException("언팩된 프로그램(titleId) 폴더를 찾을 수 없습니다.");
-                string romfsDir = Path.Combine(baseProgramDir, "romfs");
-                string? existingCuePath = (Directory.Exists(romfsDir) ? Directory.GetFiles(romfsDir, "*.cue", SearchOption.AllDirectories).FirstOrDefault() : null) ?? throw new FileNotFoundException($"romfs 안에서 cue 파일을 찾을 수 없습니다.");
-                string targetDir = Path.GetDirectoryName(existingCuePath)!;
-                var oldBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(existingCuePath);
-
-                foreach (var bin in oldBins)
-                {
-                    if (File.Exists(bin)) 
-                        File.Delete(bin);
-                }
-
-                File.Delete(existingCuePath);
-
-                string cueFileName = Path.GetFileName(existingCuePath);
-                string finalCuePath = Path.Combine(targetDir, cueFileName);
-
-                if (string.Equals(Path.GetExtension(CuePath), ".chd", StringComparison.OrdinalIgnoreCase))
-                {
-                    AppendLog("CHD 압축 해제 중...");
-
-                    using var chdman = new CHD.Core.Services.ChdmanService();
-                    bool ok = await chdman.ExtractCdAsync(CuePath, finalCuePath, progressHandler, token);
-
-                    if (!ok || !File.Exists(finalCuePath))
-                        throw new InvalidOperationException("CHD 압축 해제에 실패했습니다.");
-                }
-                else
-                {
-                    var sourceBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(CuePath);
-
-                    if (sourceBins.Count == 0) 
-                        throw new FileNotFoundException("입력한 CUE에서 참조하는 BIN 파일을 찾을 수 없습니다.");
-
-                    foreach (var bin in sourceBins)
+                    var progress = new Progress<ProgressInfo>(p =>
                     {
-                        if (!File.Exists(bin)) 
-                            throw new FileNotFoundException($"BIN 파일이 존재하지 않습니다: {bin}");
+                        Application.Current?.Dispatcher.Invoke(() =>
+                        {
+                            if (p.Percent >= 0)
+                            {
+                                ProgressPct = p.Percent;
+                                ProgressPercent = ProgressPct.ToString("0.00") + "%";
+                                ProgressLabel = $"{p.Label} ({p.Percent}%)";
+                            }
+                            else
+                            {
+                                ProgressPercent = string.Empty;
+                                if (!string.IsNullOrEmpty(p.Label))
+                                    ProgressLabel = p.Label;
+                            }
 
-                        await CopyFileAsync(bin, Path.Combine(targetDir, Path.GetFileName(bin)), token);
+                            if (!string.IsNullOrEmpty(p.Speed))
+                                ProgressSpeed = p.Speed;
+
+                            ProgressTime = string.IsNullOrEmpty(p.TimeInfo) ? $"{_totalSw.Elapsed:mm\\:ss} 경과" : p.TimeInfo;
+                        });
+                    });
+
+                    void Log(string msg) => Application.Current?.Dispatcher.Invoke(() => AppendLog(msg));
+
+                    Log("원본 NSP 언팩 중...");
+
+                    var unpackReq = new NSW.Core.Models.BuildRequest(NspPath, string.Empty, [], string.Empty, WorkPath);
+
+                    await NspBuildService.Run(unpackReq, BuildMode.UnpackOnly, AppConfig.Instance.Switch.Lz4CompressLevel, progress, (msg, lvl) => Log(msg), token);
+
+                    token.ThrowIfCancellationRequested();
+
+                    string? baseProgramDir = LibHacHelper.FindBaseProgramDir(unpackedDir) ?? throw new DirectoryNotFoundException("언팩된 프로그램(titleId) 폴더를 찾을 수 없습니다.");
+                    string romfsDir = Path.Combine(baseProgramDir, "romfs");
+                    string? existingCuePath = (Directory.Exists(romfsDir) ? Directory.GetFiles(romfsDir, "*.cue", SearchOption.AllDirectories).FirstOrDefault() : null) ?? throw new FileNotFoundException($"romfs 안에서 cue 파일을 찾을 수 없습니다.");
+                    string targetDir = Path.GetDirectoryName(existingCuePath)!;
+                    var oldBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(existingCuePath);
+
+                    foreach (var bin in oldBins)
+                    {
+                        if (File.Exists(bin))
+                            File.Delete(bin);
                     }
 
-                    await CopyFileAsync(CuePath, finalCuePath, token);
+                    File.Delete(existingCuePath);
+
+                    string cueFileName = Path.GetFileName(existingCuePath);
+                    string finalCuePath = Path.Combine(targetDir, cueFileName);
+
+                    if (string.Equals(Path.GetExtension(CuePath), ".chd", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log("CHD 압축 해제 중...");
+
+                        using var chdman = new CHD.Core.Services.ChdmanService();
+                        bool ok = await chdman.ExtractCdAsync(CuePath, finalCuePath, progress, token);
+
+                        if (!ok || !File.Exists(finalCuePath))
+                            throw new InvalidOperationException("CHD 압축 해제에 실패했습니다.");
+                    }
+                    else
+                    {
+                        var sourceBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(CuePath);
+
+                        if (sourceBins.Count == 0)
+                            throw new FileNotFoundException("입력한 CUE에서 참조하는 BIN 파일을 찾을 수 없습니다.");
+
+                        foreach (var bin in sourceBins)
+                        {
+                            if (!File.Exists(bin))
+                                throw new FileNotFoundException($"BIN 파일이 존재하지 않습니다: {bin}");
+
+                            await CopyFileAsync(bin, Path.Combine(targetDir, Path.GetFileName(bin)), token);
+                        }
+
+                        await CopyFileAsync(CuePath, finalCuePath, token);
+                    }
+
+                    var targetBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(finalCuePath);
+
+                    if (targetBins.Count == 0 || !File.Exists(targetBins[0]))
+                        throw new FileNotFoundException("참조하는 BIN 파일을 찾을 수 없습니다.");
+
+                    IniHandler ini = new($"{targetDir}\\{Path.GetFileNameWithoutExtension(cueFileName)}_Switch.ini");
+
+                    await ini.LoadAsync();
+                    ini.SetValue("Screen", "WideScreen", WideScreen ? "1" : "0");
+
+                    double volumeMultiplier = 1.0;
+
+                    if (!string.IsNullOrEmpty(SelectedSoundVolume) && double.TryParse(SelectedSoundVolume.TrimEnd('%'), out double parsedVal))
+                        volumeMultiplier = parsedVal / 100.0;
+
+                    ini.SetValue("Sound", "Volume", volumeMultiplier.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+                    await ini.SaveAsync();
+
+                    var metadata = MetadataService.GetGameMetadataFromUnpacked(unpackedDir);
+                    var koLang = metadata?.Languages.FirstOrDefault(l => l.Language == ApplicationControlProperty.Language.Korean) ?? metadata?.Languages.First();
+
+                    if (koLang != null)
+                    {
+                        koLang.TitleName = GameTitle;
+                        koLang.Publisher = Publisher;
+                        koLang.Flag = true;
+
+                        if (_coverBytes != null)
+                            koLang.LogoData = _coverBytes;
+                    }
+
+                    token.ThrowIfCancellationRequested();
+
+                    Log("리팩 중...");
+                    Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        ProgressLabel = "NSP 리팩 및 압축 중...";
+                        ProgressPercent = string.Empty;
+                        ProgressSpeed = string.Empty;
+                    });
+
+                    var rebuildReq = new NSW.Core.Models.BuildRequest(string.Empty, string.Empty, [], string.Empty, WorkPath)
+                    {
+                        UserMetadata = metadata,
+                        Language = ApplicationControlProperty.Language.None,
+                        OverrideTitleId = ulong.Parse(NspTitleId, System.Globalization.NumberStyles.HexNumber),
+                        CompressRomfs = UseLz4Compression
+                    };
+
+                    string finalNspPath = await NspBuildService.Run(rebuildReq, BuildMode.RebuildOnly, AppConfig.Instance.Switch.Lz4CompressLevel, progress, (msg, lvl) => Log(msg), token);
+                    string finalRenamedPath = RenameOutputFile(finalNspPath, GameTitle, NspTitleId);
+
+                    Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        Path.GetDirectoryName(finalRenamedPath)!.OpenFolder();
+                    });
                 }
-
-                var targetBins = CHD.Core.Services.ConversionSource.ParseBinsFromCue(finalCuePath);
-
-                if (targetBins.Count == 0 || !File.Exists(targetBins[0]))
-                    throw new FileNotFoundException("참조하는 BIN 파일을 찾을 수 없습니다.");
-
-                IniHandler ini = new($"{targetDir}\\{Path.GetFileNameWithoutExtension(cueFileName)}_Switch.ini");
-
-                await ini.LoadAsync();
-                ini.SetValue("Screen", "WideScreen", WideScreen ? "1" : "0");
-
-                double volumeMultiplier = 1.0;
-
-                if (!string.IsNullOrEmpty(SelectedSoundVolume) && double.TryParse(SelectedSoundVolume.TrimEnd('%'), out double parsedVal))
-                    volumeMultiplier = parsedVal / 100.0;
-
-                ini.SetValue("Sound", "Volume", volumeMultiplier.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-                await ini.SaveAsync();
-                
-                var metadata = MetadataService.GetGameMetadataFromUnpacked(unpackedDir);
-                var koLang = metadata?.Languages.FirstOrDefault(l => l.Language == ApplicationControlProperty.Language.Korean) ?? metadata?.Languages.First();
-
-                if (koLang != null)
+                finally
                 {
-                    koLang.TitleName = GameTitle;
-                    koLang.Publisher = Publisher;
-                    koLang.Flag = true;
-
-                    if (_coverBytes != null)
-                        koLang.LogoData = _coverBytes;
+                    if (Directory.Exists(unpackedDir))
+                        Directory.Delete(unpackedDir, true);
                 }
-
-                token.ThrowIfCancellationRequested();
-
-                AppendLog("리팩 중...");
-
-                var rebuildReq = new NSW.Core.Models.BuildRequest(string.Empty, string.Empty, [], string.Empty, WorkPath)
-                {
-                    UserMetadata = metadata,
-                    Language = ApplicationControlProperty.Language.None,
-                    OverrideTitleId = ulong.Parse(NspTitleId, System.Globalization.NumberStyles.HexNumber)
-                };
-
-                string finalNspPath = await NspBuildService.Run(rebuildReq, BuildMode.RebuildOnly, progress, (msg, lvl) => AppendLog(msg), token);
-                string finalRenamedPath = RenameOutputFile(finalNspPath, GameTitle, NspTitleId);
-
-                Path.GetDirectoryName(finalRenamedPath)!.OpenFolder();
-            }
-            finally
-            {
-                if (Directory.Exists(unpackedDir))
-                    Directory.Delete(unpackedDir, true);
-            }
+            }, token);
         }
 
         private static async Task CopyFileAsync(string sourcePath, string destPath, CancellationToken ct)

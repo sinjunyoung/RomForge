@@ -139,6 +139,11 @@ public class SwitchConfig : ViewModelBase
     private int _compressLevel = 18;
     public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
 
+    private int _lz4CompressLevel = 8;
+    public int Lz4CompressLevel { get => _lz4CompressLevel; set => SetProperty(ref _lz4CompressLevel, value); }
+
+    
+
     private bool _verifyCompress = false;
     public bool VerifyCompress { get => _verifyCompress; set => SetProperty(ref _verifyCompress, value); }
 

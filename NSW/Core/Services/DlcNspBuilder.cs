@@ -10,7 +10,7 @@ namespace NSW.Core.Services;
 
 public static class DlcNspBuilder
 {
-    public static void BuildDlcNsps(BuildRequest req, WorkDirs dirs, NcaGenerationOptions baseSettings, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    public static void BuildDlcNsps(BuildRequest req, WorkDirs dirs, NcaGenerationOptions baseSettings, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         string dlcBaseDir = Path.Combine(dirs.Unpacked, "DLCs");
 
@@ -65,7 +65,7 @@ public static class DlcNspBuilder
                 Directory.CreateDirectory(dlcSettings.TempDirectory);
 
                 if (hasRomfs)
-                    dlcSettings.PublicDataNcaPath = NcaGenerator.GenerateRomfsNca(dlcSettings, "DLC", progress, ct) ?? string.Empty;
+                    dlcSettings.PublicDataNcaPath = NcaGenerator.GenerateRomfsNca(dlcSettings, "DLC", compressLevel, progress, ct) ?? string.Empty;
 
                 NcaGenerator.GenerateMetaNca([dlcSettings], progress, ct);
 

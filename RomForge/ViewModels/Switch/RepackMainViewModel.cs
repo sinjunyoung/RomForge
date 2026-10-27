@@ -160,7 +160,7 @@ namespace RomForge.ViewModels.Switch
                     if (Context?.OverrideTitleId.HasValue == true)
                         req.OverrideTitleId = Context?.OverrideTitleId;
 
-                    string finalResult = await NspBuildService.Run(req, mode, progress, (msg, lvl) => AppendLog(msg, lvl), token);
+                    string finalResult = await NspBuildService.Run(req, mode, AppConfig.Instance.Switch.Lz4CompressLevel, progress, (msg, lvl) => AppendLog(msg, lvl), token);
 
                     AppendLog($"완료! 총 소요: {_totalSw.Elapsed:mm\\:ss}", LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();

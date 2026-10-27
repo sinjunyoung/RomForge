@@ -14,13 +14,13 @@ namespace NSW.Core.Services;
 
 public static class NspBuildService
 {
-    public static async Task<string> Run(BuildRequest req, BuildMode mode, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
+    public static async Task<string> Run(BuildRequest req, BuildMode mode, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
-        return await RunProcess(req, mode, keySet, progress, log, ct);
+        return await RunProcess(req, mode, keySet, compressLevel, progress, log, ct);
     }
 
-    private static async Task<string> RunProcess(BuildRequest req, BuildMode mode, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
+    private static async Task<string> RunProcess(BuildRequest req, BuildMode mode, KeySet keySet, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var dirs = new WorkDirs(req.OutputDir);
 
@@ -94,15 +94,15 @@ public static class NspBuildService
         foreach (var settings in settingsList)
         {
             StepNpdm(settings, log, ct);
-            StepProgramNca(req, settings, unpackResult, progress, log, ct);
+            StepProgramNca(req, settings, unpackResult, compressLevel, progress, log, ct);
         }
 
-        StepManualNcas(settingsList, unpackResult, progress, log, ct);
+        StepManualNcas(settingsList, unpackResult, compressLevel, progress, log, ct);
 
         foreach (var settings in settingsList)
-            StepControlNca(settings, unpackResult, progress, log, ct);
+            StepControlNca(settings, unpackResult, compressLevel, progress, log, ct);
 
-        DlcNspBuilder.BuildDlcNsps(req, dirs, baseSettings, progress, log, ct);
+        DlcNspBuilder.BuildDlcNsps(req, dirs, baseSettings, compressLevel, progress, log, ct);
         StepMetaNca(settingsList, progress, log, ct);
 
         return StepPackage(req, baseSettings, unpackResult, progress, log, ct);
@@ -201,7 +201,7 @@ public static class NspBuildService
         log($"NPDM 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static void StepProgramNca(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepProgramNca(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
@@ -214,12 +214,12 @@ public static class NspBuildService
             NspPatchApplier.ApplyPatch(req.PatchDir, unpackResult, settings.SourceIdOffset, progress, log, req.PatchPassword);
 
         settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
-        settings.ProgramNcaPath = NcaGenerator.GenerateProgramNca(settings, progress, ct) ?? string.Empty;
+        settings.ProgramNcaPath = NcaGenerator.GenerateProgramNca(settings, compressLevel, progress, ct) ?? string.Empty;
 
         log($"Program NCA: {Path.GetFileName(settings.ProgramNcaPath)} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, UnpackResult unpackResult, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         log("━━ 5단계(5/9): Manual NCA 생성 ━━", LogLevel.Highlight);
 
@@ -235,7 +235,7 @@ public static class NspBuildService
 
             string type = idOffset == 0 ? "htmldoc" : $"htmldoc{idOffset}";
             var manualSettings = settings.WithRomfs(htmlDir, LibHac.FsSystem.NcaHeader.ContentType.Manual);
-            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", progress, ct);
+            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", compressLevel, progress, ct);
 
             if (currentNca == null)
                 continue;
@@ -258,7 +258,7 @@ public static class NspBuildService
 
             string type = idOffset == 0 ? "legal" : $"legal{idOffset}";
             var manualSettings = settings.WithRomfs(legalDir, LibHac.FsSystem.NcaHeader.ContentType.Manual);
-            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", progress, ct);
+            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", compressLevel, progress, ct);
 
             if (currentNca == null)
                 continue;
@@ -271,7 +271,7 @@ public static class NspBuildService
         }
     }
 
-    private static void StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
@@ -287,7 +287,7 @@ public static class NspBuildService
 
         NacpProcessor.ProcessControlMetadata(controlSettings);
 
-        settings.ControlNcaPath = NcaGenerator.GenerateRomfsNca(controlSettings, "Control", progress, ct) ?? string.Empty;
+        settings.ControlNcaPath = NcaGenerator.GenerateRomfsNca(controlSettings, "Control", compressLevel, progress, ct) ?? string.Empty;
 
         log($"Control NCA: {Path.GetFileName(settings.ControlNcaPath)} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }

@@ -9,7 +9,7 @@ namespace NSW.HacPack.Services;
 
 public static class NcaGenerator
 {
-    public static string GenerateRomfsNca(NcaGenerationOptions settings, string ncaType, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static string GenerateRomfsNca(NcaGenerationOptions settings, string ncaType, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         var ncaHeader = new NcaHeader();
 
@@ -20,7 +20,7 @@ public static class NcaGenerator
 
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
 
-        var ivfcStreams = BuildAndWriteRomfsSection(ncaFile, ref ncaHeader, 0, settings, $"{ncaType}_romfs_tmp", progress, ct);
+        var ivfcStreams = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 0, settings, $"{ncaType}_romfs_tmp", progress, ct);
 
         try
         {
@@ -40,9 +40,9 @@ public static class NcaGenerator
 
             NcaHeaderService.SetSectionHash(ref ncaHeader, 0, sectionHash);
         }
-        finally 
+        finally
         {
-            foreach (var s in ivfcStreams) 
+            foreach (var s in ivfcStreams)
                 s?.Dispose();
         }
 
@@ -56,7 +56,7 @@ public static class NcaGenerator
         return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
     }
 
-    public static string GenerateProgramNca(NcaGenerationOptions settings, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static string GenerateProgramNca(NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         var ncaHeader = new NcaHeader();
 
@@ -103,9 +103,9 @@ public static class NcaGenerator
 
         NcaHeaderService.SetSectionHash(ref ncaHeader, 0, sectionHash0);
 
-        if (!string.IsNullOrEmpty(settings.RomfsDirectory) && Directory.Exists(settings.RomfsDirectory))
+        if (settings.HasRomfsSource)
         {
-            var ivfcStreams1 = BuildAndWriteRomfsSection(ncaFile, ref ncaHeader, 1, settings, "program_sec1_romfs_tmp", progress, ct);
+            var ivfcStreams1 = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 1, settings, "program_sec1_romfs_tmp", progress, ct);
 
             try
             {
@@ -123,10 +123,10 @@ public static class NcaGenerator
 
                 NcaHeaderService.SetSectionHash(ref ncaHeader, 1, sectionHash1);
             }
-            finally 
-            { 
+            finally
+            {
                 foreach (var s in ivfcStreams1)
-                    s?.Dispose(); 
+                    s?.Dispose();
             }
         }
 
@@ -156,7 +156,7 @@ public static class NcaGenerator
 
             WritePadding(ncaFile);
 
-            bool hasRomfs = !string.IsNullOrEmpty(settings.RomfsDirectory) && Directory.Exists(settings.RomfsDirectory);
+            bool hasRomfs = settings.HasRomfsSource;
             uint sec2Start = hasRomfs ? ncaHeader.SectionEntries[1].MediaEndOffset : ncaHeader.SectionEntries[0].MediaEndOffset;
 
             NcaHeaderService.SetSectionEntry(ref ncaHeader, 2, sec2Start, (uint)(ncaFile.Position / 0x200));
@@ -179,7 +179,7 @@ public static class NcaGenerator
             progress.ReportStatus("ExeFS 암호화 중...", 0);
             NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, settings, progress, ct);
 
-            if (!string.IsNullOrEmpty(settings.RomfsDirectory) && Directory.Exists(settings.RomfsDirectory))
+            if (settings.HasRomfsSource)
             {
                 ct.ThrowIfCancellationRequested();
                 progress.ReportStatus("RomFS 암호화 중...", 0);
@@ -291,11 +291,14 @@ public static class NcaGenerator
         return finalPath;
     }
 
-    private static MemoryStream[] BuildAndWriteRomfsSection(FileStream ncaFile, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    private static MemoryStream[] BuildAndWriteRomfsSection(FileStream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
+        if (settings.RomfsImageOpener != null)
+            return StreamingRomfsSectionWriter.Write(ncaFile, compressLevel, ref ncaHeader, sectionIndex, settings, progress, ct);
+
         var ivfcStreams = new MemoryStream[5];
 
-        for (int i = 0; i < 5; i++) 
+        for (int i = 0; i < 5; i++)
             ivfcStreams[i] = new MemoryStream();
 
         string romfsTempPath = Path.Combine(settings.TempDirectory, tempFileName);
@@ -314,7 +317,7 @@ public static class NcaGenerator
             {
                 compressedTempFile = new FileStream(compressedTempPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1024 * 1024, FileOptions.SequentialScan);
 
-                var info = CompressedRomfsWriter.Compress(romfsTempFile, compressedTempFile, progress, ct);
+                var info = CompressedRomfsWriter.Compress(romfsTempFile, compressedTempFile, compressLevel, progress, ct);
 
                 NcaHeaderService.SetCompressionInfo(ref ncaHeader, sectionIndex, info.TableOffset, info.TableSize, info.TableHeader);
 

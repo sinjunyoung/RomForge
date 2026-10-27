@@ -34,7 +34,7 @@ public static class CompressedRomfsWriter
         public uint PhysicalSize;
     }
 
-    public static CompressedRomfsInfo Compress(Stream input, Stream output, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static CompressedRomfsInfo Compress(Stream input, Stream output, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         long totalSize = input.Length;
 
@@ -93,7 +93,7 @@ public static class CompressedRomfsWriter
             Parallel.For(0, count, i =>
             {
                 int length = lengths[i];
-                int size = LZ4Codec.Encode(sources[i].AsSpan(0, length), targets[i].AsSpan(0, length), LZ4Level.L08_HC);
+                int size = LZ4Codec.Encode(sources[i].AsSpan(0, length), targets[i].AsSpan(0, length), (LZ4Level)compressLevel);
 
                 encoded[i] = size > 0 && size <= length ? size : 0;
             });
@@ -111,7 +111,7 @@ public static class CompressedRomfsWriter
                         VirtualOffset = chunkStart,
                         PhysicalOffset = physical,
                         CompressionType = TypeLz4,
-                        CompressionLevel = Lz4Level,
+                        CompressionLevel = (sbyte)compressLevel,
                         PhysicalSize = (uint)encoded[i]
                     });
 
