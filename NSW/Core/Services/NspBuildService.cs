@@ -40,10 +40,14 @@ public static class NspBuildService
         {
             log("━━ 기존 언팩 데이터 스캔 중... ━━", LogLevel.Highlight);
             unpackResult = UnpackedDirScanner.Scan(dirs.Unpacked, req.OverrideSdkVersion, req.OverrideKeyGeneration);
+
+            ApplyCompressionOverride(req, unpackResult, log);
         }
         else
         {
             unpackResult = await StepUnpack(req, keySet, dirs, progress, log, ct);
+
+            ApplyCompressionOverride(req, unpackResult, log);
 
             if (mode == BuildMode.UnpackOnly)
             {
@@ -102,6 +106,15 @@ public static class NspBuildService
         StepMetaNca(settingsList, progress, log, ct);
 
         return StepPackage(req, baseSettings, unpackResult, progress, log, ct);
+    }
+
+    private static void ApplyCompressionOverride(BuildRequest req, UnpackResult unpackResult, Action<string, LogLevel> log)
+    {
+        if (!req.CompressRomfs.HasValue)
+            return;
+
+        RomfsCompression.Apply(unpackResult, req.CompressRomfs.Value);
+        log(req.CompressRomfs.Value ? "RomFS Lz4 압축: 사용" : "RomFS Lz4 압축: 사용 안 함", LogLevel.Ok);
     }
 
     private static async Task<UnpackResult> StepUnpack(BuildRequest req, KeySet libHacKeySet, WorkDirs dirs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)

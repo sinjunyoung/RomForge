@@ -1,7 +1,7 @@
 using NSW.Core.Models;
 using System.Windows.Media;
 
-namespace RomForge.Core.ViewModels;
+namespace RomForge.Core.ViewModels.Switch;
 
 public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 {
@@ -14,6 +14,8 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
     private string _fileType = string.Empty;
 
     private long? _overrideSizeBytes;
+    private bool _isLz4;
+    private bool _lz4UserChanged;
 
     public string FileType
     {
@@ -25,8 +27,48 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
                 OnPropertyChanged(nameof(IsKeyMissing));
                 OnPropertyChanged(nameof(TypeBackground));
                 OnPropertyChanged(nameof(TypeForeground));
+                OnPropertyChanged(nameof(CanSetLz4));
             }
         }
+    }
+
+    public bool SourceHasCompressedRomfs { get; set; }
+
+    public bool SourceLz4 { get; private set; }
+
+    public bool? UnpackedLz4 { get; private set; }
+
+    public bool CanSetLz4 => FileType.Contains('B');
+
+    public bool IsLz4
+    {
+        get => _isLz4;
+        set
+        {
+            if (SetProperty(ref _isLz4, value))
+                _lz4UserChanged = true;
+        }
+    }
+
+    public void ApplyLz4Detection(bool sourceLz4, bool? unpackedLz4)
+    {
+        SourceLz4 = sourceLz4;
+        UnpackedLz4 = unpackedLz4;
+
+        if (_lz4UserChanged)
+            return;
+
+        SetProperty(ref _isLz4, unpackedLz4 ?? sourceLz4, nameof(IsLz4));
+    }
+
+    public bool? GetLz4Override(bool rebuildOnly)
+    {
+        if (!CanSetLz4)
+            return null;
+
+        bool? baseline = rebuildOnly ? UnpackedLz4 : SourceLz4;
+
+        return baseline.HasValue && IsLz4 != baseline.Value ? IsLz4 : null;
     }
 
     public long CustomSizeBytes

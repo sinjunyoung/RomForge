@@ -47,7 +47,7 @@
             <TabItem IsEnabled="{Binding IsIdle}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image Source="/Assets/Images/Compress.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <Image Source="/Assets/Images/Compressed.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="압축" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>

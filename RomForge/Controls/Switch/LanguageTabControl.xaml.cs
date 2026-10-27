@@ -5,7 +5,7 @@ using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.HacPack.Models;
 using RomForge.Core;
-using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using SixLabors.ImageSharp;
 using System.Collections.ObjectModel;
 using System.IO;

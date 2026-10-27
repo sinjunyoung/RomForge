@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
-             d:DesignHeight="400" d:DesignWidth="800">
+             d:DesignHeight="400" d:DesignWidth="900">
     
     <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#12FFFFFF" Padding="10">
         <Grid>
@@ -131,6 +131,16 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FileSize}" FontSize="11" HorizontalAlignment="Right"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Width="70">
+                                <GridViewColumn.Header>
+                                    <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="Lz4" ToolTip="RomFS Lz4 압축 (리팩 시 적용)"/>
+                                </GridViewColumn.Header>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding IsLz4, Mode=TwoWay}" IsThreeState="False" Visibility="{Binding CanSetLz4, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

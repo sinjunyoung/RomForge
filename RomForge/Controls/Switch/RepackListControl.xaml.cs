@@ -6,7 +6,6 @@ using RomForge.Core;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
-using RomForge.Core.ViewModels;
 using RomForge.Core.ViewModels.Switch;
 using RomForge.Views;
 using System.Collections.ObjectModel;

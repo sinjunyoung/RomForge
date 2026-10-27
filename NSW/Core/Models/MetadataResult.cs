@@ -17,4 +17,6 @@ public record MetadataResult(
     public string DefaultTitle { get; init; } = string.Empty;
 
     public long Size { get; init; }
+
+    public bool HasCompressedRomfs { get; init; }
 }

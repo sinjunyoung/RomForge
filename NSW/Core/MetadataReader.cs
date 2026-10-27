@@ -5,10 +5,12 @@ using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
 using LibHac.Ncm;
 using LibHac.Ns;
+using LibHac.NSZ;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using LibHac.Tools.Ncm;
 using NSW.Core.Models;
+using NSW.Core.Services;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -333,12 +335,27 @@ public static class MetadataReader
                     .OrderBy(o => o)
                     .ToList();
 
+                bool hasCompressedRomfs = false;
+
+                foreach (var programEntry in cnmt.ContentEntries.Where(e => e.Type == LibHac.Ncm.ContentType.Program))
+                {
+                    string programNcaId = BitConverter.ToString(programEntry.NcaId).Replace("-", string.Empty).ToLowerInvariant();
+                    string? programName = allFiles.Keys.FirstOrDefault(k => k.StartsWith(programNcaId, StringComparison.OrdinalIgnoreCase));
+
+                    if (programName != null && RomfsCompression.HasCompressedSection(OpenNca(allFiles[programName], programName, keySet)))
+                    {
+                        hasCompressedRomfs = true;
+                        break;
+                    }
+                }
+
                 results.Add(new MetadataResult(titleId, version, displayVer, krTitle, enTitle, 0, type, cnmtNcaName, path, contentNcaIds, programIdOffsets)
                 {
                     IconData = iconData,
                     Size = calculatedSize,
                     KoreanTitle = koreanTitle,
-                    DefaultTitle = defaultTitle
+                    DefaultTitle = defaultTitle,
+                    HasCompressedRomfs = hasCompressedRomfs
                 });
             }
             catch
@@ -354,6 +371,18 @@ public static class MetadataReader
             d.Dispose();
 
         return results;
+    }
+
+    private static Nca? OpenNca(IStorage storage, string fileName, KeySet keySet)
+    {
+        try
+        {
+            return fileName.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase) ? new Ncz(keySet, storage, NczReadMode.Fast) : new Nca(keySet, storage);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static byte[]? ReadControlIcon(IStorage ncaStorage, KeySet keySet, Language language)

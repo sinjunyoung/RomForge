@@ -77,7 +77,7 @@ public static class UnpackedDirScanner
             if (Directory.Exists(romfs)) 
                 romfsDirs[idOffset] = romfs;
 
-            if (File.Exists(Path.Combine(pd.Dir, "romfs.compressed")))
+            if (File.Exists(Path.Combine(pd.Dir, RomfsCompression.FlagFileName)))
                 compressedRomfs.Add(idOffset);
 
             string logo = Path.Combine(pd.Dir, "logo");

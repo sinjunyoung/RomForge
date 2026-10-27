@@ -2,7 +2,7 @@
 using NSW.Core.Models;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
-using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;

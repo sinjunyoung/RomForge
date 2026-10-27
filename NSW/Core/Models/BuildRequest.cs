@@ -27,5 +27,7 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public byte? TargetIdOffset { get; set; }
 
+    public bool? CompressRomfs { get; init; }
+
     public IReadOnlyDictionary<string, HashSet<string>>? DlcTitleIdsByFile { get; init; }
 }

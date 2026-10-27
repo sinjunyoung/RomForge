@@ -28,6 +28,7 @@
     <None Remove="Assets\Images\Certs.png" />
     <None Remove="Assets\Images\Check.png" />
     <None Remove="Assets\Images\Comment.png" />
+    <None Remove="Assets\Images\Compressed.png" />
     <None Remove="Assets\Images\Copy.png" />
     <None Remove="Assets\Images\CUE.png" />
     <None Remove="Assets\Images\Diskette.png" />
@@ -80,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Images\CancelLanguage.png" />
+    <Resource Include="Assets\Images\Compressed.png" />
     <Resource Include="Assets\Images\Language.png" />
     <Resource Include="Assets\Images\PS3.png" />
     <Resource Include="Assets\Images\Rename.png" />
@@ -163,7 +165,6 @@
     <Resource Include="Assets\Images\Cancel.png" />
     <Resource Include="Assets\Images\Checked.png" />
     <Resource Include="Assets\Images\Clear.png" />
-    <Resource Include="Assets\Images\Compress.png" />
     <Resource Include="Assets\Images\Delete.png" />
     <Resource Include="Assets\Images\Dolphin.png" />
     <Resource Include="Assets\Images\Extension.png" />

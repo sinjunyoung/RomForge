@@ -137,7 +137,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Source="/Assets/Images/Compress.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
+                            <Image Grid.Column="0" Source="/Assets/Images/Compressed.png" Width="24" Height="24" Margin="6,0,8,0" VerticalAlignment="Center"/>
                             <ComboBox Grid.Column="1" ItemsSource="{Binding CompressionLevelOptions}" SelectedIndex="{Binding SelectedCompressionIndex}" FontSize="13.3" IsEnabled="{Binding IsIdle}" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <ComboBox.ItemContainerStyle>
                                     <Style TargetType="ComboBoxItem">

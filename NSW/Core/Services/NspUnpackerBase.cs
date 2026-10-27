@@ -86,9 +86,9 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 {
                     result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), progress, ct);
 
-                    if (HasCompressedSection(effectiveProg) || HasCompressedSection(patchProg))
+                    if (RomfsCompression.HasCompressedSection(effectiveProg) || RomfsCompression.HasCompressedSection(patchProg))
                     {
-                        File.WriteAllText(Path.Combine(programDir, "romfs.compressed"), string.Empty);
+                        File.WriteAllText(Path.Combine(programDir, RomfsCompression.FlagFileName), string.Empty);
                         result.CompressedRomfs.Add(idOffset);
                     }
                 }
@@ -151,18 +151,6 @@ public abstract class NspUnpackerBase(KeySet keySet)
             foreach (var ns in collector.NscStreams)
                 ns.Dispose();
         }
-    }
-
-    private static bool HasCompressedSection(Nca? nca)
-    {
-        if (nca == null)
-            return false;
-
-        for (int i = 0; i < 4; i++)
-            if (nca.SectionExists(i) && nca.GetFsHeader(i).ExistsCompressionLayer())
-                return true;
-
-        return false;
     }
 
     protected abstract ProgressContext CreateProgressContext(List<string> inputPaths, CollectedNcas ncas);

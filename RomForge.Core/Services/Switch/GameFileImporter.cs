@@ -1,7 +1,7 @@
 ﻿using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
-using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using System.Collections.ObjectModel;
 using System.IO;
 using Res = NSW.Properties.Resources;
@@ -94,6 +94,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                             FileType = "B",
                             CustomSizeBytes = app.Size > 0 ? app.Size : fileLength,
                             ProgramIdOffsets = app.ProgramIdOffsets ?? [],
+                            SourceHasCompressedRomfs = app.HasCompressedRomfs,
                             TitleID = app.TitleId,
                             Version = app.GetEffectiveDisplayVersion(),
                             TitleName = titleName,
@@ -110,6 +111,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                             FileType = "U",
                             CustomSizeBytes = patch.Size > 0 ? patch.Size : fileLength,
                             ProgramIdOffsets = patch.ProgramIdOffsets ?? [],
+                            SourceHasCompressedRomfs = patch.HasCompressedRomfs,
                             TitleID = patch.TitleId,
                             Version = patch.GetEffectiveDisplayVersion(),
                             TitleName = titleName,
@@ -203,7 +205,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                 if (vm.PatchPath == null)
                 {
                     vm.PatchPath = existingUpdate.PatchPath;
-                    vm.PatchPassword = existingUpdate.PatchPassword;
+                    vm.PatchPassword = existingUpdate.PatchPath;
                 }
 
                 patchSync.Detach(existingUpdate);

@@ -1,6 +1,6 @@
 ﻿using Patch.Core.Interfaces;
 using RomForge.Core.Models.Switch;
-using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using System.IO;
 using System.Text;
 

@@ -1,7 +1,7 @@
 ﻿using Common;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
-using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Switch;
 using System.Diagnostics;
 using System.IO;
 using Res = NSW.Properties.Resources;

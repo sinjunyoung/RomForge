@@ -1,4 +1,5 @@
 ﻿using Common;
+using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
 using System.IO;
@@ -42,7 +43,12 @@ public partial class RepackTab : UserControl
         try
         {
             await Task.Delay(300, _cts.Token);
-            await langTab.UpdateLanguageTabAsync(titleList.GameFiles, Path.Combine(ViewModel.OutputPath, "unpacked"));
+
+            string unpackedPath = Path.Combine(ViewModel.OutputPath, "unpacked");
+
+            RepackLz4Sync.Refresh(titleList.GameFiles, unpackedPath);
+
+            await langTab.UpdateLanguageTabAsync(titleList.GameFiles, unpackedPath);
             SyncContext();
         }
         catch (OperationCanceledException) { }
@@ -77,6 +83,8 @@ public partial class RepackTab : UserControl
         SyncContext();
 
         await ViewModel.StartAsync(BuildMode.UnpackOnly);
+
+        RepackLz4Sync.Refresh(titleList.GameFiles, Path.Combine(ViewModel.OutputPath, "unpacked"));
     }
 
     private void BtnRebuild_Click(object sender, RoutedEventArgs e)

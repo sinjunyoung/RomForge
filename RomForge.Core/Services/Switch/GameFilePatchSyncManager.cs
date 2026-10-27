@@ -1,4 +1,4 @@
-﻿using RomForge.Core.ViewModels;
+﻿using RomForge.Core.ViewModels.Switch;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
