@@ -10,7 +10,7 @@ namespace NSW.HacPack.Services;
 
 public static class NcaCryptoService
 {
-    public static void EncryptSection(FileStream ncaFile, ref NcaHeader hdr, int sectionIndex, NcaGenerationOptions settings, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static void EncryptSection(Stream ncaFile, ref NcaHeader hdr, int sectionIndex, NcaGenerationOptions settings, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ulong startOffset = hdr.SectionEntries[sectionIndex].MediaStartOffset * 0x200UL;
         ulong endOffset = hdr.SectionEntries[sectionIndex].MediaEndOffset * 0x200UL;
@@ -37,7 +37,7 @@ public static class NcaCryptoService
 
         byte[] batch = new byte[batchSize];
         var reporter = new ProgressReporter("암호화 중", string.Empty, (long)fileSize, progress);
-        using var mmf = MemoryMappedFile.CreateFromFile(ncaFile, null, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, leaveOpen: true);
+        using var mmf = ncaFile is FileStream mappedFile ? MemoryMappedFile.CreateFromFile(mappedFile, null, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, leaveOpen: true) : null;
         ulong ofs = 0;
 
         while (ofs < fileSize)
@@ -45,8 +45,18 @@ public static class NcaCryptoService
             ct.ThrowIfCancellationRequested();
 
             int batchLen = (int)Math.Min(batchSize, fileSize - ofs);
-            using (var view = mmf.CreateViewStream((long)(startOffset + ofs), batchLen, MemoryMappedFileAccess.Read))
+            if (mmf != null)
+            {
+                using var view = mmf.CreateViewStream((long)(startOffset + ofs), batchLen, MemoryMappedFileAccess.Read);
+
                 view.ReadExactly(batch, 0, batchLen);
+            }
+            else
+            {
+                ncaFile.Position = (long)(startOffset + ofs);
+
+                ncaFile.ReadExactly(batch, 0, batchLen);
+            }
             int chunkCount = (batchLen + chunkSize - 1) / chunkSize;
 
             Parallel.For(0, chunkCount, new ParallelOptions { CancellationToken = ct }, i =>
@@ -65,8 +75,18 @@ public static class NcaCryptoService
                 ctx.Encrypt(batch.AsSpan(chunkOffset, chunkLen), batch.AsSpan(chunkOffset, chunkLen));
             });
 
-            using (var view = mmf.CreateViewStream((long)(startOffset + ofs), batchLen, MemoryMappedFileAccess.ReadWrite))
+            if (mmf != null)
+            {
+                using var view = mmf.CreateViewStream((long)(startOffset + ofs), batchLen, MemoryMappedFileAccess.ReadWrite);
+
                 view.Write(batch, 0, batchLen);
+            }
+            else
+            {
+                ncaFile.Position = (long)(startOffset + ofs);
+
+                ncaFile.Write(batch, 0, batchLen);
+            }
 
             ofs += (ulong)batchLen;
 

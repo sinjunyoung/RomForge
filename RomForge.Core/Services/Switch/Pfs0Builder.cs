@@ -10,14 +10,14 @@ public static class Pfs0Builder
 {
     private const uint MagicPfs0 = 0x30534650;
 
-    public static async Task WriteAsync(string displayName, string titleId, IEnumerable<(string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label)> files, Stream outputStream, uint alignment = 0x20, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static async Task WriteAsync(string displayName, string titleId, IEnumerable<(string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label)> files, Stream outputStream, uint alignment = 0x20, bool preserveOrder = false, 
+        IReadOnlyDictionary<string, Func<string>>? deferredNames = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         if (!outputStream.CanSeek)
             throw new InvalidOperationException("outputStream must be seekable");
 
-        var fileList = files
-                .OrderBy(f => f.Name, StringComparer.Ordinal)
-                .ToList(); var stringTable = new List<byte>();
+        var fileList = preserveOrder ? [.. files] : files.OrderBy(f => f.Name, StringComparer.Ordinal).ToList();
+        var stringTable = new List<byte>();
         var stringOffsets = new List<uint>();
 
         foreach (var (name, _, _, _) in fileList)
@@ -50,6 +50,8 @@ public static class Pfs0Builder
                 StringTableOffset = stringOffsets[i]
             });
         }
+
+        long stringTablePos = outputStream.Position;
 
         outputStream.Write(stringTable.ToArray());
         outputStream.Write(new byte[headerPadding]);
@@ -107,6 +109,25 @@ public static class Pfs0Builder
                 Size = actualSizes[i],
                 StringTableOffset = stringOffsets[i]
             });
+        }
+
+        if (deferredNames != null)
+        {
+            for (int i = 0; i < fileList.Count; i++)
+            {
+                if (!deferredNames.TryGetValue(fileList[i].Name, out var resolve))
+                    continue;
+
+                byte[] placeholder = System.Text.Encoding.UTF8.GetBytes(fileList[i].Name);
+                byte[] resolved = System.Text.Encoding.UTF8.GetBytes(resolve());
+
+                if (resolved.Length != placeholder.Length)
+                    throw new InvalidOperationException($"확정된 파일명 길이가 자리표시 이름과 다릅니다: {fileList[i].Name}");
+
+                outputStream.Position = stringTablePos + stringOffsets[i];
+
+                outputStream.Write(resolved);
+            }
         }
 
         outputStream.Position = endPos;

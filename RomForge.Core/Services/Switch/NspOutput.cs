@@ -13,7 +13,7 @@ internal sealed class NspOutput : OutputContainer
     protected override bool IsXci => false;
 
     public override Task WriteAsync(SourceSet source, string displayName, string progressId, uint pfsAlignment, List<FileEntry> entries, Stream fout, IProgress<ProgressInfo> progress, List<IDisposable> disposables, CancellationToken ct)
-        => Pfs0Builder.WriteAsync(displayName, progressId, entries, fout, pfsAlignment, progress, ct);
+        => Pfs0Builder.WriteAsync(displayName, progressId, entries, fout, pfsAlignment, false, null, progress, ct);
 
     public override IFileSystem OpenForValidation(Stream fout, KeySet keySet)
     {

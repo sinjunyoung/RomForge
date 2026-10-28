@@ -15,12 +15,11 @@ namespace RomForge.Core.Services.Switch;
 
 public static class NspLz4Service
 {
-    private const int BuildPercent = 80;
+    private const long MetaEstimatedSize = 0x4000;
 
     public static Task<string> CompressAsync(string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-
         return ConvertAsync(keySet.Clone(), inputPath, outputDir, lz4Level, progress, log, ct);
     }
 
@@ -99,26 +98,6 @@ public static class NspLz4Service
             Directory.CreateDirectory(workDir);
 
             string label = meta.KrTitle ?? meta.EnTitle;
-            var builtNcas = new List<(BuiltNca Nca, string Label)>();
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                var target = targets[i];
-
-                log?.Invoke($"Program NCA Lz4 압축 중 ({i + 1}/{targets.Count}, IdOffset={target.Record.IdOffset})", LogLevel.Highlight, meta.TitleId);
-
-                var scaled = new ScaledProgress(progress, BuildPercent * i / targets.Count, BuildPercent * (i + 1) / targets.Count);
-                var built = Lz4ProgramNcaBuilder.Build(target.Nca, baseTitleId, target.Record.IdOffset, keySet, workDir, lz4Level, scaled, ct);
-
-                cnmt = CnmtRecordPatcher.Replace(cnmt, target.Record.NcaId, built.NcaId, built.Hash, built.Size);
-
-                builtNcas.Add((built, $"{label} [Program Lz4]"));
-            }
-
-            builtNcas.Add((Lz4MetaNcaBuilder.Build(metaNca, cnmt, baseTitleId, keySet, workDir, ct), $"{label} [Meta]"));
-
             var replaced = new HashSet<string>(targets.Select(t => t.EntryName).Append(meta.FileName), StringComparer.OrdinalIgnoreCase);
             var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
             var fileEntries = new List<FileEntry>();
@@ -150,16 +129,53 @@ public static class NspLz4Service
                     fileEntries.Add(copied.Value);
             }
 
-            foreach (var (built, entryLabel) in builtNcas)
-                fileEntries.Add(CreateFileEntry(built, entryLabel, ct));
+            fileEntries.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
 
-            var fout = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
+            var deferredNames = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
+            var programResults = new (byte[] NcaId, byte[] Hash, long Size)[targets.Count];
+
+            for (int i = 0; i < targets.Count; i++)
+            {
+                int index = i;
+                var target = targets[i];
+                string placeholder = PlaceholderName(index);
+
+                deferredNames[placeholder] = () => Convert.ToHexString(programResults[index].NcaId).ToLowerInvariant() + ".nca";
+
+                fileEntries.Add((placeholder, (output, onRead) =>
+                {
+                    ct.ThrowIfCancellationRequested();
+
+                    log?.Invoke($"Program NCA Lz4 압축 중 ({index + 1}/{targets.Count}, IdOffset={target.Record.IdOffset})", LogLevel.Highlight, meta.TitleId);
+
+                    programResults[index] = Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, baseTitleId, target.Record.IdOffset, keySet, workDir, lz4Level, onRead, ct);
+                    cnmt = CnmtRecordPatcher.Replace(cnmt, target.Record.NcaId, programResults[index].NcaId, programResults[index].Hash, programResults[index].Size);
+
+                    return Task.CompletedTask;
+                }, (long)target.Nca.Header.NcaSize, $"{label} [Program Lz4]"));
+            }
+
+            BuiltNca? builtMeta = null;
+            string metaPlaceholder = PlaceholderName(targets.Count);
+
+            deferredNames[metaPlaceholder] = () => builtMeta!.FileName;
+
+            fileEntries.Add((metaPlaceholder, async (output, onRead) =>
+            {
+                builtMeta = Lz4MetaNcaBuilder.Build(metaNca, cnmt, baseTitleId, keySet, workDir, ct);
+
+                using var input = new FileStream(builtMeta.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20, FileOptions.SequentialScan);
+
+                await Utils.CopyStreamAsync(input, output, onRead, ct);
+            }, MetaEstimatedSize, $"{label} [Meta]"));
+
+            var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
 
             disposables.Add(fout);
 
             string displayName = "Lz4 압축 중 " + NameBuilder.CompressDisplayNameBuild(meta.KrTitle, meta.TitleId, meta.DisplayVersion);
 
-            await Pfs0Builder.WriteAsync(displayName, meta.TitleId, fileEntries, fout, Pfs0Builder.GetAlignmentPadding(inputPath), new ScaledProgress(progress, BuildPercent, 100), ct);
+            await Pfs0Builder.WriteAsync(displayName, meta.TitleId, fileEntries, fout, Pfs0Builder.GetAlignmentPadding(inputPath), true, deferredNames, progress, ct);
             await fout.FlushAsync(ct);
 
             long originalSize = new FileInfo(inputPath).Length;
@@ -185,10 +201,5 @@ public static class NspLz4Service
         }
     }
 
-    private static FileEntry CreateFileEntry(BuiltNca built, string label, CancellationToken ct) => (built.FileName, async (output, onRead) =>
-    {
-        using var input = new FileStream(built.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20, FileOptions.SequentialScan);
-
-        await Utils.CopyStreamAsync(input, output, onRead, ct);
-    }, built.Size, label);
+    private static string PlaceholderName(int index) => "$" + index.ToString("x31") + ".nca";
 }

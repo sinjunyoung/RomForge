@@ -58,12 +58,59 @@ public static class NcaGenerator
 
     public static string GenerateProgramNca(NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
+        string ncaPath = Path.Combine(settings.OutDirectory, "Program.nca");
+        using var ncaFile = new FileStream(ncaPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1024 * 1024, FileOptions.SequentialScan);
+
+        WriteProgramNca(ncaFile, settings, compressLevel, progress, ct);
+
+        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
+    }
+
+    public static (byte[] Hash, long Size) GenerateProgramNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
+    {
+        long start = output.Position;
+        var window = new OffsetStream(output, start, onAdvance);
+
+        WriteProgramNca(window, settings, compressLevel, null, ct);
+
+        long size = window.Length;
+        byte[] hash = HashRegion(output, start, size, ct);
+
+        output.Position = start + size;
+
+        return (hash, size);
+    }
+
+    private static byte[] HashRegion(Stream stream, long start, long size, CancellationToken ct)
+    {
+        using var hasher = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
+        byte[] buffer = new byte[1 << 20];
+        long remaining = size;
+
+        stream.Position = start;
+
+        while (remaining > 0)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            int read = stream.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining));
+
+            if (read <= 0)
+                throw new EndOfStreamException();
+
+            hasher.AppendData(buffer, 0, read);
+
+            remaining -= read;
+        }
+
+        return hasher.GetHashAndReset();
+    }
+
+    private static void WriteProgramNca(Stream ncaFile, NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    {
         var ncaHeader = new NcaHeader();
 
         NcaHeaderService.InitHeader(ref ncaHeader);
-
-        string ncaPath = Path.Combine(settings.OutDirectory, "Program.nca");
-        using var ncaFile = new FileStream(ncaPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1024 * 1024, FileOptions.SequentialScan);
 
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
         ct.ThrowIfCancellationRequested();
@@ -198,8 +245,6 @@ public static class NcaGenerator
         }
 
         NcaHeaderService.FinalizeNca(ncaFile, ref ncaHeader, settings);
-
-        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
     }
 
     public static string GenerateMetaNca(IEnumerable<NcaGenerationOptions> settingsList, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -291,7 +336,7 @@ public static class NcaGenerator
         return finalPath;
     }
 
-    private static MemoryStream[] BuildAndWriteRomfsSection(FileStream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    private static MemoryStream[] BuildAndWriteRomfsSection(Stream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (settings.RomfsImageOpener != null)
             return StreamingRomfsSectionWriter.Write(ncaFile, compressLevel, ref ncaHeader, sectionIndex, settings, progress, ct);
@@ -398,7 +443,7 @@ public static class NcaGenerator
         }
     }
 
-    public static void WritePadding(FileStream ncaFile)
+    public static void WritePadding(Stream ncaFile)
     {
         ulong currOffset = (ulong)ncaFile.Position;
 

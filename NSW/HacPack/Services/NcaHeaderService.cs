@@ -164,7 +164,7 @@ public static class NcaHeaderService
         }
     }
 
-    public static void FinalizeNca(FileStream ncaFile, ref NcaHeader hdr, NcaGenerationOptions settings)
+    public static void FinalizeNca(Stream ncaFile, ref NcaHeader hdr, NcaGenerationOptions settings)
     {
         ncaFile.Seek(0, SeekOrigin.End);
         hdr.NcaSize = (ulong)ncaFile.Position;

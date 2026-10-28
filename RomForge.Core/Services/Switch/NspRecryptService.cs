@@ -175,7 +175,7 @@ public class NspRecryptService
                 var fout = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
 
                 disposables.Add(fout);
-                await Pfs0Builder.WriteAsync(displayName, Path.GetFileNameWithoutExtension(finalPath), fileEntries, fout, 0x20, progress, ct);
+                await Pfs0Builder.WriteAsync(displayName, Path.GetFileNameWithoutExtension(finalPath), fileEntries, fout, 0x20, false, null, progress, ct);
             }
 
             isCompleted = true;

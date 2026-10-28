@@ -8,7 +8,7 @@ public static class StreamingRomfsSectionWriter
 {
     private const int BlockSize = IvfcConstants.HashBlockSize;
 
-    public static MemoryStream[] Write(FileStream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    public static MemoryStream[] Write(Stream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var ivfcStreams = new MemoryStream[5];
 

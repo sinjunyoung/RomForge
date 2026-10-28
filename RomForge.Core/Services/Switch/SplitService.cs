@@ -205,7 +205,7 @@ public class SplitService
             {
                 ct.ThrowIfCancellationRequested();
 
-                string targetId = BitConverter.ToString(record.NcaId).Replace("-", string.Empty).ToLower();
+                string targetId = Convert.ToHexStringLower(record.NcaId);
                 string? ncaKey = fileRegistry.Keys.FirstOrDefault(k => Path.GetFileNameWithoutExtension(k).StartsWith(targetId, StringComparison.OrdinalIgnoreCase));
 
                 if (ncaKey == null) 
@@ -250,7 +250,7 @@ public class SplitService
                 await XciWriter.WriteAsync(displayName, meta.TitleId, xciPrefixBuffer!, rootEntriesTemplate!, srcStream, fileEntries, fout, progress, ct);
             else
             {
-                await Pfs0Builder.WriteAsync($"{Res.Log_Splitting} {displayName}", meta.TitleId, fileEntries, fout, 0x20, progress, ct);
+                await Pfs0Builder.WriteAsync($"{Res.Log_Splitting} {displayName}", meta.TitleId, fileEntries, fout, 0x20, false, null, progress, ct);
 
                 if (useCompression && converters.Count > 0 && isValidationEnabled)
                 {

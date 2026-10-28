@@ -13,7 +13,7 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class Lz4ProgramNcaBuilder
 {
-    public static BuiltNca Build(Nca source, ulong baseTitleId, byte idOffset, KeySet keySet, string workDir, int lz4Level, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    public static (byte[] NcaId, byte[] Hash, long Size) BuildInto(Stream output, Nca source, ulong baseTitleId, byte idOffset, KeySet keySet, string workDir, int lz4Level, Action<long>? onAdvance, CancellationToken ct)
     {
         string programDir = Path.Combine(workDir, $"program_{idOffset}");
         string outDir = Path.Combine(programDir, "nca");
@@ -57,8 +57,8 @@ internal static class Lz4ProgramNcaBuilder
         if (!string.IsNullOrEmpty(exefsDir))
             NpdmProcessor.PatchNpdmMetadata(settings);
 
-        string path = NcaGenerator.GenerateProgramNca(settings, lz4Level, progress, ct);
+        var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, ct);
 
-        return NcaFileInspector.Inspect(path);
+        return (hash[..0x10], hash, size);
     }
 }
