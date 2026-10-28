@@ -20,6 +20,6 @@ namespace WiiU.WUP.Models
 
         public const string PathToAppXML = "/code/app.xml";
 
-        public static string TmpDir = "tmp";
+        public static string TmpDir { get; set; } = "tmp";
     }
 }

@@ -13,18 +13,6 @@ namespace WiiU.WUP.Models
             _entries.Add(root);
         }
 
-        public bool IsEmtpy() => _entries.Count == 0;
-
-        public bool AddEntry(FSTEntry entry)
-        {
-            if (!entry.IsDir)
-                return false;
-
-            _entries.Add(entry);
-
-            return true;
-        }
-
         public void Update()
         {
             foreach (FSTEntry entry in _entries)
@@ -88,8 +76,7 @@ namespace WiiU.WUP.Models
 
             FSTEntry? lastdir = root.UpdateDirRefs();
 
-            if(lastdir != null)
-                lastdir.NextOffset = FST.CurEntryOffset;
+            lastdir?.NextOffset = FST.CurEntryOffset;
         }
     }
 }

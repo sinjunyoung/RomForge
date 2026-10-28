@@ -15,7 +15,7 @@ internal sealed class RebuiltIsoSource : IRvzInputSource
     private readonly Queue<(int Partition, long Group)> _order = new();
     private readonly PartitionEncoder _encoder = new();
     private readonly byte[] _scratch = new byte[Layout.HashSize];
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private readonly bool _ownsInput;
 
     private RebuiltIsoSource(IRvzInputSource input, bool ownsInput = false)

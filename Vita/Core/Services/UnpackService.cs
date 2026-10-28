@@ -11,7 +11,13 @@ public static class UnpackService
     private static async Task<int> UnpackCoreAsync(List<SourceItem> items, string unpackedRoot, Action<string, LogLevel> log, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var groups = PatchShared.BuildBaseGroups(items, log, ct);
-        long totalBytes = groups.Sum(g => g.Owners.Sum(o => PatchShared.GetAllOwnedFiles(o).Sum(f => f.Size)));
+
+        long totalBytes = 0;
+
+        foreach (var g in groups)
+            foreach (var o in g.Owners)
+                totalBytes += PatchShared.GetAllOwnedFiles(o).Sum(f => f.Size);
+
         var reporter = new ProgressReporter("언팩 중", string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int written = 0;

@@ -2,8 +2,11 @@ using System.Text.RegularExpressions;
 
 namespace WiiU.Core.Services;
 
-public sealed class WuaTitleSource : ITitleSource
+public sealed partial class WuaTitleSource : ITitleSource
 {
+    [GeneratedRegex(@"^([0-9a-fA-F]{16})_v(\d+)$")]
+    private static partial Regex RootPrefixRegex();
+
     private readonly WuaReader _reader;
     private readonly RefCountedReader? _shared;
     private readonly string _rootPrefix;
@@ -18,7 +21,8 @@ public sealed class WuaTitleSource : ITitleSource
         _shared = shared;
         _rootPrefix = rootPrefix;
 
-        var match = Regex.Match(rootPrefix, @"^([0-9a-fA-F]{16})_v(\d+)$");
+        var match = RootPrefixRegex().Match(rootPrefix);
+        
         if (match.Success)
         {
             TitleIdHex = match.Groups[1].Value.ToLowerInvariant();

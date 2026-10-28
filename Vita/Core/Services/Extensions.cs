@@ -1,6 +1,8 @@
-﻿namespace Vita.Core.Models;
+﻿using Vita.Core.Models;
 
-public static class PfsFileTypeExtensions
+namespace Vita.Core.Services;
+
+public static class Extensions
 {
     public static bool IsDirectory(this PfsFileType type) => type is PfsFileType.NormalDirectory or PfsFileType.SysDirectory or PfsFileType.AcidDirectory;
 

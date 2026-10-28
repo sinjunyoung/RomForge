@@ -136,8 +136,7 @@ public sealed class WuaWriter(Stream output) : IDisposable
             }
         }
 
-        if (_currentFileNode is not null)
-            _currentFileNode.FileSize += (ulong)dataLen;
+        _currentFileNode?.FileSize += (ulong)dataLen;
 
         _inputOffset += (ulong)dataLen;
     }
@@ -180,7 +179,9 @@ public sealed class WuaWriter(Stream output) : IDisposable
     private void OutputData(ReadOnlySpan<byte> data)
     {
         _output.Write(data);
+
         _outputOffset += (ulong)data.Length;
+
         _sha256.AppendData(data);
     }
 

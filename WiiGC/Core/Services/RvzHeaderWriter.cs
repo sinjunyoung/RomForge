@@ -111,7 +111,6 @@ internal static class RvzHeaderWriter
     {
         byte[] buffer = new byte[ZstdSharp.Compressor.GetCompressBound(table.Length)];
         int written = compressor.Wrap(table, buffer);
-
         return buffer.AsSpan(0, written).ToArray();
     }
 

@@ -35,7 +35,6 @@ namespace WiiU.WUP.Services
             byte[] randomData = new byte[0x100];
 
             _rng.NextBytes(randomData);
-
             buffer.Put(randomData);
             buffer.Put(new byte[0x3C]);
             buffer.Put(Utils.HexStringToByteArray("526F6F742D434130303030303030332D58533030303030303063000000000000"));
@@ -47,7 +46,6 @@ namespace WiiU.WUP.Services
             randomData = new byte[0x06];
 
             _rng.NextBytes(randomData);
-
             buffer.Put(randomData);
             buffer.Put(new byte[0x04]);
             buffer.PutLong(TitleID);

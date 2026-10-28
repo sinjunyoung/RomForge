@@ -1,6 +1,6 @@
 ﻿namespace WiiU.Core.Services;
 
-public static class TitleSourceExtractExtensions
+public static class Extensions
 {
     private const int BufferSize = 1024 * 1024;
 

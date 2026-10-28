@@ -27,7 +27,11 @@ public static class PatchOutputBuilder
 
     internal static async Task<MergeResult> WriteAsync(List<MergeGroup> groups, string outputZipPath, OutputTarget target, Action<string, LogLevel> log, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        long totalBytes = groups.Sum(g => g.Targets.Sum(t => t.EstimatedSize) + GetWriteTotal(g, target));
+        long totalBytes = 0;
+
+        foreach (var g in groups)
+            totalBytes += g.Targets.Sum(t => t.EstimatedSize) + GetWriteTotal(g, target);
+
         var reporter = new ProgressReporter("패치 적용 및 압축 중", string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int patchCandidates = 0;
@@ -146,7 +150,10 @@ public static class PatchOutputBuilder
         if (target == OutputTarget.Emu)
             return group.Index.Values.Sum(e => (long)e.FileEntry.Size);
 
-        long ownedTotal = group.Owners.Sum(owner => PatchShared.GetAllOwnedFiles(owner).Sum(f => f.Size));
+        long ownedTotal = 0;
+
+        foreach (var owner in group.Owners)
+            ownedTotal += PatchShared.GetAllOwnedFiles(owner).Sum(f => f.Size);
 
         return ownedTotal + group.Targets.Sum(t => t.EstimatedSize);
     }

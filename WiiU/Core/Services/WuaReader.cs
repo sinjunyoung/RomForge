@@ -1,4 +1,3 @@
-
 using System.Buffers.Binary;
 using System.Text;
 using WiiU.Core.IO;

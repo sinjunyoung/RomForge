@@ -5,9 +5,13 @@ public sealed class DelegateReadStream(long length, Func<long, byte[], int, int,
     private long _position;
 
     public override bool CanRead => true;
+
     public override bool CanSeek => true;
+
     public override bool CanWrite => false;
+
     public override long Length => length;
+
     public override long Position { get => _position; set => _position = value; }
 
     public override int Read(byte[] buffer, int offset, int count)

@@ -43,7 +43,9 @@ public sealed class WudReader : IDisposable
     public static WudReader Open(Stream stream, bool leaveOpen)
     {
         var reader = new WudReader(stream, leaveOpen);
+
         reader.Initialize();
+
         return reader;
     }
 

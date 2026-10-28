@@ -9,11 +9,11 @@ namespace WiiU.WUP.Services
     {
         public static readonly long MAX_CONTENT_LENGTH = (long)(0xBFFFFFFFL * 0.975);
 
-        public static long CurContentSize = 0L;
+        public static long CurContentSize { get; set; } = 0L;
 
-        public static Content? CurContent = null;
+        public static Content? CurContent { get; set; } = null;
 
-        public static Content? CurContentFirst = null;
+        public static Content? CurContentFirst { get; set; } = null;
 
         public static void ApplyRules(FSTEntry root, Contents targetContents, ContentRules rules)
         {

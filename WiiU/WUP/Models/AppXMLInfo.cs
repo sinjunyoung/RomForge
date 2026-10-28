@@ -1,4 +1,4 @@
-namespace WiiU.WUP.Services
+namespace WiiU.WUP.Models
 {
     public class AppXMLInfo
     {

@@ -6,11 +6,57 @@ namespace WiiU.WUP.Models
 {
     public class FSTEntry : IHasData, ICloneable
     {
-        private readonly string? _file;
-        private List<FSTEntry>? _children;
-        private Content? _content;
-        private byte[]? _decryptedSHA1 = new byte[0x14];
-        private readonly Func<Stream>? _streamFactory;
+        private readonly Func<Stream>? _streamFactory; 
+
+        public Func<Stream>? StreamFactory => _streamFactory;
+
+        public string? FilePath { get; }
+
+        public string Filename { get; set; } = string.Empty;
+
+        public FSTEntry? Parent { get; private set; } = null;
+
+        public int NameOffset { get; private set; } = 0;
+
+        public int EntryOffset { get; set; } = 0x00;
+
+        public short Flags { get; set; }
+
+        public bool IsDir { get; set; } = false;
+
+        public int ParentOffset { get; set; } = 0;
+
+        public int NextOffset { get; set; } = 0;
+        
+        public long Filesize
+        {
+            get => IsFile ? field : 0;
+            set;
+        }
+
+        public long FileOffset { get; set; } = 0;
+
+        public bool IsRoot { get; private set; } = false;
+
+        public int RootEntryCount { get; set; } = 0;
+
+        public Content? Content
+        {
+            get;
+            set
+            {
+                field = value;
+
+                if (value != null)
+                    Flags = value.EntriesFlags;
+            }
+        }
+
+        public bool IsNotInPackage { get; set; } = false;
+
+        public bool IsFile => !(IsDir || IsNotInPackage);
+
+        public List<FSTEntry> Children => field ??= [];
 
         public FSTEntry(string filePath) : this(filePath, false) { }
 
@@ -22,31 +68,27 @@ namespace WiiU.WUP.Models
             if (filePath == null || (!isDirectory && !isFileOnDisk))
                 throw new ArgumentException("Couldn't create FSTEntry, file is NULL or doesn't exist");
 
-            _file = Path.GetFullPath(filePath);
+            FilePath = Path.GetFullPath(filePath);
 
             IsDir = isDirectory;
             Filename = isDirectory ? new DirectoryInfo(filePath).Name : Path.GetFileName(filePath);
             Filesize = isDirectory ? 0 : new FileInfo(filePath).Length;
             IsNotInPackage = notInPackage;
-
-            if (IsFile)
-                _decryptedSHA1 = null;
         }
 
         public FSTEntry(string name, Func<Stream> openRead, long length)
         {
-            _file = null;
+            FilePath = null;
             _streamFactory = openRead ?? throw new ArgumentNullException(nameof(openRead));
             IsDir = false;
             Filename = name;
             Filesize = length;
             IsNotInPackage = false;
-            _decryptedSHA1 = null;
         }
 
         public FSTEntry(bool root)
         {
-            _file = null;
+            FilePath = null;
 
             if (root)
             {
@@ -54,53 +96,6 @@ namespace WiiU.WUP.Models
                 IsDir = true;
             }
         }
-
-        public Func<Stream>? StreamFactory => _streamFactory;
-        public string? FilePath => _file;
-
-        public string Filename { get; set; } = string.Empty;
-        public FSTEntry? Parent { get; private set; } = null;
-        public int NameOffset { get; private set; } = 0;
-        public int EntryOffset { get; set; } = 0x00;
-
-        public short Flags { get; set; }
-
-        public bool IsDir { get; set; } = false;
-        public int ParentOffset { get; set; } = 0;
-        public int NextOffset { get; set; } = 0;
-
-        private long _filesize = 0;
-        public long Filesize
-        {
-            get => IsFile ? _filesize : 0;
-            set => _filesize = value;
-        }
-
-        public long FileOffset { get; set; } = 0;
-
-        public bool IsRoot { get; private set; } = false;
-
-        public int RootEntryCount { get; set; } = 0;
-
-        public Content? Content
-        {
-            get => _content;
-            set
-            {
-                _content = value;
-
-                if (value != null)
-                    Flags = value.EntriesFlags;
-            }
-        }
-
-        public bool BigFile { get; set; } = false;
-        public bool HashedFile { get; set; } = false;
-        public bool IsNotInPackage { get; set; } = false;
-
-        public bool IsFile => !(IsDir || IsNotInPackage);
-
-        public List<FSTEntry> Children => _children ??= [];
 
         public void AddChildren(FSTEntry fstEntry)
         {
@@ -130,15 +125,6 @@ namespace WiiU.WUP.Models
                 type |= (byte)Types.WiiVC;
 
             return type;
-        }
-
-        public FSTEntry? GetEntryByName(string name)
-        {
-            foreach (FSTEntry f in Children)
-                if (f.Filename.Equals(name))
-                    return f;
-
-            return null;
         }
 
         public byte[] GetAsData()
@@ -178,11 +164,8 @@ namespace WiiU.WUP.Models
                 buffer.PutShort((short)Content!.ID);
             }
 
-            if (_children != null)
-            {
-                foreach (FSTEntry entry in Children)
-                    buffer.Put(entry.GetAsData());
-            }
+            foreach (FSTEntry entry in Children)
+                buffer.Put(entry.GetAsData());
 
             return buffer.Array();
         }
@@ -195,14 +178,6 @@ namespace WiiU.WUP.Models
                 size += entry.GetDataSize();
 
             return size;
-        }
-
-        public byte[] GetDecryptedHash()
-        {
-            if (_decryptedSHA1 == null)
-                CalculateDecryptedHash();
-
-            return _decryptedSHA1!;
         }
 
         public void SetNameOffset(int offset)
@@ -362,8 +337,6 @@ namespace WiiU.WUP.Models
             return result;
         }
 
-        public List<FSTEntry> GetFileChildren() => GetFileChildren(false);
-
         public List<FSTEntry> GetFileChildren(bool all)
         {
             List<FSTEntry> result = [];
@@ -376,8 +349,6 @@ namespace WiiU.WUP.Models
 
             return result;
         }
-
-        public void CalculateDecryptedHash() => _decryptedSHA1 = HashUtil.HashSHA1(_file!, 0x8000);
 
         public FSTEntry Clone() => (FSTEntry)MemberwiseClone();
 

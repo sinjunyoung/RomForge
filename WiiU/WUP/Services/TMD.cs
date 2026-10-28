@@ -1,5 +1,6 @@
 using WiiU.WUP.Crypto;
 using WiiU.WUP.Interfaces;
+using WiiU.WUP.Models;
 
 namespace WiiU.WUP.Services
 {
@@ -9,29 +10,20 @@ namespace WiiU.WUP.Services
         private readonly byte[] _signature = new byte[0x100];
         private readonly byte[] _padding0 = new byte[0x3C];
         private readonly byte[] _issuer = Utils.HexStringToByteArray("526F6F742D434130303030303030332D435030303030303030620000000000000000000000000000000000000000000000000000000000000000000000000000");
-
         private readonly byte _version = 0x01;
         private readonly byte _caCRLVersion = 0x00;
         private readonly byte _signerCRLVersion = 0x00;
         private readonly byte _padding1 = 0x00;
-
-        private long _systemVersion = 0x000500101000400AL;
         private readonly int _titleType = 0x000100;
-        private short _groupID = 0x0000;
-        private int _appType = unchecked((int)0x80000000);
         private readonly int _random1 = 0;
         private readonly int _random2 = 0;
         private readonly byte[] _reserved = new byte[50];
         private readonly int _accessRights = 0x0000;
-        private short _titleVersion = 0x00;
-        private short _contentCount = 0x00;
         private readonly short _bootIndex = 0x00;
         private readonly byte[] _padding3 = new byte[2];
-        private byte[] _sha2 = new byte[0x20];
 
-        private ContentInfos? _contentInfos = null;
-        private Contents? _contents = null;
-        private Ticket _ticket = null!;
+        private short _contentCount = 0x00;
+        private byte[] _sha2 = new byte[0x20];
 
         public TMD(AppXMLInfo appInfo, FST fst, Ticket ticket)
         {
@@ -41,52 +33,31 @@ namespace WiiU.WUP.Services
             TitleVersion = appInfo.TitleVersion;
             Ticket = ticket;
             Contents = fst.Contents;
-            _contentInfos = new ContentInfos();
         }
 
-        public long SystemVersion
-        {
-            get => _systemVersion;
-            set => _systemVersion = value;
-        }
+        public long SystemVersion { get; set; } = 0x000500101000400AL;
 
-        public short GroupID
-        {
-            get => _groupID;
-            set => _groupID = value;
-        }
+        public short GroupID { get; set; } = 0x0000;
 
-        public int AppType
-        {
-            get => _appType;
-            set => _appType = value;
-        }
+        public int AppType { get; set; } = unchecked((int)0x80000000);
 
-        public short TitleVersion
-        {
-            get => _titleVersion;
-            set => _titleVersion = value;
-        }
+        public short TitleVersion { get; set; } = 0x00;
 
-        public Ticket Ticket
-        {
-            get => _ticket;
-            set => _ticket = value;
-        }
+        public Ticket Ticket { get; set; } = null!;
 
-        public ContentInfos ContentInfos => _contentInfos ??= new ContentInfos();
+        public ContentInfos ContentInfos { get;  set; } = new ContentInfos();
 
         public Contents Contents
         {
-            get => _contents ??= new Contents();
+            get;
             set
             {
-                _contents = value;
+                field = value;
 
                 if (value != null)
                     _contentCount = value.ContentCount;
             }
-        }
+        } = new Contents();
 
         public Encryption Encryption
         {

@@ -11,14 +11,12 @@ namespace WiiU.WUP.Services
 
         public Contents() => FSTContent = GetNewContent();
 
-        private Content _fstContent = null!;
-
         public Content FSTContent
         {
-            get => _fstContent;
+            get;
             set
             {
-                _fstContent = value;
+                field = value;
                 value.IsFSTContent = true;
             }
         }
@@ -120,8 +118,6 @@ namespace WiiU.WUP.Services
             foreach (Content c in this)
                 c.Update(fileEntries.GetFSTEntriesByContent(c));
         }
-
-        public void PackContents(string outputDir, Action<Content>? onContentPacked) => PackContents(outputDir, onContentPacked, null);
 
         public void PackContents(string outputDir, Action<Content>? onContentPacked, Action<Content, string, long, long>? onContentBytesProcessed)
         {

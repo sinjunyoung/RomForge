@@ -71,6 +71,7 @@ public static class ZrifDecoder
     {
         string s = str.Trim();
         int pad = (4 - s.Length % 4) % 4;
+
         s = s.PadRight(s.Length + pad, '=');
 
         return Convert.FromBase64String(s);

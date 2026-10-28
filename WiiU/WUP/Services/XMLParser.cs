@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Xml;
+using WiiU.WUP.Models;
 
 namespace WiiU.WUP.Services
 {

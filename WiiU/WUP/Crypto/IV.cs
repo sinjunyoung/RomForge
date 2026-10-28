@@ -18,7 +18,5 @@ namespace WiiU.WUP.Crypto
         public IV() { }
 
         public IV(byte[] array) => Value = array;
-
-        public static int GetLength() => Length;
     }
 }

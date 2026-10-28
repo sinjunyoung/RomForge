@@ -14,7 +14,7 @@ namespace WiiU.WUP.Services
         private FSTEntries? _fileEntries = null;
         private static readonly JByteBuffer _strings = JByteBuffer.Allocate(0x300000);
 
-        public static int CurEntryOffset = 0x00;
+        public static int CurEntryOffset { get; set; } = 0x00;
 
         private byte[]? _alignment = null;
 

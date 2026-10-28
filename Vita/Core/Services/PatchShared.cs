@@ -330,8 +330,7 @@ internal static class PatchShared
         return false;
     }
 
-    private static PatchFileRef CreatePatchFileRef(ISourceAccessor accessor, string rawPath)
-        => PatchFileRef.FromStream(() => new MemoryStream(accessor.ReadAllBytes(rawPath), writable: false), accessor.GetFileSize(rawPath), Path.GetFileName(NormalizePath(rawPath)));
+    private static PatchFileRef CreatePatchFileRef(ISourceAccessor accessor, string rawPath) => PatchFileRef.FromStream(() => new MemoryStream(accessor.ReadAllBytes(rawPath), writable: false), accessor.GetFileSize(rawPath), Path.GetFileName(NormalizePath(rawPath)));
 
     public static (ISourceAccessor Accessor, string Rel)? ResolveWorkBin(ISourceAccessor source, SourceItem item, (ISourceAccessor Accessor, string Rel)? fallback)
     {

@@ -5,6 +5,7 @@ namespace WiiU.WUP.Services
     public class ContentInfos : IHasData
     {
         private const int ContentInfoCount = 0x40;
+
         private readonly ContentInfo?[] _contentInfos = new ContentInfo?[ContentInfoCount];
 
         public ContentInfos() { }

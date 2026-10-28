@@ -22,6 +22,8 @@ internal sealed class GczSource : IRvzInputSource
     private readonly ulong[] _pointers;
     private readonly uint[] _hashes;
 
+    public long Length => _discSize;
+
     public GczSource(SafeFileHandle handle)
     {
         _handle = handle;
@@ -74,8 +76,6 @@ internal sealed class GczSource : IRvzInputSource
 
         ValidatePointers();
     }
-
-    public long Length => _discSize;
 
     public static bool IsGcz(SafeFileHandle handle)
     {

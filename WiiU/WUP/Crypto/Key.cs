@@ -3,6 +3,7 @@ namespace WiiU.WUP.Crypto
     public class Key
     {
         private static readonly int Length = 0x10;
+
         private byte[] _value = new byte[Length];
 
         public byte[] Value 
@@ -21,8 +22,6 @@ namespace WiiU.WUP.Crypto
         public Key(byte[] key) => Value = key;
 
         public Key(string hex) : this(Services.Utils.HexStringToByteArray(hex)) { }
-
-        public static int GetLength() => Length;
 
         public override string ToString() => Services.Utils.ByteArrayToString(Value);
     }

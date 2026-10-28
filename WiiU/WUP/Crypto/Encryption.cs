@@ -6,18 +6,18 @@ namespace WiiU.WUP.Crypto
 {
     public class Encryption
     {
+        private readonly Aes aes;
+
         private Key _key = new ();
         private IV _iv = new ();
 
-        private readonly Aes aes;
-
         public Key Key { get => _key; set => _key = value; }
+
         public IV IV { get => _iv; set => _iv = value; }
 
         public Encryption(Key key, IV iv)
         {
             aes = Aes.Create();
-
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.None;
             aes.KeySize = 128;
@@ -33,7 +33,6 @@ namespace WiiU.WUP.Crypto
         {
             Key = key;
             IV = iv;
-
             aes.Key = Key.Value;
             aes.IV = IV.Value;
         }

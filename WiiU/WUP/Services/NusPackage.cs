@@ -19,8 +19,6 @@ namespace WiiU.WUP.Services
 
         public Encryption Encryption => TMD.Encryption;
 
-        public void PackContents(string outputDir, Action<Content>? onContentPacked) => PackContents(outputDir, onContentPacked, null);
-
         public void PackContents(string outputDir, Action<Content>? onContentPacked, Action<Content, string, long, long>? onContentBytesProcessed)
         {
             if (!string.IsNullOrEmpty(outputDir))

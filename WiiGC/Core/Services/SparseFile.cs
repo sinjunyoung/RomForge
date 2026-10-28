@@ -4,7 +4,7 @@ using WiiGC.Core.Interfaces;
 
 namespace WiiGC.Core.Services;
 
-internal static class SparseFile
+internal static partial class SparseFile
 {
     private const uint FsctlSetSparse = 0x000900C4;
 
@@ -64,6 +64,7 @@ internal static class SparseFile
         }
     }
 
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool DeviceIoControl(SafeFileHandle device, uint controlCode, IntPtr inBuffer, int inBufferSize, IntPtr outBuffer, int outBufferSize, out int bytesReturned, IntPtr overlapped);
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool DeviceIoControl(SafeFileHandle device, uint controlCode, IntPtr inBuffer, int inBufferSize, IntPtr outBuffer, int outBufferSize, out int bytesReturned, IntPtr overlapped);
 }

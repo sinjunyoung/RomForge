@@ -18,6 +18,15 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         public long CachedHashGroupStart = -1;
     }
 
+    private sealed class ChunkCacheEntry(long key)
+    {
+        public long Key { get; } = key;
+
+        public Lazy<RvzChunk> Chunk { get; set; } = null!;
+
+        public int Bytes { get; set; }
+    }
+
     private const long ChunkCacheByteBudget = 256L * 1024 * 1024;
 
     private readonly SafeFileHandle _handle;
@@ -30,14 +39,9 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
     private readonly ConcurrentQueue<ChunkCacheEntry> _chunkCacheOrder = new();
     private long _chunkCacheBytes;
 
-    private sealed class ChunkCacheEntry(long key)
-    {
-        public long Key { get; } = key;
+    public long Length => _file.IsoSize;
 
-        public Lazy<RvzChunk> Chunk { get; set; } = null!;
-
-        public int Bytes { get; set; }
-    }
+    public uint ChunkSize => _file.ChunkSize;
 
     private WiaSource(SafeFileHandle handle, RvzFile file)
     {
@@ -47,10 +51,6 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         _groups = new RvzGroupReader<Context>(file, handle, GetChunk);
         _regions = _groups.BuildRegions();
     }
-
-    public long Length => _file.IsoSize;
-
-    public uint ChunkSize => _file.ChunkSize;
 
     private Context RentContext() => _contextPool.TryTake(out var context) ? context : new Context(_file.Compression, _file.CompressorData);
 

@@ -3,8 +3,11 @@ using System.Xml.Linq;
 
 namespace WiiU.Core.Services;
 
-public sealed class FolderTitleSource : ITitleSource
+public sealed partial class FolderTitleSource : ITitleSource
 {
+    [GeneratedRegex(@"^([0-9a-fA-F]{16})_v(\d+)$")]
+    private static partial Regex HexVersionRegex();
+
     private readonly string _root;
 
     public string TitleIdHex { get; private set; } = "0000000000000000";
@@ -39,7 +42,7 @@ public sealed class FolderTitleSource : ITitleSource
         if (TitleIdHex == "0000000000000000")
         {
             string name = new DirectoryInfo(rootFolder).Name;
-            var match = Regex.Match(name, @"^([0-9a-fA-F]{16})_v(\d+)$");
+            var match = HexVersionRegex().Match(name);
 
             if (match.Success)
             {

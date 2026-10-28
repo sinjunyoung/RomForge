@@ -10,6 +10,8 @@ namespace WiiGC.Core.Services.Wii;
 
 internal sealed class RvzWiiWriter
 {
+    private static readonly List<HashException> EmptyExceptions = [];
+
     private readonly record struct RawRegion(long Offset, long Size, long RewoundBase, long ExtendedSize);
 
     private readonly record struct GroupResult(byte[]? Buffer, int Length, uint DataSizeField, uint PackedSize);
@@ -401,8 +403,6 @@ internal sealed class RvzWiiWriter
 
         return [.. output];
     }
-
-    private static readonly List<HashException> EmptyExceptions = [];
 
     private static byte[] SerializeExceptions(List<HashException> exceptions)
     {

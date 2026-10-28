@@ -27,7 +27,11 @@ public static class PatchOnlyBuilder
 
     internal static async Task<PatchOnlyResult> WriteAsync(List<MergeGroup> groups, string outputZipPath, OutputTarget target, Action<string, LogLevel> log, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        long totalBytes = groups.Sum(g => g.Targets.Sum(t => t.EstimatedSize));
+        long totalBytes = 0;
+
+        foreach (var g in groups)
+            totalBytes += g.Targets.Sum(t => t.EstimatedSize);
+
         var reporter = new ProgressReporter("패치 적용 중", string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int matched = 0;

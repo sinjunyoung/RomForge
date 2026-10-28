@@ -7,13 +7,13 @@ namespace WiiGC.Core.Services;
 
 internal sealed class RvzDiscReader : IDisposable
 {
-    private const long RawItemTargetBytes = 0x200000;
-
     private enum WorkKind
     {
         Raw,
         Partition
     }
+
+    private const long RawItemTargetBytes = 0x200000;
 
     private readonly record struct WorkItem(WorkKind Kind, int EntryIndex, int DataIndex, long Start, long Length, bool IsZero);
 
@@ -22,6 +22,10 @@ internal sealed class RvzDiscReader : IDisposable
     private readonly SafeFileHandle _handle;
     private readonly RvzFile _file;
     private readonly RvzGroupReader<RvzWorkerContext> _groups;
+
+    public long IsoSize => _file.IsoSize;
+
+    public uint DiscType => _file.DiscType;
 
     public RvzDiscReader(string path)
     {
@@ -37,14 +41,9 @@ internal sealed class RvzDiscReader : IDisposable
         catch
         {
             _handle.Dispose();
-
             throw;
         }
     }
-
-    public long IsoSize => _file.IsoSize;
-
-    public uint DiscType => _file.DiscType;
 
     public void WriteIso(IIsoSink output, Action<double>? progress, CancellationToken ct)
     {

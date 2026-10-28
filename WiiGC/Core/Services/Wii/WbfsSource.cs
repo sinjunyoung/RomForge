@@ -24,7 +24,7 @@ internal sealed class WbfsSource : IRvzInputSource
 
     public int BlockSize => (int)_wbfsSectorSize;
 
-    public bool IsBlockMapped(long blockIndex) => blockIndex >= 0 && blockIndex < _blocksPerDisc && _wlbaTable[blockIndex] != 0;
+    public long Length => _length;
 
     private WbfsSource(List<FileEntry> files, long wbfsSectorSize, int wbfsSectorShift, long blocksPerDisc, ushort[] wlbaTable, long length)
     {
@@ -36,7 +36,7 @@ internal sealed class WbfsSource : IRvzInputSource
         _length = length;
     }
 
-    public long Length => _length;
+    public bool IsBlockMapped(long blockIndex) => blockIndex >= 0 && blockIndex < _blocksPerDisc && _wlbaTable[blockIndex] != 0;
 
     public static bool IsWbfs(SafeFileHandle handle)
     {

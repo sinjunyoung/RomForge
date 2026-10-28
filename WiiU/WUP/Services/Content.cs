@@ -15,23 +15,13 @@ namespace WiiU.WUP.Services
 
         public const int ALIGNMENT_IN_CONTENT_FILE = 0x20;
 
-        public const int CONTENT_FILE_PADDING = 0x08000;
-
-        private long _curFileOffset = 0;
-        private List<FSTEntry> _entries = [];
-        private short _type = TYPE_CONTENT & TYPE_ENCRYPTED;
-
-        internal Content() { }
+        public const int CONTENT_FILE_PADDING = 0x08000;        
 
         public int ID { get; set; } = 0x00;
 
         public short Index { get; set; } = 0x00;
 
-        public short ContentType
-        {
-            get => _type;
-            set => _type = value;
-        }
+        public short ContentType { get; set; } = TYPE_CONTENT & TYPE_ENCRYPTED;
 
         public long EncryptedFileSize { get; set; }
 
@@ -45,13 +35,13 @@ namespace WiiU.WUP.Services
 
         public bool IsFSTContent { get; set; }
 
-        private long CurFileOffset
-        {
-            get => _curFileOffset;
-            set => _curFileOffset = value;
-        }
+        private long CurFileOffset { get; set; } = 0;
 
-        public void AddType(short type) => _type |= type;
+        private List<FSTEntry> FSTEntries { get; set; } = [];
+
+        internal Content() { }
+
+        public void AddType(short type) => ContentType |= type;
 
         public bool IsHashed() => (ContentType & TYPE_HASHED) == TYPE_HASHED;
 
@@ -109,10 +99,6 @@ namespace WiiU.WUP.Services
 
         public void ResetFileOffsets() => CurFileOffset = 0;
 
-        private List<FSTEntry> GetFSTEntries() => _entries;
-
-        public int GetFSTEntryNumber() => _entries.Count;
-
         public byte[] GetAsData()
         {
             JByteBuffer buffer = JByteBuffer.Allocate(GetDataSize());
@@ -162,7 +148,7 @@ namespace WiiU.WUP.Services
         {
             long totalFileBytes = 0;
 
-            foreach (FSTEntry e in GetFSTEntries())
+            foreach (FSTEntry e in FSTEntries)
             {
                 if (!e.IsNotInPackage && e.IsFile)
                     totalFileBytes += e.Filesize;
@@ -172,11 +158,11 @@ namespace WiiU.WUP.Services
             string tmp_path = $"{Settings.TmpDir}/{ID:X8}.dec";
             using (FileStream fos = new(tmp_path, FileMode.Create, FileAccess.Write))
             {
-                int totalCount = GetFSTEntryNumber();
+                int totalCount = FSTEntries.Count;
                 int cnt_file = 1;
                 long cur_offset = 0;
 
-                foreach (FSTEntry entry in GetFSTEntries())
+                foreach (FSTEntry entry in FSTEntries)
                 {
                     if (!entry.IsNotInPackage)
                     {
@@ -232,7 +218,7 @@ namespace WiiU.WUP.Services
         public void Update(List<FSTEntry>? entries)
         {
             if (entries != null)
-                _entries = entries;
+                FSTEntries = entries;
         }
 
         public override bool Equals(object? other)

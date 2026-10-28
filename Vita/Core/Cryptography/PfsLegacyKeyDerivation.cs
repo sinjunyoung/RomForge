@@ -9,7 +9,6 @@ public static class PfsLegacyKeyDerivation
         byte[] message = filesSalt == 0 ? WriteUInt32LittleEndian(icvSalt) : Concat(WriteUInt32LittleEndian(filesSalt), WriteUInt32LittleEndian(icvSalt));
         using var hmac = new HMACSHA1(PfsGameDataCipher.HmacKey0);
         byte[] digest = hmac.ComputeHash(message);
-
         return digest.AsSpan(0, 16).ToArray();
     }
 
