@@ -70,7 +70,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="280">
+                        <GridViewColumn Width="270">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="TitleName">
                                     <StackPanel Orientation="Horizontal">
@@ -96,13 +96,10 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="90">
+                        <GridViewColumn Width="70">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileType">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="종류" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
@@ -114,13 +111,10 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="75">
+                        <GridViewColumn Width="60">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Extension">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Image Source="/RomForge.Core;component/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="입력" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/Input.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
@@ -132,7 +126,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="80">
+                        <GridViewColumn Width="100">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader>
                                     <StackPanel Orientation="Horizontal">
@@ -143,7 +137,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="65" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <ComboBox ItemsSource="{Binding AvailableFormats}" SelectedItem="{Binding SelectedTargetFormat, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="85" Height="26" HorizontalAlignment="Center" VerticalAlignment="Center">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Foreground" Value="White"/>
