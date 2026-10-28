@@ -21,7 +21,6 @@ public static class ArchivePatchSourceFactory
     public static (string ArchivePath, string Scope) SplitScope(string path)
     {
         int idx = path.IndexOf(ScopeSeparator, StringComparison.Ordinal);
-
         return idx < 0 ? (path, string.Empty) : (path[..idx], path[(idx + ScopeSeparator.Length)..]);
     }
 

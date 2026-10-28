@@ -24,8 +24,8 @@ internal static class Lz4ProgramNcaBuilder
 
         var extractor = new NcaExtractor(keySet, _ => true);
         var context = new ProgressContext(1);
-        string exefsDir = source.CanOpenSection(NcaSectionType.Code) ? extractor.ExtractExeFs(source, null, "exefs", programDir, context, null, ct) : string.Empty;
-        string logoDir = extractor.ExtractLogo(source, "logo", programDir, context, null, ct) ?? string.Empty;
+        string exefsDir = source.CanOpenSection(NcaSectionType.Code) ? extractor.ExtractExeFs(source, null, "exefs", programDir, context, ct) : string.Empty;
+        string logoDir = extractor.ExtractLogo(source, "logo", programDir, context, ct) ?? string.Empty;
         byte keyGeneration = source.Header.KeyGeneration == 0 ? (byte)1 : source.Header.KeyGeneration;
         int keyGenerationIndex = keyGeneration - 1;
 

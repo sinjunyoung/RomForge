@@ -72,20 +72,6 @@ public static class LibHacHelper
         }
     }
 
-    public static Stream GetDecodedStream(IFile file, string fileName, KeySet keySet)
-    {
-        var stream = file.AsStream();
-
-        if (Path.GetExtension(fileName).Equals(".ncz", StringComparison.CurrentCultureIgnoreCase))
-        {
-            var ncz = new Ncz(keySet, stream, NczReadMode.Original);
-
-            return ncz.BaseStorage.AsStream();
-        }
-
-        return stream;
-    }
-
     public static Cnmt? GetCnmtFromNca(this IFile ncaFile, KeySet ks)
     {
         try
@@ -214,39 +200,6 @@ public static class LibHacHelper
         return iconBuf;
     }
 
-    public static string GetTitleIdFromRom(string path)
-    {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        using var storage = new LocalStorage(path, FileAccess.Read);
-        IFileSystem fs = storage.OpenFileSystem(keySet, path);
-        var entries = fs.EnumerateEntries("/", "*.nca")
-            .Concat(fs.EnumerateEntries("/", "*.ncz"))
-            .Where(e => e.Type == DirectoryEntryType.File);
-
-        foreach (var entry in entries)
-        {
-            using var ncaFile = new UniqueRef<IFile>();
-
-            if (fs.OpenFile(ref ncaFile.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).IsFailure())
-                continue;
-
-            try
-            {
-                bool isNcz = entry.Name.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase);
-                Nca nca = isNcz ? new Ncz(keySet, ncaFile.Release().AsStream(), NczReadMode.Fast) : new Nca(keySet, ncaFile.Release().AsStorage());
-
-                if (nca.Header.ContentType == NcaContentType.Program)
-                    return nca.Header.TitleId.ToString("X16");
-            }
-            catch 
-            { 
-                continue; 
-            }
-        }
-
-        throw new Exception("Title ID를 찾을 수 없습니다.");
-    }
-
     public static (byte KeyGeneration, uint SdkVersion) ReadControlNcaInfo(string ncaPath)
     {
         if (!File.Exists(ncaPath))
@@ -316,9 +269,6 @@ public static class LibHacHelper
         return (tid & 0xFFFFFFFFFFFF0000UL).ToString("X16");
     }
 
-    public static bool HasSparseLayer(this Nca nca)
-    {
-        return Enumerable.Range(0, 4)
-            .Any(i => nca.SectionExists(i) && nca.GetFsHeader(i).ExistsSparseLayer());
-    }
+    public static bool HasSparseLayer(this Nca nca) => Enumerable.Range(0, 4)
+        .Any(i => nca.SectionExists(i) && nca.GetFsHeader(i).ExistsSparseLayer());
 }

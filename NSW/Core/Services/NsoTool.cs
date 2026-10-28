@@ -49,8 +49,6 @@ public static class NsoTool
 
     public static bool IsNso(byte[] data) => data.Length >= 4 && data[0] == 'N' && data[1] == 'S' && data[2] == 'O' && data[3] == '0';
 
-    public static string GetBuildIdHex(byte[] nso) => Convert.ToHexString(nso.AsSpan(0x40, 32)).TrimEnd('0');
-
     public static bool IsCompressed(byte[] nso)
     {
         uint flags = BitConverter.ToUInt32(nso, 0x0C);

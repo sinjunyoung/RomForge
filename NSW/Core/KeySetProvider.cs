@@ -6,17 +6,16 @@ namespace NSW.Core;
 
 public sealed class KeySetProvider
 {
-    private static KeySetProvider _instance;
     private static readonly Lock _lock = new();
 
-    private KeySet _keySet;
 
     public KeySet KeySet
     {
+        set;
         get
         {
-            if (_keySet == null) TryLoadKeys();
-            return _keySet;
+            if (field == null) TryLoadKeys();
+            return field ?? throw new NullReferenceException();
         }
     }
 
@@ -24,7 +23,7 @@ public sealed class KeySetProvider
     {
         get
         {
-            lock (_lock) return _instance ??= new KeySetProvider();
+            lock (_lock) return field ??= new KeySetProvider();
         }
     }
 
@@ -37,8 +36,8 @@ public sealed class KeySetProvider
         if (File.Exists(keysPath))
         {
             try 
-            { 
-                _keySet = ExternalKeyReader.ReadKeyFile(keysPath); 
+            {
+                KeySet = ExternalKeyReader.ReadKeyFile(keysPath); 
             }
             catch (Exception ex)
             {

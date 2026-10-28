@@ -13,14 +13,6 @@
 	<PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;SYSLIB1054</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;SYSLIB1054</NoWarn>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="src\**" />
     <EmbeddedResource Remove="src\**" />

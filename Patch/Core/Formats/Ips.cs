@@ -7,17 +7,6 @@ public static class Ips
     private static readonly byte[] PatchHeader = [(byte)'P', (byte)'A', (byte)'T', (byte)'C', (byte)'H'];
     private static readonly byte[] PatchFooter = [(byte)'E', (byte)'O', (byte)'F'];
 
-    public static async Task CreatePatchAsync(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        ValidateInputFiles(sourcePath, newPath);
-
-        byte[] original = await File.ReadAllBytesAsync(sourcePath, ct);
-        byte[] modified = await File.ReadAllBytesAsync(newPath, ct);
-        byte[] patch = await Task.Run(() => Encode(original, modified, progress, ct), ct);
-
-        await File.WriteAllBytesAsync(patchPath, patch, ct);
-    }
-
     public static async Task ApplyPatchAsync(string sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ValidateInputFiles(sourcePath, patchPath);
@@ -30,99 +19,6 @@ public static class Ips
     }
 
     public static Task<byte[]> ApplyPatchAsync(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => Task.Run(() => Decode(sourceData, patchData, progress, ct), ct);
-
-    private unsafe static byte[] Encode(byte[] original, byte[] modified, IProgress<ProgressInfo>? progress, CancellationToken ct)
-    {
-        using var ms = new MemoryStream();
-
-        ms.Write(PatchHeader, 0, PatchHeader.Length);
-
-        int maxLen = Math.Max(original.Length, modified.Length);
-
-        fixed (byte* pOrg = original, pMod = modified)
-        {
-            int pos = 0;
-
-            while (pos < maxLen)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                byte orgByte = pos < original.Length ? pOrg[pos] : (byte)0;
-                byte modByte = pos < modified.Length ? pMod[pos] : (byte)0;
-
-                if (orgByte != modByte)
-                {
-                    int start = pos;
-
-                    while (pos < maxLen && (pos - start) < 0xFFFF)
-                    {
-                        ct.ThrowIfCancellationRequested();
-
-                        if ((pos < original.Length ? pOrg[pos] : (byte)0) == (pos < modified.Length ? pMod[pos] : (byte)0))
-                            break;
-
-                        pos++;
-                    }
-
-                    int size = pos - start;
-                    byte firstMod = start < modified.Length ? pMod[start] : (byte)0;
-                    bool isRle = size >= 3;
-
-                    if (isRle)
-                    {
-                        for (int j = start + 1; j < start + size; j++)
-                        {
-                            ct.ThrowIfCancellationRequested();
-
-                            if ((j < modified.Length ? pMod[j] : (byte)0) != firstMod)
-                            {
-                                isRle = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    ms.WriteByte((byte)((start >> 16) & 0xFF));
-                    ms.WriteByte((byte)((start >> 8) & 0xFF));
-                    ms.WriteByte((byte)(start & 0xFF));
-
-                    if (isRle)
-                    {
-                        ms.WriteByte(0);
-                        ms.WriteByte(0);
-                        ms.WriteByte((byte)((size >> 8) & 0xFF));
-                        ms.WriteByte((byte)(size & 0xFF));
-                        ms.WriteByte(firstMod);
-                    }
-                    else
-                    {
-                        ms.WriteByte((byte)((size >> 8) & 0xFF));
-                        ms.WriteByte((byte)(size & 0xFF));
-
-                        int available = Math.Min(size, modified.Length - start);
-
-                        ms.Write(modified, start, Math.Max(0, available));
-
-                        for (int i = available; i < size; i++)
-                            ms.WriteByte(0);
-                    }
-                }
-                else pos++;
-
-                if (progress != null && pos % Math.Max(1, maxLen / 100) == 0)
-                {
-                    progress.Report(new ProgressInfo
-                    {
-                        Percent = (int)(pos / (double)maxLen * 100)
-                    });
-                }
-            }
-        }
-
-        ms.Write(PatchFooter, 0, PatchFooter.Length);
-
-        return ms.ToArray();
-    }
 
     private unsafe static byte[] Decode(byte[] rom, byte[] ips, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {

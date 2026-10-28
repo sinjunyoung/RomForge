@@ -1,7 +1,6 @@
 ﻿using Patch.Core.Formats.DCP.Models;
 using System.Text;
 
-
 namespace Patch.Core.Formats.DCP.Services;
 
 public class Iso9660Builder(byte[] originalPvd, Iso9660Entry root)

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace NSW.Core.Models;
 
@@ -37,8 +36,6 @@ public class UnpackResult
     public uint GameVersion { get; set; }
 
     public string DisplayVersion { get; set; } = string.Empty;
-
-    public uint NintendoVersion { get; set; }
 
     public bool HasUpdate { get; set; }
 

@@ -6,15 +6,21 @@ internal sealed class XtsAesContext : IDisposable
 {
     private readonly Aes _aes1;
     private readonly Aes _aes2;
+
     public ICryptoTransform Enc { get; }
+
     public ICryptoTransform Dec { get; }
+
     private readonly ICryptoTransform _tweakEnc;
 
     public XtsAesContext(byte[] key1, byte[] key2)
     {
         _aes2 = CreateEcb(key2);
+
         _tweakEnc = _aes2.CreateEncryptor();
+
         _aes1 = CreateEcb(key1);
+
         Enc = _aes1.CreateEncryptor();
         Dec = _aes1.CreateDecryptor();
     }
@@ -24,9 +30,11 @@ internal sealed class XtsAesContext : IDisposable
     private static Aes CreateEcb(byte[] key)
     {
         var aes = Aes.Create();
+
         aes.Key = key;
         aes.Mode = CipherMode.ECB;
         aes.Padding = PaddingMode.None;
+
         return aes;
     }
 

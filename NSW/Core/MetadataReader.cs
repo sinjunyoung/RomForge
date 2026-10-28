@@ -215,7 +215,7 @@ public static class MetadataReader
                 ContentMetaType type = cnmt.Type;
 
                 var contentNcaIds = cnmt.ContentEntries
-                    .Select(e => BitConverter.ToString(e.NcaId).Replace("-", string.Empty).ToLowerInvariant())
+                    .Select(e => Convert.ToHexStringLower(e.NcaId))
                     .ToList();
 
                 string selfNcaId = System.IO.Path.GetFileNameWithoutExtension(System.IO.Path.GetFileNameWithoutExtension(cnmtNcaName));
@@ -262,7 +262,7 @@ public static class MetadataReader
 
                 if (ctrlRecord != null)
                 {
-                    string ctrlId = BitConverter.ToString(ctrlRecord.NcaId).Replace("-", string.Empty).ToLowerInvariant();
+                    string ctrlId = Convert.ToHexStringLower(ctrlRecord.NcaId);
                     string? ctrlName = allFiles.Keys.FirstOrDefault(k => k.StartsWith(ctrlId, StringComparison.OrdinalIgnoreCase));
 
                     if (ctrlName != null)
@@ -339,7 +339,7 @@ public static class MetadataReader
 
                 foreach (var programEntry in cnmt.ContentEntries.Where(e => e.Type == LibHac.Ncm.ContentType.Program))
                 {
-                    string programNcaId = BitConverter.ToString(programEntry.NcaId).Replace("-", string.Empty).ToLowerInvariant();
+                    string programNcaId = Convert.ToHexStringLower(programEntry.NcaId);
                     string? programName = allFiles.Keys.FirstOrDefault(k => k.StartsWith(programNcaId, StringComparison.OrdinalIgnoreCase));
 
                     if (programName != null && RomfsCompression.HasCompressedSection(OpenNca(allFiles[programName], programName, keySet)))

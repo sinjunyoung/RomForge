@@ -17,21 +17,7 @@ public static class Aps
         await File.WriteAllBytesAsync(outputPath, result, ct);
     }
 
-    public static async Task<byte[]> ApplyPatchAsync(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        return await Task.Run(() => Decode(sourceData, patchData, progress, ct), ct);
-    }
-
-    public static async Task CreatePatchAsync(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        ValidateInputFiles(sourcePath, newPath);
-
-        byte[] source = await File.ReadAllBytesAsync(sourcePath, ct);
-        byte[] target = await File.ReadAllBytesAsync(newPath, ct);
-        byte[] result = await Task.Run(() => Encode(source, target, progress, ct), ct);
-
-        await File.WriteAllBytesAsync(patchPath, result, ct);
-    }
+    public static async Task<byte[]> ApplyPatchAsync(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => await Task.Run(() => Decode(sourceData, patchData, progress, ct), ct);
 
     private unsafe static byte[] Decode(byte[] source, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
@@ -79,56 +65,6 @@ public static class Aps
 
             return output;
         }
-    }
-
-    private unsafe static byte[] Encode(byte[] source, byte[] target, IProgress<ProgressInfo>? progress, CancellationToken ct)
-    {
-        using var ms = new MemoryStream();
-
-        ms.Write(HeaderBytes, 0, 4);
-
-        int maxLen = Math.Max(source.Length, target.Length);
-
-        fixed (byte* pSrc = source, pTar = target)
-        {
-            int i = 0;
-
-            while (i < maxLen)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                byte s = i < source.Length ? pSrc[i] : (byte)0;
-                byte t = i < target.Length ? pTar[i] : (byte)0;
-
-                if (s != t)
-                {
-                    int start = i;
-
-                    while (i < maxLen && (i - start) < 255)
-                    {
-                        byte sb = i < source.Length ? pSrc[i] : (byte)0;
-                        byte tb = i < target.Length ? pTar[i] : (byte)0;
-
-                        if (sb == tb)
-                            break;
-
-                        i++;
-                    }
-
-                    int length = i - start;
-
-                    ms.Write(BitConverter.GetBytes((uint)start), 0, 4);
-                    ms.WriteByte((byte)length);
-                    ms.Write(target, start, length);
-                }
-                else i++;
-
-                if (progress != null && i % 1000 == 0)
-                    progress.Report(new ProgressInfo((int)((double)i / maxLen * 100), string.Empty, string.Empty, string.Empty, string.Empty));
-            }
-        }
-
-        return ms.ToArray();
     }
 
     private static void ValidateInputFiles(params string[] paths)

@@ -1,4 +1,5 @@
 ﻿using Patch.Core.Interfaces;
+using Patch.Core.Models;
 using SharpCompress.Archives;
 using SharpCompress.Readers;
 

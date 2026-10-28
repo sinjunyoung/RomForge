@@ -5,8 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Patch.Core.Services;
 
-public sealed record PlannedPatch(PatchFileRef File, bool Strict);
-
 public sealed class PatchPlan
 {
     private readonly Dictionary<string, PatchFileRef> _overwrites;

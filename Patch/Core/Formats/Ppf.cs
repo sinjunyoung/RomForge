@@ -37,20 +37,6 @@ public static class Ppf
         }, ct).ConfigureAwait(false);
     }
 
-    public static async Task CreatePatchAsync(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, string description = "", bool enableBlockcheck = true, CancellationToken ct = default)
-    {
-        ValidateInputFiles(sourcePath, newPath);
-
-        await Task.Run(() =>
-        {
-            using var srcStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var tarStream = new FileStream(newPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var patStream = new FileStream(patchPath, FileMode.Create, FileAccess.Write);
-
-            EncodeStreamInternal(srcStream, tarStream, patStream, progress, description, enableBlockcheck, ct);
-        }, ct).ConfigureAwait(false);
-    }
-
     private static void DecodeStreamInternal(Stream src, Stream pat, Stream outStream, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (pat.Length < 56)
@@ -215,112 +201,6 @@ public static class Ppf
         stream.ReadExactly(buffer, 0, count);
 
         return buffer;
-    }
-
-    private static void EncodeStreamInternal(Stream src, Stream tar, Stream pat, IProgress<ProgressInfo>? progress, string description, bool enableBlockcheck, CancellationToken ct)
-    {
-        byte[] header = new byte[60];
-
-        HeaderMagic30.CopyTo(header, 0);
-        header[5] = 0x02;
-
-        byte[] descBytes = Encoding.ASCII.GetBytes(description);
-
-        Array.Copy(descBytes, 0, header, DescriptionOffset, Math.Min(descBytes.Length, DescriptionLength));
-
-        header[57] = (byte)(enableBlockcheck ? 1 : 0);
-        pat.Write(header, 0, header.Length);
-
-        if (enableBlockcheck)
-        {
-            const long blockStart = 0x9320L;
-
-            if (src.Length < blockStart + 1024)
-                throw new InvalidDataException("소스 파일이 너무 짧아 blockcheck를 생성할 수 없습니다.");
-
-            src.Position = blockStart;
-
-            byte[] blockBuf = new byte[1024];
-
-            src.ReadExactly(blockBuf, 0, 1024);
-            pat.Write(blockBuf, 0, 1024);
-        }
-
-        long maxLen = Math.Max(src.Length, tar.Length);
-        Action<long, long>? report = null;
-
-        if (progress is not null)
-        {
-            var reporter = new ProgressReporter("패치 생성중...", string.Empty, maxLen, progress);
-
-            report = reporter.CreateAction();
-        }
-
-        long nextReport = Environment.TickCount64 + 100;
-
-        src.Position = 0;
-        tar.Position = 0;
-
-        byte[] srcBuf = new byte[4096];
-        byte[] tarBuf = new byte[4096];
-        long currentPos = 0;
-
-        while (currentPos < maxLen)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            int bytesReadSrc = src.Read(srcBuf, 0, srcBuf.Length);
-            int bytesReadTar = tar.Read(tarBuf, 0, tarBuf.Length);
-            int validLen = Math.Max(bytesReadSrc, bytesReadTar);
-
-            if (validLen == 0)
-                break;
-
-            for (int i = 0; i < validLen; i++)
-            {
-                byte s = i < bytesReadSrc ? srcBuf[i] : (byte)0;
-                byte t = i < bytesReadTar ? tarBuf[i] : (byte)0;
-
-                if (s != t)
-                {
-                    long startOffset = currentPos + i;
-                    List<byte> diffBytes = [];
-
-                    while (i < validLen && diffBytes.Count < 255)
-                    {
-                        byte currS = i < bytesReadSrc ? srcBuf[i] : (byte)0;
-                        byte currT = i < bytesReadTar ? tarBuf[i] : (byte)0;
-
-                        if (currS == currT)
-                            break;
-
-                        diffBytes.Add(currT);
-                        i++;
-                    }
-
-                    byte[] offsetBytes = BitConverter.GetBytes(startOffset);
-
-                    pat.Write(offsetBytes, 0, offsetBytes.Length);
-                    pat.WriteByte((byte)diffBytes.Count);
-                    pat.Write([.. diffBytes], 0, diffBytes.Count);
-
-                    i--;
-                }
-            }
-
-            currentPos += validLen;
-
-            long now = Environment.TickCount64;
-
-            if (now >= nextReport)
-            {
-                nextReport = now + 100;
-
-                report?.Invoke(currentPos, maxLen);
-            }
-        }
-
-        report?.Invoke(maxLen, maxLen);
     }
 
     private static void ValidateBlockcheckInternal(Stream pat, Stream src, byte imagetype, int version)

@@ -19,17 +19,6 @@ public static class Ups
 
     public static Task<byte[]> ApplyPatchAsync(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => Task.Run(() => Decode(sourceData, patchData, progress, ct), ct);
 
-    public static async Task CreatePatchAsync(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        ValidateInputFiles(sourcePath, newPath);
-
-        byte[] source = await File.ReadAllBytesAsync(sourcePath, ct);
-        byte[] target = await File.ReadAllBytesAsync(newPath, ct);
-        byte[] patch = await Task.Run(() => Encode(source, target, progress, ct), ct);
-
-        await File.WriteAllBytesAsync(patchPath, patch, ct);
-    }
-
     private unsafe static byte[] Decode(byte[] input, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (patch.Length < 12) throw new InvalidDataException("UPS 패치 파일이 너무 짧습니다.");
@@ -100,78 +89,6 @@ public static class Ups
 
             return output;
         }
-    }
-
-    private unsafe static byte[] Encode(byte[] source, byte[] target, IProgress<ProgressInfo>? progress, CancellationToken ct)
-    {
-        using var ms = new MemoryStream();
-
-        ms.Write(HeaderBytes, 0, 4);
-        WriteVli(ms, source.Length);
-        WriteVli(ms, target.Length);
-
-        int maxLen = Math.Max(source.Length, target.Length);
-
-        fixed (byte* pSrc = source, pTar = target)
-        {
-            int i = 0;
-            int lastOffset = 0;
-
-            while (i < maxLen)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                byte s = i < source.Length ? pSrc[i] : (byte)0;
-                byte t = i < target.Length ? pTar[i] : (byte)0;
-
-                if (s != t)
-                {
-                    WriteVli(ms, i - lastOffset);
-
-                    int blockStart = i;
-
-                    while (i < maxLen)
-                    {
-                        ct.ThrowIfCancellationRequested();
-
-                        if ((i < source.Length ? pSrc[i] : (byte)0) == (i < target.Length ? pTar[i] : (byte)0))
-                            break;
-
-                        i++;
-                    }
-
-                    byte[] xorBlock = new byte[i - blockStart + 1];
-
-                    for (int j = 0; j < i - blockStart; j++)
-                    {
-                        byte sb = (blockStart + j) < source.Length ? pSrc[blockStart + j] : (byte)0;
-                        byte tb = (blockStart + j) < target.Length ? pTar[blockStart + j] : (byte)0;
-
-                        xorBlock[j] = (byte)(sb ^ tb);
-                    }
-
-                    xorBlock[i - blockStart] = 0;
-
-                    ms.Write(xorBlock, 0, xorBlock.Length);
-
-                    lastOffset = i;
-                }
-                else i++;
-
-                if (progress != null && i % 1000 == 0)
-                    progress.Report(new ProgressInfo { Percent = (int)(i / (double)maxLen * 100) });
-            }
-        }
-
-        byte[] raw = ms.ToArray();
-        byte[] final = new byte[raw.Length + 12];
-
-        Buffer.BlockCopy(raw, 0, final, 0, raw.Length);
-        BitConverter.GetBytes(CalculateCrc32(source)).CopyTo(final, final.Length - 12);
-        BitConverter.GetBytes(CalculateCrc32(target)).CopyTo(final, final.Length - 8);
-        BitConverter.GetBytes(CalculateCrc32(raw)).CopyTo(final, final.Length - 4);
-
-        return final;
     }
 
     private unsafe static long ReadVli(byte* patch, ref int pos, int maxLen)

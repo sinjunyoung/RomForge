@@ -13,7 +13,6 @@ public static class GdRomApplier
 
         await PreparePatchedFilesAsync(gdi, dcpPath, replacedFiles, onProgress, onLog, ct);
         await Task.Run(() => GdRomRebuilder.RebuildFull(gdi, replacedFiles, outputDir, (p, msg) => onProgress?.Invoke(0.20 + 0.80 * p, msg), onLog, ct), ct);
-
         onProgress?.Invoke(1.0, "모든 패치 적용 작업 완료!");
     }
 

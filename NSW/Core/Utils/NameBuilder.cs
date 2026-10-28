@@ -1,11 +1,13 @@
 ﻿using NSW.Core.Enums;
-using System.IO;
 using System.Text.RegularExpressions;
 
 namespace NSW.Core.Utils;
 
-public static class NameBuilder
+public static partial class NameBuilder
 {
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhitespaceRegex();
+
     public static string FileNameBuild(string suffix, string krName, string enName, string titleId, string displayVersion, uint titleVersion, int dlcCount, ContainerFormat format = ContainerFormat.Nsp)
     {
         string namePart = BuildNamePart(krName, enName);
@@ -110,7 +112,7 @@ public static class NameBuilder
         return tags.Count > 0 ? $"({string.Join("+", tags)})" : string.Empty;
     }
 
-    private static string ComposeBaseName(string namePart, string infoPart) => Regex.Replace($"{namePart} {infoPart}", @"\s+", " ").Trim();
+    private static string ComposeBaseName(string namePart, string infoPart) => WhitespaceRegex().Replace($"{namePart} {infoPart}", " ").Trim();
 
     public  static string BuildFinalSuffix(string suffix, ContainerFormat format)
     {

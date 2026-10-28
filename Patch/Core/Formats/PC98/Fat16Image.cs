@@ -21,6 +21,7 @@ public sealed class Fat16Image
     public Fat16Image(string path)
     {
         _raw = File.ReadAllBytes(path);
+
         LocateVolume();
     }
 
@@ -138,17 +139,6 @@ public sealed class Fat16Image
         }
 
         return result;
-    }
-
-    public byte[] ReadFile(Fat16DirEntry entry)
-    {
-        var chain = Chain(entry.Cluster);
-        var buf = new byte[chain.Count * _clSize];
-
-        for (int i = 0; i < chain.Count; i++)
-            Buffer.BlockCopy(_raw, ClusterOffset(chain[i]), buf, i * _clSize, _clSize);
-
-        return buf[..(int)entry.Size];
     }
 
     private Fat16DirEntry ParseEntry(int off)

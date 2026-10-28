@@ -1,12 +1,11 @@
 ﻿using Patch.Core.Interfaces;
+using Patch.Core.Models;
 using SevenZip;
 
 namespace Patch.Core.Services;
 
 public sealed class SevenZipArchivePatchSource : IArchivePatchSource
 {
-    private readonly string _archivePath;
-    private readonly string? _password;
     private readonly string _tempDir;
     private readonly Dictionary<string, ArchiveFileInfo> _byKey = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<string, string> _extractedPaths = new(StringComparer.OrdinalIgnoreCase);
@@ -19,8 +18,6 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
     {
         NativeSevenZip.EnsureInitialized();
 
-        _archivePath = path;
-        _password = password;
         _tempDir = Path.Combine(Path.GetDirectoryName(path)!, "romforge_7z_" + Guid.NewGuid().ToString("N"));
 
         try

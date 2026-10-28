@@ -55,10 +55,10 @@ public static class CnmtGenerator
             context.ContentRecords.Take(context.ContentRecordsCount).Select(record =>
                 new XElement("Content",
                     new XElement("Type", GetContentTypeName(record.Type)),
-                    new XElement("Id", BitConverter.ToString(record.NcaId).Replace("-", string.Empty).ToLower()),
+                    new XElement("Id", Convert.ToHexStringLower(record.NcaId)),
                     new XElement("IdOffset", record.IdOffset),
                     new XElement("Size", BitConverter.ToUInt64([.. record.Size, .. new byte[2]], 0)),
-                    new XElement("Hash", BitConverter.ToString(record.Hash).Replace("-", string.Empty).ToLower()),
+                    new XElement("Hash", Convert.ToHexStringLower(record.Hash)),
                     new XElement("KeyGeneration", 11)
                 )
             ),

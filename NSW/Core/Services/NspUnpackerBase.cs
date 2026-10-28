@@ -80,11 +80,11 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 var patchProg = baseProg != null ? updateProg : null;
 
                 if (effectiveProg.CanOpenSection(NcaSectionType.Code))
-                    result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, "exefs", programDir, progCtx, progress, ct);
+                    result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, "exefs", programDir, progCtx, ct);
 
                 if (effectiveProg.CanOpenSection(NcaSectionType.Data))
                 {
-                    result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), progress, ct);
+                    result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), ct);
 
                     if (RomfsCompression.HasCompressedSection(effectiveProg) || RomfsCompression.HasCompressedSection(patchProg))
                     {
@@ -93,7 +93,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
                     }
                 }
 
-                var logoDir = extractor.ExtractLogo(effectiveProg, "logo", programDir, progCtx, progress, ct);
+                var logoDir = extractor.ExtractLogo(effectiveProg, "logo", programDir, progCtx, ct);
 
                 if (logoDir != null)
                     result.LogoDirs[idOffset] = logoDir;
@@ -102,7 +102,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 ncas.UpdateControls.TryGetValue(idOffset, out var updateControl);
 
                 var effectiveControl = baseControl ?? updateControl;
-                var controlDir = extractor.ExtractControl(effectiveControl, baseControl != null ? updateControl : null, req, result, "control", programDir, BaseNspPath, progCtx, progress, ct);
+                var controlDir = extractor.ExtractControl(effectiveControl, baseControl != null ? updateControl : null, req, result, "control", programDir, BaseNspPath, progCtx, ct);
 
                 if (controlDir != null)
                     result.ControlDirs[idOffset] = controlDir;
@@ -110,7 +110,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 ncas.BaseHtmls.TryGetValue(idOffset, out var baseHtml);
                 ncas.UpdateHtmls.TryGetValue(idOffset, out var updateHtml);
 
-                var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, "htmldoc", programDir, progCtx, progress, ct);
+                var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, "htmldoc", programDir, progCtx, ct);
 
                 if (htmlDir != null)
                     result.HtmlDocDirs[idOffset] = htmlDir;
@@ -118,13 +118,13 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 ncas.BaseLegals.TryGetValue(idOffset, out var baseLegal);
                 ncas.UpdateLegals.TryGetValue(idOffset, out var updateLegal);
 
-                var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, "legal", programDir, progCtx, progress, ct);
+                var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, "legal", programDir, progCtx, ct);
 
                 if (legalDir != null)
                     result.LegalDirs[idOffset] = legalDir;
             }
 
-            extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, progress, ct);
+            extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, ct);
 
             if (withControlNca)
             {

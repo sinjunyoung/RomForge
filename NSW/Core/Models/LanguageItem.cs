@@ -14,7 +14,7 @@ public class LanguageItem
 
     public List<byte> Indices { get; set; } = [];
 
-    public Byte[] Logo { get; set; }
+    public Byte[]? Logo { get; set; }
 
     public bool IsSelected { get; set; }
 }

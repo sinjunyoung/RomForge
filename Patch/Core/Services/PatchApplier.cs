@@ -1,4 +1,5 @@
 ﻿using Common;
+using Patch.Core.Models;
 
 namespace Patch.Core.Services;
 
@@ -24,8 +25,7 @@ public static class PatchApplier
         return ApplyPatchesAsync(path, plan, original, log, ct).GetAwaiter().GetResult().Data;
     }
 
-    public static Task<(byte[] Data, bool Applied)> ApplyPatchesAsync(string path, PatchPlan plan, byte[] original, Action<string, LogLevel>? log, CancellationToken ct)
-        => ApplyPatchesAsync(path, plan.GetPatches(path), original, log, ct);
+    public static Task<(byte[] Data, bool Applied)> ApplyPatchesAsync(string path, PatchPlan plan, byte[] original, Action<string, LogLevel>? log, CancellationToken ct) => ApplyPatchesAsync(path, plan.GetPatches(path), original, log, ct);
 
     public static async Task<(byte[] Data, bool Applied)> ApplyPatchesAsync(string path, IReadOnlyList<PlannedPatch> patches, byte[] original, Action<string, LogLevel>? log, CancellationToken ct)
     {

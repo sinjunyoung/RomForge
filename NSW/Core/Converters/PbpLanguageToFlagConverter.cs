@@ -6,10 +6,10 @@ namespace NSW.Core.Converters
 {
     public class PbpLanguageToFlagConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not string lang) 
-                return null;
+                return null!;
 
             string fileName = lang switch
             {

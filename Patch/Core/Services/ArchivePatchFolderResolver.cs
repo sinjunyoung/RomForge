@@ -78,49 +78,4 @@ public static class ArchivePatchFolderResolver
 
         return dirs;
     }
-
-    public static bool HasTitleIdDirs(IReadOnlyList<string> entryPaths)
-    {
-        foreach (string dir in CollectDirs(entryPaths))
-        {
-            if (dir.Length == 0)
-                continue;
-
-            int slash = dir.LastIndexOf('/');
-            string name = slash < 0 ? dir : dir[(slash + 1)..];
-
-            if (name.Length == 16 && name.All(Uri.IsHexDigit))
-                return true;
-        }
-
-        return false;
-    }
-
-    public static string? FindTitleIdDir(IReadOnlyList<string> entryPaths, string titleIdHex)
-    {
-        string? best = null;
-        int bestDepth = int.MaxValue;
-
-        foreach (string dir in CollectDirs(entryPaths))
-        {
-            if (dir.Length == 0)
-                continue;
-
-            int slash = dir.LastIndexOf('/');
-            string name = slash < 0 ? dir : dir[(slash + 1)..];
-
-            if (!string.Equals(name, titleIdHex, StringComparison.OrdinalIgnoreCase))
-                continue;
-
-            int depth = dir.Count(c => c == '/');
-
-            if (depth < bestDepth)
-            {
-                bestDepth = depth;
-                best = dir + "/";
-            }
-        }
-
-        return best;
-    }
 }

@@ -65,8 +65,7 @@ public sealed class NestedArchivePatchSource : IArchivePatchSource
         }
     }
 
-    public IArchivePatchEntry? FindEntry(string path) =>
-        _byFlatPath.TryGetValue(path, out var loc) ? loc.Source.FindEntry(loc.LocalPath) : null;
+    public IArchivePatchEntry? FindEntry(string path) => _byFlatPath.TryGetValue(path, out var loc) ? loc.Source.FindEntry(loc.LocalPath) : null;
 
     public void Dispose()
     {

@@ -71,51 +71,6 @@ public static class NacpProcessor
         VerifyMetadata(nacpRawData, isCompressed);
     }
 
-    public static void ConvertToLegacy(NcaGenerationOptions settings)
-    {
-        string romfsDir = settings.RomfsDirectory;
-        string controlNacpPath = Path.Combine(romfsDir, "control.nacp");
-
-        if (!File.Exists(controlNacpPath))
-            return;
-
-        byte[] nacpRawData = File.ReadAllBytes(controlNacpPath);
-        var control = MemoryMarshal.Read<ApplicationControlProperty>(nacpRawData);
-
-        if (control.TitleCompression != TitleCompressionValue.Enable)
-            return;
-
-        ReadOnlySpan<byte> titleBlock = nacpRawData.AsSpan(0, TitleBlockSize);
-        ushort compressedSize = BinaryPrimitives.ReadUInt16LittleEndian(titleBlock);
-        ReadOnlySpan<byte> compressedBlob = titleBlock.Slice(2, compressedSize);
-        byte[] decompressed = new byte[ReservedSlotCount * LanguageEntrySize];
-        using (var ms = new MemoryStream(compressedBlob.ToArray()))
-        using (var deflate = new DeflateStream(ms, CompressionMode.Decompress))
-            deflate.ReadExactly(decompressed, 0, decompressed.Length);
-
-        Array.Clear(nacpRawData, 0, TitleBlockSize);
-        Buffer.BlockCopy(decompressed, 0, nacpRawData, 0, LegacyLanguageCount * LanguageEntrySize);
-
-        nacpRawData[0x3215] = (byte)TitleCompressionValue.Disable;
-
-        for (int i = LegacyLanguageCount; i < CompressedSlotCount; i++)
-        {
-            string iconPath = Path.Combine(romfsDir, $"icon_{(Language)i}.dat");
-
-            if (File.Exists(iconPath))
-                File.Delete(iconPath);
-        }
-
-        uint flag = BinaryPrimitives.ReadUInt32LittleEndian(nacpRawData.AsSpan(SupportedLanguageFlagOffset));
-        uint legacyMask = (1u << LegacyLanguageCount) - 1;
-
-        flag &= legacyMask;
-
-        BinaryPrimitives.WriteUInt32LittleEndian(nacpRawData.AsSpan(SupportedLanguageFlagOffset), flag);
-        File.WriteAllBytes(controlNacpPath, nacpRawData);
-        VerifyMetadata(nacpRawData, isCompressed: false);
-    }
-
     private static void ValidateLegacyLanguages(NcaGenerationOptions settings)
     {
         if (settings.UserMetadata == null)

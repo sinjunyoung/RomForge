@@ -20,17 +20,17 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
     private readonly byte[] _copyBuffer = new byte[0x1000000];
 
-    public string ExtractExeFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string ExtractExeFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
     {
         string dir = Path.Combine(outDir, dirName);
         using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Code, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
 
-        ExtractFileSystem(fs, dir, "ExeFS", ctx, progress, ct);
+        ExtractFileSystem(fs, dir, "ExeFS", ctx, ct);
 
         return dir;
     }
 
-    public string ExtractRomFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, bool isCreateOnly = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string ExtractRomFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, bool isCreateOnly = false, CancellationToken ct = default)
     {
         string dir = Path.Combine(outDir, dirName);
 
@@ -56,12 +56,12 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
             : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-        ExtractFileSystem(fs, dir, "RomFS", ctx, progress, ct);
+        ExtractFileSystem(fs, dir, "RomFS", ctx, ct);
 
         return dir;
     }
 
-    public string? ExtractLogo(Nca baseProg, string dirName, string outDir, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string? ExtractLogo(Nca baseProg, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
     {
         if (!baseProg.CanOpenSection(NcaSectionType.Logo))
             return null;
@@ -69,12 +69,12 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         string dir = Path.Combine(outDir, dirName);
         using var fs = baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None);
 
-        ExtractFileSystem(fs, dir, "Logo", ctx, progress, ct);
+        ExtractFileSystem(fs, dir, "Logo", ctx,  ct);
 
         return dir;
     }
 
-    public string? ExtractControl(Nca? controlNca, Nca? updateControlNca, BuildRequest req, UnpackResult result, string dirName, string outDir, string baseNspPath, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string? ExtractControl(Nca? controlNca, Nca? updateControlNca, BuildRequest req, UnpackResult result, string dirName, string outDir, string baseNspPath, ProgressContext ctx, CancellationToken ct = default)
     {
         if (controlNca == null)
             return null;
@@ -82,13 +82,13 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         string dir = Path.Combine(outDir, dirName);
 
         using (var fs = controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None))
-            ExtractFileSystem(fs, dir, "Control (Base)", ctx, progress, ct);
+            ExtractFileSystem(fs, dir, "Control (Base)", ctx, ct);
 
         if (updateControlNca != null)
         {
             using var updateFs = updateControlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-            ExtractFileSystem(updateFs, dir, "Control (Update)", ctx, progress, ct);
+            ExtractFileSystem(updateFs, dir, "Control (Update)", ctx, ct);
         }
 
         string metaSourcePath = !string.IsNullOrEmpty(req.UpdateFilePath) ? req.UpdateFilePath : baseNspPath;
@@ -106,7 +106,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         return dir;
     }
 
-    public string? ExtractHtmlDoc(Nca? baseHtml, Nca? updateHtml, string dirName, string outDir, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string? ExtractHtmlDoc(Nca? baseHtml, Nca? updateHtml, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
     {
         if (baseHtml == null && updateHtml == null)
             return null;
@@ -117,7 +117,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         {
             using var fs = baseHtml != null && updateHtml != null ? baseHtml.OpenFileSystemWithPatch(updateHtml, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseHtml ?? updateHtml)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-            ExtractFileSystem(fs, dir, "HtmlDoc", ctx, progress, ct);
+            ExtractFileSystem(fs, dir, "HtmlDoc", ctx, ct);
         }
         catch (Exception ex)
         {
@@ -128,7 +128,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         return dir;
     }
 
-    public string? ExtractLegal(Nca? baseLegal, Nca? updateLegal, string dirName, string outDir, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string? ExtractLegal(Nca? baseLegal, Nca? updateLegal, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
     {
         if (baseLegal == null && updateLegal == null)
             return null;
@@ -136,12 +136,12 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         string dir = Path.Combine(outDir, dirName);
         using var fs = baseLegal != null && updateLegal != null ? baseLegal.OpenFileSystemWithPatch(updateLegal, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseLegal ?? updateLegal)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-        ExtractFileSystem(fs, dir, "Legal", ctx, progress, ct);
+        ExtractFileSystem(fs, dir, "Legal", ctx, ct);
 
         return dir;
     }
 
-    public void ExtractDlcs(List<Nca> dlcNcas, string outDir, UnpackResult result, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public void ExtractDlcs(List<Nca> dlcNcas, string outDir, UnpackResult result, ProgressContext ctx, CancellationToken ct = default)
     {
         if (dlcNcas.Count == 0)
             return;
@@ -162,7 +162,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             {
                 using var fs = nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-                ExtractFileSystem(fs, dlcDestDir, $"DLC ({titleIdStr})", ctx, progress, ct);
+                ExtractFileSystem(fs, dlcDestDir, $"DLC ({titleIdStr})", ctx, ct);
                 result.Dlcs.Add(new DlcUnpackInfo { TitleId = nca.Header.TitleId, Dir = Path.Combine("DLCs", titleIdStr) });
             }
             catch (Exception ex)
@@ -189,7 +189,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         }
     }
 
-    public void ExtractFileSystem(IFileSystem fs, string outDir, string label, ProgressContext ctx, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public void ExtractFileSystem(IFileSystem fs, string outDir, string label, ProgressContext ctx, CancellationToken ct = default)
     {
         var buf = _copyBuffer;
 

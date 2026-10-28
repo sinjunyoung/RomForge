@@ -1,20 +1,12 @@
-﻿using System.Runtime.InteropServices;
-using Common;
+﻿using Common;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Patch.Core.Formats;
 
-public static class Xdelta3
+public static partial class Xdelta3
 {
     private const string DllName = "xdelta3";
-
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public delegate void ProgressCallback(double progress);
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr xd3_get_last_error();
-
-    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_get_last_error_code();
 
     private enum Xd3StreamStatus
     {
@@ -27,20 +19,33 @@ public static class Xdelta3
         Error = -1
     }
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_open_decode_buf", CallingConvention = CallingConvention.Cdecl)]
-    private static extern IntPtr xd3_stream_open_decode_buf(IntPtr sourceBuf, long sourceSize);
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial IntPtr xd3_get_last_error();
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_feed", CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_stream_feed(IntPtr handle, byte[] patchChunk, nuint len, int isLastChunk);
+    [LibraryImport(DllName)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial int xd3_get_last_error_code();
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_read_output", CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_stream_read_output(IntPtr handle, byte[] outBuf, nuint outBufCapacity, out nuint written);
+    [LibraryImport(DllName, EntryPoint = "xd3_stream_open_decode_buf")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial IntPtr xd3_stream_open_decode_buf(IntPtr sourceBuf, long sourceSize);
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_finish", CallingConvention = CallingConvention.Cdecl)]
-    private static extern int xd3_stream_finish(IntPtr handle);
+    [LibraryImport(DllName, EntryPoint = "xd3_stream_feed")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial int xd3_stream_feed(IntPtr handle, [In] byte[] patchChunk, nuint len, int isLastChunk);
 
-    [DllImport(DllName, EntryPoint = "xd3_stream_close", CallingConvention = CallingConvention.Cdecl)]
-    private static extern void xd3_stream_close(IntPtr handle);
+    [LibraryImport(DllName, EntryPoint = "xd3_stream_read_output")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial int xd3_stream_read_output(IntPtr handle, [Out] byte[] outBuf, nuint outBufCapacity, out nuint written);
+
+    [LibraryImport(DllName, EntryPoint = "xd3_stream_finish")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial int xd3_stream_finish(IntPtr handle);
+
+    [LibraryImport(DllName, EntryPoint = "xd3_stream_close")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    private static partial void xd3_stream_close(IntPtr handle);
 
     private const int StreamChunkSize = 4 * 1024 * 1024;
 
@@ -255,8 +260,6 @@ public static class Xdelta3
             sourceHandle?.Free();
         }
     }
-
-    public static void CreatePatch(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) { }
 
     private static void ValidateInputFiles(params string[] paths)
     {

@@ -29,7 +29,6 @@ public sealed class PatchSession : IDisposable
         catch
         {
             source.Dispose();
-
             throw;
         }
     }

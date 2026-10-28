@@ -5,8 +5,6 @@ namespace Patch.Core.Formats.DCP.Services;
 
 public static class Iso9660DirectoryReader
 {
-    private const int PvdSector = 16;
-
     public static Iso9660Entry ReadTree(Func<uint, byte[]> sectorReader, uint pvdLba = 16)
     {
         var pvd = sectorReader(pvdLba);

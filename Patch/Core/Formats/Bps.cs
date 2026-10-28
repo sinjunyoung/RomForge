@@ -4,7 +4,7 @@ namespace Patch.Core.Formats;
 
 public static class Bps
 {
-    private static readonly byte[] HeaderBytes = [(byte)'B', (byte)'P', (byte)'S', (byte)'1'];
+    private static readonly uint[] Crc32Table = BuildCrc32Table();
 
     public static async Task ApplyPatchAsync(string sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
@@ -18,17 +18,6 @@ public static class Bps
     }
 
     public static Task<byte[]> ApplyPatchAsync(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default) => Task.Run(() => Decode(sourceData, patchData, progress, ct), ct);
-
-    public static async Task CreatePatchAsync(string sourcePath, string newPath, string patchPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        ValidateInputFiles(sourcePath, newPath);
-
-        byte[] source = await File.ReadAllBytesAsync(sourcePath, ct);
-        byte[] target = await File.ReadAllBytesAsync(newPath, ct);
-        byte[] result = await Task.Run(() => Encode(source, target, progress, ct), ct);
-
-        await File.WriteAllBytesAsync(patchPath, result, ct);
-    }
 
     private unsafe static byte[] Decode(byte[] source, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
@@ -146,71 +135,6 @@ public static class Bps
         }
     }
 
-    private unsafe static byte[] Encode(byte[] source, byte[] target, IProgress<ProgressInfo>? progress, CancellationToken ct)
-    {
-        using var ms = new MemoryStream();
-
-        ms.Write(HeaderBytes, 0, 4);
-        WriteVli(ms, source.Length);
-        WriteVli(ms, target.Length);
-        WriteVli(ms, 0);
-
-        fixed (byte* pSrc = source, pTar = target)
-        {
-            int outOffset = 0;
-
-            while (outOffset < target.Length)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                if (outOffset < source.Length && pSrc[outOffset] == pTar[outOffset])
-                {
-                    int len = 0;
-
-                    while (outOffset + len < source.Length && outOffset + len < target.Length && pSrc[outOffset + len] == pTar[outOffset + len])
-                        len++;
-
-                    WriteVli(ms, (long)((len - 1) << 2) | 0);
-
-                    outOffset += len;
-                }
-                else
-                {
-                    int runLen = 0;
-
-                    while (outOffset + runLen < target.Length && runLen < 0xFFFF)
-                    {
-                        ct.ThrowIfCancellationRequested();
-
-                        if (outOffset + runLen < source.Length && pSrc[outOffset + runLen] == pTar[outOffset + runLen])
-                            break;
-
-                        runLen++;
-                    }
-
-                    if (runLen == 0) runLen = 1;
-
-                    WriteVli(ms, (long)((runLen - 1) << 2) | 1);
-                    ms.Write(target, outOffset, runLen);
-
-                    outOffset += runLen;
-                }
-
-                if (progress != null && outOffset % 1000 == 0)
-                    progress.Report(new ProgressInfo { Percent = (int)(outOffset / (double)target.Length * 100) });
-            }
-        }
-
-        byte[] raw = ms.ToArray();
-        uint crc = CalculateCrc32(raw);
-        byte[] finalPatch = new byte[raw.Length + 4];
-
-        Buffer.BlockCopy(raw, 0, finalPatch, 0, raw.Length);
-        BitConverter.GetBytes(crc).CopyTo(finalPatch, finalPatch.Length - 4);
-
-        return finalPatch;
-    }
-
     private unsafe static long ReadVli(byte* patch, ref int pos, int maxLen)
     {
         long value = 0, shift = 1;
@@ -230,28 +154,6 @@ public static class Bps
 
         return value;
     }
-
-    private static void WriteVli(Stream s, long value)
-    {
-        while (true)
-        {
-            byte b = (byte)(value & 0x7F);
-
-            value >>= 7;
-
-            if (value == 0)
-            {
-                s.WriteByte((byte)(b | 0x80));
-                break;
-            }
-
-            s.WriteByte(b);
-
-            value--;
-        }
-    }
-
-    private static readonly uint[] Crc32Table = BuildCrc32Table();
 
     private static uint[] BuildCrc32Table()
     {

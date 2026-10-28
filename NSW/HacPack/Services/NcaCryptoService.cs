@@ -106,17 +106,6 @@ public static class NcaCryptoService
         NcaStructHelper.BytesToStruct(rawHdr, ref hdr);
     }
 
-    public static void UpdateCtr(byte[] ctr, ulong ofs)
-    {
-        ofs >>= 4;
-
-        for (int j = 0; j < 8; j++)
-        {
-            ctr[0x10 - j - 1] = (byte)(ofs & 0xFF);
-            ofs >>= 8;
-        }
-    }
-
     public static void UpdateCtr(Span<byte> ctr, ulong ofs)
     {
         ofs >>= 4;

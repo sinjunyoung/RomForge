@@ -55,7 +55,6 @@ public static class XdeltaAppHeaderReader
     public static bool TargetsCompressedContainer(string patchPath)
     {
         string? hint = ReadSourceFileNameHint(patchPath);
-
         return hint is not null && CompressedExtensionRegex.IsMatch(hint);
     }
 
