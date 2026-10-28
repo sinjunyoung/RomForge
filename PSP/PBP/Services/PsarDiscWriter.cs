@@ -2,8 +2,6 @@
 
 namespace PSP.PBP.Services;
 
-public record DiscWriteInfo(Stream IsoStream, long IsoLength, string GameId, string GameTitle, byte[] TocData);
-
 public static class PsarDiscWriter
 {
     private const int BlockSize = 0x9300;
@@ -70,7 +68,7 @@ public static class PsarDiscWriter
             ct.ThrowIfCancellationRequested();
             outputStream.WriteUInt32(offset, 1);
             outputStream.WriteUInt32(x, 1);
-            outputStream.Write(dummy, 0, sizeof(uint) * dummy.Length);
+            outputStream.Write(dummy, sizeof(uint) * dummy.Length);
 
             if (compressionLevel == 0)
                 offset += BlockSize;
@@ -183,7 +181,7 @@ public static class PsarDiscWriter
             }
 
             outputStream.Seek(indexOffset, SeekOrigin.Begin);
-            outputStream.Write(indexes, 0, (int)(4 + 4 + (6 * 4) * (isoSize / BlockSize)));
+            outputStream.Write(indexes);
             outputStream.Seek(offset, SeekOrigin.Begin);
         }
     }

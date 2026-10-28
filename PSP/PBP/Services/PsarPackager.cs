@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using PSP.PBP.Models;
+using System.IO.Compression;
 
 namespace PSP.PBP.Services;
 
@@ -22,7 +23,7 @@ public static class PsarPackager
 
         var mOffset = (uint)outputStream.Position;
 
-        outputStream.Write(isoPositions, 1, sizeof(uint) * 5);
+        outputStream.Write(isoPositions, sizeof(uint) * 5);
         outputStream.WriteRandom(12);
         outputStream.WriteInt32(0, 8);
         outputStream.Write('_');
@@ -83,7 +84,7 @@ public static class PsarPackager
         outputStream.Seek(p2Offset, SeekOrigin.Begin);
         outputStream.WriteUInt32(endOffset + 0x2d31, 1);
         outputStream.Seek(mOffset, SeekOrigin.Begin);
-        outputStream.Write(isoPositions, 1, sizeof(uint) * 5);
+        outputStream.Write(isoPositions, sizeof(uint) * 5);
         outputStream.Seek(finalOffset, SeekOrigin.Begin);
     }
 

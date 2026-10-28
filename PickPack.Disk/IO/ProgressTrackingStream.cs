@@ -1,9 +1,9 @@
-﻿namespace PickPack.Disk;
+﻿namespace PickPack.Disk.IO;
 
 public class ProgressTrackingStream(Stream baseStream, long totalLength, Action<int, string, string?> progressCallback, HttpResponseMessage response) : Stream
 {
-    long _bytesRead = 0;
-    DateTime _lastProgressReport = DateTime.MinValue;
+    private long _bytesRead = 0;
+    private DateTime _lastProgressReport = DateTime.MinValue;
 
     public override bool CanRead => baseStream.CanRead;
 
@@ -19,14 +19,13 @@ public class ProgressTrackingStream(Stream baseStream, long totalLength, Action<
         set => throw new NotSupportedException();
     }
 
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
     {
-        int read = await baseStream.ReadAsync(buffer.AsMemory(offset, count), ct);
+        int read = await baseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 
         if (read > 0)
         {
             _bytesRead += read;
-
             var now = DateTime.Now;
 
             if (now - _lastProgressReport > TimeSpan.FromMilliseconds(500))
@@ -43,21 +42,37 @@ public class ProgressTrackingStream(Stream baseStream, long totalLength, Action<
         return read;
     }
 
-    public override int Read(byte[] buffer, int offset, int count) => ReadAsync(buffer, offset, count, CancellationToken.None).GetAwaiter().GetResult();
+    public override int Read(Span<byte> buffer)
+    {
+        int read = baseStream.Read(buffer);
+
+        if (read > 0)
+        {
+            _bytesRead += read;
+            var now = DateTime.Now;
+
+            if (now - _lastProgressReport > TimeSpan.FromMilliseconds(500))
+            {
+                int percent = (int)((double)_bytesRead / totalLength * 100);
+                string speedInfo = CalculateSpeed();
+
+                progressCallback(percent, "다운로드 중...", speedInfo);
+
+                _lastProgressReport = now;
+            }
+        }
+
+        return read;
+    }
+
+    public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 
     private string CalculateSpeed()
     {
-        var elapsed = DateTime.Now - _lastProgressReport;
+        double mbRead = _bytesRead / (1024.0 * 1024.0);
+        double mbTotal = totalLength / (1024.0 * 1024.0);
 
-        if (elapsed.TotalSeconds > 0)
-        {
-            double mbRead = _bytesRead / (1024.0 * 1024.0);
-            double mbTotal = totalLength / (1024.0 * 1024.0);
-
-            return $"{mbRead:F1}/{mbTotal:F1} MB";
-        }
-
-        return string.Empty;
+        return $"{mbRead:F1}/{mbTotal:F1} MB";
     }
 
     protected override void Dispose(bool disposing)

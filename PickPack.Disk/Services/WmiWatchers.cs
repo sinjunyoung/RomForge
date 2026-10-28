@@ -6,26 +6,17 @@ namespace PickPack.Disk.Services;
 
 public class WmiWatchers
 {
-
-    #region Field
-
     readonly ManagementEventWatcher _arrivalWatcher;
     readonly ManagementEventWatcher _removalWatcher;
     readonly Lock _lockObject = new();
     DateTime _lastDriveCheckTime = DateTime.MinValue;
 
-    #endregion
-
-    #region #region Event and Delegate
-
-    public event EventHandler USBArrival;
-    public event EventHandler USBRemoval;
+    public event EventHandler? USBArrival;
+    public event EventHandler? USBRemoval;
 
     protected virtual void OnUSBArrival() => USBArrival?.Invoke(this, new EventArgs());
 
     protected virtual void OnUSBRemoval() => USBRemoval?.Invoke(this, new EventArgs());
-
-    #endregion
 
     public WmiWatchers()
     {

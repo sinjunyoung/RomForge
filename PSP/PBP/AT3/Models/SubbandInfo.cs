@@ -2,8 +2,6 @@
 
 public sealed class SubbandInfo
 {
-    public const int MaxGainPointsNum = 8;
-
     public List<GainPoint>[] Info;
 
     public SubbandInfo() => Info = NewInfo(4);

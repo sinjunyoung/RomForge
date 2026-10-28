@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Version>1.0.0.1</Version>
@@ -12,14 +12,15 @@
 	<Authors>YameSoft</Authors>
 	<Copyright>Copyright © 2026 YameSoft</Copyright>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8602;CS8603;CS8604;CS8618;MSB3825;NU1903;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
+	<NoWarn>NU1903</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8602;CS8603;CS8604;CS8618;MSB3825;NU1903;CA1416;SYSLIB1045;SYSLIB1054</NoWarn>
+    <NoWarn>NU1903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

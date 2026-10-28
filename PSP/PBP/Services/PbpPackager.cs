@@ -51,7 +51,7 @@ public static class PbpPackager
 
     private static void WriteCommonSections(Stream outputStream, uint[] header, SfoFile sfo, PbpAssets assets, uint psarOffset)
     {
-        outputStream.Write(header, 0, 0x28);
+        outputStream.Write(header, 0x28);
         outputStream.WriteSFO(sfo);
         outputStream.WriteResource(assets.Icon0Png);
         outputStream.WriteResource(assets.Pic0Png);

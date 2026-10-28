@@ -4,8 +4,6 @@ public sealed class AnalysisFilterBank
 {
     public const int FrameSamples = 1024;
 
-    public const int SubbandSamples = 256;
-
     private readonly Qmf _qmf1 = new(FrameSamples);
     private readonly Qmf _qmf2 = new(FrameSamples / 2);
     private readonly Qmf _qmf3 = new(FrameSamples / 2);

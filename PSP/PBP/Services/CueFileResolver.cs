@@ -2,10 +2,13 @@
 
 namespace PSP.PBP.Services;
 
-public static class CueFileResolver
+public static partial class CueFileResolver
 {
-    private static readonly Regex FileRegex = new(@"^FILE\s+""(.*?)""\s+(.*?)\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex FileNoQuoteRegex = new(@"^FILE\s+(.*?)\s+(BINARY|MOTOROLA|AIFF|WAVE|MP3)\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    [GeneratedRegex(@"^FILE\s+""(.*?)""\s+(.*?)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FileRegex();
+
+    [GeneratedRegex(@"^FILE\s+(.*?)\s+(BINARY|MOTOROLA|AIFF|WAVE|MP3)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FileNoQuoteRegex();
 
     public static string GetBinPath(string cuePath)
     {
@@ -30,13 +33,13 @@ public static class CueFileResolver
                 continue;
 
             string? fileName = null;
-            var match = FileRegex.Match(trimmed);
+            var match = FileRegex().Match(trimmed);
 
             if (match.Success)
                 fileName = match.Groups[1].Value;
             else
             {
-                var noQuoteMatch = FileNoQuoteRegex.Match(trimmed);
+                var noQuoteMatch = FileNoQuoteRegex().Match(trimmed);
 
                 if (noQuoteMatch.Success)
                     fileName = noQuoteMatch.Groups[1].Value;

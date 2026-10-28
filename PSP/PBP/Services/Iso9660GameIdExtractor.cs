@@ -1,11 +1,16 @@
-﻿using System.Text;
+﻿using PSP.PBP.Enums;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PSP.PBP.Services;
 
-public static class Iso9660GameIdExtractor
+public static partial class Iso9660GameIdExtractor
 {
-    public enum ExtractResult { Success, NotPs1Disc, InvalidDisc }
+    [GeneratedRegex(@"([A-Z]{4})_(\d{3})\.(\d+)", RegexOptions.IgnoreCase)]
+    private static partial Regex IdRegex();
+
+    [GeneratedRegex(@"(S[A-Z]{3})[-_]?(?:([0-9]{5})|([0-9]{3})\.([0-9]{2}))", RegexOptions.IgnoreCase)]
+    private static partial Regex PatternRegex();
 
     public static (string? Id, ExtractResult Result) Extract(Func<uint, byte[]> sectorReader)
     {
@@ -57,7 +62,7 @@ public static class Iso9660GameIdExtractor
     {
         var content = Encoding.ASCII.GetString(sectorReader(lba));
 
-        var id = Regex.Match(content, @"([A-Z]{4})_(\d{3})\.(\d+)", RegexOptions.IgnoreCase);
+        var id = IdRegex().Match(content);
 
         if (!id.Success)
             return null;
@@ -73,7 +78,7 @@ public static class Iso9660GameIdExtractor
             {
                 var sector = sectorReader(i);
                 var content = Encoding.ASCII.GetString(sector);
-                var match = Regex.Match(content, @"(S[A-Z]{3})[-_]?(?:([0-9]{5})|([0-9]{3})\.([0-9]{2}))", RegexOptions.IgnoreCase);
+                var match = PatternRegex().Match(content);
 
                 if (match.Success)
                 {

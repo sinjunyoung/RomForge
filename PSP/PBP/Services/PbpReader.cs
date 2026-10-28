@@ -3,7 +3,6 @@ using PSP.PBP.Models;
 
 namespace PSP.PBP.Services;
 
-
 public class PbpReader
 {
     private const int HEADER_SFO_OFFSET = 0x08;
@@ -14,12 +13,12 @@ public class PbpReader
     private const int HEADER_SND0_OFFSET = 0x1C;
     private const int HEADER_PSP_OFFSET = 0x20;
     private const int HEADER_PSAR_OFFSET = 0x24;
-
-    public const int ISO_BLOCK_SIZE = 0x930;
-
     private const uint PBPMAGIC = 0x50425000;
 
+    public const int ISO_BLOCK_SIZE = 0x930;    
+
     public SfoFile SFOData { get; private set; }
+
     public List<PbpDiscEntry> Discs { get; private set; }
 
     public PbpReader(Stream stream)

@@ -13,11 +13,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;NETSDK1206;SYSLIB1045</NoWarn>
+    <NoWarn>NETSDK1206</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;NETSDK1206;SYSLIB1045</NoWarn>
+    <NoWarn>NETSDK1206</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

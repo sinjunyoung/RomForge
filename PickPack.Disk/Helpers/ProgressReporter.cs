@@ -96,10 +96,7 @@ namespace PickPack.Disk.Helpers
             }
         }
 
-        public void ReportCompletion(string completionMessage)
-        {
-            OnProgressChanged(100, completionMessage, null);
-        }
+        public void ReportCompletion(string completionMessage) => OnProgressChanged(100, completionMessage, null);
 
         private double CalculateSpeed()
         {

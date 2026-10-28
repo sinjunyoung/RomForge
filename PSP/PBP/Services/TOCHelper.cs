@@ -7,14 +7,6 @@ public static class TocHelper
 {
     public static int FromBinaryDecimal(int value) => (value >> 4) * 10 + (value & 0x0F);
 
-    public static int ToBinaryDecimal(int value) => ((value / 10) << 4) | (value % 10);
-
-    public static int LBAToMinute(int lba) => lba / 75 / 60;
-
-    public static int LBAToSecond(int lba) => lba / 75 % 60;
-
-    public static int LBAToFrame(int lba) => lba % 75;
-
     public static CueFile TOCtoCUE(List<TocEntry> tocEntries, string fileName)
     {
         var cueFile = new CueFile();

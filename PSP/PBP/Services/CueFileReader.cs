@@ -5,11 +5,16 @@ using System.Text.RegularExpressions;
 
 namespace PSP.PBP.Services;
 
-public static class CueFileReader
+public static partial class CueFileReader
 {
-    private static readonly Regex FileRegex = new(@"^FILE\s+""(.*?)""\s+(.*?)\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex TrackRegex = new(@"^\s*TRACK\s+(\d+)\s+(.*?)\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex IndexRegex = new(@"^\s*INDEX\s+(\d+)\s+(\d+:\d+:\d+)\s*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    [GeneratedRegex(@"^FILE\s+""(.*?)""\s+(.*?)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex FileRegex();
+
+    [GeneratedRegex(@"^\s*TRACK\s+(\d+)\s+(.*?)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex TrackRegex();
+
+    [GeneratedRegex(@"^\s*INDEX\s+(\d+)\s+(\d+:\d+:\d+)\s*$", RegexOptions.IgnoreCase)]
+    private static partial Regex IndexRegex();
 
     public static CueFile Dummy() => new()
     {
@@ -57,9 +62,9 @@ public static class CueFileReader
 
         foreach (var line in lines)
         {
-            var fileMatch = FileRegex.Match(line);
-            var trackMatch = TrackRegex.Match(line);
-            var indexMatch = IndexRegex.Match(line);
+            var fileMatch = FileRegex().Match(line);
+            var trackMatch = TrackRegex().Match(line);
+            var indexMatch = IndexRegex().Match(line);
 
             if (fileMatch.Success)
             {

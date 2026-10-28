@@ -1,4 +1,5 @@
-﻿using Patch.Core.Services;
+﻿using Patch.Core.Models;
+using Patch.Core.Services;
 
 namespace Vita.Core.Models;
 

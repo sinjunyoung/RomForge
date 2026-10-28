@@ -24,12 +24,6 @@ public static class WavReader
         public short[] CoefPairs = [];
     }
 
-    public static PcmData Read(string path)
-    {
-        using var fs = File.OpenRead(path);
-        return Read(fs);
-    }
-
     public static PcmData Read(Stream stream)
     {
         using var br = new BinaryReader(stream, System.Text.Encoding.ASCII, leaveOpen: true);

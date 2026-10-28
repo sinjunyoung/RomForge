@@ -8,8 +8,6 @@ public sealed class BitStreamWriter
 
     public long SizeInBits => _bitsUsed;
 
-    public int BufSize => _size;
-
     public ReadOnlySpan<byte> Bytes => _buf.AsSpan(0, _size);
 
     public void Write(uint val, int n)

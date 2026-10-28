@@ -6,14 +6,7 @@ namespace PickPack.Disk.Services
 {
     public class ImageReader
     {
-        #region Field
-
         readonly ProgressReporter _progressReporter;
-        CancellationToken _ct;
-
-        #endregion
-
-        #region Constructor
 
         public ImageReader()
         {
@@ -21,15 +14,11 @@ namespace PickPack.Disk.Services
             _progressReporter.ProgressChanged += (sender, args) => OnProgressChanged(args.Percent, args.Message1, args.Message2);
         }
 
-        #endregion
-
-        #region Event
-
         public event EventHandler<ProgressEventArgs>? ProgressChanged;
 
         public event EventHandler<EventArgs>? WriteEnded;
 
-        protected virtual void OnProgressChanged(int percent, string message1, string? message2 = "")
+        protected virtual void OnProgressChanged(int percent, string? message1, string? message2 = "")
         {
             ProgressChanged?.Invoke(this, new ProgressEventArgs
             {
@@ -39,18 +28,12 @@ namespace PickPack.Disk.Services
             });
         }
 
-        protected virtual void OnWriteEnded()
-        {
-            WriteEnded?.Invoke(this, EventArgs.Empty);
-        }
-
-        #endregion
+        protected virtual void OnWriteEnded() => WriteEnded?.Invoke(this, EventArgs.Empty);
 
         public async Task ReadImageAsync(int physicalDriveNumber, string outputPath, long maxOutputSegmentSize64, CompressionLevel compressionLevel, CancellationToken ct)
         {
             try
             {
-                _ct = ct;
                 _progressReporter.Initialize(ct);
 
                 string extension = Path.GetExtension(outputPath).ToLowerInvariant();

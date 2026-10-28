@@ -9,8 +9,6 @@ public class SfoBuilder
 
     public SfoBuilder() { }
 
-    public SfoBuilder(IEnumerable<SfoEntry> entries) => _entries.AddRange(entries);
-
     public void AddEntry(string key, object value) => _entries.Add(new SfoEntry { Key = key, Value = value });
 
     public SfoFile Build()

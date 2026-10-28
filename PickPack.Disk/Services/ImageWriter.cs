@@ -10,7 +10,6 @@ namespace PickPack.Disk.Services
     public class ImageWriter
     {
         readonly ProgressReporter _progressReporter;
-        CancellationToken _ct;
 
         public string WorkTitle { get; set; } = "이미지 굽기";
 
@@ -24,15 +23,13 @@ namespace PickPack.Disk.Services
 
         public event EventHandler<EventArgs>? WriteEnded;
 
-        protected virtual void OnProgressChanged(int percent, string message1, string? message2 = "") => ProgressChanged?.Invoke(this, new ProgressEventArgs { Percent = percent, Message1 = message1, Message2 = message2 });
+        protected virtual void OnProgressChanged(int percent, string? message1, string? message2 = "") => ProgressChanged?.Invoke(this, new ProgressEventArgs { Percent = percent, Message1 = message1, Message2 = message2 });
 
         protected virtual void OnWriteEnded() => WriteEnded?.Invoke(this, EventArgs.Empty);
 
         public async Task WriteImageAsync(string imagePath, int physicalDriveNumber, long diskSize, CancellationToken ct)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
-
-            _ct = ct;
 
             _progressReporter.Initialize(ct);
             await WriteImageAsyncInternal(imagePath, physicalDriveNumber, diskSize, ct);
@@ -121,8 +118,8 @@ namespace PickPack.Disk.Services
 
                     if (read == bufferSize)
                     {
-                        await writer.WriteAsync(new DataChunk { Buffer = buffer, ValidLength = bufferSize }, ct)
-                            ;
+                        await writer.WriteAsync(new DataChunk { Buffer = buffer, ValidLength = bufferSize }, ct);
+
                         buffer = Optimal.ArrayPool.Rent(bufferSize);
                     }
                     else

@@ -9,8 +9,6 @@ namespace PickPack.Disk.Helpers
     {
         static readonly string[] SafeFileSystems = ["FAT32", "NTFS", "exFAT"];
 
-        #region Private
-
         private static int GetPartitionCountByDiskNumber(int diskNumber)
         {
             using var searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_DiskPartition WHERE DiskIndex = {diskNumber}");
@@ -47,8 +45,8 @@ namespace PickPack.Disk.Helpers
         private static List<string> FindUnassignedVolumeGuids()
         {
             var result = new List<string>();
-            var volumeName = new StringBuilder(260);
-            IntPtr findHandle = Win32API.FindFirstVolume(volumeName, (uint)volumeName.Capacity);
+            var volumeNameChars = new char[260];
+            IntPtr findHandle = Win32API.FindFirstVolume(volumeNameChars, (uint)volumeNameChars.Length);
 
             if (findHandle == IntPtr.Zero)
                 return result;
@@ -57,29 +55,29 @@ namespace PickPack.Disk.Helpers
             {
                 do
                 {
-                    string currentVolumeGuid = volumeName.ToString();
+                    string currentVolumeGuid = new string(volumeNameChars).TrimEnd('\0');
 
                     Win32API.GetVolumePathNamesForVolumeName(currentVolumeGuid, null, 0, out uint pathLength);
 
-                    if (pathLength != 2) 
+                    if (pathLength != 2)
                         continue;
 
                     uint driveType = Win32API.GetDriveType(currentVolumeGuid);
 
-                    if (driveType != 2) 
+                    if (driveType != 2)
                         continue;
 
-                    var fsName = new StringBuilder(260);
+                    var fsNameChars = new char[260];
 
-                    if (!Win32API.GetVolumeInformation(currentVolumeGuid, null, 0, out _, out _, out uint fileSystemFlags, fsName, (uint)fsName.Capacity))
+                    if (!Win32API.GetVolumeInformation(currentVolumeGuid, null, 0, out _, out _, out uint fileSystemFlags, fsNameChars, (uint)fsNameChars.Length))
                         continue;
 
-                    string fileSystem = fsName.ToString();
+                    string fileSystem = new string(fsNameChars).TrimEnd('\0');
 
                     if (SafeFileSystems.Contains(fileSystem, StringComparer.OrdinalIgnoreCase) && !string.IsNullOrEmpty(fileSystem) && (fileSystemFlags & Win32API.FILE_SYSTEM_IS_HIDDEN) == 0 && (fileSystemFlags & Win32API.FILE_VOLUME_IS_SYSTEM) == 0)
                         result.Add(currentVolumeGuid);
 
-                } while (Win32API.FindNextVolume(findHandle, volumeName, (uint)volumeName.Capacity));
+                } while (Win32API.FindNextVolume(findHandle, volumeNameChars, (uint)volumeNameChars.Length));
             }
             finally
             {
@@ -151,8 +149,6 @@ namespace PickPack.Disk.Helpers
 
             Marshal.FreeHGlobal(ptr);
         }
-
-        #endregion
 
         public static async Task DeleteAllPartitionsAsync(int diskNumber)
         {

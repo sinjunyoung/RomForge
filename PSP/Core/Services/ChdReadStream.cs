@@ -4,7 +4,6 @@ namespace PSP.Core.Services;
 
 public class ChdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
 {
-    private long _position;
     private byte[]? _currentHunk;
     private uint _cachedHunkIndex = uint.MaxValue;
     private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / 2048u;
@@ -13,10 +12,10 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
     {
         int bytesRead = 0;
 
-        while (bytesRead < count && _position < totalLength)
+        while (bytesRead < count && Position < totalLength)
         {
-            long sector = _position / 2048;
-            int posInSector = (int)(_position % 2048);
+            long sector = Position / 2048;
+            int posInSector = (int)(Position % 2048);
             uint hunkIdx = (uint)(sector / _sectorsPerHunk);
             int hunkOffset = (int)(sector % _sectorsPerHunk) * 2048;
 
@@ -31,12 +30,12 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
 
             int toRead = (int)Math.Min(count - bytesRead, 2048 - posInSector);
 
-            toRead = (int)Math.Min(toRead, totalLength - _position);
+            toRead = (int)Math.Min(toRead, totalLength - Position);
 
             Array.Copy(_currentHunk, hunkOffset + posInSector, buffer, offset + bytesRead, toRead);
 
             bytesRead += toRead;
-            _position += toRead;
+            Position += toRead;
         }
 
         return bytesRead;
@@ -44,17 +43,17 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => totalLength + offset,
-            _ => _position
+            _ => Position
         };
 
-        _position = Math.Clamp(_position, 0, totalLength);
+        Position = Math.Clamp(Position, 0, totalLength);
 
-        return _position;
+        return Position;
     }
 
     protected override void Dispose(bool disposing)
@@ -73,7 +72,7 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength) : Stream
 
     public override long Length => totalLength;
 
-    public override long Position { get => _position; set => _position = value; }
+    public override long Position { get; set; }
 
     public override void Flush() { }
 

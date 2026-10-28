@@ -228,8 +228,6 @@ public class PbpDiscEntry : IDisposable, IAsyncDisposable
         }
     }
 
-    public PbpDiscStream GetDiscStream() => new(this);
-
     public void CopyTo(Stream destination, CancellationToken ct)
     {
         uint totSize = 0;

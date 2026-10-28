@@ -50,8 +50,6 @@ public sealed class Decoder
         }
     }
 
-    public int Channels => _channels;
-
     public void DecodeFrame(byte[] data, int offset, Span<float> output)
     {
         if (output.Length < CodecInfo.NumSamples * _channels)

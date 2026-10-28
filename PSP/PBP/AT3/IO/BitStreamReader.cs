@@ -8,8 +8,6 @@ public sealed class BitStreamReader(byte[] data, int start, int length)
 
     public bool Overrun { get; private set; }
 
-    public int BitsLeft => _endBit - _pos;
-
     public uint ReadBit()
     {
         if (_pos >= _endBit)

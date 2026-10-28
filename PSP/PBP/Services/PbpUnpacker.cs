@@ -17,7 +17,6 @@ public class PbpUnpacker
         var isMultiDisc = reader.Discs.Count > 1;
         var totalSize = reader.Discs.Sum(d => d.IsoSize);
         long baseSize = 0;
-
         var createdFiles = new List<string>();
 
         try

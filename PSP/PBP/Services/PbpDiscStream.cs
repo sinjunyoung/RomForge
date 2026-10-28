@@ -75,9 +75,13 @@ public class PbpDiscStream(PbpDiscEntry pbpDiscEntry) : Stream
     }
 
     public override bool CanRead => true;
+
     public override bool CanSeek => true;
+
     public override bool CanWrite => false;
+
     public override long Length => pbpDiscEntry.IsoSize;
+
     public override long Position
     {
         get => _position;
@@ -85,7 +89,9 @@ public class PbpDiscStream(PbpDiscEntry pbpDiscEntry) : Stream
     }
 
     public override void Flush() { }
+
     public override void SetLength(long value) => throw new NotSupportedException();
+
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
     protected override void Dispose(bool disposing)

@@ -2,9 +2,6 @@ namespace PSP.PBP.AT3.Services;
 
 public sealed class Mdct(int n, float scale = 1.0f) : MdctBase(n, scale)
 {
-    public int InputSize => N;
-    public int OutputSize => N >> 1;
-
     public void Transform(ReadOnlySpan<float> input, Span<float> output)
     {
         int n2 = N >> 1;

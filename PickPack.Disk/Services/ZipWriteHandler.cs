@@ -16,7 +16,6 @@ namespace PickPack.Disk.Services
                 var entry = zipFile.Entries.FirstOrDefault(e => e.FileName.EndsWith(".img", StringComparison.OrdinalIgnoreCase)) ?? throw new InvalidOperationException("ZIP 파일 안에 IMG 파일이 없습니다.");
                 var entryStream = entry.OpenReader();
                 var wrapperStream = new CompositeDisposableStream(entryStream, zipFile);
-
                 return (wrapperStream, entry.UncompressedSize);
             }
             catch

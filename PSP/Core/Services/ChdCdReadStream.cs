@@ -8,8 +8,7 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength, string? t
     private const int LogicalSectorSize = 2048;
     private readonly int _skipBytes = GetSkipBytes(trackType);
     private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / (uint)PhysicalFrameSize;
-
-    private long _position;
+    
     private byte[]? _currentHunk;
     private uint _cachedHunkIndex = uint.MaxValue;
 
@@ -24,10 +23,10 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength, string? t
     {
         int bytesRead = 0;
 
-        while (bytesRead < count && _position < totalLength)
+        while (bytesRead < count && Position < totalLength)
         {
-            long sector = _position / LogicalSectorSize;
-            int posInSector = (int)(_position % LogicalSectorSize);
+            long sector = Position / LogicalSectorSize;
+            int posInSector = (int)(Position % LogicalSectorSize);
             uint hunkIdx = (uint)(sector / _sectorsPerHunk);
             int frameOffset = (int)(sector % _sectorsPerHunk) * PhysicalFrameSize;
 
@@ -42,12 +41,12 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength, string? t
 
             int toRead = (int)Math.Min(count - bytesRead, LogicalSectorSize - posInSector);
 
-            toRead = (int)Math.Min(toRead, totalLength - _position);
+            toRead = (int)Math.Min(toRead, totalLength - Position);
 
             Array.Copy(_currentHunk, frameOffset + _skipBytes + posInSector, buffer, offset + bytesRead, toRead);
 
             bytesRead += toRead;
-            _position += toRead;
+            Position += toRead;
         }
 
         return bytesRead;
@@ -55,17 +54,17 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength, string? t
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => totalLength + offset,
-            _ => _position
+            _ => Position
         };
 
-        _position = Math.Clamp(_position, 0, totalLength);
+        Position = Math.Clamp(Position, 0, totalLength);
 
-        return _position;
+        return Position;
     }
 
     protected override void Dispose(bool disposing)
@@ -84,7 +83,7 @@ public class ChdCdReadStream(LibChdrWrapper wrapper, long totalLength, string? t
 
     public override long Length => totalLength;
 
-    public override long Position { get => _position; set => _position = value; }
+    public override long Position { get; set; }
 
     public override void Flush() { }
 

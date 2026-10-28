@@ -4,7 +4,7 @@ namespace PickPack.Disk.Services
 {
     public static class ImageWriterFactory
     {
-        private static readonly Dictionary<string, Func<Action<int, string, string?>, IImageWriteHandler>> HandlerCreators =
+        private static readonly Dictionary<string, Func<Action<int, string?, string?>, IImageWriteHandler>> HandlerCreators =
             new(StringComparer.OrdinalIgnoreCase)
             {
                 { ".zip", _ => new ZipWriteHandler() },
@@ -12,7 +12,7 @@ namespace PickPack.Disk.Services
                 { ".img", _ => new ImgWriteHandler() }
             };
 
-        public static IImageWriteHandler? GetHandler(string pathOrUrl, Action<int, string, string?> progressCallback)
+        public static IImageWriteHandler? GetHandler(string pathOrUrl, Action<int, string?, string?> progressCallback)
         {
             bool isUrl = IsUrl(pathOrUrl);
             string extension = Path.GetExtension(pathOrUrl);
@@ -23,7 +23,7 @@ namespace PickPack.Disk.Services
             return HandlerCreators.TryGetValue(extension, out var creator) ? creator(progressCallback) : null;
         }
 
-        public static HttpGzipWriteHandler CreateHttpGzipHandler(HttpClient httpClient, Action<int, string, string?> progressCallback, long compressedSize, long uncompressedSize) => new(httpClient, progressCallback, compressedSize, uncompressedSize);
+        public static HttpGzipWriteHandler CreateHttpGzipHandler(HttpClient httpClient, Action<int, string?, string?> progressCallback, long compressedSize, long uncompressedSize) => new(httpClient, progressCallback, compressedSize, uncompressedSize);
 
         public static bool IsSupported(string pathOrUrl)
         {

@@ -5,12 +5,6 @@ namespace PSP.PBP.AT3.Services;
 
 public static class Mp3Reader
 {
-    public static PcmData Read(string path)
-    {
-        using var fs = File.OpenRead(path);
-        return Read(fs);
-    }
-
     public static PcmData Read(Stream stream, int maxSeconds = 0)
     {
         using var mpeg = new MpegFile(stream);

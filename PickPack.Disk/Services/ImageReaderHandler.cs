@@ -9,7 +9,7 @@ namespace PickPack.Disk.Services
 {
     public class ZipReadHandler(long maxOutputSegmentSize, CompressionLevel compressionLevel, Action<long, long, string> progressReporter, CancellationToken ct) : IImageReaderHandler
     {
-        public async Task WriteImageAsync(Stream sourceStream, string outputPath, long totalSize, CancellationToken ct)
+        public async Task WriteImageAsync(FileStream sourceStream, string outputPath, long totalSize, CancellationToken ct)
         {
             using var zipFile = new ZipFile();
 
@@ -24,7 +24,7 @@ namespace PickPack.Disk.Services
             zipFile.Strategy = CompressionStrategy.Default;
 
             string imgFileName = $"{Path.GetFileNameWithoutExtension(outputPath)}.img";
-            var optimizedStream = new DirectReadStream(sourceStream as FileStream, totalSize);
+            var optimizedStream = new DirectReadStream(sourceStream, totalSize);
 
             zipFile.SaveProgress += (sender, e) => OnZipSaveProgress(e);
 
@@ -50,7 +50,7 @@ namespace PickPack.Disk.Services
 
         const int ERROR_SECTOR_NOT_FOUND = unchecked((int)0x8007001B);
 
-        public async Task WriteImageAsync(Stream sourceStream, string outputPath, long totalSize, CancellationToken ct)
+        public async Task WriteImageAsync(FileStream sourceStream, string outputPath, long totalSize, CancellationToken ct)
         {
             var channel = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(Optimal.ChannelCapacity) 
             {

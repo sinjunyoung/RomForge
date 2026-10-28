@@ -2,7 +2,7 @@
 
 namespace PSP.PBP.Services;
 
-public static class StreamExtensions
+public static class Extensions
 {
     public static void Read(this Stream stream, uint[] buffer, int count)
     {
@@ -115,7 +115,7 @@ public static class StreamExtensions
         return System.Text.Encoding.ASCII.GetString([.. bytes]);
     }
 
-    public static void Write(this Stream stream, uint[] buffer, int count, int size)
+    public static void Write(this Stream stream, uint[] buffer, int size)
     {
         var p = 0;
         var i = 0;
@@ -129,7 +129,7 @@ public static class StreamExtensions
         }
     }
 
-    public static void Write(this Stream stream, IsoIndexHeader[] isoIndices, int offset, int size)
+    public static void Write(this Stream stream, IsoIndexHeader[] isoIndices)
     {
         foreach (var index in isoIndices)
         {
@@ -182,7 +182,7 @@ public static class StreamExtensions
         for (var i = 0; i < count; i++)
             buffer[i] = (uint)r.Next(0, 0xFFFF);
 
-        stream.Write(buffer, 0, count * sizeof(uint));
+        stream.Write(buffer, count * sizeof(uint));
     }
 
     public static void WriteResource(this Stream stream, byte[]? resource)

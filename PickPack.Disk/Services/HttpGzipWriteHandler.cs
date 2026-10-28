@@ -42,23 +42,27 @@ namespace PickPack.Disk.Services
                 set => baseStream.Position = value;
             }
 
-            public override int Read(byte[] buffer, int offset, int count)
+            public override int Read(Span<byte> buffer)
             {
-                int read = baseStream.Read(buffer, offset, count);
+                int read = baseStream.Read(buffer);
 
                 ReportProgress(read);
 
                 return read;
             }
 
-            public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
+            public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
+
+            public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
             {
-                int read = await baseStream.ReadAsync(buffer.AsMemory(offset, count), ct);
+                int read = await baseStream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
 
                 ReportProgress(read);
 
                 return read;
             }
+
+            public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) => ReadAsync(buffer.AsMemory(offset, count), cancellationToken).AsTask();
 
             private void ReportProgress(int bytesJustRead)
             {
@@ -68,7 +72,6 @@ namespace PickPack.Disk.Services
                     return;
 
                 int currentPercent = (int)(bytesRead * 100 / totalBytes);
-
                 var now = DateTime.UtcNow;
 
                 if (currentPercent != lastReportedPercent || (now - lastReportTime).TotalSeconds >= 1.0)

@@ -7,7 +7,6 @@ public static class CuePreprocessor
         if (!Path.GetExtension(inputPath).Equals(".cue", StringComparison.InvariantCultureIgnoreCase))
         {
             var size = (uint)new FileInfo(inputPath).Length;
-
             return ResolvedDisc.Create(new FileStream(inputPath, FileMode.Open, FileAccess.Read), size, TocBuilder.BuildSingleTrackToc(size));
         }
 
@@ -17,13 +16,11 @@ public static class CuePreprocessor
         {
             var (stream, merged) = CueMerger.MergeStreams(cueFile);
             var size = (uint)stream.Length;
-
             return ResolvedDisc.Create(stream, size, TocBuilder.BuildToc(merged, size));
         }
 
         var binPath = CueFileResolver.GetBinPath(inputPath);
         var binSize = (uint)new FileInfo(binPath).Length;
-
         return ResolvedDisc.Create(new FileStream(binPath, FileMode.Open, FileAccess.Read), binSize, TocBuilder.BuildToc(cueFile, binSize));
     }
 }

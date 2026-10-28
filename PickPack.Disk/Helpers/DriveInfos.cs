@@ -4,8 +4,6 @@ namespace PickPack.Disk.Helpers
 {
     public class DriveInfos(string devicePath, string model, long sizeBytes, int diskNumber, string? driveLetter)
     {
-        #region Property
-
         internal static List<DriveInfos> Infos = [];
 
         public string DevicePath { get; set; } = devicePath;
@@ -21,8 +19,6 @@ namespace PickPack.Disk.Helpers
         public int DiskNumber { get; set; } = diskNumber;
 
         public string DisplayName => ToString();
-
-        #endregion
 
         public override string ToString()
         {

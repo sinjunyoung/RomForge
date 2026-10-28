@@ -257,14 +257,6 @@ public sealed class GainControlAnalyzer
             _pending[i >> 2][i & 3] = AnalyzeBand(i >> 2, i & 3, upInput[i >> 2][i & 3]);
     }
 
-    public void CreateSubbandInfo(float[][] upInput, int channel, SubbandInfo subbandInfo)
-    {
-        for (int band = 0; band < 4; ++band)
-            _pending[channel][band] = AnalyzeBand(channel, band, upInput[band]);
-
-        CreateSubbandInfo(channel, subbandInfo);
-    }
-
     public void CreateSubbandInfo(int channel, SubbandInfo subbandInfo)
     {
         var pending = _pending[channel];

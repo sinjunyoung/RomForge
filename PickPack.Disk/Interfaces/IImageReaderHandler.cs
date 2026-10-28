@@ -2,5 +2,5 @@
 
 public interface IImageReaderHandler
 {
-    Task WriteImageAsync(Stream sourceStream, string outputPath, long totalSize, CancellationToken ct);
+    Task WriteImageAsync(FileStream sourceStream, string outputPath, long totalSize, CancellationToken ct);
 }

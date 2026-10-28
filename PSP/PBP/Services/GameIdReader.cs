@@ -2,13 +2,17 @@
 using CHD.Core.Interop.Enums;
 using PSP.PBP.Enums;
 using PSP.PBP.Models;
+using System.Text.RegularExpressions;
 using static PSP.PBP.Services.Iso9660GameIdExtractor;
 
 namespace PSP.PBP.Services;
 
-public static class GameIdReader
+public static partial class GameIdReader
 {
     private const string Fallback = "SLUS00000";
+
+    [GeneratedRegex(@"TRACK:(\d+) TYPE:(\S+) SUBTYPE:(\S+) FRAMES:(\d+) PREGAP:(\d+) PGTYPE:(\S+) PGSUB:(\S+) POSTGAP:(\d+)")]
+    private static partial Regex TrackMetaRegex();
 
     public static string ReadFromDisk(DiskSource source) => source.Type == DiskSourceType.Chd ? ReadFromChd(source.FilePath) : ReadFromFilePath(source.FilePath);
 
@@ -32,7 +36,6 @@ public static class GameIdReader
     private static string ReadFromFilePath(string filePath)
     {
         using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-
         return ReadFromStream(stream, stream.Length);
     }
 
@@ -79,7 +82,7 @@ public static class GameIdReader
 
         while ((meta = chd.GetMetadata(0x54524B32, (uint)index++)) != null)
         {
-            var m = System.Text.RegularExpressions.Regex.Match(meta, @"TRACK:(\d+) TYPE:(\S+) SUBTYPE:(\S+) FRAMES:(\d+) PREGAP:(\d+) PGTYPE:(\S+) PGSUB:(\S+) POSTGAP:(\d+)");
+            var m = TrackMetaRegex().Match(meta);
 
             if (m.Success)
             {
