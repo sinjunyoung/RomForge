@@ -18,8 +18,4 @@ public class DbDirKey : IParentedKey
     public void WriteTo(byte[] buf, int offset) => BinaryPrimitives.WriteUInt32LittleEndian(buf.AsSpan(offset), Parent);
 
     public bool Equals(IParentedKey other) => other is DbDirKey k && k.Parent == Parent;
-
-    public static DbDirKey New(uint parent) => new() { Parent = parent };
-
-    public static DbDirKey Root() => new() { Parent = 0 };
 }

@@ -180,10 +180,7 @@ public static class ExeFsPacker
         return diff != null ? (null, diff) : (null, null);
     }
 
-    private static PatchFileRef? FindDirectChild(PatchFileIndex? index, string baseName, PatchFileKind kind)
-    {
-        return index?.Entries.FirstOrDefault(e => e.RelativeDir.Length == 0 && e.Kind == kind && string.Equals(e.BaseName, baseName, StringComparison.OrdinalIgnoreCase))?.File;
-    }
+    private static PatchFileRef? FindDirectChild(PatchFileIndex? index, string baseName, PatchFileKind kind) => index?.Entries.FirstOrDefault(e => e.RelativeDir.Length == 0 && e.Kind == kind && string.Equals(e.BaseName, baseName, StringComparison.OrdinalIgnoreCase))?.File;
 
     private static uint AlignUp(uint v, uint a) => (v + a - 1) & ~(a - 1);
 }

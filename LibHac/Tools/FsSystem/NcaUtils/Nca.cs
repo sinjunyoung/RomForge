@@ -17,24 +17,16 @@ using KeyType = LibHac.Common.Keys.KeyType;
 
 namespace LibHac.Tools.FsSystem.NcaUtils;
 
-public class Nca
+public class Nca(KeySet keySet, IStorage storage)
 {
-    private KeySet KeySet { get; }
     private bool IsEncrypted => Header.IsEncrypted;
 
     private byte[] Nca0KeyArea { get; set; }
     private IStorage Nca0TransformedBody { get; set; }
 
-    public IStorage BaseStorage { get; }
+    public IStorage BaseStorage { get; } = storage;
 
-    public NcaHeader Header { get; }
-
-    public Nca(KeySet keySet, IStorage storage)
-    {
-        KeySet = keySet;
-        BaseStorage = storage;
-        Header = new NcaHeader(keySet, storage);
-    }
+    public NcaHeader Header { get; } = new NcaHeader(keySet, storage);
 
     public ulong ProgramId => Header.TitleId;
     public ulong ProgramIdBase => Header.TitleId & ~0x1FFFUL;
@@ -64,7 +56,7 @@ public class Nca
         }
 
         int keyRevision = Utilities.GetMasterKeyRevision(Header.KeyGeneration);
-        byte[] keyAreaKey = KeySet.KeyAreaKeys[keyRevision][Header.KeyAreaKeyIndex].DataRo.ToArray();
+        byte[] keyAreaKey = keySet.KeyAreaKeys[keyRevision][Header.KeyAreaKeyIndex].DataRo.ToArray();
 
         if (keyAreaKey.IsZeros())
         {
@@ -86,7 +78,7 @@ public class Nca
     {
         RightsId rightsId = new(Header.RightsId);
 
-        if (KeySet.ExternalKeySet.Get(rightsId, out AccessKey accessKey).IsFailure())
+        if (keySet.ExternalKeySet.Get(rightsId, out AccessKey accessKey).IsFailure())
         {
             throw new MissingKeyException("Missing NCA title key.", rightsId.ToString(), KeyType.Title);
         }
@@ -97,11 +89,11 @@ public class Nca
     public byte[] GetDecryptedTitleKey()
     {
         int keyRevision = Utilities.GetMasterKeyRevision(Header.KeyGeneration);
-        byte[] titleKek = KeySet.TitleKeks[keyRevision].DataRo.ToArray();
+        byte[] titleKek = keySet.TitleKeks[keyRevision].DataRo.ToArray();
 
         RightsId rightsId = new(Header.RightsId);
 
-        if (KeySet.ExternalKeySet.Get(rightsId, out AccessKey accessKey).IsFailure())
+        if (keySet.ExternalKeySet.Get(rightsId, out AccessKey accessKey).IsFailure())
         {
             throw new MissingKeyException("Missing NCA title key.", rightsId.ToString(), KeyType.Title);
         }
@@ -144,11 +136,11 @@ public class Nca
 
         if (Header.HasRightsId)
         {
-            return KeySet.ExternalKeySet.Contains(new RightsId(Header.RightsId)) &&
-                   !KeySet.TitleKeks[keyRevision].IsZeros();
+            return keySet.ExternalKeySet.Contains(new RightsId(Header.RightsId)) &&
+                   !keySet.TitleKeks[keyRevision].IsZeros();
         }
 
-        return !KeySet.KeyAreaKeys[keyRevision][Header.KeyAreaKeyIndex].IsZeros();
+        return !keySet.KeyAreaKeys[keyRevision][Header.KeyAreaKeyIndex].IsZeros();
     }
 
     public bool SectionExists(NcaSectionType type)
@@ -254,23 +246,18 @@ public class Nca
     {
         NcaFsHeader header = GetFsHeader(index);
 
-        switch (header.EncryptionType)
+        return header.EncryptionType switch
         {
-            case NcaEncryptionType.None:
-                return baseStorage;
-            case NcaEncryptionType.AesXts:
-                return OpenAesXtsStorage(baseStorage, index, decrypting);
-            case NcaEncryptionType.AesCtr:
-                return OpenAesCtrStorage(baseStorage, index, Header.GetSectionStartOffset(index), header.Counter);
-            case NcaEncryptionType.AesCtrEx:
-                return OpenAesCtrExStorage(baseStorage, index, decrypting);
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
+            NcaEncryptionType.None => baseStorage,
+            NcaEncryptionType.AesXts => OpenAesXtsStorage(baseStorage, decrypting),
+            NcaEncryptionType.AesCtr => OpenAesCtrStorage(baseStorage, index, Header.GetSectionStartOffset(index), header.Counter),
+            NcaEncryptionType.AesCtrEx => OpenAesCtrExStorage(baseStorage, index, decrypting),
+            _ => throw new ArgumentOutOfRangeException(nameof(index), header.EncryptionType, "Unsupported encryption type."),
+        };
     }
 
     // ReSharper disable UnusedParameter.Local
-    private IStorage OpenAesXtsStorage(IStorage baseStorage, int index, bool decrypting)
+    private CachedStorage OpenAesXtsStorage(IStorage baseStorage, bool decrypting)
     {
         const int sectorSize = 0x200;
 
@@ -282,7 +269,7 @@ public class Nca
     }
     // ReSharper restore UnusedParameter.Local
 
-    private IStorage OpenAesCtrStorage(IStorage baseStorage, int index, long offset, ulong upperCounter)
+    private CachedStorage OpenAesCtrStorage(IStorage baseStorage, int index, long offset, ulong upperCounter)
     {
         byte[] key = GetContentKey(NcaKeyType.AesCtr);
         byte[] counter = Aes128CtrStorage.CreateCounter(upperCounter, Header.GetSectionStartOffset(index));
@@ -291,7 +278,7 @@ public class Nca
         return new CachedStorage(aesStorage, 0x4000, 4, true);
     }
 
-    private IStorage OpenAesCtrExStorage(IStorage baseStorage, int index, bool decrypting)
+    private ConcatenationStorage OpenAesCtrExStorage(IStorage baseStorage, int index, bool decrypting)
     {
         NcaFsHeader fsHeader = GetFsHeader(index);
         NcaFsPatchInfo info = fsHeader.GetPatchInfo();
@@ -337,10 +324,10 @@ public class Nca
         IStorage decStorage = new Aes128CtrExStorage(baseStorage.Slice(0, dataSize), tableNodeStorage,
             tableEntryStorage, treeHeader.EntryCount, key, counterEx, true);
 
-        return new ConcatenationStorage(new[] { decStorage, outputBucketTreeData }, true);
+        return new ConcatenationStorage([decStorage, outputBucketTreeData], true);
     }
 
-    public AesCtrCounterExtendedStorage? OpenAesCtrCounterExtendedStorage(int index)
+    public AesCtrCounterExtendedStorage OpenAesCtrCounterExtendedStorage(int index)
     {
         if (!SectionExists(index)) return null;
         var fsHeader = GetFsHeader(index);
@@ -546,7 +533,7 @@ public class Nca
         return compressedStorage;
     }
 
-    private static IStorage OpenCompressedStorage(NcaFsHeader header, IStorage baseStorage)
+    private static CachedStorage OpenCompressedStorage(NcaFsHeader header, IStorage baseStorage)
     {
         return new CachedStorage(CreateCompressedStorage(header, baseStorage), 0x4000, 32, true);
     }
@@ -578,8 +565,8 @@ public class Nca
         return (info.TableOffset, info.TableSize, bucketTreeHeader.EntryCount);
     }
 
-    private IStorage CreateVerificationStorage(IntegrityCheckLevel integrityCheckLevel, NcaFsHeader header,
-        IStorage rawStorage)
+    private HierarchicalIntegrityVerificationStorage CreateVerificationStorage(IntegrityCheckLevel integrityCheckLevel, NcaFsHeader header,
+            IStorage rawStorage)
     {
         switch (header.HashType)
         {
@@ -595,7 +582,7 @@ public class Nca
 
                 return InitIvfcForRomFs(header.GetIntegrityInfoIvfc(), rawStorage, integrityCheckLevel, true);
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(header), header.HashType, "Unsupported hash type.");
         }
     }
 
@@ -615,7 +602,7 @@ public class Nca
         return OpenFileSystem(storage, header);
     }
 
-    private IFileSystem OpenFileSystem(IStorage storage, NcaFsHeader header)
+    private static IFileSystem OpenFileSystem(IStorage storage, NcaFsHeader header)
     {
         switch (header.FormatType)
         {
@@ -626,7 +613,7 @@ public class Nca
             case NcaFormatType.Romfs:
                 return new RomFsFileSystem(storage);
             default:
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(header), header.FormatType, "Unsupported format type.");
         }
     }
 
@@ -767,32 +754,30 @@ public class Nca
         IStorage hashStorage = pfsStorage.Slice(info.GetLevelOffset(0), info.GetLevelSize(0), leaveOpen);
         IStorage dataStorage = pfsStorage.Slice(info.GetLevelOffset(1), info.GetLevelSize(1), leaveOpen);
 
-        IntegrityVerificationInfo[] initInfo = new IntegrityVerificationInfo[3];
+        IntegrityVerificationInfo[] initInfo =
+        [
+            // Set the master hash
+            new IntegrityVerificationInfo
+            {
+                // todo Get hash directly from header
+                Data = new MemoryStorage(info.MasterHash.ToArray()),
 
-        // Set the master hash
-        initInfo[0] = new IntegrityVerificationInfo
-        {
-            // todo Get hash directly from header
-            Data = new MemoryStorage(info.MasterHash.ToArray()),
-
-            BlockSize = 0,
-            Type = IntegrityStorageType.PartitionFs
-        };
-
-        initInfo[1] = new IntegrityVerificationInfo
-        {
-            Data = hashStorage,
-            BlockSize = (int)info.GetLevelSize(0),
-            Type = IntegrityStorageType.PartitionFs
-        };
-
-        initInfo[2] = new IntegrityVerificationInfo
-        {
-            Data = dataStorage,
-            BlockSize = info.BlockSize,
-            Type = IntegrityStorageType.PartitionFs
-        };
-
+                BlockSize = 0,
+                Type = IntegrityStorageType.PartitionFs
+            },
+            new IntegrityVerificationInfo
+            {
+                Data = hashStorage,
+                BlockSize = (int)info.GetLevelSize(0),
+                Type = IntegrityStorageType.PartitionFs
+            },
+            new IntegrityVerificationInfo
+            {
+                Data = dataStorage,
+                BlockSize = info.BlockSize,
+                Type = IntegrityStorageType.PartitionFs
+            },
+        ];
         return new HierarchicalIntegrityVerificationStorage(initInfo, integrityCheckLevel, leaveOpen);
     }
 
@@ -846,11 +831,11 @@ public class Nca
         IStorage header = Header.Version switch
         {
             3 => new CachedStorage(
-                new Aes128XtsStorage(rawHeaderStorage, KeySet.HeaderKey, NcaHeader.HeaderSectorSize, true,
+                new Aes128XtsStorage(rawHeaderStorage, keySet.HeaderKey, NcaHeader.HeaderSectorSize, true,
                     !openEncrypted), 1, true),
             2 => OpenNca2Header(headerSize, !openEncrypted),
             0 => new CachedStorage(
-                new Aes128XtsStorage(BaseStorage.Slice(0, 0x400), KeySet.HeaderKey, NcaHeader.HeaderSectorSize, true,
+                new Aes128XtsStorage(BaseStorage.Slice(0, 0x400), keySet.HeaderKey, NcaHeader.HeaderSectorSize, true,
                     !openEncrypted), 1, true),
             _ => throw new NotSupportedException("Unsupported NCA version")
         };
@@ -865,12 +850,12 @@ public class Nca
         List<IStorage> sources =
         [
             new CachedStorage(
-                new Aes128XtsStorage(BaseStorage.Slice(0, 0x400), KeySet.HeaderKey, sectorSize, true, decrypting), 1, true)
+                new Aes128XtsStorage(BaseStorage.Slice(0, 0x400), keySet.HeaderKey, sectorSize, true, decrypting), 1, true)
         ];
 
         for (int i = 0x400; i < size; i += sectorSize)
         {
-            sources.Add(new CachedStorage(new Aes128XtsStorage(BaseStorage.Slice(i, sectorSize), KeySet.HeaderKey, sectorSize, true, decrypting), 1, true));
+            sources.Add(new CachedStorage(new Aes128XtsStorage(BaseStorage.Slice(i, sectorSize), keySet.HeaderKey, sectorSize, true, decrypting), 1, true));
         }
 
         return new ConcatenationStorage(sources, true);
@@ -890,7 +875,7 @@ public class Nca
             Span<byte> keyArea = Header.GetKeyArea();
             byte[] decKeyArea = new byte[0x100];
 
-            if (CryptoOld.DecryptRsaOaep(keyArea, decKeyArea, KeySet.BetaNca0KeyAreaKeyParams, out _))
+            if (CryptoOld.DecryptRsaOaep(keyArea, decKeyArea, keySet.BetaNca0KeyAreaKeyParams, out _))
             {
                 Nca0KeyArea = decKeyArea;
             }
@@ -968,50 +953,27 @@ public class Nca
 
     public Validity VerifyHeaderSignature()
     {
-        return Header.VerifySignature1(KeySet.NcaHeaderSigningKeyParams[0].Modulus);
+        return Header.VerifySignature1(keySet.NcaHeaderSigningKeyParams[0].Modulus);
     }
 
     internal void GenerateAesCounter(int sectionIndex, LibHac.Ncm.ContentType type, int minorVersion)
     {
-        int counterType;
-        int counterVersion;
-
         NcaFsHeader header = GetFsHeader(sectionIndex);
         if (header.EncryptionType != NcaEncryptionType.AesCtr &&
             header.EncryptionType != NcaEncryptionType.AesCtrEx) return;
-
-        switch (type)
+        var counterType = type switch
         {
-            case LibHac.Ncm.ContentType.Program:
-                counterType = sectionIndex + 1;
-                break;
-            case LibHac.Ncm.ContentType.HtmlDocument:
-                counterType = (int)LibHac.Ncm.ContentType.HtmlDocument;
-                break;
-            case LibHac.Ncm.ContentType.LegalInformation:
-                counterType = (int)LibHac.Ncm.ContentType.LegalInformation;
-                break;
-            default:
-                counterType = 0;
-                break;
-        }
-
-        // Version of firmware NCAs appears to always be 0
-        // Haven't checked delta fragment NCAs
-        switch (Header.ContentType)
+            LibHac.Ncm.ContentType.Program => sectionIndex + 1,
+            LibHac.Ncm.ContentType.HtmlDocument => (int)LibHac.Ncm.ContentType.HtmlDocument,
+            LibHac.Ncm.ContentType.LegalInformation => (int)LibHac.Ncm.ContentType.LegalInformation,
+            _ => 0,
+        };
+        var counterVersion = Header.ContentType switch
         {
-            case NcaContentType.Program:
-            case NcaContentType.Manual:
-                counterVersion = Math.Max(minorVersion - 1, 0);
-                break;
-            case NcaContentType.PublicData:
-                counterVersion = minorVersion << 16;
-                break;
-            default:
-                counterVersion = 0;
-                break;
-        }
-
+            NcaContentType.Program or NcaContentType.Manual => Math.Max(minorVersion - 1, 0),
+            NcaContentType.PublicData => minorVersion << 16,
+            _ => 0,
+        };
         header.CounterType = counterType;
         header.CounterVersion = counterVersion;
     }

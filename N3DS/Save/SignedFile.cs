@@ -13,14 +13,6 @@ public class SignedFile : IRandomAccessFile
 
     public int Length => _len;
 
-    public static SignedFile NewUnverified(IRandomAccessFile signature, IRandomAccessFile data, ISigner signer, byte[] key)
-    {
-        if (signature.Length != 16)
-            throw new InvalidOperationException("SignedFile: signature must be 16 bytes");
-
-        return new SignedFile(signature, data, signer, key);
-    }
-
     public static SignedFile New(IRandomAccessFile signature, IRandomAccessFile data, ISigner signer, byte[] key)
     {
         if (signature.Length != 16)
@@ -66,6 +58,7 @@ public class SignedFile : IRandomAccessFile
     public void Commit()
     {
         byte[] sig = CalculateSignature();
+
         _signature.Write(0, sig, 0, 16);
     }
 }

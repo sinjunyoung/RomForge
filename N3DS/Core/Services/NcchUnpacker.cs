@@ -106,7 +106,6 @@ public static class NcchUnpacker
             bw.Write(contents.ContentId);
             bw.Write(contents.ContentIndex);
             bw.Write(contents.ContentType);
-
             await File.WriteAllBytesAsync(Path.Combine(outputDir, "content.bin"), contentRaw, ct);
         }
 

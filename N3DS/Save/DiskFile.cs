@@ -35,5 +35,9 @@ public class DiskFile : IRandomAccessFile, IDisposable
 
     public void Commit() => _stream.Flush();
 
-    public void Dispose() => _stream.Dispose();
+    public void Dispose()
+    {
+        _stream.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

@@ -125,7 +125,6 @@ public static class BackwardLz77
                         {
                             cand = prevPos[cand];
                             steps++;
-
                             continue;
                         }
 

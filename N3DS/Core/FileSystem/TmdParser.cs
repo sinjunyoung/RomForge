@@ -50,12 +50,12 @@ public class TmdParser
         br.ReadByte();
         br.ReadByte();
 
-        ulong systemVersion = ReadBigEndianUInt64(br);
+        _ = ReadBigEndianUInt64(br);
         ulong titleId = ReadBigEndianUInt64(br);
         uint titleTypeRaw = (uint)(titleId >> 32);
         TitleType titleType = (TitleType)titleTypeRaw;
-        uint tmdTitleTypeField = ReadBigEndianUInt32(br);
-        ushort groupId = ReadBigEndianUInt16(br);
+        _ = ReadBigEndianUInt32(br);
+        _ = ReadBigEndianUInt16(br);
 
         uint saveSize = br.ReadUInt32();
         uint srlSaveSize = br.ReadUInt32();
@@ -64,14 +64,14 @@ public class TmdParser
         br.ReadByte();
         br.ReadBytes(0x31);
 
-        uint accessRights = ReadBigEndianUInt32(br);
+        _ = ReadBigEndianUInt32(br);
         ushort titleVersion = ReadBigEndianUInt16(br);
         ushort contentCount = ReadBigEndianUInt16(br);
-        ushort bootContent = ReadBigEndianUInt16(br);
+        _ = ReadBigEndianUInt16(br);
 
         br.ReadBytes(2);
 
-        byte[] infoRecordsHash = br.ReadBytes(0x20);
+        _ = br.ReadBytes(0x20);
 
         br.ReadBytes(0x900);
 

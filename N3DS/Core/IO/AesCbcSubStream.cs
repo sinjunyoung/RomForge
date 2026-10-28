@@ -5,29 +5,24 @@ namespace N3DS.Core.IO;
 public class AesCbcSubStream(Stream baseStream, long start, long length, byte[] key, byte[] iv) : Stream
 {
     private readonly byte[] _initialIv = (byte[])iv.Clone();
-    private long _position;
     private readonly byte[] _currentIv = (byte[])iv.Clone();
     private const int BlockSize = 16;
 
     public override long Length => length;
-    public override long Position
-    {
-        get => _position;
-        set => _position = value;
-    }
+    public override long Position { get; set; }
     public override bool CanRead => true;
     public override bool CanSeek => true;
     public override bool CanWrite => false;
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        count = (int)Math.Min(count, length - _position);
+        count = (int)Math.Min(count, length - Position);
 
         if (count <= 0)
             return 0;
 
-        long blockStart = (_position / 16) * 16;
-        int prefixBytes = (int)(_position - blockStart);
+        long blockStart = (Position / 16) * 16;
+        int prefixBytes = (int)(Position - blockStart);
         int aligned = ((prefixBytes + count + 15) / 16) * 16;
         byte[] encrypted = new byte[aligned];
         lock (baseStream) { baseStream.Position = start + blockStart; }
@@ -63,7 +58,7 @@ public class AesCbcSubStream(Stream baseStream, long start, long length, byte[] 
 
         decrypted.AsSpan(prefixBytes, copyLen).CopyTo(buffer.AsSpan(offset));
 
-        _position += copyLen;
+        Position += copyLen;
 
         return copyLen;
     }
@@ -82,15 +77,15 @@ public class AesCbcSubStream(Stream baseStream, long start, long length, byte[] 
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => length + offset,
-            _ => _position,
+            _ => Position,
         };
 
-        return _position;
+        return Position;
     }
 
     public override void Flush() { }

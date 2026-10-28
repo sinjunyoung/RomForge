@@ -1,6 +1,6 @@
 ﻿namespace N3DS.Core.Services;
 
-public static class StreamExtensions
+public static class Extensions
 {
     public static async Task CopyToAsync(this Stream source, Stream destination, long length, long totalBytes = 0, Action<long, long>? progress = null, CancellationToken ct = default)
     {

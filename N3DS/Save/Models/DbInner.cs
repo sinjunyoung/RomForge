@@ -1,6 +1,4 @@
-﻿using N3DS.Save;
-
-namespace N3DS.Save.Models;
+﻿namespace N3DS.Save.Models;
 
 public class DbInner(Diff diff, Fat fat, FsMeta fs, int blockLen, int blockCount)
 {

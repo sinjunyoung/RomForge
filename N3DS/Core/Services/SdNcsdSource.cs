@@ -58,5 +58,9 @@ public class SdNcsdSource(IReadOnlyList<Contents> contents, KeyStore keyStore, S
         }
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 }

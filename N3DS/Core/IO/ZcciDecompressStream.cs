@@ -8,10 +8,8 @@ namespace N3DS.Core.IO;
 public class ZcciDecompressStream : Stream
 {
     private readonly Stream _base;
-    private readonly long _dataOffset;
     private readonly List<(long compOffset, int compSize, int decompSize)> _blocks;
     private readonly long _totalSize;
-    private long _position;
 
     private int _cachedBlockIndex = -1;
     private byte[]? _cachedBlock;
@@ -35,22 +33,24 @@ public class ZcciDecompressStream : Stream
 
             offset += e.CompressedSize;
         }
-
-        _dataOffset = compressedDataOffset;
     }
 
     public override long Length => _totalSize;
-    public override long Position { get => _position; set => _position = value; }
+
+    public override long Position { get; set; }
+
     public override bool CanRead => true;
+
     public override bool CanSeek => true;
+
     public override bool CanWrite => false;
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        if (_position >= _totalSize) 
+        if (Position >= _totalSize) 
             return 0;
 
-        count = (int)Math.Min(count, _totalSize - _position);
+        count = (int)Math.Min(count, _totalSize - Position);
 
         int totalRead = 0;
 
@@ -61,7 +61,7 @@ public class ZcciDecompressStream : Stream
 
             for (int i = 0; i < _blocks.Count; i++)
             {
-                if (_position < decompPos + _blocks[i].decompSize)
+                if (Position < decompPos + _blocks[i].decompSize)
                 {
                     blockIndex = i;
                     break;
@@ -103,13 +103,13 @@ public class ZcciDecompressStream : Stream
             for (int i = 0; i < blockIndex; i++)
                 blockDecompStart += _blocks[i].decompSize;
 
-            int blockOffset = (int)(_position - blockDecompStart);
+            int blockOffset = (int)(Position - blockDecompStart);
             int canRead = Math.Min(count - totalRead, _cachedBlock!.Length - blockOffset);
 
             Buffer.BlockCopy(_cachedBlock, blockOffset, buffer, offset + totalRead, canRead);
 
             totalRead += canRead;
-            _position += canRead;
+            Position += canRead;
         }
 
         return totalRead;
@@ -117,18 +117,20 @@ public class ZcciDecompressStream : Stream
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => _totalSize + offset,
-            _ => _position
+            _ => Position
         };
-        return _position;
+        return Position;
     }
 
     public override void Flush() { }
+
     public override void SetLength(long value) => throw new NotSupportedException();
+
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
     protected override void Dispose(bool disposing)

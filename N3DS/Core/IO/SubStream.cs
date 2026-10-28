@@ -2,66 +2,75 @@
 
 public class SubStream(Stream baseStream, long start, long length) : Stream
 {
-    private long _position;
-
     public override long Length => length;
-    public override long Position { get => _position; set => _position = value; }
+
+    public override long Position { get; set; }
+
     public override bool CanRead => true;
+
     public override bool CanSeek => true;
+
     public override bool CanWrite => false;
 
-    public override int Read(byte[] buffer, int offset, int count)
+    public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
+
+    public override int Read(Span<byte> buffer)
     {
-        count = (int)Math.Min(count, length - _position);
+        int count = (int)Math.Min(buffer.Length, length - Position);
 
         if (count <= 0)
             return 0;
 
-        lock (baseStream) { baseStream.Position = start + _position; }
-        int read = baseStream.Read(buffer, offset, count);
+        lock (baseStream) { baseStream.Position = start + Position; }
+        int read = baseStream.Read(buffer[..count]);
 
-        _position += read;
+        Position += read;
 
         return read;
     }
 
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct) => ReadAsync(buffer.AsMemory(offset, count), ct).AsTask();
+
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
     {
-        count = (int)Math.Min(count, length - _position);
+        int count = (int)Math.Min(buffer.Length, length - Position);
 
         if (count <= 0)
             return 0;
 
+        Memory<byte> slicedBuffer = buffer[..count];
+
         if (baseStream is FileStream fs)
         {
-            int read = await RandomAccess.ReadAsync(fs.SafeFileHandle, buffer.AsMemory(offset, count), start + _position, ct);
-            _position += read;
-
+            int read = await RandomAccess.ReadAsync(fs.SafeFileHandle, slicedBuffer, start + Position, ct).ConfigureAwait(false);
+            Position += read;
             return read;
         }
 
-        lock (baseStream) { baseStream.Position = start + _position; }
-        int r = await baseStream.ReadAsync(buffer.AsMemory(offset, count), ct);
+        lock (baseStream) { baseStream.Position = start + Position; }
+        int r = await baseStream.ReadAsync(slicedBuffer, ct).ConfigureAwait(false);
 
-        _position += r;
+        Position += r;
 
         return r;
     }
 
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => length + offset,
-            _ => _position,
+            _ => Position,
         };
 
-        return _position;
+        return Position;
     }
 
     public override void Flush() { }
+
     public override void SetLength(long value) => throw new NotSupportedException();
+
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 }

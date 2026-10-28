@@ -25,6 +25,8 @@ public class FileMeta : IDisposable
             _fs.Files.ReleaseTicket(_ino);
 
             _disposed = true;
+
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -33,7 +35,6 @@ public class FileMeta : IDisposable
     public uint GetParentIno()
     {
         var (_, key) = _fs.Files.GetAt(_ino);
-
         return key.GetParent();
     }
 

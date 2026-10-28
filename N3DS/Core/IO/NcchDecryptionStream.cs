@@ -12,7 +12,6 @@ public class NcchDecryptionStream : Stream
     private readonly Stream _baseStream;
     private readonly long _ncchOffset;
     private readonly NcchHeader _header;
-    private long _position;
 
     private readonly byte[] _primaryKey;
     private readonly byte[] _secondaryKey;
@@ -121,7 +120,7 @@ public class NcchDecryptionStream : Stream
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        long currentPos = _position;
+        long currentPos = Position;
         int bytesRead = 0;
 
         lock (_baseStream)
@@ -135,14 +134,14 @@ public class NcchDecryptionStream : Stream
 
         DecryptBufferRange(buffer, offset, currentPos, bytesRead);
 
-        _position += bytesRead;
+        Position += bytesRead;
 
         return bytesRead;
     }
 
     public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
     {
-        long currentPos = _position;
+        long currentPos = Position;
         int bytesRead;
 
         if (_baseStream is FileStream fs)
@@ -159,20 +158,12 @@ public class NcchDecryptionStream : Stream
 
         DecryptBufferRange(buffer, offset, currentPos, bytesRead);
 
-        _position += bytesRead;
+        Position += bytesRead;
 
         return bytesRead;
     }
 
-    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
-    {
-        byte[] array = new byte[buffer.Length];
-        int bytesRead = await ReadAsync(array, 0, array.Length, ct).ConfigureAwait(false);
-
-        array.AsMemory(0, bytesRead).CopyTo(buffer);
-
-        return bytesRead;
-    }
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default) => await base.ReadAsync(buffer, ct).ConfigureAwait(false);
 
     private void DecryptBufferRange(byte[] buffer, int offset, long ncchRelativePos, int length)
     {
@@ -335,7 +326,7 @@ public class NcchDecryptionStream : Stream
 
         if (_header.SeedCrypto)
         {
-            byte[] seed = keyStore.GetSeed(_header.ProgramId);
+            byte[]? seed = keyStore.GetSeed(_header.ProgramId) ?? throw new NullReferenceException();
 
             secondaryKeyY = CalculateSeedKey(keyYPrimary, seed);
         }
@@ -399,7 +390,7 @@ public class NcchDecryptionStream : Stream
         base.Dispose(disposing);
     }
 
-    public override long Position { get => _position; set => _position = value; }
+    public override long Position { get; set; }
     public override long Length => _baseStream.Length - _ncchOffset;
     public override bool CanRead => true;
     public override bool CanSeek => true;
@@ -407,14 +398,14 @@ public class NcchDecryptionStream : Stream
     public override void Flush() { }
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => Length + offset,
-            _ => _position
+            _ => Position
         };
-        return _position;
+        return Position;
     }
     public override void SetLength(long value) => throw new NotSupportedException();
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();

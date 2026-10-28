@@ -63,8 +63,8 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
         if (content0 != null)
         {
-            await using var src0 = File.OpenRead(content0.FilePath);
-            var sdDec = new SdDecryptStream(src0, content0.SdPath, sdCrypto);
+            await using var src0 = File.OpenRead(content0.FilePath!);
+            var sdDec = new SdDecryptStream(src0, content0.SdPath!, sdCrypto);
             byte[] ncchHeaderBytes = new byte[0x200];
 
             await sdDec.ReadExactlyAsync(ncchHeaderBytes, 0, 0x200, ct);
@@ -147,8 +147,8 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             Log($"추출 중: {entry.ContentIdHex}.app");
 
-            await using var src = File.OpenRead(entry.FilePath);
-            Stream decrypted = new SdDecryptStream(src, entry.SdPath, sdCrypto, leaveOpen: true);
+            await using var src = File.OpenRead(entry.FilePath!);
+            Stream decrypted = new SdDecryptStream(src, entry.SdPath!, sdCrypto, leaveOpen: true);
 
             byte[] ncchHeaderBytes = new byte[0x200];
 

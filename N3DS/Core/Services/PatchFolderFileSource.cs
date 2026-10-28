@@ -52,7 +52,6 @@ public class PatchFolderFileSource(PatchFileIndex index, IEnumerable<string> tar
         if (!applied)
         {
             _skippedPaths.Add(relative);
-
             return null;
         }
 

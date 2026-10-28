@@ -105,7 +105,7 @@ public class KeyStore
         if (movable.Length < 0x120)
             throw new InvalidDataException("movable.sed가 너무 짧음");
 
-        if (!movable[0..4].SequenceEqual("SEED"u8.ToArray()))
+        if (!movable.AsSpan()[0..4].SequenceEqual("SEED"u8.ToArray()))
             throw new InvalidDataException("movable.sed 매직 불일치");
 
         _sdKeyY = movable[0x110..0x120];

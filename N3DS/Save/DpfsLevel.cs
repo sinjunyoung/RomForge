@@ -151,6 +151,7 @@ public class DpfsLevel : IRandomAccessFile
 
                 BinaryPrimitives.WriteUInt32LittleEndian(bytes, newWord);
                 _selector.Write(i * 4, bytes, 0, 4);
+
                 _dirty[i] = 0;
             }
         }

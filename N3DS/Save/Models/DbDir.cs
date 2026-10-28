@@ -1,5 +1,4 @@
-﻿using N3DS.Save;
-using N3DS.Save.Interfaces;
+﻿using N3DS.Save.Interfaces;
 
 namespace N3DS.Save.Models;
 

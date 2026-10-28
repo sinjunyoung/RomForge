@@ -11,14 +11,6 @@ public struct OffsetOrFatFile
 
     public uint BlockCount;
 
-    public static OffsetOrFatFile FromOffset(ulong offset) => new()
-    {
-        BlockIndex = (uint)(offset & 0xFFFFFFFF),
-        BlockCount = (uint)(offset >> 32),
-    };
-
-    public readonly ulong ToOffset() => BlockIndex | ((ulong)BlockCount << 32);
-
     public static OffsetOrFatFile Read(IRandomAccessFile f, int pos)
     {
         var buf = new byte[Size];

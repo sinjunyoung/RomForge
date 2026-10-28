@@ -12,69 +12,7 @@ public class Diff
     private readonly DifiPartition _partition;
     private readonly ulong _uniqueId;
 
-    public int ParentLen => _parentLen;
-
-    public ulong UniqueId => _uniqueId;
-
     public DifiPartition Partition => _partition;
-
-    private static DiffInfo CalculateInfo(DifiPartitionParam param)
-    {
-        var (descriptorLen, partitionLen) = DifiPartition.CalculateSize(param);
-        int partitionAlign = param.GetAlign();
-        int secondaryTableOffset = 0x200;
-        int tableLen = descriptorLen;
-        int primaryTableOffset = Misc.AlignUp(secondaryTableOffset + tableLen, 8);
-        int partitionOffset = Misc.AlignUp(primaryTableOffset + tableLen, partitionAlign);
-        int end = partitionOffset + partitionLen;
-
-        return new DiffInfo
-        {
-            SecondaryTableOffset = secondaryTableOffset,
-            PrimaryTableOffset = primaryTableOffset,
-            TableLen = tableLen,
-            PartitionOffset = partitionOffset,
-            PartitionLen = partitionLen,
-            End = end,
-        };
-    }
-
-    public static int CalculateSize(DifiPartitionParam param) => CalculateInfo(param).End;
-
-    public static void Format(IRandomAccessFile file, (ISigner signer, byte[] key)? signer, DifiPartitionParam param, ulong uniqueId)
-    {
-        var zeros = new byte[0x200];
-
-        file.Write(0, zeros, 0, 0x200);
-
-        IRandomAccessFile headerFileBare = new SubFile(file, 0x100, 0x100);
-        IRandomAccessFile headerFile = signer is var (s, k) ? SignedFile.New(new SubFile(file, 0, 0x10), headerFileBare, s, k) : headerFileBare;
-
-        var info = CalculateInfo(param);
-        var header = new DiffHeader
-        {
-            Magic = "DIFF"u8.ToArray(),
-            Version = 0x30000,
-            SecondaryTableOffset = (ulong)info.SecondaryTableOffset,
-            PrimaryTableOffset = (ulong)info.PrimaryTableOffset,
-            TableSize = (ulong)info.TableLen,
-            PartitionOffset = (ulong)info.PartitionOffset,
-            PartitionSize = (ulong)info.PartitionLen,
-            ActiveTable = 1,
-            Padding = new byte[3],
-            Sha = new byte[0x20],
-            UniqueId = uniqueId,
-        };
-
-        header.Write(headerFile, 0);
-
-        var table = new IvfcLevel(new SubFile(headerFile, 0x34, 0x20), new SubFile(file, info.SecondaryTableOffset, info.TableLen), info.TableLen);
-
-        DifiPartition.Format(table, param);
-
-        table.Commit();
-        headerFile.Commit();
-    }
 
     public Diff(IRandomAccessFile file, (ISigner signer, byte[] key)? signer)
     {

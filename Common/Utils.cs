@@ -49,14 +49,14 @@ public static class Utils
 
     public static string GetUniqueFilePath(string filePath)
     {
-        string directory = Path.GetDirectoryName(filePath);
+        string? directory = Path.GetDirectoryName(filePath);
         string fileName = Path.GetFileNameWithoutExtension(filePath);
         string extension = Path.GetExtension(filePath);
 
         while (File.Exists(filePath))
         {
             fileName += "_";
-            filePath = Path.Combine(directory, fileName + extension);
+            filePath = Path.Combine(directory ?? string.Empty, fileName + extension);
         }
 
         return filePath;

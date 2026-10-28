@@ -6,15 +6,6 @@ public class MemoryFile(byte[] data) : IRandomAccessFile
 {
     public int Length => data.Length;
 
-    public static MemoryFile FromFile(IRandomAccessFile file)
-    {
-        var data = new byte[file.Length];
-
-        file.Read(0, data, 0, data.Length);
-
-        return new MemoryFile(data);
-    }
-
     public void Read(int pos, byte[] buf, int offset, int count)
     {
         if (pos + count > data.Length)

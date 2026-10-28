@@ -126,7 +126,6 @@ public class DifiPartition : IRandomAccessFile
     public static (int descriptorLen, int partitionLen) CalculateSize(DifiPartitionParam param)
     {
         var info = CalculateInfo(param);
-
         return (info.DescriptorLen, info.PartitionLen);
     }
 

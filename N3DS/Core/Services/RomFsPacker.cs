@@ -25,22 +25,6 @@ public static class RomFsPacker
         await PackInternalAsync(ncchStream, dataBase, unpack.Directories, unpack.Files, output, startPos, totalBytes, patchSource, patchSizeMap, progress, log, ct);
     }
 
-    public static async Task PackFromFolderAsync(string folderPath, Stream output, IRomFsFileSource? patchSource = null, Action<long, long>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
-    {
-        var (dirs, files) = RomFsFolderScanner.ScanFolder(folderPath);
-
-        IRomFsFileSource effectiveSource = new FolderRomFsFileSource(folderPath, patchSource);
-
-        var patchSizeMap = await RomFsPatchSizeResolver.BuildPatchSizeMapAsync(files, effectiveSource, null, 0, log, ct);
-        var (totalSize, _, _, _, _) = RomFsLayoutCalculator.CalculateLayout(dirs, files, patchSizeMap);
-        long startPos = output.Position;
-
-        if (output.CanSeek && output.Length < startPos + (long)totalSize)
-            output.SetLength(startPos + (long)totalSize);
-
-        await PackInternalAsync(Stream.Null, 0, dirs, files, output, startPos, 0, effectiveSource, patchSizeMap, progress, log, ct);
-    }
-
     private static async Task PackInternalAsync(Stream ncchStream, long dataBase, IReadOnlyList<RomFsDirNode> dirs, IReadOnlyList<RomFsFileNode> files, Stream output, long startPos, long totalBytes, IRomFsFileSource? patchSource = null, Dictionary<string, long>? patchSizeMap = null, Action<long, long>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         var layout = await RomFsMetadataBuilder.BuildAsync(output, startPos, dirs, files, patchSizeMap, ct);
@@ -73,7 +57,7 @@ public static class RomFsPacker
                 await hashingStream.WriteAsync(new byte[padSize], ct);
             }
 
-            Func<CancellationToken, ValueTask<Stream?>>? getOriginal = hasOriginalSource ? (ct2 => RomFsPatchSizeResolver.ReadOriginalSliceAsync(ncchStream, dataBase, file, ct2)) : null;
+            Func<CancellationToken, ValueTask<Stream?>>? getOriginal = hasOriginalSource ? (ct2 => RomFsPatchSizeResolver.ReadOriginalSliceAsync(ncchStream!, dataBase, file, ct2)) : null;
 
             Stream? patchStream = patchSource != null ? await patchSource.OpenFileAsync(file.FullPath, getOriginal, log, ct) : null;
             long before = cumulativeWritten;
@@ -85,9 +69,9 @@ public static class RomFsPacker
             }
             else
             {
-                ncchStream.Position = dataBase + (long)file.DataOffset;
+                ncchStream?.Position = dataBase + (long)file.DataOffset;
 
-                await ncchStream.CopyToAsync(hashingStream, (long)file.DataSize, totalBytes, progress != null ? (w, t) => progress(before + w, t) : null, ct);
+                await ncchStream!.CopyToAsync(hashingStream, (long)file.DataSize, totalBytes, progress != null ? (w, t) => progress(before + w, t) : null, ct);
             }
 
             dataAreaPos += (ulong)actualSize;

@@ -57,7 +57,11 @@ public class CciToCiaConverter(KeyStore keyStore)
         finally
         {
             if (!isCompleted && !string.IsNullOrEmpty(outputPath) && File.Exists(outputPath))
-                try { File.Delete(outputPath); } catch { }
+                try 
+                { 
+                    File.Delete(outputPath); 
+                } 
+                catch { }
         }
     }
 
@@ -468,7 +472,8 @@ public class CciToCiaConverter(KeyStore keyStore)
 
     private static async Task<byte[]?> ReadExeFsIconAsync(Stream ncchStream, NcchHeader ncch, CancellationToken ct)
     {
-        if (ncch.ExefsOffset == 0) return null;
+        if (ncch.ExefsOffset == 0) 
+            return null;
 
         long exefsStart = (long)ncch.ExefsOffset * 0x200;
         byte[] exefsHeader = new byte[0x200];

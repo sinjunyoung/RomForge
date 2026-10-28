@@ -7,22 +7,20 @@ public class SdTitleScanner
 {
     private readonly SdCrypto _sdCrypto;
     private readonly KeyStore _keyStore;
-    private readonly string _sdRoot;
-    private readonly string _id1Path;
 
     public SdTitleScanner(string sdRoot, KeyStore keyStore, SdCrypto sdCrypto)
     {
-        _sdRoot = sdRoot ?? throw new ArgumentNullException(nameof(sdRoot));
+        SdRoot = sdRoot ?? throw new ArgumentNullException(nameof(sdRoot));
         _keyStore = keyStore ?? throw new ArgumentNullException(nameof(keyStore));
         _sdCrypto = sdCrypto ?? throw new ArgumentNullException(nameof(sdCrypto));
 
-        _id1Path = FindId1Path();
+        Id1Path = FindId1Path();
     }
 
     private string FindId1Path()
     {
         string id0Hex = _keyStore.GetId0Hex();
-        string id0Path = Path.Combine(_sdRoot, "Nintendo 3DS", id0Hex);
+        string id0Path = Path.Combine(SdRoot, "Nintendo 3DS", id0Hex);
 
         if (!Directory.Exists(id0Path))
             throw new DirectoryNotFoundException($"id0 디렉토리를 찾을 수 없음: {id0Path}");
@@ -40,13 +38,13 @@ public class SdTitleScanner
         return id1Dirs[0];
     }
 
-    public string Id1Path => _id1Path;
+    public string Id1Path { get; internal set; }
 
-    public string SdRoot => _sdRoot;
+    public string SdRoot { get; internal set; }
 
     public List<InstalledTitle> ScanTitles(IProgress<string>? progress = null)
     {
-        string titleRoot = Path.Combine(_id1Path, "title");
+        string titleRoot = Path.Combine(Id1Path, "title");
 
         if (!Directory.Exists(titleRoot))
             return [];
@@ -125,9 +123,8 @@ public class SdTitleScanner
 
     private string ToSdPath(string absolutePath)
     {
-        string id1 = _id1Path.TrimEnd('\\', '/');
+        string id1 = Id1Path.TrimEnd('\\', '/');
         string relative = absolutePath.StartsWith(id1, StringComparison.OrdinalIgnoreCase) ? absolutePath[id1.Length..] : absolutePath;
-
         return relative.Replace('\\', '/');
     }
 

@@ -2,16 +2,14 @@
 
 public sealed class KeyStoreProvider
 {
-    private static KeyStoreProvider _instance;
     private static readonly Lock _lock = new();
-
-    private KeyStore _keyStore;
 
     public KeyStore KeyStore
     {
+        set;
         get
         {
-            lock (_lock) return _keyStore ??= new KeyStore();
+            lock (_lock) return field ??= new KeyStore();
         }
     }
 
@@ -19,7 +17,7 @@ public sealed class KeyStoreProvider
     {
         get
         {
-            lock (_lock) return _instance ??= new KeyStoreProvider();
+            lock (_lock) return field ??= new KeyStoreProvider();
         }
     }
 
@@ -27,6 +25,6 @@ public sealed class KeyStoreProvider
 
     public void Reload()
     {
-        lock (_lock) _keyStore = new KeyStore();
+        lock (_lock) KeyStore = new KeyStore();
     }
 }

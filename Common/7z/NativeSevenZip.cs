@@ -4,16 +4,16 @@ using SevenZip;
 
 namespace Patch.Core.Services;
 
-public static class NativeSevenZip
+public static partial class NativeSevenZip
 {
     private static readonly Lock InitLock = new();
     private static bool _initialized;
 
-    [DllImport("7z.dll")]
-    private static extern int GetNumberOfFormats(out uint numFormats);
+    [LibraryImport("7z.dll")]
+    private static partial int GetNumberOfFormats(out uint numFormats);
 
-    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern IntPtr GetModuleHandle(string lpModuleName);
+    [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    private static partial IntPtr GetModuleHandle(string lpModuleName);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);

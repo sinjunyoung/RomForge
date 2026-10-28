@@ -9,7 +9,6 @@ public interface ISigner
     byte[] Hash(byte[] data)
     {
         byte[] block = Block(data);
-
         return SHA256.HashData(block);
     }
 }

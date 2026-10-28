@@ -8,45 +8,48 @@ public class SdDecryptStream(Stream baseStream, string sdPath, SdCrypto sdCrypto
 {
     private readonly byte[] _key = sdCrypto.GetKey();
     private readonly byte[] _iv = SdCrypto.PathToIv(sdPath);
-    private long _position;
 
-    public override int Read(byte[] buffer, int offset, int count)
+    public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
+
+    public override int Read(Span<byte> buffer)
     {
-        long pos = _position;
+        long pos = Position;
 
         baseStream.Position = pos;
 
-        int bytesRead = baseStream.Read(buffer, offset, count);
+        int bytesRead = baseStream.Read(buffer);
 
         if (bytesRead <= 0)
             return bytesRead;
 
-        DecryptBlock(buffer, offset, pos, bytesRead);
+        DecryptBlock(buffer, pos, bytesRead);
 
-        _position += bytesRead;
+        Position += bytesRead;
 
         return bytesRead;
     }
 
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct)
+    public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken ct) => ReadAsync(buffer.AsMemory(offset, count), ct).AsTask();
+
+    public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default)
     {
-        long pos = _position;
+        long pos = Position;
 
         baseStream.Position = pos;
 
-        int bytesRead = await baseStream.ReadAsync(buffer.AsMemory(offset, count), ct);
+        int bytesRead = await baseStream.ReadAsync(buffer, ct).ConfigureAwait(false);
 
         if (bytesRead <= 0)
             return bytesRead;
 
-        DecryptBlock(buffer, offset, pos, bytesRead);
+        DecryptBlock(buffer.Span, pos, bytesRead);
 
-        _position += bytesRead;
+        Position += bytesRead;
 
         return bytesRead;
     }
 
-    private void DecryptBlock(byte[] buffer, int offset, long streamPos, int length)
+    private void DecryptBlock(Span<byte> buffer, long streamPos, int length)
     {
         using var aes = Aes.Create();
 
@@ -73,7 +76,7 @@ public class SdDecryptStream(Stream baseStream, string sdPath, SdCrypto sdCrypto
             int chunk = Math.Min(16 - blockOffset, length - pos);
 
             for (int i = 0; i < chunk; i++)
-                buffer[offset + pos + i] ^= keystream[blockOffset + i];
+                buffer[pos + i] ^= keystream[blockOffset + i];
 
             if (blockOffset + chunk >= 16)
                 IncrementCtr(ctr);
@@ -108,25 +111,34 @@ public class SdDecryptStream(Stream baseStream, string sdPath, SdCrypto sdCrypto
                 break;
     }
 
-    public override long Position { get => _position; set => _position = value; }
+    public override long Position { get; set; }
+
     public override long Length => baseStream.Length;
+
     public override bool CanRead => true;
+
     public override bool CanSeek => true;
+
     public override bool CanWrite => false;
+
     public override void Flush() { }
+
     public override long Seek(long offset, SeekOrigin origin)
     {
-        _position = origin switch
+        Position = origin switch
         {
             SeekOrigin.Begin => offset,
-            SeekOrigin.Current => _position + offset,
+            SeekOrigin.Current => Position + offset,
             SeekOrigin.End => Length + offset,
-            _ => _position
+            _ => Position
         };
-        return _position;
+        return Position;
     }
+
     public override void SetLength(long value) => throw new NotSupportedException();
+
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
     protected override void Dispose(bool disposing)
     {
         if (disposing && !leaveOpen)

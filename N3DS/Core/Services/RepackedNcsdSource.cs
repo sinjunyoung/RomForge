@@ -72,9 +72,12 @@ public class RepackedNcsdSource : INcsdSource
     public ValueTask<NcchHeader> GetNcchHeaderAsync(int contentIndex, CancellationToken ct = default)
     {
         var (unpack, _, _, _, _, _) = _ncchs[contentIndex];
-
         return ValueTask.FromResult(unpack.Header);
     }
 
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
+    public ValueTask DisposeAsync()
+    {
+        GC.SuppressFinalize(this);
+        return ValueTask.CompletedTask;
+    }
 }

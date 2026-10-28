@@ -58,26 +58,6 @@ public class MetaTable
         _isFileTable = false;
     }
 
-    public static void Format(IRandomAccessFile hash, IRandomAccessFile table, int keyLen, int infoLen, int entryCount)
-    {
-        var zeros = new byte[hash.Length];
-
-        hash.Write(0, zeros, 0, zeros.Length);
-        WriteU32(table, 0, 1);
-        WriteU32(table, 4, (uint)entryCount);
-
-        int padding = keyLen + infoLen - 8;
-
-        if (padding > 0)
-        {
-            var padBuf = new byte[padding];
-
-            table.Write(8, padBuf, 0, padding);
-        }
-
-        WriteU32(table, keyLen + infoLen, 0);
-    }
-
     private uint HashKey(IParentedKey key)
     {
         var bytes = new byte[_keyLen];

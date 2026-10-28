@@ -212,14 +212,6 @@ public class Fat
         }
     }
 
-    public static void Format(IRandomAccessFile table)
-    {
-        int blockCount = table.Length / 8 - 1;
-
-        SetHead(table, 0);
-        SetNode(table, 0, new FatNode { Size = blockCount, Prev = null, Next = null });
-    }
-
     public Fat(IRandomAccessFile table, IRandomAccessFile data, int blockLen)
     {
         int tableLen = table.Length;

@@ -63,7 +63,6 @@ public static class RomFsFormat
     public static string GetParentPath(string fullPath)
     {
         int lastSlash = fullPath.TrimEnd('/').LastIndexOf('/');
-
         return lastSlash <= 0 ? "/" : fullPath[..lastSlash];
     }
 }

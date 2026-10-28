@@ -58,6 +58,4 @@ public class FatFile(Fat fat, List<BlockMap> blockList) : IRandomAccessFile
     public void Commit() { }
 
     public void Delete() => fat.Delete(this);
-
-    public void Resize(int blockCount) => fat.Resize(this, blockCount);
 }

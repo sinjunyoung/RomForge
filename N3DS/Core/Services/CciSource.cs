@@ -227,5 +227,9 @@ public class CciSource : IInstallSource
         return buf;
     }
 
-    public async ValueTask DisposeAsync() => await Stream.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await Stream.DisposeAsync().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 }

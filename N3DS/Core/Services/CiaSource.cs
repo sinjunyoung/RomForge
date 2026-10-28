@@ -173,5 +173,9 @@ public class CiaSource : IInstallSource
 
     private static long AlignUp(long value, int alignment) => (value + alignment - 1) & ~(alignment - 1L);
 
-    public async ValueTask DisposeAsync() => await Stream.DisposeAsync();
+    public async ValueTask DisposeAsync()
+    {
+        await Stream.DisposeAsync().ConfigureAwait(false);
+        GC.SuppressFinalize(this);
+    }
 }

@@ -56,7 +56,11 @@ public class CiaToCciConverter(KeyStore keyStore)
         {
             if (!isCompleted && !string.IsNullOrEmpty(outputPath) && File.Exists(outputPath))
             {
-                try { File.Delete(outputPath); } catch { }
+                try 
+                { 
+                    File.Delete(outputPath); 
+                }
+                catch { }
             }
         }
     }

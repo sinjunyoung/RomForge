@@ -70,47 +70,12 @@ public class NcsdBuilder
                 globalWritten += size;
             }
         }
-        finally
-        {
-        }
+        finally { }
     }
 
-    public static async Task<long> CalculateSizeAsync(NcchUnpackResult unpack, byte[] exefsBlock, Stream romfsStream, CancellationToken ct = default)
-    {
-        long ncchSize = MediaUnit;
-
-        if (unpack.ExHeader != null)
-            ncchSize += unpack.ExHeader.Length;
-
-        if (unpack.Logo != null)
-            ncchSize = AlignUp(ncchSize, MediaUnit) + AlignUp(unpack.Logo.Length, MediaUnit);
-
-        if (unpack.PlainRegion != null)
-            ncchSize = AlignUp(ncchSize, MediaUnit) + AlignUp(unpack.PlainRegion.Length, MediaUnit);
-
-        if (exefsBlock.Length > 0)
-            ncchSize = AlignUp(ncchSize, MediaUnit) + AlignUp(exefsBlock.Length, MediaUnit);
-
-        if (romfsStream.Length > 0)
-        {
-            byte[] ivfcBuf = new byte[IvfcHeader.Size];
-
-            romfsStream.Position = 0;
-
-            await romfsStream.ReadExactlyAsync(ivfcBuf, ct);
-
-            ncchSize = AlignUp(ncchSize, NcchBuilder.RomFsAlign) + AlignUp(romfsStream.Length, MediaUnit);
-        }
-
-        return AlignUp(ncchSize, MediaUnit);
-    }
-
-    public static long CalculateOutputSize(INcsdSource ctx)
-    {
-        return NcsdHeadSize + ctx.Contents
-            .Where(c => c.ContentIndex <= 7)
-            .Sum(c => AlignUp(c.ContentSize, MediaUnit));
-    }
+    public static long CalculateOutputSize(INcsdSource ctx) => NcsdHeadSize + ctx.Contents
+        .Where(c => c.ContentIndex <= 7)
+        .Sum(c => AlignUp(c.ContentSize, MediaUnit));
 
     private static byte[] BuildNcsdHeader(List<(int index, NcchHeader header, long size)> partitions, (uint offset, uint size)[] partitionMap, uint totalSizeInUnits)
     {

@@ -42,6 +42,4 @@ public class DbDirInfo : IDirInfo
     }
 
     public IDirInfo Clone() => new DbDirInfo { Next = Next, SubDir = SubDir, SubFile = SubFile };
-
-    public static DbDirInfo NewRoot() => new() { Next = 0, SubDir = 0, SubFile = 0 };
 }

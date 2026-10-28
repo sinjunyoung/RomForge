@@ -47,9 +47,7 @@ public static class Z3dsCompressor
                 inputStream = new ConcatStream(ncsdHeader, ncchDecrypted);
             }
             else
-            {
                 fileStream.Position = 0;
-            }
 
             await using (inputStream)
             {

@@ -24,7 +24,6 @@
     <PathMap Condition=" '$(BuildType)' == 'Release' and '$(HasGitDir)' == 'false' ">$(MSBuildProjectDirectory)=C:/LibHac/</PathMap>
     <DeterministicSourcePaths Condition=" '$(BuildType)' == 'Release' and '$(HasGitDir)' == 'true' ">true</DeterministicSourcePaths>
 
-    <NoWarn>$(NoWarn);1591;CS8632;CA1816</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

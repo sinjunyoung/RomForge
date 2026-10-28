@@ -11,7 +11,6 @@ namespace N3DS.Core.Services;
 public static class CiaBuilder
 {
     private const int CiaAlign = 64;
-    private const int MediaUnit = 0x200;
     private const uint SigTypeRsa2048Sha256 = 0x00010004;
     private const int TicketSize = 0x140 + 0x164 + 0x28 + 0x84;
     private const int TmdBaseSize = 0x140 + 0xC4 + (0x24 * 64);
@@ -110,6 +109,7 @@ public static class CiaBuilder
             if (padding > 0)
             {
                 output.Position = contentOffsets[i] + size;
+
                 await output.WriteAsync(new byte[padding], ct);
             }
         }

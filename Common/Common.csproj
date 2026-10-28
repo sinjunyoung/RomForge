@@ -9,15 +9,8 @@
   <PropertyGroup>	
 	<Authors>YameSoft</Authors>
 	<Copyright>Copyright © 2026 YameSoft</Copyright>	
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
-	
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8604;SYSLIB1054</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8604;SYSLIB1054</NoWarn>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>	
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
