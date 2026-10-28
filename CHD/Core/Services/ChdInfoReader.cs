@@ -15,7 +15,7 @@ public class ChdInfoReader
 
     private const uint DVD_METADATA = 0x44564420;
 
-    public static ChdInfo ReadChdInfo(string filePath)
+    public static ChdInfo ReadChdInfo(string? filePath)
     {
         using var wrapper = new LibChdrWrapper();
         var result = wrapper.Open(filePath);

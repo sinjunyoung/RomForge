@@ -16,11 +16,11 @@ public class LibChdrWrapper : IDisposable
 
     public bool IsOpen => _chdHandle != IntPtr.Zero;
 
-    public ChdrError Open(string filename, ChdrOpenFlags flags = ChdrOpenFlags.CHDOPEN_READ)
+    public ChdrError Open(string? filename, ChdrOpenFlags flags = ChdrOpenFlags.CHDOPEN_READ)
     {
         Close();
 
-        var result = LibChdr.chd_open(filename, (int)flags, IntPtr.Zero, out _chdHandle);
+        var result = LibChdr.chd_open(filename!, (int)flags, IntPtr.Zero, out _chdHandle);
 
         if (result == ChdrError.CHDERR_NONE)
         {
@@ -137,7 +137,7 @@ public class LibChdrWrapper : IDisposable
         Marshal.Copy(_hunkBuffer, destination, 0, size);
     }
 
-    public string GetMetadata(uint tag, uint index = 0)
+    public string? GetMetadata(uint tag, uint index = 0)
     {
         if (!IsOpen)
             throw new InvalidOperationException("CHD not opened");

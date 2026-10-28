@@ -476,16 +476,16 @@ public class CsoService
         }
         else if (info.SourceType == ChdSourceType.ISO)
         {
-            long totalLength = (long)info.Tracks[0].Frames * 2048;
-            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info.Tracks[0].TrackType);
+            long totalLength = (long)(info?.Tracks?[0]?.Frames ?? 0) * 2048;
+            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info?.Tracks?[0]?.TrackType ?? default);
 
             await CompressAsync(chdStream, output, magic: magic, version: version, isLz4: isLz4, progress: progress, ct: ct);
         }
         else
         {
-            string trackType = info.TrackCount > 0 ? info.Tracks[0].TrackType ?? "알 수 없음" : "알 수 없음";
+            string trackType = info?.Tracks?[0]?.TrackType ?? "알 수 없음";
 
-            throw new NotSupportedException($"이 CHD({info.SourceType}, 트랙 {info.TrackCount}개, 타입 {trackType})는 CSO/ZSO 변환을 지원하지 않습니다.");
+            throw new NotSupportedException($"이 CHD({info?.SourceType}, 트랙 {info?.TrackCount}개, 타입 {trackType})는 CSO/ZSO 변환을 지원하지 않습니다.");
         }
     }
 
@@ -537,8 +537,8 @@ public class CsoService
             if (err != ChdrError.CHDERR_NONE)
                 throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
 
-            long totalLength = (long)info.Tracks[0].Frames * 2048;
-            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info.Tracks[0].TrackType);
+            long totalLength = (long)(info?.Tracks?[0]?.Frames ?? 0) * 2048;
+            using var chdStream = new ChdCdReadStream(wrapper, totalLength, info?.Tracks?[0]?.TrackType ?? string.Empty);
             await using var outputStream = File.Create(isoPath);
             var buffer = new byte[1 << 20];
             long written = 0;
@@ -557,9 +557,8 @@ public class CsoService
         }
         else
         {
-            string trackType = info.TrackCount > 0 ? info.Tracks[0].TrackType ?? "알 수 없음" : "알 수 없음";
-
-            throw new NotSupportedException($"이 CHD({info.SourceType}, 트랙 {info.TrackCount}개, 타입 {trackType})는 단일 ISO로 추출할 수 없습니다.");
+            string trackType = info?.Tracks?.FirstOrDefault()?.TrackType ?? "알 수 없음";
+            throw new NotSupportedException($"이 CHD({info?.SourceType}, 트랙 {info?.TrackCount}개, 타입 {trackType})는 단일 ISO로 추출할 수 없습니다.");
         }
     }
 }

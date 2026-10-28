@@ -3,13 +3,13 @@ using CHD.Core.Models;
 
 namespace PSP.PBP.Services;
 
-public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo info) : Stream
+public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo? info) : Stream
 {
     private long _position;
     private byte[]? _currentHunk;
     private uint _cachedHunkIndex = uint.MaxValue;
     private readonly uint _sectorsPerHunk = (wrapper.Header?.hunkbytes ?? 0) / 2448u;
-    private readonly TrackInfo[] _tracks = info.Tracks;
+    private readonly TrackInfo[] _tracks = info?.Tracks ?? [];
 
     private (long chdsector, int tracknum) PhysicalToChdLba(long physlba)
     {

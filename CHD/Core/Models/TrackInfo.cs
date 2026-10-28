@@ -4,9 +4,9 @@ public class TrackInfo
 {
     public int TrackNumber { get; set; }
 
-    public string TrackType { get; set; }
+    public string? TrackType { get; set; }
 
-    public string SubType { get; set; }
+    public string? SubType { get; set; }
 
     public int Frames { get; set; }
 

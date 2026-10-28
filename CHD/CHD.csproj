@@ -11,14 +11,7 @@
 	<Authors>YameSoft</Authors>
 	<Copyright>Copyright © 2026 YameSoft</Copyright>
 	<PackageLicenseExpression>GPL-2.0-or-later</PackageLicenseExpression>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8612;CS8619;CS8625;SYSLIB1045;SYSLIB1054;CA1401;CA1816;CA2101</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;CS8600;CS8601;CS8602;CS8603;CS8604;CS8612;CS8618;CS8612;CS8619;CS8625;SYSLIB1045;SYSLIB1054;CA1401;CA1816;CA2101</NoWarn>
+	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

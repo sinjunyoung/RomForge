@@ -22,7 +22,7 @@ public static class RawDiscProcessor
             var info = ChdInfoReader.ReadChdInfo(filePath);
 
             long totalSize = ChdmanService.CalculateOriginalSize(info);
-            long rawStreamLength = info.Tracks.Sum(t => (long)t.Frames * 2352);
+            long rawStreamLength = (info?.Tracks ?? []).Sum(t => (long)t.Frames * 2352);
             var stream = new ChdReadStream(wrapper, rawStreamLength, info);
             var cueFile = CueFileReader.BuildCueFromChdInfo(info);
             byte[] tocData = TocBuilder.BuildToc(cueFile, (uint)totalSize);

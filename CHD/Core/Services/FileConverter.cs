@@ -9,9 +9,9 @@ public class FileConverter : IDisposable
     private readonly string _compression = "zlib";
     private bool _disposed;
 
-    public string CurrentOutputPath { get; private set; }
+    public string? CurrentOutputPath { get; private set; }
 
-    public event EventHandler<(string Message, LogLevel Level)> LogMessage;
+    public event EventHandler<(string Message, LogLevel Level)>? LogMessage;
 
     public FileConverter(string compression = "zlib")
     {
@@ -194,7 +194,7 @@ public class FileConverter : IDisposable
 
     private async Task<ConversionResult> ConvertToChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        var inputPath = source.PrimaryFile;
+        var inputPath = source.PrimaryFile ?? throw new NullReferenceException();
         var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
 
         chdPath = Utils.GetUniqueFilePath(chdPath);
@@ -217,7 +217,7 @@ public class FileConverter : IDisposable
             CurrentOutputPath = null;
 
             long originalSize = 0;
-            string extension = Path.GetExtension(inputPath).ToLower();
+            string extension = Path.GetExtension(inputPath!).ToLower();
 
             if (extension == ".cue")
             {
@@ -226,7 +226,7 @@ public class FileConverter : IDisposable
 
                 foreach (var binName in referencedBins)
                 {
-                    string binPath = Path.Combine(sourceDir, Path.GetFileName(binName));
+                    string? binPath = Path.Combine(sourceDir, Path.GetFileName(binName));
 
                     if (File.Exists(binPath))
                         originalSize += new FileInfo(binPath).Length;
@@ -293,8 +293,8 @@ public class FileConverter : IDisposable
 
     private async Task<ConversionResult> ConvertIsoChdAsync(ConversionSource source, string? outputDir, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        var inputPath = source.PrimaryFile;
-        var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir));
+        var inputPath = source.PrimaryFile ?? throw new NullReferenceException("inputPath");
+        var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir)) ?? throw new NullReferenceException("chdPath");
 
         Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
 
@@ -350,8 +350,11 @@ public class FileConverter : IDisposable
         }
     }
 
-    private void CleanupFiles(params string[] paths)
+    private void CleanupFiles(params string?[] paths)
     {
+        if (paths == null)
+            return;
+
         foreach (var path in paths)
         {
             if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -379,6 +382,7 @@ public class FileConverter : IDisposable
             return;
 
         _disposed = true;
+        GC.SuppressFinalize(this);
         _chdman.Dispose();
     }
 

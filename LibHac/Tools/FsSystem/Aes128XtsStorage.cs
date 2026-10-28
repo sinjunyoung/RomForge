@@ -20,20 +20,19 @@ public class Aes128XtsStorage : SectorStorage
     public Aes128XtsStorage(IStorage baseStorage, Span<byte> key, int sectorSize, bool leaveOpen, bool decryptRead = true)
         : base(baseStorage, sectorSize, leaveOpen)
     {
-        if (key == null) throw new NullReferenceException(nameof(key));
-        if (key.Length != BlockSize * 2) throw new ArgumentException(nameof(key), $"Key must be {BlockSize * 2} bytes long");
-
+        if (key.IsEmpty) throw new NullReferenceException(nameof(key));
+        if (key.Length != BlockSize * 2) throw new ArgumentException($"Key must be {BlockSize * 2} bytes long", nameof(key));
         _tempBuffer = new byte[sectorSize];
         _decryptRead = decryptRead;
-        _key1 = key.Slice(0, BlockSize).ToArray();
+        _key1 = key[..BlockSize].ToArray();
         _key2 = key.Slice(BlockSize, BlockSize).ToArray();
     }
 
     public Aes128XtsStorage(IStorage baseStorage, Span<byte> key1, Span<byte> key2, int sectorSize, bool leaveOpen, bool decryptRead = true)
         : base(baseStorage, sectorSize, leaveOpen)
     {
-        if (key1 == null) throw new NullReferenceException(nameof(key1));
-        if (key2 == null) throw new NullReferenceException(nameof(key2));
+        if (key1.IsEmpty) throw new NullReferenceException(nameof(key1));
+        if (key2.IsEmpty) throw new NullReferenceException(nameof(key2));
         if (key1.Length != BlockSize || key1.Length != BlockSize) throw new ArgumentException($"Keys must be {BlockSize} bytes long");
 
         _tempBuffer = new byte[sectorSize];
@@ -47,7 +46,7 @@ public class Aes128XtsStorage : SectorStorage
         int size = destination.Length;
         long sectorIndex = offset / SectorSize;
 
-        if (_readTransform == null) _readTransform = new Aes128XtsTransform(_key1, _key2, _decryptRead);
+        _readTransform ??= new Aes128XtsTransform(_key1, _key2, _decryptRead);
 
         Result res = base.Read(offset, _tempBuffer.AsSpan(0, size));
         if (res.IsFailure()) return res.Miss();
@@ -63,7 +62,7 @@ public class Aes128XtsStorage : SectorStorage
         int size = source.Length;
         long sectorIndex = offset / SectorSize;
 
-        if (_writeTransform == null) _writeTransform = new Aes128XtsTransform(_key1, _key2, !_decryptRead);
+        _writeTransform ??= new Aes128XtsTransform(_key1, _key2, !_decryptRead);
 
         source.CopyTo(_tempBuffer);
         _writeTransform.TransformBlock(_tempBuffer, 0, size, (ulong)sectorIndex);

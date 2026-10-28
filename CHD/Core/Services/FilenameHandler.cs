@@ -3,14 +3,17 @@ using System.Text.RegularExpressions;
 
 namespace CHD.Core.Services;
 
-public class FilenameHandler
+public partial class FilenameHandler
 {
+    [GeneratedRegex(@"[\uAC00-\uD7A3]")]
+    private static partial Regex KoreanRegex();
+
     public static bool HasKorean(string filename)
     {
         if (string.IsNullOrEmpty(filename))
             return false;
 
-        return Regex.IsMatch(filename, @"[\uAC00-\uD7A3]");
+        return KoreanRegex().IsMatch(filename);
     }
 
     public static bool HasKoreanInDirectory(string filePath)
@@ -18,7 +21,7 @@ public class FilenameHandler
         if (string.IsNullOrEmpty(filePath))
             return false;
 
-        string directory = Path.GetDirectoryName(filePath);
+        string? directory = Path.GetDirectoryName(filePath);
 
         return !string.IsNullOrEmpty(directory) && HasKorean(directory);
     }

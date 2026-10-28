@@ -5,17 +5,30 @@ using System.Text.RegularExpressions;
 
 namespace CD.Core.Services.Readers;
 
-public class CcdImgSubReader : IDiscImageReader
+public partial class CcdImgSubReader : IDiscImageReader
 {
     private const int SectorSize = 2352;
 
-    private static readonly Regex TrackHeaderRegex = new(@"^\[TRACK\s+\d+\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex ModeRegex = new(@"^MODE\s*=\s*(\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex IndexRegex = new(@"^INDEX\s+(\d+)\s*=\s*(\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex EntryHeaderRegex = new(@"^\[Entry\s+\d+\]$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex PointRegex = new(@"^Point\s*=\s*0x([0-9A-Fa-f]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex ControlRegex = new(@"^Control\s*=\s*0x([0-9A-Fa-f]+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex PlbaRegex = new(@"^PLBA\s*=\s*(-?\d+)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    [GeneratedRegex(@"^\[TRACK\s+\d+\]$", RegexOptions.IgnoreCase)]
+    private static partial Regex TrackHeaderRegex();
+
+    [GeneratedRegex(@"^MODE\s*=\s*(\d+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex ModeRegex();
+
+    [GeneratedRegex(@"^INDEX\s+(\d+)\s*=\s*(\d+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex IndexRegex();
+
+    [GeneratedRegex(@"^\[Entry\s+\d+\]$", RegexOptions.IgnoreCase)]
+    private static partial Regex EntryHeaderRegex();
+
+    [GeneratedRegex(@"^Point\s*=\s*0x([0-9A-Fa-f]+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex PointRegex();
+
+    [GeneratedRegex(@"^Control\s*=\s*0x([0-9A-Fa-f]+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex ControlRegex();
+
+    [GeneratedRegex(@"^PLBA\s*=\s*(-?\d+)$", RegexOptions.IgnoreCase)]
+    private static partial Regex PlbaRegex();
 
     public bool CanRead(string filePath)
     {
@@ -86,7 +99,7 @@ public class CcdImgSubReader : IDiscImageReader
         {
             var line = rawLine.Trim();
 
-            if (TrackHeaderRegex.IsMatch(line))
+            if (TrackHeaderRegex().IsMatch(line))
             {
                 FlushCurrent();
 
@@ -101,7 +114,7 @@ public class CcdImgSubReader : IDiscImageReader
             if (!inTrack)
                 continue;
 
-            var modeMatch = ModeRegex.Match(line);
+            var modeMatch = ModeRegex().Match(line);
 
             if (modeMatch.Success)
             {
@@ -109,7 +122,7 @@ public class CcdImgSubReader : IDiscImageReader
                 continue;
             }
 
-            var indexMatch = IndexRegex.Match(line);
+            var indexMatch = IndexRegex().Match(line);
 
             if (indexMatch.Success)
             {
@@ -218,7 +231,7 @@ public class CcdImgSubReader : IDiscImageReader
         {
             var line = rawLine.Trim();
 
-            if (EntryHeaderRegex.IsMatch(line))
+            if (EntryHeaderRegex().IsMatch(line))
             {
                 FlushCurrent();
 
@@ -233,7 +246,7 @@ public class CcdImgSubReader : IDiscImageReader
             if (!inEntry)
                 continue;
 
-            var pointMatch = PointRegex.Match(line);
+            var pointMatch = PointRegex().Match(line);
 
             if (pointMatch.Success)
             {
@@ -241,7 +254,7 @@ public class CcdImgSubReader : IDiscImageReader
                 continue;
             }
 
-            var controlMatch = ControlRegex.Match(line);
+            var controlMatch = ControlRegex().Match(line);
 
             if (controlMatch.Success)
             {
@@ -249,7 +262,7 @@ public class CcdImgSubReader : IDiscImageReader
                 continue;
             }
 
-            var plbaMatch = PlbaRegex.Match(line);
+            var plbaMatch = PlbaRegex().Match(line);
 
             if (plbaMatch.Success)
                 plba = long.Parse(plbaMatch.Groups[1].Value);

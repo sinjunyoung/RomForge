@@ -10,7 +10,7 @@ namespace RomForge.Core.Services.Patch;
 
 public static class CompressedSourceDecompressor
 {
-    public static async Task<(string ActualSourcePath, DetectResult Detected)> ResolveAsync(string sourcePath, string workDir, Action<string, LogLevel> log, IProgress<ProgressInfo> progress, CancellationToken ct)
+    public static async Task<(string? ActualSourcePath, DetectResult Detected)> ResolveAsync(string sourcePath, string workDir, Action<string, LogLevel> log, IProgress<ProgressInfo> progress, CancellationToken ct)
     {
         var ext = Path.GetExtension(sourcePath).ToLowerInvariant();
 
@@ -62,7 +62,7 @@ public static class CompressedSourceDecompressor
         }
     }
 
-    private static async Task<(string ActualSourcePath, DetectResult Detected)> DecompressChdAsync(string chdPath, string outputDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static async Task<(string? ActualSourcePath, DetectResult Detected)> DecompressChdAsync(string chdPath, string outputDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         var converter = new FileConverter(AppConfig.Instance.Chdman.Compression);
 

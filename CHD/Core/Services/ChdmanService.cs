@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace CHD.Core.Services;
 
-public sealed class ChdmanService : IDisposable
+public sealed partial class ChdmanService : IDisposable
 {
     private const string CHDMAN_DLL = "chdman.dll";
 
@@ -24,23 +24,29 @@ public sealed class ChdmanService : IDisposable
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void LogCallback([MarshalAs(UnmanagedType.LPStr)] string message);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_create_cd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string? compression, ProgressCallback progress, LogCallback log);
+    [LibraryImport(CHDMAN_DLL, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial int chdman_create_cd(string input, string output, string? compression, ProgressCallback progress, LogCallback log);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_create_dvd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, [MarshalAs(UnmanagedType.LPUTF8Str)] string compression, ProgressCallback progress, LogCallback log);
+    [LibraryImport(CHDMAN_DLL, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial int chdman_create_dvd(string input, string output, string compression, ProgressCallback progress, LogCallback log);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_extract_cd([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, ProgressCallback progress, LogCallback log);
+    [LibraryImport(CHDMAN_DLL, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial int chdman_extract_cd(string input, string output, ProgressCallback progress, LogCallback log);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_extract_raw([MarshalAs(UnmanagedType.LPUTF8Str)] string input, [MarshalAs(UnmanagedType.LPUTF8Str)] string output, ProgressCallback progress, LogCallback log);
+    [LibraryImport(CHDMAN_DLL, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial int chdman_extract_raw(string input, string output, ProgressCallback progress, LogCallback log);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern int chdman_get_info([MarshalAs(UnmanagedType.LPUTF8Str)] string input, LogCallback log);
+    [LibraryImport(CHDMAN_DLL, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial int chdman_get_info(string input, LogCallback log);
 
-    [DllImport(CHDMAN_DLL, CallingConvention = CallingConvention.Cdecl)]
-    private static extern void chdman_cancel();
+    [LibraryImport(CHDMAN_DLL)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static partial void chdman_cancel();
 
     #endregion
 
@@ -48,10 +54,10 @@ public sealed class ChdmanService : IDisposable
 
     public ChdmanService() => _logCallback = msg => { if (!string.IsNullOrEmpty(msg)) ErrorReceived?.Invoke(this, msg); };
 
-    public Task<bool> CreateCdAsync(string cuePath, string chdPath, string? compression = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public Task<bool> CreateCdAsync(string? cuePath, string? chdPath, string? compression = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        cuePath = Path.GetFullPath(cuePath);
-        chdPath = Path.GetFullPath(chdPath);
+        cuePath = Path.GetFullPath(cuePath!);
+        chdPath = Path.GetFullPath(chdPath!);
 
         return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, "압축 중...", (i, o, p, l) => chdman_create_cd(i, o, compression, p, l), progress, ct);
     }
@@ -64,18 +70,18 @@ public sealed class ChdmanService : IDisposable
         return RunLockedAsync(Path.GetDirectoryName(isoPath) ?? Path.GetPathRoot(isoPath)!, isoPath, chdPath, "압축 중...", (i, o, p, l) => chdman_create_dvd(i, o, compression, p, l), progress, ct);
     }
 
-    public Task<bool> ExtractCdAsync(string chdPath, string cuePath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public Task<bool> ExtractCdAsync(string? chdPath, string cuePath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        chdPath = Path.GetFullPath(chdPath);
+        chdPath = Path.GetFullPath(chdPath!);
         cuePath = Path.GetFullPath(cuePath);
 
         return RunLockedAsync(Path.GetDirectoryName(cuePath)!, chdPath, cuePath, "추출 중...", chdman_extract_cd, progress, ct);
     }
 
-    public Task<bool> ExtractRawAsync(string chdPath, string isoPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public Task<bool> ExtractRawAsync(string? chdPath, string? isoPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        chdPath = Path.GetFullPath(chdPath);
-        isoPath = Path.GetFullPath(isoPath);
+        chdPath = Path.GetFullPath(chdPath!);
+        isoPath = Path.GetFullPath(isoPath!);
 
         return RunLockedAsync(Path.GetDirectoryName(isoPath)!, chdPath, isoPath, "추출 중...", chdman_extract_raw, progress, ct);
     }

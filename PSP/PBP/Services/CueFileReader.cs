@@ -99,12 +99,12 @@ public static class CueFileReader
         }
     }
 
-    public static CueFile BuildCueFromChdInfo(ChdInfo info)
+    public static CueFile BuildCueFromChdInfo(ChdInfo? info)
     {
         var entry = new CueFileEntry { FileType = "BINARY", Tracks = [] };
         long currentFrame = 0;
 
-        foreach (var track in info.Tracks.Take(info.TrackCount))
+        foreach (var track in (info?.Tracks ?? []).Take(info?.TrackCount ?? 0))
         {
             var indexes = new List<CueIndex>();
 

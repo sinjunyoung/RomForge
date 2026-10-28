@@ -2,13 +2,13 @@
 
 public class CompressionPreset
 {
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     public int Version { get; set; }
 
-    public string[] Codecs { get; set; }
+    public required string[] Codecs { get; set; }
 
-    public string Description { get; set; }
+    public required string Description { get; set; }
 
     public static readonly CompressionPreset[] Presets =
     [

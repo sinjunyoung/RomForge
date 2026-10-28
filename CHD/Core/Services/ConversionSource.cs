@@ -3,13 +3,22 @@ using System.Text.RegularExpressions;
 
 namespace CHD.Core.Services;
 
-public class ConversionSource
+public partial class ConversionSource
 {
     public InputFormat Format { get; init; }
 
-    public string PrimaryFile { get; init; }
+    public string? PrimaryFile { get; init; }
 
     public IReadOnlyList<string> BinFiles { get; init; } = [];
+
+    [GeneratedRegex(@"^FILE\s+""(.+?)""\s+BINARY", RegexOptions.IgnoreCase)]
+    private static partial Regex CueFileRegex();
+
+    [GeneratedRegex(@"^REM", RegexOptions.IgnoreCase)]
+    private static partial Regex CueRemRegex();
+
+    [GeneratedRegex(@"^TRACK\s+\d+\s+(\S+)", RegexOptions.IgnoreCase)]
+    private static partial Regex CueTrackRegex();
 
     public static ConversionSource FromPath(string filePath)
     {
@@ -57,9 +66,9 @@ public class ConversionSource
         return new ConversionSource { Format = InputFormat.Unknown, PrimaryFile = binPath };
     }
 
-    public static IReadOnlyList<string> ParseBinsFromCue(string cuePath)
+    public static IReadOnlyList<string> ParseBinsFromCue(string? cuePath)
     {
-        cuePath = Path.GetFullPath(cuePath);
+        cuePath = Path.GetFullPath(cuePath!);
 
         var dir = Path.GetDirectoryName(cuePath)!;
         var bins = new List<string>();
@@ -69,9 +78,9 @@ public class ConversionSource
 
         foreach (var line in File.ReadAllLines(cuePath))
         {
-            var match = Regex.Match(line.Trim(), @"^FILE\s+""(.+?)""\s+BINARY", RegexOptions.IgnoreCase);
+            var match = CueFileRegex().Match(line.Trim());
 
-            if (!match.Success) 
+            if (!match.Success)
                 continue;
 
             var binName = match.Groups[1].Value;
@@ -107,13 +116,13 @@ public class ConversionSource
                 continue;
             }
 
-            if (Regex.IsMatch(line, @"^FILE\s+"".+?""\s+BINARY", RegexOptions.IgnoreCase))
+            if (CueFileRegex().IsMatch(line))
             {
                 fileIndex++;
                 continue;
             }
 
-            var trackMatch = Regex.Match(line, @"^TRACK\s+\d+\s+(\S+)", RegexOptions.IgnoreCase);
+            var trackMatch = CueTrackRegex().Match(line);
 
             if (!trackMatch.Success || fileIndex < 0)
                 continue;
@@ -201,7 +210,7 @@ public class ConversionSource
         return tokens;
     }
 
-    public string Validate()
+    public string? Validate()
     {
         return Format switch
         {
@@ -211,7 +220,7 @@ public class ConversionSource
         };
     }
 
-    private string ValidateBinCue()
+    private string? ValidateBinCue()
     {
         if (!File.Exists(PrimaryFile))
             return $"CUE 파일을 찾을 수 없습니다: {Path.GetFileName(PrimaryFile)}";

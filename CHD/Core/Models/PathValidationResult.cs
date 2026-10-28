@@ -8,5 +8,5 @@ public class PathValidationResult
 
     public bool HasKoreanInFilename { get; set; }
 
-    public string Message { get; set; }
+    public string? Message { get; set; }
 }

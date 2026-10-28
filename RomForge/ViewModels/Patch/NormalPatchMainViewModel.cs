@@ -354,7 +354,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
             Chain.Validate(patchPaths);
             Directory.CreateDirectory(outputDir);
 
-            string actualSourcePath = SourcePath;
+            string? actualSourcePath = SourcePath;
 
             if (SourceArchiveExtractor.IsArchivePath(SourcePath))
             {
