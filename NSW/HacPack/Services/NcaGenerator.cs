@@ -120,7 +120,7 @@ public static class NcaGenerator
         using var exefsHashStream = new MemoryStream();
         const uint exefsBlockSize = Pfs0Builder.ExefsHashBlockSize;
 
-        BuildPfs0ToStream(settings.ExefsDirectory, exefsStream, ct);
+        BuildPfs0ToStream(settings.ExefsDirectory, settings.ExefsFiles, exefsStream, ct);
         Pfs0Builder.GeneratePfs0HashTable(exefsStream, exefsHashStream, exefsBlockSize, out ulong hashTableSize, out ulong pfs0Offset);
 
         ulong pfs0Size = (ulong)exefsStream.Length;
@@ -177,7 +177,7 @@ public static class NcaGenerator
             }
         }
 
-        if (!string.IsNullOrEmpty(settings.LogoDirectory) && Directory.Exists(settings.LogoDirectory))
+        if (settings.LogoFiles != null || (!string.IsNullOrEmpty(settings.LogoDirectory) && Directory.Exists(settings.LogoDirectory)))
         {
             const uint logoBlockSize = Pfs0Builder.LogoHashBlockSize;
 
@@ -186,7 +186,7 @@ public static class NcaGenerator
             using var logoStream = new MemoryStream();
             using var logoHashStream = new MemoryStream();
 
-            BuildPfs0ToStream(settings.LogoDirectory, logoStream, ct);
+            BuildPfs0ToStream(settings.LogoDirectory, settings.LogoFiles, logoStream, ct);
             Pfs0Builder.GeneratePfs0HashTable(logoStream, logoHashStream, logoBlockSize, out ulong logoHashSize, out ulong logoPfs0Offset);
 
             ulong logoSize = (ulong)logoStream.Length;
@@ -250,28 +250,62 @@ public static class NcaGenerator
     public static string GenerateMetaNca(IEnumerable<NcaGenerationOptions> settingsList, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         var baseSettings = settingsList.First(s => s.IdOffset == 0);
-        var ncaHeader = new NcaHeader();
-
-        NcaHeaderService.InitHeader(ref ncaHeader);
-
         string ncaPath = Path.Combine(baseSettings.OutDirectory, "Meta.nca");
         using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
-
-        NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
-
         string cnmtDirPath = Path.Combine(baseSettings.TempDirectory, "cnmt");
 
         Directory.CreateDirectory(cnmtDirPath);
 
         ct.ThrowIfCancellationRequested();
-        progress.ReportStatus("Meta NCA 생성 중...", 0);
         BuildMetadataFile(cnmtDirPath, settingsList);
+
+        var metaFiles = Directory.GetFiles(cnmtDirPath).Select(f => (Path.GetFileName(f), File.ReadAllBytes(f))).ToList();
+
+        WriteMetaNca(ncaFile, baseSettings, metaFiles, progress, ct);
+
+        byte[] ncaHash = NcaStructHelper.CalculateNcaHash(ncaFile);
+
+        ncaFile.Close();
+
+        string finalName = Convert.ToHexString(ncaHash, 0, 16).ToLowerInvariant() + ".cnmt.nca";
+        string finalPath = Path.Combine(baseSettings.OutDirectory, finalName);
+
+        File.Move(ncaPath, finalPath, overwrite: true);
+
+        return finalPath;
+    }
+
+    public static (byte[] Hash, long Size) GenerateMetaNcaInto(Stream output, NcaGenerationOptions settings, byte[] cnmt, CancellationToken ct = default)
+    {
+        long start = output.Position;
+        var window = new OffsetStream(output, start);
+        var metaFiles = new List<(string Name, byte[] Data)> { ($"{GetCnmtPrefix(settings.TitleType)}_{settings.TitleId:x16}.cnmt", cnmt) };
+
+        WriteMetaNca(window, settings, metaFiles, null, ct);
+
+        long size = window.Length;
+        byte[] hash = HashRegion(output, start, size, ct);
+
+        output.Position = start + size;
+
+        return (hash, size);
+    }
+
+    private static void WriteMetaNca(Stream ncaFile, NcaGenerationOptions baseSettings, List<(string Name, byte[] Data)> metaFiles, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    {
+        var ncaHeader = new NcaHeader();
+
+        NcaHeaderService.InitHeader(ref ncaHeader);
+
+        NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
+        ct.ThrowIfCancellationRequested();
+        progress.ReportStatus("Meta NCA 생성 중...", 0);
 
         const uint metaBlockSize = Pfs0Builder.MetaHashBlockSize;
         using var metaPfs0Stream = new MemoryStream();
         using var metaHashStream = new MemoryStream();
 
-        BuildPfs0ToStream(cnmtDirPath, metaPfs0Stream, ct);
+        BuildPfs0ToStream(string.Empty, metaFiles, metaPfs0Stream, ct);
         Pfs0Builder.GeneratePfs0HashTable(metaPfs0Stream, metaHashStream, metaBlockSize, out ulong metaHashSize, out ulong metaPfs0Offset);
 
         ulong metaPfs0Size = (ulong)metaPfs0Stream.Length;
@@ -323,18 +357,17 @@ public static class NcaGenerator
 
         ncaFile.Seek(0, SeekOrigin.Begin);
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
-
-        byte[] ncaHash = NcaStructHelper.CalculateNcaHash(ncaFile);
-
-        ncaFile.Close();
-
-        string finalName = Convert.ToHexString(ncaHash, 0, 16).ToLowerInvariant() + ".cnmt.nca";
-        string finalPath = Path.Combine(baseSettings.OutDirectory, finalName);
-
-        File.Move(ncaPath, finalPath, overwrite: true);
-
-        return finalPath;
     }
+
+    private static string GetCnmtPrefix(LibHac.Ncm.ContentMetaType titleType) => titleType switch
+    {
+        LibHac.Ncm.ContentMetaType.Application => "Application",
+        LibHac.Ncm.ContentMetaType.AddOnContent => "AddOnContent",
+        LibHac.Ncm.ContentMetaType.SystemProgram => "SystemProgram",
+        LibHac.Ncm.ContentMetaType.SystemData => "SystemData",
+        LibHac.Ncm.ContentMetaType.Patch => "Patch",
+        _ => throw new NotSupportedException($"Unknown title type: {titleType}")
+    };
 
     private static MemoryStream[] BuildAndWriteRomfsSection(Stream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
@@ -425,14 +458,22 @@ public static class NcaGenerator
         }
     }
 
-    private static void BuildPfs0ToStream(string inDirPath, MemoryStream outStream, CancellationToken ct)
+    private static void BuildPfs0ToStream(string inDirPath, List<(string Name, byte[] Data)>? files, MemoryStream outStream, CancellationToken ct)
     {
         var fileStreams = new List<(string, Stream)>();
 
         try
         {
-            foreach (var f in Directory.GetFiles(inDirPath).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal))
-                fileStreams.Add((Path.GetFileName(f), File.OpenRead(f)));
+            if (files != null)
+            {
+                foreach (var (name, data) in files.OrderBy(f => f.Name, StringComparer.Ordinal))
+                    fileStreams.Add((name, new MemoryStream(data, false)));
+            }
+            else
+            {
+                foreach (var f in Directory.GetFiles(inDirPath).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal))
+                    fileStreams.Add((Path.GetFileName(f), File.OpenRead(f)));
+            }
 
             Pfs0Builder.BuildFromMemoryStreams(fileStreams, outStream, null, ct);
         }

@@ -30,7 +30,6 @@ public static class NspLz4Service
 
         var disposables = new List<IDisposable>();
         string? finalPath = null;
-        string? workDir = null;
         bool isCompleted = false;
 
         try
@@ -93,9 +92,6 @@ public static class NspLz4Service
             Directory.CreateDirectory(directory);
 
             finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_lz4.nsp"));
-            workDir = finalPath + ".work";
-
-            Directory.CreateDirectory(workDir);
 
             string label = meta.KrTitle ?? meta.EnTitle;
             var replaced = new HashSet<string>(targets.Select(t => t.EntryName).Append(meta.FileName), StringComparer.OrdinalIgnoreCase);
@@ -148,25 +144,25 @@ public static class NspLz4Service
 
                     log?.Invoke($"Program NCA Lz4 압축 중 ({index + 1}/{targets.Count}, IdOffset={target.Record.IdOffset})", LogLevel.Highlight, meta.TitleId);
 
-                    programResults[index] = Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, baseTitleId, target.Record.IdOffset, keySet, workDir, lz4Level, onRead, ct);
+                    programResults[index] = Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, baseTitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct);
                     cnmt = CnmtRecordPatcher.Replace(cnmt, target.Record.NcaId, programResults[index].NcaId, programResults[index].Hash, programResults[index].Size);
 
                     return Task.CompletedTask;
                 }, (long)target.Nca.Header.NcaSize, $"{label} [Program Lz4]"));
             }
 
-            BuiltNca? builtMeta = null;
+            (byte[] NcaId, long Size) metaResult = default;
             string metaPlaceholder = PlaceholderName(targets.Count);
 
-            deferredNames[metaPlaceholder] = () => builtMeta!.FileName;
+            deferredNames[metaPlaceholder] = () => Convert.ToHexString(metaResult.NcaId).ToLowerInvariant() + ".cnmt.nca";
 
-            fileEntries.Add((metaPlaceholder, async (output, onRead) =>
+            fileEntries.Add((metaPlaceholder, (output, onRead) =>
             {
-                builtMeta = Lz4MetaNcaBuilder.Build(metaNca, cnmt, baseTitleId, keySet, workDir, ct);
+                metaResult = Lz4MetaNcaBuilder.BuildInto(output, metaNca, cnmt, baseTitleId, keySet, ct);
 
-                using var input = new FileStream(builtMeta.Path, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20, FileOptions.SequentialScan);
+                onRead(metaResult.Size);
 
-                await Utils.CopyStreamAsync(input, output, onRead, ct);
+                return Task.CompletedTask;
             }, MetaEstimatedSize, $"{label} [Meta]"));
 
             var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
@@ -192,9 +188,6 @@ public static class NspLz4Service
         {
             for (int i = disposables.Count - 1; i >= 0; i--)
                 disposables[i]?.Dispose();
-
-            if (workDir != null && Directory.Exists(workDir))
-                try { Directory.Delete(workDir, true); } catch { }
 
             if (!isCompleted)
                 IncompleteOutput.Delete(finalPath, log!, string.Empty);

@@ -16,6 +16,12 @@ public static class NpdmProcessor
     {
         string npdmPath = Path.Combine(settings.ExefsDirectory, "main.npdm");
         using var fl = File.Open(npdmPath, FileMode.Open, FileAccess.ReadWrite);
+
+        PatchNpdmMetadata(settings, fl);
+    }
+
+    public static void PatchNpdmMetadata(NcaGenerationOptions settings, Stream fl)
+    {
         NpdmHeader npdm = ReadStructureFromStream<NpdmHeader>(fl);
 
         if (npdm.Magic != MagicMeta)

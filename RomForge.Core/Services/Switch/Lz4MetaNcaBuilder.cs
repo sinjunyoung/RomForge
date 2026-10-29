@@ -8,7 +8,6 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Services;
 using System.IO;
-using Path = System.IO.Path;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -35,19 +34,8 @@ internal static class Lz4MetaNcaBuilder
         throw new InvalidOperationException("Meta NCA에서 cnmt 파일을 찾을 수 없습니다.");
     }
 
-    public static BuiltNca Build(Nca sourceMeta, byte[] cnmt, ulong titleId, KeySet keySet, string workDir, CancellationToken ct)
+    public static (byte[] NcaId, long Size) BuildInto(Stream output, Nca sourceMeta, byte[] cnmt, ulong titleId, KeySet keySet, CancellationToken ct)
     {
-        string metaDir = Path.Combine(workDir, "meta");
-        string outDir = Path.Combine(metaDir, "nca");
-        string tempDir = Path.Combine(metaDir, "temp");
-
-        Directory.CreateDirectory(outDir);
-        Directory.CreateDirectory(tempDir);
-
-        string cnmtPath = Path.Combine(tempDir, "source.cnmt");
-
-        File.WriteAllBytes(cnmtPath, cnmt);
-
         byte keyGeneration = sourceMeta.Header.KeyGeneration == 0 ? (byte)1 : sourceMeta.Header.KeyGeneration;
         int keyGenerationIndex = keyGeneration - 1;
 
@@ -58,8 +46,6 @@ internal static class Lz4MetaNcaBuilder
         {
             IdOffset = 0,
             TitleId = titleId,
-            TempDirectory = tempDir,
-            OutDirectory = outDir,
             Plaintext = 0,
             HasTitleKey = 0,
             NcaSig = NcaSigType.Zero,
@@ -67,12 +53,11 @@ internal static class Lz4MetaNcaBuilder
             SdkVersion = sourceMeta.Header.SdkVersion.Version,
             KeyGeneration = keyGeneration,
             KeySet = keySet,
-            CnmtPath = cnmtPath,
             KeyAreaKey = keySet.KeyAreaKeys[keyGenerationIndex][0].DataRo.ToArray()
         };
 
-        string path = NcaGenerator.GenerateMetaNca([settings], null, ct);
+        var (hash, size) = NcaGenerator.GenerateMetaNcaInto(output, settings, cnmt, ct);
 
-        return NcaFileInspector.Inspect(path);
+        return (hash[..0x10], size);
     }
 }

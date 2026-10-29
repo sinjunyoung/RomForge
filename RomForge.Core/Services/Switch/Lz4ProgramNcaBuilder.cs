@@ -1,31 +1,21 @@
-﻿using Common;
+﻿using LibHac.Common;
 using LibHac.Common.Keys;
+using LibHac.Fs;
+using LibHac.Fs.Fsa;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
-using NSW.Core.Models;
-using NSW.Core.Services;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Services;
 using System.IO;
-using Path = System.IO.Path;
 
 namespace RomForge.Core.Services.Switch;
 
 internal static class Lz4ProgramNcaBuilder
 {
-    public static (byte[] NcaId, byte[] Hash, long Size) BuildInto(Stream output, Nca source, ulong baseTitleId, byte idOffset, KeySet keySet, string workDir, int lz4Level, Action<long>? onAdvance, CancellationToken ct)
+    public static (byte[] NcaId, byte[] Hash, long Size) BuildInto(Stream output, Nca source, ulong baseTitleId, byte idOffset, KeySet keySet, int lz4Level, Action<long>? onAdvance, CancellationToken ct)
     {
-        string programDir = Path.Combine(workDir, $"program_{idOffset}");
-        string outDir = Path.Combine(programDir, "nca");
-        string tempDir = Path.Combine(programDir, "temp");
-
-        Directory.CreateDirectory(outDir);
-        Directory.CreateDirectory(tempDir);
-
-        var extractor = new NcaExtractor(keySet, _ => true);
-        var context = new ProgressContext(1);
-        string exefsDir = source.CanOpenSection(NcaSectionType.Code) ? extractor.ExtractExeFs(source, null, "exefs", programDir, context, ct) : string.Empty;
-        string logoDir = extractor.ExtractLogo(source, "logo", programDir, context, ct) ?? string.Empty;
+        var exefsFiles = ReadSection(source, NcaSectionType.Code, ct) ?? [];
+        var logoFiles = ReadSection(source, NcaSectionType.Logo, ct);
         byte keyGeneration = source.Header.KeyGeneration == 0 ? (byte)1 : source.Header.KeyGeneration;
         int keyGenerationIndex = keyGeneration - 1;
 
@@ -37,11 +27,8 @@ internal static class Lz4ProgramNcaBuilder
             IdOffset = idOffset,
             SourceIdOffset = idOffset,
             TitleId = baseTitleId,
-            TempDirectory = tempDir,
-            OutDirectory = outDir,
-            ExefsDirectory = exefsDir,
-            LogoDirectory = logoDir,
-            BackupDirectory = Path.Combine(programDir, "backups"),
+            ExefsFiles = exefsFiles,
+            LogoFiles = logoFiles,
             Plaintext = 0,
             HasTitleKey = 0,
             NcaSig = NcaSigType.Zero,
@@ -54,11 +41,52 @@ internal static class Lz4ProgramNcaBuilder
             KeyAreaKey = keySet.KeyAreaKeys[keyGenerationIndex][0].DataRo.ToArray()
         };
 
-        if (!string.IsNullOrEmpty(exefsDir))
-            NpdmProcessor.PatchNpdmMetadata(settings);
+        if (exefsFiles.Count > 0)
+            PatchNpdm(settings, exefsFiles);
 
         var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, ct);
 
         return (hash[..0x10], hash, size);
+    }
+
+    private static List<(string Name, byte[] Data)>? ReadSection(Nca source, NcaSectionType sectionType, CancellationToken ct)
+    {
+        if (!source.CanOpenSection(sectionType))
+            return null;
+
+        using var fileSystem = source.OpenFileSystem(sectionType, IntegrityCheckLevel.None);
+        var files = new List<(string Name, byte[] Data)>();
+
+        foreach (var entry in fileSystem.EnumerateEntries("/", "*", SearchOptions.RecurseSubdirectories))
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (entry.Type == DirectoryEntryType.Directory || entry.FullPath.Count(c => c == '/') > 1)
+                continue;
+
+            using var file = new UniqueRef<IFile>();
+
+            fileSystem.OpenFile(ref file.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
+            file.Get.GetSize(out long size).ThrowIfFailure();
+
+            var data = new byte[size];
+
+            file.Get.Read(out long _, 0, data, ReadOption.None).ThrowIfFailure();
+            files.Add((entry.Name.ToString(), data));
+        }
+
+        return files;
+    }
+
+    private static void PatchNpdm(NcaGenerationOptions settings, List<(string Name, byte[] Data)> exefsFiles)
+    {
+        int index = exefsFiles.FindIndex(f => f.Name == "main.npdm");
+
+        if (index < 0)
+            throw new FileNotFoundException("ExeFS에서 main.npdm을 찾을 수 없습니다.");
+
+        using var stream = new MemoryStream(exefsFiles[index].Data);
+
+        NpdmProcessor.PatchNpdmMetadata(settings, stream);
     }
 }

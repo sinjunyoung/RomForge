@@ -22,6 +22,10 @@ public class NcaGenerationOptions
 
     public string LogoDirectory = string.Empty;
 
+    public List<(string Name, byte[] Data)>? ExefsFiles;
+
+    public List<(string Name, byte[] Data)>? LogoFiles;
+
     public string NcaDirectory = string.Empty;
 
     public string BackupDirectory = string.Empty;
@@ -128,6 +132,8 @@ public class NcaGenerationOptions
         ExefsDirectory = ExefsDirectory,
         RomfsDirectory = romfsDir,
         LogoDirectory = LogoDirectory,
+        ExefsFiles = ExefsFiles,
+        LogoFiles = LogoFiles,
         NcaDirectory = NcaDirectory,
         BackupDirectory = BackupDirectory,
         ProgramNcaPath = ProgramNcaPath,
