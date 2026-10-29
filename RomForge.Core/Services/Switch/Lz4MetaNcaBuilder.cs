@@ -34,7 +34,7 @@ internal static class Lz4MetaNcaBuilder
         throw new InvalidOperationException("Meta NCA에서 cnmt 파일을 찾을 수 없습니다.");
     }
 
-    public static (byte[] NcaId, long Size) BuildInto(Stream output, Nca sourceMeta, byte[] cnmt, ulong titleId, KeySet keySet, CancellationToken ct)
+    public static (byte[] NcaId, long Size) BuildInto(Stream output, Nca sourceMeta, byte[] cnmt, ulong titleId, LibHac.Ncm.ContentMetaType titleType, KeySet keySet, CancellationToken ct)
     {
         byte keyGeneration = sourceMeta.Header.KeyGeneration == 0 ? (byte)1 : sourceMeta.Header.KeyGeneration;
         int keyGenerationIndex = keyGeneration - 1;
@@ -49,7 +49,7 @@ internal static class Lz4MetaNcaBuilder
             Plaintext = 0,
             HasTitleKey = 0,
             NcaSig = NcaSigType.Zero,
-            TitleType = LibHac.Ncm.ContentMetaType.Application,
+            TitleType = titleType,
             SdkVersion = sourceMeta.Header.SdkVersion.Version,
             KeyGeneration = keyGeneration,
             KeySet = keySet,

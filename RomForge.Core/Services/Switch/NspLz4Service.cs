@@ -1,9 +1,11 @@
 ﻿using Common;
 using LibHac.Common.Keys;
+using LibHac.Ncm;
 using LibHac.NSZ;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
+using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.Core.Utils;
 using System.IO;
@@ -16,6 +18,30 @@ namespace RomForge.Core.Services.Switch;
 public static class NspLz4Service
 {
     private const long MetaEstimatedSize = 0x4000;
+
+    private sealed record Target(CnmtRecordPatcher.ContentRecord Record, string EntryName, Nca Nca);
+
+    private sealed class MetaJob(MetadataResult meta, Nca metaNca, byte[] cnmt, ulong titleId)
+    {
+        public MetadataResult Meta { get; } = meta;
+
+        public Nca MetaNca { get; } = metaNca;
+
+        public byte[] Cnmt { get; set; } = cnmt;
+
+        public ulong TitleId { get; } = titleId;
+
+        public List<Target> Targets { get; } = [];
+    }
+
+    private sealed class BuiltResult
+    {
+        public byte[] NcaId { get; set; } = [];
+
+        public byte[] Hash { get; set; } = [];
+
+        public long Size { get; set; }
+    }
 
     public static Task<string> CompressAsync(string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
@@ -34,57 +60,37 @@ public static class NspLz4Service
 
         try
         {
-            var meta = MetadataReader.GetMetadataFromContainer(keySet, inputPath).FirstOrDefault(m => m.Type == LibHac.Ncm.ContentMetaType.Application)
-                ?? throw new InvalidOperationException("Application(본편) 메타데이터를 찾을 수 없습니다. 업데이트/DLC NSP는 지원하지 않습니다.");
+            var allMetas = MetadataReader.GetMetadataFromContainer(keySet, inputPath);
+            bool hasPatch = allMetas.Any(m => m.Type == ContentMetaType.Patch);
+            var metas = allMetas.Where(m => m.Type is ContentMetaType.Application or ContentMetaType.AddOnContent).ToList();
 
-            log?.Invoke($"{Path.GetFileName(inputPath)} Lz4 압축 시작", LogLevel.Info, meta.TitleId);
+            if (metas.Count == 0)
+                throw new InvalidOperationException("Application(본편) 또는 DLC 메타데이터를 찾을 수 없습니다. 업데이트 NSP는 지원하지 않습니다.");
+
+            var primary = metas.FirstOrDefault(m => m.Type == ContentMetaType.Application) ?? metas[0];
+
+            log?.Invoke($"{Path.GetFileName(inputPath)} Lz4 압축 시작", LogLevel.Info, primary.TitleId);
 
             var source = new SourceSet([inputPath]);
             var sourceFs = source.Open(keySet, inputPath, disposables);
             var entryPaths = sourceFs.EnumerateEntries("/", "*").ToDictionary(e => e.Name.ToString(), e => e.FullPath, StringComparer.OrdinalIgnoreCase);
+            var jobs = new List<MetaJob>();
 
-            if (!entryPaths.TryGetValue(meta.FileName, out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
-                throw new InvalidOperationException($"Meta NCA를 찾을 수 없습니다: {meta.FileName}");
-
-            var metaNca = new Nca(keySet, metaOpened.Storage);
-            byte[] cnmt = Lz4MetaNcaBuilder.ReadCnmt(metaNca);
-            ulong baseTitleId = BitConverter.ToUInt64(cnmt, 0);
-            var targets = new List<(CnmtRecordPatcher.ContentRecord Record, string EntryName, Nca Nca)>();
-
-            foreach (var record in CnmtRecordPatcher.ReadRecords(cnmt).Where(r => r.Type == CnmtRecordPatcher.ProgramType))
+            foreach (var meta in metas)
             {
-                string entryName = $"{Convert.ToHexString(record.NcaId).ToLowerInvariant()}.nca";
-
-                if (!entryPaths.TryGetValue(entryName, out var entryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, entryPath, disposables) is not { } opened)
+                if (meta.Type == ContentMetaType.Application && hasPatch)
                 {
-                    log?.Invoke($"{entryName}: NCA 파일을 찾을 수 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                    log?.Invoke("업데이트가 함께 들어 있는 본편은 업데이트 패치가 깨질 수 있어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
                     continue;
                 }
 
-                var nca = new Nca(keySet, opened.Storage);
+                var job = LoadJob(keySet, meta, entryPaths, sourceFs, disposables, log);
 
-                if (!nca.CanOpenSection(NcaSectionType.Data))
-                {
-                    log?.Invoke($"{entryName}: romfs 섹션이 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
-                    continue;
-                }
-
-                if (nca.HasSparseLayer())
-                {
-                    log?.Invoke($"{entryName}: Sparse 레이어가 있는 NCA는 지원하지 않아 건너뜁니다.", LogLevel.Warning, meta.TitleId);
-                    continue;
-                }
-
-                if (RomfsCompression.HasCompressedSection(nca))
-                {
-                    log?.Invoke($"{entryName}: 이미 압축되어 있어 건너뜁니다.", LogLevel.Info, meta.TitleId);
-                    continue;
-                }
-
-                targets.Add((record, entryName, nca));
+                if (job.Targets.Count > 0)
+                    jobs.Add(job);
             }
 
-            if (targets.Count == 0)
+            if (jobs.Count == 0)
                 throw new InvalidOperationException("Lz4로 압축할 romfs가 없거나 이미 모두 압축되어 있습니다.");
 
             string directory = string.IsNullOrWhiteSpace(outputDir) ? Path.GetDirectoryName(inputPath)! : outputDir;
@@ -93,8 +99,8 @@ public static class NspLz4Service
 
             finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_lz4.nsp"));
 
-            string label = meta.KrTitle ?? meta.EnTitle;
-            var replaced = new HashSet<string>(targets.Select(t => t.EntryName).Append(meta.FileName), StringComparer.OrdinalIgnoreCase);
+            string label = primary.KrTitle ?? primary.EnTitle;
+            var replaced = new HashSet<string>(jobs.SelectMany(j => j.Targets.Select(t => t.EntryName).Append(j.Meta.FileName)), StringComparer.OrdinalIgnoreCase);
             var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
             var fileEntries = new List<FileEntry>();
 
@@ -128,59 +134,27 @@ public static class NspLz4Service
             fileEntries.Sort((x, y) => string.CompareOrdinal(x.Name, y.Name));
 
             var deferredNames = new Dictionary<string, Func<string>>(StringComparer.Ordinal);
-            var programResults = new (byte[] NcaId, byte[] Hash, long Size)[targets.Count];
+            int placeholderIndex = 0;
 
-            for (int i = 0; i < targets.Count; i++)
-            {
-                int index = i;
-                var target = targets[i];
-                string placeholder = PlaceholderName(index);
-
-                deferredNames[placeholder] = () => Convert.ToHexString(programResults[index].NcaId).ToLowerInvariant() + ".nca";
-
-                fileEntries.Add((placeholder, (output, onRead) =>
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    log?.Invoke($"Program NCA Lz4 압축 중 ({index + 1}/{targets.Count}, IdOffset={target.Record.IdOffset})", LogLevel.Highlight, meta.TitleId);
-
-                    programResults[index] = Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, baseTitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct);
-                    cnmt = CnmtRecordPatcher.Replace(cnmt, target.Record.NcaId, programResults[index].NcaId, programResults[index].Hash, programResults[index].Size);
-
-                    return Task.CompletedTask;
-                }, (long)target.Nca.Header.NcaSize, $"{label} [Program Lz4]"));
-            }
-
-            (byte[] NcaId, long Size) metaResult = default;
-            string metaPlaceholder = PlaceholderName(targets.Count);
-
-            deferredNames[metaPlaceholder] = () => Convert.ToHexString(metaResult.NcaId).ToLowerInvariant() + ".cnmt.nca";
-
-            fileEntries.Add((metaPlaceholder, (output, onRead) =>
-            {
-                metaResult = Lz4MetaNcaBuilder.BuildInto(output, metaNca, cnmt, baseTitleId, keySet, ct);
-
-                onRead(metaResult.Size);
-
-                return Task.CompletedTask;
-            }, MetaEstimatedSize, $"{label} [Meta]"));
+            foreach (var job in jobs)
+                AddJobEntries(job, keySet, lz4Level, label, ct, log, fileEntries, deferredNames, ref placeholderIndex);
 
             var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
 
             disposables.Add(fout);
 
-            string displayName = "Lz4 압축 중 " + NameBuilder.CompressDisplayNameBuild(meta.KrTitle, meta.TitleId, meta.DisplayVersion);
+            string displayName = "Lz4 압축 중 " + NameBuilder.CompressDisplayNameBuild(primary.KrTitle, primary.TitleId, primary.DisplayVersion);
 
-            await Pfs0Builder.WriteAsync(displayName, meta.TitleId, fileEntries, fout, Pfs0Builder.GetAlignmentPadding(inputPath), true, deferredNames, progress, ct);
+            await Pfs0Builder.WriteAsync(displayName, primary.TitleId, fileEntries, fout, Pfs0Builder.GetAlignmentPadding(inputPath), true, deferredNames, progress, ct);
             await fout.FlushAsync(ct);
 
             long originalSize = new FileInfo(inputPath).Length;
 
-            log?.Invoke($"{Res.Log_CompressionRatio}: {Common.Utils.FormatFileSize(originalSize)} → {Common.Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, meta.TitleId);
+            log?.Invoke($"{Res.Log_CompressionRatio}: {Common.Utils.FormatFileSize(originalSize)} → {Common.Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, primary.TitleId);
 
             isCompleted = true;
 
-            log?.Invoke($"Lz4 압축 완료: {Path.GetFileName(finalPath)}", LogLevel.Ok, meta.TitleId);
+            log?.Invoke($"Lz4 압축 완료: {Path.GetFileName(finalPath)}", LogLevel.Ok, primary.TitleId);
 
             return finalPath;
         }
@@ -192,6 +166,104 @@ public static class NspLz4Service
             if (!isCompleted)
                 IncompleteOutput.Delete(finalPath, log!, string.Empty);
         }
+    }
+
+    private static MetaJob LoadJob(KeySet keySet, MetadataResult meta, Dictionary<string, string> entryPaths, LibHac.Fs.Fsa.IFileSystem sourceFs, List<IDisposable> disposables, Action<string, LogLevel, string>? log)
+    {
+        if (!entryPaths.TryGetValue(meta.FileName, out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
+            throw new InvalidOperationException($"Meta NCA를 찾을 수 없습니다: {meta.FileName}");
+
+        var metaNca = new Nca(keySet, metaOpened.Storage);
+        byte[] cnmt = Lz4MetaNcaBuilder.ReadCnmt(metaNca);
+        var job = new MetaJob(meta, metaNca, cnmt, BitConverter.ToUInt64(cnmt, 0));
+        byte recordType = meta.Type == ContentMetaType.Application ? CnmtRecordPatcher.ProgramType : CnmtRecordPatcher.DataType;
+
+        foreach (var record in CnmtRecordPatcher.ReadRecords(cnmt).Where(r => r.Type == recordType))
+        {
+            string entryName = $"{Convert.ToHexString(record.NcaId).ToLowerInvariant()}.nca";
+
+            if (!entryPaths.TryGetValue(entryName, out var entryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, entryPath, disposables) is not { } opened)
+            {
+                log?.Invoke($"{entryName}: NCA 파일을 찾을 수 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                continue;
+            }
+
+            var nca = new Nca(keySet, opened.Storage);
+
+            if (!nca.CanOpenSection(NcaSectionType.Data))
+            {
+                log?.Invoke($"{entryName}: romfs 섹션이 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                continue;
+            }
+
+            if (nca.HasSparseLayer())
+            {
+                log?.Invoke($"{entryName}: Sparse 레이어가 있는 NCA는 지원하지 않아 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                continue;
+            }
+
+            if (RomfsCompression.HasCompressedSection(nca))
+            {
+                log?.Invoke($"{entryName}: 이미 압축되어 있어 건너뜁니다.", LogLevel.Info, meta.TitleId);
+                continue;
+            }
+
+            job.Targets.Add(new Target(record, entryName, nca));
+        }
+
+        return job;
+    }
+
+    private static void AddJobEntries(MetaJob job, KeySet keySet, int lz4Level, string label, CancellationToken ct, Action<string, LogLevel, string>? log, List<FileEntry> fileEntries, Dictionary<string, Func<string>> deferredNames, ref int placeholderIndex)
+    {
+        bool isApplication = job.Meta.Type == ContentMetaType.Application;
+        string kind = isApplication ? "Program" : "DLC";
+
+        for (int i = 0; i < job.Targets.Count; i++)
+        {
+            int number = i + 1;
+            int total = job.Targets.Count;
+            var target = job.Targets[i];
+            var built = new BuiltResult();
+            string placeholder = PlaceholderName(placeholderIndex++);
+
+            deferredNames[placeholder] = () => Convert.ToHexString(built.NcaId).ToLowerInvariant() + ".nca";
+
+            fileEntries.Add((placeholder, (output, onRead) =>
+            {
+                ct.ThrowIfCancellationRequested();
+
+                log?.Invoke($"{kind} NCA Lz4 압축 중 ({number}/{total}, {job.Meta.TitleId})", LogLevel.Highlight, job.Meta.TitleId);
+
+                var result = isApplication
+                    ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct)
+                    : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
+
+                built.NcaId = result.NcaId;
+                built.Hash = result.Hash;
+                built.Size = result.Size;
+                job.Cnmt = CnmtRecordPatcher.Replace(job.Cnmt, target.Record.NcaId, result.NcaId, result.Hash, result.Size);
+
+                return Task.CompletedTask;
+            }, (long)target.Nca.Header.NcaSize, $"{label} [{kind} Lz4]"));
+        }
+
+        var metaBuilt = new BuiltResult();
+        string metaPlaceholder = PlaceholderName(placeholderIndex++);
+
+        deferredNames[metaPlaceholder] = () => Convert.ToHexString(metaBuilt.NcaId).ToLowerInvariant() + ".cnmt.nca";
+
+        fileEntries.Add((metaPlaceholder, (output, onRead) =>
+        {
+            var result = Lz4MetaNcaBuilder.BuildInto(output, job.MetaNca, job.Cnmt, job.TitleId, job.Meta.Type, keySet, ct);
+
+            metaBuilt.NcaId = result.NcaId;
+            metaBuilt.Size = result.Size;
+
+            onRead(result.Size);
+
+            return Task.CompletedTask;
+        }, MetaEstimatedSize, $"{label} [Meta]"));
     }
 
     private static string PlaceholderName(int index) => "$" + index.ToString("x31") + ".nca";

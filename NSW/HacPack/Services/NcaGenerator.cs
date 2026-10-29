@@ -11,12 +11,34 @@ public static class NcaGenerator
 {
     public static string GenerateRomfsNca(NcaGenerationOptions settings, string ncaType, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
+        string ncaPath = Path.Combine(settings.OutDirectory, $"{ncaType}.nca");
+        using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
+
+        WriteRomfsNca(ncaFile, settings, ncaType, compressLevel, progress, ct);
+
+        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
+    }
+
+    public static (byte[] Hash, long Size) GenerateRomfsNcaInto(Stream output, NcaGenerationOptions settings, string ncaType, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
+    {
+        long start = output.Position;
+        var window = new OffsetStream(output, start, onAdvance);
+
+        WriteRomfsNca(window, settings, ncaType, compressLevel, null, ct);
+
+        long size = window.Length;
+        byte[] hash = HashRegion(output, start, size, ct);
+
+        output.Position = start + size;
+
+        return (hash, size);
+    }
+
+    private static void WriteRomfsNca(Stream ncaFile, NcaGenerationOptions settings, string ncaType, int compressLevel, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    {
         var ncaHeader = new NcaHeader();
 
         NcaHeaderService.InitHeader(ref ncaHeader);
-
-        string ncaPath = Path.Combine(settings.OutDirectory, $"{ncaType}.nca");
-        using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
 
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
 
@@ -52,8 +74,6 @@ public static class NcaGenerator
             NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, settings, progress, ct);
 
         NcaHeaderService.FinalizeNca(ncaFile, ref ncaHeader, settings);
-
-        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
     }
 
     public static string GenerateProgramNca(NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
