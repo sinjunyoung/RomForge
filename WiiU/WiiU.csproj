@@ -11,6 +11,14 @@
 	<Copyright>Copyright © 2026 YameSoft</Copyright>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn />
+  </PropertyGroup>
 	
   <ItemGroup>
     <PackageReference Include="ZstdSharp.Port" Version="0.8.8" />

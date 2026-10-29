@@ -422,7 +422,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                     switch (sw.Extension.ToLowerInvariant(), sw.SelectedTargetFormat.ToUpperInvariant())
                     {
                         case ("nsp", _) when sw.SelectedTargetFormat == ConverterFileItem.Lz4NspFormat:
-                            await NspLz4Service.CompressAsync(sw.FilePath, _outputDir, switchConfig.Lz4CompressLevel, progress, Log, _cts.Token);
+                            await Task.Run(() => NspLz4Service.CompressAsync(sw.FilePath, _outputDir, switchConfig.Lz4CompressLevel, progress, Log, _cts.Token)); 
                             break;
                         case ("nsp", "XCI"):
                             await NspXciConvertService.NspToXciAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);

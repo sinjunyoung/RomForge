@@ -23,8 +23,21 @@ public static class Pfs0Builder
         foreach (var (name, _, _, _) in fileList)
         {
             stringOffsets.Add((uint)stringTable.Count);
-            stringTable.AddRange(System.Text.Encoding.UTF8.GetBytes(name));
-            stringTable.Add(0);
+
+            byte[] nameBytes = System.Text.Encoding.UTF8.GetBytes(name);
+            int reservedSize = nameBytes.Length;
+
+            if (deferredNames != null && deferredNames.ContainsKey(name))
+            {
+                const int minDeferredLength = 64;
+
+                reservedSize = Math.Max(nameBytes.Length, minDeferredLength);
+            }
+
+            byte[] paddedBuffer = new byte[reservedSize + 1];
+
+            nameBytes.CopyTo(paddedBuffer, 0);
+            stringTable.AddRange(paddedBuffer);
         }
 
         ulong fullHeaderSize = (ulong)(Marshal.SizeOf<Pfs0Header>() + Marshal.SizeOf<Pfs0FileEntry>() * fileList.Count + stringTable.Count);
@@ -111,22 +124,30 @@ public static class Pfs0Builder
             });
         }
 
-        if (deferredNames != null)
+        if (deferredNames != null && deferredNames.Count > 0)
         {
             for (int i = 0; i < fileList.Count; i++)
             {
-                if (!deferredNames.TryGetValue(fileList[i].Name, out var resolve))
+                string currentName = fileList[i].Name;
+
+                if (!deferredNames.TryGetValue(currentName, out var resolve))
                     continue;
 
-                byte[] placeholder = System.Text.Encoding.UTF8.GetBytes(fileList[i].Name);
-                byte[] resolved = System.Text.Encoding.UTF8.GetBytes(resolve());
+                string resolvedName = resolve();
+                byte[] resolvedBytes = System.Text.Encoding.UTF8.GetBytes(resolvedName);
+                byte[] placeholderBytes = System.Text.Encoding.UTF8.GetBytes(currentName);
+                int allocatedSize = Math.Max(placeholderBytes.Length, 64);
 
-                if (resolved.Length != placeholder.Length)
-                    throw new InvalidOperationException($"확정된 파일명 길이가 자리표시 이름과 다릅니다: {fileList[i].Name}");
+                if (resolvedBytes.Length > allocatedSize)
+                    throw new InvalidOperationException($"확정된 파일명({resolvedName})이 예약된 공간({allocatedSize}바이트)보다 깁니다.");
+
+                byte[] writeBuffer = new byte[allocatedSize];
+
+                resolvedBytes.CopyTo(writeBuffer, 0);
 
                 outputStream.Position = stringTablePos + stringOffsets[i];
 
-                outputStream.Write(resolved);
+                outputStream.Write(writeBuffer);
             }
         }
 

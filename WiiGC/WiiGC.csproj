@@ -12,6 +12,14 @@
 	<Copyright>Copyright © 2026 YameSoft</Copyright>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="src\**" />
     <EmbeddedResource Remove="src\**" />
