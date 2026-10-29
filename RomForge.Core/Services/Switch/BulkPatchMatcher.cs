@@ -90,7 +90,11 @@ public static class BulkPatchMatcher
             if (note != null)
                 details.AppendLine($"{name}: {note}");
             else
-                details.AppendLine($"{name}: 프로그램 {match.Covered.Count}/{ids.Count}" + (match.Missing.Count > 0 ? $" | 일부 프로그램 패치 없음: {string.Join(", ", match.Missing)}" : string.Empty));
+            {
+                var lines = ids.Select(id => $"{(match.Covered.Contains(id, StringComparer.OrdinalIgnoreCase) ? "✔" : "✘")} {id}");
+
+                details.AppendLine($"{name}: 프로그램 {match.Covered.Count}/{ids.Count} 패치 확인 ({string.Join(", ", lines)})");
+            }
         }
 
         if (dlcTotal > 0)

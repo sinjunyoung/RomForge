@@ -93,6 +93,27 @@ public class RepackRowViewModel : ToolTabViewModel
         return [.. offsets.Select(o => (baseValue + o).ToString("X16"))];
     }
 
+    private void LogPatchResult(string title, int coveredCount, int totalCount, IEnumerable<string> lines, bool hasWarning, string? extraWarningMsg = null)
+    {
+        string lineStr = string.Join(", ", lines);
+
+        if (hasWarning)
+        {
+            AppendLog($"[패치 지정 완료] {title}", LogLevel.Ok);
+            AppendLog($"  ㄴ 프로그램 {coveredCount}/{totalCount} 패치 확인 ({lineStr})", LogLevel.Ok);
+
+            if (!string.IsNullOrEmpty(extraWarningMsg))
+                AppendLog($"  ㄴ {extraWarningMsg}", LogLevel.Warning);
+            else
+                AppendLog($"  ㄴ 일부 프로그램은 패치가 없어 원본 그대로 빌드됩니다.", LogLevel.Warning);
+        }
+        else
+        {
+            string detailMsg = $"프로그램 {coveredCount}/{totalCount} 패치 확인 ({lineStr})";
+            AppendLog($"[패치 지정 완료] {title}\n  ㄴ {detailMsg}", LogLevel.Ok);
+        }
+    }
+
     public bool TryAssignPatch(GameFile file, PatchSource source, string? password)
     {
         var ids = GetExpectedIds(file);
@@ -108,7 +129,7 @@ public class RepackRowViewModel : ToolTabViewModel
                     : $"[패치 지정 실패] {file.TitleName}: 패치에서 타이틀 ID 폴더나 exefs/romfs/ips/xdelta를 찾지 못했습니다.";
 
                 AppendLog(reason, LogLevel.Error);
-                _= SoundPlayer.PlayErrorAsync();
+                _ = SoundPlayer.PlayErrorAsync();
                 MessageBox.Show(reason, "패치 지정 실패", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -117,20 +138,16 @@ public class RepackRowViewModel : ToolTabViewModel
             bool warning = ids.Count > 1;
 
             if (warning)
-                AppendLog($"[패치 지정 경고] {file.TitleName}: 타이틀 ID 폴더가 없는 일반 패치(exefs/romfs)로 지정했습니다. 프로그램이 여러 개인 게임이라 모든 프로그램에 같은 파일이 적용됩니다.", LogLevel.Info);
+                AppendLog($"[패치 지정 경고] {file.TitleName}: 타이틀 ID 폴더가 없는 일반 패치(exefs/romfs)로 지정했습니다. 프로그램이 여러 개인 게임이라 모든 프로그램에 같은 파일이 적용됩니다.", LogLevel.Warning);
             else
                 AppendLog($"[패치 지정 안내] {file.TitleName}: 타이틀 ID 폴더가 없는 일반 패치(exefs/romfs)로 지정했습니다.", LogLevel.Ok);
         }
         else
         {
             bool warning = match.Missing.Count > 0;
-            var lines = string.Join(", ", ids.Select(id => $"{(match.Covered.Contains(id, StringComparer.OrdinalIgnoreCase) ? "✔" : "✘")} {id}"));
-            string detailMsg = $"프로그램 {match.Covered.Count}/{ids.Count} 패치 확인 ({lines})";
+            var lines = ids.Select(id => $"{(match.Covered.Contains(id, StringComparer.OrdinalIgnoreCase) ? "✔" : "✘")} {id}");
 
-            if (warning)
-                detailMsg += " | 일부 프로그램은 패치가 없어 원본 그대로 빌드됩니다.";
-
-            AppendLog($"[패치 지정 완료] {file.TitleName}\n{detailMsg}", warning ? LogLevel.Info : LogLevel.Ok);
+            LogPatchResult(file.TitleName, match.Covered.Count, ids.Count, lines, warning);
         }
 
         file.PatchPath = path;
@@ -142,17 +159,45 @@ public class RepackRowViewModel : ToolTabViewModel
     {
         string text = $"총 {report.Total}개 중 {report.Matched}개에 패치 지정됨.";
 
-        if (report.Details.Length > 0)
-            text += $"\n상세: {report.Details.Replace(Environment.NewLine, " | ")}";
-
         if (report.Matched == 0)
         {
+            if (report.Details.Length > 0)
+                text += $"\n상세: {report.Details.Replace(Environment.NewLine, " | ")}";
+
             AppendLog($"[일괄 지정 실패] {text}", LogLevel.Error);
-            _= SoundPlayer.PlayErrorAsync();
+            _ = SoundPlayer.PlayErrorAsync();
             MessageBox.Show(text, "일괄 지정 결과", MessageBoxButton.OK, MessageBoxImage.Warning);
-        }        
+        }
         else
+        {
             AppendLog($"[일괄 지정 완료] {text}", LogLevel.Ok);
+
+            if (report.Details.Length > 0)
+            {
+                foreach (var line in report.Details.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = line.Split(':');
+                    if (parts.Length < 2) continue;
+
+                    string gameTitle = parts[0].Trim();
+                    string detailContent = parts[1].Trim();
+
+                    AppendLog($"  ㄴ {gameTitle}", LogLevel.Ok);
+
+                    bool hasWarning = detailContent.Contains("패치 없음") || detailContent.Contains("✘") || detailContent.Contains("missing");
+
+                    if (hasWarning)
+                    {
+                        AppendLog($"    ㄴ {detailContent}", LogLevel.Ok);
+                        AppendLog($"    ㄴ 일부 프로그램은 패치가 없어 원본 그대로 빌드됩니다.", LogLevel.Warning);
+                    }
+                    else
+                    {
+                        AppendLog($"    ㄴ {detailContent}", LogLevel.Ok);
+                    }
+                }
+            }
+        }
     }
 
     public void RemoveFile(GameFile item)
@@ -173,4 +218,9 @@ public class RepackRowViewModel : ToolTabViewModel
     }
 
     public void ClearPatch(GameFile file) => _patchSync.ClearPatch(file);
+
+    public new void AppendLog(string msg, LogLevel level = LogLevel.Info)
+    {
+        LogAction?.Invoke(msg, level);
+    }
 }
