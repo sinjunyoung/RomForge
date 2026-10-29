@@ -164,6 +164,9 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
                 ExtractFileSystem(fs, dlcDestDir, $"DLC ({titleIdStr})", ctx, ct);
                 result.Dlcs.Add(new DlcUnpackInfo { TitleId = nca.Header.TitleId, Dir = Path.Combine("DLCs", titleIdStr) });
+
+                if (RomfsCompression.HasCompressedSection(nca))
+                    File.WriteAllText(Path.Combine(dlcBaseDir, titleIdStr, RomfsCompression.FlagFileName), string.Empty);
             }
             catch (Exception ex)
             {

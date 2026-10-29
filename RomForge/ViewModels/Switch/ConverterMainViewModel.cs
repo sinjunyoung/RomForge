@@ -202,7 +202,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
         return (source, target) switch
         {
-            ("nsp", "lz4") => NspLz4Service.CompressAsync(item.FilePath, null, config.Lz4CompressLevel, progress, log, ct),
+            ("nsp", "lz4") => Task.Run(() => NspLz4Service.CompressAsync(item.FilePath, null, config.Lz4CompressLevel, progress, log, ct)),
             ("nsp", "xci") => NspXciConvertService.NspToXciAsync(item.FilePath, null, progress, log,  ct),
             ("nsp", "nsz") => NspCompressService.CompressAsync(item.FilePath, null, config.CompressLevel, config.VerifyCompress, config.UseBlockMode, progress, log, ct),
             ("nsp", "xcz") => NspXciConvertService.NspToXczAsync(item.FilePath, null, config.CompressLevel, config.VerifyCompress, config.UseBlockMode, progress, log, ct),

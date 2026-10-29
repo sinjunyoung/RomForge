@@ -41,8 +41,9 @@ public static class DlcNspBuilder
             }
 
             bool hasRomfs = Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any();
+            bool compressRomfs = req.CompressRomfs ?? File.Exists(Path.Combine(dlcDir, RomfsCompression.FlagFileName));
 
-            log($"DLC 빌드 시도: {titleIdStr}", LogLevel.Info);
+            log($"DLC 빌드 시도: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Info);
 
             var dlcSettings = new NcaGenerationOptions
             {
@@ -57,7 +58,8 @@ public static class DlcNspBuilder
                 KeySet = baseSettings.KeySet,
                 KeyAreaKey = baseSettings.KeyAreaKey,
                 NcaSig = NcaSigType.Zero,
-                Plaintext = 0
+                Plaintext = 0,
+                CompressRomfs = compressRomfs
             };
 
             try

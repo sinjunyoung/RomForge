@@ -137,7 +137,7 @@ public static class NspLz4Service
             int placeholderIndex = 0;
 
             foreach (var job in jobs)
-                AddJobEntries(job, keySet, lz4Level, label, ct, log, fileEntries, deferredNames, ref placeholderIndex);
+                AddJobEntries(job, keySet, lz4Level, label, fileEntries, deferredNames, ref placeholderIndex, log, ct);
 
             var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
 
@@ -214,7 +214,7 @@ public static class NspLz4Service
         return job;
     }
 
-    private static void AddJobEntries(MetaJob job, KeySet keySet, int lz4Level, string label, CancellationToken ct, Action<string, LogLevel, string>? log, List<FileEntry> fileEntries, Dictionary<string, Func<string>> deferredNames, ref int placeholderIndex)
+    private static void AddJobEntries(MetaJob job, KeySet keySet, int lz4Level, string label, List<FileEntry> fileEntries, Dictionary<string, Func<string>> deferredNames, ref int placeholderIndex, Action<string, LogLevel, string>? log, CancellationToken ct)
     {
         bool isApplication = job.Meta.Type == ContentMetaType.Application;
         string kind = isApplication ? "Program" : "DLC";
@@ -235,14 +235,14 @@ public static class NspLz4Service
 
                 log?.Invoke($"{kind} NCA Lz4 압축 중 ({number}/{total}, {job.Meta.TitleId})", LogLevel.Highlight, job.Meta.TitleId);
 
-                var result = isApplication
+                var (NcaId, Hash, Size) = isApplication
                     ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct)
                     : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
 
-                built.NcaId = result.NcaId;
-                built.Hash = result.Hash;
-                built.Size = result.Size;
-                job.Cnmt = CnmtRecordPatcher.Replace(job.Cnmt, target.Record.NcaId, result.NcaId, result.Hash, result.Size);
+                built.NcaId = NcaId;
+                built.Hash = Hash;
+                built.Size = Size;
+                job.Cnmt = CnmtRecordPatcher.Replace(job.Cnmt, target.Record.NcaId, NcaId, Hash, Size);
 
                 return Task.CompletedTask;
             }, (long)target.Nca.Header.NcaSize, $"{label} [{kind} Lz4]"));
@@ -255,12 +255,12 @@ public static class NspLz4Service
 
         fileEntries.Add((metaPlaceholder, (output, onRead) =>
         {
-            var result = Lz4MetaNcaBuilder.BuildInto(output, job.MetaNca, job.Cnmt, job.TitleId, job.Meta.Type, keySet, ct);
+            var (NcaId, Size) = Lz4MetaNcaBuilder.BuildInto(output, job.MetaNca, job.Cnmt, job.TitleId, job.Meta.Type, keySet, ct);
 
-            metaBuilt.NcaId = result.NcaId;
-            metaBuilt.Size = result.Size;
+            metaBuilt.NcaId = NcaId;
+            metaBuilt.Size = Size;
 
-            onRead(result.Size);
+            onRead(Size);
 
             return Task.CompletedTask;
         }, MetaEstimatedSize, $"{label} [Meta]"));
