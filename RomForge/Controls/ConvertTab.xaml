@@ -87,7 +87,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="120">
+                    <GridViewColumn Width="90">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="SelectedTargetFormat">
                                 <StackPanel Orientation="Horizontal">
@@ -189,7 +189,7 @@
                         <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
                             <Run Text=": NSP" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>
-                            <Run Text="NSZ, XCI, XCZ" Foreground="#FFFFFF" FontWeight="Bold"/>
+                            <Run Text="NSZ, XCI, XCZ, NSP(LZ4)" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
                             <Run Text="NSZ" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#AB47BC" FontWeight="Bold"/>

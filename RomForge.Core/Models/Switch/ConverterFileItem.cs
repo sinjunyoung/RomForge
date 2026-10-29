@@ -4,8 +4,6 @@ namespace RomForge.Core.Models.Switch;
 
 public class ConverterFileItem : GameFile, Interfaces.IConvertible
 {
-    public const string Lz4NspFormat = "NSP (Lz4)";
-
     private string _selectedTargetFormat;
 
     public ConverterFileItem(string filePath) : base(filePath)
@@ -39,7 +37,7 @@ public class ConverterFileItem : GameFile, Interfaces.IConvertible
 
     private static List<string> GetAvailableFormats(string ext) => ext.ToLowerInvariant() switch
     {
-        "nsp" => ["NSZ", "XCI", "XCZ", Lz4NspFormat],
+        "nsp" => ["NSZ", "XCI", "XCZ", "LZ4"],
         "xci" => ["XCZ", "NSP", "NSZ"],
         "nsz" => ["NSP", "XCI", "XCZ"],
         "xcz" => ["XCI", "NSP", "NSZ"],
