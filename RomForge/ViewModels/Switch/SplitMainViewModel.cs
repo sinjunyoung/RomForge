@@ -20,8 +20,6 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
-    private string _outputPath = string.Empty;
-
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
 
     private readonly List<SplitRowViewModel> _files = [];
@@ -30,42 +28,21 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 
     public bool HasFiles => _files.Count > 0;
 
-    private OutputFormat _outputFormat = OutputFormat.NSP;
-    private bool? _allSelected = false;
+    public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchSplitOutputPath = value; } } = string.Empty;
 
-    public string OutputPath
-    {
-        get => _outputPath;
-        set
-        {
-            _outputPath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(OutputHintVisibility));
-
-            AppConfig.Instance.OutputFolders.SwitchSplitOutputPath = value;
-        }
-    }
-
-    public OutputFormat OutputFormat
-    {
-        get => _outputFormat;
-        set { _outputFormat = value; OnPropertyChanged(); }
-    }
+    public OutputFormat OutputFormat { get; set { SetProperty(ref field, value); } } = OutputFormat.NSP;
 
     public bool? AllSelected
     {
-        get => _allSelected;
+        get;
         set
         {
-            if (_allSelected != value)
+            if (field != value)
             {
-                _allSelected = value;
-
-                OnPropertyChanged();
+                SetProperty(ref field, value);
             }
         }
-    }
+    } = false;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 

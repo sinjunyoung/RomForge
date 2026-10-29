@@ -20,21 +20,14 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
-    private string? _outputPath;
-    private bool _outputZip = true;
-    private bool _outputFolder;
-    private SourceRowViewModel? _selectedRow;
-
     public ObservableCollection<SourceRowViewModel> SourceRows { get; } = [];
 
     public string? OutputPath
     {
-        get => _outputPath;
+        get;
         set
         {
-            _outputPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(OutputHintVisibility));
 
             AppConfig.Instance.OutputFolders.VitaConvertOutputPath = value;
@@ -45,31 +38,11 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
 
     public Visibility EntriesHintVisibility => SourceRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-    public bool OutputZip
-    {
-        get => _outputZip;
-        set
-        {
-            _outputZip = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool OutputZip { get; set { SetProperty(ref field, value); } } = true;
 
-    public bool OutputFolder
-    {
-        get => _outputFolder;
-        set
-        {
-            _outputFolder = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool OutputFolder { get; set { SetProperty(ref field, value); } }
 
-    public SourceRowViewModel? SelectedRow
-    {
-        get => _selectedRow;
-        set { _selectedRow = value; OnPropertyChanged(); }
-    }
+    public SourceRowViewModel? SelectedRow { get; set { SetProperty(ref field, value); } }
 
     public ICommand RemoveSelectedCommand { get; }
 

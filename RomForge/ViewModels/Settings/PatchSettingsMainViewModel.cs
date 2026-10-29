@@ -9,27 +9,6 @@ namespace RomForge.ViewModels.Settings;
 
 public class PatchSettingsMainViewModel : ToolTabViewModel
 {
-    public PatchSettingsMainViewModel()
-    {
-        BrowseOutputCommand = new RelayCommand(_ => BrowseOutput());
-
-        AppConfig.Instance.Patch.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(PatchConfig.AutoCompress))
-                OnPropertyChanged(nameof(AutoCompress));
-            else if (e.PropertyName == nameof(PatchConfig.UseNormalPatchCustomOutputPath))
-            {
-                OnPropertyChanged(nameof(UseCustomOutputPath));
-                OnPropertyChanged(nameof(OutputPathVisibility));
-            }
-            else if (e.PropertyName == nameof(PatchConfig.OutputPath))
-            {
-                OnPropertyChanged(nameof(OutputPath));
-                OnPropertyChanged(nameof(OutputHintVisibility));
-            }
-        };
-    }
-
     public ICommand BrowseOutputCommand { get; }
 
     public bool AutoCompress
@@ -68,6 +47,27 @@ public class PatchSettingsMainViewModel : ToolTabViewModel
     public Visibility OutputPathVisibility => UseCustomOutputPath ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility OutputHintVisibility => string.IsNullOrWhiteSpace(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
+
+    public PatchSettingsMainViewModel()
+    {
+        BrowseOutputCommand = new RelayCommand(_ => BrowseOutput());
+
+        AppConfig.Instance.Patch.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(PatchConfig.AutoCompress))
+                OnPropertyChanged(nameof(AutoCompress));
+            else if (e.PropertyName == nameof(PatchConfig.UseNormalPatchCustomOutputPath))
+            {
+                OnPropertyChanged(nameof(UseCustomOutputPath));
+                OnPropertyChanged(nameof(OutputPathVisibility));
+            }
+            else if (e.PropertyName == nameof(PatchConfig.OutputPath))
+            {
+                OnPropertyChanged(nameof(OutputPath));
+                OnPropertyChanged(nameof(OutputHintVisibility));
+            }
+        };
+    }
 
     private void BrowseOutput()
     {

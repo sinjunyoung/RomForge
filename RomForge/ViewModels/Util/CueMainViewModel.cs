@@ -14,16 +14,11 @@ public class CueMainViewModel : BatchToolTabViewModel
 {
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".bin" };
 
-    private bool _isConverting;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<CueFileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsConverting { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); } }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

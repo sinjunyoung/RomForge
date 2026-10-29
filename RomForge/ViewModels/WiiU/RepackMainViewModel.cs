@@ -15,17 +15,10 @@ namespace RomForge.ViewModels.WiiU;
 public class RepackMainViewModel : ProgressToolTabViewModel
 {
     private BuildMode? _currentMode;
-    private TitleInputEntry? _selectedEntry;
-    private string _outputPath = string.Empty;
 
     private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
 
-    private RepackOutputFormat _outputFormat = RepackOutputFormat.Wua;
-    public RepackOutputFormat OutputFormat
-    {
-        get => _outputFormat;
-        set { _outputFormat = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsWuaFormat)); OnPropertyChanged(nameof(IsWupFormat)); }
-    }
+    public RepackOutputFormat OutputFormat { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsWuaFormat)); OnPropertyChanged(nameof(IsWupFormat)); } } = RepackOutputFormat.Wua;
 
     public bool IsWuaFormat
     {
@@ -49,24 +42,9 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     public ObservableCollection<TitleInputEntry> Entries { get; } = [];
 
-    public TitleInputEntry? SelectedEntry
-    {
-        get => _selectedEntry;
-        set { _selectedEntry = value; OnPropertyChanged(); OnPropertyChanged(nameof(HasSelection)); }
-    }
+    public TitleInputEntry? SelectedEntry { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(HasSelection)); } }
 
-    public string OutputPath
-    {
-        get => _outputPath;
-        set
-        {
-            _outputPath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(OutputHintVisibility));
-            AppConfig.Instance.OutputFolders.WiiURepackOutputPath = value;
-        }
-    }
+    public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.WiiURepackOutputPath = value; } } = string.Empty;
 
     public Visibility EntriesHintVisibility => Entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

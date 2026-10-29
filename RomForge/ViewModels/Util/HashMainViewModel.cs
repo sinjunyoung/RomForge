@@ -18,50 +18,29 @@ public class HashMainViewModel : BatchToolTabViewModel
 {
     public static string GetFileDialogFilter() => "모든 파일|*.*";
 
-    private bool _isConverting;
-    private HashAlgorithmType _selectedAlgorithm = HashAlgorithmType.MD5;
     private CancellationTokenSource _cts = new();
     private HashFileItem? _pendingScrollItem;
     private readonly ConcurrentQueue<Action> _uiQueue = new();
     private int _flushScheduled;
 
-    private bool _useUpperCase = false;
-
     public bool UseUpperCase
     {
-        get => _useUpperCase;
+        get;
         set
         {
-            if (_useUpperCase == value)
+            if (field == value)
                 return;
 
-            _useUpperCase = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             ApplyHashCase();
         }
-    }
+    } = false;
 
     public ObservableCollection<HashFileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set
-        {
-            _isConverting = value;
+    public bool IsConverting { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); } }
 
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(IsLocked));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    public HashAlgorithmType SelectedAlgorithm
-    {
-        get => _selectedAlgorithm;
-        set { _selectedAlgorithm = value; OnPropertyChanged(); }
-    }
+    public HashAlgorithmType SelectedAlgorithm { get; set { SetProperty(ref field, value); } } = HashAlgorithmType.MD5;
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

@@ -19,19 +19,14 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".cia" };
 
-    private bool _isExtracting;
     private CancellationTokenSource _cts = new();
-    private CertsFileItem? _selectedFile;
-    private TitleViewModel? _romInfo;
 
     public CertsFileItem? SelectedFile
     {
-        get => _selectedFile;
+        get;
         set
         {
-            _selectedFile = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(HintVisibility));
             OnPropertyChanged(nameof(FileInfoVisibility));
             OnPropertyChanged(nameof(ProgressStatus));
@@ -40,17 +35,9 @@ public class CertsMainViewModel : BatchToolTabViewModel
         }
     }
 
-    public TitleViewModel? RomInfo
-    {
-        get => _romInfo;
-        set { _romInfo = value; OnPropertyChanged(); OnPropertyChanged(nameof(RomInfoVisibility)); }
-    }
+    public TitleViewModel? RomInfo { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(RomInfoVisibility)); } }
 
-    public bool IsExtracting
-    {
-        get => _isExtracting;
-        set { _isExtracting = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsExtracting { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); } }
 
     public Visibility HintVisibility => SelectedFile == null ? Visibility.Visible : Visibility.Collapsed;
 

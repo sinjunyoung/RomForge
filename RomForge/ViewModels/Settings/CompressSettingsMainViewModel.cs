@@ -5,16 +5,7 @@ namespace RomForge.ViewModels.Settings;
 
 public class CompressSettingsMainViewModel() : ToolTabViewModel
 {
-    private int _selectedTabIndex;
-    public int SelectedTabIndex
-    {
-        get => _selectedTabIndex;
-        set
-        {
-            _selectedTabIndex = value;
-            OnPropertyChanged();
-        }
-    }
+    public int SelectedTabIndex { get; set { SetProperty(ref field, value); } }
 
     public record ChdmanCompressionOption(string Value, string Display);
 

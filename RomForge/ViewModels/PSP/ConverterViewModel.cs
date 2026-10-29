@@ -15,7 +15,6 @@ namespace RomForge.ViewModels.PSP;
 
 public class ConverterViewModel : ToolTabViewModel
 {
-    private bool _isConverting;
     private CancellationTokenSource _cts = new();
     private readonly CsoService _csoService = new();
 
@@ -23,11 +22,7 @@ public class ConverterViewModel : ToolTabViewModel
 
     public ObservableCollection<FileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsConverting { get; set { SetPropertyAndRequery(ref field, value); } }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

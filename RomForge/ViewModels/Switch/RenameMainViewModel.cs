@@ -26,9 +26,6 @@ public class RenameMainViewModel : ToolTabViewModel
     private static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase) { ".nsp", ".xci", ".nsz", ".xcz" };
 
     private CancellationTokenSource _cts = new();
-    private string _formatText = RenamePresets.Default.Format!;
-    private NamingFormatPreset _selectedNamingPreset = RenamePresets.Default;
-    private string _summary = string.Empty;
     private bool _refreshQueued;
 
     public ObservableCollection<RenameFileItem> Items { get; } = [];
@@ -41,38 +38,33 @@ public class RenameMainViewModel : ToolTabViewModel
 
     public NamingFormatPreset SelectedNamingPreset
     {
-        get => _selectedNamingPreset;
+        get;
         set
         {
-            if (value is null || value.IsSeparator || ReferenceEquals(_selectedNamingPreset, value))
+            if (value is null || value.IsSeparator || ReferenceEquals(field, value))
                 return;
 
-            _selectedNamingPreset = value;
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(IsFormatReadOnly));
 
             if (!value.IsCustom)
                 FormatText = value.Format!;
         }
-    }
+    } = RenamePresets.Default;
 
-    public bool IsFormatReadOnly => !_selectedNamingPreset.IsCustom;
+    public bool IsFormatReadOnly => !SelectedNamingPreset.IsCustom;
 
     public string FormatText
     {
-        get => _formatText;
+        get;
         set
         {
-            if (SetProperty(ref _formatText, value))
+            if (SetProperty(ref field, value))
                 ScheduleRefresh();
         }
-    }
+    } = RenamePresets.Default.Format!;
 
-    public string Summary
-    {
-        get => _summary;
-        private set => SetProperty(ref _summary, value);
-    }
+    public string Summary { get; private set => SetProperty(ref field, value); } = string.Empty;
 
     public RenameMainViewModel()
     {

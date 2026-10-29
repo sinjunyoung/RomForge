@@ -32,30 +32,20 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     private RiivolutionWorkspace? _workspace;
     private RiivolutionPatchSet? _patch;
     private DiscInfo? _disc;
-    private GameDisplay? _gameInfo;
-    private ImageSource? _gameIcon;
-    private PatchDisplay? _patchInfo;
     private int _discVersion;
     private int _patchVersion;
-    private string _inputPath = string.Empty;
-    private string _patchPath = string.Empty;
-    private string _outputPath = string.Empty;
-
-    private OutputFormat _outputFormat = OutputFormat.Iso;
 
     public OutputFormat OutputFormat
     {
-        get => _outputFormat;
+        get;
         set
         {
-            _outputFormat = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(IsIsoFormat));
             OnPropertyChanged(nameof(IsWbfsFormat));
             OnPropertyChanged(nameof(IsRvzFormat));
         }
-    }
+    } = OutputFormat.Iso;
 
     public bool IsIsoFormat
     {
@@ -89,41 +79,35 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     public string InputPath
     {
-        get => _inputPath;
+        get;
         set
         {
-            _inputPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(InputHintVisibility));
             _ = RefreshDiscAsync();
         }
-    }
+    } = string.Empty;
 
     public string PatchPath
     {
-        get => _patchPath;
+        get;
         set
         {
-            if (_patchPath != value)
+            if (field != value)
             {
-                _patchPath = value;
-
-                OnPropertyChanged();
+                SetProperty(ref field, value);
                 OnPropertyChanged(nameof(PatchHintVisibility));
                 _ = RefreshPatchAsync();
             }
         }
-    }
+    } = string.Empty;
 
     public string OutputPath
     {
-        get => _outputPath;
+        get;
         set
         {
-            _outputPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(OutputHintVisibility));
 
             AppConfig.Instance.OutputFolders.WiiOutputPath = value;
@@ -131,37 +115,13 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             if (string.IsNullOrWhiteSpace(InputPath))
                 _ = RefreshUnpackedFolderAsync();
         }
-    }
+    } = string.Empty;
 
-    public GameDisplay? GameInfo
-    {
-        get => _gameInfo;
-        private set
-        {
-            _gameInfo = value;
+    public GameDisplay? GameInfo { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(GameInfoVisibility)); } }
 
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(GameInfoVisibility));
-        }
-    }
+    public ImageSource? GameIcon { get; private set { SetProperty(ref field, value); } }
 
-    public ImageSource? GameIcon
-    {
-        get => _gameIcon;
-        private set { _gameIcon = value; OnPropertyChanged(); }
-    }
-
-    public PatchDisplay? PatchInfo
-    {
-        get => _patchInfo;
-        private set
-        {
-            _patchInfo = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchInfoVisibility));
-        }
-    }
+    public PatchDisplay? PatchInfo { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchInfoVisibility)); } }
 
     public Visibility InputHintVisibility => string.IsNullOrEmpty(InputPath) ? Visibility.Visible : Visibility.Collapsed;
 

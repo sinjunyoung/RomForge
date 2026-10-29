@@ -16,7 +16,6 @@ namespace RomForge.ViewModels.WiiU;
 
 public class ConverterMainViewModel : ToolTabViewModel
 {
-    private bool _isConverting;
     private CancellationTokenSource _cts = new();
 
     private static readonly HashSet<string> SupportedExtensions = [".wud", ".wux", ".wua"];
@@ -25,11 +24,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     public ObservableCollection<FileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsConverting { get; set { SetPropertyAndRequery(ref field, value); } }
 
     public string? OutputPath
     {

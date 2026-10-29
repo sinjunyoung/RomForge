@@ -18,93 +18,47 @@ namespace RomForge.ViewModels.Switch
 {
     public class ConvertSaturnMainViewModel : ProgressToolTabViewModel
     {
-        private string _gameTitle = string.Empty;
-        private string _publisher = "SEGA";
-        private string _gameId = string.Empty;
-        private string _gameVersion = string.Empty;
-        private string _nspTitleId = string.Empty;
-
-        private bool _wideScreen = false;
-        private bool _useLz4Compression = true;
-        private string _selectedSoundVolume = "100%";
-
         public ObservableCollection<string> SoundVolumeItems { get; } = ["60%", "80%", "100%", "120%"];
 
-        private string _cuePath = string.Empty;
-        private string _nspPath = string.Empty;
-        private string _workPath = string.Empty;
-        private string _coverImagePath = string.Empty;
-        private ImageSource? _coverImageSource;
         private byte[]? _coverBytes;
         private bool _isConverting;
         private readonly Stopwatch _totalSw = new();
 
-        public string GameTitle { get => _gameTitle; set { _gameTitle = value; OnPropertyChanged(); } }
+        public string GameTitle { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-        public string Publisher { get => _publisher; set { _publisher = value; OnPropertyChanged(); } }
+        public string Publisher { get; set { SetProperty(ref field, value); } } = "SEGA";
 
-        public string GameId
-        { 
-            get => _gameId;
-            set
-            { 
-                _gameId = value;
-                NspTitleId = Crc32Helper.BuildTitleId(Crc32Helper.Compute(Encoding.Default.GetBytes(value)));
-                OnPropertyChanged();
-                OnPropertyChanged(NspTitleId);
-            } 
-        }
+        public string GameId { get; set { SetProperty(ref field, value); NspTitleId = Crc32Helper.BuildTitleId(Crc32Helper.Compute(Encoding.Default.GetBytes(value))); OnPropertyChanged(NspTitleId); } } = string.Empty;
 
-        public string GameVersion { get => _gameVersion; set { _gameVersion = value; OnPropertyChanged(); } }
+        public string GameVersion { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-        public string NspTitleId { get => _nspTitleId; set { _nspTitleId = value; OnPropertyChanged(); } }
+        public string NspTitleId { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-        public bool WideScreen { get => _wideScreen; set { _wideScreen = value; OnPropertyChanged(); } }
+        public bool WideScreen { get; set { SetProperty(ref field, value); } } = false;
 
-        public bool UseLz4Compression { get => _useLz4Compression; set { _useLz4Compression = value; OnPropertyChanged(); } }        
+        public bool UseLz4Compression { get; set { SetProperty(ref field, value); } } = true;
 
-        public string SelectedSoundVolume
-        {
-            get => _selectedSoundVolume;
-            set { _selectedSoundVolume = value; OnPropertyChanged(); }
-        }
+        public string SelectedSoundVolume { get; set { SetProperty(ref field, value); } } = "100%";
 
-        public string CuePath
-        {
-            get => _cuePath;
-            set { _cuePath = value; OnPropertyChanged(); OnPropertyChanged(nameof(CueHintVisibility)); _ = ParseSaturnDataAsync(value); }
-        }
+        public string CuePath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(CueHintVisibility)); _ = ParseSaturnDataAsync(value); } } = string.Empty;
 
-        public string NspPath
-        {
-            get => _nspPath;
-            set { _nspPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(NspHintVisibility)); }
-        }
+        public string NspPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(NspHintVisibility)); } } = string.Empty;
 
-        public string WorkPath
-        {
-            get => _workPath;
-            set { _workPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(WorkHintVisibility)); }
-        }
+        public string WorkPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(WorkHintVisibility)); } } = string.Empty;
 
         public string CoverImagePath
         {
-            get => _coverImagePath;
+            get;
             set
             {
-                _coverImagePath = value;
-                OnPropertyChanged();
+                SetProperty(ref field, value);
 
                 if (!string.IsNullOrEmpty(value) && File.Exists(value))
                     SetCover(value.ToImageBytes());
             }
-        }
+        } = string.Empty;
 
-        public ImageSource? CoverImageSource
-        {
-            get => _coverImageSource;
-            set { _coverImageSource = value; OnPropertyChanged(); OnPropertyChanged(nameof(CoverHintVisibility)); }
-        }
+        public ImageSource? CoverImageSource { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(CoverHintVisibility)); } }
 
         private void SetCover(byte[]? bytes)
         {

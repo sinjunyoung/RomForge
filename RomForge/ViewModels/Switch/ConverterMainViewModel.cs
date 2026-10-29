@@ -37,7 +37,6 @@ public class ConverterMainViewModel : ToolTabViewModel
         var keySet = KeySetProvider.Instance.KeySet;
         var existing = FileItems.Select(f => f.FilePath)
                                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         var newPaths = await Task.Run(() =>
             paths.Where(p => SupportedExtensions.Contains(Path.GetExtension(p)))
                  .Where(p => existing.Add(p))

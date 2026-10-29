@@ -19,30 +19,11 @@ namespace RomForge.ViewModels.Switch
     {
         private readonly Stopwatch _totalSw = new();
 
-        private bool _isIndeterminate = false;
-        private string _outputPath = string.Empty;
         private BuildMode? _currentMode;
 
-        public bool IsIndeterminate 
-        { 
-            get => _isIndeterminate; 
-            set { _isIndeterminate = value; OnPropertyChanged(); }
-        }
+        public bool IsIndeterminate {  get; set { SetProperty(ref field, value); } } = false;
 
-
-        public string OutputPath
-        {
-            get => _outputPath;
-            set
-            {
-                _outputPath = value;
-
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(OutputHintVisibility));
-
-                AppConfig.Instance.OutputFolders.SwitchRepackOutputPath = value;
-            }
-        }
+        public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchRepackOutputPath = value; } } = string.Empty;
 
         public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
 

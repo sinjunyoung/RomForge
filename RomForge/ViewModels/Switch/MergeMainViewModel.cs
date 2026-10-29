@@ -18,33 +18,11 @@ public class MergeMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
-    private string _outputPath = string.Empty;
-    private OutputFormat _outputFormat = OutputFormat.NSP;
-    private MergeMode _mergeMode = MergeMode.ByTitleId;
+    public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchMergeOutputPath = value; } } = string.Empty;
 
-    public string OutputPath
-    {
-        get => _outputPath;
-        set
-        {
-            _outputPath = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(OutputHintVisibility));
-            AppConfig.Instance.OutputFolders.SwitchMergeOutputPath = value;
-        }
-    }
+    public OutputFormat OutputFormat { get; set { SetProperty(ref field, value); } } = OutputFormat.NSP;
 
-    public OutputFormat OutputFormat
-    {
-        get => _outputFormat;
-        set { _outputFormat = value; OnPropertyChanged(); }
-    }
-
-    public MergeMode MergeMode
-    {
-        get => _mergeMode;
-        set { _mergeMode = value; OnPropertyChanged(); }
-    }
+    public MergeMode MergeMode { get; set { SetProperty(ref field, value); } } = MergeMode.ByTitleId;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 

@@ -17,12 +17,8 @@ namespace RomForge.ViewModels.Patch;
 public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 {
     private CancellationTokenSource? _previewCts;
-
-    private string? _sourcePath;
     private bool _patchAdded;
     private string _namingPreview = string.Empty;
-    private NamingFormatPreset _selectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
-
     private string? _cachedPatchVersion;
     private string? _cachedPatchDate;
     private string? _cachedPatchLanguage;
@@ -30,12 +26,10 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
     public string? SourcePath
     {
-        get => _sourcePath;
+        get;
         set
         {
-            _sourcePath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(SourceLabel));
             OnPropertyChanged(nameof(HasSource));
             OnPropertyChanged(nameof(SourceHintVisible));
@@ -108,27 +102,25 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
     public NamingFormatPreset SelectedNamingPreset
     {
-        get => _selectedNamingPreset;
+        get;
         set
         {
-            if (value is null || ReferenceEquals(_selectedNamingPreset, value))
+            if (value is null || ReferenceEquals(field, value))
                 return;
 
-            _selectedNamingPreset = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(IsNamingFormatReadOnly));
 
             if (!value.IsCustom)
                 NamingFormat = value.Format!;
         }
-    }
+    } = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
 
-    public bool IsNamingFormatReadOnly => !_selectedNamingPreset.IsCustom;
+    public bool IsNamingFormatReadOnly => !SelectedNamingPreset.IsCustom;
 
     private void SyncNamingPreset()
     {
-        _selectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
+        SelectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
 
         OnPropertyChanged(nameof(SelectedNamingPreset));
         OnPropertyChanged(nameof(IsNamingFormatReadOnly));

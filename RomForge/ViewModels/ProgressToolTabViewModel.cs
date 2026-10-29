@@ -5,15 +5,7 @@ namespace RomForge.ViewModels;
 
 public abstract class ProgressToolTabViewModel : ToolTabViewModel
 {
-    public int ProgressPct
-    {
-        get;
-        set
-        {
-            SetProperty(ref field, value);
-            MainViewModel.SetTaskbarProgress(field);
-        }
-    }
+    public int ProgressPct { get; set { SetProperty(ref field, value); MainViewModel.SetTaskbarProgress(field); } }
 
     public string ProgressLabel { get; set { SetProperty(ref field, value); } } = "대기 중...";
 

@@ -3,46 +3,13 @@ using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
 using RomForge.Core.ViewModels;
+using System.Windows;
 using System.Windows.Input;
 
 namespace RomForge.ViewModels.Settings;
 
 public class GeneralSettingsMainViewModel : ToolTabViewModel
 {
-    public GeneralSettingsMainViewModel()
-    {
-        AppConfig.Instance.Common.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName == nameof(CommonConfig.Topmost))
-                OnPropertyChanged(nameof(Topmost));
-            else if (e.PropertyName == nameof(CommonConfig.AutoCheckUpdate))
-                OnPropertyChanged(nameof(AutoCheckUpdate));
-            else if (e.PropertyName == nameof(CommonConfig.IsMuted))
-                OnPropertyChanged(nameof(IsMuted));
-            else if (e.PropertyName == nameof(CommonConfig.SoundVolume))
-                OnPropertyChanged(nameof(SoundVolume));
-            else if (e.PropertyName == nameof(CommonConfig.CompleteSoundPath))
-            {
-                OnPropertyChanged(nameof(CompleteSoundPath));
-                OnPropertyChanged(nameof(CompleteSoundHintVisibility));
-            }
-            else if (e.PropertyName == nameof(CommonConfig.CancelSoundPath))
-            {
-                OnPropertyChanged(nameof(CancelSoundPath));
-                OnPropertyChanged(nameof(CancelSoundHintVisibility));
-            }
-            else if (e.PropertyName == nameof(CommonConfig.ErrorSoundPath))
-            {
-                OnPropertyChanged(nameof(ErrorSoundPath));
-                OnPropertyChanged(nameof(ErrorSoundHintVisibility));
-            }
-        };
-
-        BrowseCompleteSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => CompleteSoundPath = path));
-        BrowseCancelSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => CancelSoundPath = path));
-        BrowseErrorSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => ErrorSoundPath = path));
-    }
-
     public bool Topmost
     {
         get => AppConfig.Instance.Common.Topmost;
@@ -128,17 +95,51 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         }
     }
 
-    public System.Windows.Visibility CompleteSoundHintVisibility => string.IsNullOrEmpty(CompleteSoundPath) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+    public Visibility CompleteSoundHintVisibility => string.IsNullOrEmpty(CompleteSoundPath) ? Visibility.Visible : Visibility.Collapsed;
 
-    public System.Windows.Visibility CancelSoundHintVisibility => string.IsNullOrEmpty(CancelSoundPath) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+    public Visibility CancelSoundHintVisibility => string.IsNullOrEmpty(CancelSoundPath) ? Visibility.Visible : Visibility.Collapsed;
 
-    public System.Windows.Visibility ErrorSoundHintVisibility => string.IsNullOrEmpty(ErrorSoundPath) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+    public Visibility ErrorSoundHintVisibility => string.IsNullOrEmpty(ErrorSoundPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand BrowseCompleteSoundCommand { get; }
 
     public ICommand BrowseCancelSoundCommand { get; }
 
     public ICommand BrowseErrorSoundCommand { get; }
+
+    public GeneralSettingsMainViewModel()
+    {
+        AppConfig.Instance.Common.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(CommonConfig.Topmost))
+                OnPropertyChanged(nameof(Topmost));
+            else if (e.PropertyName == nameof(CommonConfig.AutoCheckUpdate))
+                OnPropertyChanged(nameof(AutoCheckUpdate));
+            else if (e.PropertyName == nameof(CommonConfig.IsMuted))
+                OnPropertyChanged(nameof(IsMuted));
+            else if (e.PropertyName == nameof(CommonConfig.SoundVolume))
+                OnPropertyChanged(nameof(SoundVolume));
+            else if (e.PropertyName == nameof(CommonConfig.CompleteSoundPath))
+            {
+                OnPropertyChanged(nameof(CompleteSoundPath));
+                OnPropertyChanged(nameof(CompleteSoundHintVisibility));
+            }
+            else if (e.PropertyName == nameof(CommonConfig.CancelSoundPath))
+            {
+                OnPropertyChanged(nameof(CancelSoundPath));
+                OnPropertyChanged(nameof(CancelSoundHintVisibility));
+            }
+            else if (e.PropertyName == nameof(CommonConfig.ErrorSoundPath))
+            {
+                OnPropertyChanged(nameof(ErrorSoundPath));
+                OnPropertyChanged(nameof(ErrorSoundHintVisibility));
+            }
+        };
+
+        BrowseCompleteSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => CompleteSoundPath = path));
+        BrowseCancelSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => CancelSoundPath = path));
+        BrowseErrorSoundCommand = new RelayCommand(_ => BrowseSoundFile(path => ErrorSoundPath = path));
+    }
 
     private static void BrowseSoundFile(Action<string> setPathAction)
     {

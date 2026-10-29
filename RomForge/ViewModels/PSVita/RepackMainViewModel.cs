@@ -25,72 +25,33 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     private BuildMode? _currentMode;
     private string? _pendingZipPath;
     private int _patchLogVersion;
-
-    private string? _outputPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
-    private bool _buildEmu = true;
-    private bool _buildRetail;
-    private bool _mergePatchIntoGame = false;
     private bool _isSyncing;
-    private SourceRowViewModel? _selectedRow;
 
     public ObservableCollection<SourceRowViewModel> SourceRows { get; } = [];
 
     public string? OutputPath
     {
-        get => _outputPath;
+        get;
         set
         {
-            _outputPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(OutputHintVisibility));
 
             AppConfig.Instance.OutputFolders.VitaOutputPath = value;
         }
-    }
+    } = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "output");
 
     public Visibility OutputHintVisibility => string.IsNullOrWhiteSpace(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility EntriesHintVisibility => SourceRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
-    public bool BuildEmu
-    {
-        get => _buildEmu;
-        set
-        {
-            _buildEmu = value;
+    public bool BuildEmu { get; set { SetProperty(ref field, value); } } = true;
 
-            OnPropertyChanged();
-        }
-    }
+    public bool BuildRetail { get; set { SetProperty(ref field, value); } }
 
-    public bool BuildRetail
-    {
-        get => _buildRetail;
-        set
-        {
-            _buildRetail = value;
+    public bool MergePatchIntoGame { get; set { SetProperty(ref field, value); } } = false;
 
-            OnPropertyChanged();
-        }
-    }
-
-    public bool MergePatchIntoGame
-    {
-        get => _mergePatchIntoGame;
-        set
-        {
-            _mergePatchIntoGame = value;
-
-            OnPropertyChanged();
-        }
-    }
-
-    public SourceRowViewModel? SelectedRow
-    {
-        get => _selectedRow;
-        set { _selectedRow = value; OnPropertyChanged(); }
-    }
+    public SourceRowViewModel? SelectedRow { get; set { SetProperty(ref field, value); } }
 
     public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
 

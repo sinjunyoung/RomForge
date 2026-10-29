@@ -5,8 +5,6 @@ namespace RomForge.ViewModels.Util;
 
 public class UtilMainViewModel : MultiToolTabViewModel
 {
-    private bool _isAdmin;
-
     public ZipImageToolMainViewModel ZipImageToolVM { get; } = new();
 
     public CertsMainViewModel CertsVM { get; } = new();
@@ -19,14 +17,13 @@ public class UtilMainViewModel : MultiToolTabViewModel
 
     public bool IsAdmin
     {
-        get => _isAdmin;
+        get;
         set
         {
-            if (_isAdmin == value)
+            if (field == value)
                 return;
 
-            _isAdmin = value;
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(IsNotAdmin));
         }
     }
@@ -53,7 +50,6 @@ public class UtilMainViewModel : MultiToolTabViewModel
     {
         var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
         var principal = new System.Security.Principal.WindowsPrincipal(identity);
-
         return principal.IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);
     }
 

@@ -9,16 +9,6 @@ namespace RomForge.ViewModels.Patch;
 public class SourceHashViewModel : ViewModelBase
 {
     private CancellationTokenSource? _cts;
-    private bool _isCalculating;
-    private bool _hasError;
-    private bool _isCancelled;
-    private int _progressPercent;
-    private int _skippedCount;
-
-    public SourceHashViewModel()
-    {
-        Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEntries));
-    }
 
     public Func<Task<GdRomHashLayout>>? RequestGdRomLayoutAsync { get; set; }
 
@@ -26,30 +16,18 @@ public class SourceHashViewModel : ViewModelBase
 
     public bool HasEntries => Entries.Count > 0;
 
-    public bool IsCalculating
-    {
-        get => _isCalculating;
-        private set => SetProperty(ref _isCalculating, value);
-    }
+    public bool IsCalculating { get; private set => SetProperty(ref field, value); }
 
-    public bool HasError
-    {
-        get => _hasError;
-        private set => SetProperty(ref _hasError, value);
-    }
+    public bool HasError { get; private set => SetProperty(ref field, value); }
 
-    public bool IsCancelled
-    {
-        get => _isCancelled;
-        private set => SetProperty(ref _isCancelled, value);
-    }
+    public bool IsCancelled { get; private set => SetProperty(ref field, value); }
 
     public int ProgressPercent
     {
-        get => _progressPercent;
+        get;
         private set
         {
-            if (SetProperty(ref _progressPercent, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(CalculatingText));
         }
     }
@@ -58,10 +36,10 @@ public class SourceHashViewModel : ViewModelBase
 
     public int SkippedCount
     {
-        get => _skippedCount;
+        get;
         private set
         {
-            if (SetProperty(ref _skippedCount, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(HasSkipped));
                 OnPropertyChanged(nameof(SkippedText));
@@ -72,6 +50,8 @@ public class SourceHashViewModel : ViewModelBase
     public bool HasSkipped => SkippedCount > 0;
 
     public string SkippedText => $"용량이 작은 {SkippedCount}개 파일은 표시하지 않았습니다";
+
+    public SourceHashViewModel() => Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEntries));
 
     public async Task StartAsync(string? path)
     {

@@ -14,49 +14,37 @@ namespace RomForge.ViewModels.Util;
 public class TistoryMainViewModel : BatchToolTabViewModel
 {
     private static readonly char[] separator = ['\r', '\n'];
-    private string _pageUrls = string.Empty;
-    private string _saveDirectory = string.IsNullOrWhiteSpace(AppConfig.Instance.Tistory.SaveDirectory) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TistoryDownloads") : AppConfig.Instance.Tistory.SaveDirectory;
-    private bool _isBusy;
-    private bool _autoExtractAfterDownload = AppConfig.Instance.Tistory.AutoExtractAfterDownload;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<TistoryDownloadItem> FileItems { get; } = [];
 
-    public string PageUrls
-    {
-        get => _pageUrls;
-        set
-        {
-            SetProperty(ref _pageUrls, value);
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
+    public string PageUrls { get; set { SetPropertyAndRequery(ref field, value); } } = string.Empty;
 
     public string SaveDirectory
     {
-        get => _saveDirectory;
+        get;
         set
         {
-            if (SetProperty(ref _saveDirectory, value))
+            if (SetProperty(ref field, value))
                 AppConfig.Instance.Tistory.SaveDirectory = value;
         }
-    }
+    } = string.IsNullOrWhiteSpace(AppConfig.Instance.Tistory.SaveDirectory) ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TistoryDownloads") : AppConfig.Instance.Tistory.SaveDirectory;
 
     public bool IsBusy
     {
-        get => _isBusy;
-        set { _isBusy = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
+        get;
+        set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsLocked)); CommandManager.InvalidateRequerySuggested(); }
     }
 
     public bool AutoExtractAfterDownload
     {
-        get => _autoExtractAfterDownload;
+        get;
         set
         {
-            if (SetProperty(ref _autoExtractAfterDownload, value))
+            if (SetProperty(ref field, value))
                 AppConfig.Instance.Tistory.AutoExtractAfterDownload = value;
         }
-    }
+    } = AppConfig.Instance.Tistory.AutoExtractAfterDownload;
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

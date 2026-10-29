@@ -8,34 +8,9 @@ namespace RomForge.ViewModels.Patch;
 
 public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 {
-    private string? _sourcePath;
-    private string? _patchPath;
+    public string? SourcePath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(SourceLabel)); CommandManager.InvalidateRequerySuggested(); } }
 
-    public string? SourcePath
-    {
-        get => _sourcePath;
-        set
-        {
-            _sourcePath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(SourceLabel));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
-
-    public string? PatchPath
-    {
-        get => _patchPath;
-        set
-        {
-            _patchPath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchLabel));
-            CommandManager.InvalidateRequerySuggested();
-        }
-    }
+    public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchLabel)); CommandManager.InvalidateRequerySuggested(); } }
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 HDI를 드래그하거나 클릭하세요";
 
