@@ -25,12 +25,15 @@ public sealed class PkgSourceAccessor : ISourceAccessor
 
     public PkgHeader Header { get; }
 
-    public PkgSourceAccessor(string pkgPath, string? license = null) : this(pkgPath, license, null) { }
+    public PkgSourceAccessor(string? pkgPath, string? license = null) : this(pkgPath, license, null) { }
 
-    public PkgSourceAccessor(string pkgPath, byte[] klicensee) : this(pkgPath, null, klicensee) { }
+    public PkgSourceAccessor(string? pkgPath, byte[] klicensee) : this(pkgPath, null, klicensee) { }
 
-    private PkgSourceAccessor(string pkgPath, string? license, byte[]? klicensee)
+    private PkgSourceAccessor(string? pkgPath, string? license, byte[]? klicensee)
     {
+        if (string.IsNullOrEmpty(pkgPath))
+            throw new NullReferenceException();
+
         _stream = new FileStream(pkgPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         Header = PkgDecryptor.ReadHeader(_stream);
         _ctr = PkgDecryptor.CreateCipher(Header);

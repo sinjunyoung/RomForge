@@ -35,7 +35,7 @@ namespace PickPack.Disk.Helpers
             return stream.Length;
         }
 
-        public static ulong GetAvailableFreeSpace(string path)
+        public static ulong GetAvailableFreeSpace(string? path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentNullException(nameof(path));

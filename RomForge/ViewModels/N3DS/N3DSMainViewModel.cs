@@ -9,7 +9,7 @@ public class N3DSMainViewModel : MultiToolTabViewModel
     public ConverterMainViewModel ConverterVM { get; } = new();
     public DecryptorMainViewModel DecryptorVM { get; } = new();
 
-    public event EventHandler RunNavigateCerts;
+    public event EventHandler? RunNavigateCerts;
 
     public N3DSMainViewModel()
     {

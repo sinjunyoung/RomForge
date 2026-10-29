@@ -26,7 +26,7 @@ namespace RomForge.Core.Services.PSVita
             _isInitialized = true;
         }
 
-        public NPSGroup? GetGroup(string titleId)
+        public NPSGroup? GetGroup(string? titleId)
         {
             Initialize();
 

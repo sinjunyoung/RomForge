@@ -9,19 +9,8 @@ namespace RomForge.Core.Models.N3DS;
 
 public class TitleViewModel : ViewModelBase
 {
-    private BitmapSource? _icon;
-    private string _filePath = string.Empty;
-    private string _shortDescription = string.Empty;
-    private string _publisher = string.Empty;
-    private string _originalShortDescription = string.Empty;
-    private string _originalPublisher = string.Empty;
-    private string _productCode = string.Empty;
-    private string _region = string.Empty;
-    private LocaleRegion _localeRegionCode = LocaleRegion.None;
-    private LocaleLanguage _forcedLanguage = LocaleLanguage.None;
-    private IReadOnlyList<LocaleLanguage> _availableLanguages = [];
-    private bool _crypto = false;
-    private double _progress;
+    private string? _originalShortDescription = string.Empty;
+    private string? _originalPublisher = string.Empty;
 
     public InstalledTitle Title { get; init; } = null!;
 
@@ -29,100 +18,42 @@ public class TitleViewModel : ViewModelBase
 
     public string SizeText => FileSize.FormatSize((long)Title.ContentSize);
 
-    public BitmapSource? Icon
+    public BitmapSource? Icon { get; set { SetProperty(ref field, value); }}
+
+    public string? ShortDescription { get; set { SetProperty(ref field, value); } } = string.Empty;
+
+    public string? Publisher { get; set { SetProperty(ref field, value); } } = string.Empty;
+
+    public bool ShortDescriptionChanged => !string.Equals(ShortDescription, _originalShortDescription, StringComparison.Ordinal);
+
+    public bool PublisherChanged => !string.Equals(Publisher, _originalPublisher, StringComparison.Ordinal);
+
+    public string FilePath { get; set { SetProperty(ref field, value); } } = string.Empty;
+
+    public string? ProductCode
     {
-        get => _icon;
-        set { _icon = value; OnPropertyChanged(); }
-    }
-
-    public string ShortDescription
-    {
-        get => _shortDescription;
-        set { _shortDescription = value; OnPropertyChanged(); }
-    }
-
-    public string Publisher
-    {
-        get => _publisher;
-        set { _publisher = value; OnPropertyChanged(); }
-    }
-
-    public bool ShortDescriptionChanged => !string.Equals(_shortDescription, _originalShortDescription, StringComparison.Ordinal);
-
-    public bool PublisherChanged => !string.Equals(_publisher, _originalPublisher, StringComparison.Ordinal);
-
-    public void CommitOriginalValues()
-    {
-        _originalShortDescription = _shortDescription;
-        _originalPublisher = _publisher;
-    }
-
-    public string FilePath
-    {
-        get => _filePath;
-        set { _filePath = value; OnPropertyChanged(); }
-    }
-
-    public string ProductCode
-    {
-        get => _productCode;
+        get;
         set
         {
-            _productCode = value;
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             Region = GetRegionFromProductCode(value);
             LocaleRegionCode = GetLocaleRegionFromProductCode(value);
         }
     }
 
-    public string Region
-    {
-        get => _region;
-        set { _region = value; OnPropertyChanged(); }
-    }
+    public string Region { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    public LocaleRegion LocaleRegionCode
-    {
-        get => _localeRegionCode;
-        private set { _localeRegionCode = value; OnPropertyChanged(); }
-    }
+    public LocaleRegion LocaleRegionCode { get; set { SetProperty(ref field, value); } } = LocaleRegion.None;
 
-    public LocaleLanguage ForcedLanguage
-    {
-        get => _forcedLanguage;
-        set { _forcedLanguage = value; OnPropertyChanged(); }
-    }
+    public LocaleLanguage ForcedLanguage { get; set { SetProperty(ref field, value); } } = LocaleLanguage.None;
 
-    public IReadOnlyList<LocaleLanguage> AvailableLanguages
-    {
-        get => _availableLanguages;
-        set
-        {
-            _availableLanguages = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(LanguageCandidates));
-        }
-    }
+    public IReadOnlyList<LocaleLanguage> AvailableLanguages { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(LanguageCandidates)); } } = [];
 
-    public IReadOnlyList<LocaleLanguage> LanguageCandidates =>
-        [LocaleLanguage.None, .. AvailableLanguages];
+    public IReadOnlyList<LocaleLanguage> LanguageCandidates => [LocaleLanguage.None, .. AvailableLanguages];
 
-    public bool Crypto
-    {
-        get => _crypto;
-        set { _crypto = value; OnPropertyChanged(); }
-    }
+    public bool Crypto { get; set { SetProperty(ref field, value); } } = false;
 
-    public double Progress
-    {
-        get => _progress;
-        set
-        {
-            _progress = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(ProgressText));
-        }
-    }
+    public double Progress { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(ProgressText)); } }
 
     public string ProgressText => $"{Progress:F0}";
 
@@ -143,6 +74,12 @@ public class TitleViewModel : ViewModelBase
         TitleType.DlcContent => new SolidColorBrush(Color.FromRgb(0xC9, 0x7B, 0xF7)),
         _ => new SolidColorBrush(Color.FromRgb(0x55, 0x55, 0x6A)),
     };
+
+    public void CommitOriginalValues()
+    {
+        _originalShortDescription = ShortDescription;
+        _originalPublisher = Publisher;
+    }
 
     private static string GetRegionFromProductCode(string productCode)
     {

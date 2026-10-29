@@ -106,7 +106,7 @@ namespace RomForge.ViewModels.Switch
             set { _coverImageSource = value; OnPropertyChanged(); OnPropertyChanged(nameof(CoverHintVisibility)); }
         }
 
-        private void SetCover(byte[] bytes)
+        private void SetCover(byte[]? bytes)
         {
             _coverBytes = bytes;
             CoverImageSource = bytes?.ToBitmapImage();

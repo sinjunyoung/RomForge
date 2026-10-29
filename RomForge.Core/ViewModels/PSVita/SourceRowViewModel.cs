@@ -1,6 +1,4 @@
-﻿using RomForge.Core;
-using RomForge.Core.ViewModels;
-using System.IO;
+﻿using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vita.Core.Models;
@@ -10,18 +8,9 @@ namespace RomForge.Core.ViewModels.PSVita;
 
 public class SourceRowViewModel : ViewModelBase
 {
-    private string _license = string.Empty;
-    private string _path = string.Empty;
-    private string _patchPath = string.Empty;
-    private ContentCategory _category;
-    private string? _errorMessage;
-    private bool _isLicenseEditable = true;
-    private long _sizeBytes = -1;
-    private byte[]? _iconBytes;
-    private string? _gameName;
     private CancellationTokenSource? _iconReloadCts;
 
-    public SourceKind Kind { get; }
+    public SourceKind? Kind { get; }
 
     public string? ItemSourcePath { get; }
 
@@ -36,87 +25,45 @@ public class SourceRowViewModel : ViewModelBase
 
     public bool IsUnpacked => Kind == SourceKind.Unpacked;
 
-    public string TitleId { get; }
+    public string? TitleId { get; }
 
     public string? ContentIdSuffix { get; set; }
 
-    public ContentCategory Category
-    {
-        get => _category;
-        set { _category = value; OnPropertyChanged(); }
+    public ContentCategory? Category { get; set { SetProperty(ref field, value); }
     }
 
-    public string License
+    public string? License
     {
-        get => _license;
+        get;
         set
         {
-            _license = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             CommandManager.InvalidateRequerySuggested();
 
             if (Kind == SourceKind.Pkg && Category == ContentCategory.App)
                 _ = DebounceReloadIconAsync();
         }
-    }
+    } = string.Empty;
 
-    public string Path
-    {
-        get => _path;
-        set { _path = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public string? Path { get; set { SetProperty(ref field, value); CommandManager.InvalidateRequerySuggested(); } } = string.Empty;
 
-    public string PatchPath
-    {
-        get => _patchPath;
-        set { _patchPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(PatchIconSource)); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchIconSource)); CommandManager.InvalidateRequerySuggested(); } } = string.Empty;
 
-    public string? ErrorMessage
-    {
-        get => _errorMessage;
-        set { _errorMessage = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsValid)); }
-    }
+    public string? ErrorMessage { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsValid)); } } = string.Empty;
 
     public bool IsValid => ErrorMessage is null;
 
-    public bool IsLicenseEditable
-    {
-        get => _isLicenseEditable;
-        set { _isLicenseEditable = value; OnPropertyChanged(); }
-    }
+    public bool IsLicenseEditable { get; set { SetProperty(ref field, value); } } = true;
 
-    public long SizeBytes
-    {
-        get => _sizeBytes;
-        set { _sizeBytes = value; OnPropertyChanged(); OnPropertyChanged(nameof(Size)); }
-    }
+    public long SizeBytes { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(Size)); } } = -1;
 
     public string Size => SizeBytes < 0 ? "계산 중..." : FormatBytes(SizeBytes);
 
-    public byte[]? IconBytes
-    {
-        get => _iconBytes;
-        set { _iconBytes = value; OnPropertyChanged(); OnPropertyChanged(nameof(IconImageSource)); }
-    }
+    public byte[]? IconBytes { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IconImageSource)); } }
 
-    public ImageSource? IconImageSource
-    {
-        get
-        {
-            if (_iconBytes == null)
-                return null;
+    public ImageSource? IconImageSource => IconBytes?.ToBitmapImage();
 
-            return _iconBytes.ToBitmapImage();
-        }
-    }
-
-    public string? GameName
-    {
-        get => _gameName;
-        set { _gameName = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayTitle)); }
-    }
+    public string? GameName { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(DisplayTitle)); } }
 
     public string DisplayTitle => string.IsNullOrWhiteSpace(GameName) ? FileName : GameName!;
 
@@ -130,13 +77,13 @@ public class SourceRowViewModel : ViewModelBase
         _ => new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)),
     };
 
-    private SourceRowViewModel(string path, SourceKind kind, string? itemSourcePath, string titleId, ContentCategory category, string? contentIdSuffix)
+    private SourceRowViewModel(string? path, SourceKind? kind, string? itemSourcePath, string? titleId, ContentCategory? category, string? contentIdSuffix)
     {
         Path = path;
         Kind = kind;
         ItemSourcePath = itemSourcePath;
         TitleId = titleId;
-        _category = category;
+        Category = category;
         ContentIdSuffix = contentIdSuffix;
     }
 

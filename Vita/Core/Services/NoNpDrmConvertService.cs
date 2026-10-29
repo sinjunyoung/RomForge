@@ -17,7 +17,7 @@ public static class NoNpDrmConvertService
 
         Directory.CreateDirectory(outputRoot);
 
-        long totalBytes = entries.Sum(e => new FileInfo(e.Path).Length);
+        long totalBytes = entries.Sum(e => new FileInfo(e.Path!).Length);
         var reporter = new ProgressReporter("변환 중", string.Empty, totalBytes, progress);
         var outputs = new List<string>();
 
@@ -47,7 +47,7 @@ public static class NoNpDrmConvertService
         return outputs;
     }
 
-    private sealed record TitleGroup(string TitleId, List<BatchSourceEntry> Entries);
+    private sealed record TitleGroup(string? TitleId, List<BatchSourceEntry> Entries);
 
     private static List<TitleGroup> BuildGroups(List<BatchSourceEntry> entries)
     {
@@ -56,11 +56,11 @@ public static class NoNpDrmConvertService
 
         return [.. entries
             .GroupBy(e => e.Probe!.TitleId, StringComparer.OrdinalIgnoreCase)
-            .Select(g => new TitleGroup(g.First().Probe!.TitleId, [.. g.OrderBy(e => GetRank(e.Probe!.Category)).ThenBy(e => e.Probe!.ContentIdSuffix, StringComparer.OrdinalIgnoreCase)]))
+            .Select(g => new TitleGroup(g.First().Probe?.TitleId, [.. g.OrderBy(e => GetRank(e.Probe?.Category)).ThenBy(e => e.Probe?.ContentIdSuffix, StringComparer.OrdinalIgnoreCase)]))
             .OrderBy(g => g.TitleId, StringComparer.OrdinalIgnoreCase)];
     }
 
-    private static int GetRank(ContentCategory category) => category switch
+    private static int GetRank(ContentCategory? category) => category switch
     {
         ContentCategory.App => 0,
         ContentCategory.Patch => 1,
@@ -183,8 +183,11 @@ public static class NoNpDrmConvertService
         return PatchShared.BuildEntryPath(PatchShared.GetRetailBaseFolder(probe.Category), probe.Category, group.TitleId, probe.ContentIdSuffix, relativePath);
     }
 
-    private static string SanitizeFileName(string name)
+    private static string SanitizeFileName(string? name)
     {
+        if (string.IsNullOrEmpty(name))
+            return string.Empty;
+
         foreach (char c in Path.GetInvalidFileNameChars())
             name = name.Replace(c, '_');
 

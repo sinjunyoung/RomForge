@@ -27,41 +27,17 @@ public class PbpFileItem(string filePath) : FileItemBase(filePath), Interfaces.I
         return brush;
     }
 
-    private BitmapSource? _icon;
-    private string _titleId = string.Empty;
-    private string _titleName = string.Empty;
-    private string _titleLocalName = string.Empty;
     private List<string> _languages = [];
 
-    public BitmapSource? Icon
-    {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
-    }
+    public BitmapSource? Icon { get; set => SetProperty(ref field, value); }
 
-    public string TitleId
-    {
-        get => _titleId;
-        set => SetProperty(ref _titleId, value);
-    }
+    public string? TitleId { get; set => SetProperty(ref field, value); } = string.Empty;
 
-    public string TitleName
-    {
-        get => string.IsNullOrEmpty(_titleName) ? TitleId : _titleName;
-        set => SetProperty(ref _titleName, value);
-    }
+    public string? TitleName { get => string.IsNullOrEmpty(field) ? TitleId : field; set => SetProperty(ref field, value); } = string.Empty;
 
-    public string TitleLocalName
-    {
-        get => _titleLocalName;
-        set => SetProperty(ref _titleLocalName, value);
-    }
+    public string? TitleLocalName { get; set => SetProperty(ref field, value); } = string.Empty;
 
-    public List<string> Languages
-    {
-        get => _languages;
-        set => SetProperty(ref _languages, value);
-    }
+    public List<string> Languages { get; set => SetProperty(ref field, value); } = [];
 
     protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
 

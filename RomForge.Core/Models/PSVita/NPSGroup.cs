@@ -8,7 +8,7 @@ public class NPSGroup
 
     public List<NPSItem> Dlcs { get; set; } = [];
 
-    public string? GetDlcLicense(string contentId)
+    public string? GetDlcLicense(string? contentId)
     {
         if (string.IsNullOrEmpty(contentId) || Dlcs == null)
             return null;

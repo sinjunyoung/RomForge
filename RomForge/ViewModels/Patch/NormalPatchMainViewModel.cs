@@ -66,7 +66,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
     public IReadOnlyList<string> PatchPaths => [.. PatchSlots.Select(s => s.FilePath).OfType<string>().Where(p => p.Length > 0)];
 
-    private string? NamingPatchPath => PatchPaths.LastOrDefault();
+    private string? NamingPatchPath => PatchPaths.Count > 0 ? PatchPaths[^1] : null;
 
     public bool AutoCompress
     {
@@ -338,7 +338,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
         SourceHash.Cancel();
 
-        string namingPatchPath = patchPaths.Last();
+        string namingPatchPath = patchPaths[patchPaths.Count - 1];
 
         CancellationTokenSource = new CancellationTokenSource();
 
@@ -470,8 +470,11 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         }
     }
 
-    private static string ResolveOutputBaseFileName(string actualSourcePath)
+    private static string ResolveOutputBaseFileName(string? actualSourcePath)
     {
+        if (actualSourcePath == null)
+            throw new NullReferenceException();
+
         string sourceMainFileName = Path.GetFileName(actualSourcePath);
         string ext = Path.GetExtension(actualSourcePath);
         var dir = Path.GetDirectoryName(actualSourcePath);

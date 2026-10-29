@@ -14,7 +14,27 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 {
     private CancellationTokenSource _cts = new();
 
-    private string _gameTitle = string.Empty;
+    public DiscListViewModel Files { get; }
+
+    public PackingImagesViewModel Images { get; }
+
+    public BgmViewModel Bgm { get; }
+
+    public PopsOptionsViewModel PopsOptions { get; }
+
+    public ICommand RunCommand { get; }
+
+    public ICommand SettingsCommand { get; }
+
+    public event EventHandler? RunNavigateSettings;
+
+    public string GameTitle { get; set { SetProperty(ref field, value); } } = string.Empty;
+
+    public bool CanEditPopsConfig => IsUnlocked && !Files.HasPresetConfig;
+
+    public bool CanAdd => !IsLocked && Files.FileItems.Count < DiscListViewModel.MaxItems;
+
+    public bool CanRun => !IsLocked && Files.FileItems.Count > 0 && !Images.IsDownloading;
 
     public PackingMainViewModel()
     {
@@ -46,32 +66,6 @@ public class PackingMainViewModel : ProgressToolTabViewModel
                 OnPropertyChanged(nameof(CanAdd));
         };
     }
-
-    public DiscListViewModel Files { get; }
-
-    public PackingImagesViewModel Images { get; }
-
-    public BgmViewModel Bgm { get; }
-
-    public PopsOptionsViewModel PopsOptions { get; }
-
-    public ICommand RunCommand { get; }
-
-    public ICommand SettingsCommand { get; }
-
-    public event EventHandler RunNavigateSettings;
-
-    public string GameTitle
-    {
-        get => _gameTitle;
-        set { _gameTitle = value; OnPropertyChanged(); }
-    }
-
-    public bool CanEditPopsConfig => IsUnlocked && !Files.HasPresetConfig;
-
-    public bool CanAdd => !IsLocked && Files.FileItems.Count < DiscListViewModel.MaxItems;
-
-    public bool CanRun => !IsLocked && Files.FileItems.Count > 0 && !Images.IsDownloading;
 
     private void OnFilesChanged(object? sender, EventArgs e)
     {
@@ -132,7 +126,7 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 
                 AppendLog($"작업 완료: {plan.TargetOutputPath}", LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
-                Path.GetDirectoryName(plan.TargetOutputPath).OpenFolder();
+                Path.GetDirectoryName(plan.TargetOutputPath)?.OpenFolder();
             }
             catch (OperationCanceledException)
             {

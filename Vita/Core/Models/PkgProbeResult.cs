@@ -2,11 +2,11 @@
 
 public sealed class PkgProbeResult
 {
-    public required string TitleId { get; init; }
+    public string? TitleId { get; init; }
 
-    public required ContentCategory Category { get; init; }
+    public ContentCategory? Category { get; init; }
 
     public string? ContentIdSuffix { get; init; }
 
-    public required string ContentId { get; init; }
+    public string? ContentId { get; init; }
 }

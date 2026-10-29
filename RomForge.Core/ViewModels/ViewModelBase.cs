@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace RomForge.Core.ViewModels;
 
@@ -19,5 +20,14 @@ public abstract class ViewModelBase : INotifyPropertyChanged
         OnPropertyChanged(name);
 
         return true;
+    }
+
+    protected bool SetPropertyAndRequery<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        bool result = SetProperty(ref field, value);
+
+        CommandManager.InvalidateRequerySuggested();
+
+        return result;
     }
 }

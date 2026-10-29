@@ -390,7 +390,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         AppendLog("언팩 폴더 항목을 목록에서 제거했습니다.");
     }
 
-    private int ComputeInsertIndex(ContentCategory category, string? contentIdSuffix)
+    private int ComputeInsertIndex(ContentCategory? category, string? contentIdSuffix)
     {
         if (category == ContentCategory.App)
             return 0;
@@ -593,7 +593,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         var target = BuildEmu ? OutputTarget.Emu : OutputTarget.Retail;
         string label = target == OutputTarget.Emu ? "에뮬" : "실기";
         bool merge = MergePatchIntoGame;
-        string baseName = SourceRows.First(r => r.Category == ContentCategory.App).TitleId;
+        string? baseName = SourceRows.First(r => r.Category == ContentCategory.App).TitleId;
         string patchPath = GetPatchPath();
         string suffix = merge ? $"_{label}_merged.zip" : $"_{label}.zip";
         string fileName = VersionInfoExtractor.ApplySuffix($"{baseName}{suffix}", patchPath);

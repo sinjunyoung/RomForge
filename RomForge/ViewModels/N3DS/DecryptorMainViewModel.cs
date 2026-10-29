@@ -18,16 +18,11 @@ namespace RomForge.ViewModels.N3DS;
 
 public class DecryptorMainViewModel : ToolTabViewModel
 {
-    private bool _isDecrypting;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<DecryptorFileItem> FileItems { get; } = [];
 
-    public bool IsDecrypting
-    {
-        get => _isDecrypting;
-        set { _isDecrypting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsDecrypting { get; set { SetPropertyAndRequery(ref field, value); } }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 

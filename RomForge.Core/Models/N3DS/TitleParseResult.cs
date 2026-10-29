@@ -5,9 +5,9 @@ namespace RomForge.Core.Models.N3DS;
 
 public class TitleParseResult
 {
-    public InstalledTitle? Title { get; init; }
+    public required InstalledTitle Title { get; init; }
 
-    public string? FilePath { get; init; }
+    public required string FilePath { get; init; }
 
     public string? ProductCode { get; init; }
 

@@ -13,6 +13,9 @@ namespace RomForge.ViewModels.Patch;
 
 public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 {
+    private CancellationTokenSource? _analyzeCts;
+    private CancellationTokenSource? _matchCts;
+
     public ObservableCollection<ArcadeMatchItem> MatchItems { get; } = [];
 
     public ObservableCollection<Entry> AllPatchEntries { get; } = [];
@@ -23,31 +26,14 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public bool HasPatchPackages => AvailablePatchPackages.Count > 0;
 
-    private CancellationTokenSource? _analyzeCts;
-    private CancellationTokenSource? _matchCts;
-    private Package? _selectedPatchPackage;
+    public Package? SelectedPatchPackage { get; set { SetProperty(ref field, value); _ = MatchItemsRebuildAsync(); } }
 
-    public Package? SelectedPatchPackage
-    {
-        get => _selectedPatchPackage;
-        set
-        {
-            _selectedPatchPackage = value;
-
-            OnPropertyChanged();
-            _ = MatchItemsRebuildAsync();
-        }
-    }
-
-    private string? _sourcePath;
     public string? SourcePath
     {
-        get => _sourcePath;
+        get;
         set
         {
-            _sourcePath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(SourceLabel));
             CommandManager.InvalidateRequerySuggested();
 
@@ -56,15 +42,12 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         }
     }
 
-    private string? _patchPath;
     public string? PatchPath
     {
-        get => _patchPath;
+        get;
         set
         {
-            _patchPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(PatchLabel));
             CommandManager.InvalidateRequerySuggested();
 
@@ -73,46 +56,22 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         }
     }
 
-    private int _totalProgress;
-    public int TotalProgress
-    {
-        get => _totalProgress;
-        set
-        {
-            _totalProgress = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(TotalProgressText));
-        }
-    }
+    public int TotalProgress { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(TotalProgressText)); } }
 
     protected override void OnOverallChanged(int percent) => TotalProgress = percent;
 
-    public string TotalProgressText => $"{_totalProgress}%";
+    public string TotalProgressText => $"{TotalProgress}%";
 
-    private string _progressSummary = "대기 중...";
-    public string ProgressSummary
-    {
-        get => _progressSummary;
-        set { _progressSummary = value; OnPropertyChanged(); }
-    }
+    public string ProgressSummary { get; set { SetProperty(ref field, value); } } = "대기 중...";
 
-    private string? _mismatchReason;
-    public string? MismatchReason
-    {
-        get => _mismatchReason;
-        set
-        {
-            _mismatchReason = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(MismatchVisibility));
-        }
-    }
+    public string? MismatchReason { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(MismatchVisibility)); } }
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 ZIP를 드래그하거나 클릭하세요";
+
     public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 폴더 또는 IPS/ZIP를 드래그하거나 클릭하세요";
+
     public Visibility HintVisibility => MatchItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
     public Visibility MismatchVisibility => MismatchReason is not null ? Visibility.Visible : Visibility.Collapsed;
 
     public async Task RunAsync()

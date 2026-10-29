@@ -12,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 
 namespace RomForge.ViewModels.Util;
@@ -23,99 +22,31 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
 
     public ObservableCollection<DriveInfos> UsbDrives { get; } = [];
 
-    private DriveInfos? _selectedDrive;
-    public DriveInfos? SelectedDrive
-    {
-        get => _selectedDrive;
-        set
-        {
-            if (_selectedDrive != value)
-            {
-                _selectedDrive = value;
-                OnPropertyChanged();
-            }
-        }
-    }
+    public DriveInfos? SelectedDrive { get; set { SetProperty(ref field, value); } }
 
-    private string _statusText1 = string.Empty;
-    public string StatusText1
-    {
-        get => _statusText1;
-        set { _statusText1 = value; OnPropertyChanged(); }
-    }
+    public string? StatusText1 { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    private string _statusText2 = string.Empty;
-    public string StatusText2
-    {
-        get => _statusText2;
-        set { _statusText2 = value; OnPropertyChanged(); }
-    }
+    public string? StatusText2 { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    private int _selectedTabIndex;
-    public int SelectedTabIndex
-    {
-        get => _selectedTabIndex;
-        set { _selectedTabIndex = value; OnPropertyChanged(); }
-    }
+    public int SelectedTabIndex { get; set { SetProperty(ref field, value); } }
 
-    private string _writeImagePath = string.Empty;
-    public string WriteImagePath
-    {
-        get => _writeImagePath;
-        set { _writeImagePath = value; OnPropertyChanged(); }
-    }
+    public string WriteImagePath { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    private string _writeButtonText = "굽기";
-    public string WriteButtonText
-    {
-        get => _writeButtonText;
-        set { _writeButtonText = value; OnPropertyChanged(); }
-    }
+    public string WriteButtonText { get; set { SetProperty(ref field, value); } } = "굽기";
 
-    private string _readImagePath = string.Empty;
-    public string ReadImagePath
-    {
-        get => _readImagePath;
-        set
-        {
-            _readImagePath = value;
+    public string ReadImagePath { get; set { SetProperty(ref field, value); UpdateSegmentOptionsVisibility(value); } } = string.Empty;
 
-            OnPropertyChanged();
-            UpdateSegmentOptionsVisibility(value);
-        }
-    }
+    public bool SegmentOptionsVisible { get; set { SetProperty(ref field, value); } }
 
-    private bool _segmentOptionsVisible;
-    public bool SegmentOptionsVisible
-    {
-        get => _segmentOptionsVisible;
-        set { _segmentOptionsVisible = value; OnPropertyChanged(); }
-    }
-
-    private string _readButtonText = "저장";
-    public string ReadButtonText
-    {
-        get => _readButtonText;
-        set { _readButtonText = value; OnPropertyChanged(); }
-    }
+    public string ReadButtonText { get; set { SetProperty(ref field, value); } } = "저장";
 
     public List<string> SegmentSizeOptions { get; } = ["분할안함", "1GB", "2GB", "5GB", "10GB", "20GB", "50GB", "100GB"];
 
-    private int _selectedSegmentIndex = 5;
-    public int SelectedSegmentIndex
-    {
-        get => _selectedSegmentIndex;
-        set { _selectedSegmentIndex = value; OnPropertyChanged(); }
-    }
+    public int SelectedSegmentIndex { get; set { SetProperty(ref field, value); } } = 5;
 
     public List<string> CompressionLevelOptions { get; } = ["압축 안함", "빠르게", "보통 압축률", "최대 압축률"];
 
-    private int _selectedCompressionIndex = 0;
-    public int SelectedCompressionIndex
-    {
-        get => _selectedCompressionIndex;
-        set { _selectedCompressionIndex = value; OnPropertyChanged(); }
-    }
+    public int SelectedCompressionIndex { get; set { SetProperty(ref field, value); } } = 0;
 
     public ICommand OpenWriteFileCommand { get; }
 
@@ -398,7 +329,7 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
             StatusText1 = "이미지 저장 완료";
 
             await SoundPlayer.PlayCompleteAsync();
-            Path.GetDirectoryName(ReadImagePath).OpenFolder();
+            Path.GetDirectoryName(ReadImagePath)?.OpenFolder();
             AppendLog("이미지 저장이 완료되었습니다.", LogLevel.Ok);
         });
     }

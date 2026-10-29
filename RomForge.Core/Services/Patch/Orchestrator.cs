@@ -18,7 +18,7 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
     private readonly ZipCompressor _zipCompressor = new(log, progress);
     private readonly CompressKnownConverter _compressKnownConverter = new(log, progress, wiiGcCompressLevel);
 
-    public async Task PatchAsync(string sourcePath, IReadOnlyList<string> patchPaths, DetectResult detected, string outputDir, string outputPath, bool sourceIsTemporary, CancellationToken ct)
+    public async Task PatchAsync(string? sourcePath, IReadOnlyList<string> patchPaths, DetectResult detected, string outputDir, string outputPath, bool sourceIsTemporary, CancellationToken ct)
     {
         _outputCuePath = null;
         _outputCcdPath = null;

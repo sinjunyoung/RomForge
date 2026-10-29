@@ -16,16 +16,11 @@ namespace RomForge.ViewModels.PSP;
 
 public class UnpackingMainViewModel : ToolTabViewModel
 {
-    private bool _isConverting;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<PbpFileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsConverting { get; set { SetProperty(ref field, value); CommandManager.InvalidateRequerySuggested(); } }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -61,7 +56,7 @@ public class UnpackingMainViewModel : ToolTabViewModel
                 vm.TitleId = string.Join(", ", reader.Discs.Select(d => d.DiscID));
 
                 if (PbpReader.TryGetResourceStream(ResourceType.ICON0, stream, out var iconStream))
-                    vm.Icon = iconStream.ToBitmapImage();
+                    vm.Icon = iconStream?.ToBitmapImage();
 
                 FileItems.Add(vm);
 

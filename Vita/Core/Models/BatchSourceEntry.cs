@@ -2,9 +2,9 @@
 
 public sealed class BatchSourceEntry
 {
-    public required SourceKind Kind { get; init; }
+    public SourceKind? Kind { get; init; }
 
-    public required string Path { get; init; }
+    public string? Path { get; init; }
 
     public string? License { get; init; }
 

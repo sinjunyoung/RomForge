@@ -18,7 +18,6 @@ public class ConverterMainViewModel : ToolTabViewModel
 {
     private bool _isConverting;
     private CancellationTokenSource _cts = new();
-    private string _outputPath;
 
     private static readonly HashSet<string> SupportedExtensions = [".wud", ".wux", ".wua"];
 
@@ -32,13 +31,12 @@ public class ConverterMainViewModel : ToolTabViewModel
         set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
     }
 
-    public string OutputPath
+    public string? OutputPath
     {
-        get => _outputPath;
+        get;
         set
         {
-            _outputPath = value;
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(OutputHintVisibility));
             AppConfig.Instance.OutputFolders.WiiUConvertOutputPath = value;
         }
@@ -336,7 +334,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
         try
         {
-            string outputRoot = OutputPath;
+            string? outputRoot = OutputPath;
             int total = sources.Count;
 
             for (int i = 0; i < sources.Count; i++)
@@ -356,21 +354,21 @@ public class ConverterMainViewModel : ToolTabViewModel
                 {
                     case "WUP":
                         {
-                            string outFolder = Utils.GetUniqueFolderPath(Path.Combine(outputRoot, $"{outputName} [WUP]"));
+                            string outFolder = Utils.GetUniqueFolderPath(Path.Combine(outputRoot!, $"{outputName} [WUP]"));
                             Converter.ConvertToWup(source, outFolder, OnFileProgress, ct);
                             break;
                         }
 
                     case "Loadiine":
                         {
-                            string outFolder = Utils.GetUniqueFolderPath(Path.Combine(outputRoot, $"{outputName} [Loadiine]"));
+                            string outFolder = Utils.GetUniqueFolderPath(Path.Combine(outputRoot!, $"{outputName} [Loadiine]"));
                             Converter.ConvertToLoadiine(source, outFolder, OnFileProgress, ct);
                             break;
                         }
 
                     case "WUA":
                         {
-                            string outFile = Utils.GetUniqueFilePath(Path.Combine(outputRoot, $"{outputName}.wua"));
+                            string outFile = Utils.GetUniqueFilePath(Path.Combine(outputRoot!, $"{outputName}.wua"));
                             Converter.ConvertToWua(source, outFile, OnFileProgress, ct);
                             break;
                         }

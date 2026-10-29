@@ -19,7 +19,6 @@ namespace RomForge.ViewModels;
 
 public class MainViewModel : ToolTabViewModel
 {
-    private int _selectedTabIndex;
 
     public static double LogBoxHeight
     {
@@ -51,14 +50,14 @@ public class MainViewModel : ToolTabViewModel
 
     public int SelectedTabIndex
     {
-        get => _selectedTabIndex;
+        get;
         set
         {
-            _selectedTabIndex = value;
+            field = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(ActiveLogEntries));
 
-            if (Tools[_selectedTabIndex] == SwitchMainVM)
+            if (Tools[field] == SwitchMainVM)
                 SwitchMainVM?.RefreshKeysStatus();
         }
     }
@@ -74,7 +73,7 @@ public class MainViewModel : ToolTabViewModel
         }
     }
 
-    public ObservableCollection<LogEntry> ActiveLogEntries => _selectedTabIndex switch
+    public ObservableCollection<LogEntry> ActiveLogEntries => SelectedTabIndex switch
     {
         0 => PatchVM.LogEntries,
         1 => CompressVM.LogEntries,
@@ -113,7 +112,7 @@ public class MainViewModel : ToolTabViewModel
         }
     }
 
-    private static MainViewModel Current { get; set; }
+    private static MainViewModel? Current { get; set; }
 
     public MainViewModel()
     {

@@ -5,46 +5,23 @@ namespace RomForge.ViewModels;
 
 public abstract class ProgressToolTabViewModel : ToolTabViewModel
 {
-    private int _progressPct;
     public int ProgressPct
     {
-        get => _progressPct;
+        get;
         set
         {
-            _progressPct = value;
-
-            MainViewModel.SetTaskbarProgress(_progressPct);
-            OnPropertyChanged();
+            SetProperty(ref field, value);
+            MainViewModel.SetTaskbarProgress(field);
         }
     }
 
-    private string _progressLabel = "대기 중...";
-    public string ProgressLabel
-    {
-        get => _progressLabel;
-        set { _progressLabel = value; OnPropertyChanged(); }
-    }
+    public string ProgressLabel { get; set { SetProperty(ref field, value); } } = "대기 중...";
 
-    private string _progressPercent = string.Empty;
-    public string ProgressPercent
-    {
-        get => _progressPercent;
-        set { _progressPercent = value; OnPropertyChanged(); }
-    }
+    public string ProgressPercent { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    private string _progressTime = "00:00 경과";
-    public string ProgressTime
-    {
-        get => _progressTime;
-        set { _progressTime = value; OnPropertyChanged(); }
-    }
+    public string ProgressTime { get; set { SetProperty(ref field, value); } } = "00:00 경과";
 
-    private string _progressSpeed = string.Empty;
-    public string ProgressSpeed
-    {
-        get => _progressSpeed;
-        set { _progressSpeed = value; OnPropertyChanged(); }
-    }
+    public string ProgressSpeed { get; set { SetProperty(ref field, value); } } = string.Empty;
 
     protected Progress<ProgressInfo> BuildProgressReporter() =>
         new(info =>

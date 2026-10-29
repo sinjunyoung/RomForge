@@ -299,7 +299,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         pbp.TitleId = string.Join(", ", reader.Discs.Select(d => d.DiscID));
 
                         if (PbpReader.TryGetResourceStream(ResourceType.ICON0, stream, out var iconStream))
-                            pbp.Icon = iconStream.ToBitmapImage();
+                            pbp.Icon = iconStream?.ToBitmapImage();
                     });
                     break;
             }

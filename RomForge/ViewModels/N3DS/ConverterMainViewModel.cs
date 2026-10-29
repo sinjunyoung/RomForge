@@ -18,23 +18,18 @@ namespace RomForge.ViewModels.N3DS;
 
 public class ConverterMainViewModel : ToolTabViewModel
 {
-    private bool _isConverting;
     private CancellationTokenSource _cts = new();
 
     public ObservableCollection<FileItem> FileItems { get; } = [];
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        set { _isConverting = value; OnPropertyChanged(); CommandManager.InvalidateRequerySuggested(); }
-    }
+    public bool IsConverting { get; set { SetPropertyAndRequery(ref field, value); } }
 
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }
 
     public event Action<FileItem>? ScrollToItemRequested;
-    public event EventHandler RunNavigateCerts;
+    public event EventHandler? RunNavigateCerts;
 
     public ConverterMainViewModel()
     {

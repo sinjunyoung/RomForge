@@ -6,7 +6,7 @@ using System.IO;
 
 namespace RomForge.Core.Services.PSP;
 
-public record PackingPlan(string TargetOutputPath, string? GameDirectory);
+public record PackingPlan(string? TargetOutputPath, string? GameDirectory);
 
 public class PackingJobRunner
 {

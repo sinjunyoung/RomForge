@@ -12,19 +12,13 @@ public class InstallMainViewModel : ToolTabViewModel
 {
     public static readonly HashSet<string> SupportedExtensions = [".3ds", ".cia", ".cci", ".zcci"];
 
-    private bool _isInstalling;
-
     public ObservableCollection<TitleViewModel> Items { get; } = [];
 
     public Visibility HintVisibility => Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public bool IsNotInstalling => !IsInstalling;
 
-    public bool IsInstalling
-    {
-        get => _isInstalling;
-        set { _isInstalling = value; OnPropertyChanged(); OnPropertyChanged(nameof(IsNotInstalling)); }
-    }
+    public bool IsInstalling { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsNotInstalling)); } }
 
     public async Task AddFiles(IEnumerable<string> paths)
     {

@@ -4,7 +4,7 @@ namespace Vita.Core.Models;
 
 public sealed class SourceItem
 {
-    public required ContentCategory Category { get; init; }
+    public ContentCategory? Category { get; init; }
 
     public required string TitleId { get; init; }
 

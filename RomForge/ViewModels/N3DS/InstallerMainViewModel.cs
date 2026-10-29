@@ -16,9 +16,6 @@ namespace RomForge.ViewModels.N3DS;
 
 public class InstallerMainViewModel : ProgressToolTabViewModel
 {
-    private string _sdPath = string.Empty;
-    private string _movablePath = string.Empty;
-    private string _statusMessage = "SD 카드와 movable.sed를 선택하세요";
     private bool _isLoading;
     private KeyStore? _keyStore;
     private SdCrypto? _sdCrypto;
@@ -35,37 +32,29 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
     public string SdPath
     {
-        get => _sdPath;
+        get;
         set
         {
-            _sdPath = value;
-
+            SetProperty(ref field, value);
             InvalidateSession();
-            OnPropertyChanged();
             OnPropertyChanged(nameof(CanLoad));
             OnPropertyChanged(nameof(CanInstall));
         }
-    }
+    } = string.Empty;
 
     public string MovablePath
     {
-        get => _movablePath;
+        get;
         set
         {
-            _movablePath = value;
-
+            SetProperty(ref field, value);
             InvalidateSession();
-            OnPropertyChanged();
             OnPropertyChanged(nameof(CanLoad));
             OnPropertyChanged(nameof(CanInstall));
         }
-    }
+    } = string.Empty;
 
-    public string StatusMessage
-    {
-        get => _statusMessage;
-        set { _statusMessage = value; OnPropertyChanged(); }
-    }
+    public string StatusMessage { get; set { SetProperty(ref field, value); } } = "SD 카드와 movable.sed를 선택하세요";
 
     public bool IsPathValid => !string.IsNullOrEmpty(SdPath) && !string.IsNullOrEmpty(MovablePath);
 
@@ -77,7 +66,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
     public bool CanInstall => CanLoad && Install.IsUnlocked && Install.IsNotInstalling;
 
-    public event EventHandler RunNavigateCerts;
+    public event EventHandler? RunNavigateCerts;
 
     public InstallerMainViewModel()
     {

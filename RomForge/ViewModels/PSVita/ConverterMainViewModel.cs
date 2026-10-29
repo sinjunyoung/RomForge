@@ -156,7 +156,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    private static void ApplyLicenseFile(SourceRowViewModel row, string pkgPath)
+    private static void ApplyLicenseFile(SourceRowViewModel? row, string pkgPath)
     {
         string? dir = Path.GetDirectoryName(pkgPath);
 
@@ -171,20 +171,20 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
                     string txtContent = File.ReadAllText(txtPath).Trim();
 
                     if (!string.IsNullOrEmpty(txtContent))
-                        row.License = txtContent;
+                        row?.License = txtContent;
                 }
                 catch { }
             }
 
-            if (string.IsNullOrEmpty(row.License))
+            if (string.IsNullOrEmpty(row?.License))
             {
-                var group = NPSService.Instance.GetGroup(row.TitleId);
+                var group = NPSService.Instance.GetGroup(row?.TitleId);
 
-                row.License = row.Category switch
+                row?.License = row?.Category switch
                 {
                     ContentCategory.App => group?.App?.ZRif,
                     ContentCategory.Addcont => group?.GetDlcLicense(row.ContentIdSuffix),
-                    _ => row.License
+                    _ => row?.License
                 };
             }
         }

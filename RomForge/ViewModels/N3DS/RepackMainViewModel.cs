@@ -19,28 +19,9 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     private int _romVersion;
     private int _patchVersion;
     private readonly RepackService _service;
-
-    private string _inputPath = string.Empty;
-    private string _patchPath = string.Empty;
-    private string _outputPath = string.Empty;
-
-    private TitleViewModel? _romInfo;
-    private PatchDisplay? _patchInfo;
     private PatchSet? _patch;
-    private RepackOutputFormat _outputFormat = RepackOutputFormat.Cci;
 
-    public RepackOutputFormat OutputFormat
-    {
-        get => _outputFormat;
-        set
-        {
-            _outputFormat = value; OnPropertyChanged();
-
-            OnPropertyChanged(nameof(IsCciFormat));
-            OnPropertyChanged(nameof(IsZcciFormat));
-            OnPropertyChanged(nameof(IsCiaFormat));
-        }
-    }
+    public RepackOutputFormat OutputFormat { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsCciFormat)); OnPropertyChanged(nameof(IsZcciFormat)); OnPropertyChanged(nameof(IsCiaFormat)); } } = RepackOutputFormat.Cci;
 
     public bool IsCciFormat
     {
@@ -72,43 +53,16 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public string InputPath
-    {
-        get => _inputPath;
-        set
-        {
-            _inputPath = value;
+    public string InputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(InputHintVisibility)); _ = RefreshRomInfoAsync(); } } = string.Empty;
 
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(InputHintVisibility));
-            _ = RefreshRomInfoAsync();
-        }
-    }
-
-    public string PatchPath
-    {
-        get => _patchPath;
-        set
-        {
-            if (_patchPath == value)
-                return;
-
-            _patchPath = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchHintVisibility));
-            _ = RefreshPatchAsync();
-        }
-    }
+    public string PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchHintVisibility)); _ = RefreshPatchAsync(); } } = string.Empty;
 
     public string OutputPath
     {
-        get => _outputPath;
+        get;
         set
         {
-            _outputPath = value;
-
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(OutputHintVisibility));
 
             AppConfig.Instance.OutputFolders.ThreeDsRepackOutputPath = value;
@@ -116,24 +70,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             if (string.IsNullOrEmpty(InputPath))
                 _ = RefreshRomInfoAsync();
         }
-    }
+    } = string.Empty;
 
-    public TitleViewModel? RomInfo
-    {
-        get => _romInfo;
-        set { _romInfo = value; OnPropertyChanged(); OnPropertyChanged(nameof(RomInfoVisibility)); }
-    }
+    public TitleViewModel? RomInfo { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(RomInfoVisibility)); } }
 
-    public PatchDisplay? PatchInfo
-    {
-        get => _patchInfo;
-        private set
-        {
-            _patchInfo = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchInfoVisibility));
-        }
-    }
+    public PatchDisplay? PatchInfo { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchInfoVisibility)); } }
 
     public Visibility InputHintVisibility => string.IsNullOrEmpty(InputPath) ? Visibility.Visible : Visibility.Collapsed;
 
@@ -257,11 +198,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                     await Task.Run(() => _service.UnpackAsync(InputPath, unpackedPath, keyStore, reporter.CreateAction(), ct), ct);
                     break;
                 case BuildMode.RebuildOnly:
-                    producedPath = await Task.Run(() => _service.RepackAsync(unpackedPath, OutputPath, _romInfo?.ShortDescription, RomInfo?.ShortDescriptionChanged == true ? RomInfo.ShortDescription : null, RomInfo?.PublisherChanged == true ? RomInfo.Publisher : null, keyStore, OutputFormat, reporter.CreateAction(), progress, TrackOutput, ct), ct); break;
+                    producedPath = await Task.Run(() => _service.RepackAsync(unpackedPath, OutputPath, RomInfo?.ShortDescription, RomInfo?.ShortDescriptionChanged == true ? RomInfo.ShortDescription : null, RomInfo?.PublisherChanged == true ? RomInfo.Publisher : null, keyStore, OutputFormat, reporter.CreateAction(), progress, TrackOutput, ct), ct); break;
                 case BuildMode.FullProcess:
-                    string safeName = Utils.SafeFileName(_romInfo?.ShortDescription ?? string.Empty);
+                    string safeName = Utils.SafeFileName(RomInfo?.ShortDescription ?? string.Empty);
                     string fileName = string.IsNullOrEmpty(safeName) ? inputFileName : safeName;
-                    string? titleId = _romInfo?.TitleId;
+                    string? titleId = RomInfo?.TitleId;
                     string namePart = string.IsNullOrEmpty(titleId) ? fileName : $"{fileName} [{titleId}]";
                     string outputBasePath = Path.Combine(OutputPath, namePart + "_Repack");
 
@@ -403,8 +344,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         if (_patch == null)
             return;
 
-        string? titleId = _romInfo?.TitleId;
-        string? productCode = _romInfo?.ProductCode;
+        string? titleId = RomInfo?.TitleId;
+        string? productCode = RomInfo?.ProductCode;
 
         PatchInfo = PatchDisplay.From(_patch, titleId, productCode);
     }
@@ -444,8 +385,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 return false;
             }
 
-            string? titleId = _romInfo?.TitleId;
-            string? productCode = _romInfo?.ProductCode;
+            string? titleId = RomInfo?.TitleId;
+            string? productCode = RomInfo?.ProductCode;
 
             if ((titleId != null || productCode != null) && !_patch.MatchesRom(titleId, productCode))
             {

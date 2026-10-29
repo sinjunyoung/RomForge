@@ -72,7 +72,7 @@ public abstract class ToolTabViewModel : ViewModelBase
 
     public virtual void Cancel() => CancellationTokenSource?.Cancel();
 
-    public void AppendLog(string msg, LogLevel level = LogLevel.Info) => Application.Current?.Dispatcher?.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
+    public virtual void AppendLog(string msg, LogLevel level = LogLevel.Info) => Application.Current?.Dispatcher?.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
 
     public virtual void ClearLog() => Application.Current?.Dispatcher?.Invoke(() => LogEntries.Clear());
 

@@ -111,22 +111,20 @@ public class CertsMainViewModel : BatchToolTabViewModel
     {
         try
         {
-            var result = await Task.Run(() => Core.Services.N3DS.Util.ParseFile(path));
-
-
+            var result = await Task.Run(() => Core.Services.N3DS.Util.ParseFile(path)) ?? throw new NullReferenceException();
             BitmapSource? icon = null;
 
-            if (result?.IconPixels is not null)
+            if (result.IconPixels is not null)
             {
-                var bitmap = BitmapSource.Create(48, 48, 96, 96, PixelFormats.Bgr32, null, result?.IconPixels, 48 * 4);
+                var bitmap = BitmapSource.Create(48, 48, 96, 96, PixelFormats.Bgr32, null, result.IconPixels, 48 * 4);
                 bitmap.Freeze();
                 icon = bitmap;
             }
 
             RomInfo = new TitleViewModel
             {
-                Title = result?.Title,
-                FilePath = result?.FilePath,
+                Title = result.Title,
+                FilePath = result.FilePath,
                 ShortDescription = result?.ShortDescription,
                 Publisher = result?.Publisher,
                 ProductCode = result?.ProductCode,

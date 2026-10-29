@@ -38,7 +38,7 @@ internal static class PatchShared
         var appSourceByTitle = new Dictionary<string, (ISourceAccessor Accessor, string SourcePath)>(StringComparer.OrdinalIgnoreCase);
         var orderedEntries = entries.OrderBy(GetEntrySortRank).ToList();
 
-        void AddItem(ContentCategory category, string titleId, string? contentIdSuffix, string sourcePath, ISourceAccessor accessor, string? patchPath)
+        void AddItem(ContentCategory? category, string titleId, string? contentIdSuffix, string sourcePath, ISourceAccessor accessor, string? patchPath)
         {
             items.Add(new SourceItem
             {
@@ -68,7 +68,7 @@ internal static class PatchShared
 
                     ISourceAccessor accessor;
 
-                    if (entry.Probe.Category == ContentCategory.Patch && string.IsNullOrWhiteSpace(entry.License) && appSourceByTitle.TryGetValue(entry.Probe.TitleId, out var appSource))
+                    if (entry.Probe.Category == ContentCategory.Patch && string.IsNullOrWhiteSpace(entry.License) && appSourceByTitle.TryGetValue(entry.Probe.TitleId!, out var appSource))
                     {
                         string appWorkBinRel = $"{appSource.SourcePath}/sce_sys/package/work.bin";
                         var appLicense = WorkBinReader.Read(appSource.Accessor, appWorkBinRel);
@@ -81,11 +81,11 @@ internal static class PatchShared
                         accessor = new PkgSourceAccessor(entry.Path, entry.License);
 
                     ownedAccessors.Add(accessor);
-                    AddItem(entry.Probe.Category, entry.Probe.TitleId, entry.Probe.ContentIdSuffix, string.Empty, accessor, entry.PatchPath);
+                    AddItem(entry.Probe.Category, entry.Probe.TitleId!, entry.Probe.ContentIdSuffix, string.Empty, accessor, entry.PatchPath);
                 }
                 else
                 {
-                    var accessor = SourceAccessorFactory.Open(entry.Path);
+                    var accessor = SourceAccessorFactory.Open(entry.Path!);
 
                     ownedAccessors.Add(accessor);
 
@@ -99,7 +99,7 @@ internal static class PatchShared
                     else
                     {
                         foreach (var discovered in SourcePreparer.DiscoverItems(accessor))
-                            AddItem(discovered.Category, discovered.TitleId, discovered.ContentIdSuffix, discovered.SourcePath, accessor, entry.PatchPath);
+                            AddItem(discovered.Category, discovered.TitleId!, discovered.ContentIdSuffix, discovered.SourcePath!, accessor, entry.PatchPath);
                     }
                 }
             }
@@ -187,7 +187,7 @@ internal static class PatchShared
 
     public static string BuildEntryPath(string prefix, MergeGroup group, string relativePath) => BuildEntryPath(prefix, group.Category, group.TitleId, group.ContentIdSuffix, relativePath);
 
-    public static string BuildEntryPath(string prefix, ContentCategory category, string titleId, string? contentIdSuffix, string relativePath)
+    public static string BuildEntryPath(string prefix, ContentCategory? category, string? titleId, string? contentIdSuffix, string relativePath)
         => category == ContentCategory.Addcont ? ToSafeEntryPath($"{prefix}/{titleId}/{contentIdSuffix}/{relativePath}") : ToSafeEntryPath($"{prefix}/{titleId}/{relativePath}");
 
     private static string ToSafeEntryPath(string path)
@@ -557,7 +557,7 @@ internal static class PatchShared
         es.Write(license.Data);
     }
 
-    public static string GetPatchedPrefix(ContentCategory category, OutputTarget target) => (category, target) switch
+    public static string GetPatchedPrefix(ContentCategory? category, OutputTarget target) => (category, target) switch
     {
         (ContentCategory.App, OutputTarget.Emu) => "app",
         (ContentCategory.Patch, OutputTarget.Emu) => "app",
@@ -568,9 +568,9 @@ internal static class PatchShared
         _ => throw new NotSupportedException()
     };
 
-    public static string GetBasePrefix(ContentCategory category) => category == ContentCategory.Addcont ? "addcont" : "app";
+    public static string GetBasePrefix(ContentCategory? category) => category == ContentCategory.Addcont ? "addcont" : "app";
 
-    public static string GetRetailBaseFolder(ContentCategory category) => category switch
+    public static string GetRetailBaseFolder(ContentCategory? category) => category switch
     {
         ContentCategory.App => "app",
         ContentCategory.Patch => "patch",

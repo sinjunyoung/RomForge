@@ -7,47 +7,40 @@ namespace RomForge.Core.Models.N3DS;
 
 public class DecryptorFileItem(string filePath) : FileItemBase(filePath)
 {
-    private BitmapSource? _icon;
-    private string _titleId = string.Empty;
-    private string _shortDescription = string.Empty;
-    private string _publisher = string.Empty;
-    private string _productCode = string.Empty;
-    private bool _crypto;
-
     public BitmapSource? Icon
     {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
-    public string TitleId
+    public string? TitleId
     {
-        get => _titleId;
-        set => SetProperty(ref _titleId, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
-    public string ShortDescription
+    public string? ShortDescription
     {
-        get => string.IsNullOrEmpty(_shortDescription) ? TitleId : _shortDescription;
-        set => SetProperty(ref _shortDescription, value);
+        get => string.IsNullOrEmpty(field) ? TitleId : field;
+        set => SetProperty(ref field, value);
     }
 
-    public string Publisher
+    public string? Publisher
     {
-        get => _publisher;
-        set => SetProperty(ref _publisher, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
-    public string ProductCode
+    public string? ProductCode
     {
-        get => _productCode;
-        set => SetProperty(ref _productCode, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public bool Crypto
     {
-        get => _crypto;
-        set => SetProperty(ref _crypto, value);
+        get;
+        set => SetProperty(ref field, value);
     }
 
     public TitleType Type => (TitleType)(Convert.ToUInt64(TitleId, 16) >> 32);

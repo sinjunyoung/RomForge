@@ -17,11 +17,11 @@ public partial class CommonListControl : SwitchListControlBase
 
     public Button ExtraButton1 => btnExtra1;
 
-    public Action ExtraButton1Clicked;
+    public Action? ExtraButton1Clicked;
 
     public Button ExtraButton2 => btnExtra2;
 
-    public Action ExtraButton2Clicked;
+    public Action? ExtraButton2Clicked;
 
     public ObservableCollection<GameFile> GameFiles { get; set; } = [];
 

@@ -119,7 +119,7 @@ public static class VersionInfoExtractor
         return (version, date, ExtractLanguage(name));
     }
 
-    public static string ApplySuffix(string fileName, string patchFilePath, bool namingEnabled = true, string? namingFormat = null, string appLanguage = "Korean")
+    public static string ApplySuffix(string fileName, string patchFilePath, bool namingEnabled = true, string? namingFormat = null, string? appLanguage = "Korean")
     {
         if (!namingEnabled)
             return fileName;
@@ -129,7 +129,7 @@ public static class VersionInfoExtractor
         return ApplyFormat(fileName, version, date, language, namingFormat, appLanguage);
     }
 
-    public static string ApplyFormat(string fileName, string? version, string date, string? language, string? namingFormat, string appLanguage = "Korean")
+    public static string ApplyFormat(string fileName, string? version, string date, string? language, string? namingFormat, string? appLanguage = "Korean")
     {
         string rawNameOnly = Path.GetFileNameWithoutExtension(fileName);
         string? originalLanguage = ExtractLanguage(rawNameOnly);

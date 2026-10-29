@@ -219,8 +219,5 @@ public class RepackRowViewModel : ToolTabViewModel
 
     public void ClearPatch(GameFile file) => _patchSync.ClearPatch(file);
 
-    public new void AppendLog(string msg, LogLevel level = LogLevel.Info)
-    {
-        LogAction?.Invoke(msg, level);
-    }
+    public override void AppendLog(string msg, LogLevel level = LogLevel.Info) => LogAction?.Invoke(msg, level);
 }

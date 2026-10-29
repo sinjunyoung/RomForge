@@ -11,7 +11,7 @@ public class PSPMainViewModel : MultiToolTabViewModel
     public ConverterViewModel ConverterVM { get; } = new();
 
 
-    public event EventHandler RunNavigatePackingSettings;
+    public event EventHandler? RunNavigatePackingSettings;
 
     public PSPMainViewModel()
     {
