@@ -40,7 +40,7 @@ public class SwitchListControlBase : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            await AddPathsAsync(Common.Utils.ExpandPaths(dlg.FileNames));
+            await AddPathsAsync(Utils.ExpandPaths(dlg.FileNames));
     }
 
     protected async void BtnAddFolder_Click(object sender, RoutedEventArgs e)
@@ -52,7 +52,7 @@ public class SwitchListControlBase : UserControl
         };
 
         if (dlg.ShowDialog() == true)
-            await AddPathsAsync(Common.Utils.ExpandPaths([dlg.SelectedPath]));
+            await AddPathsAsync(Utils.ExpandPaths([dlg.SelectedPath]));
     }
 
     protected void BtnRemoveFile_Click(object sender, RoutedEventArgs e) => RemoveSelectedItems();
@@ -76,7 +76,7 @@ public class SwitchListControlBase : UserControl
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
             return;
 
-        await AddPathsAsync(Common.Utils.ExpandPaths(paths));
+        await AddPathsAsync(Utils.ExpandPaths(paths));
     }
 
     protected void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)

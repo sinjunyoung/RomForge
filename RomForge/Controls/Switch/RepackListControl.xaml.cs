@@ -245,4 +245,20 @@ public partial class RepackListControl : SwitchListControlBase
             return false;
         }
     }
+
+    private void HeaderCheckBox_Checked(object sender, RoutedEventArgs e)
+    {
+        SetAllItemsChecked(true);
+    }
+
+    private void HeaderCheckBox_Unchecked(object sender, RoutedEventArgs e)
+    {
+        SetAllItemsChecked(false);
+    }
+
+    private void SetAllItemsChecked(bool isChecked)
+    {
+        foreach (var item in GameFiles)
+            item.IsLz4 = isChecked;
+    }
 }

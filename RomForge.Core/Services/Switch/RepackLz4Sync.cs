@@ -10,17 +10,57 @@ public static class RepackLz4Sync
     {
         var files = gameFiles.ToList();
         var baseEntry = files.FirstOrDefault(f => f.FileType.Contains('B'));
+        ulong? baseTitleId = baseEntry != null && ulong.TryParse(baseEntry.TitleID, NumberStyles.HexNumber, null, out ulong parsedBaseId) ? parsedBaseId : null;
 
-        if (baseEntry == null)
-            return;
+        foreach (var file in files.Where(f => f.CanSetLz4))
+        {
+            bool? unpackedLz4 = null;
 
-        var updateEntry = files.FirstOrDefault(f => f.FileType.Contains('U'));
-        bool sourceLz4 = baseEntry.SourceHasCompressedRomfs || (updateEntry?.SourceHasCompressedRomfs ?? false) || files.Any(f => f.FileType.Contains('D') && f.SourceHasCompressedRomfs);
-        bool? unpackedLz4 = null;
+            if (baseTitleId.HasValue)
+            {
+                if (IsDlcRow(file))
+                {
+                    if (ulong.TryParse(file.TitleID, NumberStyles.HexNumber, null, out ulong dlcTitleId))
+                        unpackedLz4 = RomfsCompression.ReadUnpackedDlcFlag(unpackedDir, baseTitleId.Value, dlcTitleId);
+                }
+                else
+                {
+                    unpackedLz4 = RomfsCompression.ReadUnpackedFlag(unpackedDir, baseTitleId.Value);
+                }
+            }
 
-        if (ulong.TryParse(baseEntry.TitleID, NumberStyles.HexNumber, null, out ulong baseTitleId))
-            unpackedLz4 = RomfsCompression.ReadUnpackedFlag(unpackedDir, baseTitleId);
-
-        baseEntry.ApplyLz4Detection(sourceLz4, unpackedLz4);
+            file.ApplyLz4Detection(file.SourceHasCompressedRomfs, unpackedLz4);
+        }
     }
+
+    public static bool? ResolveProgramOverride(IEnumerable<GameFile>? gameFiles, bool rebuildOnly)
+    {
+        if (gameFiles == null)
+            return null;
+
+        var programRows = gameFiles.Where(f => !IsDlcRow(f) && f.CanSetLz4).ToList();
+
+        if (programRows.All(f => f.GetLz4Override(rebuildOnly) == null))
+            return null;
+
+        return programRows.Any(f => f.IsLz4);
+    }
+
+    public static IReadOnlyDictionary<string, bool> ResolveDlcOverrides(IEnumerable<GameFile>? gameFiles, bool rebuildOnly)
+    {
+        var result = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+        if (gameFiles == null)
+            return result;
+
+        foreach (var file in gameFiles.Where(f => IsDlcRow(f) && !string.IsNullOrEmpty(f.TitleID)))
+        {
+            if (file.GetLz4Override(rebuildOnly) is bool value)
+                result[file.TitleID!] = value;
+        }
+
+        return result;
+    }
+
+    private static bool IsDlcRow(GameFile file) => file.FileType.Contains('D') && !file.FileType.Contains('B') && !file.FileType.Contains('U');
 }

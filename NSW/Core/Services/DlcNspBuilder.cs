@@ -41,7 +41,7 @@ public static class DlcNspBuilder
             }
 
             bool hasRomfs = Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any();
-            bool compressRomfs = req.CompressRomfs ?? File.Exists(Path.Combine(dlcDir, RomfsCompression.FlagFileName));
+            bool compressRomfs = req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : File.Exists(Path.Combine(dlcDir, RomfsCompression.FlagFileName));
 
             log($"DLC 빌드 시도: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Info);
 

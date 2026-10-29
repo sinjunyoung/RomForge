@@ -38,7 +38,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
     public bool? UnpackedLz4 { get; private set; }
 
-    public bool CanSetLz4 => FileType.Contains('B');
+    public bool CanSetLz4 => FileType.Contains('B') || FileType.Contains('U') || FileType.Contains('D');
 
     public bool IsLz4
     {

@@ -6,6 +6,7 @@ using NSW.Core.Services;
 using NSW.HacPack.Models;
 using RomForge.Core;
 using RomForge.Core.Services;
+using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
 using RomForge.Core.ViewModels.Switch;
 using System.Diagnostics;
@@ -215,7 +216,8 @@ namespace RomForge.ViewModels.Switch
 
                 req = new BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath)
                 {
-                    CompressRomfs = Context?.GameFiles.FirstOrDefault(f => f.FileType.Contains('B'))?.GetLz4Override(rebuildOnly: true)
+                    CompressRomfs = RepackLz4Sync.ResolveProgramOverride(Context?.GameFiles, rebuildOnly: true),
+                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true)
                 };
 
                 return true;
@@ -261,7 +263,8 @@ namespace RomForge.ViewModels.Switch
                 DlcPatchDirs = dlcPatchDirs,
                 PatchPassword = mainPatchPassword,
                 DlcPatchPasswords = dlcPatchPasswords,
-                CompressRomfs = baseEntry.GetLz4Override(rebuildOnly: false)
+                CompressRomfs = RepackLz4Sync.ResolveProgramOverride(gameFiles, rebuildOnly: false),
+                DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(gameFiles, rebuildOnly: false)
             };
 
             return true;

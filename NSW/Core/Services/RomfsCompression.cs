@@ -66,11 +66,19 @@ public static class RomfsCompression
         if (programDirs.Count == 0 || programDirs.Min(p => p.Id) != baseTitleId)
             return null;
 
-        if (programDirs.Any(p => File.Exists(Path.Combine(p.Dir, FlagFileName))))
-            return true;
+        return programDirs.Any(p => File.Exists(Path.Combine(p.Dir, FlagFileName)));
+    }
 
-        string dlcRoot = Path.Combine(unpackedDir, "DLCs");
+    public static bool? ReadUnpackedDlcFlag(string unpackedDir, ulong baseTitleId, ulong dlcTitleId)
+    {
+        if (ReadUnpackedFlag(unpackedDir, baseTitleId) == null)
+            return null;
 
-        return Directory.Exists(dlcRoot) && Directory.GetDirectories(dlcRoot).Any(d => File.Exists(Path.Combine(d, FlagFileName)));
+        string dlcDir = Path.Combine(unpackedDir, "DLCs", dlcTitleId.ToString("X16"));
+
+        if (!Directory.Exists(dlcDir))
+            return null;
+
+        return File.Exists(Path.Combine(dlcDir, FlagFileName));
     }
 }

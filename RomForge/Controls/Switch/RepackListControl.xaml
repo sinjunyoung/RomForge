@@ -136,7 +136,10 @@
                             </GridViewColumn>
                             <GridViewColumn Width="70">
                                 <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="Lz4" ToolTip="RomFS Lz4 압축 (리팩 시 적용)"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="False" IsThreeState="False" Margin="0,0,5,0" Checked="HeaderCheckBox_Checked" Unchecked="HeaderCheckBox_Unchecked"/>
+                                        <TextBlock Text="Lz4" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" ToolTip="RomFS Lz4 압축 (리팩 시 적용). 본편과 업데이트는 하나로 합쳐지므로 둘 중 하나라도 체크하면 압축됩니다."/>
+                                    </StackPanel>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>

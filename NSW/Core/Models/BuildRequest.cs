@@ -29,5 +29,7 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public bool? CompressRomfs { get; init; }
 
+    public IReadOnlyDictionary<string, bool> DlcCompressRomfs { get; init; } = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
     public IReadOnlyDictionary<string, HashSet<string>>? DlcTitleIdsByFile { get; init; }
 }

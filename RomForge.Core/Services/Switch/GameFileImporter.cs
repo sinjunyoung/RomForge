@@ -14,8 +14,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var validPaths = await Task.Run(() =>
-            paths.Where(p => supportedExtensions.Contains(Path.GetExtension(p)))
-                 .ToList());
+            paths.Where(p => supportedExtensions.Contains(Path.GetExtension(p))).ToList());
 
         foreach (var path in validPaths)
         {
@@ -23,24 +22,15 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
             System.Windows.Media.Imaging.BitmapImage? icon = null;
             long fileLength = 0;
 
-            try
-            {
-                fileLength = new FileInfo(path).Length;
-            }
+            try { fileLength = new FileInfo(path).Length; }
             catch { }
 
             if (keySet != null)
             {
                 List<MetadataResult> allMeta;
 
-                try
-                {
-                    allMeta = MetadataReader.GetMetadataFromContainer(keySet, path);
-                }
-                catch
-                {
-                    allMeta = [];
-                }
+                try { allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); }
+                catch { allMeta = []; }
 
                 if (allMeta.Count > 0)
                 {
@@ -60,7 +50,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                     foreach (var patch in patchMetas)
                         expectedItems.Add(("U", patch.TitleId ?? string.Empty));
 
-                    foreach (var dlc in dlcResults) 
+                    foreach (var dlc in dlcResults)
                         expectedItems.Add(("D", dlc.TitleId ?? string.Empty));
 
                     var currentItemsForFile = gameFiles.Where(f => string.Equals(f.FilePath, path, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -123,6 +113,8 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
 
                     foreach (var dlc in dlcResults)
                     {
+                        string dlcTitleId = dlc.TitleId ?? string.Empty;
+
                         var dlcVm = new GameFile(path)
                         {
                             FileType = "D",
@@ -130,7 +122,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                             SourceHasCompressedRomfs = dlc.HasCompressedRomfs,
                             TitleID = dlc.TitleId,
                             Version = dlc.GetEffectiveDisplayVersion(),
-                            TitleName = string.IsNullOrEmpty(titleName) ? dlc.TitleId : $"{titleName} (DLC {dlc.TitleId[^4..]})",
+                            TitleName = string.IsNullOrEmpty(titleName) ? dlcTitleId : $"{titleName} (DLC {dlcTitleId[^4..]})",
                             Icon = icon
                         };
 
@@ -182,56 +174,54 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
     {
         if (vm.FileType.Contains('B'))
         {
-            var existingBase = gameFiles.FirstOrDefault(f => f.FileType.Contains('B') && !string.Equals(f.FilePath, vm.FilePath, StringComparison.OrdinalIgnoreCase));
-
-            if (existingBase != null)
+            foreach (var oldFile in gameFiles.ToList())
             {
-                if (vm.PatchPath == null)
-                {
-                    vm.PatchPath = existingBase.PatchPath;
-                    vm.PatchPassword = existingBase.PatchPassword;
-                }
-
-                patchSync.Detach(existingBase);
-                gameFiles.Remove(existingBase);
+                patchSync.Detach(oldFile);
+                gameFiles.Remove(oldFile);
             }
         }
-
-        if (vm.FileType.Contains('U'))
+        else if (vm.FileType.Contains('U'))
         {
-            var existingUpdate = gameFiles.FirstOrDefault(f => f.FileType.Contains('U') && !string.Equals(f.FilePath, vm.FilePath, StringComparison.OrdinalIgnoreCase));
+            var existingUpdate = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'));
 
             if (existingUpdate != null)
             {
                 if (vm.PatchPath == null)
                 {
                     vm.PatchPath = existingUpdate.PatchPath;
-                    vm.PatchPassword = existingUpdate.PatchPath;
+                    vm.PatchPassword = existingUpdate.PatchPassword;
                 }
 
                 patchSync.Detach(existingUpdate);
                 gameFiles.Remove(existingUpdate);
             }
         }
-
-        if (vm.FileType.Contains('D'))
+        else if (vm.FileType.Contains('D'))
         {
-            var existingDlc = gameFiles.FirstOrDefault(f => f.FileType.Contains('D') && f.TitleID != null && f.TitleID.Equals(vm.TitleID, StringComparison.OrdinalIgnoreCase) && !string.Equals(f.FilePath, vm.FilePath, StringComparison.OrdinalIgnoreCase));
-
-            if (existingDlc != null)
+            if (!string.IsNullOrEmpty(vm.TitleID))
             {
-                if (vm.PatchPath == null)
-                {
-                    vm.PatchPath = existingDlc.PatchPath;
-                    vm.PatchPassword = existingDlc.PatchPassword;
-                }
+                var existingDlc = gameFiles.FirstOrDefault(f =>
+                    f.FileType.Contains('D') &&
+                    string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase));
 
-                patchSync.Detach(existingDlc);
-                gameFiles.Remove(existingDlc);
+                if (existingDlc != null)
+                {
+                    if (vm.PatchPath == null)
+                    {
+                        vm.PatchPath = existingDlc.PatchPath;
+                        vm.PatchPassword = existingDlc.PatchPassword;
+                    }
+
+                    patchSync.Detach(existingDlc);
+                    gameFiles.Remove(existingDlc);
+                }
             }
         }
 
-        if (gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.FileType == vm.FileType && f.TitleID == vm.TitleID))
+        if (!string.IsNullOrEmpty(vm.TitleID) && gameFiles.Any(f =>
+            f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) &&
+            f.FileType == vm.FileType &&
+            string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase)))
             return;
 
         gameFiles.Add(vm);
