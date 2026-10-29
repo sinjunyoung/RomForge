@@ -337,12 +337,12 @@ public static class MetadataReader
 
                 bool hasCompressedRomfs = false;
 
-                foreach (var programEntry in cnmt.ContentEntries.Where(e => e.Type == LibHac.Ncm.ContentType.Program))
+                foreach (var romfsEntry in cnmt.ContentEntries.Where(e => e.Type is LibHac.Ncm.ContentType.Program or LibHac.Ncm.ContentType.Data))
                 {
-                    string programNcaId = Convert.ToHexStringLower(programEntry.NcaId);
-                    string? programName = allFiles.Keys.FirstOrDefault(k => k.StartsWith(programNcaId, StringComparison.OrdinalIgnoreCase));
+                    string romfsNcaId = Convert.ToHexStringLower(romfsEntry.NcaId);
+                    string? romfsName = allFiles.Keys.FirstOrDefault(k => k.StartsWith(romfsNcaId, StringComparison.OrdinalIgnoreCase));
 
-                    if (programName != null && RomfsCompression.HasCompressedSection(OpenNca(allFiles[programName], programName, keySet)))
+                    if (romfsName != null && RomfsCompression.HasCompressedSection(OpenNca(allFiles[romfsName], romfsName, keySet)))
                     {
                         hasCompressedRomfs = true;
                         break;

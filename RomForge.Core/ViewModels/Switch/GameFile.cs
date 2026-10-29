@@ -68,7 +68,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
         bool? baseline = rebuildOnly ? UnpackedLz4 : SourceLz4;
 
-        return baseline.HasValue && IsLz4 != baseline.Value ? IsLz4 : null;
+        return baseline.HasValue && (_lz4UserChanged || IsLz4 != baseline.Value) ? IsLz4 : null;
     }
 
     public long CustomSizeBytes

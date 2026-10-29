@@ -14,6 +14,7 @@ using RomForge.ViewModels.WiiU;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Shell;
+using System.Windows.Threading;
 
 namespace RomForge.ViewModels;
 
@@ -183,6 +184,13 @@ public class MainViewModel : ToolTabViewModel
     {
         if (Current == null) return;
 
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher != null && !dispatcher.CheckAccess())
+        {
+            dispatcher.Invoke(() => SetTaskbarProgress(value, state));
+            return;
+        }
+
         if (value <= 0 || state == TaskbarItemProgressState.None)
         {
             Current.TaskbarProgressState = TaskbarItemProgressState.None;
@@ -194,7 +202,7 @@ public class MainViewModel : ToolTabViewModel
             Current.TaskbarProgressValue = value / 100.0;
 
             if (state == TaskbarItemProgressState.Error)
-                Core.UI.Helpers.Win32API.FlashTaskbarIcon(Application.Current.MainWindow);
+                Core.UI.Helpers.Win32API.FlashTaskbarIcon(Application.Current?.MainWindow!);
         }
     }
 

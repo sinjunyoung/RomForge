@@ -127,6 +127,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                         {
                             FileType = "D",
                             CustomSizeBytes = dlc.Size > 0 ? dlc.Size : fileLength,
+                            SourceHasCompressedRomfs = dlc.HasCompressedRomfs,
                             TitleID = dlc.TitleId,
                             Version = dlc.GetEffectiveDisplayVersion(),
                             TitleName = string.IsNullOrEmpty(titleName) ? dlc.TitleId : $"{titleName} (DLC {dlc.TitleId[^4..]})",

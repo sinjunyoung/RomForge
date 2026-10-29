@@ -28,49 +28,54 @@ public static class Win32API
     private const uint FLASHW_STOP = 0;
     private const uint FLASHW_TRAY = 2;
 
+    private static readonly Lock _lock = new();
+
     private static DispatcherTimer? _flashTimer;
     private static IntPtr _flashingHwnd;
 
     public static void FlashTaskbarIcon(Window window)
     {
-        IntPtr hwnd = new WindowInteropHelper(window).Handle;
+        IntPtr hwnd = window.Dispatcher.Invoke(() => new WindowInteropHelper(window).Handle);
         if (hwnd == IntPtr.Zero) return;
 
-        if (_flashTimer != null) return;
-
-        _flashingHwnd = hwnd;
-
-        _flashTimer = new DispatcherTimer
+        lock (_lock)
         {
-            Interval = TimeSpan.FromMilliseconds(800)
-        };
+            if (_flashTimer != null) return;
 
-        _flashTimer.Tick += (s, e) =>
-        {
-            if (window.IsActive)
-            {
-                StopFlash();
-                return;
-            }
+            _flashingHwnd = hwnd;
 
-            FLASHWINFO info = new()
+            _flashTimer = new DispatcherTimer
             {
-                cbSize = (uint)Marshal.SizeOf(typeof(FLASHWINFO)),
-                hwnd = _flashingHwnd,
-                dwFlags = FLASHW_TRAY,
-                uCount = 1,
-                dwTimeout = 0
+                Interval = TimeSpan.FromMilliseconds(800)
             };
 
-            FlashWindowEx(ref info);
-        };
+            _flashTimer.Tick += (s, e) =>
+            {
+                if (window.Dispatcher.Invoke(() => window.IsActive))
+                {
+                    StopFlash();
+                    return;
+                }
 
-        _flashTimer.Start();
+                FLASHWINFO info = new()
+                {
+                    cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
+                    hwnd = _flashingHwnd,
+                    dwFlags = FLASHW_TRAY,
+                    uCount = 1,
+                    dwTimeout = 0
+                };
+
+                FlashWindowEx(ref info);
+            };
+
+            _flashTimer.Start();
+        }
 
         FLASHWINFO initialInfo = new()
         {
-            cbSize = (uint)Marshal.SizeOf(typeof(FLASHWINFO)),
-            hwnd = _flashingHwnd,
+            cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
+            hwnd = hwnd,
             dwFlags = FLASHW_TRAY,
             uCount = 1,
             dwTimeout = 0
@@ -80,22 +85,25 @@ public static class Win32API
 
     public static void StopFlash()
     {
-        _flashTimer?.Stop();
-        _flashTimer = null;
-
-        if (_flashingHwnd != IntPtr.Zero)
+        lock (_lock)
         {
-            FLASHWINFO info = new()
-            {
-                cbSize = (uint)Marshal.SizeOf(typeof(FLASHWINFO)),
-                hwnd = _flashingHwnd,
-                dwFlags = FLASHW_STOP,
-                uCount = 0,
-                dwTimeout = 0
-            };
+            _flashTimer?.Stop();
+            _flashTimer = null;
 
-            FlashWindowEx(ref info);
-            _flashingHwnd = IntPtr.Zero;
+            if (_flashingHwnd != IntPtr.Zero)
+            {
+                FLASHWINFO info = new()
+                {
+                    cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
+                    hwnd = _flashingHwnd,
+                    dwFlags = FLASHW_STOP,
+                    uCount = 0,
+                    dwTimeout = 0
+                };
+
+                FlashWindowEx(ref info);
+                _flashingHwnd = IntPtr.Zero;
+            }
         }
     }
 }
