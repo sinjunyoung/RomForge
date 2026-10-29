@@ -48,7 +48,7 @@ public static class RomfsCompression
         }
     }
 
-    public static bool? ReadUnpackedFlag(string unpackedDir)
+    public static bool? ReadUnpackedFlag(string unpackedDir, ulong baseTitleId)
     {
         if (string.IsNullOrEmpty(unpackedDir) || !Directory.Exists(unpackedDir))
             return null;
@@ -62,6 +62,9 @@ public static class RomfsCompression
             if (name.Length == 16 && ulong.TryParse(name, NumberStyles.HexNumber, null, out ulong id))
                 programDirs.Add((id, dir));
         }
+
+        if (programDirs.Count == 0 || programDirs.Min(p => p.Id) != baseTitleId)
+            return null;
 
         if (programDirs.Any(p => File.Exists(Path.Combine(p.Dir, FlagFileName))))
             return true;
