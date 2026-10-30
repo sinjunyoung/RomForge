@@ -67,7 +67,6 @@ public static class Service
                 Percent = p.Percent
             });
         });
-
         var resultBytes = await UniversalPatcher.ApplyPatchAsync(sourceBytes, patchBytes, entryProgress, ct);
         var newEntry = outputZip.CreateEntry(sourceEntry.FullName, CompressionLevel.Optimal);
         using (var destStream = newEntry.Open())

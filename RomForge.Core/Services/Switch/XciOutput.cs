@@ -12,7 +12,7 @@ internal sealed class XciOutput : OutputContainer
 {
     protected override bool IsXci => true;
 
-    public override async Task WriteAsync(SourceSet source, string displayName, string progressId, uint pfsAlignment, List<FileEntry> entries, Stream fout, IProgress<ProgressInfo> progress, List<IDisposable> disposables, CancellationToken ct = default)
+    public override async Task WriteAsync(SourceSet source, string displayName, string progressId, uint pfsAlignment, List<FileEntry> entries, Stream fout, IProgress<ProgressInfo>? progress, List<IDisposable> disposables, CancellationToken ct = default)
     {
         var baseStream = source.OpenXciBaseStream(disposables);
 

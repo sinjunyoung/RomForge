@@ -5,13 +5,13 @@ using System.Text;
 
 namespace RomForge.Core.Services.Patch;
 
-public class GdiTrackCopier(Action<string, LogLevel> log)
+public class GdiTrackCopier(Action<string, LogLevel>? log)
 {
-    public string? CopyGdiTracks(string sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public string? CopyGdiTracks(string? sourcePath, string outputDir, string outputPath, List<string> copiedTrackPaths, bool moveInsteadOfCopy = false, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         string[] gdiCandidates = Directory.GetFiles(Path.GetDirectoryName(sourcePath)!, "*.gdi");
         GdiFile? gdi = null;
-        string sourceMainFileName = Path.GetFileName(sourcePath);
+        string sourceMainFileName = Path.GetFileName(sourcePath ?? throw new NullReferenceException());
 
         foreach (var candidate in gdiCandidates)
         {
@@ -30,8 +30,7 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
 
         if (gdi is null)
         {
-            log("GDI 파일을 찾을 수 없습니다. GD-ROM 이미지가 아니거나 GDI가 누락되었을 수 있습니다.", LogLevel.Error);
-
+            log?.Invoke("GDI 파일을 찾을 수 없습니다. GD-ROM 이미지가 아니거나 GDI가 누락되었을 수 있습니다.", LogLevel.Error);
             return null;
         }
 
@@ -49,7 +48,7 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
 
             if (!File.Exists(sourceTrackPath))
             {
-                log($"트랙 파일을 찾을 수 없습니다: {track.FileName}", LogLevel.Error);
+                log?.Invoke($"트랙 파일을 찾을 수 없습니다: {track.FileName}", LogLevel.Error);
                 return null;
             }
 
@@ -75,7 +74,6 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
             foreach (var track in gdi.Tracks)
             {
                 string fileName = string.Equals(track.FileName, sourceMainFileName, StringComparison.OrdinalIgnoreCase) ? newMainFileName : track.FileName;
-
                 string quotedFileName = fileName.Contains(' ') ? $"\"{fileName}\"" : fileName;
 
                 sb.AppendLine($"{track.Number} {track.StartLba} {(int)track.Type} {track.SectorSize} {quotedFileName} {track.FileOffset}");
@@ -87,7 +85,7 @@ public class GdiTrackCopier(Action<string, LogLevel> log)
         }
         catch (Exception ex)
         {
-            log($"GDI 파일 처리 중 오류 발생: {ex.Message}", LogLevel.Error);
+            log?.Invoke($"GDI 파일 처리 중 오류 발생: {ex.Message}", LogLevel.Error);
             return null;
         }
     }

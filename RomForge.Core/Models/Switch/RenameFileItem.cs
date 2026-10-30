@@ -5,22 +5,12 @@ namespace RomForge.Core.Models.Switch;
 
 public class RenameFileItem(string filePath) : GameFile(filePath)
 {
-    private string _newName = string.Empty;
-    private string _statusColor = "#888888";
 
     public string OldName => Path.GetFileName(FilePath);
 
-    public string NewName
-    {
-        get => _newName;
-        private set => SetProperty(ref _newName, value);
-    }
+    public string NewName { get; private set => SetProperty(ref field, value); } = string.Empty;
 
-    public string StatusColor
-    {
-        get => _statusColor;
-        private set => SetProperty(ref _statusColor, value);
-    }
+    public string StatusColor { get; private set => SetProperty(ref field, value); } = "#888888";
 
     public void ApplyPlan(RenamePlan plan, string? statusOverride = null)
     {

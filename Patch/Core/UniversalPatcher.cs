@@ -6,7 +6,7 @@ namespace Patch.Core;
 
 public static class UniversalPatcher
 {
-    public static async Task ApplyPatchAsync(string sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static async Task ApplyPatchAsync(string? sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         if (!File.Exists(sourcePath))
             throw new FileNotFoundException($"원본 파일을 찾을 수 없습니다: {sourcePath}");

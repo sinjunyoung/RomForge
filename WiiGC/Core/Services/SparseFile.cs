@@ -1,13 +1,11 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System.Runtime.InteropServices;
+﻿using Common;
+using Microsoft.Win32.SafeHandles;
 using WiiGC.Core.Interfaces;
 
 namespace WiiGC.Core.Services;
 
-internal static partial class SparseFile
+internal static class SparseFile
 {
-    private const uint FsctlSetSparse = 0x000900C4;
-
     public static bool TryMark(SafeFileHandle handle)
     {
         if (!OperatingSystem.IsWindows())
@@ -15,7 +13,7 @@ internal static partial class SparseFile
 
         try
         {
-            return DeviceIoControl(handle, FsctlSetSparse, IntPtr.Zero, 0, IntPtr.Zero, 0, out _, IntPtr.Zero);
+            return Win32API.DeviceIoControl(handle, Win32API.FsctlSetSparse, IntPtr.Zero, 0, IntPtr.Zero, 0, out _, IntPtr.Zero);
         }
         catch
         {
@@ -63,8 +61,4 @@ internal static partial class SparseFile
             reporter?.Add(size);
         }
     }
-
-    [LibraryImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool DeviceIoControl(SafeFileHandle device, uint controlCode, IntPtr inBuffer, int inBufferSize, IntPtr outBuffer, int outBufferSize, out int bytesReturned, IntPtr overlapped);
 }

@@ -12,16 +12,14 @@ public class DiscFileItem(string filePath) : ProcessableItemBase
 
     public string Extension => Path.GetExtension(FilePath).TrimStart('.').ToLowerInvariant();
 
-    private string _gameId = "인식중...";
-    public string GameId { get => _gameId; set => SetProperty(ref _gameId, value); }
+    public string GameId { get; set => SetProperty(ref field, value); } = "인식중...";
 
-    private long _fileSizeBytes;
     public long FileSizeBytes
     {
-        get => _fileSizeBytes;
+        get;
         set
         {
-            if (SetProperty(ref _fileSizeBytes, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(FileSize));
         }
     }
@@ -29,6 +27,7 @@ public class DiscFileItem(string filePath) : ProcessableItemBase
     public string FileSize => FileSizeBytes <= 0 ? "..." : FileSizeBytes >= 1024L * 1024 * 1024 ? $"{FileSizeBytes / (1024.0 * 1024 * 1024):F2} GB" : $"{FileSizeBytes / (1024.0 * 1024):F1} MB";
 
     public byte[]? PresetConfigBytes { get; set; }
+
     public bool HasPresetConfig => PresetConfigBytes != null;
 
     public Brush ExtensionBackground => ExtensionColorMap.Resolve(Extension, ColorMap);

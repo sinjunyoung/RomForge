@@ -1,6 +1,7 @@
 ﻿using Common;
 using RomForge.Core;
 using RomForge.Core.Models;
+using RomForge.Core.UI.Helpers;
 using RomForge.Core.ViewModels;
 using RomForge.ViewModels.N3DS;
 using RomForge.ViewModels.Patch;
@@ -202,7 +203,7 @@ public class MainViewModel : ToolTabViewModel
             Current.TaskbarProgressValue = value / 100.0;
 
             if (state == TaskbarItemProgressState.Error)
-                Core.UI.Helpers.Win32API.FlashTaskbarIcon(Application.Current?.MainWindow!);
+                FlashTaskbar.FlashTaskbarIcon(Application.Current?.MainWindow!);
         }
     }
 

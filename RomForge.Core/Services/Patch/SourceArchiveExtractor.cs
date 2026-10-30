@@ -10,8 +10,11 @@ using System.Text.RegularExpressions;
 
 namespace RomForge.Core.Services.Patch;
 
-public static class SourceArchiveExtractor
+public static partial class SourceArchiveExtractor
 {
+    [GeneratedRegex(@"FILE\s+""[^""]+""\s+BINARY", RegexOptions.IgnoreCase)]
+    private static partial Regex CueFileBinaryReplaceRegex();
+
     private static readonly string[] SupportedExtensions = [".zip", ".7z", ".rar"];
 
     private const long TinySizeThresholdBytes = 64 * 1024;
@@ -346,7 +349,7 @@ public static class SourceArchiveExtractor
             return;
 
         string content = File.ReadAllText(cuePath);
-        string updated = Regex.Replace(content, @"FILE\s+""[^""]+""\s+BINARY", _ => $"FILE \"{actualName}\" BINARY", RegexOptions.IgnoreCase);
+        string updated = CueFileBinaryReplaceRegex().Replace(content, _ => $"FILE \"{actualName}\" BINARY");
 
         File.WriteAllText(cuePath, updated);
     }

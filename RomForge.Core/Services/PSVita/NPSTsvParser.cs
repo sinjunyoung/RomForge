@@ -24,8 +24,6 @@ namespace RomForge.Core.Services.PSVita
                 ParseTsvFile(dlcsTsvPath, isDlc: true, _cachedData);
         }
 
-        public Dictionary<string, NPSGroup> GetData() => _cachedData;
-
         public bool TryGetGroup(string titleId, out NPSGroup group) => _cachedData.TryGetValue(titleId, out group!);
 
         private static void ParseTsvFile(string filePath, bool isDlc, Dictionary<string, NPSGroup> dictionary)

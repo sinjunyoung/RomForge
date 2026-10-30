@@ -9,24 +9,11 @@ namespace RomForge.Core.ViewModels.PSP;
 
 public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
 {
-    private string? _filePath;
-    private bool _isConverting;
-    private int _progressPct;
-
     public BgmPreviewViewModel Preview { get; } = new BgmPreviewViewModel(log);
 
     public byte[]? Bytes { get; private set; }
 
-    public string? FilePath
-    {
-        get => _filePath;
-        private set
-        {
-            SetProperty(ref _filePath, value);
-            OnPropertyChanged(nameof(FileName));
-            OnPropertyChanged(nameof(HasBgm));
-        }
-    }
+    public string? FilePath { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(FileName)); OnPropertyChanged(nameof(HasBgm)); } }
 
     public string FileName => !string.IsNullOrEmpty(FilePath) ? Path.GetFileName(FilePath) : string.Empty;
 
@@ -52,18 +39,14 @@ public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
         }
     }
 
-    public bool IsConverting
-    {
-        get => _isConverting;
-        private set => SetProperty(ref _isConverting, value);
-    }
+    public bool IsConverting { get; private set => SetProperty(ref field, value); }
 
     public int ProgressPct
     {
-        get => _progressPct;
+        get;
         private set
         {
-            if (SetProperty(ref _progressPct, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(ProgressText));
         }
     }

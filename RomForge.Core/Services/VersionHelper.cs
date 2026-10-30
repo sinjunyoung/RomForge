@@ -33,7 +33,7 @@ public static class VersionHelper
         return version != null ? $"{version.Major}.{version.Minor}.{version.Revision}" : "1.0.0";
     }
 
-    private static bool IsNewerVersion(string current, string latest)
+    private static bool IsNewerVersion(string current, string? latest)
     {
         current = current?.TrimStart('v') ?? "0.0.0";
         latest = latest?.TrimStart('v') ?? "0.0.0";

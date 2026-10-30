@@ -10,11 +10,6 @@ public class PackingImagesViewModel : ViewModelBase
     private readonly CoverArtUpdater _coverArtUpdater = new();
 
     private string? _lastGameId;
-    private bool _isDownloading;
-    private BitmapImage? _icon0Image;
-    private BitmapImage? _pic0Image;
-    private BitmapImage? _pic1Image;
-    private BitmapImage? _bootLogoImage;
 
     public PackingImagesViewModel()
     {
@@ -31,44 +26,19 @@ public class PackingImagesViewModel : ViewModelBase
 
     public byte[]? BootLogoBytes { get; private set; }
 
-    public BitmapImage? Icon0Image
-    {
-        get => _icon0Image;
-        private set => SetProperty(ref _icon0Image, value);
-    }
+    public BitmapImage? Icon0Image { get; private set => SetProperty(ref field, value); }
 
-    public BitmapImage? Pic0Image
-    {
-        get => _pic0Image;
-        private set => SetProperty(ref _pic0Image, value);
-    }
+    public BitmapImage? Pic0Image { get; private set => SetProperty(ref field, value); }
 
-    public BitmapImage? Pic1Image
-    {
-        get => _pic1Image;
-        private set => SetProperty(ref _pic1Image, value);
-    }
+    public BitmapImage? Pic1Image { get; private set => SetProperty(ref field, value); }
 
-    public BitmapImage? BootLogoImage
-    {
-        get => _bootLogoImage;
-        private set
-        {
-            SetProperty(ref _bootLogoImage, value);
-            OnPropertyChanged(nameof(HasBootLogo));
-            OnPropertyChanged(nameof(ShowBootLogoHint));
-        }
-    }
+    public BitmapImage? BootLogoImage { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(HasBootLogo)); OnPropertyChanged(nameof(ShowBootLogoHint)); } }
 
     public bool HasBootLogo => BootLogoImage != null;
 
     public bool ShowBootLogoHint => !HasBootLogo;
 
-    public bool IsDownloading
-    {
-        get => _isDownloading;
-        private set => SetProperty(ref _isDownloading, value);
-    }
+    public bool IsDownloading { get; private set => SetProperty(ref field, value); }
 
     public void SetIcon0FromBytes(byte[] rawBytes)
     {

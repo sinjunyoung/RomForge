@@ -16,46 +16,31 @@ public class BgmPreviewViewModel : ViewModelBase
     private WaveOut? _waveOut;
     private WaveStream? _waveStream;
     private bool _isSeeking;
-    private bool _isPlaying;
-    private double _positionSeconds;
-    private double _durationSeconds;
-
-    public BgmPreviewViewModel(Action<string, LogLevel> log)
-    {
-        _log = log;
-
-        TogglePlayCommand = new RelayCommand(_ => TogglePlay());
-        _timer.Tick += (_, _) => UpdatePosition();
-    }
 
     public ICommand TogglePlayCommand { get; }
 
     public bool HasPreview => _wav is { Length: > 0 };
 
-    public bool IsPlaying
-    {
-        get => _isPlaying;
-        private set => SetProperty(ref _isPlaying, value);
-    }
+    public bool IsPlaying { get; private set => SetProperty(ref field, value); }
 
     public double DurationSeconds
     {
-        get => _durationSeconds;
+        get;
         private set
         {
-            if (SetProperty(ref _durationSeconds, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(DurationText));
         }
     }
 
     public double PositionSeconds
     {
-        get => _positionSeconds;
+        get;
         set
         {
-            value = Math.Clamp(value, 0, _durationSeconds);
+            value = Math.Clamp(value, 0, DurationSeconds);
 
-            if (Math.Abs(value - _positionSeconds) < 0.001)
+            if (Math.Abs(value - field) < 0.001)
                 return;
 
             SetPosition(value);
@@ -65,9 +50,16 @@ public class BgmPreviewViewModel : ViewModelBase
         }
     }
 
-    public string PositionText => FormatTime(_positionSeconds);
+    public string PositionText => FormatTime(PositionSeconds);
 
-    public string DurationText => FormatTime(_durationSeconds);
+    public string DurationText => FormatTime(PositionSeconds);
+
+    public BgmPreviewViewModel(Action<string, LogLevel> log)
+    {
+        _log = log;
+        TogglePlayCommand = new RelayCommand(_ => TogglePlay());
+        _timer.Tick += (_, _) => UpdatePosition();
+    }
 
     public void Load(byte[]? wav)
     {
@@ -103,7 +95,7 @@ public class BgmPreviewViewModel : ViewModelBase
     {
         _isSeeking = false;
 
-        Seek(_positionSeconds);
+        Seek(PositionSeconds);
     }
 
     private void TogglePlay()
@@ -189,7 +181,7 @@ public class BgmPreviewViewModel : ViewModelBase
 
     private void SetPosition(double seconds)
     {
-        _positionSeconds = Math.Clamp(seconds, 0, _durationSeconds);
+        PositionSeconds = Math.Clamp(seconds, 0, PositionSeconds);
 
         OnPropertyChanged(nameof(PositionSeconds));
         OnPropertyChanged(nameof(PositionText));

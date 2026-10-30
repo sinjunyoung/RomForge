@@ -7,31 +7,15 @@ public record FmvFixOption(string Label, uint Value);
 
 public class PopsOptionsViewModel : ViewModelBase
 {
-    private FmvFixOption _selectedFmvFix;
-    private bool _useFmvFix;
-    private bool _useCdTimingFix;
-
-    public PopsOptionsViewModel() => _selectedFmvFix = FmvFixPresets[0];
+    public PopsOptionsViewModel() => SelectedFmvFix = FmvFixPresets[0];
 
     public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [new("0x04 (다수 게임에서 검증됨)", 0x04), new("0x07 (실험적)", 0x07)];
 
-    public FmvFixOption SelectedFmvFix
-    {
-        get => _selectedFmvFix;
-        set => SetProperty(ref _selectedFmvFix, value);
-    }
+    public FmvFixOption SelectedFmvFix { get; set => SetProperty(ref field, value); }
 
-    public bool UseFmvFix
-    {
-        get => _useFmvFix;
-        set => SetProperty(ref _useFmvFix, value);
-    }
+    public bool UseFmvFix { get; set => SetProperty(ref field, value); }
 
-    public bool UseCdTimingFix
-    {
-        get => _useCdTimingFix;
-        set => SetProperty(ref _useCdTimingFix, value);
-    }
+    public bool UseCdTimingFix { get; set => SetProperty(ref field, value); }
 
     public byte[]? BuildConfig(byte[]? presetConfig)
     {

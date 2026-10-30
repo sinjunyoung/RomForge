@@ -4,8 +4,11 @@ using System.Text.RegularExpressions;
 
 namespace RomForge.Core.Services.Patch;
 
-public static class PackageService
+public static partial class PackageService
 {
+    [GeneratedRegex(@"CRC\(([0-9a-fA-F]+)\)")]
+    private static partial Regex CrcPatternRegex();
+
     public static Package ParseDatFile(string fileName, string content)
     {
         var lines = content.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
@@ -28,7 +31,7 @@ public static class PackageService
             if (parts.Length < 3)
                 break;
 
-            var crcMatch = Regex.Match(parts[2], @"CRC\(([0-9a-fA-F]+)\)");
+            var crcMatch = CrcPatternRegex().Match(parts[2]);
 
             if (!crcMatch.Success)
                 break;

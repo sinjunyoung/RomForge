@@ -138,7 +138,7 @@ public static class Utils
         .Concat([':', '*', '?', '"', '<', '>', '|', '\\', '/'])
         .Distinct()];
 
-    public static string SafeFileName(string name)
+    public static string SafeFileName(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return string.Empty;

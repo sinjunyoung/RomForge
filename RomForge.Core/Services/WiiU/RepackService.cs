@@ -71,7 +71,7 @@ public sealed class RepackService()
             }
             catch (Exception ex)
             {
-                log($"'{dir}' 폴더를 읽지 못했습니다: {ex.Message}", LogLevel.Error); 
+                log?.Invoke($"'{dir}' 폴더를 읽지 못했습니다: {ex.Message}", LogLevel.Error); 
             }
         }
 

@@ -12,8 +12,8 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class NczValidator
 {
-    public static async Task ValidateAsync(IFileSystem validationFs, Dictionary<string, NcaToNczConverter> converters, List<FileEntry> fileEntries, string progressId, Func<string, string> labelOf, string startText, string endText,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, string logId, CancellationToken ct)
+    public static async Task ValidateAsync(IFileSystem validationFs, Dictionary<string, NcaToNczConverter> converters, List<FileEntry> fileEntries, string? progressId, Func<string, string> labelOf, string startText, string endText,
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, string? logId, CancellationToken ct)
     {
         var nczEntries = validationFs.EnumerateEntries("/", "*.ncz")
             .Where(e => converters.ContainsKey(Path.ChangeExtension(e.Name, ".nca")))

@@ -93,7 +93,7 @@ public class RepackRowViewModel : ToolTabViewModel
         return [.. offsets.Select(o => (baseValue + o).ToString("X16"))];
     }
 
-    private void LogPatchResult(string title, int coveredCount, int totalCount, IEnumerable<string> lines, bool hasWarning, string? extraWarningMsg = null)
+    private void LogPatchResult(string? title, int coveredCount, int totalCount, IEnumerable<string> lines, bool hasWarning, string? extraWarningMsg = null)
     {
         string lineStr = string.Join(", ", lines);
 
@@ -174,7 +174,7 @@ public class RepackRowViewModel : ToolTabViewModel
 
             if (report.Details.Length > 0)
             {
-                foreach (var line in report.Details.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var line in report.Details.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries))
                 {
                     var parts = line.Split(':');
                     if (parts.Length < 2) continue;
@@ -184,7 +184,7 @@ public class RepackRowViewModel : ToolTabViewModel
 
                     AppendLog($"  ㄴ {gameTitle}", LogLevel.Ok);
 
-                    bool hasWarning = detailContent.Contains("패치 없음") || detailContent.Contains("✘") || detailContent.Contains("missing");
+                    bool hasWarning = detailContent.Contains("패치 없음") || detailContent.Contains('✘') || detailContent.Contains("missing");
 
                     if (hasWarning)
                     {

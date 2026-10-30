@@ -5,15 +5,12 @@ namespace RomForge.Core.Services.WiiU;
 
 public sealed class UnpackService
 {
-    public static ITitleSource Open(string inputPath, string? keysTxtPath = null) => OpenAll(inputPath, keysTxtPath)[0];
-
     public static IReadOnlyList<ITitleSource> OpenAll(string inputPath, string? keysTxtPath = null)
     {
         if (Directory.Exists(inputPath))
         {
             if (WupTitleSource.LooksLikeWupFolder(inputPath))
                 return [new WupTitleSource(inputPath)];
-
             throw new NotSupportedException($"Unsupported folder input: \"{inputPath}\". Expected a WUP folder containing title.tmd/title.tik.");
         }
 
@@ -21,6 +18,7 @@ public sealed class UnpackService
             throw new FileNotFoundException($"Input file not found: {inputPath}", inputPath);
 
         string ext = Path.GetExtension(inputPath).ToLowerInvariant();
+
         switch (ext)
         {
             case ".wua":

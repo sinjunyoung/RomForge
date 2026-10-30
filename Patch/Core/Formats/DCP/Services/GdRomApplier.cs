@@ -4,7 +4,7 @@ namespace Patch.Core.Formats.DCP.Services;
 
 public static class GdRomApplier
 {
-    public static async Task ApplyAsync(string gdiPath, string dcpPath, string outputDir, Action<double, string>? onProgress = null, Action<string>? onLog = null, CancellationToken ct = default)
+    public static async Task ApplyAsync(string? gdiPath, string? dcpPath, string outputDir, Action<double, string>? onProgress = null, Action<string>? onLog = null, CancellationToken ct = default)
     {
         onProgress?.Invoke(0.0, "GDI 메타데이터 및 원본 구조 파싱 중...");
 
@@ -16,7 +16,7 @@ public static class GdRomApplier
         onProgress?.Invoke(1.0, "모든 패치 적용 작업 완료!");
     }
 
-    private static async Task PreparePatchedFilesAsync(GdiFile gdi, string dcpPath, Dictionary<string, byte[]> replacedFiles, Action<double, string>? onProgress, Action<string>? onLog, CancellationToken ct)
+    private static async Task PreparePatchedFilesAsync(GdiFile gdi, string? dcpPath, Dictionary<string, byte[]> replacedFiles, Action<double, string>? onProgress, Action<string>? onLog, CancellationToken ct)
     {
         using var sourceReader = new GdRomCompositeSectorReader(gdi);
         var sourceFunc = sourceReader.AsFunc();
@@ -24,7 +24,7 @@ public static class GdRomApplier
         var root = Iso9660DirectoryReader.ReadTree(sourceFunc, pvdLba);
         var byPath = Iso9660DirectoryReader.Flatten(root)
             .ToDictionary(e => e.FullPath.Replace('/', '\\'), e => e, StringComparer.OrdinalIgnoreCase);
-        using var archive = ZipFile.OpenRead(dcpPath);
+        using var archive = ZipFile.OpenRead(dcpPath ?? throw new ArgumentNullException(nameof(dcpPath)));
         var entries = archive.Entries.Where(e => !string.IsNullOrEmpty(e.Name)).ToList();
         int entryDone = 0;
 

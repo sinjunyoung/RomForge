@@ -134,7 +134,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                             MainViewModel.SetTaskbarProgress(item.Progress);
                         }
                     });
-                    void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
+                    void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
 
                     try
                     {
@@ -193,7 +193,7 @@ public class ConverterMainViewModel : ToolTabViewModel
         }
     }
 
-    private static Task ConvertItemAsync(ConverterFileItem item, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel, string>? log = null, CancellationToken ct = default)
+    private static Task ConvertItemAsync(ConverterFileItem item, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel, string?>? log = null, CancellationToken ct = default)
     {
         string source = item.Extension.ToLower();
         string target = item.SelectedTargetFormat.ToLower();

@@ -81,7 +81,7 @@ public class TitleViewModel : ViewModelBase
         _originalPublisher = Publisher;
     }
 
-    private static string GetRegionFromProductCode(string productCode)
+    private static string GetRegionFromProductCode(string? productCode)
     {
         if (string.IsNullOrEmpty(productCode) || productCode.Length < 7)
             return string.Empty;
@@ -112,7 +112,7 @@ public class TitleViewModel : ViewModelBase
         };
     }
 
-    private static LocaleRegion GetLocaleRegionFromProductCode(string productCode)
+    private static LocaleRegion GetLocaleRegionFromProductCode(string? productCode)
     {
         if (string.IsNullOrEmpty(productCode) || productCode.Length < 7)
             return LocaleRegion.None;

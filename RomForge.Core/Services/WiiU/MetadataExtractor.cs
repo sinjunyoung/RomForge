@@ -12,19 +12,54 @@ using ZstdSharp;
 
 namespace RomForge.Core.Services.WiiU
 {
-    public class MetadataExtractor
+    public partial class MetadataExtractor
     {
-        private static readonly ConcurrentDictionary<string, ExtractorMetadata> _cache = new();
+        [GeneratedRegex(@"<longname_ko[^>]*>(.+?)</longname_ko>", RegexOptions.Singleline)]
+        private static partial Regex LongNameKoRegex();
 
-        #region WUA Structures
+        [GeneratedRegex(@"<longname_en[^>]*>(.+?)</longname_en>", RegexOptions.Singleline)]
+        private static partial Regex LongNameEnRegex();
+
+        [GeneratedRegex(@"<longname_ja[^>]*>(.+?)</longname_ja>", RegexOptions.Singleline)]
+        private static partial Regex LongNameJaRegex();
+
+        [GeneratedRegex(@"<longname[^>]*>(.+?)</longname>", RegexOptions.Singleline)]
+        private static partial Regex LongNameRegex();
+
+        [GeneratedRegex(@"<shortname_ko[^>]*>(.+?)</shortname_ko>", RegexOptions.Singleline)]
+        private static partial Regex ShortNameKoRegex();
+
+        [GeneratedRegex(@"<shortname_en[^>]*>(.+?)</shortname_en>", RegexOptions.Singleline)]
+        private static partial Regex ShortNameEnRegex();
+
+        [GeneratedRegex(@"<shortname_ja[^>]*>(.+?)</shortname_ja>", RegexOptions.Singleline)]
+        private static partial Regex ShortNameJaRegex();
+
+        [GeneratedRegex(@"<shortname[^>]*>(.+?)</shortname>", RegexOptions.Singleline)]
+        private static partial Regex ShortNameRegex();
+
+        [GeneratedRegex(@"<publisher_ko[^>]*>(.+?)</publisher_ko>", RegexOptions.Singleline)]
+        private static partial Regex PublisherKoRegex();
+
+        [GeneratedRegex(@"<publisher_en[^>]*>(.+?)</publisher_en>", RegexOptions.Singleline)]
+        private static partial Regex PublisherEnRegex();
+
+        [GeneratedRegex(@"<publisher_ja[^>]*>(.+?)</publisher_ja>", RegexOptions.Singleline)]
+        private static partial Regex PublisherJaRegex();
+
+        [GeneratedRegex(@"<publisher[^>]*>(.+?)</publisher>", RegexOptions.Singleline)]
+        private static partial Regex PublisherRegex();
+
+        [GeneratedRegex(@"\s+")]
+        private static partial Regex WhitespaceRegex();
+
+        private static readonly ConcurrentDictionary<string, ExtractorMetadata> _cache = new();
 
         private record struct WuaSectionInfo(ulong Offset, ulong Size);
 
         private record struct ZArchiveFooter(uint Magic, uint Version, ulong TotalSize, WuaSectionInfo SectionCompressedData, WuaSectionInfo SectionOffsetRecords, WuaSectionInfo SectionNames, WuaSectionInfo SectionFileTree, WuaSectionInfo SectionMetaDirectory, WuaSectionInfo SectionMetaData);
 
         private record struct FileEntry(uint NameOffset, bool IsFile, ulong OffsetOrNodeStart, ulong SizeOrCount);
-
-        #endregion
 
         public static async Task<ExtractorMetadata> Extract(string filePath, string? keysTxtPath = null)
         {
@@ -299,52 +334,52 @@ namespace RomForge.Core.Services.WiiU
         {
             try
             {
-                var longnameMatch = Regex.Match(xmlContent, @"<longname_ko[^>]*>(.+?)</longname_ko>", RegexOptions.Singleline);
+                var longnameMatch = LongNameKoRegex().Match(xmlContent);
 
                 if (!longnameMatch.Success || string.IsNullOrWhiteSpace(longnameMatch.Groups[1].Value))
-                    longnameMatch = Regex.Match(xmlContent, @"<longname_en[^>]*>(.+?)</longname_en>", RegexOptions.Singleline);
+                    longnameMatch = LongNameEnRegex().Match(xmlContent);
 
                 if (!longnameMatch.Success || string.IsNullOrWhiteSpace(longnameMatch.Groups[1].Value))
-                    longnameMatch = Regex.Match(xmlContent, @"<longname_ja[^>]*>(.+?)</longname_ja>", RegexOptions.Singleline);
+                    longnameMatch = LongNameJaRegex().Match(xmlContent);
 
                 if (!longnameMatch.Success || string.IsNullOrWhiteSpace(longnameMatch.Groups[1].Value))
-                    longnameMatch = Regex.Match(xmlContent, @"<longname[^>]*>(.+?)</longname>", RegexOptions.Singleline);
+                    longnameMatch = LongNameRegex().Match(xmlContent);
 
-                var shortnameMatch = Regex.Match(xmlContent, @"<shortname_ko[^>]*>(.+?)</shortname_ko>", RegexOptions.Singleline);
-
-                if (!shortnameMatch.Success || string.IsNullOrWhiteSpace(shortnameMatch.Groups[1].Value))
-                    shortnameMatch = Regex.Match(xmlContent, @"<shortname_en[^>]*>(.+?)</shortname_en>", RegexOptions.Singleline);
+                var shortnameMatch = ShortNameKoRegex().Match(xmlContent);
 
                 if (!shortnameMatch.Success || string.IsNullOrWhiteSpace(shortnameMatch.Groups[1].Value))
-                    shortnameMatch = Regex.Match(xmlContent, @"<shortname_ja[^>]*>(.+?)</shortname_ja>", RegexOptions.Singleline);
+                    shortnameMatch = ShortNameEnRegex().Match(xmlContent);
 
                 if (!shortnameMatch.Success || string.IsNullOrWhiteSpace(shortnameMatch.Groups[1].Value))
-                    shortnameMatch = Regex.Match(xmlContent, @"<shortname[^>]*>(.+?)</shortname>", RegexOptions.Singleline);
+                    shortnameMatch = ShortNameJaRegex().Match(xmlContent);
 
-                var publisherMatch = Regex.Match(xmlContent, @"<publisher_ko[^>]*>(.+?)</publisher_ko>", RegexOptions.Singleline);
+                if (!shortnameMatch.Success || string.IsNullOrWhiteSpace(shortnameMatch.Groups[1].Value))
+                    shortnameMatch = ShortNameRegex().Match(xmlContent);
 
-                if (!publisherMatch.Success || string.IsNullOrWhiteSpace(publisherMatch.Groups[1].Value))
-                    publisherMatch = Regex.Match(xmlContent, @"<publisher_en[^>]*>(.+?)</publisher_en>", RegexOptions.Singleline);
-
-                if (!publisherMatch.Success || string.IsNullOrWhiteSpace(publisherMatch.Groups[1].Value))
-                    publisherMatch = Regex.Match(xmlContent, @"<publisher_ja[^>]*>(.+?)</publisher_ja>", RegexOptions.Singleline);
+                var publisherMatch = PublisherKoRegex().Match(xmlContent);
 
                 if (!publisherMatch.Success || string.IsNullOrWhiteSpace(publisherMatch.Groups[1].Value))
-                    publisherMatch = Regex.Match(xmlContent, @"<publisher[^>]*>(.+?)</publisher>", RegexOptions.Singleline);
+                    publisherMatch = PublisherEnRegex().Match(xmlContent);
+
+                if (!publisherMatch.Success || string.IsNullOrWhiteSpace(publisherMatch.Groups[1].Value))
+                    publisherMatch = PublisherJaRegex().Match(xmlContent);
+
+                if (!publisherMatch.Success || string.IsNullOrWhiteSpace(publisherMatch.Groups[1].Value))
+                    publisherMatch = PublisherRegex().Match(xmlContent);
 
                 string? title = null;
 
                 if (longnameMatch.Success)
                 {
                     title = longnameMatch.Groups[1].Value.Trim();
-                    title = Regex.Replace(title, @"\s+", " ");
+                    title = WhitespaceRegex().Replace(title, " ");
                     title = System.Net.WebUtility.HtmlDecode(title);
                 }
 
                 if (string.IsNullOrWhiteSpace(title) && shortnameMatch.Success)
                 {
                     title = shortnameMatch.Groups[1].Value.Trim();
-                    title = Regex.Replace(title, @"\s+", " ");
+                    title = WhitespaceRegex().Replace(title, " ");
                     title = System.Net.WebUtility.HtmlDecode(title);
                 }
 
@@ -354,7 +389,7 @@ namespace RomForge.Core.Services.WiiU
                 {
                     var publisher = publisherMatch.Groups[1].Value.Trim();
 
-                    publisher = Regex.Replace(publisher, @"\s+", " ");
+                    publisher = WhitespaceRegex().Replace(publisher, " ");
                     publisher = System.Net.WebUtility.HtmlDecode(publisher);
 
                     if (!string.IsNullOrWhiteSpace(publisher)) 
@@ -373,13 +408,14 @@ namespace RomForge.Core.Services.WiiU
                         var finalTitle = longname ?? shortname;
 
                         if (!string.IsNullOrWhiteSpace(finalTitle))
-                            metadata.Title = Regex.Replace(finalTitle.Trim(), @"\s+", " ");
+                            metadata.Title = WhitespaceRegex().Replace(finalTitle.Trim(), " ");
 
                         if (string.IsNullOrEmpty(metadata.Developer))
                         {
                             var publisher = GetNonEmptyElement(root, "publisher_ko") ?? GetNonEmptyElement(root, "publisher_en") ?? GetNonEmptyElement(root, "publisher_ja") ?? root.Element("publisher")?.Value;
 
-                            if (!string.IsNullOrWhiteSpace(publisher)) metadata.Developer = Regex.Replace(publisher.Trim(), @"\s+", " ");
+                            if (!string.IsNullOrWhiteSpace(publisher))
+                                metadata.Developer = WhitespaceRegex().Replace(publisher.Trim(), " ");
                         }
                     }
                 }
@@ -391,7 +427,6 @@ namespace RomForge.Core.Services.WiiU
         private static string? GetNonEmptyElement(XElement root, string elementName)
         {
             var value = root.Element(elementName)?.Value;
-
             return string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
@@ -463,6 +498,7 @@ namespace RomForge.Core.Services.WiiU
         private static WuaSectionInfo ReadSectionInfoBE(byte[] data, ref int offset)
         {
             var info = new WuaSectionInfo(BinaryPrimitives.ReadUInt64BigEndian(data.AsSpan(offset, 8)), BinaryPrimitives.ReadUInt64BigEndian(data.AsSpan(offset + 8, 8)));
+
             offset += 16;
 
             return info;

@@ -24,7 +24,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged
 
     protected bool SetPropertyAndRequery<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
-        bool result = SetProperty(ref field, value);
+        bool result = SetProperty(ref field, value, name);
 
         CommandManager.InvalidateRequerySuggested();
 

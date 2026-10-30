@@ -10,15 +10,15 @@ public class SourceRowViewModel : ViewModelBase
 {
     private CancellationTokenSource? _iconReloadCts;
 
-    public SourceKind? Kind { get; }
+    public SourceKind Kind { get; }
 
     public string? ItemSourcePath { get; }
 
-    public string FileName => Kind switch
+    public string? FileName => Kind switch
     {
         SourceKind.Pkg => System.IO.Path.GetFileName(Path),
         SourceKind.Unpacked => TitleId,
-        _ => $"{System.IO.Path.GetFileName(Path.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar))} :: {ItemSourcePath}"
+        _ => $"{System.IO.Path.GetFileName(Path?.TrimEnd(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar))} :: {ItemSourcePath}"
     };
 
     public bool IsPkg => Kind == SourceKind.Pkg;
@@ -45,7 +45,7 @@ public class SourceRowViewModel : ViewModelBase
         }
     } = string.Empty;
 
-    public string? Path { get; set { SetProperty(ref field, value); CommandManager.InvalidateRequerySuggested(); } } = string.Empty;
+    public string Path { get; set { SetProperty(ref field, value); CommandManager.InvalidateRequerySuggested(); } } = string.Empty;
 
     public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchIconSource)); CommandManager.InvalidateRequerySuggested(); } } = string.Empty;
 
@@ -65,7 +65,7 @@ public class SourceRowViewModel : ViewModelBase
 
     public string? GameName { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(DisplayTitle)); } }
 
-    public string DisplayTitle => string.IsNullOrWhiteSpace(GameName) ? FileName : GameName!;
+    public string? DisplayTitle => string.IsNullOrWhiteSpace(GameName) ? FileName : GameName;
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
@@ -77,7 +77,7 @@ public class SourceRowViewModel : ViewModelBase
         _ => new SolidColorBrush(Color.FromRgb(0x6B, 0x72, 0x80)),
     };
 
-    private SourceRowViewModel(string? path, SourceKind? kind, string? itemSourcePath, string? titleId, ContentCategory? category, string? contentIdSuffix)
+    private SourceRowViewModel(string path, SourceKind kind, string? itemSourcePath, string? titleId, ContentCategory? category, string? contentIdSuffix)
     {
         Path = path;
         Kind = kind;

@@ -4,20 +4,10 @@ namespace RomForge.Core.ViewModels;
 
 public abstract class ProcessableItemBase(string initialStatus = "") : ViewModelBase, IProgressTrackable
 {
-    private int _no;
-    private int _progress;
 
-    public int No
-    {
-        get => _no;
-        set => SetProperty(ref _no, value);
-    }
+    public int No { get; set => SetProperty(ref field, value); }
 
-    public int Progress
-    {
-        get => _progress;
-        set => SetProperty(ref _progress, value);
-    }
+    public int Progress { get; set => SetProperty(ref field, value); }
 
     public string Status
     {

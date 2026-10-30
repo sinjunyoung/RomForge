@@ -4,21 +4,16 @@ namespace RomForge.Core.Models.Switch;
 
 public class ConverterFileItem : GameFile, Interfaces.IConvertible
 {
-    private string _selectedTargetFormat;
 
     public ConverterFileItem(string filePath) : base(filePath)
     {
         AvailableFormats = GetAvailableFormats(Extension);
-        _selectedTargetFormat = AvailableFormats.FirstOrDefault() ?? string.Empty;
+        SelectedTargetFormat = AvailableFormats.FirstOrDefault() ?? string.Empty;
     }
 
     public List<string> AvailableFormats { get; }
 
-    public string SelectedTargetFormat
-    {
-        get => _selectedTargetFormat;
-        set => SetProperty(ref _selectedTargetFormat, value);
-    }
+    public string SelectedTargetFormat { get; set => SetProperty(ref field, value); }
 
     public string StatusColor => Status switch
     {

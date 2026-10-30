@@ -411,7 +411,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             MainViewModel.SetTaskbarProgress(p.Percent);
         });
 
-        void Log(string msg, LogLevel level, string id = "") => AppendLog(msg, level);
+        void Log(string msg, LogLevel level, string? id = "") => AppendLog(msg, level);
 
         var switchConfig = AppConfig.Instance.Switch;
 

@@ -6,10 +6,13 @@ namespace PSP.PBP.Services;
 
 public static class PbpPackager
 {
-    public static Task<string> WritePbpAsync(IReadOnlyList<DiscWriteInfo> discInfos, string gameId, string gameTitle, string outputPath, int compressionLevel, PbpAssets? assets, byte[]? config = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static Task<string> WritePbpAsync(IReadOnlyList<DiscWriteInfo> discInfos, string gameId, string gameTitle, string? outputPath, int compressionLevel, PbpAssets? assets, byte[]? config = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         return Task.Run(() =>
         {
+            if (outputPath == null)
+                throw new NullReferenceException();
+
             assets ??= new PbpAssets();
 
             var basePbpBytes = BaseResourceLoader.GetBasePbpBytes();

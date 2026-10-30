@@ -7,18 +7,7 @@ namespace RomForge.Core.ViewModels;
 
 public abstract class MultiToolTabViewModel : ToolTabViewModel
 {
-    private int _subTabIndex;
-
-    public int SubTabIndex
-    {
-        get => _subTabIndex;
-        set
-        {
-            _subTabIndex = value;
-            OnPropertyChanged();
-            SyncLogEntries();
-        }
-    }
+    public int SubTabIndex { get; set { SetProperty(ref field, value); OnPropertyChanged(); SyncLogEntries(); } }
 
     public ToolTabViewModel SelectedViewModel
     {

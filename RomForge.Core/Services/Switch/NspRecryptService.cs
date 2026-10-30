@@ -17,7 +17,7 @@ namespace RomForge.Core.Services.Switch;
 
 public class NspRecryptService
 {
-    public static async Task<List<string>> Recrypt(IReadOnlyList<string> inputPaths, bool forceKeyGen0, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    public static async Task<List<string>> Recrypt(IReadOnlyList<string> inputPaths, bool forceKeyGen0, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var ks = KeySetProvider.Instance.KeySet.Clone();
         var processedFiles = new List<string>();
@@ -50,7 +50,7 @@ public class NspRecryptService
         return processedFiles;
     }
 
-    private static async Task<string> RunCoreAsync(string inputPath, bool forceKeyGen0, KeySet keySet, IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+    private static async Task<string> RunCoreAsync(string inputPath, bool forceKeyGen0, KeySet keySet, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct)
     {
         var disposables = new List<IDisposable>();
         string? finalPath = null;

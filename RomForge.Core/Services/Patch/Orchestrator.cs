@@ -6,7 +6,7 @@ using System.IO;
 
 namespace RomForge.Core.Services.Patch;
 
-public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> progress, bool autoCompress, int wiiGcCompressLevel)
+public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>? progress, bool autoCompress, int wiiGcCompressLevel)
 {
     private string? _outputCuePath;
     private string? _outputCcdPath;
@@ -37,9 +37,9 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
             if (detected.Format != RomFormat.Gdi)
                 throw new InvalidOperationException("DCP 패치는 드림캐스트 GDI 원본(또는 GDI로 변환되는 CHD)에만 적용할 수 있습니다.");
 
-            string gdiPath = sourcePath;
+            string? gdiPath = sourcePath;
 
-            if (!Path.GetExtension(gdiPath).Equals(".gdi", StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(Path.GetExtension(gdiPath), ".gdi", StringComparison.OrdinalIgnoreCase))
             {
                 var sourceDir = Path.GetDirectoryName(sourcePath)!;
 
@@ -47,23 +47,22 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
             }
 
             string workDir = Path.GetDirectoryName(gdiPath)!;
-            string titleName = VersionInfoExtractor.ApplySuffix(Path.GetFileNameWithoutExtension(gdiPath), patchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat);
+            string titleName = VersionInfoExtractor.ApplySuffix(Path.GetFileNameWithoutExtension(gdiPath ?? string.Empty), patchPath ?? string.Empty, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat ?? string.Empty);
 
             if (sourceIsTemporary)
             {
-                await GdRomApplier.ApplyAsync(gdiPath, patchPath, workDir, (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log(msg, LogLevel.Info), ct);
-                progress.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
-                log($"패치 완료: {gdiPath}", LogLevel.Ok);
-
+                await GdRomApplier.ApplyAsync(gdiPath, patchPath, workDir, (p, msg) => progress?.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log?.Invoke(msg, LogLevel.Info), ct);
+                progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+                log?.Invoke($"패치 완료: {gdiPath}", LogLevel.Ok);
                 Directory.CreateDirectory(outputDir);
 
                 if (autoCompress)
                 {
-                    progress.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
-                    converter.LogMessage += (_, e) => log(e.Message, e.Level);
+                    converter.LogMessage += (_, e) => log?.Invoke(e.Message, e.Level);
 
                     var chdResult = await converter.ConvertFileAsync(gdiPath, null, progress, null, ct);
 
@@ -73,14 +72,14 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
                     string finalChdPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, titleName + ".chd"));
 
                     File.Move(chdResult.OutputFile!, finalChdPath);
-                    log($"CHD 변환 완료: {finalChdPath}", LogLevel.Ok);
+                    log?.Invoke($"CHD 변환 완료: {finalChdPath}", LogLevel.Ok);
                 }
                 else
                 {
                     string finalDir = Utils.GetUniqueFolderPath(Path.Combine(outputDir, titleName));
 
                     Directory.Move(workDir, finalDir);
-                    log($"결과물 저장 완료: {finalDir}", LogLevel.Ok);
+                    log?.Invoke($"결과물 저장 완료: {finalDir}", LogLevel.Ok);
                 }
             }
             else
@@ -88,9 +87,9 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
                 string dcpOutputDir = Utils.GetUniqueFolderPath(Path.Combine(outputDir, titleName));
 
                 Directory.CreateDirectory(dcpOutputDir);
-                await GdRomApplier.ApplyAsync(gdiPath, patchPath, dcpOutputDir, (p, msg) => progress.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log(msg, LogLevel.Info), ct);
+                await GdRomApplier.ApplyAsync(gdiPath, patchPath, dcpOutputDir, (p, msg) => progress?.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log?.Invoke(msg, LogLevel.Info), ct);
 
-                _outputGdiPath = Path.Combine(dcpOutputDir, Path.GetFileName(gdiPath));
+                _outputGdiPath = Path.Combine(dcpOutputDir ?? string.Empty, Path.GetFileName(gdiPath ?? string.Empty));
 
                 if (File.Exists(_outputGdiPath))
                 {
@@ -105,8 +104,8 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
                     }
                 }
 
-                progress.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
-                log($"패치 완료: {_outputGdiPath}", LogLevel.Ok);
+                progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+                log?.Invoke($"패치 완료: {_outputGdiPath}", LogLevel.Ok);
 
                 if (autoCompress && File.Exists(_outputGdiPath))
                     await _compressKnownConverter.ConvertAsync(detected, outputPath, null, _copiedTrackPaths, null, _outputGdiPath, outputDir, ct);
@@ -116,8 +115,8 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
         }
 
         await Chain.ApplyAsync(sourcePath, patchPaths, outputPath, outputDir, log, progress, ct);
-        progress.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
-        log($"패치 완료: {outputPath}", LogLevel.Ok);
+        progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+        log?.Invoke($"패치 완료: {outputPath}", LogLevel.Ok);
 
         skipCompress = false;
 
@@ -142,7 +141,7 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
 
         if (isZipTarget)
         {
-            progress.Report(new ProgressInfo { Label = "압축 중...", Percent = 0 });
+            progress?.Report(new ProgressInfo { Label = "압축 중...", Percent = 0 });
             await _zipCompressor.CompressFromFileAsync(sourcePath, outputPath, outputDir, ct);
         }
         else
@@ -171,7 +170,7 @@ public class Orchestrator(Action<string, LogLevel> log, IProgress<ProgressInfo> 
         }
         catch (Exception ex)
         {
-            log($"파일 정리 실패: {ex.Message}", LogLevel.Error);
+            log?.Invoke($"파일 정리 실패: {ex.Message}", LogLevel.Error);
         }
     }
 }

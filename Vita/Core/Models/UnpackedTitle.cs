@@ -4,7 +4,7 @@ public sealed record UnpackedTitle
 {
     public string? TitleId { get; init; }
 
-    public string? FolderPath { get; init; }
+    public required string FolderPath { get; init; }
 
     public string? TitleName { get; init; }
 

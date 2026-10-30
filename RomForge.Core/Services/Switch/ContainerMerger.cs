@@ -18,7 +18,7 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class ContainerMerger
 {
-    private static List<MetadataResult> ReadAllMetadata(KeySet keySet, IReadOnlyList<string> inputPaths, Action<string, LogLevel, string> log, CancellationToken ct = default)
+    private static List<MetadataResult> ReadAllMetadata(KeySet keySet, IReadOnlyList<string> inputPaths, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         log?.Invoke(Res.Log_AnalyzeMetadata, LogLevel.Info, string.Empty);
 
@@ -37,7 +37,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<List<string>> MergeAllAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var groups = MergePlanner.BuildTitleGroups(allMeta);
@@ -117,7 +117,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<List<string>> MergeSingleAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, useBlockMode);
@@ -143,7 +143,7 @@ internal static class ContainerMerger
     }
 
     public static async Task<string> MergeProcessAsync(OutputContainer output, Models.Switch.BuildRequest req, KeySet keySet, List<MetadataResult> cachedMeta, bool isValidationEnabled, bool forceKeyGen0, int index, int groupCount, bool hasBase, bool hasUpdate,
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct = default)
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);

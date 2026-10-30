@@ -11,6 +11,7 @@ namespace RomForge.Core.Services.Switch;
 public static class SaturnCoverArtFetcher
 {
     private const string BaseUrl = "https://raw.githubusercontent.com/sinjunyoung/ss-covers/main/covers/default";
+
     private static readonly HttpClient Http = new();
 
     public static async Task<byte[]?> TryDownloadCoverPngAsync(string gameId, CancellationToken ct = default)

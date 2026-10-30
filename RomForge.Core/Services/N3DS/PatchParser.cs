@@ -4,10 +4,13 @@ using RomForge.Core.Models.N3DS;
 
 namespace RomForge.Core.Services.N3DS;
 
-public static class PatchParser
+public static partial class PatchParser
 {
-    private static readonly Regex TitleIdRegex = new(@"00040000[0-9a-fA-F]{8}", RegexOptions.Compiled);
-    private static readonly Regex ProductCodeRegex = new(@"CTR-[A-Z0-9]{4}", RegexOptions.Compiled);
+    [GeneratedRegex(@"00040000[0-9a-fA-F]{8}")]
+    private static partial Regex TitleIdRegex();
+
+    [GeneratedRegex(@"CTR-[A-Z0-9]{4}")]
+    private static partial Regex ProductCodeRegex();
 
     public static PatchSet Parse(string path, CancellationToken ct = default)
     {
@@ -82,7 +85,7 @@ public static class PatchParser
                 if (IsPatchContentDirectory(segment))
                     break;
 
-                Match titleMatch = TitleIdRegex.Match(segment);
+                Match titleMatch = TitleIdRegex().Match(segment);
 
                 if (titleMatch.Success)
                 {
@@ -90,7 +93,7 @@ public static class PatchParser
                     continue;
                 }
 
-                Match productMatch = ProductCodeRegex.Match(segment);
+                Match productMatch = ProductCodeRegex().Match(segment);
 
                 if (productMatch.Success)
                     targetIds.Add(productMatch.Value.ToUpperInvariant());

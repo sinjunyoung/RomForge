@@ -21,8 +21,6 @@ public class Hfs0Builder
 
     public void AddFileWithOffset(string name, ulong offset, ulong size, byte[] hash, uint hashTargetSize) => _files.Add(new Hfs0BuilderEntry(name, offset, size, hash, hashTargetSize));
 
-    public int FileCount => _files.Count;
-
     public ulong RawHeaderSize()
     {
         ulong stringTableSize = (ulong)_files.Sum(f => f.Name.Length + 1);

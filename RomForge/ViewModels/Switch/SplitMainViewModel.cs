@@ -303,7 +303,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
                 var config = AppConfig.Instance.Switch;
                 bool compress = OutputFormat is OutputFormat.NSZ or OutputFormat.XCZ;
                 bool asXci = OutputFormat is OutputFormat.XCI or OutputFormat.XCZ;
-                void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
+                void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
 
                 for (int i = 0; i < jobs.Count; i++)
                 {

@@ -60,7 +60,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
                 var keySet = KeySetProvider.Instance.KeySet.Clone();
                 var results = new List<string>();
                 bool mergeAll = MergeMode == MergeMode.AllInOne;
-                void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
+                void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
 
                 List<string> output =
                     asXci

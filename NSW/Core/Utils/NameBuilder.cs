@@ -76,9 +76,9 @@ public static partial class NameBuilder
         return $"{baseName}.{GetExtension(format)}";
     }
 
-    public static string CompressDisplayNameBuild(string krName, string titleId, string displayVersion)
+    public static string CompressDisplayNameBuild(string? krName, string titleId, string displayVersion)
     {
-        string namePart = BuildNamePart(krName, string.Empty);
+        string namePart = BuildNamePart(krName ?? string.Empty, string.Empty);
         string cleanVersion = NormalizeVersion(displayVersion);
         string infoPart = $"[{titleId.ToUpper()}] [v{cleanVersion}]";
 

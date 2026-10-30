@@ -31,15 +31,6 @@ public sealed class RomHashSink : Stream
     private RomHashResult? _result;
     private bool _disposed;
 
-    public RomHashSink(long totalBytes, IProgress<double>? progress, CancellationToken ct)
-    {
-        _totalBytes = totalBytes;
-        _progress = progress;
-        _externalToken = ct;
-        _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        _consumer = Task.Run(Consume, ct);
-    }
-
     public override bool CanRead => false;
 
     public override bool CanSeek => true;
@@ -52,6 +43,15 @@ public sealed class RomHashSink : Stream
     {
         get => _written;
         set => Seek(value, SeekOrigin.Begin);
+    }
+
+    public RomHashSink(long totalBytes, IProgress<double>? progress, CancellationToken ct)
+    {
+        _totalBytes = totalBytes;
+        _progress = progress;
+        _externalToken = ct;
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        _consumer = Task.Run(Consume, ct);
     }
 
     public override void Flush() { }

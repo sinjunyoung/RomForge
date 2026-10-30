@@ -19,11 +19,10 @@ public static class GameMetadataLookup
     public static GameItem? Find(string gameId)
     {
         _cache ??= Load();
-
         return _cache.GetValueOrDefault(gameId);
     }
 
-    public static async Task<byte[]?> TryDownloadImagePngAsync(string url, CancellationToken ct = default)
+    public static async Task<byte[]?> TryDownloadImagePngAsync(string? url, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(url)) 
             return null;

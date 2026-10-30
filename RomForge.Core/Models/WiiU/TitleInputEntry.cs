@@ -23,13 +23,8 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 
     public ImageSource? Icon { get; init; }
 
-    private TitleRole _role = GuessRole(titleIdHex);
 
-    public TitleRole Role
-    {
-        get => _role;
-        set { _role = value; OnPropertyChanged(); OnPropertyChanged(nameof(Kind)); OnPropertyChanged(nameof(KindBackground)); }
-    }
+    public TitleRole Role { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(Kind)); OnPropertyChanged(nameof(KindBackground)); } } = GuessRole(titleIdHex);
 
     public string Kind => Role switch
     {
@@ -39,25 +34,9 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
         _ => "알수없음",
     };
 
-    private string? _filePath;
-    public string FilePath
-    {
-        get => _filePath ?? filePath;
-        set { _filePath = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayName)); }
-    }
+    public string FilePath { get => field ?? filePath; set { SetProperty(ref field, value); OnPropertyChanged(nameof(DisplayName)); } }
 
-    private string? _patchPath;
-    public string? PatchPath
-    {
-        get => _patchPath;
-        set
-        {
-            _patchPath = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(PatchDisplay));
-            OnPropertyChanged(nameof(PatchIconSource));
-        }
-    }
+    public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchDisplay)); OnPropertyChanged(nameof(PatchIconSource)); } }
 
     public string DisplayName => string.IsNullOrWhiteSpace(TitleName) ? FilePath : TitleName!;
 

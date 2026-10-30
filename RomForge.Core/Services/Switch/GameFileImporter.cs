@@ -22,15 +22,24 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
             System.Windows.Media.Imaging.BitmapImage? icon = null;
             long fileLength = 0;
 
-            try { fileLength = new FileInfo(path).Length; }
+            try 
+            { 
+                fileLength = new FileInfo(path).Length; 
+            }
             catch { }
 
             if (keySet != null)
             {
                 List<MetadataResult> allMeta;
 
-                try { allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); }
-                catch { allMeta = []; }
+                try 
+                {
+                    allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); 
+                }
+                catch 
+                { 
+                    allMeta = []; 
+                }
 
                 if (allMeta.Count > 0)
                 {

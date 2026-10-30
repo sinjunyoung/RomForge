@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common;
+using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;

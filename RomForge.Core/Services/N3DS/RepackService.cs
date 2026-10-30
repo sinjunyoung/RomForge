@@ -3,7 +3,6 @@ using N3DS.Core.Crypto;
 using N3DS.Core.Interfaces;
 using N3DS.Core.Models;
 using N3DS.Core.Services;
-using NSW.Core.Utils;
 using Patch.Core.Enums;
 using Patch.Core.Services;
 using RomForge.Core.Models.N3DS;
@@ -98,7 +97,6 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         string? titleId = null;
         using var patchCtx = PatchSourceContext.Open(getPatchPath(), log);
         bool patchDirSpecified = patchCtx.HasSource;
-
         var partitionIndices = Directory.GetDirectories(unpackedPath, "partition*")
             .Select(Path.GetFileName)
             .Select(name => int.TryParse(name!.AsSpan("partition".Length), out int i) ? i : (int?)null)

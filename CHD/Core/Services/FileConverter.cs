@@ -22,7 +22,7 @@ public class FileConverter : IDisposable
 
     }
 
-    public async Task<ConversionResult> ConvertFileAsync(string filePath, string? outputDir = null, IProgress<ProgressInfo>? progress = null, string? targetFormat = null, CancellationToken ct = default)
+    public async Task<ConversionResult> ConvertFileAsync(string? filePath, string? outputDir = null, IProgress<ProgressInfo>? progress = null, string? targetFormat = null, CancellationToken ct = default)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 

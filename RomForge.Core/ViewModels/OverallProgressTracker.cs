@@ -2,7 +2,7 @@
 
 public sealed class OverallProgressTracker(Action<int> onChanged)
 {
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private int _total;
     private int _finished;
     private int _failed;

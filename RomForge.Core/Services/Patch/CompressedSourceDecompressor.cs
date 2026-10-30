@@ -73,7 +73,7 @@ public static class CompressedSourceDecompressor
         if (!result.Success)
             throw new Exception($"CHD 압축 해제 실패: {result.Message}");
 
-        var outExt = Path.GetExtension(result.OutputFile).ToLowerInvariant();
+        var outExt = Path.GetExtension(result.OutputFile)?.ToLowerInvariant();
 
         if (outExt == ".cue")
         {
@@ -85,7 +85,6 @@ public static class CompressedSourceDecompressor
             int mainIndex = ConversionSource.ResolveMainDataTrackIndex(result.OutputFile);
             string mainBinName = mainIndex >= 0 && mainIndex < bins.Count ? bins[mainIndex] : bins[0];
             var mainBin = Path.Combine(Path.GetDirectoryName(result.OutputFile)!, Path.GetFileName(mainBinName));
-
             return (mainBin, new DetectResult { Format = RomFormat.Bin, Direction = ConvertDirection.Compress, OutputExtension = "chd" });
         }
 
@@ -93,7 +92,6 @@ public static class CompressedSourceDecompressor
         {
             var gdi = GdiFile.Parse(result.OutputFile);
             var mainTrackPath = gdi.GetTrackFullPath(gdi.DataTrack);
-
             return (mainTrackPath, new DetectResult { Format = RomFormat.Gdi, Direction = ConvertDirection.Compress, OutputExtension = "chd" });
         }
 

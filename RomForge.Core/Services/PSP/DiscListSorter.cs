@@ -5,8 +5,11 @@ using System.Text.RegularExpressions;
 
 namespace RomForge.Core.Services.PSP;
 
-public static class DiscListSorter
+public static partial class DiscListSorter
 {
+    [GeneratedRegex(@"\s*\(Disc\s*\d+\)", RegexOptions.IgnoreCase)]
+    private static partial Regex DiscNumberRegex();
+
     public static void SortAndRenumber(ObservableCollection<DiscFileItem> items)
     {
         var sorted = items
@@ -25,5 +28,5 @@ public static class DiscListSorter
         }
     }
 
-    public static string GuessTitle(string filePath) => Regex.Replace(Path.GetFileNameWithoutExtension(filePath), @"\s*\(Disc\s*\d+\)", string.Empty, RegexOptions.IgnoreCase).Trim();
+    public static string GuessTitle(string filePath) => DiscNumberRegex().Replace(Path.GetFileNameWithoutExtension(filePath), string.Empty).Trim();
 }

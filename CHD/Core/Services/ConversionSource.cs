@@ -20,7 +20,7 @@ public partial class ConversionSource
     [GeneratedRegex(@"^TRACK\s+\d+\s+(\S+)", RegexOptions.IgnoreCase)]
     private static partial Regex CueTrackRegex();
 
-    public static ConversionSource FromPath(string filePath)
+    public static ConversionSource FromPath(string? filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             throw new ArgumentException("경로가 비어있습니다.", nameof(filePath));
@@ -92,7 +92,7 @@ public partial class ConversionSource
         return bins;
     }
 
-    public static int ResolveMainDataTrackIndex(string cuePath)
+    public static int ResolveMainDataTrackIndex(string? cuePath)
     {
         if (!File.Exists(cuePath))
             return 0;

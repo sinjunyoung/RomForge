@@ -2,15 +2,9 @@
 
 public abstract class ConvertibleFileItemBase : FileItemBase, Interfaces.IConvertible
 {
-    private string _selectedTargetFormat = string.Empty;
-
     public List<string> AvailableFormats { get; } = [];
 
-    public string SelectedTargetFormat
-    {
-        get => _selectedTargetFormat;
-        set => SetProperty(ref _selectedTargetFormat, value);
-    }
+    public string SelectedTargetFormat { get; set => SetProperty(ref field, value); } = string.Empty;
 
     protected ConvertibleFileItemBase(string filePath, string unsupportedLabel = "미지원") : base(filePath)
     {

@@ -1,33 +1,13 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using static Common.Win32API;
 
 namespace RomForge.Core.UI.Helpers;
 
-public static class Win32API
+public static partial class FlashTaskbar
 {
-    [DllImport("dwmapi.dll")]
-    public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
-
-    [DllImport("user32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct FLASHWINFO
-    {
-        public uint cbSize;
-        public IntPtr hwnd;
-        public uint dwFlags;
-        public uint uCount;
-        public uint dwTimeout;
-    }
-
-    private const uint FLASHW_STOP = 0;
-    private const uint FLASHW_TRAY = 2;
-
     private static readonly Lock _lock = new();
 
     private static DispatcherTimer? _flashTimer;

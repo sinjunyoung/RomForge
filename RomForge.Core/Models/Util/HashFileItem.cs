@@ -5,26 +5,20 @@ namespace RomForge.Core.Models.Util;
 
 public class HashFileItem(string filePath) : FileItemBase(filePath)
 {
-    private string _hashResult = string.Empty;
-    private bool _isCopied;
 
     public string RawHash { get; set; } = string.Empty;
 
     public string HashResult
     {
-        get => _hashResult;
+        get;
         set
         {
-            if (SetProperty(ref _hashResult, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(IsHashAvailable));
         }
-    }
+    } = string.Empty;
 
-    public bool IsCopied
-    {
-        get => _isCopied;
-        set => SetProperty(ref _isCopied, value);
-    }
+    public bool IsCopied { get; set => SetProperty(ref field, value); }
 
     public bool IsHashAvailable => !string.IsNullOrEmpty(HashResult);
 

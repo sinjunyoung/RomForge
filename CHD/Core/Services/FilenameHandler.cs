@@ -8,7 +8,7 @@ public partial class FilenameHandler
     [GeneratedRegex(@"[\uAC00-\uD7A3]")]
     private static partial Regex KoreanRegex();
 
-    public static bool HasKorean(string filename)
+    public static bool HasKorean(string? filename)
     {
         if (string.IsNullOrEmpty(filename))
             return false;
@@ -16,7 +16,7 @@ public partial class FilenameHandler
         return KoreanRegex().IsMatch(filename);
     }
 
-    public static bool HasKoreanInDirectory(string filePath)
+    public static bool HasKoreanInDirectory(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath))
             return false;
@@ -26,7 +26,7 @@ public partial class FilenameHandler
         return !string.IsNullOrEmpty(directory) && HasKorean(directory);
     }
 
-    public static bool HasKoreanInFilename(string filePath)
+    public static bool HasKoreanInFilename(string? filePath)
     {
         if (string.IsNullOrEmpty(filePath))
             return false;
@@ -36,7 +36,7 @@ public partial class FilenameHandler
         return HasKorean(filename);
     }
 
-    public static PathValidationResult ValidatePath(string filePath)
+    public static PathValidationResult ValidatePath(string? filePath)
     {
         return new PathValidationResult
         {

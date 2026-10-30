@@ -37,7 +37,7 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
             {
                 CancellationTokenSource = new CancellationTokenSource();
                 var progress = BuildProgressReporter();
-                void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
+                void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
                 var results = await Task.Run(async () => await NspRecryptService.Recrypt(inputPaths, true, progress, Log, CancellationTokenSource.Token), CancellationTokenSource.Token);
 
                 if (results != null && results.Count > 0)

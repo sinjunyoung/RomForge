@@ -27,8 +27,6 @@ public class PbpFileItem(string filePath) : FileItemBase(filePath), Interfaces.I
         return brush;
     }
 
-    private List<string> _languages = [];
-
     public BitmapSource? Icon { get; set => SetProperty(ref field, value); }
 
     public string? TitleId { get; set => SetProperty(ref field, value); } = string.Empty;
@@ -45,7 +43,6 @@ public class PbpFileItem(string filePath) : FileItemBase(filePath), Interfaces.I
 
     public string SelectedTargetFormat
     {
-        get => "CUE";
-        set { }
+        get => "CUE"; set { }
     }
 }

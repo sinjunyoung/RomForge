@@ -13,7 +13,6 @@ public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
     public const int MaxItems = 5;
 
     private readonly DiscImportService _importService = new();
-    private bool _isValidating;
 
     public ObservableCollection<DiscFileItem> FileItems { get; } = [];
 
@@ -23,11 +22,7 @@ public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
 
     public DiscFileItem? Primary => FileItems.FirstOrDefault(i => i.No == 1);
 
-    public bool IsValidating
-    {
-        get => _isValidating;
-        set => SetProperty(ref _isValidating, value);
-    }
+    public bool IsValidating { get; set => SetProperty(ref field, value); }
 
     public event EventHandler? Changed;
 

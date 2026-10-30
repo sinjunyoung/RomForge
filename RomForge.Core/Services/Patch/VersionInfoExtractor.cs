@@ -3,19 +3,58 @@ using System.Text.RegularExpressions;
 
 namespace RomForge.Core.Services.Patch;
 
-public static class VersionInfoExtractor
+public static partial class VersionInfoExtractor
 {
     public const string DefaultNamingFormat = "{fileName} ({Lan1:code1}-{Lan2:code1}_v{Version}_{Date:yyMMdd})";
 
-    private static readonly Regex VersionRegex = new(@"(?<![A-Za-z0-9])(?:v(?<Version>\d+(?:\.\d+)*[A-Za-z]*)|(?<Version>\d+(?:\.\d+)+[A-Za-z]*)(?:v)?)(?![A-Za-z0-9])", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex DateRegex = new(@"(?<!\d)(?:\d{4}|(\d{2}))(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?!\d)", RegexOptions.Compiled);
-    private static readonly Regex BracketGroupRegex = new(@"\((?<Paren>[^()]*)\)|\[(?<Square>[^\[\]]*)\]", RegexOptions.Compiled);
-    private static readonly Regex LanguageSeparatorRegex = new(@"(?:\s*[,;/|+&]\s*|\s+)", RegexOptions.Compiled);
-    private static readonly Regex FileNameTokenRegex = new(@"\{fileName\}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex VersionTokenRegex = new(@"[ _\-]?\{Version\}[ _\-]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex DateTokenRegex = new(@"\{Date(?::(?<Format>[^{}]+))?\}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex Lan1TokenRegex = new(@"[ _\-]?\{Lan(?:guage|1)(?::(?<Format>[^{}]+))?\}[ _\-]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-    private static readonly Regex Lan2TokenRegex = new(@"[ _\-]?\{Lan2(?::(?<Format>[^{}]+))?\}[ _\-]?", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    [GeneratedRegex(@"(?<![A-Za-z0-9])(?:v(?<Version>\d+(?:\.\d+)*[A-Za-z]*)|(?<Version>\d+(?:\.\d+)+[A-Za-z]*)(?:v)?)(?![A-Za-z0-9])", RegexOptions.IgnoreCase)]
+    private static partial Regex VersionRegex();
+
+    [GeneratedRegex(@"(?<!\d)(?:\d{4}|(\d{2}))(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?!\d)")]
+    private static partial Regex DateRegex();
+
+    [GeneratedRegex(@"\((?<Paren>[^()]*)\)|\[(?<Square>[^\[\]]*)\]")]
+    private static partial Regex BracketGroupRegex();
+
+    [GeneratedRegex(@"(?:\s*[,;/|+&]\s*|\s+)")]
+    private static partial Regex LanguageSeparatorRegex();
+
+    [GeneratedRegex(@"\{fileName\}", RegexOptions.IgnoreCase)]
+    private static partial Regex FileNameTokenRegex();
+
+    [GeneratedRegex(@"[ _\-]?\{Version\}[ _\-]?", RegexOptions.IgnoreCase)]
+    private static partial Regex VersionTokenRegex();
+
+    [GeneratedRegex(@"\{Date(?::(?<Format>[^{}]+))?\}", RegexOptions.IgnoreCase)]
+    private static partial Regex DateTokenRegex();
+
+    [GeneratedRegex(@"[ _\-]?\{Lan(?:guage|1)(?::(?<Format>[^{}]+))?\}[ _\-]?", RegexOptions.IgnoreCase)]
+    private static partial Regex Lan1TokenRegex();
+
+    [GeneratedRegex(@"[ _\-]?\{Lan2(?::(?<Format>[^{}]+))?\}[ _\-]?", RegexOptions.IgnoreCase)]
+    private static partial Regex Lan2TokenRegex();
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhitespaceRegex();
+
+    [GeneratedRegex(@"\{Lan(?:guage|1)(?::[^{}]+)?\}", RegexOptions.IgnoreCase)]
+    private static partial Regex LanPlaceholderRegex();
+
+    [GeneratedRegex(@"\{Lan2(?::[^{}]+)?\}", RegexOptions.IgnoreCase)]
+    private static partial Regex Lan2PlaceholderRegex();
+
+    [GeneratedRegex(@"\(\s*[\-_]\s*")]
+    private static partial Regex ParenDashOpenRegex();
+
+    [GeneratedRegex(@"\s*[\-_]\s*\)")]
+    private static partial Regex ParenDashCloseRegex();
+
+    [GeneratedRegex(@"\(\s*\)")]
+    private static partial Regex EmptyParenRegex();
+
+    [GeneratedRegex(@"\[\s*\]")]
+    private static partial Regex EmptySquareBracketRegex();
+
     private static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
 
     private static readonly Dictionary<string, (string Code1, string Code2, string Code3, string Full)> LanguageMap =
@@ -104,8 +143,8 @@ public static class VersionInfoExtractor
     public static (string? Version, string? Date, string? Language) Extract(string patchFileName)
     {
         string name = Path.GetFileNameWithoutExtension(patchFileName);
-        var versionMatch = VersionRegex.Match(name);
-        var dateMatch = DateRegex.Match(name);
+        var versionMatch = VersionRegex().Match(name);
+        var dateMatch = DateRegex().Match(name);
         string? version = versionMatch.Success ? versionMatch.Groups["Version"].Value : null;
         string? date = null;
 
@@ -136,14 +175,14 @@ public static class VersionInfoExtractor
         string patchLanguage = !string.IsNullOrWhiteSpace(language) ? NormalizeLanguage(language) : NormalizeLanguage(appLanguage);
         string nameOnly = RemoveLanguageGroups(rawNameOnly);
 
-        nameOnly = Regex.Replace(nameOnly, @"\s+", " ").Trim();
+        nameOnly = WhitespaceRegex().Replace(nameOnly, " ").Trim();
 
         string ext = Path.GetExtension(fileName);
         string format = IsValidFormat(namingFormat) ? namingFormat! : DefaultNamingFormat;
-        string result = FileNameTokenRegex.Replace(format, _ => nameOnly);
+        string result = FileNameTokenRegex().Replace(format, _ => nameOnly);
 
-        result = VersionTokenRegex.Replace(result, m => version is null ? string.Empty : Regex.Replace(m.Value, @"\{Version\}", _ => version, RegexOptions.IgnoreCase));
-        result = Lan1TokenRegex.Replace(result, m =>
+        result = VersionTokenRegex().Replace(result, m => version is null ? string.Empty : m.Value.Replace("{Version}", version, StringComparison.OrdinalIgnoreCase));
+        result = Lan1TokenRegex().Replace(result, m =>
         {
             if (string.IsNullOrEmpty(originalLanguage))
                 return string.Empty;
@@ -151,9 +190,9 @@ public static class VersionInfoExtractor
             string fmt = m.Groups["Format"].Success ? m.Groups["Format"].Value : "full";
             string formatted = FormatLanguage(originalLanguage, fmt);
 
-            return Regex.Replace(m.Value, @"\{Lan(?:guage|1)(?::[^{}]+)?\}", _ => formatted, RegexOptions.IgnoreCase);
+            return LanPlaceholderRegex().Replace(m.Value, _ => formatted);
         });
-        result = Lan2TokenRegex.Replace(result, m =>
+        result = Lan2TokenRegex().Replace(result, m =>
         {
             if (string.IsNullOrEmpty(patchLanguage))
                 return string.Empty;
@@ -161,9 +200,9 @@ public static class VersionInfoExtractor
             string fmt = m.Groups["Format"].Success ? m.Groups["Format"].Value : "full";
             string formatted = FormatLanguage(patchLanguage, fmt);
 
-            return Regex.Replace(m.Value, @"\{Lan2(?::[^{}]+)?\}", _ => formatted, RegexOptions.IgnoreCase);
+            return Lan2PlaceholderRegex().Replace(m.Value, _ => formatted);
         });
-        result = DateTokenRegex.Replace(result, m =>
+        result = DateTokenRegex().Replace(result, m =>
         {
             string dateFormat = m.Groups["Format"].Success ? m.Groups["Format"].Value : "yyMMdd";
 
@@ -175,18 +214,18 @@ public static class VersionInfoExtractor
 
             return date;
         });
-        result = Regex.Replace(result, @"\(\s*[\-_]\s*", "(");
-        result = Regex.Replace(result, @"\s*[\-_]\s*\)", ")");
-        result = Regex.Replace(result, @"\(\s*\)", string.Empty);
-        result = Regex.Replace(result, @"\[\s*\]", string.Empty);
-        result = Regex.Replace(result, @"\s+", " ").Trim();
+        result = ParenDashOpenRegex().Replace(result, "(");
+        result = ParenDashCloseRegex().Replace(result, ")");
+        result = EmptyParenRegex().Replace(result, string.Empty);
+        result = EmptySquareBracketRegex().Replace(result, string.Empty);
+        result = WhitespaceRegex().Replace(result, " ").Trim();
 
         return result + ext;
     }
 
     private static string? ExtractLanguage(string name)
     {
-        foreach (Match group in BracketGroupRegex.Matches(name))
+        foreach (Match group in BracketGroupRegex().Matches(name))
         {
             string content = GetBracketContent(group);
             string? language = ExtractLanguageFromGroup(content);
@@ -200,7 +239,7 @@ public static class VersionInfoExtractor
 
     private static string? ExtractLanguageFromGroup(string content)
     {
-        foreach (string part in LanguageSeparatorRegex.Split(content))
+        foreach (string part in LanguageSeparatorRegex().Split(content))
         {
             string candidate = part.Trim();
 
@@ -216,7 +255,7 @@ public static class VersionInfoExtractor
 
     private static string GetBracketContent(Match match) => match.Groups["Paren"].Success ? match.Groups["Paren"].Value : match.Groups["Square"].Value;
 
-    private static string NormalizeLanguage(string rawLanguage)
+    private static string NormalizeLanguage(string? rawLanguage)
     {
         if (string.IsNullOrWhiteSpace(rawLanguage))
             return string.Empty;
@@ -234,7 +273,7 @@ public static class VersionInfoExtractor
 
     private static string RemoveLanguageGroups(string name)
     {
-        return BracketGroupRegex.Replace(name, match =>
+        return BracketGroupRegex().Replace(name, match =>
         {
             string content = GetBracketContent(match);
             return ExtractLanguageFromGroup(content) is not null ? string.Empty : match.Value;
@@ -273,10 +312,10 @@ public static class VersionInfoExtractor
         if (string.IsNullOrWhiteSpace(format) || !format.Contains("{fileName}", StringComparison.OrdinalIgnoreCase) || format.Length > 150)
             return false;
 
-        string validationFormat = DateTokenRegex.Replace(format, "{Date}");
+        string validationFormat = DateTokenRegex().Replace(format, "{Date}");
 
-        validationFormat = Lan1TokenRegex.Replace(validationFormat, "{Lan1}");
-        validationFormat = Lan2TokenRegex.Replace(validationFormat, "{Lan2}");
+        validationFormat = Lan1TokenRegex().Replace(validationFormat, "{Lan1}");
+        validationFormat = Lan2TokenRegex().Replace(validationFormat, "{Lan2}");
 
         return validationFormat.IndexOfAny(InvalidFileNameChars) < 0;
     }

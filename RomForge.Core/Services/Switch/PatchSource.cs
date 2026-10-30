@@ -11,13 +11,6 @@ public sealed class PatchSource
     private readonly Dictionary<string, (string Location, int Depth)> _idDirs = new(StringComparer.OrdinalIgnoreCase);
     private readonly Func<string, string> _toPatchPath;
 
-    private PatchSource(Func<string, string> toPatchPath, string genericPath, bool hasGeneric)
-    {
-        _toPatchPath = toPatchPath;
-        GenericPath = genericPath;
-        HasGeneric = hasGeneric;
-    }
-
     public string GenericPath { get; }
 
     public bool HasGeneric { get; }
@@ -25,6 +18,13 @@ public sealed class PatchSource
     public bool HasIdDirs => _idDirs.Count > 0;
 
     public IReadOnlyCollection<string> FoundIds => _idDirs.Keys;
+
+    private PatchSource(Func<string, string> toPatchPath, string genericPath, bool hasGeneric)
+    {
+        _toPatchPath = toPatchPath;
+        GenericPath = genericPath;
+        HasGeneric = hasGeneric;
+    }
 
     public static bool IsTitleIdName(string name) => name.Length == 16 && name.All(Uri.IsHexDigit);
 

@@ -7,13 +7,6 @@ namespace RomForge.Core.ViewModels.Switch;
 public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null) : ViewModelBase
 {
     private bool _ownChecked = true;
-    private bool _isExpanded;
-    private string _name = Path.GetFileNameWithoutExtension(filePath);
-    private string _typeText = string.Empty;
-    private string _titleId = string.Empty;
-    private string _version = string.Empty;
-    private long _sizeBytes;
-    private ImageSource? _icon;
 
     public string FilePath { get; } = filePath;
 
@@ -27,68 +20,52 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
 
     public bool CanExpand => Parent == null && Children.Count > 1;
 
-    public string ExpanderText => _isExpanded ? "−" : "+";
+    public string ExpanderText => IsExpanded ? "−" : "+";
 
     public string Extension => IsChild ? string.Empty : Path.GetExtension(FilePath).TrimStart('.').ToLowerInvariant();
 
     public bool IsExpanded
     {
-        get => _isExpanded;
+        get;
         set
         {
-            if (SetProperty(ref _isExpanded, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(ExpanderText));
         }
     }
 
-    public string Name
-    {
-        get => _name;
-        set => SetProperty(ref _name, value);
-    }
+    public string Name { get; set => SetProperty(ref field, value); } = Path.GetFileNameWithoutExtension(filePath);
 
     public string TypeText
     {
-        get => _typeText;
+        get;
         set
         {
-            if (SetProperty(ref _typeText, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(TypeBackground));
                 OnPropertyChanged(nameof(TypeForeground));
             }
         }
-    }
+    } = string.Empty;
 
-    public string TitleId
-    {
-        get => _titleId;
-        set => SetProperty(ref _titleId, value);
-    }
+    public string TitleId { get; set => SetProperty(ref field, value); } = string.Empty;
 
-    public string Version
-    {
-        get => _version;
-        set => SetProperty(ref _version, value);
-    }
+    public string Version { get; set => SetProperty(ref field, value); } = string.Empty;
 
     public long SizeBytes
     {
-        get => _sizeBytes;
+        get;
         set
         {
-            if (SetProperty(ref _sizeBytes, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(SizeText));
         }
     }
 
-    public string SizeText => Common.Utils.FormatFileSize(_sizeBytes);
+    public string SizeText => Common.Utils.FormatFileSize(SizeBytes);
 
-    public ImageSource? Icon
-    {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
-    }
+    public ImageSource? Icon { get; set => SetProperty(ref field, value); }
 
     public bool? IsChecked
     {
@@ -164,8 +141,8 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
         if (Children.Count > 1)
             return new HashSet<string>(Children.Where(c => c._ownChecked).Select(c => c.TitleId), StringComparer.OrdinalIgnoreCase);
 
-        if (Analyzed && _ownChecked && !string.IsNullOrEmpty(_titleId))
-            return new HashSet<string>([_titleId], StringComparer.OrdinalIgnoreCase);
+        if (Analyzed && _ownChecked && !string.IsNullOrEmpty(TitleId))
+            return new HashSet<string>([TitleId], StringComparer.OrdinalIgnoreCase);
 
         return new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     }
@@ -183,15 +160,15 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (_typeText == Res.Status_NoKey)
+            if (TypeText == Res.Status_NoKey)
                 return new SolidColorBrush(Color.FromArgb(60, 220, 50, 50));
 
-            if (_typeText == "?")
+            if (TypeText == "?")
                 return new SolidColorBrush(Color.FromArgb(60, 200, 160, 0));
 
-            bool hasBase = _typeText.Contains('B');
-            bool hasUpdate = _typeText.Contains('U');
-            bool hasDlc = _typeText.Contains('D');
+            bool hasBase = TypeText.Contains('B');
+            bool hasUpdate = TypeText.Contains('U');
+            bool hasDlc = TypeText.Contains('D');
             int count = (hasBase ? 1 : 0) + (hasUpdate ? 1 : 0) + (hasDlc ? 1 : 0);
 
             if (count > 1)
@@ -214,15 +191,15 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (_typeText == Res.Status_NoKey)
+            if (TypeText == Res.Status_NoKey)
                 return new SolidColorBrush(Color.FromRgb(255, 100, 100));
 
-            if (_typeText == "?")
+            if (TypeText == "?")
                 return new SolidColorBrush(Color.FromRgb(255, 210, 80));
 
-            bool hasBase = _typeText.Contains('B');
-            bool hasUpdate = _typeText.Contains('U');
-            bool hasDlc = _typeText.Contains('D');
+            bool hasBase = TypeText.Contains('B');
+            bool hasUpdate = TypeText.Contains('U');
+            bool hasDlc = TypeText.Contains('D');
             int count = (hasBase ? 1 : 0) + (hasUpdate ? 1 : 0) + (hasDlc ? 1 : 0);
 
             if (count > 1)

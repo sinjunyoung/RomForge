@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace RomForge.Core.Services.Switch
+﻿namespace RomForge.Core.Services.Switch
 {
     public static class Crc32Helper
     {
@@ -29,22 +27,6 @@ namespace RomForge.Core.Services.Switch
 
             foreach (byte b in data)
                 crc = Table[(crc ^ b) & 0xFF] ^ (crc >> 8);
-
-            return crc ^ 0xFFFFFFFF;
-        }
-
-        public static uint ComputeFile(string path)
-        {
-            uint crc = 0xFFFFFFFF;
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-            var buffer = new byte[1 << 20];
-            int read;
-
-            while ((read = fs.Read(buffer, 0, buffer.Length)) > 0)
-            {
-                for (int i = 0; i < read; i++)
-                    crc = Table[(crc ^ buffer[i]) & 0xFF] ^ (crc >> 8);
-            }
 
             return crc ^ 0xFFFFFFFF;
         }

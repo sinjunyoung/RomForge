@@ -23,7 +23,7 @@ namespace RomForge.Core.Services.Switch;
 public class SplitService
 {
     public static async Task<int> Split(string sourcePath, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, int index, int groupCount, 
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, IReadOnlySet<string>? onlyTitleIds = null, CancellationToken ct = default)
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, IReadOnlySet<string>? onlyTitleIds = null, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet.Clone();
         var allMetas = MetadataReader.GetMetadataFromContainer(keySet, sourcePath);
@@ -125,7 +125,7 @@ public class SplitService
 
     private static async Task<bool> ProcessSplitItem(MetadataResult meta, Dictionary<string, (string EntryName, string Ext)> fileRegistry, Dictionary<string, (string EntryName, string Ext)> tikRegistry, IFileSystem fs, KeySet keySet, string baseTitle, string outputDir, 
         bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, byte[]? xciPrefixBuffer, List<(string Name, ulong AbsOffset, ulong Size, byte[] Hash, uint HashTargetSize)>? rootEntriesTemplate, Stream? srcStream, int index, int groupCount, 
-        IProgress<ProgressInfo> progress, Action<string, LogLevel, string> log, CancellationToken ct)
+        IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct)
     {
         var disposables = new List<IDisposable>();
         var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);

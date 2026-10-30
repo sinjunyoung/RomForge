@@ -8,234 +8,128 @@ namespace RomForge.Core;
 
 public class CommonConfig : ViewModelBase
 {
-    private double _logBoxHeight = 130;
-    public double LogBoxHeight
-    {
-        get => _logBoxHeight;
-        set { SetProperty(ref _logBoxHeight, value); }
-    }
+    public double LogBoxHeight { get; set { SetProperty(ref field, value); } } = 130;
 
-    private bool _topmost;
-    public bool Topmost
-    {
-        get => _topmost;
-        set { SetProperty(ref _topmost, value); }
-    }
+    public bool Topmost { get; set { SetProperty(ref field, value); } }
+    
+    public bool AutoCheckUpdate { get; set { SetProperty(ref field, value); } } = true;
 
-    private bool _autoCheckUpdate = true;
-    public bool AutoCheckUpdate
-    {
-        get => _autoCheckUpdate;
-        set { SetProperty(ref _autoCheckUpdate, value); }
-    }
+    public string? Language { get; set { SetProperty(ref field, value); } } = "Korean";
 
-    private string? _language = "Korean";
-    public string? Language
-    {
-        get => _language;
-        set { SetProperty(ref _language, value); }
-    }
+    public bool IsMuted { get; set { SetProperty(ref field, value); } }
 
-    private bool _isMuted;
-    public bool IsMuted
-    {
-        get => _isMuted;
-        set { SetProperty(ref _isMuted, value); }
-    }
+    public double SoundVolume { get; set { SetProperty(ref field, value); } } = 50;
 
-    private double _soundVolume = 50;
-    public double SoundVolume
-    {
-        get => _soundVolume;
-        set { SetProperty(ref _soundVolume, value); }
-    }
+    public string CompleteSoundPath { get; set { SetProperty(ref field, value); } } = "complete.mp3";
 
-    private string _completeSoundPath = "complete.mp3";
-    public string CompleteSoundPath
-    {
-        get => _completeSoundPath;
-        set { SetProperty(ref _completeSoundPath, value); }
-    }
+    public string CancelSoundPath { get; set { SetProperty(ref field, value); } } = "cancel.mp3";
 
-    private string _cancelSoundPath = "cancel.mp3";
-    public string CancelSoundPath
-    {
-        get => _cancelSoundPath;
-        set { SetProperty(ref _cancelSoundPath, value); }
-    }
-
-    private string _errorSoundPath = "error.mp3";
-    public string ErrorSoundPath
-    {
-        get => _errorSoundPath;
-        set { SetProperty(ref _errorSoundPath, value); }
-    }
+    public string ErrorSoundPath { get; set { SetProperty(ref field, value); } } = "error.mp3";
 }
 
 public class WindowConfig : ViewModelBase
 {
-    private double _left = 100;
-    public double Left { get => _left; set => SetProperty(ref _left, value); }
+    public double Left { get; set { SetProperty(ref field, value); } } = 100;
 
-    private double _top = 100;
-    public double Top { get => _top; set => SetProperty(ref _top, value); }
+    public double Top { get; set { SetProperty(ref field, value); } } = 100;
 
-    private double _width = 900;
-    public double Width { get => _width; set => SetProperty(ref _width, value); }
+    public double Width { get; set { SetProperty(ref field, value); } } = 900;
 
-    private double _height = 715;
-    public double Height { get => _height; set => SetProperty(ref _height, value); }
+    public double Height { get; set { SetProperty(ref field, value); } } = 715;
 
-    private bool _isMaximized = false;
-    public bool IsMaximized { get => _isMaximized; set => SetProperty(ref _isMaximized, value); }
+    public bool IsMaximized { get; set { SetProperty(ref field, value); } } = false;
 }
 
 public class PatchConfig : ViewModelBase
 {
-    private bool _autoCompress;
-    public bool AutoCompress
-    {
-        get => _autoCompress;
-        set { SetProperty(ref _autoCompress, value); }
-    }
+    public bool AutoCompress { get; set { SetProperty(ref field, value); } }
 
-    private bool _namingEnabled = true;
-    public bool NamingEnabled
-    {
-        get => _namingEnabled;
-        set { SetProperty(ref _namingEnabled, value); }
-    }
+    public bool NamingEnabled { get; set { SetProperty(ref field, value); } } = true;
 
-    private string _namingFormat = "{fileName} (v{Version}_{Date:yyMMdd})";
-    public string NamingFormat
-    {
-        get => _namingFormat;
-        set { SetProperty(ref _namingFormat, value); }
-    }
+    public string NamingFormat { get; set { SetProperty(ref field, value); } } = "{fileName} (v{Version}_{Date:yyMMdd})";
 
-    private bool _useNormalPatchCustomOutputPath;
-    public bool UseNormalPatchCustomOutputPath
-    {
-        get => _useNormalPatchCustomOutputPath;
-        set { SetProperty(ref _useNormalPatchCustomOutputPath, value); }
-    }
+    public bool UseNormalPatchCustomOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _outputPath;
-    public string? OutputPath
-    {
-        get => _outputPath;
-        set { SetProperty(ref _outputPath, value); }
-    }
+    public string? OutputPath { get; set { SetProperty(ref field, value); } }
 }
 
 public class ChdmanConfig : ViewModelBase
 {
-    private string _compression = "zlib";
-    public string Compression { get => _compression; set => SetProperty(ref _compression, value); }
+    public string Compression { get; set { SetProperty(ref field, value); } } = "zlib";
 }
 
 public class SwitchConfig : ViewModelBase
 {
-    private int _compressLevel = 18;
-    public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
+    public int CompressLevel { get; set { SetProperty(ref field, value); } } = 18;
 
-    private int _lz4CompressLevel = 9;
-    public int Lz4CompressLevel { get => _lz4CompressLevel; set => SetProperty(ref _lz4CompressLevel, value); }
+    public int Lz4CompressLevel { get; set { SetProperty(ref field, value); } } = 9;
 
-    
+    public bool VerifyCompress { get; set { SetProperty(ref field, value); } } = false;
 
-    private bool _verifyCompress = false;
-    public bool VerifyCompress { get => _verifyCompress; set => SetProperty(ref _verifyCompress, value); }
+    public bool UseBlockMode { get; set { SetProperty(ref field, value); } } = true;
 
-    private bool _useBlockMode = true;
-    public bool UseBlockMode { get => _useBlockMode; set => SetProperty(ref _useBlockMode, value); }
+    public bool UseBlocklessMode { get; set { SetProperty(ref field, value); } } = false;
 
-    private bool _useBlocklessMode = false;
-    public bool UseBlocklessMode { get => _useBlocklessMode; set => SetProperty(ref _useBlocklessMode, value); }
-
-    private bool _forceKeyGen0 = false;
-    public bool ForceKeyGen0 { get => _forceKeyGen0; set => SetProperty(ref _forceKeyGen0, value); }
+    public bool ForceKeyGen0 { get; set { SetProperty(ref field, value); } } = false;
 }
 
 public class AzaharConfig : ViewModelBase
 {
-    private int _compressLevel = 18;
-    public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
+    public int CompressLevel { get; set { SetProperty(ref field, value); } } = 18;
 }
 
 public class WiiGCConfig : ViewModelBase
 {
-    private int _compressLevel = 18;
-    public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
+    public int CompressLevel { get; set { SetProperty(ref field, value); } } = 18;
 }
 
 public class PS1Config : ViewModelBase
 {
-    private int _compressLevel = 9;
-    public int CompressLevel { get => _compressLevel; set => SetProperty(ref _compressLevel, value); }
+    public int CompressLevel { get; set { SetProperty(ref field, value); } } = 9;
 
-    private bool _useGameIdMode = false;
-    public bool UseGameIdMode { get => _useGameIdMode; set => SetProperty(ref _useGameIdMode, value); }
+    public bool UseGameIdMode { get; set { SetProperty(ref field, value); } } = false;
 
-    private bool _useFileNameMode = true;
-    public bool UseFileNameMode { get => _useFileNameMode; set => SetProperty(ref _useFileNameMode, value); }
+    public bool UseFileNameMode { get; set { SetProperty(ref field, value); } } = true;
 
-    private bool _useUpperCase = false;
-    public bool UseUpperCase { get => _useUpperCase; set => SetProperty(ref _useUpperCase, value); }
+    public bool UseUpperCase { get; set { SetProperty(ref field, value); } } = false;
 
-    private bool _isHighQualityMode = true;
-    public bool IsHighQualityMode { get => _isHighQualityMode; set => SetProperty(ref _isHighQualityMode, value); }
+    public bool IsHighQualityMode { get; set { SetProperty(ref field, value); } } = true;
 }
 
 public class TistoryConfig : ViewModelBase
 {
-    private string? _saveDirectory;
-    public string? SaveDirectory { get => _saveDirectory; set => SetProperty(ref _saveDirectory, value); }
+    public string? SaveDirectory { get; set { SetProperty(ref field, value); } }
 
-    private bool _autoExtractAfterDownload;
-    public bool AutoExtractAfterDownload { get => _autoExtractAfterDownload; set => SetProperty(ref _autoExtractAfterDownload, value); }
+    public bool AutoExtractAfterDownload { get; set { SetProperty(ref field, value); } }
 }
 
 public class OutputFoldersConfig : ViewModelBase
 {
-    private string? _switchRepackOutputPath;
-    public string? SwitchRepackOutputPath { get => _switchRepackOutputPath; set => SetProperty(ref _switchRepackOutputPath, value); }
+    public string? SwitchRepackOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _switchMergeOutputPath;
-    public string? SwitchMergeOutputPath { get => _switchMergeOutputPath; set => SetProperty(ref _switchMergeOutputPath, value); }
+    public string? SwitchMergeOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _switchSplitOutputPath;
-    public string? SwitchSplitOutputPath { get => _switchSplitOutputPath; set => SetProperty(ref _switchSplitOutputPath, value); }    
+    public string? SwitchSplitOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _wiiURepackOutputPath;
-    public string? WiiURepackOutputPath { get => _wiiURepackOutputPath; set => SetProperty(ref _wiiURepackOutputPath, value); }
+    public string? WiiURepackOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _wiiUConvertOutputPath;
-    public string? WiiUConvertOutputPath { get => _wiiUConvertOutputPath; set => SetProperty(ref _wiiUConvertOutputPath, value); }
+    public string? WiiUConvertOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _threeDsRepackOutputPath;
-    public string? ThreeDsRepackOutputPath { get => _threeDsRepackOutputPath; set => SetProperty(ref _threeDsRepackOutputPath, value); }
+    public string? ThreeDsRepackOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _vitaOutputPath;
-    public string? VitaOutputPath { get => _vitaOutputPath; set => SetProperty(ref _vitaOutputPath, value); }
+    public string? VitaOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _vitaConvertOutputPath;
-    public string? VitaConvertOutputPath { get => _vitaConvertOutputPath; set => SetProperty(ref _vitaConvertOutputPath, value); }
+    public string? VitaConvertOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private bool _useCompressCustomOutputPath;
-    public bool UseCompressCustomOutputPath { get => _useCompressCustomOutputPath; set => SetProperty(ref _useCompressCustomOutputPath, value); }
+    public bool UseCompressCustomOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _compressOutputPath;
-    public string? CompressOutputPath { get => _compressOutputPath; set => SetProperty(ref _compressOutputPath, value); }
+    public string? CompressOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private bool _useConvertCustomOutputPath;
-    public bool UseConvertCustomOutputPath { get => _useConvertCustomOutputPath; set => SetProperty(ref _useConvertCustomOutputPath, value); }
+    public bool UseConvertCustomOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _convertOutputPath;
-    public string? ConvertOutputPath { get => _convertOutputPath; set => SetProperty(ref _convertOutputPath, value); }
+    public string? ConvertOutputPath { get; set { SetProperty(ref field, value); } }
 
-    private string? _wiiOutputPath;
-    public string? WiiOutputPath { get => _wiiOutputPath; set => SetProperty(ref _wiiOutputPath, value); }
+    public string? WiiOutputPath { get; set { SetProperty(ref field, value); } }
 }
 
 public class AppConfig : ViewModelBase
@@ -246,35 +140,25 @@ public class AppConfig : ViewModelBase
     private static readonly Lazy<AppConfig> _instance = new(() => new AppConfig().LoadInternal());
     public static AppConfig Instance => _instance.Value;
 
-    private CommonConfig _common = new();
-    public CommonConfig Common { get => _common; set => SetProperty(ref _common, value); }
+    public CommonConfig Common { get; set { SetProperty(ref field, value); } } = new();
 
-    private WindowConfig _window = new();
-    public WindowConfig Window { get => _window; set => SetProperty(ref _window, value); }
+    public WindowConfig Window { get; set { SetProperty(ref field, value); } } = new();
 
-    private PatchConfig _patch = new();
-    public PatchConfig Patch { get => _patch; set => SetProperty(ref _patch, value); }
+    public PatchConfig Patch { get; set { SetProperty(ref field, value); } } = new();
 
-    private ChdmanConfig _chdman = new();
-    public ChdmanConfig Chdman { get => _chdman; set => SetProperty(ref _chdman, value); }
+    public ChdmanConfig Chdman { get; set { SetProperty(ref field, value); } } = new();
 
-    private SwitchConfig _switch = new();
-    public SwitchConfig Switch { get => _switch; set => SetProperty(ref _switch, value); }
+    public SwitchConfig Switch { get; set { SetProperty(ref field, value); } } = new();
 
-    private AzaharConfig _azahar = new();
-    public AzaharConfig Azahar { get => _azahar; set => SetProperty(ref _azahar, value); }
+    public AzaharConfig Azahar { get; set { SetProperty(ref field, value); } } = new();
 
-    private WiiGCConfig _wiigc = new();
-    public WiiGCConfig WiiGC { get => _wiigc; set => SetProperty(ref _wiigc, value); }
+    public WiiGCConfig WiiGC { get; set { SetProperty(ref field, value); } } = new();
 
-    private PS1Config _ps1 = new();
-    public PS1Config PS1 { get => _ps1; set => SetProperty(ref _ps1, value); }
+    public PS1Config PS1 { get; set { SetProperty(ref field, value); } } = new();
 
-    private TistoryConfig _tistory = new();
-    public TistoryConfig Tistory { get => _tistory; set => SetProperty(ref _tistory, value); }
+    public TistoryConfig Tistory { get; set { SetProperty(ref field, value); } } = new();
 
-    private OutputFoldersConfig _outputFolders = new();
-    public OutputFoldersConfig OutputFolders { get => _outputFolders; set => SetProperty(ref _outputFolders, value); }
+    public OutputFoldersConfig OutputFolders { get; set { SetProperty(ref field, value); } } = new();
 
     [JsonConstructor]
     private AppConfig() { }

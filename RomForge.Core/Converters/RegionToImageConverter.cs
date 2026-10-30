@@ -8,12 +8,12 @@ namespace RomForge.Core.Converters
     {
         public RegionToImageConverter() { }
 
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is null)
+            if (value == null)
                 return null;
 
-            string productCode = value.ToString();
+            string productCode = value.ToString()!;
 
             if (string.IsNullOrEmpty(productCode) || productCode.Length < 7) 
                 return null;

@@ -21,7 +21,7 @@ public static class ChdHasher
                 return false;
 
             var track = SelectDataTrack(info, true);
-            int index = info.Tracks.Take(info.TrackCount).ToList().IndexOf(track);
+            int index = (info.Tracks ?? []).Take(info.TrackCount).ToList().IndexOf(track);
             var layout = BuildRedumpLayout(info);
 
             return layout is not null && index >= 0 && IsRedumpLayoutDifferent(layout[index], track);
@@ -58,7 +58,7 @@ public static class ChdHasher
 
         if (gdRomLayout == GdRomHashLayout.Cue)
         {
-            int index = info.Tracks.Take(info.TrackCount).ToList().IndexOf(track);
+            int index = (info.Tracks ?? []).Take(info.TrackCount).ToList().IndexOf(track);
             var layout = BuildRedumpLayout(info);
 
             if (layout is not null && index >= 0)
@@ -70,7 +70,7 @@ public static class ChdHasher
 
     private static TrackInfo SelectDataTrack(ChdInfo info, bool lastDataTrack)
     {
-        var tracks = info.Tracks.Take(info.TrackCount).ToList();
+        var tracks = (info.Tracks ?? []).Take(info.TrackCount).ToList();
         var dataTracks = tracks.Where(t => !IsAudio(t.TrackType)).ToList();
 
         if (dataTracks.Count == 0)
@@ -79,7 +79,7 @@ public static class ChdHasher
         return lastDataTrack ? dataTracks[^1] : dataTracks[0];
     }
 
-    private static bool IsAudio(string trackType) => string.Equals(trackType, "AUDIO", StringComparison.OrdinalIgnoreCase);
+    private static bool IsAudio(string? trackType) => string.Equals(trackType, "AUDIO", StringComparison.OrdinalIgnoreCase);
 
     private static (string Name, RomHashResult Hashes) HashTrack(LibChdrWrapper chd, ChdInfo info, TrackInfo track, bool gdiNaming, IProgress<double>? progress, CancellationToken ct)
     {
@@ -142,7 +142,7 @@ public static class ChdHasher
 
     private static List<RestoreTrack>? BuildRedumpLayout(ChdInfo info)
     {
-        var tracks = info.Tracks.Take(info.TrackCount).Select(t => new RestoreTrack
+        var tracks = (info.Tracks ?? []).Take(info.TrackCount).Select(t => new RestoreTrack
         {
             Frames = t.Frames,
             PadFrames = t.PadFrames,
@@ -209,7 +209,7 @@ public static class ChdHasher
         StreamRestoredTrack(chd, layout, index, span => sink.Write(span), ct);
 
         var result = sink.Complete();
-        string baseName = Path.GetFileNameWithoutExtension(info.FileName);
+        string? baseName = Path.GetFileNameWithoutExtension(info.FileName);
         string number = layout.Count >= 10 ? trackNumber.ToString("00") : trackNumber.ToString();
 
         return ($"{baseName} (Track {number}).bin", result);
@@ -266,13 +266,13 @@ public static class ChdHasher
 
     private static string BuildTrackName(ChdInfo info, TrackInfo track, bool gdiNaming)
     {
-        string baseName = Path.GetFileNameWithoutExtension(info.FileName);
+        string? baseName = Path.GetFileNameWithoutExtension(info.FileName);
 
         if (gdiNaming)
             return $"{baseName}{track.TrackNumber:00}.bin";
 
         if (info.TrackCount == 1)
-            return baseName + (track.TrackType.StartsWith("MODE1", StringComparison.OrdinalIgnoreCase) ? ".iso" : ".bin");
+            return baseName + (track.TrackType?.StartsWith("MODE1", StringComparison.OrdinalIgnoreCase) == true ? ".iso" : ".bin");
 
         string number = info.TrackCount >= 10 ? track.TrackNumber.ToString("00") : track.TrackNumber.ToString();
 
@@ -302,7 +302,7 @@ public static class ChdHasher
         return sink.Complete();
     }
 
-    private static int GetDataSize(string trackType) => trackType.ToUpperInvariant() switch
+    private static int GetDataSize(string? trackType) => trackType?.ToUpperInvariant() switch
     {
         "MODE1" or "MODE1/2048" or "MODE2_FORM1" or "MODE2/2048" => 2048,
         "MODE2" or "MODE2/2336" or "MODE2_FORM_MIX" => 2336,

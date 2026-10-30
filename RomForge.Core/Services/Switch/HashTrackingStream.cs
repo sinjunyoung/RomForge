@@ -6,6 +6,7 @@ namespace RomForge.Core.Services.Switch;
 public sealed class HashTrackingStream(Stream inner, long hashLimit) : Stream
 {
     private readonly IncrementalHash _sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+
     private long _bytesHashed;
 
     public byte[] GetHash() => _sha256.GetHashAndReset();

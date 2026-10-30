@@ -5,24 +5,16 @@ namespace RomForge.Core.ViewModels.Switch;
 
 public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 {
-    private string? _titleName;
-    private string? _titleId;
-    private string? _version;
-    private ImageSource? _icon;
-    private string? _patchPath;
-    private string? _patchPassword;
-    private string _fileType = string.Empty;
-
     private long? _overrideSizeBytes;
     private bool _isLz4;
     private bool _lz4UserChanged;
 
     public string FileType
     {
-        get => _fileType;
+        get;
         set
         {
-            if (SetProperty(ref _fileType, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(IsKeyMissing));
                 OnPropertyChanged(nameof(TypeBackground));
@@ -30,7 +22,7 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
                 OnPropertyChanged(nameof(CanSetLz4));
             }
         }
-    }
+    } = string.Empty;
 
     public bool SourceHasCompressedRomfs { get; set; }
 
@@ -91,48 +83,17 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
     public GameNamingInfo? Naming { get; set; }
 
-    protected override void OnStatusChanged() => base.OnStatusChanged();
+    public string? TitleName { get; set => SetProperty(ref field, value); }
 
-    public string? TitleName
-    {
-        get => _titleName;
-        set => SetProperty(ref _titleName, value);
-    }
+    public string? TitleID { get; set => SetProperty(ref field, value); }
 
-    public string? TitleID
-    {
-        get => _titleId;
-        set => SetProperty(ref _titleId, value);
-    }
+    public string? Version { get; set => SetProperty(ref field, value); }
 
-    public string? Version
-    {
-        get => _version;
-        set => SetProperty(ref _version, value);
-    }
+    public ImageSource? Icon { get; set => SetProperty(ref field, value); }
 
-    public ImageSource? Icon
-    {
-        get => _icon;
-        set => SetProperty(ref _icon, value);
-    }
+    public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchDisplay)); OnPropertyChanged(nameof(PatchIconSource)); } }
 
-    public string? PatchPath
-    {
-        get => _patchPath;
-        set
-        {
-            SetProperty(ref _patchPath, value);
-            OnPropertyChanged(nameof(PatchDisplay));
-            OnPropertyChanged(nameof(PatchIconSource));
-        }
-    }
-
-    public string? PatchPassword
-    {
-        get => _patchPassword;
-        set => SetProperty(ref _patchPassword, value);
-    }
+    public string? PatchPassword { get; set => SetProperty(ref field, value); }
 
     public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
 
@@ -233,6 +194,8 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
     }
 
     public static GameFile FromPath(string path) => new(path);
+
+    protected override void OnStatusChanged() => base.OnStatusChanged();
 
     protected override string FormatSize(long bytes) => Common.Utils.FormatFileSize(bytes);
 }

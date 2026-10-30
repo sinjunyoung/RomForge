@@ -5,22 +5,24 @@ using System.Text.RegularExpressions;
 
 namespace RomForge.Core.Services.Switch;
 
-public static class RenameService
+public static partial class RenameService
 {
     public const string DefaultFormat = "{Name} [{TitleID}] {Tag} [v{DisplayVersion}] [v{Version}]";
 
     private const int MaxFileNameLength = 255;
 
-    private static readonly Regex TokenRegex = new(@"\{(Name|KTitleName|TitleName|TitleID|Tag|DisplayVersion|Version)\}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    [GeneratedRegex(@"\{(Name|KTitleName|TitleName|TitleID|Tag|DisplayVersion|Version)\}", RegexOptions.IgnoreCase)]
+    private static partial Regex TokenRegex();
 
-    private static readonly Regex SpacesRegex = new(@"\s{2,}", RegexOptions.Compiled);
+    [GeneratedRegex(@"\s{2,}")]
+    private static partial Regex SpacesRegex();
 
     public static string Format(string format, RenameSource source)
     {
         if (string.IsNullOrWhiteSpace(format))
             return string.Empty;
 
-        string result = TokenRegex.Replace(format, m => m.Groups[1].Value.ToLowerInvariant() switch
+        string result = TokenRegex().Replace(format, m => m.Groups[1].Value.ToLowerInvariant() switch
         {
             "name" => source.Name ?? string.Empty,
             "ktitlename" => source.KoreanTitleName ?? string.Empty,
@@ -31,7 +33,7 @@ public static class RenameService
             _ => source.Version ?? string.Empty
         });
 
-        result = SpacesRegex.Replace(result, " ");
+        result = SpacesRegex().Replace(result, " ");
 
         return Common.Utils.SafeFileName(result).TrimEnd('.', ' ');
     }

@@ -14,14 +14,12 @@ public class ConvertFileItem(string filePath) : FileItemBase(filePath), Interfac
         _ => SourceFormat.Unknown
     };
 
-    private int _trackCount;
-
     public int TrackCount
     {
-        get => _trackCount;
+        get;
         set
         {
-            if (SetProperty(ref _trackCount, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(IsMultiTrack));
                 OnPropertyChanged(nameof(AvailableOutputFormats));
@@ -37,23 +35,21 @@ public class ConvertFileItem(string filePath) : FileItemBase(filePath), Interfac
 
     public IReadOnlyList<OutputFormat> AvailableOutputFormats => IsMultiTrack ? [OutputFormat.BinCue] : [OutputFormat.BinCue, OutputFormat.Iso];
 
-    private OutputFormat _outputFormat = OutputFormat.BinCue;
-
     public OutputFormat OutputFormat
     {
-        get => _outputFormat;
+        get;
         set
         {
             if (value == OutputFormat.Iso && IsMultiTrack)
                 value = OutputFormat.BinCue;
 
-            if (SetProperty(ref _outputFormat, value))
+            if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(nameof(ExtensionLabel));
                 OnPropertyChanged(nameof(SelectedTargetFormat));
             }
         }
-    }
+    } = OutputFormat.BinCue;
 
     public string ExtensionLabel => SourceFormat switch
     {

@@ -14,7 +14,7 @@ public class GdiFile
 
     public GdiTrack DataTrack => Tracks.Where(t => t.Type == TrackType.Data).OrderByDescending(t => t.Number).First();
 
-    public static GdiFile Parse(string gdiPath)
+    public static GdiFile Parse(string? gdiPath)
     {
         if (!File.Exists(gdiPath))
             throw new FileNotFoundException($".gdi 파일을 찾을 수 없습니다: {gdiPath}");

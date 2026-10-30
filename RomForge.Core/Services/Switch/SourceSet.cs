@@ -12,11 +12,9 @@ namespace RomForge.Core.Services.Switch;
 
 internal sealed class SourceSet(IReadOnlyList<string> paths, bool dropXciUpdatePartition = false)
 {
-    private List<XciRootEntry>? _xciRootEntries;
-
     private string? XciPath => paths.FirstOrDefault(p => Path.GetExtension(p).ToLowerInvariant() is ".xci" or ".xcz");
 
-    public List<XciRootEntry> XciRootEntries => _xciRootEntries ?? XciWriter.DummyRootEntries();
+    public List<XciRootEntry> XciRootEntries { get => field ?? XciWriter.DummyRootEntries(); set; }
 
     public IFileSystem Open(KeySet keySet, string path, List<IDisposable> disposables)
     {
@@ -34,7 +32,7 @@ internal sealed class SourceSet(IReadOnlyList<string> paths, bool dropXciUpdateP
             disposables.Add(rootPartition);
 
             fileSystem = xci.OpenPartition(XciPartitionType.Secure);
-            _xciRootEntries ??= ReadRootEntries(rootPartition);
+            XciRootEntries ??= ReadRootEntries(rootPartition);
         }
         else
             fileSystem = storage.OpenFileSystem(keySet, path);

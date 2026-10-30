@@ -188,7 +188,7 @@ public class CompressMainViewModel : ToolTabViewModel
                             MainViewModel.SetTaskbarProgress(item.Progress);
                         });
 
-                        void Log(string msg, LogLevel level, string id) => AppendLog(msg, level);
+                        void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
 
                         var switchConfig = AppConfig.Instance.Switch;
 

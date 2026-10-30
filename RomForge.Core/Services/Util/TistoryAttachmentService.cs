@@ -6,11 +6,28 @@ using System.Collections.Concurrent;
 
 namespace RomForge.Core.Services.Util;
 
-public static class TistoryAttachmentService
+public static partial class TistoryAttachmentService
 {
+    [GeneratedRegex(@"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase)]
+    private static partial Regex FileSizeRegex();
+
+    [GeneratedRegex(@"[\-\|]+$")]
+    private static partial Regex TrailingDashOrPipeRegex();
+
+    [GeneratedRegex(@"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", RegexOptions.IgnoreCase)]
+    private static partial Regex SizeInBracketsRegex();
+
     private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
     private const string TargetDivXPath = "//div[contains(@class, 'tt_article_useless_p_margin') and contains(@class, 'contents_style')]";
     private const int TimeoutSeconds = 30;
+
+    private static readonly HashSet<string> AttachmentExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".zip", ".rar", ".7z", ".alz", ".egg", ".gz", ".tar",
+        ".iso", ".bin", ".cue", ".img", ".chd", ".gdi",
+        ".nsp", ".xci", ".nsz", ".xcz", ".3ds", ".cia", ".cci",
+        ".gba", ".gbc", ".gb", ".nes", ".sfc", ".smc", ".n64", ".z64", ".pce", ".md", ".sms"
+    };
 
     private static readonly HttpClient Http = CreateHttpClient();
     private static readonly ConcurrentDictionary<string, string> FileNameCache = new(StringComparer.OrdinalIgnoreCase);
@@ -59,17 +76,17 @@ public static class TistoryAttachmentService
 
                             var text = HtmlEntity.DeEntitize(node.InnerText).Trim();
                             var containerText = node.ParentNode != null ? HtmlEntity.DeEntitize(node.ParentNode.InnerText).Trim() : text;
-                            var sizeMatch = Regex.Match(containerText, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
+                            var sizeMatch = FileSizeRegex().Match(containerText);
 
                             if (!sizeMatch.Success)
-                                sizeMatch = Regex.Match(text, @"([\d.]+)\s*(KB|MB|GB)", RegexOptions.IgnoreCase);
+                                sizeMatch = FileSizeRegex().Match(text);
 
                             if (sizeMatch.Success)
                             {
                                 var targetSourceText = containerText.Contains(sizeMatch.Value) ? containerText : text;
                                 var rawName = targetSourceText[..sizeMatch.Index].Trim();
 
-                                rawName = Regex.Replace(rawName, @"[\-\|]+$", string.Empty).Trim();
+                                rawName = TrailingDashOrPipeRegex().Replace(rawName, string.Empty).Trim();
                                 rawName = rawName.Trim('[', ']', '(', ')', '{', '}').Trim();
 
                                 if (!string.IsNullOrWhiteSpace(rawName) && !rawName.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -92,7 +109,7 @@ public static class TistoryAttachmentService
                             }
                             else
                             {
-                                var cleaned = Regex.Replace(text, @"\s*[\(\[\{]\s*[\d\.]+\s*(KB|MB|GB|Bytes|bytes)?\s*[\)\]\}]", string.Empty, RegexOptions.IgnoreCase);
+                                var cleaned = SizeInBracketsRegex().Replace(text, string.Empty);
 
                                 cleaned = cleaned.Replace("다운로드", string.Empty).Trim();
 
@@ -161,14 +178,6 @@ public static class TistoryAttachmentService
 
         return -1;
     }
-
-    private static readonly HashSet<string> AttachmentExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".zip", ".rar", ".7z", ".alz", ".egg", ".gz", ".tar",
-        ".iso", ".bin", ".cue", ".img", ".chd", ".gdi",
-        ".nsp", ".xci", ".nsz", ".xcz", ".3ds", ".cia", ".cci",
-        ".gba", ".gbc", ".gb", ".nes", ".sfc", ".smc", ".n64", ".z64", ".pce", ".md", ".sms"
-    };
 
     private static bool IsAttachmentUrl(string url)
     {

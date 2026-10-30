@@ -5,42 +5,25 @@ namespace RomForge.Core.Models.Util;
 
 public class TistoryDownloadItem(string url) : ProcessableItemBase("대기중")
 {
-    private string _fileName = GuessFileName(url);
-    private long _fileSizeBytes;
-    private string? _savedPath;
-    private bool _isSelected = true;
-
     public string Url { get; } = url;
 
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set => SetProperty(ref _isSelected, value);
-    }
+    public bool IsSelected { get; set => SetProperty(ref field, value); }
 
-    public string FileName
-    {
-        get => _fileName;
-        set => SetProperty(ref _fileName, value);
-    }
+    public string FileName { get; set => SetProperty(ref field, value); } = GuessFileName(url);
 
     public long FileSizeBytes
     {
-        get => _fileSizeBytes;
+        get;
         set
         {
-            if (SetProperty(ref _fileSizeBytes, value))
+            if (SetProperty(ref field, value))
                 OnPropertyChanged(nameof(FileSize));
         }
     }
 
     public string FileSize => FileSizeBytes > 0 ? PickPack.Disk.Helpers.FileSize.FormatSize(FileSizeBytes) : "-";
 
-    public string? SavedPath
-    {
-        get => _savedPath;
-        set => SetProperty(ref _savedPath, value);
-    }
+    public string? SavedPath { get; set => SetProperty(ref field, value); }
 
     private static string GuessFileName(string url)
     {

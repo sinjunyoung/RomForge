@@ -12,18 +12,17 @@ public static class Chain
             throw new InvalidOperationException("DCP 패치는 연속 패치를 적용할 수 없습니다.");
     }
 
-    public static async Task ApplyAsync(string sourcePath, IReadOnlyList<string> patchPaths, string outputPath, string workDir, Action<string, LogLevel> log, IProgress<ProgressInfo> progress, CancellationToken ct)
+    public static async Task ApplyAsync(string? sourcePath, IReadOnlyList<string> patchPaths, string outputPath, string workDir, Action<string, LogLevel>? log, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (patchPaths.Count == 1)
         {
             await UniversalPatcher.ApplyPatchAsync(sourcePath, patchPaths[0], outputPath, progress, ct);
-
             return;
         }
 
         int total = patchPaths.Count;
         var intermediates = new List<string>();
-        string current = sourcePath;
+        string? current = sourcePath;
 
         try
         {
@@ -41,13 +40,13 @@ public static class Chain
                 }
 
                 int step = i;
-                var stepProgress = new Progress<ProgressInfo>(info => progress.Report(info with
+                var stepProgress = new Progress<ProgressInfo>(info => progress?.Report(info with
                 {
                     Percent = (step * 100 + info.Percent) / total,
                     Label = $"[{step + 1}/{total}] {info.Label}"
                 }));
 
-                log($"연속 패치 {i + 1}/{total} 적용 중: {Path.GetFileName(patchPaths[i])}", LogLevel.Highlight);
+                log?.Invoke($"연속 패치 {i + 1}/{total} 적용 중: {Path.GetFileName(patchPaths[i])}", LogLevel.Highlight);
 
                 await UniversalPatcher.ApplyPatchAsync(current, patchPaths[i], target, stepProgress, ct);
 
@@ -64,7 +63,7 @@ public static class Chain
         }
     }
 
-    private static void TryDelete(string path)
+    private static void TryDelete(string? path)
     {
         try
         {
