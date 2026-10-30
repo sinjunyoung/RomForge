@@ -1,4 +1,5 @@
-﻿using LibHac.Ncm;
+﻿
+using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
 using RomForge.Core.ViewModels.Switch;
@@ -13,34 +14,41 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
     public async Task AddFilesAsync(IEnumerable<string> paths, Action onFileAdded)
     {
         var keySet = KeySetProvider.Instance.KeySet;
-        var validPaths = await Task.Run(() =>
-            paths.Where(p => supportedExtensions.Contains(Path.GetExtension(p))).ToList());
+        var fileMetadatas = await Task.Run(() =>
+            paths.Where(p => supportedExtensions.Contains(Path.GetExtension(p)))
+                .Select(path =>
+                {
+                    List<MetadataResult> metadata = [];
 
-        foreach (var path in validPaths)
+                    if (keySet != null)
+                    {
+                        try
+                        {
+                            metadata = MetadataReader.GetMetadataFromContainer(keySet, path);
+                        }
+                        catch { }
+                    }
+
+                    int priority = metadata.Any(m => m.Type == ContentMetaType.Application) ? 0 : metadata.Any(m => m.Type == ContentMetaType.Patch) ? 1 : metadata.Any(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta) ? 2 : 3;
+                    return (Path: path, Metadata: metadata, Priority: priority);
+                })
+                .OrderBy(x => x.Priority)
+                .ToList());
+
+        foreach (var (path, allMeta, _) in fileMetadatas)
         {
             string titleName = Path.GetFileNameWithoutExtension(path);
             System.Windows.Media.Imaging.BitmapImage? icon = null;
             long fileLength = 0;
 
-            try 
-            { 
-                fileLength = new FileInfo(path).Length; 
+            try
+            {
+                fileLength = new FileInfo(path).Length;
             }
             catch { }
 
             if (keySet != null)
             {
-                List<MetadataResult> allMeta;
-
-                try 
-                {
-                    allMeta = MetadataReader.GetMetadataFromContainer(keySet, path); 
-                }
-                catch 
-                { 
-                    allMeta = []; 
-                }
-
                 if (allMeta.Count > 0)
                 {
                     var appMetas = allMeta.Where(m => m.Type == ContentMetaType.Application).ToList();
@@ -63,8 +71,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                         expectedItems.Add(("D", dlc.TitleId ?? string.Empty));
 
                     var currentItemsForFile = gameFiles.Where(f => string.Equals(f.FilePath, path, StringComparison.OrdinalIgnoreCase)).ToList();
-                    bool isAlreadyFullyAdded = expectedItems.Count > 0 && expectedItems.All(exp =>
-                        currentItemsForFile.Any(curr => curr.FileType.Contains(exp.FileType) && string.Equals(curr.TitleID, exp.TitleId, StringComparison.OrdinalIgnoreCase)));
+                    bool isAlreadyFullyAdded = expectedItems.Count > 0 && expectedItems.All(exp => currentItemsForFile.Any(curr => curr.FileType.Contains(exp.FileType) && string.Equals(curr.TitleID, exp.TitleId, StringComparison.OrdinalIgnoreCase)));
 
                     if (isAlreadyFullyAdded)
                         continue;
@@ -123,7 +130,6 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
                     foreach (var dlc in dlcResults)
                     {
                         string dlcTitleId = dlc.TitleId ?? string.Empty;
-
                         var dlcVm = new GameFile(path)
                         {
                             FileType = "D",
@@ -209,9 +215,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
         {
             if (!string.IsNullOrEmpty(vm.TitleID))
             {
-                var existingDlc = gameFiles.FirstOrDefault(f =>
-                    f.FileType.Contains('D') &&
-                    string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase));
+                var existingDlc = gameFiles.FirstOrDefault(f => f.FileType.Contains('D') && string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase));
 
                 if (existingDlc != null)
                 {
@@ -227,10 +231,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
             }
         }
 
-        if (!string.IsNullOrEmpty(vm.TitleID) && gameFiles.Any(f =>
-            f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) &&
-            f.FileType == vm.FileType &&
-            string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase)))
+        if (!string.IsNullOrEmpty(vm.TitleID) && gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.FileType == vm.FileType && string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase)))
             return;
 
         gameFiles.Add(vm);

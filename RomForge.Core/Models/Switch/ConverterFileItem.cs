@@ -4,7 +4,6 @@ namespace RomForge.Core.Models.Switch;
 
 public class ConverterFileItem : GameFile, Interfaces.IConvertible
 {
-
     public ConverterFileItem(string filePath) : base(filePath)
     {
         AvailableFormats = GetAvailableFormats(Extension);
@@ -32,7 +31,7 @@ public class ConverterFileItem : GameFile, Interfaces.IConvertible
 
     private static List<string> GetAvailableFormats(string ext) => ext.ToLowerInvariant() switch
     {
-        "nsp" => ["NSZ", "XCI", "XCZ", "LZ4"],
+        "nsp" => ["NSZ", "XCI", "XCZ"],
         "xci" => ["XCZ", "NSP", "NSZ"],
         "nsz" => ["NSP", "XCI", "XCZ"],
         "xcz" => ["XCI", "NSP", "NSZ"],
