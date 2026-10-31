@@ -31,7 +31,6 @@ public static class Lz4MergeService
         if (total == 0)
         {
             log("처리할 수 있는 파일이 없습니다.", LogLevel.Error);
-
             return results;
         }
 
@@ -53,7 +52,6 @@ public static class Lz4MergeService
                 string path = await MergedTitleWriter.WriteAsync(keySet.Clone(), plan, outputDir, compressLevel, progress, log, ct);
 
                 results.Add(path);
-
                 log($"출력: {path}", LogLevel.Ok);
             }
             catch (OperationCanceledException)
@@ -81,7 +79,6 @@ public static class Lz4MergeService
                 string path = await NspLz4Service.CompressAsync(file, outputDir, compressLevel, progress, (message, level, _) => log(message, level), ct);
 
                 results.Add(path);
-
                 log($"출력: {path}", LogLevel.Ok);
             }
             catch (OperationCanceledException)
@@ -97,7 +94,6 @@ public static class Lz4MergeService
         }
 
         log($"완료: 성공 {results.Count}개, 실패 {failed}개", failed == 0 ? LogLevel.Ok : LogLevel.Error);
-
         return results;
     }
 
@@ -157,10 +153,8 @@ public static class Lz4MergeService
         }
 
         var individuals = paths.Where(p => !merged.Contains(p) && !skipped.ContainsKey(p)).ToList();
-
         return new Routing(plans, individuals, [.. skipped.Select(s => (s.Key, s.Value.Reason, s.Value.IsError))]);
     }
 
-    private static string DisplayName(MetadataResult meta)
-        => !string.IsNullOrWhiteSpace(meta.KrTitle) ? meta.KrTitle : !string.IsNullOrWhiteSpace(meta.EnTitle) ? meta.EnTitle : meta.TitleId;
+    private static string DisplayName(MetadataResult meta) => !string.IsNullOrWhiteSpace(meta.KrTitle) ? meta.KrTitle : !string.IsNullOrWhiteSpace(meta.EnTitle) ? meta.EnTitle : meta.TitleId;
 }

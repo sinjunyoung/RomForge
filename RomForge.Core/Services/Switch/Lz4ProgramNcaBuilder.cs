@@ -45,7 +45,6 @@ internal static class Lz4ProgramNcaBuilder
             PatchNpdm(settings, exefsFiles);
 
         var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, ct);
-
         return (hash[..0x10], hash, size);
     }
 
@@ -55,7 +54,6 @@ internal static class Lz4ProgramNcaBuilder
             return null;
 
         using var fileSystem = source.OpenFileSystem(sectionType, IntegrityCheckLevel.None);
-
         return ReadFiles(fileSystem, ct);
     }
 

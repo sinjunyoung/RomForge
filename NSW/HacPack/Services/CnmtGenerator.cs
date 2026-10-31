@@ -162,7 +162,8 @@ public static class CnmtGenerator
 
     private static void TryAddContentRecord(CnmtContext context, string path, bool isValid, byte type, byte idOffset = 0)
     {
-        if (!isValid) return;
+        if (!isValid)
+            return;
 
         PopulateContentRecord(path, ref context.ContentRecords[context.ContentRecordsCount]);
 

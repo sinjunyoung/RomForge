@@ -188,7 +188,6 @@ internal static class MergedTitleWriter
         {
             asm.Log($"{baseFile.Name}: 압축할 romfs가 없거나 이미 압축되어 있어 그대로 복사합니다.", LogLevel.Info);
             AddCopy(asm, baseContainer, record);
-
             return;
         }
 
@@ -201,7 +200,6 @@ internal static class MergedTitleWriter
         asm.BuildEntries.Add((placeholder, (output, onRead) =>
         {
             asm.Ct.ThrowIfCancellationRequested();
-
             asm.Log($"Program NCA 병합·Lz4 압축 중 (IdOffset {record.IdOffset})", LogLevel.Highlight);
 
             var (ncaId, hash, size) = MergedProgramNcaBuilder.BuildInto(output, baseFile.Nca, updateFile?.Nca, titleId, record.IdOffset, asm.KeySet, asm.Lz4Level, onRead, asm.Ct);
@@ -220,7 +218,6 @@ internal static class MergedTitleWriter
         if (patchIndex < 0 || updateContainer == null)
         {
             AddCopy(asm, baseContainer, record);
-
             return;
         }
 
@@ -245,7 +242,6 @@ internal static class MergedTitleWriter
             if (record.Type != CnmtRecordPatcher.DataType || !file.Nca.CanOpenSection(NcaSectionType.Data) || file.Nca.HasSparseLayer() || RomfsCompression.HasCompressedSection(file.Nca))
             {
                 AddCopy(asm, container, record);
-
                 continue;
             }
 
@@ -259,7 +255,6 @@ internal static class MergedTitleWriter
             asm.BuildEntries.Add((placeholder, (output, onRead) =>
             {
                 asm.Ct.ThrowIfCancellationRequested();
-
                 asm.Log($"DLC NCA Lz4 압축 중 ({dlc.Meta.TitleId})", LogLevel.Highlight);
 
                 var (ncaId, hash, size) = Lz4DataNcaBuilder.BuildInto(output, file.Nca, titleId, asm.KeySet, asm.Lz4Level, onRead, asm.Ct);
@@ -321,7 +316,6 @@ internal static class MergedTitleWriter
     {
         var fs = source.Open(keySet, path, disposables);
         var entries = fs.EnumerateEntries("/", "*").ToDictionary(e => e.Name.ToString(), e => e.FullPath, StringComparer.OrdinalIgnoreCase);
-
         return new Container(fs, entries);
     }
 
@@ -345,6 +339,5 @@ internal static class MergedTitleWriter
 
     private static string NextPlaceholder(MergeAssembly asm) => "$" + (asm.PlaceholderIndex++).ToString("x31") + ".nca";
 
-    private static string DisplayName(MetadataResult meta)
-        => !string.IsNullOrWhiteSpace(meta.KrTitle) ? meta.KrTitle : !string.IsNullOrWhiteSpace(meta.EnTitle) ? meta.EnTitle : meta.TitleId;
+    private static string DisplayName(MetadataResult meta) => !string.IsNullOrWhiteSpace(meta.KrTitle) ? meta.KrTitle : !string.IsNullOrWhiteSpace(meta.EnTitle) ? meta.EnTitle : meta.TitleId;
 }

@@ -17,10 +17,7 @@ internal static class MergedProgramNcaBuilder
 
         return () =>
         {
-            var storage = updateNca != null
-                ? baseNca.OpenStorageWithPatch(updateNca, index, IntegrityCheckLevel.None)
-                : baseNca.OpenStorage(index, IntegrityCheckLevel.None);
-
+            var storage = updateNca != null ? baseNca.OpenStorageWithPatch(updateNca, index, IntegrityCheckLevel.None) : baseNca.OpenStorage(index, IntegrityCheckLevel.None);
             return storage.AsStream(FileAccess.Read);
         };
     }
@@ -28,7 +25,6 @@ internal static class MergedProgramNcaBuilder
     public static long GetRomfsSize(Nca baseNca, Nca? updateNca)
     {
         using var stream = CreateRomfsOpener(baseNca, updateNca)();
-
         return stream.Length;
     }
 
@@ -66,7 +62,6 @@ internal static class MergedProgramNcaBuilder
             Lz4ProgramNcaBuilder.PatchNpdm(settings, exefsFiles);
 
         var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, ct);
-
         return (hash[..0x10], hash, size);
     }
 
@@ -75,7 +70,6 @@ internal static class MergedProgramNcaBuilder
         if (updateNca != null && updateNca.CanOpenSection(NcaSectionType.Code))
         {
             using var patched = baseNca.OpenFileSystemWithPatch(updateNca, NcaSectionType.Code, IntegrityCheckLevel.None);
-
             return Lz4ProgramNcaBuilder.ReadFiles(patched, ct);
         }
 
@@ -83,7 +77,6 @@ internal static class MergedProgramNcaBuilder
             return [];
 
         using var plain = baseNca.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
-
         return Lz4ProgramNcaBuilder.ReadFiles(plain, ct);
     }
 
@@ -93,7 +86,6 @@ internal static class MergedProgramNcaBuilder
             return null;
 
         using var fileSystem = baseNca.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None);
-
         return Lz4ProgramNcaBuilder.ReadFiles(fileSystem, ct);
     }
 

@@ -131,7 +131,6 @@ public static class NcaGenerator
         var ncaHeader = new NcaHeader();
 
         NcaHeaderService.InitHeader(ref ncaHeader);
-
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
         ct.ThrowIfCancellationRequested();
         progress.ReportStatus("ExeFS 빌드 중...", 0);
@@ -275,7 +274,6 @@ public static class NcaGenerator
         string cnmtDirPath = Path.Combine(baseSettings.TempDirectory, "cnmt");
 
         Directory.CreateDirectory(cnmtDirPath);
-
         ct.ThrowIfCancellationRequested();
         BuildMetadataFile(cnmtDirPath, settingsList);
 
@@ -316,7 +314,6 @@ public static class NcaGenerator
         var ncaHeader = new NcaHeader();
 
         NcaHeaderService.InitHeader(ref ncaHeader);
-
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
         ct.ThrowIfCancellationRequested();
         progress.ReportStatus("Meta NCA 생성 중...", 0);

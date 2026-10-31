@@ -18,7 +18,6 @@ public static class CompressedRomfsWriter
     private const int PhysicalAlignment = 0x10;
     private const byte TypeNone = 0;
     private const byte TypeLz4 = 3;
-    private const sbyte Lz4Level = 8;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct Entry

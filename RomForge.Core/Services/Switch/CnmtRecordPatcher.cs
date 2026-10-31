@@ -15,6 +15,7 @@ internal static class CnmtRecordPatcher
     private const int IdOffsetOffset = 0x37;
 
     public const byte ProgramType = 0x1;
+
     public const byte DataType = 0x2;
 
     public readonly record struct ContentRecord(byte[] Hash, byte[] NcaId, long Size, byte Type, byte IdOffset);
@@ -93,7 +94,6 @@ internal static class CnmtRecordPatcher
 
         Array.Copy(cnmt, 0, result, 0, offset);
         Array.Copy(cnmt, offset, result, offset + RecordSize, cnmt.Length - offset);
-
         record.Hash.CopyTo(result, offset + HashOffset);
         record.NcaId.CopyTo(result, offset + NcaIdOffset);
 
