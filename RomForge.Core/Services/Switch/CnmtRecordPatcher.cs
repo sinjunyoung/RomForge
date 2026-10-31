@@ -64,6 +64,50 @@ internal static class CnmtRecordPatcher
         throw new InvalidOperationException("cnmt에서 대상 Content 레코드를 찾을 수 없습니다.");
     }
 
+    public static byte[] Add(byte[] cnmt, ContentRecord record)
+    {
+        if (record.NcaId.Length != 0x10 || record.Hash.Length != 0x20)
+            throw new ArgumentException("NcaId는 16바이트, Hash는 32바이트여야 합니다.");
+
+        if (record.Size < 0 || record.Size > 0xFFFFFFFFFFFFL)
+            throw new ArgumentOutOfRangeException(nameof(record));
+
+        int start = GetRecordsStart(cnmt, out int count);
+
+        if (count >= ushort.MaxValue)
+            throw new InvalidOperationException("cnmt Content 레코드 수가 한계를 넘었습니다.");
+
+        int insertIndex = count;
+
+        for (int i = 0; i < count; i++)
+        {
+            if (cnmt[start + i * RecordSize + TypeOffset] > record.Type)
+            {
+                insertIndex = i;
+                break;
+            }
+        }
+
+        int offset = start + insertIndex * RecordSize;
+        var result = new byte[cnmt.Length + RecordSize];
+
+        Array.Copy(cnmt, 0, result, 0, offset);
+        Array.Copy(cnmt, offset, result, offset + RecordSize, cnmt.Length - offset);
+
+        record.Hash.CopyTo(result, offset + HashOffset);
+        record.NcaId.CopyTo(result, offset + NcaIdOffset);
+
+        for (int b = 0; b < 6; b++)
+            result[offset + SizeOffset + b] = (byte)(record.Size >> (8 * b));
+
+        result[offset + TypeOffset] = record.Type;
+        result[offset + IdOffsetOffset] = record.IdOffset;
+
+        BitConverter.GetBytes((ushort)(count + 1)).CopyTo(result, ContentCountOffset);
+
+        return result;
+    }
+
     private static int GetRecordsStart(byte[] cnmt, out int count)
     {
         if (cnmt.Length < HeaderSize)

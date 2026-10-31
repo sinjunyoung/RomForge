@@ -2,18 +2,18 @@
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
-using LibHac.NSZ;
 using LibHac.Ncm;
+using LibHac.NSZ;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.Core.Utils;
-using System.IO;
-using Path = System.IO.Path;
-using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using RomForge.Core.Models.Switch;
+using System.IO;
+using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
+using Path = System.IO.Path;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -161,8 +161,19 @@ internal static class MergedTitleWriter
                 AddCopy(asm, baseContainer, record);
         }
 
-        foreach (var orphan in patchRecords.Where(p => p.Type is ControlType or HtmlDocumentType or LegalInformationType && !baseRecords.Any(b => b.Type == p.Type && b.IdOffset == p.IdOffset)))
-            asm.Log($"업데이트에만 있는 콘텐츠(Type {orphan.Type}, IdOffset {orphan.IdOffset})는 포함하지 않습니다.", LogLevel.Warning);
+        if (updateContainer != null)
+        {
+            var orphans = patchRecords.Where(p => p.Type is ControlType or HtmlDocumentType or LegalInformationType && !baseRecords.Any(b => b.Type == p.Type && b.IdOffset == p.IdOffset)).ToList();
+
+            foreach (var orphan in orphans)
+            {
+                AddCopy(asm, updateContainer, orphan);
+
+                state.Cnmt = CnmtRecordPatcher.Add(state.Cnmt, orphan);
+
+                asm.Log($"업데이트에만 있는 콘텐츠를 추가했습니다 (Type {orphan.Type}, IdOffset {orphan.IdOffset})", LogLevel.Info);
+            }
+        }
 
         AddMeta(asm, state, baseMetaNca, titleId, ContentMetaType.Application);
     }
