@@ -55,6 +55,12 @@ internal static class Lz4ProgramNcaBuilder
             return null;
 
         using var fileSystem = source.OpenFileSystem(sectionType, IntegrityCheckLevel.None);
+
+        return ReadFiles(fileSystem, ct);
+    }
+
+    internal static List<(string Name, byte[] Data)> ReadFiles(IFileSystem fileSystem, CancellationToken ct)
+    {
         var files = new List<(string Name, byte[] Data)>();
 
         foreach (var entry in fileSystem.EnumerateEntries("/", "*", SearchOptions.RecurseSubdirectories))
@@ -78,7 +84,7 @@ internal static class Lz4ProgramNcaBuilder
         return files;
     }
 
-    private static void PatchNpdm(NcaGenerationOptions settings, List<(string Name, byte[] Data)> exefsFiles)
+    internal static void PatchNpdm(NcaGenerationOptions settings, List<(string Name, byte[] Data)> exefsFiles)
     {
         int index = exefsFiles.FindIndex(f => f.Name == "main.npdm");
 
