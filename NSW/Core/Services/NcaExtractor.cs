@@ -30,28 +30,63 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         return dir;
     }
 
+    private static void EnsureSparseHasUpdate(Nca baseProg, Nca? updateProg)
+    {
+        bool hasSparse = false;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (!baseProg.SectionExists(i))
+                continue;
+
+            if (baseProg.GetFsHeader(i).ExistsSparseLayer())
+            {
+                hasSparse = true;
+                break;
+            }
+        }
+        if (hasSparse && updateProg == null)
+            throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
+    }
+
+    public static Func<Stream> CreateRomfsOpener(Nca baseProg, Nca? updateProg, bool isCreateOnly)
+    {
+        if (!isCreateOnly)
+            EnsureSparseHasUpdate(baseProg, updateProg);
+
+        int index = Nca.GetSectionIndexFromType(NcaSectionType.Data, baseProg.Header.ContentType);
+
+        return () =>
+        {
+            var storage = updateProg != null ? baseProg.OpenStorageWithPatch(updateProg, index, IntegrityCheckLevel.None)
+                : baseProg.IsPatch ? baseProg.OpenStorageWithoutBase(index, IntegrityCheckLevel.None)
+                : baseProg.OpenStorage(index, IntegrityCheckLevel.None);
+
+            return storage.AsStream(FileAccess.Read);
+        };
+    }
+
+    public static void RegisterDlcStreams(List<Nca> dlcNcas, UnpackResult result)
+    {
+        foreach (var nca in dlcNcas)
+        {
+            if (!nca.CanOpenSection(NcaSectionType.Data))
+                continue;
+
+            result.Dlcs.Add(new DlcUnpackInfo
+            {
+                TitleId = nca.Header.TitleId,
+                RomfsOpener = () => nca.OpenStorage(NcaSectionType.Data, IntegrityCheckLevel.None).AsStream(FileAccess.Read)
+            });
+        }
+    }
+
     public string ExtractRomFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, bool isCreateOnly = false, CancellationToken ct = default)
     {
         string dir = Path.Combine(outDir, dirName);
 
         if (!isCreateOnly)
-        {
-            bool hasSparse = false;
-
-            for (int i = 0; i < 4; i++)
-            {
-                if (!baseProg.SectionExists(i))
-                    continue;
-
-                if (baseProg.GetFsHeader(i).ExistsSparseLayer())
-                {
-                    hasSparse = true;
-                    break;
-                }
-            }
-            if (hasSparse && updateProg == null)
-                throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
-        }
+            EnsureSparseHasUpdate(baseProg, updateProg);
 
         using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
             : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
@@ -69,7 +104,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         string dir = Path.Combine(outDir, dirName);
         using var fs = baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None);
 
-        ExtractFileSystem(fs, dir, "Logo", ctx,  ct);
+        ExtractFileSystem(fs, dir, "Logo", ctx, ct);
 
         return dir;
     }

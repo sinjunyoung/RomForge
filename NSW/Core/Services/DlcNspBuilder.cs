@@ -10,11 +10,11 @@ namespace NSW.Core.Services;
 
 public static class DlcNspBuilder
 {
-    public static void BuildDlcNsps(BuildRequest req, WorkDirs dirs, NcaGenerationOptions baseSettings, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    public static void BuildDlcNsps(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs, NcaGenerationOptions baseSettings, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        string dlcBaseDir = Path.Combine(dirs.Unpacked, "DLCs");
+        var items = CollectItems(req, unpackResult, dirs);
 
-        if (!Directory.Exists(dlcBaseDir))
+        if (items.Count == 0)
             return;
 
         var sw = Stopwatch.StartNew();
@@ -23,25 +23,22 @@ public static class DlcNspBuilder
 
         int dlcCount = 0;
 
-        foreach (var dlcDir in Directory.GetDirectories(dlcBaseDir))
+        foreach (var item in items)
         {
             ct.ThrowIfCancellationRequested();
 
-            string titleIdStr = Path.GetFileName(dlcDir);
+            string titleIdStr = item.TitleIdStr;
+            ulong titleId = item.TitleId;
+            string romfsPath = item.RomfsPath;
 
-            if (!ulong.TryParse(titleIdStr, System.Globalization.NumberStyles.HexNumber, null, out ulong titleId))
-                continue;
-
-            string romfsPath = Path.Combine(dlcDir, "romfs");
-
-            if (req.DlcPatchDirs.TryGetValue(titleIdStr, out var dlcPatchDir) && !string.IsNullOrEmpty(dlcPatchDir))
+            if (item.RomfsOpener == null && req.DlcPatchDirs.TryGetValue(titleIdStr, out var dlcPatchDir) && !string.IsNullOrEmpty(dlcPatchDir))
             {
                 req.DlcPatchPasswords.TryGetValue(titleIdStr, out var dlcPatchPassword);
                 NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, romfsPath, progress, log, dlcPatchPassword);
             }
 
-            bool hasRomfs = Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any();
-            bool compressRomfs = req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : File.Exists(Path.Combine(dlcDir, RomfsCompression.FlagFileName));
+            bool hasRomfs = item.RomfsOpener != null || (Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any());
+            bool compressRomfs = item.RomfsOpener != null || (req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : File.Exists(Path.Combine(item.DlcDir, RomfsCompression.FlagFileName)));
 
             log($"DLC 빌드 시도: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Info);
 
@@ -50,7 +47,8 @@ public static class DlcNspBuilder
                 TitleId = titleId,
                 TempDirectory = Path.Combine(dirs.Temp, "dlc_" + titleIdStr),
                 OutDirectory = baseSettings.OutDirectory,
-                RomfsDirectory = hasRomfs ? romfsPath : string.Empty,
+                RomfsDirectory = hasRomfs && item.RomfsOpener == null ? romfsPath : string.Empty,
+                RomfsImageOpener = item.RomfsOpener,
                 TitleType = LibHac.Ncm.ContentMetaType.AddOnContent,
                 NcaType = LibHac.FsSystem.NcaHeader.ContentType.PublicData,
                 SdkVersion = req.OverrideSdkVersion ?? baseSettings.SdkVersion,
@@ -87,4 +85,36 @@ public static class DlcNspBuilder
 
         log($"총 ({dlcCount})개의 DLC 빌드 완료 : ({sw.Elapsed.TotalSeconds:F2}s)", LogLevel.Ok);
     }
+
+    private static List<DlcItem> CollectItems(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs)
+    {
+        var items = new List<DlcItem>();
+
+        if (req.StreamRomfs)
+        {
+            foreach (var dlc in unpackResult.Dlcs.Where(d => d.RomfsOpener != null))
+                items.Add(new DlcItem(dlc.TitleId.ToString("X16"), dlc.TitleId, string.Empty, string.Empty, dlc.RomfsOpener));
+
+            return items;
+        }
+
+        string dlcBaseDir = Path.Combine(dirs.Unpacked, "DLCs");
+
+        if (!Directory.Exists(dlcBaseDir))
+            return items;
+
+        foreach (var dlcDir in Directory.GetDirectories(dlcBaseDir))
+        {
+            string titleIdStr = Path.GetFileName(dlcDir);
+
+            if (!ulong.TryParse(titleIdStr, System.Globalization.NumberStyles.HexNumber, null, out ulong titleId))
+                continue;
+
+            items.Add(new DlcItem(titleIdStr, titleId, dlcDir, Path.Combine(dlcDir, "romfs"), null));
+        }
+
+        return items;
+    }
+
+    private sealed record DlcItem(string TitleIdStr, ulong TitleId, string DlcDir, string RomfsPath, Func<Stream>? RomfsOpener);
 }

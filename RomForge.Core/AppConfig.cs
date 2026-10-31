@@ -130,6 +130,8 @@ public class OutputFoldersConfig : ViewModelBase
     public string? ConvertOutputPath { get; set { SetProperty(ref field, value); } }
 
     public string? WiiOutputPath { get; set { SetProperty(ref field, value); } }
+
+    public string? SwitchLz4MergeOutputPath { get; set { SetProperty(ref field, value); } }
 }
 
 public class AppConfig : ViewModelBase

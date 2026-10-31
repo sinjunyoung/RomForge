@@ -38,6 +38,15 @@
             <TabItem IsEnabled="{Binding CanUseTools}">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image Source="/Assets/Images/Compressed.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="Lz4압축" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem.Header>
+                <local:Lz4MergeTab DataContext="{Binding Lz4MergeVM}"/>
+            </TabItem>
+            <TabItem IsEnabled="{Binding CanUseTools}">
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Convert.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
                         <TextBlock Text="포맷 변환" VerticalAlignment="Center"/>
                     </StackPanel>

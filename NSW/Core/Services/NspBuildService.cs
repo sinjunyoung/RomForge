@@ -52,60 +52,68 @@ public static class NspBuildService
             if (mode == BuildMode.UnpackOnly)
             {
                 log("━━ 언팩 완료 ━━", LogLevel.Ok);
+                unpackResult.ReleaseResources();
                 return dirs.Unpacked;
             }
         }
 
-        var settingsList = StepBuildSettings(req, unpackResult, keySet, dirs, log);
-
-        if (req.OverrideTitleId.HasValue)
+        try
         {
-            foreach (var s in settingsList)
-                s.TitleId = req.OverrideTitleId.Value;
+            var settingsList = StepBuildSettings(req, unpackResult, keySet, dirs, log);
 
-            unpackResult.TitleId = req.OverrideTitleId.Value;
+            if (req.OverrideTitleId.HasValue)
+            {
+                foreach (var s in settingsList)
+                    s.TitleId = req.OverrideTitleId.Value;
 
-            log($"Title ID 오버라이드: {req.OverrideTitleId.Value:x16}", LogLevel.Ok);
+                unpackResult.TitleId = req.OverrideTitleId.Value;
+
+                log($"Title ID 오버라이드: {req.OverrideTitleId.Value:x16}", LogLevel.Ok);
+            }
+
+            if (req.TargetIdOffset.HasValue)
+            {
+                settingsList = [.. settingsList.Where(s => s.IdOffset == req.TargetIdOffset.Value)];
+
+                if (settingsList.Count == 0)
+                    throw new Exception($"IdOffset {req.TargetIdOffset.Value}에 해당하는 타이틀이 없습니다.");
+
+                var s = settingsList[0];
+                s.TitleId += req.TargetIdOffset.Value;
+                s.IdOffset = 0;
+                unpackResult.TitleId = s.TitleId;
+            }
+
+            foreach (var settings in settingsList)
+            {
+                settings.TitleVersion = unpackResult.GameVersion;
+                settings.Language = req.Language;
+                settings.UserMetadata = req.UserMetadata;
+                settings.KeySet = keySet;
+            }
+
+            var baseSettings = settingsList.First(s => s.IdOffset == 0);
+
+            foreach (var settings in settingsList)
+            {
+                StepNpdm(settings, log, ct);
+                StepProgramNca(req, settings, unpackResult, compressLevel, progress, log, ct);
+            }
+
+            StepManualNcas(settingsList, unpackResult, compressLevel, progress, log, ct);
+
+            foreach (var settings in settingsList)
+                StepControlNca(settings, unpackResult, compressLevel, progress, log, ct);
+
+            DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, progress, log, ct);
+            StepMetaNca(settingsList, progress, log, ct);
+
+            return StepPackage(req, baseSettings, unpackResult, progress, log, ct);
         }
-
-        if (req.TargetIdOffset.HasValue)
+        finally
         {
-            settingsList = [.. settingsList.Where(s => s.IdOffset == req.TargetIdOffset.Value)];
-
-            if (settingsList.Count == 0)
-                throw new Exception($"IdOffset {req.TargetIdOffset.Value}에 해당하는 타이틀이 없습니다.");
-
-            var s = settingsList[0];
-            s.TitleId += req.TargetIdOffset.Value;
-            s.IdOffset = 0;
-            unpackResult.TitleId = s.TitleId;
+            unpackResult.ReleaseResources();
         }
-
-        foreach (var settings in settingsList)
-        {
-            settings.TitleVersion = unpackResult.GameVersion;
-            settings.Language = req.Language;
-            settings.UserMetadata = req.UserMetadata;
-            settings.KeySet = keySet;
-        }
-
-        var baseSettings = settingsList.First(s => s.IdOffset == 0);
-
-        foreach (var settings in settingsList)
-        {
-            StepNpdm(settings, log, ct);
-            StepProgramNca(req, settings, unpackResult, compressLevel, progress, log, ct);
-        }
-
-        StepManualNcas(settingsList, unpackResult, compressLevel, progress, log, ct);
-
-        foreach (var settings in settingsList)
-            StepControlNca(settings, unpackResult, compressLevel, progress, log, ct);
-
-        DlcNspBuilder.BuildDlcNsps(req, dirs, baseSettings, compressLevel, progress, log, ct);
-        StepMetaNca(settingsList, progress, log, ct);
-
-        return StepPackage(req, baseSettings, unpackResult, progress, log, ct);
     }
 
     private static void ApplyCompressionOverride(BuildRequest req, UnpackResult unpackResult, Action<string, LogLevel> log)
@@ -163,6 +171,7 @@ public static class NspBuildService
                 OutDirectory = dirs.BuildNca,
                 ExefsDirectory = exefsDir ?? string.Empty,
                 RomfsDirectory = romfsDir ?? string.Empty,
+                RomfsImageOpener = result.RomfsOpeners.GetValueOrDefault(idOffset),
                 LogoDirectory = logoDir ?? string.Empty,
                 BackupDirectory = Path.Combine(Path.GetDirectoryName(dirs.Temp)!, "backups"),
                 Plaintext = 0,
@@ -343,7 +352,7 @@ public static class NspBuildService
         progress.ReportStatus("NSP 패키징 중...", 0);
         Directory.CreateDirectory(req.OutputDir);
 
-        string suffix = req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
+        string suffix = req.StreamRomfs ? "Merged_Lz4.nsp" : req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount);
         string finalNsp = Path.Combine(req.OutputDir, fileName);

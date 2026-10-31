@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="RomForge.Controls.Switch.Lz4MergeTab"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:l="clr-namespace:NSW.Properties;assembly=NSW"  
+             xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW"
+             xmlns:local="clr-namespace:RomForge.Controls.Switch"
+             xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <local:CommonListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
+            <TextBlock Grid.Row="1" Margin="10,0,10,8" Foreground="#A0A0A0" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center"
+                       Text="본편, 업데이트, DLC를 타이틀별로 하나의 NSP로 합치면서 RomFS를 Lz4로 압축합니다. 여러 타이틀을 한 번에 추가할 수 있으며, 파일 교체나 한글패치는 리팩 탭을 사용하세요."/>
+
+            <Grid Grid.Row="2" Margin="0,0,0,5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" x:Name="btnWorkSpace" Background="Transparent" BorderThickness="0" Command="{Binding OpenWorkSpaceCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}">
+                    <Button.ToolTip>
+                        <ToolTip Content="{x:Static l:Resources.ToolTip_OpenWorkSpace}"/>
+                    </Button.ToolTip>
+                </Button>
+                <Border Grid.Column="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6">
+                    <Grid>
+                        <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Height="30" IsEnabled="{Binding IsIdle}" Text="{Binding OutputPath, Mode=TwoWay}" VerticalContentAlignment="Center" x:Name="txtOutput" AllowDrop="True" 
+                             PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
+                        <TextBlock Text="출력 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
+                    </Grid>
+                </Border>
+                <Button Grid.Column="3" x:Name="btnBrowseOutput" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Center" IsEnabled="{Binding IsIdle}" Margin="5,0,5,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center"
+                        Click="BtnBrowseOutput_Click">
+                    <Button.ToolTip>
+                        <ToolTip Content="{x:Static l:Resources.ToolTip_BrowseOutput}"/>
+                    </Button.ToolTip>
+                    <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Stretch="Uniform"/>
+                </Button>
+            </Grid>
+
+            <Grid Grid.Row="3" Margin="5,0,0,5">
+                <core:IconButton x:Name="btnStart" Margin="0,0,5,0" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{x:Static l:Resources.Button_Cancel}" CancelIcon="/Assets/Images/Cancel.png" 
+                                 IsRunning="{Binding IsLocked, Mode=OneWay}" Click="BtnStart_Click"/>
+            </Grid>
+            <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
+                <Grid x:Name="progressArea" Height="28">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="140"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" x:Name="progressLabel" Text="{Binding ProgressLabel}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1" x:Name="progressPercent" Margin="0,0,10,0" Text="{Binding ProgressPercent}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" x:Name="progressSpeed" Margin="0,0,10,0" Text="{Binding ProgressSpeed}" Foreground="Gray" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" x:Name="progressTime" Margin="0,0,10,0" Text="{Binding ProgressTime}" Foreground="#4CAF50" FontSize="11" VerticalAlignment="Center"/>
+                    <Grid Grid.Column="4" Height="10" VerticalAlignment="Center">
+                        <Border Background="#25FFFFFF" CornerRadius="5"/>
+                        <Border x:Name="barTrack" CornerRadius="5" ClipToBounds="True">
+                            <Border Background="#4CAF50" CornerRadius="5" HorizontalAlignment="Left">
+                                <Border.Width>
+                                    <MultiBinding Converter="{StaticResource ProgressToWidthConverter}">
+                                        <Binding Path="ActualWidth" ElementName="barTrack"/>
+                                        <Binding Path="ProgressPct"/>
+                                    </MultiBinding>
+                                </Border.Width>
+                            </Border>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.IO;
+using System.Text.Json.Serialization;
 
 namespace NSW.Core.Models;
 
@@ -21,6 +22,12 @@ public class UnpackResult
     public HashSet<byte> CompressedRomfs { get; set; } = [];
 
     [JsonIgnore]
+    public Dictionary<byte, Func<Stream>> RomfsOpeners { get; } = [];
+
+    [JsonIgnore]
+    public List<IDisposable> Resources { get; } = [];
+
+    [JsonIgnore]
     public int DlcCount => Dlcs.Count;
 
     public ulong TitleId { get; set; }
@@ -41,4 +48,12 @@ public class UnpackResult
 
     [JsonIgnore]
     public string TitleIdStr => $"{TitleId:x16}";
+
+    public void ReleaseResources()
+    {
+        for (int i = Resources.Count - 1; i >= 0; i--)
+            Resources[i].Dispose();
+
+        Resources.Clear();
+    }
 }

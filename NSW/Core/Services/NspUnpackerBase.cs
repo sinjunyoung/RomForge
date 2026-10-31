@@ -18,15 +18,19 @@ public abstract class NspUnpackerBase(KeySet keySet)
 
     public string BaseNspPath { get; private set; } = string.Empty;
 
+    protected bool StreamRomfs { get; private set; }
+
     protected async Task<UnpackResult> UnpackCore(BuildRequest req, string outDir, bool withControlNca, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         BaseNspPath = req.BaseFilePath;
+        StreamRomfs = req.StreamRomfs;
 
         Directory.CreateDirectory(outDir);
 
         var storages = new List<LocalStorage>();
         var partitions = new List<IFileSystem>();
         var collector = new NcaCollector(_keySet);
+        UnpackResult? streamResult = null;
 
         try
         {
@@ -84,12 +88,20 @@ public abstract class NspUnpackerBase(KeySet keySet)
 
                 if (effectiveProg.CanOpenSection(NcaSectionType.Data))
                 {
-                    result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), ct);
-
-                    if (RomfsCompression.HasCompressedSection(effectiveProg) || RomfsCompression.HasCompressedSection(patchProg))
+                    if (StreamRomfs)
                     {
-                        File.WriteAllText(Path.Combine(programDir, RomfsCompression.FlagFileName), string.Empty);
+                        result.RomfsOpeners[idOffset] = NcaExtractor.CreateRomfsOpener(effectiveProg, patchProg, ncas.CreateOnlyOffsets.Contains(idOffset));
                         result.CompressedRomfs.Add(idOffset);
+                    }
+                    else
+                    {
+                        result.RomfsDirs[idOffset] = extractor.ExtractRomFs(effectiveProg, patchProg, "romfs", programDir, progCtx, ncas.CreateOnlyOffsets.Contains(idOffset), ct);
+
+                        if (RomfsCompression.HasCompressedSection(effectiveProg) || RomfsCompression.HasCompressedSection(patchProg))
+                        {
+                            File.WriteAllText(Path.Combine(programDir, RomfsCompression.FlagFileName), string.Empty);
+                            result.CompressedRomfs.Add(idOffset);
+                        }
                     }
                 }
 
@@ -124,7 +136,10 @@ public abstract class NspUnpackerBase(KeySet keySet)
                     result.LegalDirs[idOffset] = legalDir;
             }
 
-            extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, ct);
+            if (StreamRomfs)
+                NcaExtractor.RegisterDlcStreams(ncas.DlcNcas, result);
+            else
+                extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, ct);
 
             if (withControlNca)
             {
@@ -141,15 +156,26 @@ public abstract class NspUnpackerBase(KeySet keySet)
 
             progress.ReportStatus("완료", 100);
 
+            if (StreamRomfs)
+                streamResult = result;
+
             return result;
         }
         finally
         {
-            foreach (var s in storages)
-                s.Dispose();
+            if (streamResult != null)
+            {
+                streamResult.Resources.AddRange(storages);
+                streamResult.Resources.AddRange(collector.NscStreams);
+            }
+            else
+            {
+                foreach (var s in storages)
+                    s.Dispose();
 
-            foreach (var ns in collector.NscStreams)
-                ns.Dispose();
+                foreach (var ns in collector.NscStreams)
+                    ns.Dispose();
+            }
         }
     }
 
@@ -211,7 +237,9 @@ public abstract class NspUnpackerBase(KeySet keySet)
             ncas.UpdateProgs.TryGetValue(idOffset, out var updateProg);
 
             NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Code, SumFs);
-            NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Data, SumFs);
+
+            if (!StreamRomfs)
+                NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Data, SumFs);
 
             if (idOffset == 0 && baseProg.CanOpenSection(NcaSectionType.Logo))
                 NcaExtractor.TryWithFs(baseProg, null, NcaSectionType.Logo, SumFs);
@@ -235,8 +263,11 @@ public abstract class NspUnpackerBase(KeySet keySet)
             NcaExtractor.TryWithFs(baseLegal, updateLegal, NcaSectionType.Data, SumFs);
         }
 
-        foreach (var dlc in ncas.DlcNcas)
-            NcaExtractor.TryWithFs(dlc, null, NcaSectionType.Data, SumFs);
+        if (!StreamRomfs)
+        {
+            foreach (var dlc in ncas.DlcNcas)
+                NcaExtractor.TryWithFs(dlc, null, NcaSectionType.Data, SumFs);
+        }
 
         return total;
     }
