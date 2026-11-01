@@ -12,6 +12,11 @@
     <RootNamespace>RomForge</RootNamespace>
     <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
   </PropertyGroup>
+  <PropertyGroup>
+	<Authors>YameSoft</Authors>
+	<Copyright>Copyright © 2026 YameSoft</Copyright>
+	<PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>NETSDK1206</NoWarn>
   </PropertyGroup>

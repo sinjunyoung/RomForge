@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<Version>1.0.0.0</Version>
   </PropertyGroup>
 
   <PropertyGroup>	
@@ -12,6 +13,29 @@
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>	
 	<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
+
+	<Target Name="AutoIncrementVersion" BeforeTargets="BeforeBuild">
+		<PropertyGroup>
+			<VersionFile>$(MSBuildProjectDirectory)\version.txt</VersionFile>
+		</PropertyGroup>
+
+		<WriteLinesToFile File="$(VersionFile)" Lines="0" Overwrite="false" Condition="!Exists('$(VersionFile)')" />
+
+		<ReadLinesFromFile File="$(VersionFile)">
+			<Output TaskParameter="Lines" PropertyName="BuildNumber" />
+		</ReadLinesFromFile>
+
+		<PropertyGroup>
+			<NewBuildNumber>$([MSBuild]::Add($(BuildNumber), 1))</NewBuildNumber>
+			<Version>1.0.0.$(NewBuildNumber)</Version>
+			<AssemblyVersion>1.0.0.$(NewBuildNumber)</AssemblyVersion>
+			<FileVersion>1.0.0.$(NewBuildNumber)</FileVersion>
+		</PropertyGroup>
+
+		<WriteLinesToFile File="$(VersionFile)" Lines="$(NewBuildNumber)" Overwrite="true" />
+
+		<Message Text="[자동 버전 업데이트] 현재 버전: $(Version)" Importance="high" />
+	</Target>
 
   <ItemGroup>
     <PackageReference Include="Squid-Box.SevenZipSharp.Lite" Version="1.6.2.24" />

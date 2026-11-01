@@ -5,6 +5,11 @@
 	<UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <PropertyGroup>
+	<Authors>YameSoft</Authors>
+	<Copyright>Copyright © 2026 YameSoft</Copyright>
+	<PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>NETSDK1206;NU1902;NU1903</NoWarn>
   </PropertyGroup>
