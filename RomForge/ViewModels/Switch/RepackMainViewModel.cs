@@ -22,7 +22,7 @@ namespace RomForge.ViewModels.Switch
 
         private BuildMode? _currentMode;
 
-        public bool IsIndeterminate {  get; set { SetProperty(ref field, value); } } = false;
+        public bool IsIndeterminate { get; set { SetProperty(ref field, value); } } = false;
 
         public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchRepackOutputPath = value; } } = string.Empty;
 
@@ -217,8 +217,7 @@ namespace RomForge.ViewModels.Switch
                 req = new BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath)
                 {
                     CompressRomfs = RepackLz4Sync.ResolveProgramOverride(Context?.GameFiles, rebuildOnly: true),
-                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true),
-                    StreamRomfs = mode == BuildMode.FullProcess
+                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true)
                 };
 
                 return true;
@@ -265,7 +264,8 @@ namespace RomForge.ViewModels.Switch
                 PatchPassword = mainPatchPassword,
                 DlcPatchPasswords = dlcPatchPasswords,
                 CompressRomfs = RepackLz4Sync.ResolveProgramOverride(gameFiles, rebuildOnly: false),
-                DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(gameFiles, rebuildOnly: false)
+                DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(gameFiles, rebuildOnly: false),
+                StreamRomfs = mode == BuildMode.FullProcess
             };
 
             return true;

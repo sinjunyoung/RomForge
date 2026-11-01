@@ -46,6 +46,14 @@ public static class RomfsCompression
                 result.CompressedRomfs.Remove(idOffset);
             }
         }
+
+        foreach (var idOffset in result.RomfsOpeners.Keys)
+        {
+            if (compress)
+                result.CompressedRomfs.Add(idOffset);
+            else
+                result.CompressedRomfs.Remove(idOffset);
+        }
     }
 
     public static bool? ReadUnpackedFlag(string unpackedDir, ulong baseTitleId)
