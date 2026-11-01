@@ -34,7 +34,7 @@ internal static class Lz4DataNcaBuilder
             KeyAreaKey = keySet.KeyAreaKeys[keyGenerationIndex][0].DataRo.ToArray()
         };
 
-        var (hash, size) = NcaGenerator.GenerateRomfsNcaInto(output, settings, "Data", lz4Level, onAdvance, ct);
+        var (hash, size) = NcaGenerator.GenerateRomfsNcaInto(output, settings, lz4Level, onAdvance, ct);
 
         return (hash[..0x10], hash, size);
     }

@@ -14,17 +14,17 @@ public static class NcaGenerator
         string ncaPath = Path.Combine(settings.OutDirectory, $"{ncaType}.nca");
         using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
 
-        WriteRomfsNca(ncaFile, settings, ncaType, compressLevel, progress, ct);
+        WriteRomfsNca(ncaFile, settings, compressLevel, progress, ct);
 
         return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
     }
 
-    public static (byte[] Hash, long Size) GenerateRomfsNcaInto(Stream output, NcaGenerationOptions settings, string ncaType, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
+    public static (byte[] Hash, long Size) GenerateRomfsNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
     {
         long start = output.Position;
         var window = new OffsetStream(output, start, onAdvance);
 
-        WriteRomfsNca(window, settings, ncaType, compressLevel, null, ct);
+        WriteRomfsNca(window, settings, compressLevel, null, ct);
 
         long size = window.Length;
         byte[] hash = HashRegion(output, start, size, ct);
@@ -34,7 +34,7 @@ public static class NcaGenerator
         return (hash, size);
     }
 
-    private static void WriteRomfsNca(Stream ncaFile, NcaGenerationOptions settings, string ncaType, int compressLevel, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    private static void WriteRomfsNca(Stream ncaFile, NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         var ncaHeader = new NcaHeader();
 
@@ -42,7 +42,7 @@ public static class NcaGenerator
 
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
 
-        var ivfcStreams = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 0, settings, $"{ncaType}_romfs_tmp", progress, ct);
+        var ivfcStreams = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 0, settings, progress, ct);
 
         try
         {
@@ -171,7 +171,7 @@ public static class NcaGenerator
 
         if (settings.HasRomfsSource)
         {
-            var ivfcStreams1 = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 1, settings, "program_sec1_romfs_tmp", progress, ct);
+            var ivfcStreams1 = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 1, settings, progress, ct);
 
             try
             {
@@ -386,7 +386,7 @@ public static class NcaGenerator
         _ => throw new NotSupportedException($"Unknown title type: {titleType}")
     };
 
-    private static MemoryStream[] BuildAndWriteRomfsSection(Stream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, string tempFileName, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    private static MemoryStream[] BuildAndWriteRomfsSection(Stream ncaFile, int compressLevel, ref NcaHeader ncaHeader, int sectionIndex, NcaGenerationOptions settings, IProgress<ProgressInfo>? progress, CancellationToken ct)
         => settings.CompressRomfs ? StreamingRomfsSectionWriter.Write(ncaFile, compressLevel, ref ncaHeader, sectionIndex, settings, progress, ct) : UncompressedRomfsSectionWriter.Write(ncaFile, ref ncaHeader, sectionIndex, settings, progress, ct);
 
     private static void BuildPfs0ToStream(string inDirPath, List<(string Name, byte[] Data)>? files, MemoryStream outStream, CancellationToken ct)
