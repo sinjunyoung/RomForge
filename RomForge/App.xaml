@@ -32,7 +32,9 @@
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
             <converters:StringHasValueConverter x:Key="StringHasValueConverter" />
             <converters:BoolToPlayStopTextConverter x:Key="BoolToPlayStopTextConverter" />
-
+            <converters:TitleIdGroupConverter x:Key="TitleIdGroupConverter" />
+            <converters:RepresentativeTitleNameConverter x:Key="RepresentativeTitleNameConverter" />
+            
             <Style TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="1"/>
