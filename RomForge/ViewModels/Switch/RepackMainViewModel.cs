@@ -217,7 +217,8 @@ namespace RomForge.ViewModels.Switch
                 req = new BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath)
                 {
                     CompressRomfs = RepackLz4Sync.ResolveProgramOverride(Context?.GameFiles, rebuildOnly: true),
-                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true)
+                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true),
+                    StreamRomfs = mode == BuildMode.FullProcess
                 };
 
                 return true;

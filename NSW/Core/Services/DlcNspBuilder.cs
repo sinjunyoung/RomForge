@@ -31,14 +31,18 @@ public static class DlcNspBuilder
             ulong titleId = item.TitleId;
             string romfsPath = item.RomfsPath;
 
-            if (item.RomfsOpener == null && req.DlcPatchDirs.TryGetValue(titleIdStr, out var dlcPatchDir) && !string.IsNullOrEmpty(dlcPatchDir))
+            if (req.DlcPatchDirs.TryGetValue(titleIdStr, out var dlcPatchDir) && !string.IsNullOrEmpty(dlcPatchDir))
             {
                 req.DlcPatchPasswords.TryGetValue(titleIdStr, out var dlcPatchPassword);
-                NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, romfsPath, progress, log, dlcPatchPassword);
+
+                if (item.Virtual != null)
+                    NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, item.Virtual, progress, log, dlcPatchPassword);
+                else
+                    NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, romfsPath, progress, log, dlcPatchPassword);
             }
 
             bool hasRomfs = item.RomfsOpener != null || (Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any());
-            bool compressRomfs = item.RomfsOpener != null || (req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : File.Exists(Path.Combine(item.DlcDir, RomfsCompression.FlagFileName)));
+            bool compressRomfs = req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : item.RomfsOpener != null ? item.SourceCompressed : File.Exists(Path.Combine(item.DlcDir, RomfsCompression.FlagFileName));
 
             log($"DLC 빌드 시도: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Info);
 
@@ -93,7 +97,7 @@ public static class DlcNspBuilder
         if (req.StreamRomfs)
         {
             foreach (var dlc in unpackResult.Dlcs.Where(d => d.RomfsOpener != null))
-                items.Add(new DlcItem(dlc.TitleId.ToString("X16"), dlc.TitleId, string.Empty, string.Empty, dlc.RomfsOpener));
+                items.Add(new DlcItem(dlc.TitleId.ToString("X16"), dlc.TitleId, string.Empty, string.Empty, dlc.RomfsOpener, dlc.Virtual, dlc.SourceCompressed));
 
             return items;
         }
@@ -110,11 +114,11 @@ public static class DlcNspBuilder
             if (!ulong.TryParse(titleIdStr, System.Globalization.NumberStyles.HexNumber, null, out ulong titleId))
                 continue;
 
-            items.Add(new DlcItem(titleIdStr, titleId, dlcDir, Path.Combine(dlcDir, "romfs"), null));
+            items.Add(new DlcItem(titleIdStr, titleId, dlcDir, Path.Combine(dlcDir, "romfs"), null, null, false));
         }
 
         return items;
     }
 
-    private sealed record DlcItem(string TitleIdStr, ulong TitleId, string DlcDir, string RomfsPath, Func<Stream>? RomfsOpener);
+    private sealed record DlcItem(string TitleIdStr, ulong TitleId, string DlcDir, string RomfsPath, Func<Stream>? RomfsOpener, VirtualRomfs? Virtual, bool SourceCompressed);
 }

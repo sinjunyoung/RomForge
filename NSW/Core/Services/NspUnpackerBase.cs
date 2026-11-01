@@ -90,8 +90,14 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 {
                     if (StreamRomfs)
                     {
-                        result.RomfsOpeners[idOffset] = NcaExtractor.CreateRomfsOpener(effectiveProg, patchProg, ncas.CreateOnlyOffsets.Contains(idOffset));
-                        result.CompressedRomfs.Add(idOffset);
+                        var virtualRomfs = NcaExtractor.OpenVirtualRomfs(effectiveProg, patchProg, GetStreamTempDir(outDir), ncas.CreateOnlyOffsets.Contains(idOffset));
+
+                        result.Resources.Add(virtualRomfs);
+                        result.VirtualRomfsPrograms[idOffset] = virtualRomfs;
+                        result.RomfsOpeners[idOffset] = virtualRomfs.OpenImage;
+
+                        if (RomfsCompression.HasCompressedSection(effectiveProg) || RomfsCompression.HasCompressedSection(patchProg))
+                            result.CompressedRomfs.Add(idOffset);
                     }
                     else
                     {
@@ -137,7 +143,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
             }
 
             if (StreamRomfs)
-                NcaExtractor.RegisterDlcStreams(ncas.DlcNcas, result);
+                NcaExtractor.RegisterDlcStreams(ncas.DlcNcas, result, GetStreamTempDir(outDir));
             else
                 extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, ct);
 
@@ -165,8 +171,8 @@ public abstract class NspUnpackerBase(KeySet keySet)
         {
             if (streamResult != null)
             {
-                streamResult.Resources.AddRange(storages);
-                streamResult.Resources.AddRange(collector.NscStreams);
+                streamResult.Resources.InsertRange(0, collector.NscStreams);
+                streamResult.Resources.InsertRange(0, storages);
             }
             else
             {
@@ -178,6 +184,8 @@ public abstract class NspUnpackerBase(KeySet keySet)
             }
         }
     }
+
+    private static string GetStreamTempDir(string outDir) => Path.GetFullPath(Path.Combine(outDir, "..", "temp"));
 
     protected abstract ProgressContext CreateProgressContext(List<string> inputPaths, CollectedNcas ncas);
 

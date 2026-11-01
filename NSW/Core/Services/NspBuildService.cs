@@ -113,6 +113,9 @@ public static class NspBuildService
         finally
         {
             unpackResult.ReleaseResources();
+
+            if (req.StreamRomfs)
+                dirs.Cleanup();
         }
     }
 
@@ -352,7 +355,7 @@ public static class NspBuildService
         progress.ReportStatus("NSP 패키징 중...", 0);
         Directory.CreateDirectory(req.OutputDir);
 
-        string suffix = req.StreamRomfs ? "Merged_Lz4.nsp" : req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
+        string suffix = req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount);
         string finalNsp = Path.Combine(req.OutputDir, fileName);

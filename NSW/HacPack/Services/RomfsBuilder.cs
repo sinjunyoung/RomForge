@@ -12,9 +12,49 @@ public static class RomfsBuilder
     private const ulong FilePartitionOfs = 0x200;
     private const int HashBlockSize = IvfcConstants.HashBlockSize;
 
-    public static void BuildRomfsImage(string inDirPath, Stream outStream, out ulong outSize, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static RomfsNode FromDirectory(string dirPath)
     {
-        ConstructRomfsStructure(inDirPath, outStream, 0, progress, ct);
+        var root = new RomfsNode { Name = string.Empty, IsDirectory = true };
+
+        FillFromDirectory(root, dirPath);
+
+        return root;
+    }
+
+    private static void FillFromDirectory(RomfsNode parent, string dirPath)
+    {
+        foreach (var entry in Directory.EnumerateFileSystemEntries(dirPath))
+        {
+            string name = Path.GetFileName(entry);
+
+            if ((File.GetAttributes(entry) & FileAttributes.Directory) != 0)
+            {
+                var dir = new RomfsNode { Name = name, IsDirectory = true };
+
+                parent.Children.Add(dir);
+
+                FillFromDirectory(dir, entry);
+            }
+            else
+            {
+                string filePath = entry;
+
+                parent.Children.Add(new RomfsNode
+                {
+                    Name = name,
+                    Size = new FileInfo(entry).Length,
+                    Open = () => new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.SequentialScan)
+                });
+            }
+        }
+    }
+
+    public static void BuildRomfsImage(string inDirPath, Stream outStream, out ulong outSize, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+        => BuildRomfsImage(FromDirectory(inDirPath), inDirPath, outStream, out outSize, progress, ct);
+
+    public static void BuildRomfsImage(RomfsNode root, string rootPath, Stream outStream, out ulong outSize, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    {
+        WriteLayout(CreateLayout(root, rootPath), outStream, 0, progress, ct);
 
         outSize = (ulong)outStream.Position;
 
@@ -24,9 +64,11 @@ public static class RomfsBuilder
             outStream.Write(new byte[paddingSize]);
     }
 
-    private static void ConstructRomfsStructure(string inDirPath, Stream fout, long baseOffset, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    public static Stream OpenImage(RomfsNode root, string rootPath = "") => new RomfsImageStream(CreateLayout(root, rootPath));
+
+    internal static RomfsLayout CreateLayout(RomfsNode root, string rootPath)
     {
-        var rootCtx = new RomfsDirentCtx { SumPath = inDirPath, CurPath = string.Empty };
+        var rootCtx = new RomfsDirentCtx { SumPath = rootPath, CurPath = string.Empty, Node = root };
 
         rootCtx.Parent = rootCtx;
 
@@ -43,7 +85,7 @@ public static class RomfsBuilder
         uint[] dirHashTable = new uint[dirHashCount];
         uint[] fileHashTable = new uint[fileHashCount];
 
-        for (int i = 0; i < dirHashCount; i++) 
+        for (int i = 0; i < dirHashCount; i++)
             dirHashTable[i] = EntryEmpty;
 
         for (int i = 0; i < fileHashCount; i++)
@@ -111,17 +153,31 @@ public static class RomfsBuilder
             FileTableSize = romfsCtx.FileTableSize,
         };
 
+        byte[] dirHashBytes = new byte[romfsCtx.DirHashTableSize];
+
+        Buffer.BlockCopy(dirHashTable, 0, dirHashBytes, 0, (int)romfsCtx.DirHashTableSize);
+
+        byte[] fileHashBytes = new byte[romfsCtx.FileHashTableSize];
+
+        Buffer.BlockCopy(fileHashTable, 0, fileHashBytes, 0, (int)romfsCtx.FileHashTableSize);
+
+        var files = new List<RomfsFentCtx>();
+
+        for (var f = romfsCtx.Files; f != null; f = f.Next)
+            files.Add(f);
+
+        return new RomfsLayout(header, files, romfsCtx.FilePartitionSize, dirHashBytes, dirTableBuf, fileHashBytes, fileTableBuf);
+    }
+
+    private static void WriteLayout(RomfsLayout layout, Stream fout, long baseOffset, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    {
         fout.Seek(baseOffset, SeekOrigin.Begin);
-        NcaStructHelper.WriteStruct(fout, header);
+        NcaStructHelper.WriteStruct(fout, layout.Header);
 
         ulong totalSize = 0;
-        var tmp = romfsCtx.Files;
 
-        while (tmp != null) 
-        {
-            totalSize += tmp.Size; 
-            tmp = tmp.Next;
-        }
+        foreach (var file in layout.Files)
+            totalSize += file.Size;
 
         var reporter = new ProgressReporter("RomFS 빌드 중", string.Empty, (long)totalSize, progress);
         const int bufSize = 0x800000;
@@ -129,17 +185,15 @@ public static class RomfsBuilder
 
         try
         {
-            curFile = romfsCtx.Files;
-
-            while (curFile != null)
+            foreach (var curFile in layout.Files)
             {
                 ct.ThrowIfCancellationRequested();
 
-                using var fin = new FileStream(curFile.SumPath, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.SequentialScan); 
+                using var fin = curFile.Open!();
 
                 fout.Seek(baseOffset + (long)(curFile.Offset + FilePartitionOfs), SeekOrigin.Begin);
 
-                ulong remaining = curFile.Size;                
+                ulong remaining = curFile.Size;
 
                 while (remaining > 0)
                 {
@@ -148,7 +202,7 @@ public static class RomfsBuilder
                     int toRead = (int)Math.Min(bufSize, remaining);
                     int read = fin.Read(buf.AsSpan(0, toRead));
 
-                    if (read <= 0) 
+                    if (read <= 0)
                         break;
 
                     fout.Write(buf.AsSpan(0, read));
@@ -157,8 +211,6 @@ public static class RomfsBuilder
 
                     reporter.AddProgress(read);
                 }
-
-                curFile = curFile.Next;
             }
 
             reporter.ForceReport();
@@ -168,19 +220,12 @@ public static class RomfsBuilder
             System.Buffers.ArrayPool<byte>.Shared.Return(buf);
         }
 
-        fout.Seek(baseOffset + (long)dirHashTableOfs, SeekOrigin.Begin);
+        fout.Seek(baseOffset + (long)layout.Header.DirHashTableOfs, SeekOrigin.Begin);
 
-        byte[] dirHashBytes = new byte[romfsCtx.DirHashTableSize];
-
-        Buffer.BlockCopy(dirHashTable, 0, dirHashBytes, 0, (int)romfsCtx.DirHashTableSize);
-        fout.Write(dirHashBytes);
-        fout.Write(dirTableBuf);
-
-        byte[] fileHashBytes = new byte[romfsCtx.FileHashTableSize];
-
-        Buffer.BlockCopy(fileHashTable, 0, fileHashBytes, 0, (int)romfsCtx.FileHashTableSize);
-        fout.Write(fileHashBytes);
-        fout.Write(fileTableBuf);
+        fout.Write(layout.DirHashBytes);
+        fout.Write(layout.DirTableBuf);
+        fout.Write(layout.FileHashBytes);
+        fout.Write(layout.FileTableBuf);
     }
 
     private static void TraverseDirectoryTree(RomfsDirentCtx parent, RomfsCtx romfsCtx)
@@ -188,20 +233,20 @@ public static class RomfsBuilder
         RomfsDirentCtx? childDirTree = null;
         RomfsFentCtx? childFileTree = null;
 
-        foreach (var entry in Directory.EnumerateFileSystemEntries(parent.SumPath))
+        foreach (var node in parent.Node!.Children)
         {
-            string name = Path.GetFileName(entry);
+            string name = node.Name;
             string curPath = "/" + name;
-            string sumPath = entry;
-            var attr = File.GetAttributes(entry);
+            string sumPath = Path.Combine(parent.SumPath, name);
 
-            if ((attr & FileAttributes.Directory) != 0)
+            if (node.IsDirectory)
             {
                 var curDir = new RomfsDirentCtx
                 {
                     Parent = parent,
                     SumPath = sumPath,
-                    CurPath = curPath
+                    CurPath = curPath,
+                    Node = node
                 };
 
                 romfsCtx.NumDirs++;
@@ -217,7 +262,8 @@ public static class RomfsBuilder
                     Parent = parent,
                     SumPath = sumPath,
                     CurPath = curPath,
-                    Size = (ulong)new FileInfo(entry).Length
+                    Size = (ulong)node.Size,
+                    Open = node.Open
                 };
 
                 romfsCtx.NumFiles++;
@@ -246,14 +292,14 @@ public static class RomfsBuilder
         if (tree == null || string.Compare(node.SumPath, tree.SumPath, StringComparison.Ordinal) < 0)
         {
             node.Sibling = tree; tree = node;
-            return; 
+            return;
         }
 
         var prev = tree;
         var cur = tree.Sibling;
 
         while (cur != null && string.Compare(node.SumPath, cur.SumPath, StringComparison.Ordinal) >= 0)
-        { 
+        {
             prev = cur;
             cur = cur.Sibling;
         }
@@ -264,12 +310,12 @@ public static class RomfsBuilder
 
     private static void InsertDirNext(RomfsDirentCtx parent, RomfsDirentCtx node)
     {
-        var tmp = parent.Next; 
+        var tmp = parent.Next;
         var tmpPrev = parent;
 
         while (tmp != null && string.Compare(node.SumPath, tmp.SumPath, StringComparison.Ordinal) >= 0)
-        { 
-            tmpPrev = tmp; 
+        {
+            tmpPrev = tmp;
             tmp = tmp.Next;
         }
 
@@ -280,17 +326,17 @@ public static class RomfsBuilder
     private static void InsertFileSibling(ref RomfsFentCtx? tree, RomfsFentCtx node)
     {
         if (tree == null || string.Compare(node.SumPath, tree.SumPath, StringComparison.Ordinal) < 0)
-        { 
-            node.Sibling = tree; 
+        {
+            node.Sibling = tree;
             tree = node;
-            return; 
+            return;
         }
 
-        var prev = tree; 
+        var prev = tree;
         var cur = tree.Sibling;
 
         while (cur != null && string.Compare(node.SumPath, cur.SumPath, StringComparison.Ordinal) >= 0)
-        { 
+        {
             prev = cur;
             cur = cur.Sibling;
         }
@@ -302,22 +348,22 @@ public static class RomfsBuilder
     private static void InsertFileNext(RomfsCtx ctx, RomfsFentCtx node)
     {
         if (ctx.Files == null || string.Compare(node.SumPath, ctx.Files.SumPath, StringComparison.Ordinal) < 0)
-        { 
+        {
             node.Next = ctx.Files;
-            ctx.Files = node; 
-            return; 
+            ctx.Files = node;
+            return;
         }
 
-        var prev = ctx.Files; 
+        var prev = ctx.Files;
         var cur = ctx.Files.Next;
 
         while (cur != null && string.Compare(node.SumPath, cur.SumPath, StringComparison.Ordinal) >= 0)
-        { 
-            prev = cur; 
+        {
+            prev = cur;
             cur = cur.Next;
         }
 
-        prev.Next = node; 
+        prev.Next = node;
         node.Next = cur;
     }
 
@@ -390,10 +436,10 @@ public static class RomfsBuilder
 
     private static uint GetHashTableCount(uint numEntries)
     {
-        if (numEntries < 3) 
+        if (numEntries < 3)
             return 3;
 
-        if (numEntries < 19) 
+        if (numEntries < 19)
             return numEntries | 1;
 
         uint count = numEntries;

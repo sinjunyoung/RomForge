@@ -1,4 +1,6 @@
-﻿namespace NSW.HacPack.Models;
+﻿using System.IO;
+
+namespace NSW.HacPack.Models;
 
 public class RomfsCtx
 {

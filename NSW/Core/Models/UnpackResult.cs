@@ -49,6 +49,9 @@ public class UnpackResult
     [JsonIgnore]
     public string TitleIdStr => $"{TitleId:x16}";
 
+    [JsonIgnore] 
+    public Dictionary<byte, Services.VirtualRomfs> VirtualRomfsPrograms { get; } = [];
+
     public void ReleaseResources()
     {
         for (int i = Resources.Count - 1; i >= 0; i--)

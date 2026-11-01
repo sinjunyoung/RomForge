@@ -11,6 +11,8 @@ public static class NspPatchApplier
     {
         string exefsDir = unpackResult.ExefsDirs.GetValueOrDefault(sourceIdOffset, string.Empty);
         string romfsDir = unpackResult.RomfsDirs.GetValueOrDefault(sourceIdOffset, string.Empty);
+        IPatchTarget? exefsTarget = exefsDir.Length > 0 && Directory.Exists(exefsDir) ? new DiskPatchTarget(exefsDir) : null;
+        IPatchTarget? romfsTarget = unpackResult.VirtualRomfsPrograms.TryGetValue(sourceIdOffset, out var virtualRomfs) ? virtualRomfs : DiskTarget(romfsDir);
 
         if (sourceIdOffset != 0 || unpackResult.ExefsDirs.Count > 1)
             patchPath = ResolveProgramPatchPath(patchPath, GetProgramId(exefsDir, romfsDir));
@@ -21,12 +23,12 @@ public static class NspPatchApplier
         {
             using var archive = ArchivePatchSourceFactory.Open(patchPath, patchPassword);
 
-            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsDir, romfsDir, progress, log, "한글패치");
+            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, "한글패치");
             matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsDir, progress, log);
         }
         else if (Directory.Exists(patchPath))
         {
-            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), exefsDir, romfsDir, progress, log, "한글패치");
+            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), exefsTarget, romfsTarget, progress, log, "한글패치");
             matchedCount += NspExefsPatchApplier.ApplyFolderExefsPatches(patchPath, exefsDir, progress, log);
         }
 
@@ -72,6 +74,14 @@ public static class NspPatchApplier
 
     public static void ApplyDlcPatch(string patchPath, string titleIdStr, string romfsDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string? patchPassword = null)
     {
+        var target = DiskTarget(romfsDir);
+
+        if (target != null)
+            ApplyDlcPatch(patchPath, titleIdStr, target, progress, log, patchPassword);
+    }
+
+    public static void ApplyDlcPatch(string patchPath, string titleIdStr, IPatchTarget romfsTarget, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string? patchPassword = null)
+    {
         int matchedCount = 0;
         string label = $"DLC 패치 ({titleIdStr})";
 
@@ -79,46 +89,48 @@ public static class NspPatchApplier
         {
             using var archive = ArchivePatchSourceFactory.Open(patchPath, patchPassword);
 
-            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), string.Empty, romfsDir, progress, log, label);
+            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), null, romfsTarget, progress, log, label);
         }
         else
         {
             if (!Directory.Exists(patchPath))
                 return;
 
-            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), string.Empty, romfsDir, progress, log, label);
+            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), null, romfsTarget, progress, log, label);
         }
 
         if (matchedCount == 0)
             log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
     }
 
-    private static int ApplyIndex(PatchFileIndex index, string exefsDir, string romfsDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string label)
+    private static IPatchTarget? DiskTarget(string directory) => directory.Length > 0 && Directory.Exists(directory) ? new DiskPatchTarget(directory) : null;
+
+    private static int ApplyIndex(PatchFileIndex index, IPatchTarget? exefsTarget, IPatchTarget? romfsTarget, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string label)
     {
-        var dirs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var targetsByPrefix = new Dictionary<string, IPatchTarget>(StringComparer.OrdinalIgnoreCase);
 
-        if (exefsDir.Length > 0 && Directory.Exists(exefsDir))
-            dirs[PatchIndex.ExefsPrefix] = exefsDir;
+        if (exefsTarget != null)
+            targetsByPrefix[PatchIndex.ExefsPrefix] = exefsTarget;
 
-        if (romfsDir.Length > 0 && Directory.Exists(romfsDir))
-            dirs[PatchIndex.RomfsPrefix] = romfsDir;
+        if (romfsTarget != null)
+            targetsByPrefix[PatchIndex.RomfsPrefix] = romfsTarget;
 
-        if (dirs.Count == 0)
+        if (targetsByPrefix.Count == 0)
             return 0;
 
         progress.ReportStatus($"{label} 적용 중...", -1);
 
-        var targets = dirs.SelectMany(kv => Directory.EnumerateFiles(kv.Value, "*", SearchOption.AllDirectories).Select(f => $"{kv.Key}/{Path.GetRelativePath(kv.Value, f).Replace('\\', '/')}")).ToList();
+        var targets = targetsByPrefix.SelectMany(kv => kv.Value.EnumerateRelativeFiles().Select(f => $"{kv.Key}/{f}")).ToList();
         var plan = PatchPlan.Build(index, targets, StringComparer.OrdinalIgnoreCase);
 
-        string? ResolvePath(string key)
+        (IPatchTarget Target, string Relative)? Resolve(string key)
         {
             int slash = key.IndexOf('/');
 
-            if (slash < 0 || !dirs.TryGetValue(key[..slash], out string? dir))
+            if (slash < 0 || !targetsByPrefix.TryGetValue(key[..slash], out var target))
                 return null;
 
-            return Path.Combine(dir, key[(slash + 1)..].Replace('/', Path.DirectorySeparatorChar));
+            return (target, key[(slash + 1)..]);
         }
 
         int replaced = 0;
@@ -126,12 +138,12 @@ public static class NspPatchApplier
 
         foreach (var (key, file) in plan.Overwrites.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
         {
-            string? dest = ResolvePath(key);
+            var resolved = Resolve(key);
 
-            if (dest == null)
+            if (resolved == null)
                 continue;
 
-            PatchDiskApplier.CopyTo(file, dest);
+            resolved.Value.Target.Overwrite(resolved.Value.Relative, file);
             log($"{label} 교체: {key}", LogLevel.Info);
 
             replaced++;
@@ -139,12 +151,12 @@ public static class NspPatchApplier
 
         foreach (var (key, file) in plan.UnmatchedOverwrites.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase))
         {
-            string? dest = ResolvePath(key);
+            var resolved = Resolve(key);
 
-            if (dest == null)
+            if (resolved == null)
                 continue;
 
-            PatchDiskApplier.CopyTo(file, dest);
+            resolved.Value.Target.Overwrite(resolved.Value.Relative, file);
             log($"{label} 추가: {key}", LogLevel.Info);
 
             added++;
@@ -155,14 +167,14 @@ public static class NspPatchApplier
 
         foreach (string key in plan.PatchedPaths.OrderBy(k => k, StringComparer.OrdinalIgnoreCase))
         {
-            string? dest = ResolvePath(key);
+            var resolved = Resolve(key);
 
-            if (dest == null)
+            if (resolved == null)
                 continue;
 
             foreach (var patch in plan.GetPatches(key))
             {
-                bool ok = PatchDiskApplier.ApplyAsync(dest, patch, key, progress, log, CancellationToken.None).GetAwaiter().GetResult();
+                bool ok = resolved.Value.Target.PatchAsync(resolved.Value.Relative, patch, key, progress, log, CancellationToken.None).GetAwaiter().GetResult();
 
                 if (ok)
                 {

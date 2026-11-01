@@ -17,4 +17,6 @@ public class RomfsDirentCtx
     public RomfsFentCtx? File;
 
     public RomfsDirentCtx? Next;
+
+    public RomfsNode? Node;
 }

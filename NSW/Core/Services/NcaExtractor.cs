@@ -49,35 +49,43 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
     }
 
-    public static Func<Stream> CreateRomfsOpener(Nca baseProg, Nca? updateProg, bool isCreateOnly)
+    public static VirtualRomfs OpenVirtualRomfs(Nca baseProg, Nca? updateProg, string tempDir, bool isCreateOnly = false)
     {
         if (!isCreateOnly)
             EnsureSparseHasUpdate(baseProg, updateProg);
 
-        int index = Nca.GetSectionIndexFromType(NcaSectionType.Data, baseProg.Header.ContentType);
+        var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
+            : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-        return () =>
-        {
-            var storage = updateProg != null ? baseProg.OpenStorageWithPatch(updateProg, index, IntegrityCheckLevel.None)
-                : baseProg.IsPatch ? baseProg.OpenStorageWithoutBase(index, IntegrityCheckLevel.None)
-                : baseProg.OpenStorage(index, IntegrityCheckLevel.None);
-
-            return storage.AsStream(FileAccess.Read);
-        };
+        return VirtualRomfs.FromFileSystem(fs, tempDir);
     }
 
-    public static void RegisterDlcStreams(List<Nca> dlcNcas, UnpackResult result)
+    public static void RegisterDlcStreams(List<Nca> dlcNcas, UnpackResult result, string tempDir)
     {
         foreach (var nca in dlcNcas)
         {
             if (!nca.CanOpenSection(NcaSectionType.Data))
                 continue;
 
-            result.Dlcs.Add(new DlcUnpackInfo
+            string titleIdStr = nca.Header.TitleId.ToString("X16");
+
+            try
             {
-                TitleId = nca.Header.TitleId,
-                RomfsOpener = () => nca.OpenStorage(NcaSectionType.Data, IntegrityCheckLevel.None).AsStream(FileAccess.Read)
-            });
+                var virtualRomfs = VirtualRomfs.FromFileSystem(nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None), Path.Combine(tempDir, "dlc_" + titleIdStr));
+
+                result.Resources.Add(virtualRomfs);
+                result.Dlcs.Add(new DlcUnpackInfo
+                {
+                    TitleId = nca.Header.TitleId,
+                    Virtual = virtualRomfs,
+                    RomfsOpener = virtualRomfs.OpenImage,
+                    SourceCompressed = RomfsCompression.HasCompressedSection(nca)
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"DLC 열기 실패 ({titleIdStr}): {ex.Message}");
+            }
         }
     }
 

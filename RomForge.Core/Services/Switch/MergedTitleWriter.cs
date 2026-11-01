@@ -113,7 +113,7 @@ internal static class MergedTitleWriter
 
             long inputSize = paths.Sum(p => new FileInfo(p).Length);
 
-            log($"크기: {Common.Utils.FormatFileSize(inputSize)} → {Common.Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / inputSize:F1}%)", LogLevel.Highlight);
+            log($"크기: {Utils.FormatFileSize(inputSize)} → {Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / inputSize:F1}%)", LogLevel.Highlight);
 
             completed = true;
 
