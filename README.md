@@ -1,8 +1,8 @@
 # RomForge
 
-롬 패치 / 압축 툴
+Multi-Platform ROM Patching & Compression Utility
 
-## 사용자 매뉴얼
+## User Guide
 
 https://sinjunyoung.github.io/RomForge/
 
