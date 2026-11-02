@@ -20,7 +20,7 @@ public static class StreamingRomfsSectionWriter
             long dataStart = ncaFile.Position;
             CompressedRomfsInfo info;
 
-            using (var source = settings.RomfsImageOpener!())
+            using (var source = settings.OpenRomfsImage())
                 info = CompressedRomfsWriter.Compress(source, ncaFile, compressLevel, progress, ct);
 
             long dataSize = ncaFile.Position - dataStart;

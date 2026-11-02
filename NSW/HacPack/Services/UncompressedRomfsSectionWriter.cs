@@ -19,7 +19,7 @@ public static class UncompressedRomfsSectionWriter
 
         try
         {
-            using var source = settings.RomfsImageOpener!();
+            using var source = settings.OpenRomfsImage();
 
             long hashedSize = source.Length;
             long dataSize = source is IUnpaddedLengthSource unpadded ? unpadded.UnpaddedLength : hashedSize;

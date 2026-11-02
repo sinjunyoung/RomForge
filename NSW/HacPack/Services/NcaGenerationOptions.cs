@@ -84,6 +84,10 @@ public class NcaGenerationOptions
 
     public Func<Stream>? RomfsImageOpener;
 
+    public Stream OpenRomfsImage() => RomfsImageOpener != null
+        ? RomfsImageOpener()
+        : RomfsBuilder.OpenImage(RomfsBuilder.FromDirectory(RomfsDirectory), RomfsDirectory);
+
     public bool HasRomfsSource => RomfsImageOpener != null || (!string.IsNullOrEmpty(RomfsDirectory) && Directory.Exists(RomfsDirectory));
 
     public string SdkVersionString
