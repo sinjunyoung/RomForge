@@ -61,7 +61,7 @@ internal static class MergedProgramNcaBuilder
         if (exefsFiles.Count > 0)
             Lz4ProgramNcaBuilder.PatchNpdm(settings, exefsFiles);
 
-        var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, ct);
+        var (hash, size) = NcaGenerator.GenerateProgramNcaInto(output, settings, lz4Level, onAdvance, null, ct);
         return (hash[..0x10], hash, size);
     }
 
