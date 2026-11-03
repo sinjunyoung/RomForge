@@ -51,125 +51,32 @@ public static partial class Xdelta3
 
     private static string GetLastError() => Marshal.PtrToStringAnsi(xd3_get_last_error()) ?? "unknown error";
 
+    public static Stream OpenDecoder(Func<Stream> openSource, long sourceLength, Func<Stream> openPatch, long patchLength, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
+    {
+        var source = SourceBuffer.Load(openSource, sourceLength, progress, ct);
+
+        try
+        {
+            return new DecodeStream(source, true, openPatch, patchLength, sourceLength, progress, ct);
+        }
+        catch
+        {
+            source.Dispose();
+            throw;
+        }
+    }
+
     public static void ApplyPatch(string sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         ValidateInputFiles(sourcePath, patchPath);
 
         long sourceSize = new FileInfo(sourcePath).Length;
-        IntPtr sourceBuf = sourceSize > 0 ? Marshal.AllocHGlobal((nint)sourceSize) : IntPtr.Zero;
+        long patchSize = new FileInfo(patchPath).Length;
 
-        try
-        {
-            ProgressReporter? loadReporter = progress is null || sourceSize <= 0 ? null : new ProgressReporter("소스 로딩중...", string.Empty, sourceSize, progress);
-            Action<long, long>? loadReport = loadReporter?.CreateAction();
-            using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan))
-            {
-                var chunk = new byte[StreamChunkSize];
-                long offset = 0;
+        using var decoder = OpenDecoder(() => OpenSequential(sourcePath), sourceSize, () => OpenSequential(patchPath), patchSize, progress, ct);
+        using var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, StreamChunkSize);
 
-                while (offset < sourceSize)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    int n = sourceStream.Read(chunk, 0, (int)Math.Min(chunk.Length, sourceSize - offset));
-
-                    if (n <= 0)
-                        throw new InvalidOperationException("소스 파일을 읽는 중 오류가 발생했습니다.");
-
-                    Marshal.Copy(chunk, 0, sourceBuf + (nint)offset, n);
-
-                    offset += n;
-
-                    loadReport?.Invoke(offset, sourceSize);
-                }
-            }
-
-            ApplyPatchFromBuffer(sourceBuf, sourceSize, patchPath, outputPath, progress, ct);
-        }
-        finally
-        {
-            if (sourceBuf != IntPtr.Zero)
-                Marshal.FreeHGlobal(sourceBuf);
-        }
-    }
-
-    private static void ApplyPatchFromBuffer(IntPtr sourceBuf, long sourceSize, string patchPath, string outputPath, IProgress<ProgressInfo>? progress, CancellationToken ct)
-    {
-        IntPtr handle = xd3_stream_open_decode_buf(sourceBuf, sourceSize);
-
-        if (handle == IntPtr.Zero)
-            throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
-
-        try
-        {
-            using var patchStream = new FileStream(patchPath, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan);
-            using var outStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, StreamChunkSize);
-            long patchTotal = patchStream.Length;
-
-            if (patchTotal == 0)
-                throw new InvalidOperationException("패치 파일이 비어 있습니다.");
-
-            long patchConsumed = 0;
-            long totalWritten = 0;
-            long estimatedTotal = Math.Max(sourceSize, 1);
-            ProgressReporter? reporter = progress is null ? null : new ProgressReporter("패치중...", string.Empty, estimatedTotal, progress);
-            Action<long, long>? report = reporter?.CreateAction();
-            var readBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
-            var outBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
-
-            while (true)
-            {
-                ct.ThrowIfCancellationRequested();
-
-                int n = patchStream.Read(readBuf, 0, readBuf.Length);
-
-                if (n <= 0)
-                    throw new InvalidOperationException("패치 파일을 읽는 중 오류가 발생했습니다.");
-
-                patchConsumed += n;
-
-                bool isLastChunk = patchConsumed >= patchTotal;
-                int feedRet = xd3_stream_feed(handle, readBuf, (nuint)n, isLastChunk ? 1 : 0);
-
-                if (feedRet != 0)
-                    ThrowLastError();
-
-                while (true)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    int status = xd3_stream_read_output(handle, outBuf, (nuint)outBuf.Length, out nuint written);
-
-                    if (status == (int)Xd3StreamStatus.Error)
-                        ThrowLastError();
-
-                    if ((int)written > 0)
-                    {
-                        outStream.Write(outBuf, 0, (int)written);
-
-                        totalWritten += (int)written;
-
-                        long reportValue = Math.Min(totalWritten, estimatedTotal - 1);
-
-                        report?.Invoke(reportValue, estimatedTotal);
-                    }
-
-                    if (status != (int)Xd3StreamStatus.Ok)
-                        break;
-                }
-
-                if (isLastChunk)
-                    break;
-            }
-
-            FinishStream(handle);
-
-            report?.Invoke(estimatedTotal, estimatedTotal);
-        }
-        finally
-        {
-            xd3_stream_close(handle);
-        }
+        decoder.CopyTo(outStream, StreamChunkSize);
     }
 
     public static byte[] ApplyPatch(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -177,87 +84,276 @@ public static partial class Xdelta3
         if (patchData.Length == 0)
             throw new InvalidOperationException("패치 데이터가 비어 있습니다.");
 
-        long sourceSize = sourceData.Length;
-        IntPtr sourceBuf = IntPtr.Zero;
+        using var source = SourceBuffer.Pin(sourceData);
+        using var decoder = new DecodeStream(source, false, () => new MemoryStream(patchData, false), patchData.Length, sourceData.Length, progress, ct);
+        using var outStream = new MemoryStream(sourceData.Length);
 
-        GCHandle? sourceHandle = sourceSize > 0 ? GCHandle.Alloc(sourceData, GCHandleType.Pinned) : null;
+        decoder.CopyTo(outStream, StreamChunkSize);
 
-        if (sourceHandle.HasValue)
-            sourceBuf = sourceHandle.Value.AddrOfPinnedObject();
+        return outStream.ToArray();
+    }
 
-        IntPtr handle = xd3_stream_open_decode_buf(sourceBuf, sourceSize);
+    private static FileStream OpenSequential(string path) => new(path, FileMode.Open, FileAccess.Read, FileShare.Read, StreamChunkSize, FileOptions.SequentialScan);
 
-        if (handle == IntPtr.Zero)
+    private sealed class SourceBuffer : IDisposable
+    {
+        private GCHandle? _pinned;
+
+        private bool _owned;
+
+        private SourceBuffer(IntPtr pointer, long size)
         {
-            sourceHandle?.Free();
-            throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
+            Pointer = pointer;
+            Size = size;
         }
 
-        try
+        public IntPtr Pointer { get; private set; }
+
+        public long Size { get; }
+
+        public static SourceBuffer Load(Func<Stream> openSource, long size, IProgress<ProgressInfo>? progress, CancellationToken ct)
         {
-            using var outStream = new MemoryStream((int)sourceSize);
-            long patchTotal = patchData.Length;
-            long patchConsumed = 0;
-            long totalWritten = 0;
-            long estimatedTotal = Math.Max(sourceSize, 1);
-            ProgressReporter? reporter = progress is null ? null : new ProgressReporter("패치중...", string.Empty, estimatedTotal, progress);
-            Action<long, long>? report = reporter?.CreateAction();
-            var readBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
-            var outBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
+            IntPtr pointer = size > 0 ? Marshal.AllocHGlobal((nint)size) : IntPtr.Zero;
+            var buffer = new SourceBuffer(pointer, size) { _owned = pointer != IntPtr.Zero };
 
-            while (patchConsumed < patchTotal)
+            try
             {
-                ct.ThrowIfCancellationRequested();
+                ProgressReporter? loadReporter = progress is null || size <= 0 ? null : new ProgressReporter("소스 로딩중...", string.Empty, size, progress);
+                Action<long, long>? loadReport = loadReporter?.CreateAction();
 
-                int n = (int)Math.Min(StreamChunkSize, patchTotal - patchConsumed);
+                using var sourceStream = openSource();
 
-                Array.Copy(patchData, patchConsumed, readBuf, 0, n);
+                var chunk = new byte[StreamChunkSize];
+                long offset = 0;
 
-                patchConsumed += n;
-
-                bool isLastChunk = patchConsumed >= patchTotal;
-                int feedRet = xd3_stream_feed(handle, readBuf, (nuint)n, isLastChunk ? 1 : 0);
-
-                if (feedRet != 0)
-                    ThrowLastError();
-
-                while (true)
+                while (offset < size)
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    int status = xd3_stream_read_output(handle, outBuf, (nuint)outBuf.Length, out nuint written);
+                    int n = sourceStream.Read(chunk, 0, (int)Math.Min(chunk.Length, size - offset));
 
-                    if (status == (int)Xd3StreamStatus.Error)
-                        ThrowLastError();
+                    if (n <= 0)
+                        throw new InvalidOperationException("소스 파일을 읽는 중 오류가 발생했습니다.");
 
-                    if ((int)written > 0)
-                    {
-                        outStream.Write(outBuf, 0, (int)written);
+                    Marshal.Copy(chunk, 0, pointer + (nint)offset, n);
 
-                        totalWritten += (int)written;
+                    offset += n;
 
-                        long reportValue = Math.Min(totalWritten, estimatedTotal - 1);
-
-                        report?.Invoke(reportValue, estimatedTotal);
-                    }
-
-                    if (status != (int)Xd3StreamStatus.Ok)
-                        break;
+                    loadReport?.Invoke(offset, size);
                 }
 
-                if (isLastChunk)
-                    break;
+                return buffer;
+            }
+            catch
+            {
+                buffer.Dispose();
+                throw;
+            }
+        }
+
+        public static SourceBuffer Pin(byte[] data)
+        {
+            if (data.Length == 0)
+                return new SourceBuffer(IntPtr.Zero, 0);
+
+            var handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+
+            return new SourceBuffer(handle.AddrOfPinnedObject(), data.Length) { _pinned = handle };
+        }
+
+        public void Dispose()
+        {
+            if (_pinned.HasValue)
+            {
+                _pinned.Value.Free();
+                _pinned = null;
             }
 
-            FinishStream(handle);
-            report?.Invoke(estimatedTotal, estimatedTotal);
+            if (_owned && Pointer != IntPtr.Zero)
+                Marshal.FreeHGlobal(Pointer);
 
-            return outStream.ToArray();
+            _owned = false;
+            Pointer = IntPtr.Zero;
         }
-        finally
+    }
+
+    private sealed class DecodeStream : Stream
+    {
+        private readonly SourceBuffer _source;
+        private readonly bool _ownsSource;
+        private readonly IntPtr _handle;
+        private readonly Stream _patch;
+        private readonly long _patchTotal;
+        private readonly long _estimatedTotal;
+        private readonly Action<long, long>? _report;
+        private readonly byte[] _readBuf;
+        private readonly byte[] _outBuf;
+        private readonly CancellationToken _ct;
+
+        private long _patchConsumed;
+        private long _totalWritten;
+        private int _outPos;
+        private int _outCount;
+        private bool _patchFedLast;
+        private bool _finished;
+        private bool _disposed;
+
+        public DecodeStream(SourceBuffer source, bool ownsSource, Func<Stream> openPatch, long patchLength, long sourceLength, IProgress<ProgressInfo>? progress, CancellationToken ct)
         {
-            xd3_stream_close(handle);
-            sourceHandle?.Free();
+            if (patchLength <= 0)
+                throw new InvalidOperationException("패치 파일이 비어 있습니다.");
+
+            _source = source;
+            _ownsSource = ownsSource;
+            _patchTotal = patchLength;
+            _estimatedTotal = Math.Max(sourceLength, 1);
+            _ct = ct;
+            _handle = xd3_stream_open_decode_buf(source.Pointer, source.Size);
+
+            if (_handle == IntPtr.Zero)
+                throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
+
+            try
+            {
+                _patch = openPatch();
+                _report = progress is null ? null : new ProgressReporter("패치중...", string.Empty, _estimatedTotal, progress).CreateAction();
+                _readBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
+                _outBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
+            }
+            catch
+            {
+                xd3_stream_close(_handle);
+                _patch?.Dispose();
+                throw;
+            }
+        }
+
+        public override bool CanRead => true;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => false;
+
+        public override long Length => throw new NotSupportedException();
+
+        public override long Position
+        {
+            get => throw new NotSupportedException();
+            set => throw new NotSupportedException();
+        }
+
+        public override void Flush()
+        {
+        }
+
+        public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
+
+        public override int Read(Span<byte> buffer)
+        {
+            int total = 0;
+
+            while (total < buffer.Length)
+            {
+                if (_outPos >= _outCount && !Fill())
+                    break;
+
+                int copy = Math.Min(buffer.Length - total, _outCount - _outPos);
+
+                _outBuf.AsSpan(_outPos, copy).CopyTo(buffer[total..]);
+
+                _outPos += copy;
+                total += copy;
+            }
+
+            return total;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+        public override void SetLength(long value) => throw new NotSupportedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                _disposed = true;
+
+                xd3_stream_close(_handle);
+                _patch.Dispose();
+
+                if (_ownsSource)
+                    _source.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        private bool Fill()
+        {
+            while (true)
+            {
+                _ct.ThrowIfCancellationRequested();
+
+                if (_finished)
+                    return false;
+
+                int status = xd3_stream_read_output(_handle, _outBuf, (nuint)_outBuf.Length, out nuint written);
+
+                if (status == (int)Xd3StreamStatus.Error)
+                    ThrowLastError();
+
+                if (written > 0)
+                {
+                    _outPos = 0;
+                    _outCount = (int)written;
+                    _totalWritten += (int)written;
+
+                    _report?.Invoke(Math.Min(_totalWritten, _estimatedTotal - 1), _estimatedTotal);
+
+                    return true;
+                }
+
+                bool drained = status == (int)Xd3StreamStatus.Finished || status == (int)Xd3StreamStatus.NeedInput && _patchFedLast;
+
+                if (drained)
+                {
+                    FinishStream(_handle);
+
+                    _report?.Invoke(_estimatedTotal, _estimatedTotal);
+                    _finished = true;
+
+                    return false;
+                }
+
+                if (status == (int)Xd3StreamStatus.NeedInput)
+                    FeedNext();
+            }
+        }
+
+        private void FeedNext()
+        {
+            int n = _patch.Read(_readBuf, 0, _readBuf.Length);
+
+            if (n <= 0)
+            {
+                if (xd3_stream_feed(_handle, _readBuf, 0, 1) != 0)
+                    ThrowLastError();
+
+                _patchFedLast = true;
+
+                return;
+            }
+
+            _patchConsumed += n;
+
+            bool isLastChunk = _patchConsumed >= _patchTotal;
+
+            if (xd3_stream_feed(_handle, _readBuf, (nuint)n, isLastChunk ? 1 : 0) != 0)
+                ThrowLastError();
+
+            _patchFedLast = isLastChunk;
         }
     }
 

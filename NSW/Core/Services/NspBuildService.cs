@@ -59,7 +59,7 @@ public static class NspBuildService
     {
         var dirs = new WorkDirs(req.OutputDir);
 
-        if (mode != BuildMode.RebuildOnly)
+        if (mode == BuildMode.UnpackOnly)
             dirs.Prepare();
 
         UnpackResult unpackResult;
@@ -86,6 +86,8 @@ public static class NspBuildService
         }
 
         string? tempNsp = null;
+        List<string> createdDirs = [];
+        bool completed = false;
 
         try
         {
@@ -124,6 +126,8 @@ public static class NspBuildService
 
             var baseSettings = settingsList.First(s => s.IdOffset == 0);
 
+            createdDirs = FindMissingDirectories(req.OutputDir);
+
             Directory.CreateDirectory(req.OutputDir);
 
             tempNsp = Path.Combine(req.OutputDir, $"~repack_{Guid.NewGuid():N}.tmp");
@@ -153,6 +157,7 @@ public static class NspBuildService
             string finalNsp = StepFinalize(req, unpackResult, tempNsp, progress, log);
 
             tempNsp = null;
+            completed = true;
 
             return finalNsp;
         }
@@ -161,8 +166,8 @@ public static class NspBuildService
             DeleteIfExists(tempNsp);
             unpackResult.ReleaseResources();
 
-            if (req.StreamRomfs)
-                dirs.Cleanup();
+            if (!completed)
+                DeleteCreatedDirectories(createdDirs);
         }
     }
 
@@ -345,6 +350,7 @@ public static class NspBuildService
         var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, manualSettings, compressLevel, null, progress, ct));
 
         log($"[{type}] NCA 등록: {name}", LogLevel.Ok);
+
         return new CnmtContent(contentType, settings.IdOffset, hash, size);
     }
 
@@ -377,6 +383,7 @@ public static class NspBuildService
         var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, controlSettings, compressLevel, null, progress, ct));
 
         log($"Control NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+
         return new CnmtContent(ContentTypeControl, settings.IdOffset, hash, size);
     }
 
@@ -419,7 +426,37 @@ public static class NspBuildService
 
         progress.ReportStatus("완료", 100);
         log($"출력: {finalNsp}", LogLevel.Ok);
+
         return finalNsp;
+    }
+
+    private static List<string> FindMissingDirectories(string directory)
+    {
+        var missing = new List<string>();
+
+        for (string? current = Path.GetFullPath(directory); !string.IsNullOrEmpty(current) && !Directory.Exists(current); current = Path.GetDirectoryName(current))
+            missing.Add(current);
+
+        return missing;
+    }
+
+    private static void DeleteCreatedDirectories(List<string> directories)
+    {
+        foreach (var directory in directories)
+        {
+            try
+            {
+                if (!Directory.Exists(directory) || Directory.EnumerateFileSystemEntries(directory).Any())
+                    return;
+
+                Directory.Delete(directory);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"빈 출력 폴더 삭제 실패 ({directory}): {ex.Message}");
+                return;
+            }
+        }
     }
 
     private static void DeleteIfExists(string? path)

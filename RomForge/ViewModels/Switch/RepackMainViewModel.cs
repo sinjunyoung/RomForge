@@ -66,10 +66,9 @@ namespace RomForge.ViewModels.Switch
                 return;
             }
 
-            bool isRebuild = (mode == BuildMode.RebuildOnly);
             string unpackedPath = Path.Combine(req.OutputDir, "unpacked");
 
-            if (!isRebuild && Directory.Exists(unpackedPath))
+            if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
             {
                 if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
                     return;
@@ -162,7 +161,8 @@ namespace RomForge.ViewModels.Switch
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
 
-                        new WorkDirs(req.OutputDir).Cleanup(keepUnpacked: mode == BuildMode.RebuildOnly);
+                        if (mode == BuildMode.UnpackOnly)
+                            new WorkDirs(req.OutputDir).Cleanup();
                     }
                     catch (Exception cleanupEx)
                     {

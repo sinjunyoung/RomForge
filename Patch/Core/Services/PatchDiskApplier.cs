@@ -20,17 +20,13 @@ public static class PatchDiskApplier
         string name = patch.File.DisplayName;
         string tempOutPath = targetPath + ".patched";
 
-        log?.Invoke($"패치 적용: {name} ➡️ {displayPath}", LogLevel.Info);
+        PatchApplyLog.Start(log, name, displayPath);
 
         try
         {
             using var tempPatch = patch.File.MaterializeAsTempFile(".patch");
 
-            var wrapper = progress is null ? null : new Progress<ProgressInfo>(p =>
-            {
-                if (p.Percent > 0)
-                    progress.Report(p with { Label = string.IsNullOrEmpty(p.Label) ? $"패치 적용 중 - {name}" : p.Label });
-            });
+            var wrapper = PatchApplyLog.Wrap(progress, name);
 
             await UniversalPatcher.ApplyPatchAsync(targetPath, Path.GetFullPath(tempPatch.Path), tempOutPath, wrapper, ct);
 
@@ -41,7 +37,6 @@ public static class PatchDiskApplier
             }
 
             File.Move(tempOutPath, targetPath, overwrite: true);
-
             return true;
         }
         catch (OperationCanceledException)
@@ -52,12 +47,7 @@ public static class PatchDiskApplier
         catch (Exception ex)
         {
             DeleteQuietly(tempOutPath);
-
-            if (patch.Strict)
-                log?.Invoke($"❌ 패치 실패 ({name}): {ex.Message}", LogLevel.Error);
-            else
-                log?.Invoke($"⚠️ 원본이 맞지 않아 건너뜀: {name} ➡️ {displayPath} ({ex.Message})", LogLevel.Info);
-
+            PatchApplyLog.Failure(log, patch.Strict, name, displayPath, ex);
             return false;
         }
     }

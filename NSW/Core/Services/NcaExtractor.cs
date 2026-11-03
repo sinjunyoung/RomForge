@@ -33,16 +33,16 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
     private static IFileSystem OpenManualFileSystem(Nca? baseNca, Nca? updateNca) => baseNca != null && updateNca != null ? baseNca.OpenFileSystemWithPatch(updateNca, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseNca ?? updateNca)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
-    public static VirtualRomfs OpenVirtualExefs(Nca baseProg, Nca? updateProg, string tempDir) => VirtualRomfs.FromFileSystem(OpenExeFsFileSystem(baseProg, updateProg), tempDir);
+    public static VirtualRomfs OpenVirtualExefs(Nca baseProg, Nca? updateProg) => VirtualRomfs.FromFileSystem(OpenExeFsFileSystem(baseProg, updateProg));
 
-    public static VirtualRomfs? OpenVirtualLogo(Nca baseProg, string tempDir) => baseProg.CanOpenSection(NcaSectionType.Logo) ? VirtualRomfs.FromFileSystem(baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None), tempDir) : null;
+    public static VirtualRomfs? OpenVirtualLogo(Nca baseProg) => baseProg.CanOpenSection(NcaSectionType.Logo) ? VirtualRomfs.FromFileSystem(baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None)) : null;
 
-    public static VirtualRomfs? OpenVirtualControl(Nca? controlNca, Nca? updateControlNca, string tempDir)
+    public static VirtualRomfs? OpenVirtualControl(Nca? controlNca, Nca? updateControlNca)
     {
         if (controlNca == null)
             return null;
 
-        var control = VirtualRomfs.FromFileSystem(controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None), tempDir);
+        var control = VirtualRomfs.FromFileSystem(controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None));
 
         if (updateControlNca != null)
             control.MergeFileSystem(updateControlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None));
@@ -50,14 +50,14 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         return control;
     }
 
-    public static VirtualRomfs? OpenVirtualManual(Nca? baseNca, Nca? updateNca, string tempDir, string label)
+    public static VirtualRomfs? OpenVirtualManual(Nca? baseNca, Nca? updateNca, string label)
     {
         if (baseNca == null && updateNca == null)
             return null;
 
         try
         {
-            return VirtualRomfs.FromFileSystem(OpenManualFileSystem(baseNca, updateNca), tempDir);
+            return VirtualRomfs.FromFileSystem(OpenManualFileSystem(baseNca, updateNca));
         }
         catch (Exception ex)
         {
@@ -85,16 +85,16 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
     }
 
-    public static VirtualRomfs OpenVirtualRomfs(Nca baseProg, Nca? updateProg, string tempDir, bool isCreateOnly = false)
+    public static VirtualRomfs OpenVirtualRomfs(Nca baseProg, Nca? updateProg, bool isCreateOnly = false)
     {
         if (!isCreateOnly)
             EnsureSparseHasUpdate(baseProg, updateProg);
 
         var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-        return VirtualRomfs.FromFileSystem(fs, tempDir);
+        return VirtualRomfs.FromFileSystem(fs);
     }
 
-    public static void RegisterDlcStreams(List<Nca> dlcNcas, UnpackResult result, string tempDir)
+    public static void RegisterDlcStreams(List<Nca> dlcNcas, UnpackResult result)
     {
         foreach (var nca in dlcNcas)
         {
@@ -105,7 +105,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
             try
             {
-                var virtualRomfs = VirtualRomfs.FromFileSystem(nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None), Path.Combine(tempDir, "dlc_" + titleIdStr));
+                var virtualRomfs = VirtualRomfs.FromFileSystem(nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None));
 
                 result.Resources.Add(virtualRomfs);
                 result.Dlcs.Add(new DlcUnpackInfo
@@ -134,6 +134,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "RomFS", ctx, ct);
+
         return dir;
     }
 
@@ -146,6 +147,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         using var fs = baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "Logo", ctx, ct);
+
         return dir;
     }
 
@@ -167,6 +169,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         }
 
         ApplyTitleMetadata(req, result, baseNspPath);
+
         return dir;
     }
 
@@ -216,6 +219,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         using var fs = OpenManualFileSystem(baseLegal, updateLegal);
 
         ExtractFileSystem(fs, dir, "Legal", ctx, ct);
+
         return dir;
     }
 

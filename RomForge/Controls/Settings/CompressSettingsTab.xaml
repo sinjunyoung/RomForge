@@ -37,8 +37,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="5"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <Border Margin="5,0,5,0" Grid.Row="0" Style="{StaticResource OptionBorder}">
@@ -78,30 +76,6 @@
                             <Image Grid.Column="0" Source="/Assets/Images/Level.png" Width="24" Margin="0,0,10,0"/>
                             <Slider Grid.Column="1" x:Name="sliderSwitch" Style="{StaticResource SliderStyle}" Minimum="3" Maximum="18" Value="{Binding SwitchCompressLevel}" SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Cursor="Hand"/>
                             <TextBlock Grid.Column="2" Text="{Binding ElementName=sliderSwitch, Path=Value}" Foreground="{Binding ElementName=sliderSwitch, Path=Value, Converter={StaticResource LevelToColorConverter}}" 
-                                       FontWeight="Bold" VerticalAlignment="Center" Width="30" TextAlignment="Center" Margin="10,0,0,0"/>
-                        </Grid>
-                    </StackPanel>
-                </Border>                
-
-                <Border Margin="5,0,5,0" Grid.Row="4" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="압축 레벨 (LZ4)" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
-                            <TextBlock FontSize="11" Foreground="#00FFFF">3: 최소</TextBlock>
-                            <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
-                            <TextBlock FontSize="11" Foreground="#66FFAD">8: 권장</TextBlock>
-                            <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
-                            <TextBlock FontSize="11" Foreground="#FFFF33">9: 최대</TextBlock>
-                        </StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Image Grid.Column="0" Source="/Assets/Images/Level.png" Width="24" Margin="0,0,10,0"/>
-                            <Slider Grid.Column="1" x:Name="sliderSwitchLz4" IsEnabled="False" Style="{StaticResource SliderStyle}" Minimum="3" Maximum="9" Value="{Binding SwitchLz4CompressLevel}" SmallChange="1" LargeChange="1" IsSnapToTickEnabled="True" TickFrequency="1" VerticalAlignment="Center" Cursor="Hand"/>
-                            <TextBlock Grid.Column="2" Text="{Binding ElementName=sliderSwitchLz4, Path=Value}" Foreground="{Binding ElementName=sliderSwitchLz4, Path=Value, Converter={StaticResource LevelToColorConverter}}" 
                                        FontWeight="Bold" VerticalAlignment="Center" Width="30" TextAlignment="Center" Margin="10,0,0,0"/>
                         </Grid>
                     </StackPanel>

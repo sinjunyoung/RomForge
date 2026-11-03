@@ -9,7 +9,6 @@ using NSW.HacPack.Services;
 using Patch.Core.Models;
 using Patch.Core.Services;
 using System.IO;
-using Path = System.IO.Path;
 
 namespace NSW.Core.Services;
 
@@ -21,20 +20,17 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
 
         public Func<Stream> Open { get; set; } = open;
 
-        public string? TempPath { get; set; }
     }
 
     private readonly HashSet<string> _directories = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Entry> _files = new(StringComparer.Ordinal);
-    private readonly string _tempDirectory;
     private readonly List<IDisposable> _owners = [];
     private readonly Lock _lock = new();
 
     public int FileCount => _files.Count;
 
-    public VirtualRomfs(IEnumerable<string> directories, IEnumerable<(string Path, long Size, Func<Stream> Open)> files, string tempDirectory, IDisposable? owner = null)
+    public VirtualRomfs(IEnumerable<string> directories, IEnumerable<(string Path, long Size, Func<Stream> Open)> files, IDisposable? owner = null)
     {
-        _tempDirectory = tempDirectory;
         if (owner != null)
             _owners.Add(owner);
 
@@ -45,7 +41,7 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
             _files[path] = new Entry(size, open);
     }
 
-    public static VirtualRomfs FromFileSystem(IFileSystem fileSystem, string tempDirectory)
+    public static VirtualRomfs FromFileSystem(IFileSystem fileSystem)
     {
         var directories = new List<string>();
         var files = new List<(string Path, long Size, Func<Stream> Open)>();
@@ -65,7 +61,7 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
             files.Add((relative, entry.Size, () => OpenFile(fileSystem, fullPath)));
         }
 
-        return new VirtualRomfs(directories, files, tempDirectory, fileSystem);
+        return new VirtualRomfs(directories, files, fileSystem);
     }
 
     public void MergeFileSystem(IFileSystem fileSystem)
@@ -85,9 +81,6 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
                 }
 
                 string fullPath = entry.FullPath;
-
-                if (_files.TryGetValue(relative, out var existing))
-                    DeleteTemp(existing);
 
                 _files[relative] = new Entry(entry.Size, () => OpenFile(fileSystem, fullPath));
             }
@@ -125,12 +118,7 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
     public void WriteAllBytes(string relativePath, byte[] data)
     {
         lock (_lock)
-        {
-            if (_files.TryGetValue(relativePath, out var existing))
-                DeleteTemp(existing);
-
             _files[relativePath] = new Entry(data.Length, () => new MemoryStream(data, false));
-        }
     }
 
     public List<(string Name, byte[] Data)> ReadTopLevelFiles()
@@ -152,70 +140,42 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
     public void Overwrite(string relativePath, PatchFileRef file)
     {
         lock (_lock)
-        {
-            if (_files.TryGetValue(relativePath, out var existing))
-                DeleteTemp(existing);
-
             _files[relativePath] = new Entry(file.Length, file.OpenRead);
-        }
     }
 
     public async Task<bool> PatchAsync(string relativePath, PlannedPatch patch, string displayPath, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        Entry entry;
-        string tempPath;
-        bool createdTemp = false;
+        Func<Stream> openSource;
+        long sourceLength;
 
         lock (_lock)
         {
-            if (!_files.TryGetValue(relativePath, out entry!))
+            if (!_files.TryGetValue(relativePath, out var entry))
                 return false;
 
-            tempPath = entry.TempPath ?? string.Empty;
+            openSource = entry.Open;
+            sourceLength = entry.Size;
         }
 
-        if (tempPath.Length == 0)
-        {
-            Directory.CreateDirectory(_tempDirectory);
+        var patched = await PatchStreamApplier.ApplyAsync(openSource, sourceLength, patch, displayPath, progress, log, ct);
 
-            tempPath = Path.Combine(_tempDirectory, Guid.NewGuid().ToString("N") + Path.GetExtension(relativePath));
-
-            using (var source = entry.Open())
-            using (var destination = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20))
-                source.CopyTo(destination);
-
-            createdTemp = true;
-        }
-
-        bool ok = await PatchDiskApplier.ApplyAsync(tempPath, patch, displayPath, progress, log, ct);
+        if (patched == null)
+            return false;
 
         lock (_lock)
         {
-            if (ok)
+            if (_files.TryGetValue(relativePath, out var current))
             {
-                string finalPath = tempPath;
-
-                entry.Size = new FileInfo(finalPath).Length;
-                entry.Open = () => new FileStream(finalPath, FileMode.Open, FileAccess.Read, FileShare.Read, 64 * 1024, FileOptions.SequentialScan);
-                entry.TempPath = finalPath;
-            }
-            else if (createdTemp)
-            {
-                TryDelete(tempPath);
+                current.Size = patched.Length;
+                current.Open = patched.Open;
             }
         }
 
-        return ok;
+        return true;
     }
 
     public void Dispose()
     {
-        lock (_lock)
-        {
-            foreach (var entry in _files.Values)
-                DeleteTemp(entry);
-        }
-
         for (int i = _owners.Count - 1; i >= 0; i--)
             _owners[i].Dispose();
     }
@@ -267,27 +227,5 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
         fileSystem.OpenFile(ref file.Ref, fullPath.ToU8Span(), OpenMode.Read).ThrowIfFailure();
 
         return file.Release().AsStream();
-    }
-
-    private static void DeleteTemp(Entry entry)
-    {
-        if (entry.TempPath == null)
-            return;
-
-        TryDelete(entry.TempPath);
-
-        entry.TempPath = null;
-    }
-
-    private static void TryDelete(string path)
-    {
-        try
-        {
-            File.Delete(path);
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"임시 파일 삭제 실패: {ex.Message}");
-        }
     }
 }
