@@ -1,5 +1,4 @@
 ﻿using NSW.HacPack.Models;
-using NSW.HacPack.Cryptography.Core;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
@@ -8,20 +7,19 @@ namespace NSW.HacPack.Services;
 
 public static class CnmtGenerator
 {
-    public static void GenerateApplication(string cnmtFilepath, IEnumerable<NcaGenerationOptions> settingsList)
+    public static byte[] Build(NcaGenerationOptions baseSettings, IReadOnlyList<CnmtContent> contents) => baseSettings.TitleType switch
     {
-        var context = new CnmtContext();
+        LibHac.Ncm.ContentMetaType.Application => BuildApplication(baseSettings, contents),
+        LibHac.Ncm.ContentMetaType.AddOnContent => BuildAddon(baseSettings, contents),
+        LibHac.Ncm.ContentMetaType.SystemProgram => BuildSystemProgram(baseSettings, contents),
+        LibHac.Ncm.ContentMetaType.SystemData => BuildSystemData(baseSettings, contents),
+        LibHac.Ncm.ContentMetaType.Patch => throw new NotSupportedException("Creating Patch metadata without providing cnmt is not supported yet!"),
+        _ => throw new NotSupportedException($"Unknown title type: {baseSettings.TitleType}")
+    };
 
-        foreach (var settings in settingsList)
-        {
-            TryAddContentRecord(context, settings.ProgramNcaPath, settings.IsProgramNcaValid, 0x1, settings.IdOffset);
-            TryAddContentRecord(context, settings.DataNcaPath, settings.IsDataNcaValid, 0x2, settings.IdOffset);
-            TryAddContentRecord(context, settings.ControlNcaPath, settings.IsControlNcaValid, 0x3, settings.IdOffset);
-            TryAddContentRecord(context, settings.HtmlDocNcaPath, settings.IsHtmlDocNcaValid, 0x4, settings.IdOffset);
-            TryAddContentRecord(context, settings.LegalNcaPath, settings.IsLegalNcaValid, 0x5, settings.IdOffset);
-        }
-
-        var baseSettings = settingsList.First(s => s.IdOffset == 0);
+    public static byte[] BuildApplication(NcaGenerationOptions baseSettings, IReadOnlyList<CnmtContent> contents)
+    {
+        var context = CreateContext(contents);
 
         context.Header.Type = 0x80;
         context.Header.TitleId = baseSettings.TitleId;
@@ -34,14 +32,13 @@ public static class CnmtGenerator
             PatchTitleId = context.Header.TitleId + 0x800
         };
 
-        using var file = CreateFileStream(cnmtFilepath);
+        using var stream = new MemoryStream();
 
-        WriteStructure(file, context.Header);
-        WriteStructure(file, extHeader);
-        WriteContentEntries(file, context);
-        file.Write(baseSettings.Digest, 0, 0x20);
-
-        //ExportToXml("cnmt.xml", context, baseSettings.TitleId, baseSettings.TitleVersion, BitConverter.ToString(baseSettings.Digest));
+        WriteStructure(stream, context.Header);
+        WriteStructure(stream, extHeader);
+        WriteContentEntries(stream, context);
+        stream.Write(baseSettings.Digest, 0, 0x20);
+        return stream.ToArray();
     }
 
     public static void ExportToXml(string xmlFilepath, CnmtContext context, ulong titleId, uint version, string digest)
@@ -80,11 +77,9 @@ public static class CnmtGenerator
         _ => "Unknown"
     };
 
-    public static void GenerateAddon(string cnmtFilepath, NcaGenerationOptions settings)
+    public static byte[] BuildAddon(NcaGenerationOptions settings, IReadOnlyList<CnmtContent> contents)
     {
-        var context = new CnmtContext();
-
-        TryAddContentRecord(context, settings.PublicDataNcaPath, settings.IsPublicDataNcaValid, 0x2);
+        var context = CreateContext(contents);
 
         context.Header.Type = 0x82;
         context.Header.TitleId = settings.TitleId;
@@ -97,94 +92,77 @@ public static class CnmtGenerator
             ApplicationTitleId = context.Header.TitleId - 0x1000 & 0xFFFFFFFFFFFFF000
         };
 
-        using var file = CreateFileStream(cnmtFilepath);
+        using var stream = new MemoryStream();
 
-        WriteStructure(file, context.Header);
-        WriteStructure(file, extHeader);
-        WriteContentEntries(file, context);
-        file.Write(settings.Digest, 0, 0x20);
+        WriteStructure(stream, context.Header);
+        WriteStructure(stream, extHeader);
+        WriteContentEntries(stream, context);
+        stream.Write(settings.Digest, 0, 0x20);
+        return stream.ToArray();
     }
 
-    public static void CreateSystemProgram(string cnmtFilepath, NcaGenerationOptions settings)
+    public static byte[] BuildSystemProgram(NcaGenerationOptions settings, IReadOnlyList<CnmtContent> contents)
     {
-        var context = new CnmtContext();
-
-        TryAddContentRecord(context, settings.ProgramNcaPath, settings.IsProgramNcaValid, 0x1);
+        var context = CreateContext(contents);
 
         context.Header.Type = 0x1;
         context.Header.TitleId = settings.TitleId;
         context.Header.TitleVersion = settings.TitleVersion;
         context.Header.ContentEntryCount = context.ContentRecordsCount;
-
-        using var file = CreateFileStream(cnmtFilepath);
-
-        WriteStructure(file, context.Header);
-        WriteContentEntries(file, context);
-        file.Write(settings.Digest, 0, 0x20);
+        return Serialize(context, settings);
     }
 
-    public static void CreateSystemData(string cnmtFilepath, NcaGenerationOptions settings)
+    public static byte[] BuildSystemData(NcaGenerationOptions settings, IReadOnlyList<CnmtContent> contents)
     {
-        var context = new CnmtContext();
-
-        TryAddContentRecord(context, settings.DataNcaPath, settings.IsDataNcaValid, 0x2);
+        var context = CreateContext(contents);
 
         context.Header.Type = 0x2;
         context.Header.TitleId = settings.TitleId;
         context.Header.TitleVersion = settings.TitleVersion;
         context.Header.ContentEntryCount = context.ContentRecordsCount;
-
-        using var file = CreateFileStream(cnmtFilepath);
-
-        WriteStructure(file, context.Header);
-        WriteContentEntries(file, context);
-        file.Write(settings.Digest, 0, 0x20);
+        return Serialize(context, settings);
     }
 
-    public static void PopulateContentRecord(string ncaPath, ref CnmtContentRecord record)
+    private static byte[] Serialize(CnmtContext context, NcaGenerationOptions settings)
     {
-        using var file = new FileStream(ncaPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, FileOptions.SequentialScan);
-        byte[] hash = Sha256Service.CalculateHash(file);
+        using var stream = new MemoryStream();
 
-        record.Hash ??= new byte[32];
-        record.NcaId ??= new byte[16];
-        record.Size ??= new byte[6];
+        WriteStructure(stream, context.Header);
+        WriteContentEntries(stream, context);
+        stream.Write(settings.Digest, 0, 0x20);
+        return stream.ToArray();
+    }
 
-        Array.Copy(hash, 0, record.Hash, 0, 32);
-        Array.Copy(hash, 0, record.NcaId, 0, 16);
+    private static CnmtContext CreateContext(IReadOnlyList<CnmtContent> contents)
+    {
+        var context = new CnmtContext();
 
-        ulong length = (ulong)file.Length;
+        if (contents.Count > context.ContentRecords.Length)
+            throw new InvalidOperationException($"콘텐츠 레코드가 너무 많습니다: {contents.Count}");
+
         Span<byte> sizeSpan = stackalloc byte[8];
 
-        MemoryMarshal.Write(sizeSpan, in length);
-        sizeSpan[..6].CopyTo(record.Size);
-    }
-
-    private static void TryAddContentRecord(CnmtContext context, string path, bool isValid, byte type, byte idOffset = 0)
-    {
-        if (!isValid)
-            return;
-
-        PopulateContentRecord(path, ref context.ContentRecords[context.ContentRecordsCount]);
-
-        context.ContentRecords[context.ContentRecordsCount].Type = type;
-        context.ContentRecords[context.ContentRecordsCount].IdOffset = idOffset;
-        context.ContentRecordsCount++;
-    }
-
-    private static FileStream CreateFileStream(string path)
-    {
-        try 
-        { 
-            return File.Open(path, FileMode.Create, FileAccess.Write); 
-        }
-        catch (Exception ex) 
+        foreach (var content in contents)
         {
-            throw new IOException($"Failed to create {path}!", ex); 
+            if (content.Hash.Length != 0x20)
+                throw new ArgumentException("NCA 해시는 32바이트여야 합니다.");
+
+            ref var record = ref context.ContentRecords[context.ContentRecordsCount];
+
+            BitConverter.TryWriteBytes(sizeSpan, content.Size);
+
+            record.Hash = (byte[])content.Hash.Clone();
+            record.NcaId = content.Hash[..0x10];
+            record.Size = sizeSpan[..6].ToArray();
+            record.Type = content.Type;
+            record.IdOffset = content.IdOffset;
+            context.ContentRecordsCount++;
         }
+
+        return context;
     }
 
-    private static void WriteStructure<T>(FileStream file, T value) where T : struct
+    private static void WriteStructure<T>(Stream stream, T value) where T : struct
     {
         int size = Marshal.SizeOf<T>();
         Span<byte> buffer = stackalloc byte[size];
@@ -200,7 +178,7 @@ public static class CnmtGenerator
                     Buffer.MemoryCopy((void*)ptr, pBuffer, size, size);
             }
 
-            file.Write(buffer);
+            stream.Write(buffer);
         }
         finally
         {
@@ -208,9 +186,9 @@ public static class CnmtGenerator
         }
     }
 
-    private static void WriteContentEntries(FileStream file, CnmtContext ctx)
+    private static void WriteContentEntries(Stream stream, CnmtContext ctx)
     {
         for (int i = 0; i < ctx.ContentRecordsCount; i++)
-            WriteStructure(file, ctx.ContentRecords[i]);
+            WriteStructure(stream, ctx.ContentRecords[i]);
     }
 }

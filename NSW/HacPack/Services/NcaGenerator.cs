@@ -9,22 +9,12 @@ namespace NSW.HacPack.Services;
 
 public static class NcaGenerator
 {
-    public static string GenerateRomfsNca(NcaGenerationOptions settings, string ncaType, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        string ncaPath = Path.Combine(settings.OutDirectory, $"{ncaType}.nca");
-        using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
-
-        WriteRomfsNca(ncaFile, settings, compressLevel, progress, ct);
-
-        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
-    }
-
-    public static (byte[] Hash, long Size) GenerateRomfsNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
+    public static (byte[] Hash, long Size) GenerateRomfsNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         long start = output.Position;
         var window = new OffsetStream(output, start, onAdvance);
 
-        WriteRomfsNca(window, settings, compressLevel, null, ct);
+        WriteRomfsNca(window, settings, compressLevel, progress, ct);
 
         long size = window.Length;
         byte[] hash = HashRegion(output, start, size, ct);
@@ -39,7 +29,6 @@ public static class NcaGenerator
         var ncaHeader = new NcaHeader();
 
         NcaHeaderService.InitHeader(ref ncaHeader);
-
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
 
         var ivfcStreams = BuildAndWriteRomfsSection(ncaFile, compressLevel, ref ncaHeader, 0, settings, progress, ct);
@@ -76,22 +65,12 @@ public static class NcaGenerator
         NcaHeaderService.FinalizeNca(ncaFile, ref ncaHeader, settings);
     }
 
-    public static string GenerateProgramNca(NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        string ncaPath = Path.Combine(settings.OutDirectory, "Program.nca");
-        using var ncaFile = new FileStream(ncaPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1024 * 1024, FileOptions.SequentialScan);
-
-        WriteProgramNca(ncaFile, settings, compressLevel, progress, ct);
-
-        return WriteAndRename(ncaFile, settings, ncaPath, ".nca");
-    }
-
-    public static (byte[] Hash, long Size) GenerateProgramNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, CancellationToken ct = default)
+    public static (byte[] Hash, long Size) GenerateProgramNcaInto(Stream output, NcaGenerationOptions settings, int compressLevel, Action<long>? onAdvance = null, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         long start = output.Position;
         var window = new OffsetStream(output, start, onAdvance);
 
-        WriteProgramNca(window, settings, compressLevel, null, ct);
+        WriteProgramNca(window, settings, compressLevel, progress, ct);
 
         long size = window.Length;
         byte[] hash = HashRegion(output, start, size, ct);
@@ -266,33 +245,6 @@ public static class NcaGenerator
         NcaHeaderService.FinalizeNca(ncaFile, ref ncaHeader, settings);
     }
 
-    public static string GenerateMetaNca(IEnumerable<NcaGenerationOptions> settingsList, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-    {
-        var baseSettings = settingsList.First(s => s.IdOffset == 0);
-        string ncaPath = Path.Combine(baseSettings.OutDirectory, "Meta.nca");
-        using var ncaFile = File.Open(ncaPath, FileMode.Create, FileAccess.ReadWrite);
-        string cnmtDirPath = Path.Combine(baseSettings.TempDirectory, "cnmt");
-
-        Directory.CreateDirectory(cnmtDirPath);
-        ct.ThrowIfCancellationRequested();
-        BuildMetadataFile(cnmtDirPath, settingsList);
-
-        var metaFiles = Directory.GetFiles(cnmtDirPath).Select(f => (Path.GetFileName(f), File.ReadAllBytes(f))).ToList();
-
-        WriteMetaNca(ncaFile, baseSettings, metaFiles, progress, ct);
-
-        byte[] ncaHash = NcaStructHelper.CalculateNcaHash(ncaFile);
-
-        ncaFile.Close();
-
-        string finalName = Convert.ToHexString(ncaHash, 0, 16).ToLowerInvariant() + ".cnmt.nca";
-        string finalPath = Path.Combine(baseSettings.OutDirectory, finalName);
-
-        File.Move(ncaPath, finalPath, overwrite: true);
-
-        return finalPath;
-    }
-
     public static (byte[] Hash, long Size) GenerateMetaNcaInto(Stream output, NcaGenerationOptions settings, byte[] cnmt, CancellationToken ct = default)
     {
         long start = output.Position;
@@ -421,43 +373,5 @@ public static class NcaGenerator
 
         if (currOffset % 0x200 != 0)
             ncaFile.Write(new byte[0x200 - currOffset % 0x200]);
-    }
-
-    private static string WriteAndRename(FileStream ncaFile, NcaGenerationOptions settings, string ncaPath, string ext)
-    {
-        byte[] ncaHash = NcaStructHelper.CalculateNcaHash(ncaFile);
-        string finalName = Convert.ToHexString(ncaHash, 0, 16).ToLowerInvariant() + ext;
-        string finalPath = Path.Combine(settings.OutDirectory, finalName);
-
-        ncaFile.Close();
-        File.Move(ncaPath, finalPath, overwrite: true);
-
-        return finalPath;
-    }
-
-    private static string BuildMetadataFile(string cnmtDirPath, IEnumerable<NcaGenerationOptions> settingsList)
-    {
-        var baseSettings = settingsList.First(s => s.IdOffset == 0);
-
-        var (prefix, generate) = baseSettings.TitleType switch
-        {
-            LibHac.Ncm.ContentMetaType.Application => ("Application", (Action<string, IEnumerable<NcaGenerationOptions>>)CnmtGenerator.GenerateApplication),
-            LibHac.Ncm.ContentMetaType.AddOnContent => ("AddOnContent", (path, list) => CnmtGenerator.GenerateAddon(path, list.First())),
-            LibHac.Ncm.ContentMetaType.SystemProgram => ("SystemProgram", (path, list) => CnmtGenerator.CreateSystemProgram(path, list.First())),
-            LibHac.Ncm.ContentMetaType.SystemData => ("SystemData", (path, list) => CnmtGenerator.CreateSystemData(path, list.First())),
-            LibHac.Ncm.ContentMetaType.Patch => ("Patch", null!),
-            _ => throw new NotSupportedException($"Unknown title type: {baseSettings.TitleType}")
-        };
-
-        string cnmtPath = Path.Combine(cnmtDirPath, $"{prefix}_{baseSettings.TitleId:x16}.cnmt");
-
-        if (!string.IsNullOrEmpty(baseSettings.CnmtPath) && File.Exists(baseSettings.CnmtPath))
-            File.Copy(baseSettings.CnmtPath, cnmtPath, true);
-        else if (generate != null)
-            generate(cnmtPath, settingsList);
-        else
-            throw new NotSupportedException("Creating Patch metadata without providing cnmt is not supported yet!");
-
-        return cnmtPath;
     }
 }

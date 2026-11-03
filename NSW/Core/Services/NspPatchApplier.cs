@@ -1,5 +1,6 @@
 ﻿using Common;
 using NSW.Core.Models;
+using NSW.HacPack;
 using Patch.Core.Services;
 using System.IO;
 
@@ -11,11 +12,17 @@ public static class NspPatchApplier
     {
         string exefsDir = unpackResult.ExefsDirs.GetValueOrDefault(sourceIdOffset, string.Empty);
         string romfsDir = unpackResult.RomfsDirs.GetValueOrDefault(sourceIdOffset, string.Empty);
-        IPatchTarget? exefsTarget = exefsDir.Length > 0 && Directory.Exists(exefsDir) ? new DiskPatchTarget(exefsDir) : null;
-        IPatchTarget? romfsTarget = unpackResult.VirtualRomfsPrograms.TryGetValue(sourceIdOffset, out var virtualRomfs) ? virtualRomfs : DiskTarget(romfsDir);
 
-        if (sourceIdOffset != 0 || unpackResult.ExefsDirs.Count > 1)
-            patchPath = ResolveProgramPatchPath(patchPath, GetProgramId(exefsDir, romfsDir));
+        unpackResult.VirtualParts.TryGetValue(sourceIdOffset, out var parts);
+
+        bool diskExefs = exefsDir.Length > 0 && Directory.Exists(exefsDir);
+        IPatchTarget? exefsTarget = parts?.Exefs != null ? parts.Exefs : diskExefs ? new DiskPatchTarget(exefsDir) : null;
+        IFileStore? exefsStore = parts?.Exefs != null ? parts.Exefs : diskExefs ? new DiskFileStore(exefsDir) : null;
+        IPatchTarget? romfsTarget = unpackResult.VirtualRomfsPrograms.TryGetValue(sourceIdOffset, out var virtualRomfs) ? virtualRomfs : DiskTarget(romfsDir);
+        int exefsCount = unpackResult.ExefsDirs.Count + unpackResult.VirtualParts.Values.Count(p => p.Exefs != null);
+
+        if (sourceIdOffset != 0 || exefsCount > 1)
+            patchPath = ResolveProgramPatchPath(patchPath, parts?.ProgramId ?? GetProgramId(exefsDir, romfsDir));
 
         int matchedCount = 0;
 
@@ -24,12 +31,12 @@ public static class NspPatchApplier
             using var archive = ArchivePatchSourceFactory.Open(patchPath, patchPassword);
 
             matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, "한글패치");
-            matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsDir, progress, log);
+            matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsStore, progress, log);
         }
         else if (Directory.Exists(patchPath))
         {
             matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), exefsTarget, romfsTarget, progress, log, "한글패치");
-            matchedCount += NspExefsPatchApplier.ApplyFolderExefsPatches(patchPath, exefsDir, progress, log);
+            matchedCount += NspExefsPatchApplier.ApplyFolderExefsPatches(patchPath, exefsStore, progress, log);
         }
 
         if (matchedCount == 0)
@@ -103,7 +110,7 @@ public static class NspPatchApplier
             log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
     }
 
-    private static IPatchTarget? DiskTarget(string directory) => directory.Length > 0 && Directory.Exists(directory) ? new DiskPatchTarget(directory) : null;
+    private static DiskPatchTarget? DiskTarget(string directory) => directory.Length > 0 && Directory.Exists(directory) ? new DiskPatchTarget(directory) : null;
 
     private static int ApplyIndex(PatchFileIndex index, IPatchTarget? exefsTarget, IPatchTarget? romfsTarget, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string label)
     {

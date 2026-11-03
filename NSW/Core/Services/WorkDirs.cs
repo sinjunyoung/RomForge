@@ -8,22 +8,20 @@ public sealed class WorkDirs(string outputDir)
 
     public string Temp { get; } = Path.Combine(outputDir, "temp");
 
-    public string BuildNca { get; } = Path.Combine(outputDir, "build_nca");
-
     public void Prepare()
     {
-        foreach (var dir in new[] { Unpacked, Temp, BuildNca })
+        foreach (var dir in new[] { Unpacked, Temp })
         {
             if (Directory.Exists(dir))
                 Directory.Delete(dir, true);
-
-            Directory.CreateDirectory(dir);
         }
+
+        Directory.CreateDirectory(Unpacked);
     }
 
     public void Cleanup(bool keepUnpacked = false)
     {
-        string [] targets = keepUnpacked ? [BuildNca, Temp] : [ BuildNca, Temp, Unpacked ];
+        string[] targets = keepUnpacked ? [Temp] : [Temp, Unpacked];
 
         foreach (var dir in targets)
         {

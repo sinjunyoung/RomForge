@@ -12,8 +12,6 @@ public class NcaGenerationOptions
 
     public ulong TitleId;
 
-    public string TempDirectory = string.Empty;
-
     public string OutDirectory = string.Empty;
 
     public string ExefsDirectory = string.Empty;
@@ -29,22 +27,6 @@ public class NcaGenerationOptions
     public string NcaDirectory = string.Empty;
 
     public string BackupDirectory = string.Empty;
-
-    public string ProgramNcaPath = string.Empty;
-
-    public string ControlNcaPath = string.Empty;
-
-    public string LegalNcaPath = string.Empty;
-
-    public string HtmlDocNcaPath = string.Empty;
-
-    public string MetaNcaPath = string.Empty;
-
-    public string DataNcaPath = string.Empty;
-
-    public string PublicDataNcaPath = string.Empty;
-
-    public string CnmtPath = string.Empty;
 
     public string AcidSignaturePrivateKey = string.Empty;
 
@@ -70,8 +52,6 @@ public class NcaGenerationOptions
 
     public int KeyGeneration;
 
-    public List<string> ManualNcaPaths = [];
-
     public Language Language = Language.None;
 
     public uint SdkVersion;
@@ -84,9 +64,7 @@ public class NcaGenerationOptions
 
     public Func<Stream>? RomfsImageOpener;
 
-    public Stream OpenRomfsImage() => RomfsImageOpener != null
-        ? RomfsImageOpener()
-        : RomfsBuilder.OpenImage(RomfsBuilder.FromDirectory(RomfsDirectory), RomfsDirectory);
+    public Stream OpenRomfsImage() => RomfsImageOpener != null ? RomfsImageOpener() : RomfsBuilder.OpenImage(RomfsBuilder.FromDirectory(RomfsDirectory), RomfsDirectory);
 
     public bool HasRomfsSource => RomfsImageOpener != null || (!string.IsNullOrEmpty(RomfsDirectory) && Directory.Exists(RomfsDirectory));
 
@@ -109,45 +87,23 @@ public class NcaGenerationOptions
 
     public LibHac.FsSystem.NcaHeader.DistributionType NcaDistType = LibHac.FsSystem.NcaHeader.DistributionType.Download;
 
-    public bool IsProgramNcaValid => !string.IsNullOrEmpty(ProgramNcaPath) && File.Exists(ProgramNcaPath);
-
-    public bool IsControlNcaValid => !string.IsNullOrEmpty(ControlNcaPath) && File.Exists(ControlNcaPath);
-
-    public bool IsLegalNcaValid => !string.IsNullOrEmpty(LegalNcaPath) && File.Exists(LegalNcaPath);
-
-    public bool IsHtmlDocNcaValid => !string.IsNullOrEmpty(HtmlDocNcaPath) && File.Exists(HtmlDocNcaPath);
-
-    public bool IsMetaNcaValid => !string.IsNullOrEmpty(MetaNcaPath) && File.Exists(MetaNcaPath);
-
-    public bool IsDataNcaValid => !string.IsNullOrEmpty(DataNcaPath) && File.Exists(DataNcaPath);
-
-    public bool IsPublicDataNcaValid => !string.IsNullOrEmpty(PublicDataNcaPath) && File.Exists(PublicDataNcaPath);
-
     public GameMetadata? UserMetadata { get; set; }
 
 
-    public NcaGenerationOptions WithRomfs(string romfsDir, LibHac.FsSystem.NcaHeader.ContentType ncaType)
+    public NcaGenerationOptions WithRomfs(string romfsDir, LibHac.FsSystem.NcaHeader.ContentType ncaType, Func<Stream>? romfsImageOpener = null)
     => new()
     {
         KeySet = KeySet,
         TitleId = TitleId,
-        TempDirectory = TempDirectory,
         OutDirectory = OutDirectory,
         ExefsDirectory = ExefsDirectory,
         RomfsDirectory = romfsDir,
+        RomfsImageOpener = romfsImageOpener,
         LogoDirectory = LogoDirectory,
         ExefsFiles = ExefsFiles,
         LogoFiles = LogoFiles,
         NcaDirectory = NcaDirectory,
         BackupDirectory = BackupDirectory,
-        ProgramNcaPath = ProgramNcaPath,
-        ControlNcaPath = ControlNcaPath,
-        LegalNcaPath = LegalNcaPath,
-        HtmlDocNcaPath = HtmlDocNcaPath,
-        MetaNcaPath = MetaNcaPath,
-        DataNcaPath = DataNcaPath,
-        PublicDataNcaPath = PublicDataNcaPath,
-        CnmtPath = CnmtPath,
         AcidSignaturePrivateKey = AcidSignaturePrivateKey,
         NcaSignature1PrivateKey = NcaSignature1PrivateKey,
         NcaSignature2PrivateKey = NcaSignature2PrivateKey,
@@ -160,7 +116,6 @@ public class NcaGenerationOptions
         TitleKey = (byte[])TitleKey.Clone(),
         KeyAreaKey = KeyAreaKey,
         KeyGeneration = KeyGeneration,
-        ManualNcaPaths = [.. ManualNcaPaths],
         Language = Language,
         SdkVersion = SdkVersion,
         NcaType = ncaType,

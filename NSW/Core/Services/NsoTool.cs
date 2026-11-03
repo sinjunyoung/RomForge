@@ -13,12 +13,16 @@ public static class NsoTool
 
     public static bool TryReadHeaderInfo(string path, out bool isNso, out string buildIdHex)
     {
+        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return TryReadHeaderInfo(fs, out isNso, out buildIdHex);
+    }
+
+    public static bool TryReadHeaderInfo(Stream stream, out bool isNso, out string buildIdHex)
+    {
         isNso = false;
         buildIdHex = string.Empty;
 
-        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-
-        if (fs.Length < MinHeaderReadSize)
+        if (stream.Length < MinHeaderReadSize)
             return false;
 
         Span<byte> header = stackalloc byte[MinHeaderReadSize];
@@ -26,7 +30,7 @@ public static class NsoTool
 
         while (totalRead < MinHeaderReadSize)
         {
-            int read = fs.Read(header[totalRead..]);
+            int read = stream.Read(header[totalRead..]);
 
             if (read == 0)
                 return false;
@@ -45,7 +49,7 @@ public static class NsoTool
 
     private record struct SegInfo(int FileOffField, int MemOffField, int SizeField, int FileSizeField, int CompBit, int HashBit, int HashOffset);
 
-    private static readonly SegInfo[] Segs = [ new(0x10, 0x14, 0x18, 0x60, 0, 3, 0xA0), new(0x20, 0x24, 0x28, 0x64, 1, 4, 0xC0), new(0x30, 0x34, 0x38, 0x68, 2, 5, 0xE0), ];
+    private static readonly SegInfo[] Segs = [new(0x10, 0x14, 0x18, 0x60, 0, 3, 0xA0), new(0x20, 0x24, 0x28, 0x64, 1, 4, 0xC0), new(0x30, 0x34, 0x38, 0x68, 2, 5, 0xE0),];
 
     public static bool IsNso(byte[] data) => data.Length >= 4 && data[0] == 'N' && data[1] == 'S' && data[2] == 'O' && data[3] == '0';
 
@@ -101,7 +105,6 @@ public static class NsoTool
         }
 
         BitConverter.GetBytes(newFlags).CopyTo(outNso, 0x0C);
-
         return outNso;
     }
 

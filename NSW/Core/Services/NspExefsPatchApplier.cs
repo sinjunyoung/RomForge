@@ -1,4 +1,5 @@
 ﻿using Common;
+using NSW.HacPack;
 using Patch.Core;
 using Patch.Core.Interfaces;
 using Patch.Core.Services;
@@ -27,9 +28,9 @@ public static class NspExefsPatchApplier
         return (buildId, Read);
     }
 
-    public static int ApplyFolderExefsPatches(string patchPath, string exefsDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
+    public static int ApplyFolderExefsPatches(string patchPath, IFileStore? exefs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
-        if (string.IsNullOrEmpty(exefsDir) || !Directory.Exists(exefsDir) || !Directory.Exists(patchPath))
+        if (exefs == null || !Directory.Exists(patchPath))
             return 0;
 
         var openedArchives = new List<IArchivePatchSource>();
@@ -71,8 +72,7 @@ public static class NspExefsPatchApplier
                 return 0;
 
             log($"exefs_patches용 .ips 발견: {items.Count}개", LogLevel.Info);
-
-            return ApplyExefsPatchesCore(items, exefsDir, progress, log);
+            return ApplyExefsPatchesCore(items, exefs, progress, log);
         }
         finally
         {
@@ -81,8 +81,11 @@ public static class NspExefsPatchApplier
         }
     }
 
-    public static int ApplyArchiveExefsPatches(IArchivePatchSource archive, string exefsDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
+    public static int ApplyArchiveExefsPatches(IArchivePatchSource archive, IFileStore? exefs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
+        if (exefs == null)
+            return 0;
+
         var ipsKeys = archive.EntryPaths.Where(k => k.EndsWith(".ips", StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (ipsKeys.Count == 0)
@@ -90,22 +93,24 @@ public static class NspExefsPatchApplier
 
         var items = ipsKeys.Select(k => MakeArchiveIpsItem(archive, k));
 
-        return ApplyExefsPatchesCore(items, exefsDir, progress, log);
+        return ApplyExefsPatchesCore(items, exefs, progress, log);
     }
 
-    private static int ApplyExefsPatchesCore(IEnumerable<(string BuildId, Func<byte[]> ReadIps)> ipsItems, string exefsDir, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
+    private static int ApplyExefsPatchesCore(IEnumerable<(string BuildId, Func<byte[]> ReadIps)> ipsItems, IFileStore exefs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
         var buildIdMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var nsoPath in Directory.EnumerateFiles(exefsDir))
+        foreach (var name in exefs.EnumerateRelativeFiles().Where(f => !f.Contains('/')))
         {
-            if (Path.GetFileName(nsoPath).Equals("main.npdm", StringComparison.OrdinalIgnoreCase))
+            if (name.Equals("main.npdm", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            if (!NsoTool.TryReadHeaderInfo(nsoPath, out bool isNso, out string headerBuildId) || !isNso)
+            using var stream = exefs.OpenRead(name);
+
+            if (!NsoTool.TryReadHeaderInfo(stream, out bool isNso, out string headerBuildId) || !isNso)
                 continue;
 
-            buildIdMap[headerBuildId] = nsoPath;
+            buildIdMap[headerBuildId] = name;
         }
 
         int count = 0;
@@ -125,18 +130,18 @@ public static class NspExefsPatchApplier
                 continue;
             }
 
-            progress.ReportStatus($"exefs_patches 적용 중... ({Path.GetFileName(targetNso)})", -1);
+            progress.ReportStatus($"exefs_patches 적용 중... ({targetNso})", -1);
 
-            byte[] nso = File.ReadAllBytes(targetNso);
+            byte[] nso = exefs.ReadAllBytes(targetNso);
             uint originalFlags = BitConverter.ToUInt32(nso, 0x0C);
             bool wasCompressed = NsoTool.IsCompressed(nso);
             byte[] plain = wasCompressed ? NsoTool.DecompressToPlain(nso) : nso;
             byte[] patched = NsoMemoryImage.Apply(plain, image => UniversalPatcher.ApplyPatchAsync(image, readIps()).GetAwaiter().GetResult());
             byte[] final = NsoTool.RecompressFromPlain(patched, originalFlags);
 
-            File.WriteAllBytes(targetNso, final);
+            exefs.WriteAllBytes(targetNso, final);
 
-            log($"exefs_patches 적용 완료: {Path.GetFileName(targetNso)} ⬅️ {buildId} (재압축: {wasCompressed})", LogLevel.Ok);
+            log($"exefs_patches 적용 완료: {targetNso} ⬅️ {buildId} (재압축: {wasCompressed})", LogLevel.Ok);
 
             count++;
         }

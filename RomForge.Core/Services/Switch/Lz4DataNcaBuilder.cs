@@ -9,7 +9,7 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class Lz4DataNcaBuilder
 {
-    public static (byte[] NcaId, byte[] Hash, long Size) BuildInto(Stream output, Nca source, ulong titleId, KeySet keySet, int lz4Level, Action<long>? onAdvance, CancellationToken ct)
+    public static (byte[] NcaId, byte[] Hash, long Size) BuildInto(Stream output, Nca source, ulong titleId, KeySet keySet, int lz4Level, Action<long>? onAdvance, CancellationToken ct = default)
     {
         byte keyGeneration = source.Header.KeyGeneration == 0 ? (byte)1 : source.Header.KeyGeneration;
         int keyGenerationIndex = keyGeneration - 1;
@@ -34,8 +34,7 @@ internal static class Lz4DataNcaBuilder
             KeyAreaKey = keySet.KeyAreaKeys[keyGenerationIndex][0].DataRo.ToArray()
         };
 
-        var (hash, size) = NcaGenerator.GenerateRomfsNcaInto(output, settings, lz4Level, onAdvance, ct);
-
+        var (hash, size) = NcaGenerator.GenerateRomfsNcaInto(output, settings, lz4Level, onAdvance, null, ct);
         return (hash[..0x10], hash, size);
     }
 }

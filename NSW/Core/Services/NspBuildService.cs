@@ -1,10 +1,9 @@
 ﻿using Common;
 using LibHac.Common.Keys;
-using LibHac.Tools.FsSystem;
-using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core.Models;
 using NSW.Core.Utils;
 using NSW.HacPack.Enums;
+using NSW.HacPack.Models;
 using NSW.HacPack.Services;
 using System.Diagnostics;
 using System.IO;
@@ -14,6 +13,42 @@ namespace NSW.Core.Services;
 
 public static class NspBuildService
 {
+    private sealed record ManualSource(string Dir, Func<Stream>? Opener);
+
+    private sealed class TitleContents
+    {
+        public CnmtContent? Program { get; set; }
+
+        public CnmtContent? Control { get; set; }
+
+        public CnmtContent? HtmlDoc { get; set; }
+
+        public CnmtContent? Legal { get; set; }
+
+        public IEnumerable<CnmtContent> Ordered()
+        {
+            if (Program.HasValue)
+                yield return Program.Value;
+
+            if (Control.HasValue)
+                yield return Control.Value;
+
+            if (HtmlDoc.HasValue)
+                yield return HtmlDoc.Value;
+
+            if (Legal.HasValue)
+                yield return Legal.Value;
+        }
+    }
+
+    private const byte ContentTypeProgram = 0x1;
+
+    private const byte ContentTypeControl = 0x3;
+
+    private const byte ContentTypeHtmlDoc = 0x4;
+
+    private const byte ContentTypeLegal = 0x5;
+
     public static async Task<string> Run(BuildRequest req, BuildMode mode, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
@@ -26,13 +61,6 @@ public static class NspBuildService
 
         if (mode != BuildMode.RebuildOnly)
             dirs.Prepare();
-        else
-        {
-            if (Directory.Exists(dirs.BuildNca))
-                Directory.Delete(dirs.BuildNca, true);
-
-            Directory.CreateDirectory(dirs.BuildNca);
-        }
 
         UnpackResult unpackResult;
 
@@ -57,9 +85,11 @@ public static class NspBuildService
             }
         }
 
+        string? tempNsp = null;
+
         try
         {
-            var settingsList = StepBuildSettings(req, unpackResult, keySet, dirs, log);
+            var settingsList = StepBuildSettings(req, unpackResult, keySet, log);
 
             if (req.OverrideTitleId.HasValue)
             {
@@ -94,24 +124,41 @@ public static class NspBuildService
 
             var baseSettings = settingsList.First(s => s.IdOffset == 0);
 
-            foreach (var settings in settingsList)
+            Directory.CreateDirectory(req.OutputDir);
+
+            tempNsp = Path.Combine(req.OutputDir, $"~repack_{Guid.NewGuid():N}.tmp");
+
+            int maxFiles = settingsList.Count * 4 + DlcNspBuilder.CountItems(req, unpackResult, dirs) * 2 + 1;
+            var contents = settingsList.ToDictionary(s => s, _ => new TitleContents());
+
+            using (var package = new NspPackageWriter(new FileStream(tempNsp, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20), maxFiles))
             {
-                StepNpdm(settings, log, ct);
-                StepProgramNca(req, settings, unpackResult, compressLevel, progress, log, ct);
+                foreach (var settings in settingsList)
+                {
+                    StepNpdm(settings, unpackResult, log, ct);
+
+                    contents[settings].Program = StepProgramNca(req, settings, unpackResult, compressLevel, package, progress, log, ct);
+                }
+
+                StepManualNcas(settingsList, contents, unpackResult, compressLevel, package, progress, log, ct);
+
+                foreach (var settings in settingsList)
+                    contents[settings].Control = StepControlNca(settings, unpackResult, compressLevel, package, progress, log, ct);
+
+                DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, package, progress, log, ct);
+                StepMetaNca(settingsList, contents, package, progress, log, ct);
+                StepComplete(package, progress, log);
             }
 
-            StepManualNcas(settingsList, unpackResult, compressLevel, progress, log, ct);
+            string finalNsp = StepFinalize(req, unpackResult, tempNsp, progress, log);
 
-            foreach (var settings in settingsList)
-                StepControlNca(settings, unpackResult, compressLevel, progress, log, ct);
+            tempNsp = null;
 
-            DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, progress, log, ct);
-            StepMetaNca(settingsList, progress, log, ct);
-
-            return StepPackage(req, baseSettings, unpackResult, progress, log, ct);
+            return finalNsp;
         }
         finally
         {
+            DeleteIfExists(tempNsp);
             unpackResult.ReleaseResources();
 
             if (req.StreamRomfs)
@@ -143,7 +190,7 @@ public static class NspBuildService
         return result;
     }
 
-    private static List<NcaGenerationOptions> StepBuildSettings(BuildRequest req, UnpackResult result, KeySet keySet, WorkDirs dirs, Action<string, LogLevel> log)
+    private static List<NcaGenerationOptions> StepBuildSettings(BuildRequest req, UnpackResult result, KeySet keySet, Action<string, LogLevel> log)
     {
         var sw = Stopwatch.StartNew();
 
@@ -157,6 +204,7 @@ public static class NspBuildService
 
         var settingsList = new List<NcaGenerationOptions>();
         var allIdOffsets = result.ExefsDirs.Keys
+            .Union(result.VirtualParts.Where(p => p.Value.Exefs != null).Select(p => p.Key))
             .OrderBy(k => k);
 
         foreach (var idOffset in allIdOffsets)
@@ -170,13 +218,11 @@ public static class NspBuildService
                 IdOffset = idOffset,
                 SourceIdOffset = idOffset,
                 TitleId = result.TitleId,
-                TempDirectory = dirs.Temp,
-                OutDirectory = dirs.BuildNca,
                 ExefsDirectory = exefsDir ?? string.Empty,
                 RomfsDirectory = romfsDir ?? string.Empty,
                 RomfsImageOpener = result.RomfsOpeners.GetValueOrDefault(idOffset),
                 LogoDirectory = logoDir ?? string.Empty,
-                BackupDirectory = Path.Combine(Path.GetDirectoryName(dirs.Temp)!, "backups"),
+                BackupDirectory = Path.Combine(req.OutputDir, "backups"),
                 Plaintext = 0,
                 HasTitleKey = 0,
                 NcaSig = NcaSigType.Zero,
@@ -202,18 +248,23 @@ public static class NspBuildService
         return settingsList;
     }
 
-    private static void StepNpdm(NcaGenerationOptions settings, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepNpdm(NcaGenerationOptions settings, UnpackResult unpackResult, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
         var sw = Stopwatch.StartNew();
 
         log($"━━ 3단계(3/9): NPDM 처리 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
-        NpdmProcessor.PatchNpdmMetadata(settings);
+
+        if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts) && parts.Exefs != null)
+            NpdmProcessor.PatchNpdmMetadata(settings, parts.Exefs);
+        else
+            NpdmProcessor.PatchNpdmMetadata(settings);
+
         log($"NPDM 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static void StepProgramNca(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static CnmtContent StepProgramNca(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
@@ -225,65 +276,79 @@ public static class NspBuildService
         if (req.HasPatch)
             NspPatchApplier.ApplyPatch(req.PatchDir, unpackResult, settings.SourceIdOffset, progress, log, req.PatchPassword);
 
-        settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
-        settings.ProgramNcaPath = NcaGenerator.GenerateProgramNca(settings, compressLevel, progress, ct) ?? string.Empty;
+        if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts))
+        {
+            settings.ExefsFiles = parts.Exefs?.ReadTopLevelFiles();
+            settings.LogoFiles = parts.Logo?.ReadTopLevelFiles();
+        }
 
-        log($"Program NCA: {Path.GetFileName(settings.ProgramNcaPath)} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
+
+        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct));
+
+        log($"Program NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+
+        return new CnmtContent(ContentTypeProgram, settings.IdOffset, hash, size);
     }
 
-    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         log("━━ 5단계(5/9): Manual NCA 생성 ━━", LogLevel.Highlight);
 
-        foreach (var (idOffset, htmlDir) in unpackResult.HtmlDocDirs)
+        foreach (var (idOffset, source) in ManualSources(unpackResult, p => p.HtmlDoc, unpackResult.HtmlDocDirs))
         {
-            if (!Directory.Exists(htmlDir) || Directory.GetFileSystemEntries(htmlDir).Length == 0)
-                continue;
-
             var settings = settingsList.FirstOrDefault(s => s.SourceIdOffset == idOffset);
 
             if (settings == null)
                 continue;
 
             string type = idOffset == 0 ? "htmldoc" : $"htmldoc{idOffset}";
-            var manualSettings = settings.WithRomfs(htmlDir, LibHac.FsSystem.NcaHeader.ContentType.Manual);
-            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", compressLevel, progress, ct);
 
-            if (currentNca == null)
-                continue;
-
-            settings.ManualNcaPaths.Add(currentNca);
-            settings.HtmlDocNcaPath = currentNca;
-
-            log($"[{type}] NCA 등록: {Path.GetFileName(currentNca)}", LogLevel.Ok);
+            contents[settings].HtmlDoc = BuildManualNca(settings, source, type, ContentTypeHtmlDoc, compressLevel, package, progress, log, ct);
         }
 
-        foreach (var (idOffset, legalDir) in unpackResult.LegalDirs)
+        foreach (var (idOffset, source) in ManualSources(unpackResult, p => p.Legal, unpackResult.LegalDirs))
         {
-            if (!Directory.Exists(legalDir) || Directory.GetFileSystemEntries(legalDir).Length == 0)
-                continue;
-
             var settings = settingsList.FirstOrDefault(s => s.SourceIdOffset == idOffset);
 
             if (settings == null)
                 continue;
 
             string type = idOffset == 0 ? "legal" : $"legal{idOffset}";
-            var manualSettings = settings.WithRomfs(legalDir, LibHac.FsSystem.NcaHeader.ContentType.Manual);
-            var currentNca = NcaGenerator.GenerateRomfsNca(manualSettings, "Manual", compressLevel, progress, ct);
 
-            if (currentNca == null)
-                continue;
-
-            settings.ManualNcaPaths.Add(currentNca);
-
-            settings.LegalNcaPath = currentNca;
-
-            log($"[{type}] NCA 등록: {Path.GetFileName(currentNca)}", LogLevel.Ok);
+            contents[settings].Legal = BuildManualNca(settings, source, type, ContentTypeLegal, compressLevel, package, progress, log, ct);
         }
     }
 
-    private static void StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static IEnumerable<(byte IdOffset, ManualSource Source)> ManualSources(UnpackResult unpackResult, Func<VirtualProgramParts, VirtualRomfs?> select, Dictionary<byte, string> dirs)
+    {
+        foreach (var (idOffset, parts) in unpackResult.VirtualParts)
+        {
+            var virtualFiles = select(parts);
+
+            if (virtualFiles != null && virtualFiles.FileCount > 0)
+                yield return (idOffset, new ManualSource(string.Empty, virtualFiles.OpenImage));
+        }
+
+        foreach (var (idOffset, dir) in dirs)
+        {
+            if (HasEntries(dir))
+                yield return (idOffset, new ManualSource(dir, null));
+        }
+    }
+
+    private static bool HasEntries(string dir) => Directory.Exists(dir) && Directory.GetFileSystemEntries(dir).Length > 0;
+
+    private static CnmtContent BuildManualNca(NcaGenerationOptions settings, ManualSource source, string type, byte contentType, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    {
+        var manualSettings = settings.WithRomfs(source.Dir, LibHac.FsSystem.NcaHeader.ContentType.Manual, source.Opener);
+        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, manualSettings, compressLevel, null, progress, ct));
+
+        log($"[{type}] NCA 등록: {name}", LogLevel.Ok);
+        return new CnmtContent(contentType, settings.IdOffset, hash, size);
+    }
+
+    private static CnmtContent? StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
@@ -292,19 +357,30 @@ public static class NspBuildService
         log($"━━ 6단계(6/9): Control NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
         progress.ReportStatus("Control NCA 생성 중...", 0);
 
-        if (!unpackResult.ControlDirs.TryGetValue(settings.SourceIdOffset, out var controlDir))
-            return;
+        NcaGenerationOptions controlSettings;
 
-        var controlSettings = settings.WithRomfs(controlDir, LibHac.FsSystem.NcaHeader.ContentType.Control);
+        if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts) && parts.Control != null)
+        {
+            controlSettings = settings.WithRomfs(string.Empty, LibHac.FsSystem.NcaHeader.ContentType.Control, parts.Control.OpenImage);
 
-        NacpProcessor.ProcessControlMetadata(controlSettings);
+            NacpProcessor.ProcessControlMetadata(controlSettings, parts.Control);
+        }
+        else if (unpackResult.ControlDirs.TryGetValue(settings.SourceIdOffset, out var controlDir))
+        {
+            controlSettings = settings.WithRomfs(controlDir, LibHac.FsSystem.NcaHeader.ContentType.Control);
 
-        settings.ControlNcaPath = NcaGenerator.GenerateRomfsNca(controlSettings, "Control", compressLevel, progress, ct) ?? string.Empty;
+            NacpProcessor.ProcessControlMetadata(controlSettings);
+        }
+        else
+            return null;
 
-        log($"Control NCA: {Path.GetFileName(settings.ControlNcaPath)} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, controlSettings, compressLevel, null, progress, ct));
+
+        log($"Control NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        return new CnmtContent(ContentTypeControl, settings.IdOffset, hash, size);
     }
 
-    private static void StepMetaNca(List<NcaGenerationOptions> settingsList, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepMetaNca(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
@@ -314,82 +390,51 @@ public static class NspBuildService
         progress.ReportStatus("Meta NCA 생성 중...", -1);
 
         var baseSettings = settingsList.First(s => s.IdOffset == 0);
+        var records = new List<CnmtContent>();
 
-        NcaGenerator.GenerateMetaNca(settingsList, progress, ct);
+        foreach (var settings in settingsList)
+            records.AddRange(contents[settings].Ordered());
 
-        var metaFiles = Directory.GetFiles(baseSettings.OutDirectory, "*.cnmt.nca")
-                                 .OrderByDescending(File.GetLastWriteTime);
+        byte[] cnmt = CnmtGenerator.Build(baseSettings, records);
+        var (name, _, _) = package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, baseSettings, cnmt, ct));
 
-        foreach (var file in metaFiles)
-        {
-            try
-            {
-                using var fs = File.OpenRead(file);
-                var nca = new Nca(baseSettings.KeySet, fs.AsStorage());
-
-                if (nca.Header.ContentType == NcaContentType.Meta)
-                {
-                    baseSettings.MetaNcaPath = file;
-                    break;
-                }
-            }
-            catch
-            {
-                continue;
-            }
-        }
-
-        if (string.IsNullOrEmpty(baseSettings.MetaNcaPath))
-            log("Meta NCA를 찾을 수 없습니다!", LogLevel.Error);
-        else
-            log($"Meta NCA: {Path.GetFileName(baseSettings.MetaNcaPath)} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        log($"Meta NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static string StepPackage(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepComplete(NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
-        ct.ThrowIfCancellationRequested();
+        log("━━ 9단계(9/9): NSP 마무리 ━━", LogLevel.Highlight);
+        progress.ReportStatus("NSP 마무리 중...", 0);
+        package.Complete();
+    }
 
-        var sw = Stopwatch.StartNew();
-
-        log("━━ 9단계(9/9): NSP 패키징 ━━", LogLevel.Highlight);
-        progress.ReportStatus("NSP 패키징 중...", 0);
-        Directory.CreateDirectory(req.OutputDir);
-
+    private static string StepFinalize(BuildRequest req, UnpackResult unpackResult, string tempNsp, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
+    {
         string suffix = req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount);
-        string finalNsp = Path.Combine(req.OutputDir, fileName);
+        string finalNsp = Common.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));
 
-        finalNsp = Common.Utils.GetUniqueFilePath(finalNsp);
+        File.Move(tempNsp, finalNsp);
 
-        var fileStreams = new List<(string, Stream)>();
+        progress.ReportStatus("완료", 100);
+        log($"출력: {finalNsp}", LogLevel.Ok);
+        return finalNsp;
+    }
+
+    private static void DeleteIfExists(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return;
 
         try
         {
-            foreach (var f in Directory.GetFiles(settings.OutDirectory).OrderBy(f => Path.GetFileName(f), StringComparer.Ordinal))
-                fileStreams.Add((Path.GetFileName(f), File.OpenRead(f)));
-
-            using var outStream = File.Open(finalNsp, FileMode.Create, FileAccess.Write);
-
-            Pfs0Builder.BuildFromMemoryStreams(fileStreams, outStream, progress, ct);
+            if (File.Exists(path))
+                File.Delete(path);
         }
-        finally
+        catch (Exception ex)
         {
-            foreach (var (_, stream) in fileStreams)
-                stream.Dispose();
-
-            var dirs = new WorkDirs(req.OutputDir);
-
-            if (Directory.Exists(dirs.BuildNca))
-                Directory.Delete(dirs.BuildNca, true);
-
-            if (Directory.Exists(dirs.Temp))
-                Directory.Delete(dirs.Temp, true);
+            Debug.WriteLine($"임시 NSP 삭제 실패 ({path}): {ex.Message}");
         }
-
-        progress.ReportStatus("완료", 100);
-        log($"출력: {finalNsp} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
-
-        return finalNsp;
     }
 }

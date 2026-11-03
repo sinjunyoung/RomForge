@@ -1,5 +1,4 @@
-﻿using Common;
-using LibHac.Common;
+﻿using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -23,11 +22,48 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
     public string ExtractExeFs(Nca baseProg, Nca? updateProg, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
     {
         string dir = Path.Combine(outDir, dirName);
-        using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Code, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
+        using var fs = OpenExeFsFileSystem(baseProg, updateProg);
 
         ExtractFileSystem(fs, dir, "ExeFS", ctx, ct);
 
         return dir;
+    }
+
+    private static IFileSystem OpenExeFsFileSystem(Nca baseProg, Nca? updateProg) => updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Code, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Code, IntegrityCheckLevel.None);
+
+    private static IFileSystem OpenManualFileSystem(Nca? baseNca, Nca? updateNca) => baseNca != null && updateNca != null ? baseNca.OpenFileSystemWithPatch(updateNca, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseNca ?? updateNca)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+
+    public static VirtualRomfs OpenVirtualExefs(Nca baseProg, Nca? updateProg, string tempDir) => VirtualRomfs.FromFileSystem(OpenExeFsFileSystem(baseProg, updateProg), tempDir);
+
+    public static VirtualRomfs? OpenVirtualLogo(Nca baseProg, string tempDir) => baseProg.CanOpenSection(NcaSectionType.Logo) ? VirtualRomfs.FromFileSystem(baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None), tempDir) : null;
+
+    public static VirtualRomfs? OpenVirtualControl(Nca? controlNca, Nca? updateControlNca, string tempDir)
+    {
+        if (controlNca == null)
+            return null;
+
+        var control = VirtualRomfs.FromFileSystem(controlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None), tempDir);
+
+        if (updateControlNca != null)
+            control.MergeFileSystem(updateControlNca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None));
+
+        return control;
+    }
+
+    public static VirtualRomfs? OpenVirtualManual(Nca? baseNca, Nca? updateNca, string tempDir, string label)
+    {
+        if (baseNca == null && updateNca == null)
+            return null;
+
+        try
+        {
+            return VirtualRomfs.FromFileSystem(OpenManualFileSystem(baseNca, updateNca), tempDir);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"{label} 열기 실패: {ex.Message}");
+            return null;
+        }
     }
 
     private static void EnsureSparseHasUpdate(Nca baseProg, Nca? updateProg)
@@ -54,9 +90,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         if (!isCreateOnly)
             EnsureSparseHasUpdate(baseProg, updateProg);
 
-        var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
-            : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-
+        var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
         return VirtualRomfs.FromFileSystem(fs, tempDir);
     }
 
@@ -100,7 +134,6 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "RomFS", ctx, ct);
-
         return dir;
     }
 
@@ -113,7 +146,6 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         using var fs = baseProg.OpenFileSystem(NcaSectionType.Logo, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "Logo", ctx, ct);
-
         return dir;
     }
 
@@ -134,6 +166,12 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             ExtractFileSystem(updateFs, dir, "Control (Update)", ctx, ct);
         }
 
+        ApplyTitleMetadata(req, result, baseNspPath);
+        return dir;
+    }
+
+    public void ApplyTitleMetadata(BuildRequest req, UnpackResult result, string baseNspPath)
+    {
         string metaSourcePath = !string.IsNullOrEmpty(req.UpdateFilePath) ? req.UpdateFilePath : baseNspPath;
         var meta = MetadataReader.GetMetadataFromContainer(_keySet, metaSourcePath)
             .OrderByDescending(m => m.Type == LibHac.Ncm.ContentMetaType.Patch)
@@ -145,8 +183,6 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             result.EnTitle = meta.EnTitle;
             result.DisplayVersion = meta.DisplayVersion;
         }
-
-        return dir;
     }
 
     public string? ExtractHtmlDoc(Nca? baseHtml, Nca? updateHtml, string dirName, string outDir, ProgressContext ctx, CancellationToken ct = default)
@@ -158,7 +194,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
 
         try
         {
-            using var fs = baseHtml != null && updateHtml != null ? baseHtml.OpenFileSystemWithPatch(updateHtml, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseHtml ?? updateHtml)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+            using var fs = OpenManualFileSystem(baseHtml, updateHtml);
 
             ExtractFileSystem(fs, dir, "HtmlDoc", ctx, ct);
         }
@@ -177,10 +213,9 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             return null;
 
         string dir = Path.Combine(outDir, dirName);
-        using var fs = baseLegal != null && updateLegal != null ? baseLegal.OpenFileSystemWithPatch(updateLegal, NcaSectionType.Data, IntegrityCheckLevel.None) : (baseLegal ?? updateLegal)!.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
+        using var fs = OpenManualFileSystem(baseLegal, updateLegal);
 
         ExtractFileSystem(fs, dir, "Legal", ctx, ct);
-
         return dir;
     }
 

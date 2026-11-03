@@ -20,15 +20,16 @@ public static class NacpProcessor
     const int TitleBlockSize = 0x3000;
     const int SupportedLanguageFlagOffset = 0x302C;
 
-    public static void ProcessControlMetadata(NcaGenerationOptions settings)
-    {
-        string romfsDir = settings.RomfsDirectory;
-        string controlNacpPath = Path.Combine(romfsDir, "control.nacp");
+    public static void ProcessControlMetadata(NcaGenerationOptions settings) => ProcessControlMetadata(settings, new DiskFileStore(settings.RomfsDirectory));
 
-        if (!File.Exists(controlNacpPath))
+    public static void ProcessControlMetadata(NcaGenerationOptions settings, IFileStore store)
+    {
+        const string controlNacpName = "control.nacp";
+
+        if (!store.Exists(controlNacpName))
             return;
 
-        byte[] nacpRawData = File.ReadAllBytes(controlNacpPath);
+        byte[] nacpRawData = store.ReadAllBytes(controlNacpName);
         var control = MemoryMarshal.Read<ApplicationControlProperty>(nacpRawData);
         bool isCompressed = control.TitleCompression == TitleCompressionValue.Enable;
 
@@ -42,7 +43,7 @@ public static class NacpProcessor
             using (var deflate = new DeflateStream(ms, CompressionMode.Decompress))
                 deflate.ReadExactly(decompressed, 0, decompressed.Length);
 
-            ApplyLanguageChanges(decompressed, isCompressed: true, settings);
+            ApplyLanguageChanges(decompressed, isCompressed: true, settings, store);
 
             byte[] recompressed;
             using (var ms = new MemoryStream())
@@ -63,11 +64,11 @@ public static class NacpProcessor
         else
         {
             ValidateLegacyLanguages(settings);
-            ApplyLanguageChanges(nacpRawData, isCompressed: false, settings);
+            ApplyLanguageChanges(nacpRawData, isCompressed: false, settings, store);
         }
 
         ApplyLanguageFlags(nacpRawData, settings);
-        File.WriteAllBytes(controlNacpPath, nacpRawData);
+        store.WriteAllBytes(controlNacpName, nacpRawData);
         VerifyMetadata(nacpRawData, isCompressed);
     }
 
@@ -83,9 +84,9 @@ public static class NacpProcessor
         }
     }
 
-    private static void ApplyLanguageChanges(byte[] data, bool isCompressed, NcaGenerationOptions settings)
+    private static void ApplyLanguageChanges(byte[] data, bool isCompressed, NcaGenerationOptions settings, IFileStore store)
     {
-        if (settings.UserMetadata == null) 
+        if (settings.UserMetadata == null)
             return;
 
         int maxSlot = isCompressed ? CompressedSlotCount : LegacyLanguageCount;
@@ -108,14 +109,13 @@ public static class NacpProcessor
             if (info.LogoData != null && info.LogoData.Length > 0)
             {
                 string iconFileName = $"icon_{info.Language}.dat";
-                string iconPath = Path.Combine(settings.RomfsDirectory, iconFileName);
 
-                try 
-                { 
-                    File.WriteAllBytes(iconPath, info.LogoData); 
+                try
+                {
+                    store.WriteAllBytes(iconFileName, info.LogoData);
                 }
-                catch (Exception ex) 
-                { 
+                catch (Exception ex)
+                {
                     throw new IOException($"아이콘 파일 작성 실패: {iconFileName}", ex);
                 }
             }

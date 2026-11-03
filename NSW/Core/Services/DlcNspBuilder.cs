@@ -1,6 +1,7 @@
 ﻿using Common;
 using NSW.Core.Models;
 using NSW.HacPack.Enums;
+using NSW.HacPack.Models;
 using NSW.HacPack.Services;
 using System.Diagnostics;
 using System.IO;
@@ -10,7 +11,11 @@ namespace NSW.Core.Services;
 
 public static class DlcNspBuilder
 {
-    public static void BuildDlcNsps(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs, NcaGenerationOptions baseSettings, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private sealed record DlcItem(string TitleIdStr, ulong TitleId, string DlcDir, string RomfsPath, Func<Stream>? RomfsOpener, VirtualRomfs? Virtual, bool SourceCompressed);
+
+    public static int CountItems(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs) => CollectItems(req, unpackResult, dirs).Count;
+
+    public static void BuildDlcNsps(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs, NcaGenerationOptions baseSettings, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
         var items = CollectItems(req, unpackResult, dirs);
 
@@ -49,8 +54,6 @@ public static class DlcNspBuilder
             var dlcSettings = new NcaGenerationOptions
             {
                 TitleId = titleId,
-                TempDirectory = Path.Combine(dirs.Temp, "dlc_" + titleIdStr),
-                OutDirectory = baseSettings.OutDirectory,
                 RomfsDirectory = hasRomfs && item.RomfsOpener == null ? romfsPath : string.Empty,
                 RomfsImageOpener = item.RomfsOpener,
                 TitleType = LibHac.Ncm.ContentMetaType.AddOnContent,
@@ -64,26 +67,30 @@ public static class DlcNspBuilder
                 CompressRomfs = compressRomfs
             };
 
+            var checkpoint = package.CreateCheckpoint();
+
             try
             {
-                Directory.CreateDirectory(dlcSettings.TempDirectory);
+                var contents = new List<CnmtContent>();
 
                 if (hasRomfs)
-                    dlcSettings.PublicDataNcaPath = NcaGenerator.GenerateRomfsNca(dlcSettings, "DLC", compressLevel, progress, ct) ?? string.Empty;
+                {
+                    var (_, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, dlcSettings, compressLevel, null, progress, ct));
 
-                NcaGenerator.GenerateMetaNca([dlcSettings], progress, ct);
+                    contents.Add(new CnmtContent(0x2, 0, hash, size));
+                }
 
+                byte[] cnmt = CnmtGenerator.Build(dlcSettings, contents);
+
+                package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, dlcSettings, cnmt, ct));
                 log($"DLC 완료: {titleIdStr}", LogLevel.Ok);
+
                 dlcCount++;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                package.Rollback(checkpoint);
                 log($"DLC 실패: {titleIdStr} - {ex.Message}", LogLevel.Error);
-            }
-            finally
-            {
-                if (Directory.Exists(dlcSettings.TempDirectory))
-                    Directory.Delete(dlcSettings.TempDirectory, true);
             }
         }
 
@@ -119,6 +126,4 @@ public static class DlcNspBuilder
 
         return items;
     }
-
-    private sealed record DlcItem(string TitleIdStr, ulong TitleId, string DlcDir, string RomfsPath, Func<Stream>? RomfsOpener, VirtualRomfs? Virtual, bool SourceCompressed);
 }

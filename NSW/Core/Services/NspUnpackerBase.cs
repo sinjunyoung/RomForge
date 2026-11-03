@@ -69,6 +69,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
             progCtx.Reporter = new ProgressReporter(string.Empty, string.Empty, progCtx.TotalSize, progress);
 
             var result = BuildBaseResult(ncas);
+            string streamTempDir = GetStreamTempDir(outDir);
             var allOffsets = ncas.BaseProgs.Keys
                 .Union(ncas.UpdateProgs.Keys)
                 .OrderBy(k => k);
@@ -85,15 +86,27 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 string programDir = Path.Combine(outDir, programTitleId.ToString("X16"));
                 var effectiveProg = baseProg ?? updateProg!;
                 var patchProg = baseProg != null ? updateProg : null;
+                VirtualProgramParts? parts = null;
+
+                if (StreamRomfs)
+                {
+                    parts = new VirtualProgramParts { ProgramId = programTitleId.ToString("X16") };
+                    result.VirtualParts[idOffset] = parts;
+                }
 
                 if (effectiveProg.CanOpenSection(NcaSectionType.Code))
-                    result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, "exefs", programDir, progCtx, ct);
+                {
+                    if (parts != null)
+                        parts.Exefs = Register(result, NcaExtractor.OpenVirtualExefs(effectiveProg, patchProg, streamTempDir));
+                    else
+                        result.ExefsDirs[idOffset] = extractor.ExtractExeFs(effectiveProg, patchProg, "exefs", programDir, progCtx, ct);
+                }
 
                 if (effectiveProg.CanOpenSection(NcaSectionType.Data))
                 {
                     if (StreamRomfs)
                     {
-                        var virtualRomfs = NcaExtractor.OpenVirtualRomfs(effectiveProg, patchProg, GetStreamTempDir(outDir), ncas.CreateOnlyOffsets.Contains(idOffset));
+                        var virtualRomfs = NcaExtractor.OpenVirtualRomfs(effectiveProg, patchProg, streamTempDir, ncas.CreateOnlyOffsets.Contains(idOffset));
 
                         result.Resources.Add(virtualRomfs);
                         result.VirtualRomfsPrograms[idOffset] = virtualRomfs;
@@ -114,43 +127,70 @@ public abstract class NspUnpackerBase(KeySet keySet)
                     }
                 }
 
-                var logoDir = extractor.ExtractLogo(effectiveProg, "logo", programDir, progCtx, ct);
+                if (parts != null)
+                    parts.Logo = Register(result, NcaExtractor.OpenVirtualLogo(effectiveProg, streamTempDir));
+                else
+                {
+                    var logoDir = extractor.ExtractLogo(effectiveProg, "logo", programDir, progCtx, ct);
 
-                if (logoDir != null)
-                    result.LogoDirs[idOffset] = logoDir;
+                    if (logoDir != null)
+                        result.LogoDirs[idOffset] = logoDir;
+                }
 
                 ncas.BaseControls.TryGetValue(idOffset, out var baseControl);
                 ncas.UpdateControls.TryGetValue(idOffset, out var updateControl);
 
                 var effectiveControl = baseControl ?? updateControl;
-                var controlDir = extractor.ExtractControl(effectiveControl, baseControl != null ? updateControl : null, req, result, "control", programDir, BaseNspPath, progCtx, ct);
+                var effectiveUpdateControl = baseControl != null ? updateControl : null;
 
-                if (controlDir != null)
-                    result.ControlDirs[idOffset] = controlDir;
+                if (parts != null)
+                {
+                    parts.Control = Register(result, NcaExtractor.OpenVirtualControl(effectiveControl, effectiveUpdateControl, streamTempDir));
+
+                    if (parts.Control != null)
+                        extractor.ApplyTitleMetadata(req, result, BaseNspPath);
+                }
+                else
+                {
+                    var controlDir = extractor.ExtractControl(effectiveControl, effectiveUpdateControl, req, result, "control", programDir, BaseNspPath, progCtx, ct);
+
+                    if (controlDir != null)
+                        result.ControlDirs[idOffset] = controlDir;
+                }
 
                 ncas.BaseHtmls.TryGetValue(idOffset, out var baseHtml);
                 ncas.UpdateHtmls.TryGetValue(idOffset, out var updateHtml);
 
-                var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, "htmldoc", programDir, progCtx, ct);
+                if (parts != null)
+                    parts.HtmlDoc = Register(result, NcaExtractor.OpenVirtualManual(baseHtml, updateHtml, streamTempDir, "HtmlDoc"));
+                else
+                {
+                    var htmlDir = extractor.ExtractHtmlDoc(baseHtml, updateHtml, "htmldoc", programDir, progCtx, ct);
 
-                if (htmlDir != null)
-                    result.HtmlDocDirs[idOffset] = htmlDir;
+                    if (htmlDir != null)
+                        result.HtmlDocDirs[idOffset] = htmlDir;
+                }
 
                 ncas.BaseLegals.TryGetValue(idOffset, out var baseLegal);
                 ncas.UpdateLegals.TryGetValue(idOffset, out var updateLegal);
 
-                var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, "legal", programDir, progCtx, ct);
+                if (parts != null)
+                    parts.Legal = Register(result, NcaExtractor.OpenVirtualManual(baseLegal, updateLegal, streamTempDir, "Legal"));
+                else
+                {
+                    var legalDir = extractor.ExtractLegal(baseLegal, updateLegal, "legal", programDir, progCtx, ct);
 
-                if (legalDir != null)
-                    result.LegalDirs[idOffset] = legalDir;
+                    if (legalDir != null)
+                        result.LegalDirs[idOffset] = legalDir;
+                }
             }
 
             if (StreamRomfs)
-                NcaExtractor.RegisterDlcStreams(ncas.DlcNcas, result, GetStreamTempDir(outDir));
+                NcaExtractor.RegisterDlcStreams(ncas.DlcNcas, result, streamTempDir);
             else
                 extractor.ExtractDlcs(ncas.DlcNcas, outDir, result, progCtx, ct);
 
-            if (withControlNca)
+            if (withControlNca && !StreamRomfs)
             {
                 if (ncas.BaseControls.TryGetValue(0, out var mainControl))
                 {
@@ -188,6 +228,14 @@ public abstract class NspUnpackerBase(KeySet keySet)
         }
     }
 
+    private static VirtualRomfs? Register(UnpackResult result, VirtualRomfs? virtualFiles)
+    {
+        if (virtualFiles != null)
+            result.Resources.Add(virtualFiles);
+
+        return virtualFiles;
+    }
+
     private static string GetStreamTempDir(string outDir) => Path.GetFullPath(Path.Combine(outDir, "..", "temp"));
 
     protected abstract ProgressContext CreateProgressContext(List<string> inputPaths, CollectedNcas ncas);
@@ -217,6 +265,9 @@ public abstract class NspUnpackerBase(KeySet keySet)
 
     protected long CalculateMatchedSize(CollectedNcas ncas)
     {
+        if (StreamRomfs)
+            return 0;
+
         long total = 0;
 
         void SumFs(IFileSystem fs)
@@ -248,9 +299,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
             ncas.UpdateProgs.TryGetValue(idOffset, out var updateProg);
 
             NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Code, SumFs);
-
-            if (!StreamRomfs)
-                NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Data, SumFs);
+            NcaExtractor.TryWithFs(baseProg, updateProg, NcaSectionType.Data, SumFs);
 
             if (idOffset == 0 && baseProg.CanOpenSection(NcaSectionType.Logo))
                 NcaExtractor.TryWithFs(baseProg, null, NcaSectionType.Logo, SumFs);
@@ -274,11 +323,8 @@ public abstract class NspUnpackerBase(KeySet keySet)
             NcaExtractor.TryWithFs(baseLegal, updateLegal, NcaSectionType.Data, SumFs);
         }
 
-        if (!StreamRomfs)
-        {
-            foreach (var dlc in ncas.DlcNcas)
-                NcaExtractor.TryWithFs(dlc, null, NcaSectionType.Data, SumFs);
-        }
+        foreach (var dlc in ncas.DlcNcas)
+            NcaExtractor.TryWithFs(dlc, null, NcaSectionType.Data, SumFs);
 
         return total;
     }

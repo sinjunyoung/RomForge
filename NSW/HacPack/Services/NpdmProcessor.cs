@@ -12,12 +12,21 @@ public static class NpdmProcessor
     private const uint MagicAcid = 0x44494341;
     private const uint MagicAci0 = 0x30494341;
 
-    public static void PatchNpdmMetadata(NcaGenerationOptions settings)
-    {
-        string npdmPath = Path.Combine(settings.ExefsDirectory, "main.npdm");
-        using var fl = File.Open(npdmPath, FileMode.Open, FileAccess.ReadWrite);
+    public static void PatchNpdmMetadata(NcaGenerationOptions settings) => PatchNpdmMetadata(settings, new DiskFileStore(settings.ExefsDirectory));
 
-        PatchNpdmMetadata(settings, fl);
+    public static void PatchNpdmMetadata(NcaGenerationOptions settings, IFileStore exefs)
+    {
+        const string npdmName = "main.npdm";
+
+        if (!exefs.Exists(npdmName))
+            throw new FileNotFoundException("ExeFS에서 main.npdm을 찾을 수 없습니다.");
+
+        byte[] data = exefs.ReadAllBytes(npdmName);
+
+        using (var stream = new MemoryStream(data))
+            PatchNpdmMetadata(settings, stream);
+
+        exefs.WriteAllBytes(npdmName, data);
     }
 
     public static void PatchNpdmMetadata(NcaGenerationOptions settings, Stream fl)
@@ -109,7 +118,7 @@ public static class NpdmProcessor
             return Marshal.PtrToStructure<T>(ptr);
         }
         finally
-        { 
+        {
             Marshal.FreeHGlobal(ptr);
         }
     }
@@ -128,7 +137,7 @@ public static class NpdmProcessor
             Marshal.Copy(ptr, buf, 0, size);
             stream.Write(buf, 0, size);
         }
-        finally 
+        finally
         {
             Marshal.FreeHGlobal(ptr);
         }
