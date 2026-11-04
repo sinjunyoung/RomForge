@@ -41,7 +41,7 @@ public static class DlcNspBuilder
                 req.DlcPatchPasswords.TryGetValue(titleIdStr, out var dlcPatchPassword);
 
                 if (item.Virtual != null)
-                    NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, item.Virtual, progress, log, dlcPatchPassword);
+                    NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, item.Virtual, unpackResult.Resources, progress, log, dlcPatchPassword);
                 else
                     NspPatchApplier.ApplyDlcPatch(dlcPatchDir, titleIdStr, romfsPath, progress, log, dlcPatchPassword);
             }

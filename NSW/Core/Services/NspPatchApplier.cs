@@ -1,6 +1,7 @@
 ﻿using Common;
 using NSW.Core.Models;
 using NSW.HacPack;
+using Patch.Core.Interfaces;
 using Patch.Core.Services;
 using System.IO;
 
@@ -28,10 +29,19 @@ public static class NspPatchApplier
 
         if (ArchivePatchSourceFactory.IsArchivePath(patchPath))
         {
-            using var archive = ArchivePatchSourceFactory.Open(patchPath, patchPassword);
+            bool keepAlive = exefsTarget is VirtualRomfs || romfsTarget is VirtualRomfs;
+            var archive = OpenArchive(patchPath, patchPassword, keepAlive, unpackResult.Resources);
 
-            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, "한글패치");
-            matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsStore, progress, log);
+            try
+            {
+                matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, "한글패치");
+                matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsStore, progress, log);
+            }
+            finally
+            {
+                if (!keepAlive)
+                    archive.Dispose();
+            }
         }
         else if (Directory.Exists(patchPath))
         {
@@ -84,19 +94,28 @@ public static class NspPatchApplier
         var target = DiskTarget(romfsDir);
 
         if (target != null)
-            ApplyDlcPatch(patchPath, titleIdStr, target, progress, log, patchPassword);
+            ApplyDlcPatch(patchPath, titleIdStr, target, [], progress, log, patchPassword);
     }
 
-    public static void ApplyDlcPatch(string patchPath, string titleIdStr, IPatchTarget romfsTarget, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string? patchPassword = null)
+    public static void ApplyDlcPatch(string patchPath, string titleIdStr, IPatchTarget romfsTarget, ICollection<IDisposable> owner, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string? patchPassword = null)
     {
         int matchedCount = 0;
         string label = $"DLC 패치 ({titleIdStr})";
 
         if (ArchivePatchSourceFactory.IsArchivePath(patchPath))
         {
-            using var archive = ArchivePatchSourceFactory.Open(patchPath, patchPassword);
+            bool keepAlive = romfsTarget is VirtualRomfs;
+            var archive = OpenArchive(patchPath, patchPassword, keepAlive, owner);
 
-            matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), null, romfsTarget, progress, log, label);
+            try
+            {
+                matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), null, romfsTarget, progress, log, label);
+            }
+            finally
+            {
+                if (!keepAlive)
+                    archive.Dispose();
+            }
         }
         else
         {
@@ -108,6 +127,16 @@ public static class NspPatchApplier
 
         if (matchedCount == 0)
             log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
+    }
+
+    private static IArchivePatchSource OpenArchive(string patchPath, string? password, bool keepAlive, ICollection<IDisposable> owner)
+    {
+        var archive = ArchivePatchSourceFactory.Open(patchPath, password);
+
+        if (keepAlive)
+            owner.Add(archive);
+
+        return archive;
     }
 
     private static DiskPatchTarget? DiskTarget(string directory) => directory.Length > 0 && Directory.Exists(directory) ? new DiskPatchTarget(directory) : null;
