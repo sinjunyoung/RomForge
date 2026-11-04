@@ -12,6 +12,7 @@
 	<Authors>YameSoft</Authors>
 	<Copyright>Copyright © 2026 YameSoft</Copyright>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<AllowUnsafeBlocks>False</AllowUnsafeBlocks>
   </PropertyGroup>	
 
   <ItemGroup>

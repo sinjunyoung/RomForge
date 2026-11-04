@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;

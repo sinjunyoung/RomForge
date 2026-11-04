@@ -1,4 +1,5 @@
-﻿using LibHac.Common.Keys;
+﻿using Common.Services;
+using LibHac.Common.Keys;
 using LibHac.Crypto;
 using LibHac.Fs;
 using LibHac.Tools.FsSystem;
@@ -18,7 +19,7 @@ public static class NcaRecryptService
         {
             inputStream.Position = 0;
 
-            await Common.Utils.CopyStreamAsync(inputStream, outputStream, onRead, ct);
+            await Utils.CopyStreamAsync(inputStream, outputStream, onRead, ct);
 
             return;
         }

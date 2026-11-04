@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using NSW.HacPack.Models;
 using System.IO;
 
@@ -17,26 +17,22 @@ public static class StreamingRomfsSectionWriter
 
         try
         {
-            long dataStart = ncaFile.Position;
+            using var section = EncryptedSectionStream.Create(ncaFile, ref ncaHeader, sectionIndex, settings);
+
+            long dataStart = section.Position;
             CompressedRomfsInfo info;
 
-            using (var source = settings.OpenRomfsImage())
-                info = CompressedRomfsWriter.Compress(source, ncaFile, compressLevel, progress, ct);
+            section.BeginIvfc();
 
-            long dataSize = ncaFile.Position - dataStart;
+            using (var source = settings.OpenRomfsImage())
+                info = CompressedRomfsWriter.Compress(source, section, compressLevel, progress, ct);
+
+            long dataSize = section.Position - dataStart;
 
             NcaHeaderService.SetCompressionInfo(ref ncaHeader, sectionIndex, info.TableOffset, info.TableSize, info.TableHeader);
             NcaHeaderService.SetIvfcLevel5(ref ncaHeader, sectionIndex, (ulong)dataSize);
-
-            long dataEnd = ncaFile.Position;
-
-            using (var region = new ReadOnlyRegionStream(ncaFile, dataStart, dataSize))
-            {
-                IvfcGenerator.GenerateHashLevel(ivfcStreams[4], region, out ulong lvlSize4);
-                NcaHeaderService.SetIvfcLevel(ref ncaHeader, sectionIndex, 4, lvlSize4);
-            }
-
-            ncaFile.Position = dataEnd;
+            section.EndIvfc(ivfcStreams[4], out ulong lvlSize4);
+            NcaHeaderService.SetIvfcLevel(ref ncaHeader, sectionIndex, 4, lvlSize4);
 
             for (int b = 3; b >= 0; b--)
             {
@@ -47,8 +43,7 @@ public static class StreamingRomfsSectionWriter
 
             long hashLevelsStart = (dataSize + BlockSize - 1) / BlockSize * BlockSize;
 
-            ncaFile.Write(new byte[hashLevelsStart - dataSize]);
-
+            section.Write(new byte[hashLevelsStart - dataSize]);
             NcaHeaderService.SetIvfcLogicalOffsetsDataFirst(ref ncaHeader, sectionIndex, (ulong)hashLevelsStart);
 
             for (int c = 0; c < 5; c++)
@@ -57,10 +52,10 @@ public static class StreamingRomfsSectionWriter
 
                 ivfcStreams[c].Position = 0;
 
-                ivfcStreams[c].CopyTo(ncaFile);
+                ivfcStreams[c].CopyTo(section);
             }
 
-            NcaGenerator.WritePadding(ncaFile);
+            NcaGenerator.WritePadding(section);
 
             return ivfcStreams;
         }

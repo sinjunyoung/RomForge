@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using WiiGC.Core.Models;
 using WiiGC.Core.Services.Wii;
 

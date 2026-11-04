@@ -1,61 +1,37 @@
 ﻿using System.Buffers;
 using System.IO;
 using System.Security.Cryptography;
-using NSW.HacPack.Models;
 
 namespace NSW.HacPack.Services;
 
 public static class IvfcGenerator
 {
-    public static unsafe void GenerateHashLevel(Stream outputStream, Stream inputStream, out ulong generatedSize)
+    public static void GenerateHashLevel(Stream outputStream, Stream inputStream, out ulong generatedSize)
     {
-        const int hashBlockSize = IvfcConstants.HashBlockSize;
-        const int hashSize = 32;
-        const int batchCount = 128;
+        const int readSize = 1 << 20;
 
-        long srcLength = inputStream.Length;
-        byte[] buffer = ArrayPool<byte>.Shared.Rent(hashBlockSize);
-        Span<byte> outputBatch = stackalloc byte[hashSize * batchCount];
-        int batchIdx = 0;
+        var builder = new IvfcLevelBuilder();
+        byte[] buffer = ArrayPool<byte>.Shared.Rent(readSize);
 
         try
         {
             inputStream.Position = 0;
 
-            long remaining = srcLength;
+            long remaining = inputStream.Length;
 
             while (remaining > 0)
             {
-                int toRead = (int)Math.Min((long)hashBlockSize, remaining);
-                int read = inputStream.Read(buffer, 0, toRead);
+                int read = inputStream.Read(buffer, 0, (int)Math.Min(readSize, remaining));
 
-                SHA256.HashData(buffer.AsSpan(0, read), outputBatch.Slice(batchIdx * hashSize, hashSize));
+                if (read <= 0)
+                    throw new EndOfStreamException("IVFC 입력 스트림이 예상보다 일찍 끝났습니다.");
 
-                batchIdx++;
-
-                if (batchIdx == batchCount)
-                {
-                    outputStream.Write(outputBatch);
-
-                    batchIdx = 0;
-                }
+                builder.Add(buffer, 0, read);
 
                 remaining -= read;
             }
 
-            if (batchIdx > 0)
-                outputStream.Write(outputBatch[..(batchIdx * hashSize)]);
-
-            long currentPos = outputStream.Position;
-            int paddingSize = (int)(hashBlockSize - (currentPos % hashBlockSize));
-
-            if (paddingSize != hashBlockSize)
-            {
-                Array.Clear(buffer, 0, paddingSize);
-                outputStream.Write(buffer, 0, paddingSize);
-            }
-
-            generatedSize = (ulong)outputStream.Position;
+            builder.Complete(outputStream, out generatedSize);
         }
         finally
         {

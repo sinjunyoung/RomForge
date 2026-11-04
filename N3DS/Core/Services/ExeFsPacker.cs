@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using N3DS.Core.Models;
 using Patch.Core;
 using Patch.Core.Enums;

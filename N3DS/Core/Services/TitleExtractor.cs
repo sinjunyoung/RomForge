@@ -1,5 +1,4 @@
-﻿using Common;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,6 +6,8 @@ using N3DS.Core.FileSystem;
 using N3DS.Core.Crypto;
 using N3DS.Core.Models;
 using N3DS.Core.IO;
+using Common.Models;
+using Common.Services;
 
 namespace N3DS.Core.Services;
 

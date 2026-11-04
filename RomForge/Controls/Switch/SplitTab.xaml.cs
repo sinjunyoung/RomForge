@@ -1,4 +1,5 @@
-﻿using NSW.Core;
+﻿using Common.Models;
+using NSW.Core;
 using RomForge.Core.Services;
 using RomForge.ViewModels.Switch;
 using System.IO;
@@ -55,14 +56,14 @@ public partial class SplitTab : UserControl
 
         if (!ViewModel.HasFiles)
         {
-            ViewModel.AppendLog(Res.Main_Err_NoFiles, Common.LogLevel.Error);
+            ViewModel.AppendLog(Res.Main_Err_NoFiles, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (KeySetProvider.Instance.KeySet == null)
         {
-            ViewModel.AppendLog(Res.Main_Err_NoKeys, Common.LogLevel.Error);
+            ViewModel.AppendLog(Res.Main_Err_NoKeys, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }

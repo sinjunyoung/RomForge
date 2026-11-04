@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;

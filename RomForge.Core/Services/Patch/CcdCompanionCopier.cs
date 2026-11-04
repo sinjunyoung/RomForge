@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using System.IO;
 
 namespace RomForge.Core.Services.Patch;

@@ -1,10 +1,10 @@
-﻿using Common;
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using System.Security.Cryptography;
 using N3DS.Core.Interfaces;
 using N3DS.Core.Models;
 using N3DS.Core.Crypto;
 using N3DS.Core.IO;
+using Common.Models;
 
 namespace N3DS.Core.Services;
 

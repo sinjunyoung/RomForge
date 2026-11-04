@@ -1,5 +1,4 @@
-﻿using Common;
-using RomForge.Core.UI.Command;
+﻿using RomForge.Core.UI.Command;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -11,6 +10,8 @@ using PSP.PBP.Enums;
 using PSP.PBP.Services;
 using RomForge.Core;
 using RomForge.Core.ViewModels;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.ViewModels.PSP;
 
@@ -40,7 +41,7 @@ public class UnpackingMainViewModel : ToolTabViewModel
         {
             var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var path in Common.Utils.ExpandPaths(paths))
+            foreach (var path in Utils.ExpandPaths(paths))
             {
                 if (!existing.Add(path))
                     continue;

@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using Microsoft.Win32;
 using NSW.Core;
 using Patch.Core.Services;

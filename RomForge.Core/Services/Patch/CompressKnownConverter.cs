@@ -1,7 +1,7 @@
 ﻿using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
-using Common;
+using Common.Models;
 using N3DS.Core.Services;
 using RomForge.Core.Models.Compression;
 using System.IO;

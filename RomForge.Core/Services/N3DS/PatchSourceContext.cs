@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using N3DS.Core.Services;
 using Patch.Core.Interfaces;
 using Patch.Core.Services;

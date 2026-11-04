@@ -7,6 +7,12 @@ namespace RomForge.Core.Models.Compression;
 
 public class FileItem(string filePath) : FileItemBase(filePath)
 {
+    //public string? EstimatedRatioText
+    //{
+    //    get;
+    //    set { SetProperty(ref field, value); OnPropertyChanged(); }
+    //}
+
     public string ExtensionLabel
     {
         get

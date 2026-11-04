@@ -1,4 +1,6 @@
 ﻿using Common;
+using Common.Models;
+using Common.Services;
 using LibHac.Common.Keys;
 using NSW.Core.Models;
 using NSW.Core.Utils;
@@ -420,7 +422,7 @@ public static class NspBuildService
         string suffix = req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount);
-        string finalNsp = Common.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));
+        string finalNsp = Common.Services.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));
 
         File.Move(tempNsp, finalNsp);
 

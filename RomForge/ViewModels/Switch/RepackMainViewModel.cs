@@ -1,4 +1,6 @@
 ﻿using Common;
+using Common.Models;
+using Common.Services;
 using LibHac.Ns;
 using NSW.Core.Exceptions;
 using NSW.Core.Models;

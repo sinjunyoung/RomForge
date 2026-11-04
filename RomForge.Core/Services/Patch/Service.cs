@@ -1,4 +1,4 @@
-using Common;
+using Common.Models;
 using Patch.Core;
 using RomForge.Core.Models.Patch;
 using System.IO;

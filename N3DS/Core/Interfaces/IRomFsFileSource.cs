@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 
 namespace N3DS.Core.Interfaces;
 

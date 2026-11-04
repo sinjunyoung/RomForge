@@ -1,4 +1,5 @@
-﻿using NSW.Core.Utils;
+﻿using Common.Services;
+using NSW.Core.Utils;
 using RomForge.Core.Models.Switch;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -35,7 +36,7 @@ public static partial class RenameService
 
         result = SpacesRegex().Replace(result, " ");
 
-        return Common.Utils.SafeFileName(result).TrimEnd('.', ' ');
+        return Utils.SafeFileName(result).TrimEnd('.', ' ');
     }
 
     public static List<RenamePlan> BuildPlans(IEnumerable<RenameSource> sources, string format, Func<string, bool>? fileExists = null)

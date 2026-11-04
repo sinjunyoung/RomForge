@@ -1,7 +1,8 @@
 ﻿using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
-using Common;
+using Common.Models;
+using Common.Services;
 using N3DS.Core.Crypto;
 using N3DS.Core.Models;
 using N3DS.Core.Services;

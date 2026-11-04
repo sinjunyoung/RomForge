@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
@@ -32,7 +32,7 @@ public partial class RenameTab : UserControl
         if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths)
             return;
 
-        await ViewModel.AddPathsAsync(Common.Utils.ExpandPaths(paths));
+        await ViewModel.AddPathsAsync(Utils.ExpandPaths(paths));
     }
 
     private void LvFiles_KeyUp(object sender, KeyEventArgs e)
@@ -77,7 +77,7 @@ public partial class RenameTab : UserControl
         if (dialog.ShowDialog() != true)
             return;
 
-        await ViewModel.AddPathsAsync(Common.Utils.ExpandPaths([dialog.SelectedPath]));
+        await ViewModel.AddPathsAsync(Utils.ExpandPaths([dialog.SelectedPath]));
     }
 
     private void BtnRemove_Click(object sender, RoutedEventArgs e) => ViewModel?.RemoveItems([.. lvFiles.SelectedItems.Cast<RenameFileItem>()]);

@@ -1,3 +1,4 @@
+using Common.Services;
 using NSW.Core.Models;
 using System.Windows.Media;
 
@@ -197,5 +198,5 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
 
     protected override void OnStatusChanged() => base.OnStatusChanged();
 
-    protected override string FormatSize(long bytes) => Common.Utils.FormatFileSize(bytes);
+    protected override string FormatSize(long bytes) => Utils.FormatFileSize(bytes);
 }

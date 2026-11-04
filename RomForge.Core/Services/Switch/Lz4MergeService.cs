@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;

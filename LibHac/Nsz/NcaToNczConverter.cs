@@ -1,5 +1,4 @@
-﻿using Common;
-using LibHac.Common.FixedArrays;
+﻿using LibHac.Common.FixedArrays;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.FsSystem;
@@ -19,6 +18,7 @@ using System.Threading.Tasks;
 using ZstdSharp;
 using ZstdSharp.Unsafe;
 using Blake3;
+using Common.Models;
 
 namespace LibHac.NSZ;
 
@@ -52,7 +52,7 @@ public class NcaToNczConverter(KeySet keySet)
 
         if (hasSparse)
         {
-            await global::Common.Utils.CopyStreamAsync(originalStorage.AsStream(), outputStream, onRead, ct);
+            await global::Common.Services.Utils.CopyStreamAsync(originalStorage.AsStream(), outputStream, onRead, ct);
             return;
         }
 
@@ -384,7 +384,7 @@ public class NcaToNczConverter(KeySet keySet)
                     ? (int)Math.Min(100, currentVerifyPos * 100 / totalVerifySize)
                     : 0;
 
-                var r = global::Common.Utils.CalculateProgress(currentVerifyPos, totalVerifySize, label);
+                var r = global::Common.Services.Utils.CalculateProgress(currentVerifyPos, totalVerifySize, label);
                 progress?.Report(new ProgressInfo(
                     pct,
                     $"Decompressing and hashing... {r.label}",

@@ -1,5 +1,5 @@
 ﻿using CHD.Core.Services;
-using Common;
+using Common.Models;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core.Models.Compression;
 using RomForge.Core.Services.Compression;

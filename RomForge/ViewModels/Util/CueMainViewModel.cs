@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using RomForge.Core.Models.Util;
 using RomForge.Core.Services;
 using RomForge.Core.UI.Command;
@@ -36,7 +37,7 @@ public class CueMainViewModel : BatchToolTabViewModel
     {
         var existing = FileItems.Select(f => f.FilePath).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var path in Common.Utils.ExpandPaths(paths))
+        foreach (var path in Utils.ExpandPaths(paths))
         {
             if (!SupportedExtensions.Contains(Path.GetExtension(path)))
                 continue;

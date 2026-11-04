@@ -87,8 +87,8 @@ public static partial class NameBuilder
 
     public static string BuildNamePart(string krName, string enName)
     {
-        krName = Common.Utils.SafeFileName(krName);
-        enName = Common.Utils.SafeFileName(enName);
+        krName = Common.Services.Utils.SafeFileName(krName);
+        enName = Common.Services.Utils.SafeFileName(enName);
 
         if (string.IsNullOrWhiteSpace(krName))
             return enName.Trim();

@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.Models;
+using Microsoft.Win32;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
 using RomForge.ViewModels.N3DS;
@@ -37,7 +38,7 @@ public partial class InstalledTitlesTab : UserControl
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"로드 실패: {ex.Message}", Common.LogLevel.Error);
+            Vm.AppendLog($"로드 실패: {ex.Message}", LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -50,7 +51,7 @@ public partial class InstalledTitlesTab : UserControl
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"복구 실패: {ex.Message}", Common.LogLevel.Error);
+            Vm.AppendLog($"복구 실패: {ex.Message}", LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -110,11 +111,11 @@ public partial class InstalledTitlesTab : UserControl
             await Vm.ExtractTitleAsync(selected, dialog.FileName, asCci);
 
             if (File.Exists(dialog.FileName))
-                Vm.AppendLog($"추출 완료: {dialog.FileName}", Common.LogLevel.Ok);
+                Vm.AppendLog($"추출 완료: {dialog.FileName}", LogLevel.Ok);
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"추출 실패: {ex.Message}", Common.LogLevel.Error);
+            Vm.AppendLog($"추출 실패: {ex.Message}", LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }

@@ -1,4 +1,5 @@
-﻿using RomForge.Core.Services;
+﻿using Common.Models;
+using RomForge.Core.Services;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;
@@ -54,14 +55,14 @@ public partial class MergeTab : UserControl
 
         if (!fileMgr.GameFiles.Any())
         {
-            ViewModel.AppendLog(Res.Main_Err_NoFiles, Common.LogLevel.Error);
+            ViewModel.AppendLog(Res.Main_Err_NoFiles, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (!CommonListControl.KeyExists())
         {
-            ViewModel.AppendLog(Res.Main_Err_NoKeys, Common.LogLevel.Error);
+            ViewModel.AppendLog(Res.Main_Err_NoKeys, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }

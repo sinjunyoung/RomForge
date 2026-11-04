@@ -1,5 +1,4 @@
-﻿using Common;
-using NSW.Core;
+﻿using NSW.Core;
 using NSW.Core.Models;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
@@ -13,6 +12,8 @@ using Res = NSW.Properties.Resources;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Services;
 using RomForge.Core.ViewModels.Switch;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.ViewModels.Switch;
 

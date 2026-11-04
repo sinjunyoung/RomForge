@@ -1,4 +1,6 @@
 ﻿using Common;
+using Common.Models;
+using Common.Services;
 using K4os.Compression.LZ4;
 using LibHac;
 using LibHac.Fs;

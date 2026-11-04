@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Services;
 using RomForge.Core.Models.WiiU;
 using RomForge.ViewModels.WiiU;
 using System.IO;

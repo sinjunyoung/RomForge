@@ -1,5 +1,4 @@
-﻿using Common;
-using RomForge.Core.UI.Command;
+﻿using RomForge.Core.UI.Command;
 using RomForge.Core.Models.Util;
 using System.IO;
 using System.Windows;
@@ -8,6 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using RomForge.Core.Services;
 using RomForge.Core.Models.N3DS;
+using Common.Models;
 
 namespace RomForge.ViewModels.Util;
 

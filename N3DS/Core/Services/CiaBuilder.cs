@@ -1,4 +1,6 @@
 ﻿using Common;
+using Common.Models;
+using Common.Services;
 using N3DS.Core.Crypto;
 using N3DS.Core.Interfaces;
 using N3DS.Core.Models;

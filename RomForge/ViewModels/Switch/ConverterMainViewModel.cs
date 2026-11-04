@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using NSW.Core;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;

@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -100,7 +101,7 @@ internal static class MergedTitleWriter
 
             Directory.CreateDirectory(outputDir);
 
-            finalPath = Common.Utils.GetUniqueFilePath(Path.Combine(outputDir, fileName));
+            finalPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, fileName));
 
             var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
 

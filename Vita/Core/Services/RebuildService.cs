@@ -1,4 +1,4 @@
-using Common;
+using Common.Models;
 using Vita.Core.Models;
 
 namespace Vita.Core.Services;

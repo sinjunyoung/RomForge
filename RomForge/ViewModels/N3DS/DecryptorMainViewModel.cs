@@ -1,5 +1,4 @@
-﻿using Common;
-using RomForge.Core.UI.Command;
+﻿using RomForge.Core.UI.Command;
 using System.Buffers.Binary;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -13,6 +12,8 @@ using N3DS.Core.IO;
 using N3DS.Core.Services;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.ViewModels;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.ViewModels.N3DS;
 

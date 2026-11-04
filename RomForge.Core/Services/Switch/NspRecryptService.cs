@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
@@ -141,7 +142,7 @@ public class NspRecryptService
                     {
                         var cap = currentStorage;
 
-                        fileEntries.Add((entryName, async (s, onRead) => await Common.Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
+                        fileEntries.Add((entryName, async (s, onRead) => await Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
                     }
                     continue;
                 }
@@ -150,7 +151,7 @@ public class NspRecryptService
                 {
                     var cap = currentStorage;
 
-                    fileEntries.Add((entryName, async (s, onRead) => await Common.Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
+                    fileEntries.Add((entryName, async (s, onRead) => await Utils.CopyStreamAsync(cap.AsStream(), s, onRead, ct), size, entryName));
                     continue;
                 }
 

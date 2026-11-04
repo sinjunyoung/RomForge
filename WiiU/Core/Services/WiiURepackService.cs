@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using Patch.Core.Services;
 using WiiU.Core.Models;
 

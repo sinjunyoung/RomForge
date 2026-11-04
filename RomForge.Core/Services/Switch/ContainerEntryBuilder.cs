@@ -1,4 +1,5 @@
-﻿using LibHac.Common;
+﻿using Common.Services;
+using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -109,5 +110,5 @@ internal static class ContainerEntryBuilder
         return (storage, size);
     }
 
-    public static (string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label) CreateCopyEntry(string name, IStorage storage, long size, CancellationToken ct) => (name, async (s, onRead) => await Common.Utils.CopyStreamAsync(storage.AsStream(), s, onRead, ct), size, name);
+    public static (string Name, Func<Stream, Action<long>, Task> Writer, long EstimatedSize, string Label) CreateCopyEntry(string name, IStorage storage, long size, CancellationToken ct) => (name, async (s, onRead) => await Utils.CopyStreamAsync(storage.AsStream(), s, onRead, ct), size, name);
 }

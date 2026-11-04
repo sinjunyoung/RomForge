@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using N3DS.Core.Crypto;
 
 namespace N3DS.Core.Services;

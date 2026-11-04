@@ -1,5 +1,4 @@
-﻿using Common;
-using RomForge.Core;
+﻿using RomForge.Core;
 using RomForge.Core.UI.Command;
 using System.IO;
 using System.Windows;
@@ -7,6 +6,8 @@ using System.Windows.Input;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;
 using RomForge.Core.ViewModels.PSP;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.ViewModels.PSP;
 

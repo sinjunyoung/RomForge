@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using NSW.HacPack.Models;
 using System.IO;
 
@@ -20,27 +21,21 @@ public static class UncompressedRomfsSectionWriter
         try
         {
             using var source = settings.OpenRomfsImage();
-
+            using var section = EncryptedSectionStream.Create(ncaFile, ref ncaHeader, sectionIndex, settings);
             long hashedSize = source.Length;
             long dataSize = source is IUnpaddedLengthSource unpadded ? unpadded.UnpaddedLength : hashedSize;
             long[] expectedSizes = GetLevelSizes(hashedSize);
-            long levelsStart = ncaFile.Position;
+            long levelsStart = section.Position;
 
-            WriteZeros(ncaFile, expectedSizes.Sum(), ct);
+            WriteZeros(section, expectedSizes.Sum(), ct);
+            section.BeginIvfc();
+            CopyData(source, section, hashedSize, progress, ct);
 
-            long dataStart = ncaFile.Position;
-
-            CopyData(source, ncaFile, hashedSize, progress, ct);
-
-            long dataEnd = ncaFile.Position;
+            long dataEnd = section.Position;
 
             NcaHeaderService.SetIvfcLevel5(ref ncaHeader, sectionIndex, (ulong)dataSize);
-
-            using (var region = new ReadOnlyRegionStream(ncaFile, dataStart, hashedSize))
-            {
-                IvfcGenerator.GenerateHashLevel(ivfcStreams[4], region, out ulong lvlSize4);
-                NcaHeaderService.SetIvfcLevel(ref ncaHeader, sectionIndex, 4, lvlSize4);
-            }
+            section.EndIvfc(ivfcStreams[4], out ulong lvlSize4);
+            NcaHeaderService.SetIvfcLevel(ref ncaHeader, sectionIndex, 4, lvlSize4);
 
             for (int b = 3; b >= 0; b--)
             {
@@ -58,19 +53,20 @@ public static class UncompressedRomfsSectionWriter
 
             NcaHeaderService.SetIvfcLogicalOffsets(ref ncaHeader, sectionIndex);
 
-            ncaFile.Position = levelsStart;
+            section.Position = levelsStart;
 
             for (int c = 0; c < 5; c++)
             {
                 ct.ThrowIfCancellationRequested();
 
                 ivfcStreams[c].Position = 0;
-                ivfcStreams[c].CopyTo(ncaFile);
+
+                ivfcStreams[c].CopyTo(section);
             }
 
-            ncaFile.Position = dataEnd;
+            section.Position = dataEnd;
 
-            NcaGenerator.WritePadding(ncaFile);
+            NcaGenerator.WritePadding(section);
 
             return ivfcStreams;
         }
@@ -129,7 +125,6 @@ public static class UncompressedRomfsSectionWriter
             while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
             {
                 ct.ThrowIfCancellationRequested();
-
                 output.Write(buffer, 0, read);
 
                 copied += read;

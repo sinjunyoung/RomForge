@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.N3DS;
 using RomForge.ViewModels.N3DS;

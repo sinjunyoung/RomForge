@@ -1,5 +1,4 @@
-﻿using Common;
-using LibHac.Common.Keys;
+﻿using LibHac.Common.Keys;
 using LibHac.NSZ;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
@@ -10,6 +9,8 @@ using Path = System.IO.Path;
 using Res = NSW.Properties.Resources;
 using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using System.IO;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -83,7 +84,7 @@ internal static class ContainerConverter
                 long originalSize = new FileInfo(inputPath).Length;
                 long compressedSize = fout.Length;
 
-                log?.Invoke($"{Res.Log_CompressionRatio}: {Common.Utils.FormatFileSize(originalSize)} → {Common.Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight, meta.TitleId);
+                log?.Invoke($"{Res.Log_CompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight, meta.TitleId);
             }
 
             if (useCompression && validation && converters.Count > 0)

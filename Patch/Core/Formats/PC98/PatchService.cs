@@ -1,4 +1,6 @@
 using Common;
+using Common.Models;
+using Common.Services;
 using Patch.Core.Formats.PC98.Models;
 using System.IO.Compression;
 

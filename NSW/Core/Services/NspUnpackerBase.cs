@@ -1,4 +1,6 @@
 ﻿using Common;
+using Common.Models;
+using Common.Services;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;

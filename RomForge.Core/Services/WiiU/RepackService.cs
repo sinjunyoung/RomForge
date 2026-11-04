@@ -1,4 +1,5 @@
-using Common;
+using Common.Models;
+using Common.Services;
 using Patch.Core.Services;
 using RomForge.Core.Models.WiiU;
 using System.Diagnostics;

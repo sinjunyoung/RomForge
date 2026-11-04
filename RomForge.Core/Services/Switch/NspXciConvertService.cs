@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using LibHac.Common.Keys;
 using NSW.Core;
 using Res = NSW.Properties.Resources;

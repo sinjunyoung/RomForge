@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using NSW.Core.Models;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;

@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Common.Services;
+using System.IO;
 using System.Windows.Media;
 using Res = NSW.Properties.Resources;
 
@@ -63,7 +64,7 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
         }
     }
 
-    public string SizeText => Common.Utils.FormatFileSize(SizeBytes);
+    public string SizeText => Utils.FormatFileSize(SizeBytes);
 
     public ImageSource? Icon { get; set => SetProperty(ref field, value); }
 

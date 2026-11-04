@@ -1,5 +1,4 @@
-﻿using Common;
-using LibHac.Common.Keys;
+﻿using LibHac.Common.Keys;
 using LibHac.Ncm;
 using LibHac.NSZ;
 using LibHac.Tools.FsSystem;
@@ -12,6 +11,8 @@ using System.IO;
 using Path = System.IO.Path;
 using Res = NSW.Properties.Resources;
 using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -150,7 +151,7 @@ public static class NspLz4Service
 
             long originalSize = new FileInfo(inputPath).Length;
 
-            log?.Invoke($"{Res.Log_CompressionRatio}: {Common.Utils.FormatFileSize(originalSize)} → {Common.Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, primary.TitleId);
+            log?.Invoke($"{Res.Log_CompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, primary.TitleId);
 
             isCompleted = true;
 

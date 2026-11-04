@@ -1,7 +1,7 @@
 ﻿using System.Buffers;
 using System.Diagnostics;
 
-namespace Common;
+namespace Common.Services;
 
 public static class Utils
 {

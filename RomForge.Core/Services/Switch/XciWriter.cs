@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using LibHac.Tools.FsSystem;
 using System.Buffers.Binary;
 using System.IO;

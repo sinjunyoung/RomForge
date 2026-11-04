@@ -1,7 +1,8 @@
 ﻿using CD.Core.Services.Readers;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
-using Common;
+using Common.Models;
+using Common.Services;
 using N3DS.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Compression;
@@ -93,6 +94,8 @@ public class CompressMainViewModel : ToolTabViewModel
 
             FileItems.Add(item);
 
+            //_ = CalculateEstimateAsync(item);
+
             for (int i = 0; i < FileItems.Count; i++)
                 FileItems[i].No = i + 1;
         }
@@ -100,6 +103,31 @@ public class CompressMainViewModel : ToolTabViewModel
         OnPropertyChanged(nameof(HintVisibility));
         CommandManager.InvalidateRequerySuggested();
     }
+
+    //private static async Task CalculateEstimateAsync(FileItem item)
+    //{
+    //    try
+    //    {
+    //        var detected = FormatDetector.Detect(item.FilePath);
+
+    //        if (detected.Format == RomFormat.Cci || detected.Format == RomFormat.Cci)
+    //        {
+    //            item.EstimatedRatioText = "분석 중...";
+
+    //            int level = AppConfig.Instance.Azahar.CompressLevel;
+    //            var estimator = new Z3dsEstimator();
+    //            var result = await estimator.EstimateAsync(item.FilePath, level);
+
+    //            item.EstimatedRatioText = $"{result.SavedFraction * 100:F1}% ({Utils.FormatFileSize(result.InputBytes)} → {Utils.FormatFileSize(result.OutputBytes)})";
+    //        }
+    //        else
+    //            item.EstimatedRatioText = "-";
+    //    }
+    //    catch
+    //    {
+    //        item.EstimatedRatioText = "추정 실패";
+    //    }
+    //}
 
     public void RemoveItems(IEnumerable<FileItem> items)
     {

@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using LibHac.Common.Keys;
 
 namespace RomForge.Core.Services.Switch;

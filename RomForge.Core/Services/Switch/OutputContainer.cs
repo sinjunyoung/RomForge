@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using LibHac.Common.Keys;
 using LibHac.Fs.Fsa;
 using NSW.Core.Enums;

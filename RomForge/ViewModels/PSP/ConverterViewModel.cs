@@ -1,5 +1,4 @@
-﻿using Common;
-using PSP.Core.Models;
+﻿using PSP.Core.Models;
 using PSP.Core.Services;
 using RomForge.Core;
 using RomForge.Core.UI.Command;
@@ -10,6 +9,8 @@ using System.Windows.Input;
 using RomForge.Core.Services;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.ViewModels;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.ViewModels.PSP;
 

@@ -1,7 +1,7 @@
-﻿using Common;
+﻿using Common.Models;
+using Common.Services;
 using LibHac.Crypto;
 using NSW.HacPack.Cryptography.Core;
-using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
 using System.IO;
 using System.IO.MemoryMappedFiles;
@@ -22,20 +22,11 @@ public static class NcaCryptoService
         else
             Array.Copy(hdr.EncryptedKeys, 2 * 0x10, encKey, 0, 0x10);
 
-        ulong ctrOfs = startOffset >> 4;
-        byte[] baseCtr = new byte[0x10];
-
-        for (int j = 0; j < 8; j++)
-        {
-            baseCtr[j] = hdr.FsHeaders[sectionIndex].SectionCtr[8 - j - 1];
-            baseCtr[0x10 - j - 1] = (byte)(ctrOfs & 0xFF);
-            ctrOfs >>= 8;
-        }
+        using var cipher = NSW.HacPack.Cryptography.Core.AesCtrCipher.ForSection(encKey, hdr.FsHeaders[sectionIndex].SectionCtr);
 
         const int batchSize = 0x10000000;
-        const int chunkSize = 0x1000000;
 
-        byte[] batch = new byte[batchSize];
+        byte[] batch = new byte[(int)Math.Min((ulong)batchSize, fileSize)];
         var reporter = new ProgressReporter("암호화 중", string.Empty, (long)fileSize, progress);
         using var mmf = ncaFile is FileStream mappedFile ? MemoryMappedFile.CreateFromFile(mappedFile, null, 0, MemoryMappedFileAccess.ReadWrite, HandleInheritability.None, leaveOpen: true) : null;
         ulong ofs = 0;
@@ -59,23 +50,7 @@ public static class NcaCryptoService
                 ncaFile.ReadExactly(batch, 0, batchLen);
             }
 
-            int chunkCount = (batchLen + chunkSize - 1) / chunkSize;
-
-            Parallel.For(0, chunkCount, new ParallelOptions { CancellationToken = ct }, i =>
-            {
-                int chunkOffset = i * chunkSize;
-                int chunkLen = Math.Min(chunkSize, batchLen - chunkOffset);
-                ulong absOffset = startOffset + ofs + (ulong)chunkOffset;
-                Span<byte> ctr = stackalloc byte[0x10];
-
-                baseCtr.AsSpan(0, 8).CopyTo(ctr);
-                UpdateCtr(ctr, absOffset);
-
-                using var ctx = new AesContext(encKey, AesMode.CTR);
-
-                ctx.SetIV(ctr.ToArray());
-                ctx.Encrypt(batch.AsSpan(chunkOffset, chunkLen), batch.AsSpan(chunkOffset, chunkLen));
-            });
+            cipher.Transform(batch, 0, batch, 0, batchLen, startOffset + ofs);
 
             if (mmf != null)
             {
@@ -126,16 +101,5 @@ public static class NcaCryptoService
         }
 
         NcaStructHelper.BytesToStruct(rawHdr, ref hdr);
-    }
-
-    public static void UpdateCtr(Span<byte> ctr, ulong ofs)
-    {
-        ofs >>= 4;
-
-        for (int j = 0; j < 8; j++)
-        {
-            ctr[0x10 - j - 1] = (byte)(ofs & 0xFF);
-            ofs >>= 8;
-        }
     }
 }

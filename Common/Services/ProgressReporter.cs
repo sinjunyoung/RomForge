@@ -1,5 +1,6 @@
-﻿using System.Diagnostics;
-namespace Common;
+﻿using Common.Models;
+using System.Diagnostics;
+namespace Common.Services;
 
 public class ProgressReporter(string gameTitle, string gameId, long totalEstimated, IProgress<ProgressInfo>? progress)
 {

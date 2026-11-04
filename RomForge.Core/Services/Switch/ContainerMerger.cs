@@ -1,5 +1,4 @@
-﻿using Common;
-using LibHac.Common.Keys;
+﻿using LibHac.Common.Keys;
 using LibHac.Fs.Fsa;
 using LibHac.Ncm;
 using LibHac.NSZ;
@@ -13,6 +12,8 @@ using Path = System.IO.Path;
 using Res = NSW.Properties.Resources;
 using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using System.IO;
+using Common.Models;
+using Common.Services;
 
 namespace RomForge.Core.Services.Switch;
 

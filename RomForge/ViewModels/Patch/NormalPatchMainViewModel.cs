@@ -1,5 +1,6 @@
 ﻿using CHD.Core.Services;
-using Common;
+using Common.Models;
+using Common.Services;
 using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;

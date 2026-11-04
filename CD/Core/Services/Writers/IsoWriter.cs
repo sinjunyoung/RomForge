@@ -1,5 +1,5 @@
 ﻿using CD.Core.Models;
-using Common;
+using Common.Models;
 
 namespace CD.Core.Services.Writers;
 
