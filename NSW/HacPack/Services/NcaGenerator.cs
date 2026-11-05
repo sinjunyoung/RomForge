@@ -1,5 +1,5 @@
-﻿using Common.Models;
-using Common.Services;
+﻿using Common.Services;
+using Common.Models;
 using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Cryptography.Keys;
 using NSW.HacPack.Enums;
@@ -59,10 +59,6 @@ public static class NcaGenerator
         }
 
         NcaHeaderService.FinalizeKeyArea(ref ncaHeader, settings);
-
-        if (settings.Plaintext == 0)
-            NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, settings, progress, ct);
-
         NcaHeaderService.FinalizeNca(ncaFile, ref ncaHeader, settings);
     }
 
@@ -224,13 +220,6 @@ public static class NcaGenerator
         {
             progress.ReportStatus("ExeFS 암호화 중...", 0);
             NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, settings, progress, ct);
-
-            if (settings.HasRomfsSource)
-            {
-                ct.ThrowIfCancellationRequested();
-                progress.ReportStatus("RomFS 암호화 중...", 0);
-                NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 1, settings, progress, ct);
-            }
         }
 
         if (settings.NoSelfSignNcaSignature2 == 0 || !string.IsNullOrEmpty(settings.NcaSignature2PrivateKey) && File.Exists(settings.NcaSignature2PrivateKey))
