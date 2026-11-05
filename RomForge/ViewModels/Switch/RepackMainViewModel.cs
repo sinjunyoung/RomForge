@@ -240,6 +240,19 @@ namespace RomForge.ViewModels.Switch
 
             var baseEntry = gameFiles.First(f => f.FileType.Contains('B'));
             var updateEntry = gameFiles.FirstOrDefault(f => f.FileType.Contains('U'));
+
+            if (updateEntry != null && !string.IsNullOrEmpty(baseEntry.TitleID) && !string.IsNullOrEmpty(updateEntry.TitleID))
+            {
+                string baseId13 = baseEntry.TitleID.Length >= 13 ? baseEntry.TitleID[..13] : baseEntry.TitleID;
+                string updateId13 = updateEntry.TitleID.Length >= 13 ? updateEntry.TitleID[..13] : updateEntry.TitleID;
+
+                if (!string.Equals(baseId13, updateId13, StringComparison.OrdinalIgnoreCase))
+                {
+                    errorMsg = "본편과 업데이트의 타이틀이 일치하지 않습니다.";
+                    return false;
+                }
+            }
+
             var dlcEntries = gameFiles.Where(f => f.FileType.Contains('D')).ToList();
             var mainPatchSource = !string.IsNullOrEmpty(baseEntry.PatchPath) ? baseEntry : updateEntry;
             string mainPatch = (mainPatchSource?.PatchPath ?? string.Empty).Trim();

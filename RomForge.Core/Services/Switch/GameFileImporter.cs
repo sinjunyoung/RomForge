@@ -185,14 +185,45 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
         onFileAdded();
     }
 
+
     private void AssignOrReplace(GameFile vm)
     {
         if (vm.FileType.Contains('B'))
         {
+            string baseTitleId = vm.TitleID ?? string.Empty;
+
             foreach (var oldFile in gameFiles.ToList())
             {
-                patchSync.Detach(oldFile);
-                gameFiles.Remove(oldFile);
+                bool keep = false;
+
+                if (oldFile.FileType.Contains('U'))
+                {
+                    // 업데이트: 본편과 앞 13자리가 같으면 유지
+                    keep = baseTitleId.Length >= 13 &&
+                           !string.IsNullOrEmpty(oldFile.TitleID) &&
+                           oldFile.TitleID.Length >= 13 &&
+                           string.Equals(
+                               baseTitleId[..13],
+                               oldFile.TitleID[..13],
+                               StringComparison.OrdinalIgnoreCase);
+                }
+                else if (oldFile.FileType.Contains('D'))
+                {
+                    // DLC: 본편과 앞 12자리가 같으면 유지
+                    keep = baseTitleId.Length >= 12 &&
+                           !string.IsNullOrEmpty(oldFile.TitleID) &&
+                           oldFile.TitleID.Length >= 12 &&
+                           string.Equals(
+                               baseTitleId[..12],
+                               oldFile.TitleID[..12],
+                               StringComparison.OrdinalIgnoreCase);
+                }
+
+                if (!keep)
+                {
+                    patchSync.Detach(oldFile);
+                    gameFiles.Remove(oldFile);
+                }
             }
         }
         else if (vm.FileType.Contains('U'))
@@ -215,7 +246,9 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
         {
             if (!string.IsNullOrEmpty(vm.TitleID))
             {
-                var existingDlc = gameFiles.FirstOrDefault(f => f.FileType.Contains('D') && string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase));
+                var existingDlc = gameFiles.FirstOrDefault(f =>
+                    f.FileType.Contains('D') &&
+                    string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase));
 
                 if (existingDlc != null)
                 {
@@ -231,11 +264,18 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
             }
         }
 
-        if (!string.IsNullOrEmpty(vm.TitleID) && gameFiles.Any(f => f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) && f.FileType == vm.FileType && string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase)))
+        if (!string.IsNullOrEmpty(vm.TitleID) &&
+            gameFiles.Any(f =>
+                f.FilePath.Equals(vm.FilePath, StringComparison.OrdinalIgnoreCase) &&
+                f.FileType == vm.FileType &&
+                string.Equals(f.TitleID, vm.TitleID, StringComparison.OrdinalIgnoreCase)))
+        {
             return;
+        }
 
         gameFiles.Add(vm);
         patchSync.Attach(vm);
         patchSync.SyncPatchToPartner(vm);
     }
+
 }
