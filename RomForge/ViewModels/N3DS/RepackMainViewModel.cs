@@ -1,5 +1,4 @@
-﻿using Common;
-using Common.Models;
+﻿using Common.Models;
 using Common.Services;
 using N3DS.Core.Crypto;
 using RomForge.Core;

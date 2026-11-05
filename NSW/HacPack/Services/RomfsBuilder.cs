@@ -1,6 +1,6 @@
-﻿using Common;
-using Common.Models;
+﻿using Common.Models;
 using Common.Services;
+using NSW.HacPack.IO;
 using NSW.HacPack.Models;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -34,7 +34,6 @@ public static class RomfsBuilder
                 var dir = new RomfsNode { Name = name, IsDirectory = true };
 
                 parent.Children.Add(dir);
-
                 FillFromDirectory(dir, entry);
             }
             else
@@ -50,9 +49,6 @@ public static class RomfsBuilder
             }
         }
     }
-
-    public static void BuildRomfsImage(string inDirPath, Stream outStream, out ulong outSize, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
-        => BuildRomfsImage(FromDirectory(inDirPath), inDirPath, outStream, out outSize, progress, ct);
 
     public static void BuildRomfsImage(RomfsNode root, string rootPath, Stream outStream, out ulong outSize, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {

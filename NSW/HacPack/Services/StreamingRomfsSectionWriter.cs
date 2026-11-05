@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using NSW.HacPack.IO;
 using NSW.HacPack.Models;
 using System.IO;
 
@@ -18,7 +19,6 @@ public static class StreamingRomfsSectionWriter
         try
         {
             using var section = EncryptedSectionStream.Create(ncaFile, ref ncaHeader, sectionIndex, settings);
-
             long dataStart = section.Position;
             CompressedRomfsInfo info;
 

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace NSW.HacPack.Services;
+namespace NSW.HacPack.IO;
 
 public sealed class OffsetStream(Stream inner, long baseOffset, Action<long>? onAdvance = null) : Stream
 {

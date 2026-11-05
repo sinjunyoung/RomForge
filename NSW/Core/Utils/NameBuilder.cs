@@ -17,7 +17,6 @@ public static partial class NameBuilder
         string infoPart = $"[{titleId.ToUpper()}] {tagPart} [v{cleanVersion}] [v{titleVersion}]";
         string baseName = ComposeBaseName(namePart, infoPart);
         string finalSuffix = BuildFinalSuffix(suffix, format);
-
         return $"{baseName}_{finalSuffix}";
     }
 
@@ -29,7 +28,6 @@ public static partial class NameBuilder
         string infoPart = $"[{titleId.ToUpper()}] {tagPart} [v{cleanVersion}] [v{titleVersion}]";
         string baseName = ComposeBaseName(namePart, infoPart);
         string finalSuffix = BuildFinalSuffix(suffix, format);
-
         return $"{baseName}_{finalSuffix}";
     }
 
@@ -41,7 +39,6 @@ public static partial class NameBuilder
         string tagPart = BuildTagPart(true, hasUpdate, dlcCount);
         string infoPart = $"[{titleId.ToUpper()}] {tagPart} [v{cleanVersion}]";
         string baseName = ComposeBaseName(namePart, infoPart);
-
         return $"{baseName}.{GetExtension(format)}";
     }
 
@@ -52,7 +49,6 @@ public static partial class NameBuilder
         string tagPart = BuildTagPart(hasBase, hasUpdate, dlcCount);
         string infoPart = $"[{titleId.ToUpper()}] {tagPart} [v{cleanVersion}]";
         string baseName = ComposeBaseName(namePart, infoPart);
-
         return $"{baseName}.{GetExtension(format)}";
     }
 
@@ -62,7 +58,6 @@ public static partial class NameBuilder
         string cleanVersion = NormalizeVersion(displayVersion);
         string infoPart = $"[{titleId.ToUpper()}] [v{cleanVersion}]";
         string baseName = ComposeBaseName(namePart, infoPart);
-
         return $"{baseName}.nsp";
     }
 
@@ -72,7 +67,6 @@ public static partial class NameBuilder
         string cleanVersion = typeTag != "DLC" ? $" [v{NormalizeVersion(displayVersion)}]" : string.Empty;
         string infoPart = $"[{titleId.ToUpper()}] ({typeTag}){cleanVersion}";
         string baseName = ComposeBaseName(namePart, infoPart);
-
         return $"{baseName}.{GetExtension(format)}";
     }
 
@@ -81,7 +75,6 @@ public static partial class NameBuilder
         string namePart = BuildNamePart(krName ?? string.Empty, string.Empty);
         string cleanVersion = NormalizeVersion(displayVersion);
         string infoPart = $"[{titleId.ToUpper()}] [v{cleanVersion}]";
-
         return ComposeBaseName(namePart, infoPart);
     }
 
@@ -117,7 +110,6 @@ public static partial class NameBuilder
     public  static string BuildFinalSuffix(string suffix, ContainerFormat format)
     {
         string ext = GetExtension(format);
-
         return HasKnownExtension(suffix) ? suffix : $"{suffix}.{ext}";
     }
 

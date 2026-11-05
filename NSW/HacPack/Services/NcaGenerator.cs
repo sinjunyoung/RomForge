@@ -4,7 +4,9 @@ using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Cryptography.Keys;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
+using System.Buffers;
 using System.IO;
+using NSW.HacPack.IO;
 
 namespace NSW.HacPack.Services;
 
@@ -18,7 +20,7 @@ public static class NcaGenerator
         WriteRomfsNca(window, settings, compressLevel, progress, ct);
 
         long size = window.Length;
-        byte[] hash = HashRegion(output, start, size, ct);
+        byte[] hash = HashRegion(output, start, size, progress, ct);
 
         output.Position = start + size;
 
@@ -70,36 +72,72 @@ public static class NcaGenerator
         WriteProgramNca(window, settings, compressLevel, progress, ct);
 
         long size = window.Length;
-        byte[] hash = HashRegion(output, start, size, ct);
+        byte[] hash = HashRegion(output, start, size, progress, ct);
 
         output.Position = start + size;
 
         return (hash, size);
     }
 
-    private static byte[] HashRegion(Stream stream, long start, long size, CancellationToken ct)
+    private static byte[] HashRegion(Stream stream, long start, long size, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
+        const int bufferSize = 4 << 20;
+
         using var hasher = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
-        byte[] buffer = new byte[1 << 20];
-        long remaining = size;
+        var reporter = new ProgressReporter("NCA 해시 계산 중", string.Empty, size, progress);
+        byte[][] buffers = [ArrayPool<byte>.Shared.Rent(bufferSize), ArrayPool<byte>.Shared.Rent(bufferSize)];
 
-        stream.Position = start;
-
-        while (remaining > 0)
+        try
         {
-            ct.ThrowIfCancellationRequested();
+            stream.Position = start;
 
-            int read = stream.Read(buffer, 0, (int)Math.Min(buffer.Length, remaining));
+            long remaining = size;
+            int current = 0;
+            int bytes = ReadChunk(stream, buffers[current], remaining);
+
+            while (bytes > 0)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                int next = current ^ 1;
+                long afterCurrent = remaining - bytes;
+                var nextRead = afterCurrent > 0 ? Task.Run(() => ReadChunk(stream, buffers[next], afterCurrent)) : Task.FromResult(0);
+
+                hasher.AppendData(buffers[current], 0, bytes);
+                reporter.AddProgress(bytes);
+
+                remaining = afterCurrent;
+                bytes = nextRead.GetAwaiter().GetResult();
+                current = next;
+            }
+
+            reporter.ForceReport();
+
+            return hasher.GetHashAndReset();
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffers[0]);
+            ArrayPool<byte>.Shared.Return(buffers[1]);
+        }
+    }
+
+    private static int ReadChunk(Stream stream, byte[] buffer, long remaining)
+    {
+        int wanted = (int)Math.Min(buffer.Length, remaining);
+        int total = 0;
+
+        while (total < wanted)
+        {
+            int read = stream.Read(buffer, total, wanted - total);
 
             if (read <= 0)
                 throw new EndOfStreamException();
 
-            hasher.AppendData(buffer, 0, read);
-
-            remaining -= read;
+            total += read;
         }
 
-        return hasher.GetHashAndReset();
+        return total;
     }
 
     private static void WriteProgramNca(Stream ncaFile, NcaGenerationOptions settings, int compressLevel, IProgress<ProgressInfo>? progress, CancellationToken ct)
@@ -122,14 +160,18 @@ public static class NcaGenerator
 
         NcaHeaderService.SetPfs0Superblock(ref ncaHeader, 0, pfs0Size, hashTableSize, pfs0Offset, exefsBlockSize);
 
-        exefsHashStream.Position = 0;
+        using (var exefsSection = EncryptedSectionStream.Create(ncaFile, ref ncaHeader, 0, settings))
+        {
+            exefsHashStream.Position = 0;
 
-        exefsHashStream.CopyTo(ncaFile);
+            exefsHashStream.CopyTo(exefsSection);
 
-        exefsStream.Position = 0;
+            exefsStream.Position = 0;
 
-        exefsStream.CopyTo(ncaFile);
-        WritePadding(ncaFile);
+            exefsStream.CopyTo(exefsSection);
+            WritePadding(exefsSection);
+        }
+
         NcaHeaderService.SetCommonHeader(ref ncaHeader, settings);
 
         ncaHeader.ContentType = 0x0;
@@ -195,7 +237,6 @@ public static class NcaGenerator
             logoStream.Position = 0;
 
             logoStream.CopyTo(ncaFile);
-
             WritePadding(ncaFile);
 
             bool hasRomfs = settings.HasRomfsSource;
@@ -215,12 +256,6 @@ public static class NcaGenerator
 
         NcaHeaderService.FinalizeKeyArea(ref ncaHeader, settings);
         ct.ThrowIfCancellationRequested();
-
-        if (settings.Plaintext == 0)
-        {
-            progress.ReportStatus("ExeFS 암호화 중...", 0);
-            NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, settings, progress, ct);
-        }
 
         if (settings.NoSelfSignNcaSignature2 == 0 || !string.IsNullOrEmpty(settings.NcaSignature2PrivateKey) && File.Exists(settings.NcaSignature2PrivateKey))
         {
@@ -244,7 +279,7 @@ public static class NcaGenerator
         WriteMetaNca(window, settings, metaFiles, null, ct);
 
         long size = window.Length;
-        byte[] hash = HashRegion(output, start, size, ct);
+        byte[] hash = HashRegion(output, start, size, null, ct);
 
         output.Position = start + size;
 
@@ -271,15 +306,17 @@ public static class NcaGenerator
 
         NcaHeaderService.SetPfs0Superblock(ref ncaHeader, 0, metaPfs0Size, metaHashSize, metaPfs0Offset, metaBlockSize);
 
-        metaHashStream.Position = 0;
+        using (var metaSection = EncryptedSectionStream.Create(ncaFile, ref ncaHeader, 0, baseSettings))
+        {
+            metaHashStream.Position = 0;
 
-        metaHashStream.CopyTo(ncaFile);
+            metaHashStream.CopyTo(metaSection);
 
-        metaPfs0Stream.Position = 0;
+            metaPfs0Stream.Position = 0;
 
-        metaPfs0Stream.CopyTo(ncaFile);
-
-        WritePadding(ncaFile);
+            metaPfs0Stream.CopyTo(metaSection);
+            WritePadding(metaSection);
+        }
 
         NcaHeaderService.SetCommonHeader(ref ncaHeader, baseSettings);
 
@@ -300,12 +337,7 @@ public static class NcaGenerator
             throw new Exception("KeyAreaKey가 설정되지 않았습니다.");
 
         Array.Copy(baseSettings.KeyAreaKey, 0, ncaHeader.EncryptedKeys, 2 * 0x10, 0x10);
-
         ct.ThrowIfCancellationRequested();
-
-        if (baseSettings.Plaintext == 0)
-            NcaCryptoService.EncryptSection(ncaFile, ref ncaHeader, 0, baseSettings, null, ct);
-
         ncaFile.Seek(0, SeekOrigin.End);
 
         ncaHeader.NcaSize = (ulong)ncaFile.Position;
@@ -313,7 +345,6 @@ public static class NcaGenerator
         NcaCryptoService.EncryptKeyArea(ref ncaHeader, baseSettings);
         NcaSigningService.SignNca(ref ncaHeader, baseSettings);
         NcaCryptoService.EncryptHeader(ref ncaHeader, baseSettings);
-
         ncaFile.Seek(0, SeekOrigin.Begin);
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
     }

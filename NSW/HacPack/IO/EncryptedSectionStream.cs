@@ -2,8 +2,9 @@
 using System.IO;
 using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Models;
+using NSW.HacPack.Services;
 
-namespace NSW.HacPack.Services;
+namespace NSW.HacPack.IO;
 
 public sealed class EncryptedSectionStream : Stream
 {
@@ -69,7 +70,6 @@ public sealed class EncryptedSectionStream : Stream
         }
 
         ivfc?.Add(buffer, offset, count);
-
         WriteEncrypted(buffer, offset, count);
     }
 

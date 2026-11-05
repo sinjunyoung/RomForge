@@ -13,6 +13,7 @@ public sealed class IvfcLevelBuilder
 
     private readonly MemoryStream _hashes = new();
     private readonly byte[] _tail = new byte[BlockSize];
+
     private int _tailLength;
 
     public void Add(byte[] data, int offset, int count)

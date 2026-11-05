@@ -130,7 +130,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
         if (!isCreateOnly)
             EnsureSparseHasUpdate(baseProg, updateProg);
 
-        using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None)
+        using var fs = updateProg != null ? baseProg.OpenFileSystemWithPatch(updateProg, NcaSectionType.Data, IntegrityCheckLevel.None) 
             : baseProg.IsPatch ? baseProg.OpenFileSystemWithoutBase(NcaSectionType.Data, IntegrityCheckLevel.None) : baseProg.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
 
         ExtractFileSystem(fs, dir, "RomFS", ctx, ct);

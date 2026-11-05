@@ -1,5 +1,4 @@
-﻿using Common;
-using Common.Models;
+﻿using Common.Models;
 using Common.Services;
 using K4os.Compression.LZ4;
 using LibHac;
@@ -115,7 +114,6 @@ public static class CompressedRomfsWriter
                         CompressionLevel = (sbyte)compressLevel,
                         PhysicalSize = (uint)encoded[i]
                     });
-
                     output.Write(targets[i], 0, encoded[i]);
 
                     physical += encoded[i];

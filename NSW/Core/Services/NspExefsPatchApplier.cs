@@ -73,6 +73,7 @@ public static class NspExefsPatchApplier
                 return 0;
 
             log($"exefs_patches용 .ips 발견: {items.Count}개", LogLevel.Info);
+
             return ApplyExefsPatchesCore(items, exefs, progress, log);
         }
         finally

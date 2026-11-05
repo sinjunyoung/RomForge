@@ -47,7 +47,6 @@ public sealed class AesCtrCipher : IDisposable
         if (count < ParallelThreshold || Environment.ProcessorCount == 1)
         {
             TransformSerial(_aes, source.AsSpan(sourceOffset, count), destination.AsSpan(destinationOffset, count), offset);
-
             return;
         }
 

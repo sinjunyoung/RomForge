@@ -1,5 +1,4 @@
-﻿using Common;
-using Common.Models;
+﻿using Common.Models;
 using Common.Services;
 using LibHac.Common.Keys;
 using NSW.Core.Models;
@@ -166,7 +165,8 @@ public static class NspBuildService
 
                 DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, package, progress, log, ct);
                 StepMetaNca(settingsList, contents, package, ct);
-                StepComplete(package, progress);
+                progress.ReportStatus("NSP 마무리 중...", 0);
+                package.Complete();
             }
 
             string finalNsp = StepFinalize(req, unpackResult, tempNsp, progress, log);
@@ -355,12 +355,6 @@ public static class NspBuildService
         byte[] cnmt = CnmtGenerator.Build(baseSettings, records);
         package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, baseSettings, cnmt, ct));
 
-    }
-
-    private static void StepComplete(NspPackageWriter package, IProgress<ProgressInfo> progress)
-    {
-        progress.ReportStatus("NSP 마무리 중...", 0);
-        package.Complete();
     }
 
     private static string StepFinalize(BuildRequest req, UnpackResult unpackResult, string tempNsp, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)

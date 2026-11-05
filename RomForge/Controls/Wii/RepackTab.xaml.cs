@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using Microsoft.Win32;
 using RomForge.Core.Services.Wii;
 using RomForge.ViewModels.Wii;

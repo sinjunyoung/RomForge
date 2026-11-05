@@ -24,14 +24,12 @@ public static class NcaSigningService
             case NcaSigType.Static:
                 for (int i = 0; i < 0x100; i++)
                     sig[i] = 4;
-
                 break;
             case NcaSigType.Random:
                 var rng = new Random();
 
                 for (int i = 0; i < 0x100; i++) 
                     sig[i] = (byte)(rng.Next() % 0xFF);
-
                 break;
             case NcaSigType.Zero:
                 break;

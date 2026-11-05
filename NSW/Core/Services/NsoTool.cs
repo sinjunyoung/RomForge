@@ -11,12 +11,6 @@ public static class NsoTool
 
     private const int MinHeaderReadSize = 0x60;
 
-    public static bool TryReadHeaderInfo(string path, out bool isNso, out string buildIdHex)
-    {
-        using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        return TryReadHeaderInfo(fs, out isNso, out buildIdHex);
-    }
-
     public static bool TryReadHeaderInfo(Stream stream, out bool isNso, out string buildIdHex)
     {
         isNso = false;

@@ -178,6 +178,7 @@ public static class MetadataService
         }
 
         indices.Sort();
+
         return indices;
     }
 }

@@ -8,13 +8,14 @@ public sealed class KeySetProvider
 {
     private static readonly Lock _lock = new();
 
-
     public KeySet KeySet
     {
         set;
         get
         {
-            if (field == null) TryLoadKeys();
+            if (field == null)
+                TryLoadKeys();
+
             return field ?? throw new NullReferenceException();
         }
     }
@@ -23,7 +24,8 @@ public sealed class KeySetProvider
     {
         get
         {
-            lock (_lock) return field ??= new KeySetProvider();
+            lock (_lock) 
+                return field ??= new KeySetProvider();
         }
     }
 

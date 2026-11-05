@@ -75,10 +75,4 @@ public static class NcaStructHelper
         byte[] fsHdrBytes = StructToBytes(ref hdr.FsHeaders[idx]);
         return SHA256.HashData(fsHdrBytes.AsSpan(0, 0x200));
     }
-
-    public static byte[] CalculateNcaHash(FileStream ncaFile)
-    {
-        ncaFile.Seek(0, SeekOrigin.Begin);
-        return SHA256.HashData(ncaFile);
-    }
 }

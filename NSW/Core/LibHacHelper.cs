@@ -4,7 +4,6 @@ using LibHac.Fs;
 using LibHac.Fs.Fsa;
 using LibHac.FsSystem;
 using LibHac.Ns;
-using LibHac.NSZ;
 using LibHac.Tools.Es;
 using LibHac.Tools.Fs;
 using LibHac.Tools.FsSystem;
@@ -46,7 +45,9 @@ public static class LibHacHelper
         else if (ext == ".nsp" || ext == ".nsz")
         {
             var nsp = new PartitionFileSystem();
+
             nsp.Initialize(storage).ThrowIfFailure();
+
             fs = nsp;
         }
         else

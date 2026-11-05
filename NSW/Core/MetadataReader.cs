@@ -434,52 +434,6 @@ public static class MetadataReader
         return info;
     }
 
-    public static List<Cnmt> GetCnmtsFromContainer(KeySet keySet, string path)
-    {
-        var results = new List<Cnmt>();
-
-        if (string.IsNullOrEmpty(path) || !File.Exists(path))
-            return results;
-
-        using var storage = new LocalStorage(path, FileAccess.Read);
-        using var fs = storage.OpenFileSystem(keySet, path);
-
-        foreach (var entry in fs.EnumerateEntries("/", "*.nc*")
-            .Where(e => e.Type == DirectoryEntryType.File && (e.Name.EndsWith(".nca", StringComparison.OrdinalIgnoreCase) || e.Name.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase))))
-        {
-            try
-            {
-                using var file = new UniqueRef<IFile>();
-
-                if (fs.OpenFile(ref file.Ref, entry.FullPath.ToU8Span(), OpenMode.Read).IsFailure())
-                    continue;
-
-                var nca = new Nca(keySet, file.Release().AsStorage());
-
-                if (nca.Header.ContentType != NcaContentType.Meta)
-                    continue;
-
-                using var metaFs = nca.OpenFileSystem(NcaSectionType.Data, IntegrityCheckLevel.None);
-
-                foreach (var cnmtEntry in metaFs.EnumerateEntries("/", "*.cnmt"))
-                {
-                    using var cnmtFile = new UniqueRef<IFile>();
-
-                    if (metaFs.OpenFile(ref cnmtFile.Ref, cnmtEntry.FullPath.ToU8Span(), OpenMode.Read).IsFailure())
-                        continue;
-
-                    results.Add(new Cnmt(cnmtFile.Get.AsStream()));
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"CNMT 파싱 실패 ({entry.FullPath}): {ex.Message}");
-            }
-        }
-
-        return results;
-    }
-
     public static string GetContentMetaTypeTag(ContentMetaType type) => type switch
     {
         ContentMetaType.Application => "Base",

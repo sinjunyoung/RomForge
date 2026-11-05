@@ -11,7 +11,6 @@ public static class Utils
         double totalMiB = (double)totalBytes / 1024 / 1024;
         int pct = totalBytes > 0 ? Math.Min(100, (int)((double)readBytes / totalBytes * 100)) : 0;
         string formattedLabel = $"{label} ({currentMiB:N0}MiB / {totalMiB:N2}MiB)";
-
         return (pct, formattedLabel, currentMiB, totalMiB);
     }
 
@@ -20,7 +19,6 @@ public static class Utils
         string processPath = Environment.ProcessPath ?? string.Empty;
         var info = FileVersionInfo.GetVersionInfo(processPath);
         DateTime buildDate = File.GetLastWriteTime(processPath);
-
         return $"{info.ProductMajorPart}.{info.ProductMinorPart}.{info.ProductPrivatePart} (Build: {buildDate:yyyy'/'MM'/'dd})";
     }
 

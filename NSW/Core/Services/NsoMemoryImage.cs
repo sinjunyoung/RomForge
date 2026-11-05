@@ -39,7 +39,6 @@ public static class NsoMemoryImage
             Array.Copy(plain, fileOff[i], image, HeaderSize + memOff[i], size[i]);
 
         byte[] patched = applyPatch(image);
-
         var newSize = new int[3];
 
         for (int i = 0; i < 3; i++)

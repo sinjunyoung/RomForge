@@ -1,7 +1,6 @@
 ﻿using NSW.HacPack.Models;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Xml.Linq;
 
 namespace NSW.HacPack.Services;
 
@@ -41,42 +40,6 @@ public static class CnmtGenerator
         return stream.ToArray();
     }
 
-    public static void ExportToXml(string xmlFilepath, CnmtContext context, ulong titleId, uint version, string digest)
-    {
-        var xml = new XElement("ContentMeta",
-            new XElement("Type", "Application"),
-            new XElement("Id", "0x" + titleId.ToString("X16")),
-            new XElement("Version", version),
-            new XElement("RequiredDownloadSystemVersion", 0),
-
-            context.ContentRecords.Take(context.ContentRecordsCount).Select(record =>
-                new XElement("Content",
-                    new XElement("Type", GetContentTypeName(record.Type)),
-                    new XElement("Id", Convert.ToHexStringLower(record.NcaId)),
-                    new XElement("IdOffset", record.IdOffset),
-                    new XElement("Size", BitConverter.ToUInt64([.. record.Size, .. new byte[2]], 0)),
-                    new XElement("Hash", Convert.ToHexStringLower(record.Hash)),
-                    new XElement("KeyGeneration", 11)
-                )
-            ),
-            new XElement("Digest", digest),
-            new XElement("KeyGenerationMin", 11),
-            new XElement("RequiredSystemVersion", 1073741824)
-        );
-
-        xml.Save(xmlFilepath);
-    }
-
-    private static string GetContentTypeName(byte type) => type switch
-    {
-        0x1 => "Program",
-        0x2 => "Data",
-        0x3 => "Control",
-        0x4 => "HtmlDocument",
-        0x5 => "LegalInformation",
-        _ => "Unknown"
-    };
-
     public static byte[] BuildAddon(NcaGenerationOptions settings, IReadOnlyList<CnmtContent> contents)
     {
         var context = CreateContext(contents);
@@ -98,6 +61,7 @@ public static class CnmtGenerator
         WriteStructure(stream, extHeader);
         WriteContentEntries(stream, context);
         stream.Write(settings.Digest, 0, 0x20);
+
         return stream.ToArray();
     }
 
@@ -109,6 +73,7 @@ public static class CnmtGenerator
         context.Header.TitleId = settings.TitleId;
         context.Header.TitleVersion = settings.TitleVersion;
         context.Header.ContentEntryCount = context.ContentRecordsCount;
+
         return Serialize(context, settings);
     }
 
@@ -120,6 +85,7 @@ public static class CnmtGenerator
         context.Header.TitleId = settings.TitleId;
         context.Header.TitleVersion = settings.TitleVersion;
         context.Header.ContentEntryCount = context.ContentRecordsCount;
+
         return Serialize(context, settings);
     }
 
@@ -130,6 +96,7 @@ public static class CnmtGenerator
         WriteStructure(stream, context.Header);
         WriteContentEntries(stream, context);
         stream.Write(settings.Digest, 0, 0x20);
+
         return stream.ToArray();
     }
 

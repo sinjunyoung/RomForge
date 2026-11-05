@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using Common.Services;
+using NSW.HacPack.IO;
 using NSW.HacPack.Models;
 using System.IO;
 

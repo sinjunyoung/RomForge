@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using Microsoft.Win32;
 using RomForge.Core;
 using RomForge.ViewModels.N3DS;

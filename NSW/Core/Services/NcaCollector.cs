@@ -15,8 +15,7 @@ using Path = System.IO.Path;
 
 namespace NSW.Core.Services;
 
-public sealed record CollectedNcas(
-    Dictionary<byte, Nca> BaseProgs, Dictionary<byte, Nca> UpdateProgs, Dictionary<byte, Nca> BaseControls, Dictionary<byte, Nca> UpdateControls, Dictionary<byte, Nca> BaseHtmls,
+public sealed record CollectedNcas(Dictionary<byte, Nca> BaseProgs, Dictionary<byte, Nca> UpdateProgs, Dictionary<byte, Nca> BaseControls, Dictionary<byte, Nca> UpdateControls, Dictionary<byte, Nca> BaseHtmls,
     Dictionary<byte, Nca> UpdateHtmls, Dictionary<byte, Nca> BaseLegals, Dictionary<byte, Nca> UpdateLegals, List<Nca> DlcNcas, uint PatchVersion, HashSet<byte> CreateOnlyOffsets);
 
 public sealed class NcaCollector(KeySet keySet)

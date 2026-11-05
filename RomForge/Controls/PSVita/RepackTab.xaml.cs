@@ -1,4 +1,4 @@
-﻿using Common;
+﻿using Common.Models;
 using Common.Services;
 using Ookii.Dialogs.Wpf;
 using RomForge.Core.ViewModels.PSVita;

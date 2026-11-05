@@ -1,7 +1,8 @@
 ﻿using NSW.HacPack.Models;
+using NSW.HacPack.Services;
 using System.IO;
 
-namespace NSW.HacPack.Services;
+namespace NSW.HacPack.IO;
 
 internal sealed class RomfsImageStream : Stream, IUnpaddedLengthSource
 {
@@ -58,9 +59,7 @@ internal sealed class RomfsImageStream : Stream, IUnpaddedLengthSource
         }
     }
 
-    public override void Flush()
-    {
-    }
+    public override void Flush() { }
 
     public override int Read(byte[] buffer, int offset, int count) => Read(buffer.AsSpan(offset, count));
 

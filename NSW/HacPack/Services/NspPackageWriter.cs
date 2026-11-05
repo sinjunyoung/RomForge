@@ -19,6 +19,8 @@ public sealed class NspPackageWriter : IDisposable
 
     private bool _completed;
 
+    public int MaxFiles { get; }
+
     public NspPackageWriter(Stream output, int maxFiles)
     {
         if (!output.CanSeek || !output.CanRead || !output.CanWrite)
@@ -39,10 +41,6 @@ public sealed class NspPackageWriter : IDisposable
 
         _output.Write(new byte[_headerSize]);
     }
-
-    public int MaxFiles { get; }
-
-    public int FileCount => _files.Count;
 
     public (string Name, byte[] Hash, long Size) AddNca(string extension, Func<Stream, (byte[] Hash, long Size)> write)
     {

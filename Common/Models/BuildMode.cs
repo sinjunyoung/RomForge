@@ -1,4 +1,4 @@
-﻿namespace Common;
+﻿namespace Common.Models;
 
 public enum BuildMode
 {
