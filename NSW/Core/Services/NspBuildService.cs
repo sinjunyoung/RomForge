@@ -44,48 +44,61 @@ public static class NspBuildService
     }
 
     private const byte ContentTypeProgram = 0x1;
-
     private const byte ContentTypeControl = 0x3;
-
     private const byte ContentTypeHtmlDoc = 0x4;
-
     private const byte ContentTypeLegal = 0x5;
 
     public static async Task<string> Run(BuildRequest req, BuildMode mode, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
-        return await RunProcess(req, mode, keySet, compressLevel, progress, log, ct);
-    }
-
-    private static async Task<string> RunProcess(BuildRequest req, BuildMode mode, KeySet keySet, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
-    {
         var dirs = new WorkDirs(req.OutputDir);
 
         if (mode == BuildMode.UnpackOnly)
+        {
             dirs.Prepare();
+            return await RunUnpackOnly(req, keySet, dirs, progress, log, ct);
+        }
 
+        return await RunFullBuild(req, mode, keySet, compressLevel, dirs, progress, log, ct);
+    }
+
+    private static async Task<string> RunUnpackOnly(BuildRequest req, KeySet keySet, WorkDirs dirs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    {
+        var sw = Stopwatch.StartNew();
+
+        log("언팩 시작", LogLevel.Highlight);
+        progress.ReportStatus("언팩 진행 중...", 0);
+
+        var unpacker = new NspUnpacker(keySet);
+        var result = await unpacker.Unpack(req, dirs.Unpacked, progress, ct);
+
+        if (req.CompressRomfs.HasValue)
+        {
+            RomfsCompression.Apply(result, req.CompressRomfs.Value);
+            log(req.CompressRomfs.Value ? "RomFS Lz4 압축: 사용" : "RomFS Lz4 압축: 사용 안 함", LogLevel.Ok);
+        }
+
+        log($"언팩 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        progress.ReportStatus("완료", 100);
+        result.ReleaseResources();
+
+        return dirs.Unpacked;
+    }
+
+    private static async Task<string> RunFullBuild(BuildRequest req, BuildMode mode, KeySet keySet, int compressLevel, WorkDirs dirs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    {
         UnpackResult unpackResult;
 
         if (mode == BuildMode.RebuildOnly)
-        {
-            log("━━ 기존 언팩 데이터 스캔 중... ━━", LogLevel.Highlight);
             unpackResult = UnpackedDirScanner.Scan(dirs.Unpacked, req.OverrideSdkVersion, req.OverrideKeyGeneration);
-
-            ApplyCompressionOverride(req, unpackResult, log);
-        }
         else
         {
-            unpackResult = await StepUnpack(req, keySet, dirs, progress, log, ct);
-
-            ApplyCompressionOverride(req, unpackResult, log);
-
-            if (mode == BuildMode.UnpackOnly)
-            {
-                log("━━ 언팩 완료 ━━", LogLevel.Ok);
-                unpackResult.ReleaseResources();
-                return dirs.Unpacked;
-            }
+            var unpacker = new NspUnpacker(keySet);
+            unpackResult = await unpacker.Unpack(req, dirs.Unpacked, progress, ct);
         }
+
+        if (req.CompressRomfs.HasValue)
+            RomfsCompression.Apply(unpackResult, req.CompressRomfs.Value);
 
         string? tempNsp = null;
         List<string> createdDirs = [];
@@ -93,7 +106,7 @@ public static class NspBuildService
 
         try
         {
-            var settingsList = StepBuildSettings(req, unpackResult, keySet, log);
+            var settingsList = StepBuildSettings(req, unpackResult, keySet);
 
             if (req.OverrideTitleId.HasValue)
             {
@@ -113,6 +126,7 @@ public static class NspBuildService
                     throw new Exception($"IdOffset {req.TargetIdOffset.Value}에 해당하는 타이틀이 없습니다.");
 
                 var s = settingsList[0];
+
                 s.TitleId += req.TargetIdOffset.Value;
                 s.IdOffset = 0;
                 unpackResult.TitleId = s.TitleId;
@@ -136,24 +150,23 @@ public static class NspBuildService
 
             int maxFiles = settingsList.Count * 4 + DlcNspBuilder.CountItems(req, unpackResult, dirs) * 2 + 1;
             var contents = settingsList.ToDictionary(s => s, _ => new TitleContents());
-
             using (var package = new NspPackageWriter(new FileStream(tempNsp, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20), maxFiles))
             {
                 foreach (var settings in settingsList)
                 {
-                    StepNpdm(settings, unpackResult, log, ct);
+                    StepNpdm(settings, unpackResult);
 
-                    contents[settings].Program = StepProgramNca(req, settings, unpackResult, compressLevel, package, progress, log, ct);
+                    contents[settings].Program = await StepProgramNcaAsync(req, settings, unpackResult, compressLevel, package, progress, log, ct);
                 }
 
-                StepManualNcas(settingsList, contents, unpackResult, compressLevel, package, progress, log, ct);
+                StepManualNcas(settingsList, contents, unpackResult, compressLevel, package);
 
                 foreach (var settings in settingsList)
-                    contents[settings].Control = StepControlNca(settings, unpackResult, compressLevel, package, progress, log, ct);
+                    contents[settings].Control = StepControlNca(settings, unpackResult, compressLevel, package);
 
                 DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, package, progress, log, ct);
-                StepMetaNca(settingsList, contents, package, progress, log, ct);
-                StepComplete(package, progress, log);
+                StepMetaNca(settingsList, contents, package, ct);
+                StepComplete(package, progress);
             }
 
             string finalNsp = StepFinalize(req, unpackResult, tempNsp, progress, log);
@@ -173,36 +186,36 @@ public static class NspBuildService
         }
     }
 
-    private static void ApplyCompressionOverride(BuildRequest req, UnpackResult unpackResult, Action<string, LogLevel> log)
+    private static async Task<CnmtContent> StepProgramNcaAsync(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
     {
-        if (!req.CompressRomfs.HasValue)
-            return;
+        ct.ThrowIfCancellationRequested();
 
-        RomfsCompression.Apply(unpackResult, req.CompressRomfs.Value);
-        log(req.CompressRomfs.Value ? "RomFS Lz4 압축: 사용" : "RomFS Lz4 압축: 사용 안 함", LogLevel.Ok);
-    }
-
-    private static async Task<UnpackResult> StepUnpack(BuildRequest req, KeySet libHacKeySet, WorkDirs dirs, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
-    {
         var sw = Stopwatch.StartNew();
 
-        log("━━ 1단계(1/9): 언패킹 ━━", LogLevel.Highlight);
-        progress.ReportStatus("언패킹 중...", 0);
+        log($"프로그램 빌드 시작 (IdOffset={settings.IdOffset})", LogLevel.Highlight);
+        progress.ReportStatus("프로그램 빌드 중...", 0);
 
-        var unpacker = new NspUnpacker(libHacKeySet);
-        var result = await unpacker.Unpack(req, dirs.Unpacked, progress, ct);
+        if (req.HasPatch)
+            NspPatchApplier.ApplyPatch(req.PatchDir, unpackResult, settings.SourceIdOffset, progress, log, req.PatchPassword);
 
-        log($"언패킹 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts))
+        {
+            settings.ExefsFiles = parts.Exefs?.ReadTopLevelFiles();
+            settings.LogoFiles = parts.Logo?.ReadTopLevelFiles();
+        }
 
-        return result;
+        settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
+
+        var (name, hash, size) = await Task.Run(() =>
+            package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct)), ct);
+
+        log($"프로그램 빌드 완료: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+
+        return new CnmtContent(ContentTypeProgram, settings.IdOffset, hash, size);
     }
 
-    private static List<NcaGenerationOptions> StepBuildSettings(BuildRequest req, UnpackResult result, KeySet keySet, Action<string, LogLevel> log)
+    private static List<NcaGenerationOptions> StepBuildSettings(BuildRequest req, UnpackResult result, KeySet keySet)
     {
-        var sw = Stopwatch.StartNew();
-
-        log("━━ 2단계(2/9): 설정 초기화 ━━", LogLevel.Highlight);
-
         byte keyGeneration = result.BaseKeyGeneration == 0 ? (byte)1 : result.BaseKeyGeneration;
         int keygenIdx = keyGeneration - 1;
 
@@ -247,61 +260,19 @@ public static class NspBuildService
             settingsList.Add(settings);
         }
 
-        var first = settingsList[0];
-
-        log($"TitleId: {first.TitleId:x16}  KeyGen: {first.KeyGeneration}  SDK: {first.SdkVersionString}", LogLevel.Ok);
-        log($"설정 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
-
         return settingsList;
     }
 
-    private static void StepNpdm(NcaGenerationOptions settings, UnpackResult unpackResult, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepNpdm(NcaGenerationOptions settings, UnpackResult unpackResult)
     {
-        ct.ThrowIfCancellationRequested();
-
-        var sw = Stopwatch.StartNew();
-
-        log($"━━ 3단계(3/9): NPDM 처리 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
-
         if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts) && parts.Exefs != null)
             NpdmProcessor.PatchNpdmMetadata(settings, parts.Exefs);
         else
             NpdmProcessor.PatchNpdmMetadata(settings);
-
-        log($"NPDM 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static CnmtContent StepProgramNca(BuildRequest req, NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, UnpackResult unpackResult, int compressLevel, NspPackageWriter package)
     {
-        ct.ThrowIfCancellationRequested();
-
-        var sw = Stopwatch.StartNew();
-
-        log($"━━ 4단계(4/9): Program NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
-        progress.ReportStatus("Program NCA 생성 중...", 0);
-
-        if (req.HasPatch)
-            NspPatchApplier.ApplyPatch(req.PatchDir, unpackResult, settings.SourceIdOffset, progress, log, req.PatchPassword);
-
-        if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts))
-        {
-            settings.ExefsFiles = parts.Exefs?.ReadTopLevelFiles();
-            settings.LogoFiles = parts.Logo?.ReadTopLevelFiles();
-        }
-
-        settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
-
-        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct));
-
-        log($"Program NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
-
-        return new CnmtContent(ContentTypeProgram, settings.IdOffset, hash, size);
-    }
-
-    private static void StepManualNcas(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
-    {
-        log("━━ 5단계(5/9): Manual NCA 생성 ━━", LogLevel.Highlight);
-
         foreach (var (idOffset, source) in ManualSources(unpackResult, p => p.HtmlDoc, unpackResult.HtmlDocDirs))
         {
             var settings = settingsList.FirstOrDefault(s => s.SourceIdOffset == idOffset);
@@ -309,9 +280,7 @@ public static class NspBuildService
             if (settings == null)
                 continue;
 
-            string type = idOffset == 0 ? "htmldoc" : $"htmldoc{idOffset}";
-
-            contents[settings].HtmlDoc = BuildManualNca(settings, source, type, ContentTypeHtmlDoc, compressLevel, package, progress, log, ct);
+            contents[settings].HtmlDoc = BuildManualNca(settings, source, ContentTypeHtmlDoc, compressLevel, package);
         }
 
         foreach (var (idOffset, source) in ManualSources(unpackResult, p => p.Legal, unpackResult.LegalDirs))
@@ -321,9 +290,7 @@ public static class NspBuildService
             if (settings == null)
                 continue;
 
-            string type = idOffset == 0 ? "legal" : $"legal{idOffset}";
-
-            contents[settings].Legal = BuildManualNca(settings, source, type, ContentTypeLegal, compressLevel, package, progress, log, ct);
+            contents[settings].Legal = BuildManualNca(settings, source, ContentTypeLegal, compressLevel, package);
         }
     }
 
@@ -346,25 +313,15 @@ public static class NspBuildService
 
     private static bool HasEntries(string dir) => Directory.Exists(dir) && Directory.GetFileSystemEntries(dir).Length > 0;
 
-    private static CnmtContent BuildManualNca(NcaGenerationOptions settings, ManualSource source, string type, byte contentType, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static CnmtContent BuildManualNca(NcaGenerationOptions settings, ManualSource source, byte contentType, int compressLevel, NspPackageWriter package)
     {
         var manualSettings = settings.WithRomfs(source.Dir, LibHac.FsSystem.NcaHeader.ContentType.Manual, source.Opener);
-        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, manualSettings, compressLevel, null, progress, ct));
-
-        log($"[{type}] NCA 등록: {name}", LogLevel.Ok);
-
+        var (_, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, manualSettings, compressLevel, null, null, default));
         return new CnmtContent(contentType, settings.IdOffset, hash, size);
     }
 
-    private static CnmtContent? StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static CnmtContent? StepControlNca(NcaGenerationOptions settings, UnpackResult unpackResult, int compressLevel, NspPackageWriter package)
     {
-        ct.ThrowIfCancellationRequested();
-
-        var sw = Stopwatch.StartNew();
-
-        log($"━━ 6단계(6/9): Control NCA 생성 (IdOffset={settings.IdOffset}) ━━", LogLevel.Highlight);
-        progress.ReportStatus("Control NCA 생성 중...", 0);
-
         NcaGenerationOptions controlSettings;
 
         if (unpackResult.VirtualParts.TryGetValue(settings.SourceIdOffset, out var parts) && parts.Control != null)
@@ -382,22 +339,13 @@ public static class NspBuildService
         else
             return null;
 
-        var (name, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, controlSettings, compressLevel, null, progress, ct));
-
-        log($"Control NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        var (_, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, controlSettings, compressLevel, null, null, default));
 
         return new CnmtContent(ContentTypeControl, settings.IdOffset, hash, size);
     }
 
-    private static void StepMetaNca(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct)
+    private static void StepMetaNca(List<NcaGenerationOptions> settingsList, Dictionary<NcaGenerationOptions, TitleContents> contents, NspPackageWriter package, CancellationToken ct)
     {
-        ct.ThrowIfCancellationRequested();
-
-        var sw = Stopwatch.StartNew();
-
-        log("━━ 8단계(8/9): Meta NCA 생성 ━━", LogLevel.Highlight);
-        progress.ReportStatus("Meta NCA 생성 중...", -1);
-
         var baseSettings = settingsList.First(s => s.IdOffset == 0);
         var records = new List<CnmtContent>();
 
@@ -405,14 +353,12 @@ public static class NspBuildService
             records.AddRange(contents[settings].Ordered());
 
         byte[] cnmt = CnmtGenerator.Build(baseSettings, records);
-        var (name, _, _) = package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, baseSettings, cnmt, ct));
+        package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, baseSettings, cnmt, ct));
 
-        log($"Meta NCA: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
     }
 
-    private static void StepComplete(NspPackageWriter package, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
+    private static void StepComplete(NspPackageWriter package, IProgress<ProgressInfo> progress)
     {
-        log("━━ 9단계(9/9): NSP 마무리 ━━", LogLevel.Highlight);
         progress.ReportStatus("NSP 마무리 중...", 0);
         package.Complete();
     }
@@ -425,7 +371,6 @@ public static class NspBuildService
         string finalNsp = Common.Services.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));
 
         File.Move(tempNsp, finalNsp);
-
         progress.ReportStatus("완료", 100);
         log($"출력: {finalNsp}", LogLevel.Ok);
 
@@ -463,13 +408,12 @@ public static class NspBuildService
 
     private static void DeleteIfExists(string? path)
     {
-        if (string.IsNullOrEmpty(path))
+        if (string.IsNullOrEmpty(path)) 
             return;
 
         try
         {
-            if (File.Exists(path))
-                File.Delete(path);
+            if (File.Exists(path)) File.Delete(path);
         }
         catch (Exception ex)
         {

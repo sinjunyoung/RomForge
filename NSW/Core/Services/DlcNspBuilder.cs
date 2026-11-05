@@ -24,8 +24,6 @@ public static class DlcNspBuilder
 
         var sw = Stopwatch.StartNew();
 
-        log("━━ 7단계(7/9): DLC 빌드 시작 ━━", LogLevel.Info);
-
         int dlcCount = 0;
 
         foreach (var item in items)
@@ -49,7 +47,7 @@ public static class DlcNspBuilder
             bool hasRomfs = item.RomfsOpener != null || (Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any());
             bool compressRomfs = req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : item.RomfsOpener != null ? item.SourceCompressed : File.Exists(Path.Combine(item.DlcDir, RomfsCompression.FlagFileName));
 
-            log($"DLC 빌드 시도: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Info);
+            log($"DLC 빌드 시작: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Highlight);
 
             var dlcSettings = new NcaGenerationOptions
             {
