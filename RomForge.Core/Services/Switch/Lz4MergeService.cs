@@ -12,6 +12,8 @@ public static class Lz4MergeService
 {
     private sealed record Routing(List<MergePlan> Plans, List<string> Individuals, List<(string Path, string Reason, LogLevel Level)> Skipped);
 
+    private sealed record Job(MergePlan? Plan, string? File, int Order);
+
     public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory,
         Action<IReadOnlyList<string>, bool> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
@@ -28,7 +30,21 @@ public static class Lz4MergeService
                 failed++;
         }
 
-        int total = routing.Plans.Count + routing.Individuals.Count;
+        var order = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        for (int i = 0; i < inputPaths.Count; i++)
+        {
+            if (!string.IsNullOrEmpty(inputPaths[i]))
+                order.TryAdd(inputPaths[i], i);
+        }
+
+        var jobs = routing.Plans
+            .Select(p => new Job(p, null, p.AllPaths.Min(path => order[path])))
+            .Concat(routing.Individuals.Select(f => new Job(null, f, order[f])))
+            .OrderBy(j => j.Order)
+            .ToList();
+
+        int total = jobs.Count;
 
         if (total == 0)
         {
@@ -39,26 +55,40 @@ public static class Lz4MergeService
         Directory.CreateDirectory(outputDir);
         jobsPlanned(total);
 
+        Action<string, LogLevel> quietLog = (message, level) =>
+        {
+            if (level is LogLevel.Warning or LogLevel.Error)
+                log(message, level);
+        };
+
         int index = 0;
 
-        foreach (var plan in routing.Plans)
+        foreach (var job in jobs)
         {
             ct.ThrowIfCancellationRequested();
 
             index++;
 
-            IReadOnlyList<string> jobPaths = plan.AllPaths;
+            bool isBuild = job.Plan != null;
+            IReadOnlyList<string> jobPaths = isBuild ? job.Plan!.AllPaths : new[] { job.File! };
 
-            log($"━━ [{index}/{total}] {DisplayName(plan.Base.Meta)} ({plan.BaseTitleId}) 본편 Lz4 압축 ━━", LogLevel.Highlight);
-            log($"구성: 본편 1, 업데이트 {(plan.Update != null ? 1 : 0)}, DLC {plan.Dlcs.Count}", LogLevel.Ok);
+            if (job.Plan != null)
+            {
+                log($"━━ [{index}/{total}] {DisplayName(job.Plan.Base.Meta)} ({job.Plan.BaseTitleId}) 본편 Lz4 압축 ━━", LogLevel.Highlight);
+                log($"구성: 본편 1, 업데이트 {(job.Plan.Update != null ? 1 : 0)}, DLC {job.Plan.Dlcs.Count}", LogLevel.Ok);
+            }
+            else
+                log($"━━ [{index}/{total}] {Path.GetFileName(job.File!)} ━━", LogLevel.Highlight);
 
             try
             {
-                string path = await NspBuildService.Run(CreateRequest(plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), log, ct);
+                string path = job.Plan != null
+                    ? await NspBuildService.Run(CreateRequest(job.Plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), quietLog, ct)
+                    : await NspLz4Service.CompressAsync(job.File!, outputDir, compressLevel, progressFactory(jobPaths, false), (message, level, _) => quietLog(message, level), ct);
 
                 results.Add(path);
                 jobFinished(jobPaths, true);
-                log($"출력: {path}", LogLevel.Ok);
+                log($"완료: {Path.GetFileName(path)}", LogLevel.Ok);
             }
             catch (OperationCanceledException)
             {
@@ -73,38 +103,9 @@ public static class Lz4MergeService
             }
         }
 
-        foreach (var file in routing.Individuals)
-        {
-            ct.ThrowIfCancellationRequested();
+        if (failed > 0)
+            log($"실패 {failed}개", LogLevel.Error);
 
-            index++;
-
-            IReadOnlyList<string> jobPaths = [file];
-
-            log($"━━ [{index}/{total}] {Path.GetFileName(file)} ━━", LogLevel.Highlight);
-
-            try
-            {
-                string path = await NspLz4Service.CompressAsync(file, outputDir, compressLevel, progressFactory(jobPaths, false), (message, level, _) => log(message, level), ct);
-
-                results.Add(path);
-                jobFinished(jobPaths, true);
-                log($"출력: {path}", LogLevel.Ok);
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                failed++;
-
-                jobFinished(jobPaths, false);
-                log($"실패: {ex.Message}", LogLevel.Error);
-            }
-        }
-
-        log($"완료: 성공 {results.Count}개, 실패 {failed}개", failed == 0 ? LogLevel.Ok : LogLevel.Error);
         return results;
     }
 

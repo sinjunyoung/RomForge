@@ -67,7 +67,6 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 if (results.Count > 0)
                 {
                     AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
-                    AppendLog(Res.Main_Msg_Done);
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
                 }

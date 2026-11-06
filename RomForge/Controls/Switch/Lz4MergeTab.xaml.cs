@@ -59,7 +59,9 @@ public partial class Lz4MergeTab : UserControl
         if (fileMgr.GameFiles.Any(f => f.IsKeyMissing))
             await RecalcKeyMissingAsync();
 
-        await ViewModel.StartAsync(fileMgr.GameFiles);
+        var orderedFiles = System.Windows.Data.CollectionViewSource.GetDefaultView(fileMgr.GameFiles).OfType<RomForge.Core.ViewModels.Switch.GameFile>().ToList();
+
+        await ViewModel.StartAsync(orderedFiles);
     }
 
     private Task RecalcKeyMissingAsync()
