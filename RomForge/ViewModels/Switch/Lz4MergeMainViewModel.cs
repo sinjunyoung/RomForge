@@ -1,6 +1,5 @@
 ﻿using Common.Models;
 using Common.Services;
-using NSW.Core;
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
@@ -10,12 +9,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Shell;
 using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
-public class Lz4MergeMainViewModel : ProgressToolTabViewModel
+public class Lz4MergeMainViewModel : BatchToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
@@ -42,6 +40,9 @@ public class Lz4MergeMainViewModel : ProgressToolTabViewModel
 
         _totalSw.Restart();
 
+        bool canceled = false;
+        bool failed = false;
+
         using (BeginWork())
         {
             try
@@ -55,16 +56,18 @@ public class Lz4MergeMainViewModel : ProgressToolTabViewModel
                     .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
                 foreach (var file in gameFiles)
+                {
                     file.Progress = 0;
+                    file.Status = "대기중";
+                }
 
-                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, paths => CreateJobProgress(rowsByPath, paths), (paths, success) => FinishJob(rowsByPath, paths, success),
+                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, paths => CreateJobProgress(rowsByPath, paths), (paths, success) => FinishJob(rowsByPath, paths, success),
                     (msg, level) => AppendLog(msg, level), token), token);
 
                 if (results.Count > 0)
                 {
                     AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     AppendLog(Res.Main_Msg_Done);
-                    MainViewModel.SetTaskbarProgress(100);
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
                 }
@@ -75,51 +78,79 @@ public class Lz4MergeMainViewModel : ProgressToolTabViewModel
             }
             catch (OperationCanceledException)
             {
+                canceled = true;
+
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
 
-                foreach (var file in gameFiles.Where(f => f.Progress < 100))
+                foreach (var file in gameFiles.Where(f => f.Status != "완료" && f.Status != "실패"))
+                {
+                    file.Status = "취소";
                     file.Progress = 0;
+                }
 
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
+                failed = true;
+
                 AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {
-                CleanupTask();
+                EndBatch(canceled, failed);
             }
         }
     }
 
-    private static Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)
+    private Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)
     {
         var rows = SelectRows(rowsByPath, paths);
+        var jobProgress = new Lz4JobProgress();
 
-        return Application.Current.Dispatcher.Invoke(() => new Progress<ProgressInfo>(info =>
+        BatchItemStarted(paths);
+
+        return Application.Current.Dispatcher.Invoke(() =>
         {
             foreach (var row in rows)
-                row.Progress = info.Percent;
+            {
+                row.Progress = 0;
+                row.Status = "준비 중";
+            }
 
-            MainViewModel.SetTaskbarProgress(info.Percent);
-        }));
+            return new Progress<ProgressInfo>(info =>
+            {
+                if (info.Percent < 0)
+                    return;
+
+                foreach (var row in rows)
+                {
+                    row.Progress = info.Percent;
+
+                    if (!string.IsNullOrEmpty(info.Label))
+                        row.Status = info.Label;
+                }
+
+                BatchItemProgress(paths, jobProgress.Combine(info.Percent));
+            });
+        });
     }
 
-    private static void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool success)
+    private void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool success)
     {
         var rows = SelectRows(rowsByPath, paths);
 
         Application.Current.Dispatcher.InvokeAsync(() =>
         {
             foreach (var row in rows)
+            {
                 row.Progress = success ? 100 : 0;
-
-            if (!success)
-                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+                row.Status = success ? "완료" : "실패";
+            }
         });
+
+        BatchItemCompleted(paths, success);
     }
 
     private static List<GameFile> SelectRows(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)

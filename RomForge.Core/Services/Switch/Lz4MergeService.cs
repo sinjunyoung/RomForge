@@ -12,8 +12,8 @@ public static class Lz4MergeService
 {
     private sealed record Routing(List<MergePlan> Plans, List<string> Individuals, List<(string Path, string Reason, LogLevel Level)> Skipped);
 
-    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Func<IReadOnlyList<string>, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, bool> jobFinished,
-        Action<string, LogLevel> log, CancellationToken ct = default)
+    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, IProgress<ProgressInfo>> progressFactory,
+        Action<IReadOnlyList<string>, bool> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var routing = BuildRouting(keySet, inputPaths, ct);
@@ -37,6 +37,7 @@ public static class Lz4MergeService
         }
 
         Directory.CreateDirectory(outputDir);
+        jobsPlanned(total);
 
         int index = 0;
 

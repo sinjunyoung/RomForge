@@ -275,7 +275,7 @@ public static class NcaGenerator
         var window = new OffsetStream(output, start);
         var metaFiles = new List<(string Name, byte[] Data)> { ($"{GetCnmtPrefix(settings.TitleType)}_{settings.TitleId:x16}.cnmt", cnmt) };
 
-        WriteMetaNca(window, settings, metaFiles, null, ct);
+        WriteMetaNca(window, settings, metaFiles, ct);
 
         long size = window.Length;
         byte[] hash = HashRegion(output, start, size, null, ct);
@@ -285,7 +285,7 @@ public static class NcaGenerator
         return (hash, size);
     }
 
-    private static void WriteMetaNca(Stream ncaFile, NcaGenerationOptions baseSettings, List<(string Name, byte[] Data)> metaFiles, IProgress<ProgressInfo>? progress, CancellationToken ct)
+    private static void WriteMetaNca(Stream ncaFile, NcaGenerationOptions baseSettings, List<(string Name, byte[] Data)> metaFiles, CancellationToken ct)
     {
         var ncaHeader = new NcaHeader();
 
