@@ -7,6 +7,7 @@ using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.Core.Utils;
+using RomForge.Core.Models.Switch;
 using System.IO;
 using Path = System.IO.Path;
 using Res = NSW.Properties.Resources;
@@ -52,8 +53,8 @@ public static class NspLz4Service
 
     internal static async Task<string> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
-        if (!string.Equals(Path.GetExtension(inputPath), ".nsp", StringComparison.OrdinalIgnoreCase))
-            throw new NotSupportedException("NSP 파일만 지원합니다.");
+        if (!SwitchFileTypes.Extensions.Contains(Path.GetExtension(inputPath)))
+            throw new NotSupportedException("NSP, NSZ, XCI, XCZ 파일만 지원합니다.");
 
         var disposables = new List<IDisposable>();
         string? finalPath = null;
@@ -66,7 +67,7 @@ public static class NspLz4Service
             var metas = allMetas.Where(m => m.Type is ContentMetaType.Application or ContentMetaType.AddOnContent).ToList();
 
             if (metas.Count == 0)
-                throw new InvalidOperationException("Application(본편) 또는 DLC 메타데이터를 찾을 수 없습니다. 업데이트 NSP는 지원하지 않습니다.");
+                throw new InvalidOperationException("Application(본편) 또는 DLC 메타데이터를 찾을 수 없습니다. 업데이트는 지원하지 않습니다.");
 
             var primary = metas.FirstOrDefault(m => m.Type == ContentMetaType.Application) ?? metas[0];
 
@@ -74,7 +75,11 @@ public static class NspLz4Service
 
             var source = new SourceSet([inputPath]);
             var sourceFs = source.Open(keySet, inputPath, disposables);
-            var entryPaths = sourceFs.EnumerateEntries("/", "*").ToDictionary(e => e.Name.ToString(), e => e.FullPath, StringComparer.OrdinalIgnoreCase);
+            var entryPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in sourceFs.EnumerateEntries("/", "*"))
+                entryPaths[NormalizeName(entry.Name.ToString())] = entry.FullPath;
+
             var jobs = new List<MetaJob>();
 
             foreach (var meta in metas)
@@ -101,7 +106,7 @@ public static class NspLz4Service
             finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_lz4.nsp"));
 
             string label = primary.KrTitle ?? primary.EnTitle;
-            var replaced = new HashSet<string>(jobs.SelectMany(j => j.Targets.Select(t => t.EntryName).Append(j.Meta.FileName)), StringComparer.OrdinalIgnoreCase);
+            var replaced = new HashSet<string>(jobs.SelectMany(j => j.Targets.Select(t => t.EntryName).Append(NormalizeName(j.Meta.FileName))), StringComparer.OrdinalIgnoreCase);
             var converters = new Dictionary<string, NcaToNczConverter>(StringComparer.OrdinalIgnoreCase);
             var fileEntries = new List<FileEntry>();
 
@@ -109,7 +114,7 @@ public static class NspLz4Service
             {
                 string entryName = entry.Name.ToString();
 
-                if (replaced.Contains(entryName))
+                if (replaced.Contains(NormalizeName(entryName)))
                     continue;
 
                 string entryExt = Path.GetExtension(entryName).ToLowerInvariant();
@@ -169,12 +174,16 @@ public static class NspLz4Service
         }
     }
 
+    private static string NormalizeName(string name) => name.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase) ? Path.ChangeExtension(name, ".nca") : name;
+
+    private static Nca OpenNca(KeySet keySet, LibHac.Fs.IStorage storage, string entryPath) => entryPath.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase) ? new Ncz(keySet, storage, NczReadMode.Fast) : new Nca(keySet, storage);
+
     private static MetaJob LoadJob(KeySet keySet, MetadataResult meta, Dictionary<string, string> entryPaths, LibHac.Fs.Fsa.IFileSystem sourceFs, List<IDisposable> disposables, Action<string, LogLevel, string>? log)
     {
-        if (!entryPaths.TryGetValue(meta.FileName, out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
+        if (!entryPaths.TryGetValue(NormalizeName(meta.FileName), out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
             throw new InvalidOperationException($"Meta NCA를 찾을 수 없습니다: {meta.FileName}");
 
-        var metaNca = new Nca(keySet, metaOpened.Storage);
+        var metaNca = OpenNca(keySet, metaOpened.Storage, metaEntryPath);
         byte[] cnmt = Lz4MetaNcaBuilder.ReadCnmt(metaNca);
         var job = new MetaJob(meta, metaNca, cnmt, BitConverter.ToUInt64(cnmt, 0));
         byte recordType = meta.Type == ContentMetaType.Application ? CnmtRecordPatcher.ProgramType : CnmtRecordPatcher.DataType;
@@ -189,7 +198,7 @@ public static class NspLz4Service
                 continue;
             }
 
-            var nca = new Nca(keySet, opened.Storage);
+            var nca = OpenNca(keySet, opened.Storage, entryPath);
 
             if (!nca.CanOpenSection(NcaSectionType.Data))
             {
@@ -233,12 +242,9 @@ public static class NspLz4Service
             fileEntries.Add((placeholder, (output, onRead) =>
             {
                 ct.ThrowIfCancellationRequested();
-
                 log?.Invoke($"{kind} NCA Lz4 압축 중 ({number}/{total}, {job.Meta.TitleId})", LogLevel.Highlight, job.Meta.TitleId);
 
-                var (NcaId, Hash, Size) = isApplication
-                    ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct)
-                    : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
+                var (NcaId, Hash, Size) = isApplication ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct) : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
 
                 built.NcaId = NcaId;
                 built.Hash = Hash;

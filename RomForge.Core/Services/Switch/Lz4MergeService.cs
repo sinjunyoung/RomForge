@@ -2,6 +2,7 @@
 using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
+using NSW.Core.Services;
 using RomForge.Core.Models.Switch;
 using System.IO;
 
@@ -9,7 +10,7 @@ namespace RomForge.Core.Services.Switch;
 
 public static class Lz4MergeService
 {
-    private sealed record Routing(List<MergePlan> Plans, List<string> Individuals, List<(string Path, string Reason, bool IsError)> Skipped);
+    private sealed record Routing(List<MergePlan> Plans, List<string> Individuals, List<(string Path, string Reason, LogLevel Level)> Skipped);
 
     public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
@@ -18,11 +19,11 @@ public static class Lz4MergeService
         var results = new List<string>();
         int failed = 0;
 
-        foreach (var (path, reason, isError) in routing.Skipped)
+        foreach (var (path, reason, level) in routing.Skipped)
         {
-            log($"{Path.GetFileName(path)}: {reason}", isError ? LogLevel.Error : LogLevel.Info);
+            log($"{Path.GetFileName(path)}: {reason}", level);
 
-            if (isError)
+            if (level == LogLevel.Error)
                 failed++;
         }
 
@@ -44,12 +45,12 @@ public static class Lz4MergeService
 
             index++;
 
-            log($"━━ [{index}/{total}] {DisplayName(plan.Base.Meta)} ({plan.BaseTitleId}) 본편+업데이트 병합 ━━", LogLevel.Highlight);
-            log($"구성: 본편 1, 업데이트 1, DLC {plan.Dlcs.Count}", LogLevel.Ok);
+            log($"━━ [{index}/{total}] {DisplayName(plan.Base.Meta)} ({plan.BaseTitleId}) 본편 Lz4 압축 ━━", LogLevel.Highlight);
+            log($"구성: 본편 1, 업데이트 {(plan.Update != null ? 1 : 0)}, DLC {plan.Dlcs.Count}", LogLevel.Ok);
 
             try
             {
-                string path = await MergedTitleWriter.WriteAsync(keySet.Clone(), plan, outputDir, compressLevel, progress, log, ct);
+                string path = await NspBuildService.Run(CreateRequest(plan, outputDir), BuildMode.FullProcess, compressLevel, progress, log, ct);
 
                 results.Add(path);
                 log($"출력: {path}", LogLevel.Ok);
@@ -97,6 +98,28 @@ public static class Lz4MergeService
         return results;
     }
 
+    private static NSW.Core.Models.BuildRequest CreateRequest(MergePlan plan, string outputDir)
+    {
+        string basePath = plan.Base.Path;
+        string updatePath = plan.Update != null && !plan.Update.Path.Equals(basePath, StringComparison.OrdinalIgnoreCase) ? plan.Update.Path : string.Empty;
+        var dlcPaths = plan.Dlcs.Select(d => d.Path).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        bool hasIntegratedDlc = dlcPaths.Any(p => p.Equals(basePath, StringComparison.OrdinalIgnoreCase) || (updatePath.Length > 0 && p.Equals(updatePath, StringComparison.OrdinalIgnoreCase)));
+        Dictionary<string, HashSet<string>>? dlcTitleIds = hasIntegratedDlc
+            ? null
+            : plan.Dlcs
+                .GroupBy(d => d.Path, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.Select(d => d.Meta.TitleId).ToHashSet(StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase);
+        var dlcCompress = plan.Dlcs.ToDictionary(d => d.Meta.TitleId, _ => true, StringComparer.OrdinalIgnoreCase);
+
+        return new NSW.Core.Models.BuildRequest(basePath, updatePath, dlcPaths, string.Empty, outputDir)
+        {
+            DlcTitleIdsByFile = dlcTitleIds,
+            CompressRomfs = true,
+            DlcCompressRomfs = dlcCompress,
+            StreamRomfs = true
+        };
+    }
+
     private static Routing BuildRouting(LibHac.Common.Keys.KeySet keySet, IReadOnlyList<string> inputPaths, CancellationToken ct)
     {
         var paths = inputPaths.Where(p => !string.IsNullOrEmpty(p) && File.Exists(p)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
@@ -111,25 +134,16 @@ public static class Lz4MergeService
         }
 
         var plans = new List<MergePlan>();
-        var merged = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var skipped = new Dictionary<string, (string Reason, bool IsError)>(StringComparer.OrdinalIgnoreCase);
+        var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var group in entries.GroupBy(e => LibHacHelper.GetBaseTitleId(e.Meta.TitleId), StringComparer.OrdinalIgnoreCase).Where(g => !string.IsNullOrEmpty(g.Key)))
         {
             var baseEntry = group.Where(e => e.Meta.Type == ContentMetaType.Application).OrderByDescending(e => e.Meta.TitleVersion).FirstOrDefault();
-            var updateEntry = group.Where(e => e.Meta.Type == ContentMetaType.Patch).OrderByDescending(e => e.Meta.TitleVersion).FirstOrDefault();
-
-            if (updateEntry == null)
-                continue;
 
             if (baseEntry == null)
-            {
-                foreach (var file in group.Where(e => e.Meta.Type == ContentMetaType.Patch).Select(e => e.Path).Distinct(StringComparer.OrdinalIgnoreCase))
-                    skipped[file] = ("업데이트는 단독으로 압축할 수 없습니다. 본편 NSP를 함께 추가하세요.", true);
-
                 continue;
-            }
 
+            var updateEntry = group.Where(e => e.Meta.Type == ContentMetaType.Patch).OrderByDescending(e => e.Meta.TitleVersion).FirstOrDefault();
             var dlcEntries = group
                 .Where(e => e.Meta.Type == ContentMetaType.AddOnContent)
                 .GroupBy(e => e.Meta.TitleId, StringComparer.OrdinalIgnoreCase)
@@ -140,20 +154,32 @@ public static class Lz4MergeService
             plans.Add(plan);
 
             foreach (var path in plan.AllPaths)
-                merged.Add(path);
+                used.Add(path);
         }
 
-        foreach (var entry in entries)
+        var individuals = new List<string>();
+        var skipped = new List<(string Path, string Reason, LogLevel Level)>();
+
+        foreach (var path in paths.Where(p => !used.Contains(p)))
         {
-            if (merged.Contains(entry.Path) || skipped.ContainsKey(entry.Path))
-                continue;
+            var metas = entries.Where(e => e.Path.Equals(path, StringComparison.OrdinalIgnoreCase)).Select(e => e.Meta).ToList();
 
-            if (plans.Any(p => p.BaseTitleId.Equals(LibHacHelper.GetBaseTitleId(entry.Meta.TitleId), StringComparison.OrdinalIgnoreCase)))
-                skipped[entry.Path] = ("병합에 사용되지 않는 이전 버전 파일이라 건너뜁니다.", false);
+            if (metas.Any(m => plans.Any(p => p.BaseTitleId.Equals(LibHacHelper.GetBaseTitleId(m.TitleId), StringComparison.OrdinalIgnoreCase))))
+            {
+                skipped.Add((path, "압축에 사용되지 않는 이전 버전 파일이라 건너뜁니다.", LogLevel.Info));
+                continue;
+            }
+
+            if (metas.Any(m => m.Type == ContentMetaType.Patch))
+            {
+                skipped.Add((path, "업데이트는 단독으로 Lz4 압축할 수 없어 건너뜁니다. 본편 NSP를 함께 추가하면 본편과 함께 압축됩니다.", LogLevel.Warning));
+                continue;
+            }
+
+            individuals.Add(path);
         }
 
-        var individuals = paths.Where(p => !merged.Contains(p) && !skipped.ContainsKey(p)).ToList();
-        return new Routing(plans, individuals, [.. skipped.Select(s => (s.Key, s.Value.Reason, s.Value.IsError))]);
+        return new Routing(plans, individuals, skipped);
     }
 
     private static string DisplayName(MetadataResult meta) => !string.IsNullOrWhiteSpace(meta.KrTitle) ? meta.KrTitle : !string.IsNullOrWhiteSpace(meta.EnTitle) ? meta.EnTitle : meta.TitleId;

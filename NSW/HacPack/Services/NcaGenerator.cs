@@ -147,7 +147,6 @@ public static class NcaGenerator
         NcaHeaderService.InitHeader(ref ncaHeader);
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
         ct.ThrowIfCancellationRequested();
-        progress.ReportStatus("ExeFS 빌드 중...", 0);
 
         using var exefsStream = new MemoryStream(10 * 1024 * 1024);
         using var exefsHashStream = new MemoryStream();
@@ -293,7 +292,6 @@ public static class NcaGenerator
         NcaHeaderService.InitHeader(ref ncaHeader);
         NcaStructHelper.WriteStruct(ncaFile, ncaHeader);
         ct.ThrowIfCancellationRequested();
-        progress.ReportStatus("Meta NCA 생성 중...", 0);
 
         const uint metaBlockSize = Pfs0Builder.MetaHashBlockSize;
         using var metaPfs0Stream = new MemoryStream();
