@@ -12,7 +12,7 @@ public static class Lz4MergeService
 {
     private sealed record Routing(List<MergePlan> Plans, List<string> Individuals, List<(string Path, string Reason, LogLevel Level)> Skipped);
 
-    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, IProgress<ProgressInfo>> progressFactory,
+    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory,
         Action<IReadOnlyList<string>, bool> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
@@ -54,7 +54,7 @@ public static class Lz4MergeService
 
             try
             {
-                string path = await NspBuildService.Run(CreateRequest(plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths), log, ct);
+                string path = await NspBuildService.Run(CreateRequest(plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), log, ct);
 
                 results.Add(path);
                 jobFinished(jobPaths, true);
@@ -85,7 +85,7 @@ public static class Lz4MergeService
 
             try
             {
-                string path = await NspLz4Service.CompressAsync(file, outputDir, compressLevel, progressFactory(jobPaths), (message, level, _) => log(message, level), ct);
+                string path = await NspLz4Service.CompressAsync(file, outputDir, compressLevel, progressFactory(jobPaths, false), (message, level, _) => log(message, level), ct);
 
                 results.Add(path);
                 jobFinished(jobPaths, true);

@@ -61,7 +61,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     file.Status = "대기중";
                 }
 
-                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, paths => CreateJobProgress(rowsByPath, paths), (paths, success) => FinishJob(rowsByPath, paths, success),
+                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild), (paths, success) => FinishJob(rowsByPath, paths, success),
                     (msg, level) => AppendLog(msg, level), token), token);
 
                 if (results.Count > 0)
@@ -72,9 +72,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     outputDir.OpenFolder();
                 }
                 else
-                {
                     await SoundPlayer.PlayErrorAsync();
-                }
             }
             catch (OperationCanceledException)
             {
@@ -104,10 +102,10 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
         }
     }
 
-    private Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)
+    private Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool isBuild)
     {
         var rows = SelectRows(rowsByPath, paths);
-        var jobProgress = new Lz4JobProgress();
+        var jobProgress = new Lz4JobProgress(isBuild);
 
         BatchItemStarted(paths);
 
@@ -124,15 +122,15 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 if (info.Percent < 0)
                     return;
 
+                int overall = jobProgress.Combine(info.Percent);
+
                 foreach (var row in rows)
                 {
                     row.Progress = info.Percent;
-
-                    if (!string.IsNullOrEmpty(info.Label))
-                        row.Status = info.Label;
+                    row.Status = jobProgress.Label;
                 }
 
-                BatchItemProgress(paths, jobProgress.Combine(info.Percent));
+                BatchItemProgress(paths, overall);
             });
         });
     }
