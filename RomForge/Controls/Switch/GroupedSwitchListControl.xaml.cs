@@ -22,6 +22,24 @@ public partial class GroupedSwitchListControl : CommonListControlBase
 
     public Action? ExtraButton2Clicked;
 
+    public bool ShowProgressColumns
+    {
+        get;
+        set
+        {
+            field = value;
+
+            //gridView.Columns.Remove(colEstimatedRatio);
+            gridView.Columns.Remove(colProgress);
+
+            if (value)
+            {
+                //gridView.Columns.Add(colEstimatedRatio);
+                gridView.Columns.Add(colProgress);
+            }
+        }
+    }
+
     protected override ListView? TargetListView => lvFiles;
 
     protected override FrameworkElement? DropHintElement => dropHint;
@@ -29,6 +47,7 @@ public partial class GroupedSwitchListControl : CommonListControlBase
     public GroupedSwitchListControl()
     {
         InitializeComponent();
+        ShowProgressColumns = false;
 
         if (CollectionViewSource.GetDefaultView(GameFiles) is ListCollectionView view)
         {

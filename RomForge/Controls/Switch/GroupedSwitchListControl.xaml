@@ -57,7 +57,7 @@
                     </ListView.GroupStyle>
 
                     <ListView.View>
-                        <GridView>
+                        <GridView x:Name="gridView">
                             <GridViewColumn Width="70">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="FileType">
@@ -73,7 +73,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="380">
+                            <GridViewColumn Width="370">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="TitleName">
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
@@ -135,6 +135,38 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FileSize}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+
+                            <!--<GridViewColumn x:Name="colEstimatedRatio" Width="110">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader>
+                                        <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="예상 압축률"/>
+                                    </GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding EstimatedRatioText}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>-->
+
+                            <GridViewColumn x:Name="colProgress" Width="90">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader>
+                                        <local:IconHeader Icon="/Assets/Images/Progress.png" Text="진행률"/>
+                                    </GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="6,0">
+                                            <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="14"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Progress}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                                <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Shell;
 using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
@@ -47,15 +48,23 @@ public class Lz4MergeMainViewModel : ProgressToolTabViewModel
             {
                 CancellationTokenSource = new CancellationTokenSource();
 
-                var progress = BuildProgressReporter();
                 var token = CancellationTokenSource.Token;
                 int compressLevel = AppConfig.Instance.Switch.Lz4CompressLevel;
-                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, progress, (msg, level) => AppendLog(msg, level), token), token);
+                var rowsByPath = gameFiles
+                    .GroupBy(f => f.FilePath, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+                foreach (var file in gameFiles)
+                    file.Progress = 0;
+
+                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, paths => CreateJobProgress(rowsByPath, paths), (paths, success) => FinishJob(rowsByPath, paths, success),
+                    (msg, level) => AppendLog(msg, level), token), token);
 
                 if (results.Count > 0)
                 {
                     AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     AppendLog(Res.Main_Msg_Done);
+                    MainViewModel.SetTaskbarProgress(100);
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
                 }
@@ -67,19 +76,63 @@ public class Lz4MergeMainViewModel : ProgressToolTabViewModel
             catch (OperationCanceledException)
             {
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+
+                foreach (var file in gameFiles.Where(f => f.Progress < 100))
+                    file.Progress = 0;
+
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
                 AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
-                MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
             }
             finally
             {
                 CleanupTask();
             }
         }
+    }
+
+    private static Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)
+    {
+        var rows = SelectRows(rowsByPath, paths);
+
+        return Application.Current.Dispatcher.Invoke(() => new Progress<ProgressInfo>(info =>
+        {
+            foreach (var row in rows)
+                row.Progress = info.Percent;
+
+            MainViewModel.SetTaskbarProgress(info.Percent);
+        }));
+    }
+
+    private static void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool success)
+    {
+        var rows = SelectRows(rowsByPath, paths);
+
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var row in rows)
+                row.Progress = success ? 100 : 0;
+
+            if (!success)
+                MainViewModel.SetTaskbarProgress(100, TaskbarItemProgressState.Error);
+        });
+    }
+
+    private static List<GameFile> SelectRows(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)
+    {
+        var rows = new List<GameFile>();
+
+        foreach (var path in paths)
+        {
+            if (rowsByPath.TryGetValue(path, out var matched))
+                rows.AddRange(matched);
+        }
+
+        return rows;
     }
 
     private bool ValidateInputs(IList<GameFile> gameFiles, out List<string> inputPaths, out string outputDir, out string errorMsg)

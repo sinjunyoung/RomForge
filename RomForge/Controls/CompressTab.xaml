@@ -118,7 +118,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="140">
+                    <GridViewColumn Width="120">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Progress">
                                 <StackPanel Orientation="Horizontal">
