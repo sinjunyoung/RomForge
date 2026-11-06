@@ -1,0 +1,10 @@
+﻿<Window x:Class="RomForge.Views.BaseToolWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="RomForge Tool" Height="650" Width="1050"
+        WindowStartupLocation="CenterScreen" ShowInTaskbar="False"
+        Background="#1E1E1E" Foreground="White">
+    <Grid>
+        <ContentPresenter x:Name="MainContentPresenter" />
+    </Grid>
+</Window>

@@ -1,8 +1,12 @@
 ﻿using Common.Services;
 using Microsoft.Win32;
+using RomForge.Controls.Settings;
+using RomForge.Controls.Util;
 using RomForge.Core;
 using RomForge.Core.Models.Compression;
 using RomForge.ViewModels;
+using RomForge.ViewModels.Settings;
+using RomForge.Views;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -88,6 +92,14 @@ public partial class CompressTab : UserControl
     }
 
     private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel.CompressVM.ClearItems();
+
+    private void BtnSettings_Click(object sender, RoutedEventArgs e)
+    {
+        var tab = new CompressSettingsTab();
+        var window = new BaseToolWindow(MainViewModel.Current!.Settings.Compress, tab, "압축 설정");
+
+        window.Show();
+    }
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {

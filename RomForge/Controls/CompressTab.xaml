@@ -298,6 +298,12 @@
                             <TextBlock Text="전체 삭제" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding CompressVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnSettings_Click" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/RomForge.Core;component/Assets/Images/Settings.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="설정" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </DockPanel>
         </Border>

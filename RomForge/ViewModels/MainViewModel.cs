@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using RomForge.Controls.Util;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.UI.Helpers;
@@ -12,6 +13,7 @@ using RomForge.ViewModels.Switch;
 using RomForge.ViewModels.Util;
 using RomForge.ViewModels.Wii;
 using RomForge.ViewModels.WiiU;
+using RomForge.Views;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -127,7 +129,7 @@ public class MainViewModel : ToolTabViewModel
 
     public override bool HasHelpPage => SelectedViewModel?.HasHelpPage ?? false;
 
-    private static MainViewModel? Current { get; set; }
+    internal static MainViewModel? Current { get; set; }
 
     public MainViewModel()
     {
@@ -163,11 +165,13 @@ public class MainViewModel : ToolTabViewModel
     }
 
     public async Task MapsToHashAndProcess(string fileName)
-    {
-        SelectedViewModel = UtilMainVM;
-        UtilMainVM.SelectedViewModel = UtilMainVM.HashVM;
+    {        
+        var tab = new HashTab();
 
         await UtilMainVM.HashVM.AddPaths([fileName]);
+
+        var window = new BaseToolWindow(UtilMainVM.HashVM, tab, "해시 계산");
+        window.Show();
 
         if (UtilMainVM.HashVM.RunCommand.CanExecute(null))
             UtilMainVM.HashVM.RunCommand.Execute(null);
