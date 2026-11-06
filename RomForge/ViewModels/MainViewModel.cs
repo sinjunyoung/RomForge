@@ -232,7 +232,7 @@ public class MainViewModel : ToolTabViewModel
         }
     }
 
-    public override void OpenHelpPage() => SelectedViewModel?.OpenHelpPage();
+    public override string? HelpPageUrl => SelectedViewModel?.HelpPageUrl;
 
     public override void ClearLog() => ActiveLogEntries.Clear();
 }

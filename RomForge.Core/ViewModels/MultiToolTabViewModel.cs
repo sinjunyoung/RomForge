@@ -32,7 +32,7 @@ public abstract class MultiToolTabViewModel : ToolTabViewModel
 
     public ToolTabViewModel? SelectedTool => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
 
-    public override void OpenHelpPage() => SelectedViewModel?.OpenHelpPage();
+    public override string? HelpPageUrl => SelectedViewModel?.HelpPageUrl;
 
     protected void InitializeMultiTools()
     {

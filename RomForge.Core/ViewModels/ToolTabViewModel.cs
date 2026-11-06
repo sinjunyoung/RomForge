@@ -23,7 +23,9 @@ public abstract class ToolTabViewModel : ViewModelBase
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
-    public virtual bool HasHelpPage => false;
+    public virtual bool HasHelpPage => HelpPageUrl != null;
+
+    public virtual string? HelpPageUrl => null;
 
     protected CancellationTokenSource? CancellationTokenSource { get; set; }
 
@@ -77,8 +79,6 @@ public abstract class ToolTabViewModel : ViewModelBase
     public virtual void AppendLog(string msg, LogLevel level = LogLevel.Info) => Application.Current?.Dispatcher?.Invoke(() => LogEntries.Add(new LogEntry { Message = msg, Level = level }));
 
     public virtual void ClearLog() => Application.Current?.Dispatcher?.Invoke(() => LogEntries.Clear());
-
-    public virtual void OpenHelpPage() { }
 
     private sealed class ActionDisposable(Action action) : IDisposable
     {

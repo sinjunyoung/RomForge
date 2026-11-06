@@ -1,17 +1,13 @@
-﻿using Common;
-using Common.Services;
+﻿using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Services;
-using RomForge.Core.UI.Helpers;
 using RomForge.ViewModels;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace RomForge.Views;
 
@@ -86,9 +82,7 @@ public partial class MainWindow : Window
         var cfg = AppConfig.Instance.Window;
 
         cfg.IsMaximized = WindowState == WindowState.Maximized;
-
         var bounds = WindowState == WindowState.Maximized ? RestoreBounds : new Rect(Left, Top, Width, Height);
-
         cfg.Left = bounds.Left;
         cfg.Top = bounds.Top;
         cfg.Width = bounds.Width;
@@ -101,7 +95,6 @@ public partial class MainWindow : Window
         var point = element.TransformToAncestor(this).Transform(new Point(0, element.ActualHeight));
 
         point.Offset(Left, Top);
-
         SystemCommands.ShowSystemMenu(this, point);
     }
 
@@ -110,6 +103,7 @@ public partial class MainWindow : Window
         var element = (FrameworkElement)sender;
         var pos = e.GetPosition(element);
         var screenPoint = element.PointToScreen(pos);
+
         SystemCommands.ShowSystemMenu(this, screenPoint);
     }
 
@@ -158,10 +152,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-    {
-        SystemCommands.MinimizeWindow(this);
-    }
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e) => SystemCommands.MinimizeWindow(this);
 
     private void MaximizeButton_Click(object sender, RoutedEventArgs e)
     {
@@ -171,12 +162,9 @@ public partial class MainWindow : Window
             SystemCommands.MaximizeWindow(this);
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e)
-    {
-        SystemCommands.CloseWindow(this);
-    }
+    private void CloseButton_Click(object sender, RoutedEventArgs e) => SystemCommands.CloseWindow(this);
 
-    private void UrlButton_Click(object sender, RoutedEventArgs e) => "https://github.com/sinjunyoung/RomForge/releases".OpenUrl();
+    private void UrlButton_Click(object sender, RoutedEventArgs e) => "https://github.com/sinjunyoung/RomForge/releases/latest".OpenUrl();
 
-    private void HelpButton_Click(object sender, RoutedEventArgs e) => ViewModel.OpenHelpPage();
+    private void HelpButton_Click(object sender, RoutedEventArgs e) => ViewModel.HelpPageUrl?.OpenUrl();
 }

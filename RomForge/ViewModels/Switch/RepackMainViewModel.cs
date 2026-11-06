@@ -39,8 +39,6 @@ namespace RomForge.ViewModels.Switch
 
         public bool StartEnabled => !IsLocked || _currentMode == BuildMode.FullProcess;
 
-        public override bool HasHelpPage => true;
-
         public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
         public record BuildContext(IList<GameFile> GameFiles, GameMetadata? Metadata, ApplicationControlProperty.Language ForcedLanguage, byte? TargetIdOffset, ulong? OverrideTitleId);
@@ -100,7 +98,7 @@ namespace RomForge.ViewModels.Switch
             NotifyButtonStates();
         }
 
-        public override void OpenHelpPage() => "https://sinjunyoung.github.io/RomForge/switch-unpack-repack/".OpenUrl();
+        public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/switch-unpack-repack/";
 
         private void NotifyButtonStates()
         {

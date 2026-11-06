@@ -47,8 +47,6 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.WiiURepackOutputPath = value; } } = string.Empty;
 
-    public override bool HasHelpPage => true;
-
     public Visibility EntriesHintVisibility => Entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
@@ -168,7 +166,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public override void OpenHelpPage() => "https://sinjunyoung.github.io/RomForge/wiiu-repack/".OpenUrl();
+    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/wiiu-repack/";
 
     private static bool LooksLikeSupportedFolder(string path) => WupTitleSource.LooksLikeWupFolder(path) || (Directory.Exists(Path.Combine(path, "code")) && Directory.Exists(Path.Combine(path, "content")) && Directory.Exists(Path.Combine(path, "meta")));
 
