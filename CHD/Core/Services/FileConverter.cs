@@ -176,7 +176,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("변환 취소중...", LogLevel.Error);
+            Log("변환 취소 중...", LogLevel.Error);
             CleanupFiles(CurrentOutputPath);
 
             CurrentOutputPath = null;
@@ -275,7 +275,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("압축 취소중...", LogLevel.Error);
+            Log("압축 취소 중...", LogLevel.Error);
             CleanupFiles(chdPath);
 
             CurrentOutputPath = null;
@@ -336,7 +336,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("압축 취소중...", LogLevel.Error);
+            Log("압축 취소 중...", LogLevel.Error);
             CleanupFiles(chdPath);
             CurrentOutputPath = null;
 

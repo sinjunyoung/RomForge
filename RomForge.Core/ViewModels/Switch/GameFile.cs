@@ -4,7 +4,7 @@ using System.Windows.Media;
 
 namespace RomForge.Core.ViewModels.Switch;
 
-public class GameFile(string filePath) : FileItemBase(filePath, "대기중")
+public class GameFile(string filePath) : FileItemBase(filePath, "대기 중")
 {
     private long? _overrideSizeBytes;
     private bool _isLz4;

@@ -46,7 +46,7 @@ public class ConverterMainViewModel : ToolTabViewModel
         {
             var item = new ConverterFileItem(path)
             {
-                FileType = keySet == null ? "키 없음" : "분석중",
+                FileType = keySet == null ? "키 없음" : "분석 중",
             };
 
             FileItems.Add(item);
@@ -121,7 +121,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                     if (item.Status == "완료" || item.Status == "미지원")
                         continue;
 
-                    item.Status = "변환중";
+                    item.Status = "변환 중";
                     item.Progress = 0;
 
                     ScrollToItemRequested?.Invoke(item);
@@ -174,7 +174,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
-                foreach (var item in FileItems.Where(i => i.Status == "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
@@ -183,7 +183,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                foreach (var item in FileItems.Where(i => i.Status == "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
                     item.Status = "실패";
             }
             finally

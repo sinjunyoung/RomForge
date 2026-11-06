@@ -335,9 +335,9 @@ public class ConvertMainViewModel : ToolTabViewModel
                     if (tracker.Status is "완료" or "미지원")
                         continue;
 
-                    tracker.Status = "대기중";
+                    tracker.Status = "대기 중";
                     tracker.Progress = 0;
-                    tracker.Status = "변환중";
+                    tracker.Status = "변환 중";
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -393,7 +393,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                 {
                     var tracker = (IProgressTrackable)item;
 
-                    if (tracker.Status is "대기중" or "변환중")
+                    if (tracker.Status is "대기 중" or "변환 중")
                         tracker.Status = "취소";
                 }
             }

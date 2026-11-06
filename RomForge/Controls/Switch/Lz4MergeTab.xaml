@@ -14,9 +14,11 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <local:GroupedSwitchListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}" ShowProgressColumns="True"/>
-        <Grid Grid.Row="1" Margin="0,0,0,5">
+        <local:SwitchOutputFormatSelector Grid.Row="1" Margin="10,0,0,5" Format="{Binding OutputFormat, Mode=TwoWay}" IsEnabled="{Binding IsIdle}"/>
+        <Grid Grid.Row="2" Margin="0,0,0,5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -44,7 +46,7 @@
             </Button>
         </Grid>
 
-        <Grid Grid.Row="2" Margin="5,0,0,5">
+        <Grid Grid.Row="3" Margin="5,0,0,5">
             <core:IconButton x:Name="btnStart" Margin="0,0,5,0" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{x:Static l:Resources.Button_Cancel}" CancelIcon="/Assets/Images/Cancel.png" 
                                  IsRunning="{Binding IsLocked, Mode=OneWay}" Click="BtnStart_Click"/>
         </Grid>

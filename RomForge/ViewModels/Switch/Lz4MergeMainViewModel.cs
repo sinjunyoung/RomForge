@@ -17,11 +17,14 @@ namespace RomForge.ViewModels.Switch;
 public class Lz4MergeMainViewModel : BatchToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
+    private readonly Dictionary<IReadOnlyList<string>, Lz4JobProgress> _jobProgress = [];
 
     private bool _hadFailure;
     private int _handledWithoutOutput;
 
     public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchLz4MergeOutputPath = value; } } = string.Empty;
+
+    public OutputFormat OutputFormat { get; set { SetProperty(ref field, value); } } = OutputFormat.NSP;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
@@ -55,6 +58,8 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
                 var token = CancellationTokenSource.Token;
                 int compressLevel = AppConfig.Instance.Switch.Lz4CompressLevel;
+                var outputFormat = OutputFormat;
+                bool hasNsz = outputFormat == OutputFormat.NSZ;
                 var rowsByPath = gameFiles
                     .GroupBy(f => f.FilePath, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
@@ -65,15 +70,16 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
                 _hadFailure = false;
                 _handledWithoutOutput = 0;
+                _jobProgress.Clear();
 
                 foreach (var file in gameFiles.Where(f => !completedPaths.Contains(f.FilePath)))
                 {
                     file.Progress = 0;
-                    file.Status = "대기중";
+                    file.Status = "대기 중";
                 }
 
-                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, paths => paths.All(completedPaths.Contains), (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild),
-                    (paths, result) => FinishJob(rowsByPath, paths, result), (msg, level) => AppendLog(msg, level), token), token);
+                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, outputFormat, BeginBatch, paths => paths.All(completedPaths.Contains),
+                    (paths, stage) => CreateJobProgress(rowsByPath, paths, stage, hasNsz), (paths, result) => FinishJob(rowsByPath, paths, result), (msg, level) => AppendLog(msg, level), token), token);
 
                 if (results.Count > 0 || (!_hadFailure && _handledWithoutOutput > 0))
                 {
@@ -114,19 +120,32 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
         }
     }
 
-    private Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool isBuild)
+    private Progress<ProgressInfo> CreateJobProgress(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, Lz4Stage stage, bool hasNsz)
     {
         var rows = SelectRows(rowsByPath, paths);
-        var jobProgress = new Lz4JobProgress(isBuild);
+        Lz4JobProgress jobProgress;
 
-        BatchItemStarted(paths);
+        if (stage == Lz4Stage.Nsz && _jobProgress.TryGetValue(paths, out var existing))
+        {
+            jobProgress = existing;
+            jobProgress.StartNsz();
+        }
+        else
+        {
+            jobProgress = new Lz4JobProgress(stage == Lz4Stage.Build, hasNsz);
+            _jobProgress[paths] = jobProgress;
+
+            BatchItemStarted(paths);
+        }
+
+        string initialStatus = stage == Lz4Stage.Nsz ? jobProgress.Label : "준비 중";
 
         return Application.Current.Dispatcher.Invoke(() =>
         {
             foreach (var row in rows)
             {
                 row.Progress = 0;
-                row.Status = "준비 중";
+                row.Status = initialStatus;
             }
 
             return new Progress<ProgressInfo>(info =>
@@ -149,6 +168,8 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
     private void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, Lz4JobResult result)
     {
+        _jobProgress.Remove(paths);
+
         if (result == Lz4JobResult.Failed)
             _hadFailure = true;
 

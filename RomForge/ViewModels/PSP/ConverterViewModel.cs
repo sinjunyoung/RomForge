@@ -105,10 +105,10 @@ public class ConverterViewModel : ToolTabViewModel
                     if (item.Status == "완료" || item.Status == "미지원")
                         continue;
 
-                    item.Status = "대기중";
+                    item.Status = "대기 중";
                     item.Progress = 0;
                     MainViewModel.SetTaskbarProgress(0);
-                    item.Status = "변환중";
+                    item.Status = "변환 중";
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -224,7 +224,7 @@ public class ConverterViewModel : ToolTabViewModel
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기중" or "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
@@ -233,7 +233,7 @@ public class ConverterViewModel : ToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                foreach (var item in FileItems.Where(i => i.Status == "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
                     item.Status = "실패";
             }
             finally

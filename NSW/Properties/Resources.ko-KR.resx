@@ -163,7 +163,7 @@
     <value>모든 파일</value>
   </data>
   <data name="Status_Analyzing" xml:space="preserve">
-    <value>분석중...</value>
+    <value>분석 중...</value>
   </data>
   <data name="Msg_Title_Info" xml:space="preserve">
     <value>알림</value>
@@ -265,7 +265,7 @@
     <value>[{0}] 병합 실패: {1}</value>
   </data>
   <data name="Log_DecompressAndMerge" xml:space="preserve">
-    <value>압축 해제 및 병합중</value>
+    <value>압축 해제 및 병합 중</value>
   </data>
   <data name="Log_DeleteIncompleteFile" xml:space="preserve">
     <value>불완전하게 생성된 파일을 삭제했습니다.</value>
@@ -397,6 +397,6 @@
     <value>압축하며 분리 중...</value>
   </data>
   <data name="Log_DecompressAndSplit" xml:space="preserve">
-    <value>압축 해제 및 분리중</value>
+    <value>압축 해제 및 분리 중</value>
   </data>
 </root>

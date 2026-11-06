@@ -98,7 +98,7 @@ public class PackingImagesViewModel : ViewModelBase
 
     public async Task<string?> UpdateFromGameIdAsync(string? gameId)
     {
-        if (gameId == null || gameId == _lastGameId || gameId is "인식중..." or "인식실패")
+        if (gameId == null || gameId == _lastGameId || gameId is "인식 중..." or "인식실패")
             return null;
 
         _lastGameId = gameId;

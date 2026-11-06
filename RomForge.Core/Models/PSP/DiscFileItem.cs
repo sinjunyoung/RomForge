@@ -12,7 +12,7 @@ public class DiscFileItem(string filePath) : ProcessableItemBase
 
     public string Extension => Path.GetExtension(FilePath).TrimStart('.').ToLowerInvariant();
 
-    public string GameId { get; set => SetProperty(ref field, value); } = "인식중...";
+    public string GameId { get; set => SetProperty(ref field, value); } = "인식 중...";
 
     public long FileSizeBytes
     {

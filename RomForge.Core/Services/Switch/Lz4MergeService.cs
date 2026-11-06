@@ -14,8 +14,8 @@ public static class Lz4MergeService
 
     private sealed record Job(MergePlan? Plan, string? File, int Order);
 
-    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
-        Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
+    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, OutputFormat outputFormat, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
+        Func<IReadOnlyList<string>, Lz4Stage, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var routing = BuildRouting(keySet, inputPaths, ct);
@@ -69,8 +69,7 @@ public static class Lz4MergeService
 
             index++;
 
-            bool isBuild = job.Plan != null;
-            IReadOnlyList<string> jobPaths = isBuild ? job.Plan!.AllPaths : new[] { job.File! };
+            IReadOnlyList<string> jobPaths = job.Plan != null ? job.Plan.AllPaths : new[] { job.File! };
 
             if (isCompleted(jobPaths))
             {
@@ -91,9 +90,7 @@ public static class Lz4MergeService
 
             try
             {
-                string? path = job.Plan != null
-                    ? await NspBuildService.Run(CreateRequest(job.Plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), quietLog, ct)
-                    : await NspLz4Service.CompressAsync(job.File!, outputDir, compressLevel, progressFactory(jobPaths, false), (message, level, _) => quietLog(message, level), ct);
+                string? path = await OutputFormatPipeline.RunAsync(outputFormat, outputDir, workDir => BuildNspAsync(job, workDir, compressLevel, jobPaths, progressFactory, quietLog, ct), () => progressFactory(jobPaths, Lz4Stage.Nsz), quietLog, ct);
 
                 if (path == null)
                 {
@@ -124,6 +121,14 @@ public static class Lz4MergeService
         return results;
     }
 
+    private static async Task<string?> BuildNspAsync(Job job, string workDir, int compressLevel, IReadOnlyList<string> jobPaths, Func<IReadOnlyList<string>, Lz4Stage, IProgress<ProgressInfo>> progressFactory, Action<string, LogLevel> quietLog, CancellationToken ct)
+    {
+        if (job.Plan != null)
+            return await NspBuildService.Run(CreateRequest(job.Plan, workDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, Lz4Stage.Build), quietLog, ct);
+
+        return await NspLz4Service.CompressAsync(job.File!, workDir, compressLevel, progressFactory(jobPaths, Lz4Stage.Single), (message, level, _) => quietLog(message, level), ct);
+    }
+
     private static NSW.Core.Models.BuildRequest CreateRequest(MergePlan plan, string outputDir)
     {
         string basePath = plan.Base.Path;
@@ -143,7 +148,7 @@ public static class Lz4MergeService
             CompressRomfs = true,
             DlcCompressRomfs = dlcCompress,
             StreamRomfs = true,
-            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + "_Lz4.nsp"
+            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + "_lz4.nsp"
         };
     }
 

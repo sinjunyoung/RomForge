@@ -130,7 +130,7 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
         if (IsLocked)
         {
             Cancel();
-            StatusText1 = "취소중...";
+            StatusText1 = "취소 중...";
             return;
         }
 
@@ -213,7 +213,7 @@ public class ZipImageToolMainViewModel : ProgressToolTabViewModel
         if (IsLocked)
         {
             CancellationTokenSource?.Cancel();
-            StatusText1 = "취소중...";
+            StatusText1 = "취소 중...";
             return;
         }
 

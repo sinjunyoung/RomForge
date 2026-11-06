@@ -2,7 +2,7 @@
 
 namespace RomForge.Core.Models.Util;
 
-public class CertsFileItem(string filePath) : FileItemBase(filePath, "대기중")
+public class CertsFileItem(string filePath) : FileItemBase(filePath, "대기 중")
 {
     protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
 }

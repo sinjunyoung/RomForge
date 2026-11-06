@@ -19,7 +19,7 @@ public class ConverterFileItem : GameFile, Interfaces.IConvertible
         "완료" => "#4CAF50",
         "실패" => "#F44336",
         "취소" => "#FF9800",
-        "변환중" => "#2196F3",
+        "변환 중" => "#2196F3",
         _ => "#888888"
     };
 

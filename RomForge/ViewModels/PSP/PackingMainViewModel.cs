@@ -102,7 +102,7 @@ public class PackingMainViewModel : ProgressToolTabViewModel
             return;
         }
 
-        if (Files.FileItems.Any(i => i.GameId is "인식중..." or "인식실패"))
+        if (Files.FileItems.Any(i => i.GameId is "인식 중..." or "인식실패"))
         {
             AppendLog("GameID 인식 오류", LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();

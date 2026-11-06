@@ -142,7 +142,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     }
 
                     item.Progress = 0;
-                    item.Status = "복호화중";
+                    item.Status = "복호화 중";
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -191,7 +191,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기중" or "복호화중"))
+                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "복호화 중"))
                     item.Status = "취소";
             }
             catch (Exception ex)
@@ -199,7 +199,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status == "복호화중"))
+                foreach (var item in FileItems.Where(i => i.Status is "복호화 중"))
                     item.Status = "실패";
             }
             finally

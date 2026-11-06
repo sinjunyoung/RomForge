@@ -196,17 +196,17 @@ public class CompressMainViewModel : ToolTabViewModel
                         break;
                     }
 
-                    if (item.Status == "완료" || item.Status == "미지원")
+                    if (item.Status is "완료" or "미지원")
                         continue;
 
                     try
                     {
-                        item.Status = "대기중";
+                        item.Status = "대기 중";
                         item.Progress = 0;
 
                         var detected = FormatDetector.Detect(item.FilePath);
 
-                        item.Status = "변환중";
+                        item.Status = "변환 중";
 
                         ScrollToItemRequested?.Invoke(item);
 
@@ -354,7 +354,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
     private void CancelRemainingItems()
     {
-        foreach (var remainingItem in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
+        foreach (var remainingItem in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
         {
             remainingItem.Status = "취소";
             remainingItem.Progress = 0;

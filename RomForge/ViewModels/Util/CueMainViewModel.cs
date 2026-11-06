@@ -119,7 +119,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                     _cts.Token.ThrowIfCancellationRequested();
 
                     item.Progress = 0;
-                    item.Status = "변환중";
+                    item.Status = "변환 중";
 
                     StartBatchItem();
 
@@ -142,7 +142,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                         CompleteBatchItem(false);
                         await SoundPlayer.PlayErrorAsync();
 
-                        if (item.Status == "변환중")
+                        if (item.Status is "변환 중")
                             item.Status = "실패";
                     }
                 }
@@ -163,7 +163,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
                 {
                     item.Status = "취소";
                     item.Progress = 0;
@@ -175,7 +175,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
 
-                foreach (var item in FileItems.Where(i => i.Status == "변환중"))
+                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
                     item.Status = "실패";
             }
             finally

@@ -117,7 +117,7 @@ public static class Ppf
         long patchDataStartPos = pos;
         long patchDataSize = dataEnd - patchDataStartPos;
         long totalWork = srcSize;
-        var reporter = new ProgressReporter("패치중...", string.Empty, totalWork, progress);
+        var reporter = new ProgressReporter("패치 중...", string.Empty, totalWork, progress);
         Action<long, long>? report = reporter.CreateAction();
         long nextReport = Environment.TickCount64 + 100;
         const double copyWeight = 0.60;

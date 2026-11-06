@@ -146,7 +146,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
         {
             try
             {
-                SelectedFile.Status = "추출중";
+                SelectedFile.Status = "추출 중";
                 SelectedFile.Progress = 0;
 
                 BeginBatch(1);
@@ -174,7 +174,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
                     CompleteBatchItem(false);
                     await SoundPlayer.PlayErrorAsync();
 
-                    if (SelectedFile.Status == "추출중")
+                    if (SelectedFile.Status is "추출 중")
                         SelectedFile.Status = "실패";
                 }
             }
@@ -184,7 +184,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
 
-                if (SelectedFile.Status == "추출중")
+                if (SelectedFile.Status is "추출 중")
                 {
                     SelectedFile.Status = "취소";
                     SelectedFile.Progress = 0;

@@ -13,7 +13,7 @@ public static partial class DiscListSorter
     public static void SortAndRenumber(ObservableCollection<DiscFileItem> items)
     {
         var sorted = items
-            .OrderBy(i => i.GameId is "인식중..." or "인식실패" ? 1 : 0)
+            .OrderBy(i => i.GameId is "인식 중..." or "인식실패" ? 1 : 0)
             .ThenBy(i => i.GameId, StringComparer.OrdinalIgnoreCase)
             .ToList();
 

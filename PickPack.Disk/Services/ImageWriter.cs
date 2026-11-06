@@ -158,7 +158,7 @@ namespace PickPack.Disk.Services
 
                     long overallWritten = headerSize + totalWritten;
 
-                    _progressReporter.ReportProgressWithInterval(overallWritten, totalBytes, $"{WorkTitle} 진행중...", 1.0);
+                    _progressReporter.ReportProgressWithInterval(overallWritten, totalBytes, $"{WorkTitle} 진행 중...", 1.0);
                 }
                 catch (IOException)
                 {

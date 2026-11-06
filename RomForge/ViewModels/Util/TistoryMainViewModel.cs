@@ -222,7 +222,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     if (item.Status == "완료")
                         return;
 
-                    item.Status = "다운로드중";
+                    item.Status = "다운로드 중";
                     item.Progress = 0;
                     BatchItemStarted(item);
 
@@ -288,7 +288,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status == "대기중" || i.Status == "다운로드중"))
+                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "다운로드 중"))
                 {
                     item.Status = "취소";
                     item.Progress = 0;
@@ -349,7 +349,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 foreach (var item in items)
                 {
                     item.Progress = 0;
-                    item.Status = "압축해제중";
+                    item.Status = "압축해제 중";
                 }
 
                 BatchItemStarted(group);
