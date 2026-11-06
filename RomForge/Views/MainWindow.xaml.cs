@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Services;
@@ -9,13 +10,13 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Interop;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace RomForge.Views;
 
 public partial class MainWindow : Window
 {
-
     private MainViewModel ViewModel { get; } = new();
 
     public MainWindow()
@@ -52,11 +53,7 @@ public partial class MainWindow : Window
                 {
                     try
                     {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "https://github.com/sinjunyoung/RomForge/releases/latest",
-                            UseShellExecute = true
-                        });
+                        "https://github.com/sinjunyoung/RomForge/releases/latest".OpenUrl();
                     }
                     catch (Exception ex)
                     {
@@ -98,14 +95,22 @@ public partial class MainWindow : Window
         cfg.Height = bounds.Height;
     }
 
-    protected override void OnSourceInitialized(EventArgs e)
+    private void IconBox_Click(object sender, RoutedEventArgs e)
     {
-        base.OnSourceInitialized(e);
+        var element = (FrameworkElement)sender;
+        var point = element.TransformToAncestor(this).Transform(new Point(0, element.ActualHeight));
 
-        IntPtr hWnd = new WindowInteropHelper(this).Handle;
-        int value = 1;
+        point.Offset(Left, Top);
 
-        _ = Win32API.DwmSetWindowAttribute(hWnd, 20, ref value, sizeof(int));
+        SystemCommands.ShowSystemMenu(this, point);
+    }
+
+    private void IconBox_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        var element = (FrameworkElement)sender;
+        var pos = e.GetPosition(element);
+        var screenPoint = element.PointToScreen(pos);
+        SystemCommands.ShowSystemMenu(this, screenPoint);
     }
 
     private void GridSplitter_DragCompleted(object sender, DragCompletedEventArgs e) => MainViewModel.LogBoxHeight = LogRow.Height.Value;
@@ -152,4 +157,26 @@ public partial class MainWindow : Window
                 ClipboardHelper.CopyText(string.Join(Environment.NewLine, lines));
         }
     }
+
+    private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        SystemCommands.MinimizeWindow(this);
+    }
+
+    private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (WindowState == WindowState.Maximized)
+            SystemCommands.RestoreWindow(this);
+        else
+            SystemCommands.MaximizeWindow(this);
+    }
+
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        SystemCommands.CloseWindow(this);
+    }
+
+    private void UrlButton_Click(object sender, RoutedEventArgs e) => "https://github.com/sinjunyoung/RomForge/releases".OpenUrl();
+
+    private void HelpButton_Click(object sender, RoutedEventArgs e) => ViewModel.OpenHelpPage();
 }

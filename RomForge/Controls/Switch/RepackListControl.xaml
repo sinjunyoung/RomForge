@@ -182,9 +182,6 @@
                 <Button ToolTip="전체 삭제" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="도움말" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnHelp_Click">
-                    <Image Source="/Assets/Images/Help.png" Style="{StaticResource ListToolIcon}"/>
-                </Button>
             </StackPanel>
         </Grid>
     </Border>

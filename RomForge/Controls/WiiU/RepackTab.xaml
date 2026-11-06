@@ -226,10 +226,6 @@
                 <RadioButton Content="WUP ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
             </StackPanel>
 
-            <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" ToolTip="도움말" Style="{StaticResource GrayButton}" Click="BtnHelp_Click">
-                <Image Source="/Assets/Images/Help.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality"/>
-            </Button>
-
         </Grid>
 
         <StackPanel Grid.Row="2" Margin="5,0,5,5">

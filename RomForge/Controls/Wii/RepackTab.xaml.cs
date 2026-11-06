@@ -126,17 +126,6 @@ public partial class RepackTab : UserControl
         await ViewModel.StartAsync(BuildMode.FullProcess);
     }
 
-    private void BtnHelp_Click(object sender, RoutedEventArgs e)
-    {
-        var psi = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "https://sinjunyoung.github.io/RomForge/wii-merge/",
-            UseShellExecute = true
-        };
-
-        System.Diagnostics.Process.Start(psi);
-    }
-
     private void TxtOutputPath_PreviewDragOver(object sender, DragEventArgs e)
     {
         if (e.Data.GetDataPresent(DataFormats.FileDrop))

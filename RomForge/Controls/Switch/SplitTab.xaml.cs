@@ -15,17 +15,6 @@ public partial class SplitTab : UserControl
 
     public SplitTab() => InitializeComponent();
 
-    private void BtnHelp_Click(object sender, RoutedEventArgs e)
-    {
-        var psi = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "https://sinjunyoung.github.io/RomForge/switch-merge/",
-            UseShellExecute = true
-        };
-
-        System.Diagnostics.Process.Start(psi);
-    }
-
     protected override void OnVisualParentChanged(DependencyObject oldParent)
     {
         base.OnVisualParentChanged(oldParent);

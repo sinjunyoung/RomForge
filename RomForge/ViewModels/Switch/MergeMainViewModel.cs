@@ -25,6 +25,8 @@ public class MergeMainViewModel : ProgressToolTabViewModel
 
     public MergeMode MergeMode { get; set { SetProperty(ref field, value); } } = MergeMode.ByTitleId;
 
+    public override bool HasHelpPage => true;
+
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand OpenWorkSpaceCommand { get; }
@@ -99,6 +101,8 @@ public class MergeMainViewModel : ProgressToolTabViewModel
             }
         }
     }
+
+    public override void OpenHelpPage() => "https://sinjunyoung.github.io/RomForge/switch-merge/".OpenUrl();
 
     private bool ValidateMergeInputs(IList<GameFile> gameFiles, out List<string> inputPaths, out string outputDir, out string errorMsg)
     {

@@ -7,20 +7,32 @@ namespace RomForge.Core.ViewModels;
 
 public abstract class MultiToolTabViewModel : ToolTabViewModel
 {
-    public int SubTabIndex { get; set { SetProperty(ref field, value); OnPropertyChanged(); SyncLogEntries(); } }
+    public int SubTabIndex { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(HasHelpPage)); SyncLogEntries(); } }
 
-    public ToolTabViewModel SelectedViewModel
+    public override bool HasHelpPage => SelectedViewModel?.HasHelpPage ?? false;
+
+    public ToolTabViewModel? SelectedViewModel
     {
+        get => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
         set
         {
-            var index = Tools.IndexOf(value);
+            if (value != null)
+            {
+                var index = Tools.IndexOf(value);
 
-            if (index != -1)
-                SubTabIndex = index;
+                if (index != -1)
+                {
+                    SubTabIndex = index;
+                    OnPropertyChanged(nameof(SelectedViewModel));
+                    OnPropertyChanged(nameof(HasHelpPage));
+                }
+            }
         }
     }
 
     public ToolTabViewModel? SelectedTool => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
+
+    public override void OpenHelpPage() => SelectedViewModel?.OpenHelpPage();
 
     protected void InitializeMultiTools()
     {

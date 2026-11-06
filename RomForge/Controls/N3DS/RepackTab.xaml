@@ -157,9 +157,6 @@
                 <RadioButton Content="CIA ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsCiaFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="ZCCI ( Azahar 전용 압축 )" GroupName="OutputFormat" IsChecked="{Binding IsZcciFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
             </StackPanel>
-            <Button Grid.Column="1" x:Name="btnHelp" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Click="BtnHelp_Click" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" ToolTip="도움말">
-                <Image Source="/Assets/Images/Help.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
-            </Button>
         </Grid>
 
         <StackPanel Grid.Row="4" Margin="5,0,5,5">

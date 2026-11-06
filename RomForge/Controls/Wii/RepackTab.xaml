@@ -147,9 +147,6 @@
                 <RadioButton Content="WBFS ( USB 로더 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsWbfsFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="RVZ ( Dolphin 전용 압축 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsRvzFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
             </StackPanel>
-            <Button Grid.Column="1" x:Name="btnHelp" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Click="BtnHelp_Click" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" ToolTip="도움말">
-                <Image Source="/Assets/Images/Help.png" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
-            </Button>
         </Grid>
 
         <StackPanel Grid.Row="4" Margin="5,0,5,5">

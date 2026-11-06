@@ -77,6 +77,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     public PatchDisplay? PatchInfo { get; private set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchInfoVisibility)); } }
 
+    public override bool HasHelpPage => true;
+
     public Visibility InputHintVisibility => string.IsNullOrEmpty(InputPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility PatchHintVisibility => string.IsNullOrEmpty(PatchPath) ? Visibility.Visible : Visibility.Collapsed;
@@ -160,6 +162,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         base.Cancel();
         _patchCts.Cancel();
     }
+
+    public override void OpenHelpPage() => "https://sinjunyoung.github.io/RomForge/3ds-merge/".OpenUrl();
 
     private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {

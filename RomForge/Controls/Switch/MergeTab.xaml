@@ -45,14 +45,7 @@
                 </StackPanel>
             </Border>
 
-            <StackPanel Grid.Column="1" Margin="5,0,5,0" Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding IsIdle}">
-                <Button Background="Transparent" BorderThickness="0" Click="BtnHelp_Click" Height="30" HorizontalContentAlignment="Center" Margin="10,0,0,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center" Width="36" x:Name="btnHelp">
-                    <Button.ToolTip>
-                        <ToolTip Content="도움말"/>
-                    </Button.ToolTip>
-                    <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Help.png" Stretch="Uniform"/>
-                </Button>
-            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="5,0,5,0" Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding IsIdle}"/>
         </Grid>
 
         <Grid Grid.Row="2" Margin="0,0,0,5">

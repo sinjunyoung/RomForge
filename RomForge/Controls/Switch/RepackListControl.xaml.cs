@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Services;
 using Microsoft.Win32;
 using NSW.Core;
 using Patch.Core.Services;
@@ -136,17 +137,6 @@ public partial class RepackListControl : SwitchListControlBase
         }
 
         return targets;
-    }
-
-    private void BtnHelp_Click(object sender, RoutedEventArgs e)
-    {
-        var psi = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "https://sinjunyoung.github.io/RomForge/switch-unpack-repack/",
-            UseShellExecute = true
-        };
-
-        System.Diagnostics.Process.Start(psi);
     }
 
     private void MenuItem_RemovePatch_Click(object sender, RoutedEventArgs e)

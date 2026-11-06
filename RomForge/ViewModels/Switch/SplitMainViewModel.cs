@@ -45,6 +45,8 @@ public class SplitMainViewModel : ProgressToolTabViewModel
         }
     } = false;
 
+    public override bool HasHelpPage => true;
+
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand OpenWorkSpaceCommand { get; }
@@ -93,6 +95,8 @@ public class SplitMainViewModel : ProgressToolTabViewModel
                 await AnalyzeAsync(row);
         }
     }
+
+    public override void OpenHelpPage() => "https://sinjunyoung.github.io/RomForge/switch-merge/".OpenUrl();
 
     private static long GetFileLength(string path)
     {

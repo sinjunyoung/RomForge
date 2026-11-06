@@ -13,14 +13,42 @@ using RomForge.ViewModels.Util;
 using RomForge.ViewModels.Wii;
 using RomForge.ViewModels.WiiU;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Drawing;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shell;
-using System.Windows.Threading;
 
 namespace RomForge.ViewModels;
 
 public class MainViewModel : ToolTabViewModel
 {
+    public static ImageSource? AppIcon
+    {
+        get
+        {
+            try
+            {
+                var exePath = Process.GetCurrentProcess().MainModule?.FileName;
+
+                if (string.IsNullOrEmpty(exePath))
+                    return null;
+
+                using var icon = Icon.ExtractAssociatedIcon(exePath);
+
+                if (icon == null)
+                    return null;
+
+                return Imaging.CreateBitmapSourceFromHIcon(icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
 
     public static double LogBoxHeight
     {
@@ -55,9 +83,9 @@ public class MainViewModel : ToolTabViewModel
         get;
         set
         {
-            field = value;
-            OnPropertyChanged();
+            SetProperty(ref field, value);
             OnPropertyChanged(nameof(ActiveLogEntries));
+            OnPropertyChanged(nameof(HasHelpPage));
 
             if (Tools[field] == SwitchMainVM)
                 SwitchMainVM?.RefreshKeysStatus();
@@ -66,6 +94,7 @@ public class MainViewModel : ToolTabViewModel
 
     public ToolTabViewModel SelectedViewModel
     {
+        get => Tools[SelectedTabIndex];
         set
         {
             var index = Tools.IndexOf(value);
@@ -91,28 +120,12 @@ public class MainViewModel : ToolTabViewModel
     };
 
     public static string AppVersion => $"{AppDomain.CurrentDomain.FriendlyName} - Ver {Utils.ToAppVersionString()}";
+        
+    public double TaskbarProgressValue { get; set => SetProperty(ref field, value); }
 
-    private double _taskbarProgressValue;
-    public double TaskbarProgressValue
-    {
-        get => _taskbarProgressValue;
-        set
-        {
-            _taskbarProgressValue = value;
-            OnPropertyChanged(nameof(TaskbarProgressValue));
-        }
-    }
+    public TaskbarItemProgressState TaskbarProgressState { get; set => SetProperty(ref field, value); } = TaskbarItemProgressState.None;
 
-    private TaskbarItemProgressState _taskbarProgressState = TaskbarItemProgressState.None;
-    public TaskbarItemProgressState TaskbarProgressState
-    {
-        get => _taskbarProgressState;
-        set
-        {
-            _taskbarProgressState = value;
-            OnPropertyChanged(nameof(TaskbarProgressState));
-        }
-    }
+    public override bool HasHelpPage => SelectedViewModel?.HasHelpPage ?? false;
 
     private static MainViewModel? Current { get; set; }
 
@@ -138,7 +151,15 @@ public class MainViewModel : ToolTabViewModel
         Tools.Add(Settings);
 
         foreach (var tool in Tools)
+        {
             RegisterChild(tool);
+
+            tool.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(HasHelpPage))
+                    OnPropertyChanged(nameof(HasHelpPage));
+            };
+        }
     }
 
     public async Task MapsToHashAndProcess(string fileName)
@@ -206,6 +227,8 @@ public class MainViewModel : ToolTabViewModel
                 FlashTaskbar.FlashTaskbarIcon(Application.Current?.MainWindow!);
         }
     }
+
+    public override void OpenHelpPage() => SelectedViewModel?.OpenHelpPage();
 
     public override void ClearLog() => ActiveLogEntries.Clear();
 }

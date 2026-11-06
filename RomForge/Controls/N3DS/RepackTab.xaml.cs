@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core;
 using RomForge.ViewModels.N3DS;
@@ -134,17 +135,6 @@ public partial class RepackTab : UserControl
         }
 
         _ = ViewModel.StartAsync(BuildMode.RebuildOnly);
-    }
-
-    private void BtnHelp_Click(object sender, RoutedEventArgs e)
-    {
-        var psi = new System.Diagnostics.ProcessStartInfo
-        {
-            FileName = "https://sinjunyoung.github.io/RomForge/3ds-merge/",
-            UseShellExecute = true
-        };
-
-        System.Diagnostics.Process.Start(psi);
     }
 
     private void TxtOutputPath_PreviewDragOver(object sender, DragEventArgs e)
