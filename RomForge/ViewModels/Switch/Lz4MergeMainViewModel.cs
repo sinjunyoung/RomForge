@@ -1,6 +1,7 @@
 ﻿using Common.Models;
 using Common.Services;
 using RomForge.Core;
+using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
@@ -16,6 +17,9 @@ namespace RomForge.ViewModels.Switch;
 public class Lz4MergeMainViewModel : BatchToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
+
+    private bool _hadFailure;
+    private int _handledWithoutOutput;
 
     public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchLz4MergeOutputPath = value; } } = string.Empty;
 
@@ -54,21 +58,30 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 var rowsByPath = gameFiles
                     .GroupBy(f => f.FilePath, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+                var completedPaths = rowsByPath
+                    .Where(p => p.Value.All(r => r.Status == "완료"))
+                    .Select(p => p.Key)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                foreach (var file in gameFiles)
+                _hadFailure = false;
+                _handledWithoutOutput = 0;
+
+                foreach (var file in gameFiles.Where(f => !completedPaths.Contains(f.FilePath)))
                 {
                     file.Progress = 0;
                     file.Status = "대기중";
                 }
 
-                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild), (paths, success) => FinishJob(rowsByPath, paths, success),
-                    (msg, level) => AppendLog(msg, level), token), token);
+                var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, BeginBatch, paths => paths.All(completedPaths.Contains), (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild),
+                    (paths, result) => FinishJob(rowsByPath, paths, result), (msg, level) => AppendLog(msg, level), token), token);
 
-                if (results.Count > 0)
+                if (results.Count > 0 || (!_hadFailure && _handledWithoutOutput > 0))
                 {
                     AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
-                    outputDir.OpenFolder();
+
+                    if (results.Count > 0)
+                        outputDir.OpenFolder();
                 }
                 else
                     await SoundPlayer.PlayErrorAsync();
@@ -79,7 +92,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
 
-                foreach (var file in gameFiles.Where(f => f.Status != "완료" && f.Status != "실패"))
+                foreach (var file in gameFiles.Where(f => f.Status is not ("완료" or "실패" or "건너뜀")))
                 {
                     file.Status = "취소";
                     file.Progress = 0;
@@ -134,20 +147,34 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
         });
     }
 
-    private void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, bool success)
+    private void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, Lz4JobResult result)
     {
-        var rows = SelectRows(rowsByPath, paths);
+        if (result == Lz4JobResult.Failed)
+            _hadFailure = true;
 
-        Application.Current.Dispatcher.InvokeAsync(() =>
+        if (result is Lz4JobResult.Skipped or Lz4JobResult.AlreadyDone)
+            _handledWithoutOutput++;
+
+        if (result != Lz4JobResult.AlreadyDone)
         {
-            foreach (var row in rows)
-            {
-                row.Progress = success ? 100 : 0;
-                row.Status = success ? "완료" : "실패";
-            }
-        });
+            var rows = SelectRows(rowsByPath, paths);
 
-        BatchItemCompleted(paths, success);
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                foreach (var row in rows)
+                {
+                    row.Progress = result == Lz4JobResult.Done ? 100 : 0;
+                    row.Status = result switch
+                    {
+                        Lz4JobResult.Done => "완료",
+                        Lz4JobResult.Skipped => "건너뜀",
+                        _ => "실패"
+                    };
+                }
+            });
+        }
+
+        BatchItemCompleted(paths, result != Lz4JobResult.Failed);
     }
 
     private static List<GameFile> SelectRows(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)

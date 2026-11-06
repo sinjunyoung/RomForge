@@ -45,13 +45,13 @@ public static class NspLz4Service
         public long Size { get; set; }
     }
 
-    public static Task<string> CompressAsync(string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
+    public static Task<string?> CompressAsync(string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
         return ConvertAsync(keySet.Clone(), inputPath, outputDir, lz4Level, progress, log, ct);
     }
 
-    internal static async Task<string> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
+    internal static async Task<string?> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         if (!SwitchFileTypes.Extensions.Contains(Path.GetExtension(inputPath)))
             throw new NotSupportedException("NSP, NSZ, XCI, XCZ 파일만 지원합니다.");
@@ -81,6 +81,7 @@ public static class NspLz4Service
                 entryPaths[NormalizeName(entry.Name.ToString())] = entry.FullPath;
 
             var jobs = new List<MetaJob>();
+            int alreadyCompressed = 0;
 
             foreach (var meta in metas)
             {
@@ -90,20 +91,29 @@ public static class NspLz4Service
                     continue;
                 }
 
-                var job = LoadJob(keySet, meta, entryPaths, sourceFs, disposables, log);
+                var job = LoadJob(keySet, meta, entryPaths, sourceFs, disposables, log, out int compressed);
+
+                alreadyCompressed += compressed;
 
                 if (job.Targets.Count > 0)
                     jobs.Add(job);
             }
 
             if (jobs.Count == 0)
-                throw new InvalidOperationException("Lz4로 압축할 romfs가 없거나 이미 모두 압축되어 있습니다.");
+            {
+                if (alreadyCompressed == 0)
+                    throw new InvalidOperationException("Lz4로 압축할 romfs가 없습니다.");
+
+                log?.Invoke("이미 Lz4 압축되어 있어 압축할 대상이 없습니다. 건너뜁니다.", LogLevel.Warning, primary.TitleId);
+
+                return null;
+            }
 
             string directory = string.IsNullOrWhiteSpace(outputDir) ? Path.GetDirectoryName(inputPath)! : outputDir;
 
             Directory.CreateDirectory(directory);
 
-            finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_lz4.nsp"));
+            finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_Lz4.nsp"));
 
             string label = primary.KrTitle ?? primary.EnTitle;
             var replaced = new HashSet<string>(jobs.SelectMany(j => j.Targets.Select(t => t.EntryName).Append(NormalizeName(j.Meta.FileName))), StringComparer.OrdinalIgnoreCase);
@@ -178,8 +188,10 @@ public static class NspLz4Service
 
     private static Nca OpenNca(KeySet keySet, LibHac.Fs.IStorage storage, string entryPath) => entryPath.EndsWith(".ncz", StringComparison.OrdinalIgnoreCase) ? new Ncz(keySet, storage, NczReadMode.Fast) : new Nca(keySet, storage);
 
-    private static MetaJob LoadJob(KeySet keySet, MetadataResult meta, Dictionary<string, string> entryPaths, LibHac.Fs.Fsa.IFileSystem sourceFs, List<IDisposable> disposables, Action<string, LogLevel, string>? log)
+    private static MetaJob LoadJob(KeySet keySet, MetadataResult meta, Dictionary<string, string> entryPaths, LibHac.Fs.Fsa.IFileSystem sourceFs, List<IDisposable> disposables, Action<string, LogLevel, string>? log, out int alreadyCompressed)
     {
+        alreadyCompressed = 0;
+
         if (!entryPaths.TryGetValue(NormalizeName(meta.FileName), out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
             throw new InvalidOperationException($"Meta NCA를 찾을 수 없습니다: {meta.FileName}");
 
@@ -214,7 +226,9 @@ public static class NspLz4Service
 
             if (RomfsCompression.HasCompressedSection(nca))
             {
-                log?.Invoke($"{entryName}: 이미 압축되어 있어 건너뜁니다.", LogLevel.Info, meta.TitleId);
+                alreadyCompressed++;
+
+                log?.Invoke($"{entryName}: 이미 압축되어 있어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
                 continue;
             }
 

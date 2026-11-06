@@ -14,8 +14,8 @@ public static class Lz4MergeService
 
     private sealed record Job(MergePlan? Plan, string? File, int Order);
 
-    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory,
-        Action<IReadOnlyList<string>, bool> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
+    public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
+        Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var routing = BuildRouting(keySet, inputPaths, ct);
@@ -55,11 +55,11 @@ public static class Lz4MergeService
         Directory.CreateDirectory(outputDir);
         jobsPlanned(total);
 
-        Action<string, LogLevel> quietLog = (message, level) =>
+        void quietLog(string message, LogLevel level)
         {
             if (level is LogLevel.Warning or LogLevel.Error)
                 log(message, level);
-        };
+        }
 
         int index = 0;
 
@@ -72,6 +72,15 @@ public static class Lz4MergeService
             bool isBuild = job.Plan != null;
             IReadOnlyList<string> jobPaths = isBuild ? job.Plan!.AllPaths : new[] { job.File! };
 
+            if (isCompleted(jobPaths))
+            {
+                string name = job.Plan != null ? DisplayName(job.Plan.Base.Meta) : Path.GetFileName(job.File!);
+
+                jobFinished(jobPaths, Lz4JobResult.AlreadyDone);
+                log($"[{index}/{total}] {name}: 이미 완료되어 건너뜁니다.", LogLevel.Info);
+                continue;
+            }
+
             if (job.Plan != null)
             {
                 log($"━━ [{index}/{total}] {DisplayName(job.Plan.Base.Meta)} ({job.Plan.BaseTitleId}) 본편 Lz4 압축 ━━", LogLevel.Highlight);
@@ -82,12 +91,18 @@ public static class Lz4MergeService
 
             try
             {
-                string path = job.Plan != null
+                string? path = job.Plan != null
                     ? await NspBuildService.Run(CreateRequest(job.Plan, outputDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), quietLog, ct)
                     : await NspLz4Service.CompressAsync(job.File!, outputDir, compressLevel, progressFactory(jobPaths, false), (message, level, _) => quietLog(message, level), ct);
 
+                if (path == null)
+                {
+                    jobFinished(jobPaths, Lz4JobResult.Skipped);
+                    continue;
+                }
+
                 results.Add(path);
-                jobFinished(jobPaths, true);
+                jobFinished(jobPaths, Lz4JobResult.Done);
                 log($"완료: {Path.GetFileName(path)}", LogLevel.Ok);
             }
             catch (OperationCanceledException)
@@ -98,7 +113,7 @@ public static class Lz4MergeService
             {
                 failed++;
 
-                jobFinished(jobPaths, false);
+                jobFinished(jobPaths, Lz4JobResult.Failed);
                 log($"실패: {ex.Message}", LogLevel.Error);
             }
         }
@@ -127,7 +142,8 @@ public static class Lz4MergeService
             DlcTitleIdsByFile = dlcTitleIds,
             CompressRomfs = true,
             DlcCompressRomfs = dlcCompress,
-            StreamRomfs = true
+            StreamRomfs = true,
+            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + "_Lz4.nsp"
         };
     }
 
