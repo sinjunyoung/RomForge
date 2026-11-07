@@ -94,8 +94,6 @@ public class SplitMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/switch-split/";
-
     private static long GetFileLength(string path)
     {
         try

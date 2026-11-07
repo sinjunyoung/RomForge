@@ -24,6 +24,8 @@ public class InstalledTitlesMainViewModel(Action<string> setStatus) : ToolTabVie
 
     public ObservableCollection<TitleViewModel> FilteredTitles { get; } = [];
 
+    public override string? HelpPageKey => "3ds-extract";
+
     public Visibility LoadingVisibility => _isLoading ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility EmptyVisibility => !_isLoading && AllTitles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;

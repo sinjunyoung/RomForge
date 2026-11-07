@@ -12,6 +12,8 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
+    public override string? HelpPageKey => "switch-version-ignore";
+
     public KeygenMainViewModel() { }
 
     public async Task ExecuteStartWorkAsync(IList<GameFile> gameFiles)

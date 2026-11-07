@@ -212,8 +212,6 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/wii-merge/";
-
     private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {
         string unpackedPath = Path.Combine(OutputPath, "unpacked");

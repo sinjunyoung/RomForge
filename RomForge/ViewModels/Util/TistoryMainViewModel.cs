@@ -47,6 +47,8 @@ public class TistoryMainViewModel : BatchToolTabViewModel
         }
     } = AppConfig.Instance.Tistory.AutoExtractAfterDownload;
 
+    public override string? HelpPageKey => "util-tistory";
+
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand AnalyzeCommand { get; }

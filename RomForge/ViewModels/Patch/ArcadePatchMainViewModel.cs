@@ -59,8 +59,6 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public int TotalProgress { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(TotalProgressText)); } }
 
-    protected override void OnOverallChanged(int percent) => TotalProgress = percent;
-
     public string TotalProgressText => $"{TotalProgress}%";
 
     public string ProgressSummary { get; set { SetProperty(ref field, value); } } = "대기 중...";
@@ -74,6 +72,8 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
     public Visibility HintVisibility => MatchItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility MismatchVisibility => MismatchReason is not null ? Visibility.Visible : Visibility.Collapsed;
+
+    public override string? HelpPageKey => "patch-arcade";
 
     public async Task RunAsync()
     {
@@ -158,20 +158,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         }
     }
 
-    public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && !string.IsNullOrEmpty(PatchPath);
-
-    private void TryDeleteIncompleteOutput(string outputZipPath)
-    {
-        try
-        {
-            if (File.Exists(outputZipPath))
-                File.Delete(outputZipPath);
-        }
-        catch (Exception ex)
-        {
-            AppendLog($"중단된 결과 파일 삭제 실패: {ex.Message} (수동으로 확인해주세요: {outputZipPath})", LogLevel.Error);
-        }
-    }
+    public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && !string.IsNullOrEmpty(PatchPath);    
 
     public void ManualMatch(ArcadeMatchItem item, Entry? patch)
     {
@@ -227,6 +214,21 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
         OnPropertyChanged(nameof(HintVisibility));
         OnPropertyChanged(nameof(HasPatchPackages));
+    }
+
+    protected override void OnOverallChanged(int percent) => TotalProgress = percent;
+
+    private void TryDeleteIncompleteOutput(string outputZipPath)
+    {
+        try
+        {
+            if (File.Exists(outputZipPath))
+                File.Delete(outputZipPath);
+        }
+        catch (Exception ex)
+        {
+            AppendLog($"중단된 결과 파일 삭제 실패: {ex.Message} (수동으로 확인해주세요: {outputZipPath})", LogLevel.Error);
+        }
     }
 
     private async Task AnalyzeAsync()

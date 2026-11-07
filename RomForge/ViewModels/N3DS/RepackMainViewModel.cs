@@ -161,7 +161,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         _patchCts.Cancel();
     }
 
-    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/3ds-merge/";
+    public override string? HelpPageKey => "3ds-merge";
 
     private async Task ExecuteAsync(BuildMode mode, CancellationToken ct)
     {

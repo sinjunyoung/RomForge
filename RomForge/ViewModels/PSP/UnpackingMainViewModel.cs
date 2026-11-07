@@ -23,6 +23,8 @@ public class UnpackingMainViewModel : ToolTabViewModel
 
     public bool IsConverting { get; set { SetProperty(ref field, value); CommandManager.InvalidateRequerySuggested(); } }
 
+    public override string? HelpPageKey => "psp-pbp-restore";
+
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }

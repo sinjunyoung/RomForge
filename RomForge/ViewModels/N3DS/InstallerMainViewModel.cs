@@ -5,10 +5,13 @@ using N3DS.Core.FileSystem;
 using N3DS.Core.Models;
 using N3DS.Core.Services;
 using RomForge.Core;
+using RomForge.Core.Models;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
 using RomForge.Core.Services.N3DS;
 using RomForge.Core.ViewModels;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.IO;
 using System.Windows;
 
@@ -29,6 +32,47 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
     public InstalledTitlesMainViewModel InstalledTitles { get; }
 
     public InstallMainViewModel Install { get; } = new();
+
+    public int SubTabIndex
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            OnPropertyChanged(nameof(SelectedViewModel));
+            OnPropertyChanged(nameof(SelectedTool));
+            OnPropertyChanged(nameof(HasHelpKey));
+            OnPropertyChanged(nameof(HelpPageKey));
+            SyncLogEntries();
+        }
+    }
+
+    public override bool HasHelpKey => SelectedViewModel?.HasHelpKey ?? false;
+
+    public ToolTabViewModel? SelectedViewModel
+    {
+        get => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
+
+        set
+        {
+            if (value == null)
+                return;
+
+            var index = Tools.IndexOf(value);
+
+            if (index != -1)
+            {
+                SubTabIndex = index;
+                OnPropertyChanged(nameof(SelectedViewModel));
+                OnPropertyChanged(nameof(HasHelpKey));
+                OnPropertyChanged(nameof(HelpPageKey));
+            }
+        }
+    }
+
+    public ToolTabViewModel? SelectedTool => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
+
+    public override string? HelpPageKey => SelectedViewModel?.HelpPageKey;
 
     public string SdPath
     {
@@ -74,8 +118,8 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
         Tools.Add(InstalledTitles);
         Tools.Add(Install);
-        RegisterChild(InstalledTitles);
-        RegisterChild(Install);
+
+        InitializeMultiTools();
 
         InstalledTitles.PropertyChanged += (_, e) =>
         {
@@ -448,10 +492,9 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
     public async Task CheckAndSetMovablePathAsync(string driveLetter)
     {
-        var found = await Task.Run(() =>
-            MovableSearchPaths
-                .Select(p => Path.Combine(driveLetter, p))
-                .FirstOrDefault(File.Exists));
+        var found = await Task.Run(() => MovableSearchPaths
+        .Select(p => Path.Combine(driveLetter, p))
+        .FirstOrDefault(File.Exists));
 
         MovablePath = found ?? string.Empty;
     }
@@ -465,5 +508,88 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
         if (!loading)
             CleanupTask();
+    }
+
+    private void InitializeMultiTools()
+    {
+        foreach (var tool in AllTabs)
+        {
+            RegisterChild(tool);
+
+            tool.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(HasHelpKey) && SelectedViewModel == tool)
+                    OnPropertyChanged(nameof(HasHelpKey));
+
+                if (e.PropertyName == nameof(HelpPageKey) && SelectedViewModel == tool)
+                    OnPropertyChanged(nameof(HelpPageKey));
+            };
+
+            var logProp = tool.GetType().GetProperty(nameof(LogEntries));
+
+            if (logProp?.GetValue(tool) is ObservableCollection<LogEntry> childLogs)
+                childLogs.CollectionChanged += (_, e) => LogEntries_CollectionChanged(e, tool);
+        }
+
+        SyncLogEntries();
+    }
+
+    private void LogEntries_CollectionChanged(NotifyCollectionChangedEventArgs e, ToolTabViewModel tool)
+    {
+        if (SelectedViewModel != tool)
+            return;
+
+        if (Application.Current?.Dispatcher != null)
+            Application.Current.Dispatcher.Invoke(() => HandleCollectionChanged(e));
+        else
+            HandleCollectionChanged(e);
+    }
+
+    private void HandleCollectionChanged(NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems != null)
+                    foreach (LogEntry item in e.NewItems)
+                        LogEntries.Add(item);
+                break;
+
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems != null)
+                    foreach (LogEntry item in e.OldItems)
+                        LogEntries.Remove(item);
+                break;
+
+            case NotifyCollectionChangedAction.Reset:
+                LogEntries.Clear();
+                break;
+        }
+    }
+
+    private void SyncLogEntries()
+    {
+        if (Application.Current?.Dispatcher != null)
+            Application.Current.Dispatcher.Invoke(DoSync);
+        else
+            DoSync();
+    }
+
+    private void DoSync()
+    {
+        LogEntries.Clear();
+
+        var currentTool = SelectedViewModel;
+
+        if (currentTool == null)
+            return;
+
+        var logProp = currentTool.GetType().GetProperty(nameof(LogEntries));
+
+        if (logProp?.GetValue(currentTool) is ObservableCollection<LogEntry> childLogs)
+        {
+            foreach (var item in childLogs)
+                LogEntries.Add(item);
+        }
     }
 }

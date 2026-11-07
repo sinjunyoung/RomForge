@@ -52,11 +52,7 @@ public class MainViewModel : ToolTabViewModel
         }
     }
 
-    public static double LogBoxHeight
-    {
-        get => AppConfig.Instance.Common.LogBoxHeight;
-        set { AppConfig.Instance.Common.LogBoxHeight = value; }
-    }
+    public static double LogBoxHeight { get => AppConfig.Instance.Common.LogBoxHeight; set { AppConfig.Instance.Common.LogBoxHeight = value; } }
 
     public PatchMainViewModel PatchVM { get; }
 
@@ -87,7 +83,7 @@ public class MainViewModel : ToolTabViewModel
         {
             SetProperty(ref field, value);
             OnPropertyChanged(nameof(ActiveLogEntries));
-            OnPropertyChanged(nameof(HasHelpPage));
+            OnPropertyChanged(nameof(HasHelpKey));
 
             if (Tools[field] == SwitchMainVM)
                 SwitchMainVM?.RefreshKeysStatus();
@@ -127,7 +123,9 @@ public class MainViewModel : ToolTabViewModel
 
     public TaskbarItemProgressState TaskbarProgressState { get; set => SetProperty(ref field, value); } = TaskbarItemProgressState.None;
 
-    public override bool HasHelpPage => SelectedViewModel?.HasHelpPage ?? false;
+    public override bool HasHelpKey => SelectedViewModel?.HasHelpKey ?? false;
+
+    public override string? HelpPageKey => SelectedViewModel?.HelpPageKey;
 
     internal static MainViewModel? Current { get; set; }
 
@@ -158,8 +156,8 @@ public class MainViewModel : ToolTabViewModel
 
             tool.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName == nameof(HasHelpPage))
-                    OnPropertyChanged(nameof(HasHelpPage));
+                if (e.PropertyName == nameof(HasHelpKey))
+                    OnPropertyChanged(nameof(HasHelpKey));
             };
         }
     }
@@ -231,8 +229,6 @@ public class MainViewModel : ToolTabViewModel
                 FlashTaskbar.FlashTaskbarIcon(Application.Current?.MainWindow!);
         }
     }
-
-    public override string? HelpPageUrl => SelectedViewModel?.HelpPageUrl;
 
     public override void ClearLog() => ActiveLogEntries.Clear();
 }

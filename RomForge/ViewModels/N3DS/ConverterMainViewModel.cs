@@ -25,6 +25,8 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     public bool IsConverting { get; set { SetPropertyAndRequery(ref field, value); } }
 
+    public override string? HelpPageKey => "3ds-format";
+
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }

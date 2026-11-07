@@ -98,7 +98,7 @@ namespace RomForge.ViewModels.Switch
             NotifyButtonStates();
         }
 
-        public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/switch-unpack-repack/";
+        public override string? HelpPageKey => "switch-unpack-repack";
 
         private void NotifyButtonStates()
         {

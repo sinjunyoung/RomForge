@@ -100,7 +100,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/switch-merge/";
+    public override string? HelpPageKey => "switch-merge";
 
     private bool ValidateMergeInputs(IList<GameFile> gameFiles, out List<string> inputPaths, out string outputDir, out string errorMsg)
     {

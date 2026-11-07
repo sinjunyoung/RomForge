@@ -19,7 +19,6 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 {
     private CancellationTokenSource? _previewCts;
     private bool _patchAdded;
-    private string _namingPreview = string.Empty;
     private string? _cachedPatchVersion;
     private string? _cachedPatchDate;
     private string? _cachedPatchLanguage;
@@ -119,102 +118,13 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
     public bool IsNamingFormatReadOnly => !SelectedNamingPreset.IsCustom;
 
-    private void SyncNamingPreset()
-    {
-        SelectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
-
-        OnPropertyChanged(nameof(SelectedNamingPreset));
-        OnPropertyChanged(nameof(IsNamingFormatReadOnly));
-    }
-
-    public string NamingPreview
-    {
-        get => _namingPreview;
-        private set
-        {
-            _namingPreview = value;
-
-            OnPropertyChanged();
-        }
-    }
-
-    private void TriggerPreviewUpdate()
-    {
-        _previewCts?.Cancel();
-
-        _previewCts = new CancellationTokenSource();
-
-        var token = _previewCts.Token;
-
-        Task.Delay(100, token).ContinueWith(t =>
-        {
-            if (t.IsCanceled) 
-                return;
-
-            string baseFileName = ResolvePreviewBaseFileName();
-
-            if (!NamingEnabled)
-            {
-                NamingPreview = baseFileName;
-                return;
-            }
-
-            string? namingPatchPath = NamingPatchPath;
-
-            if (namingPatchPath != _lastProcessedPatchPath)
-            {
-                _lastProcessedPatchPath = namingPatchPath;
-
-                var (v, d, l) = VersionInfoExtractor.GetPatchMetadata(namingPatchPath);
-
-                _cachedPatchVersion = v;
-                _cachedPatchDate = d;
-                _cachedPatchLanguage = l;
-            }
-
-            string version = _cachedPatchVersion ?? "1.0";
-            string date = _cachedPatchDate ?? DateTime.Now.ToString("yyMMdd");
-            string? language = _cachedPatchLanguage;
-            string result = VersionInfoExtractor.ApplyFormat(baseFileName, version, date, language, NamingFormat, AppConfig.Instance.Common.Language);
-
-            NamingPreview = result;
-
-        }, TaskScheduler.FromCurrentSynchronizationContext());
-    }
-
-    private string ResolvePreviewBaseFileName()
-    {
-        if (SourcePath is null)
-            return "원본.bin";
-
-        if (!File.Exists(SourcePath) || SourceArchiveExtractor.IsArchivePath(SourcePath))
-            return Path.GetFileName(SourcePath);
-
-        string ext = Path.GetExtension(SourcePath);
-
-        if (ext.Equals(".chd", StringComparison.OrdinalIgnoreCase) || ext.Equals(".rvz", StringComparison.OrdinalIgnoreCase))
-            return Path.GetFileName(SourcePath);
-
-        string baseFileName = ResolveOutputBaseFileName(SourcePath);
-
-        if (AutoCompress)
-        {
-            try
-            {
-                var detected = FormatDetector.Detect(SourcePath);
-
-                if (detected.Direction == ConvertDirection.Compress && !string.IsNullOrEmpty(detected.OutputExtension))
-                    baseFileName = Path.ChangeExtension(baseFileName, detected.OutputExtension);
-            }
-            catch { }
-        }
-
-        return baseFileName;
-    }
+    public string? NamingPreview { get; private set { SetProperty(ref field, value); } }
 
     public Func<IReadOnlyList<ArchiveCandidate>, Task<string?>>? RequestSourceSelectionAsync { get; set; }
 
     public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 파일을 드래그하거나 클릭하세요";
+
+    public override string? HelpPageKey => "patch-general";
 
     public NormalPatchMainViewModel()
     {
@@ -254,6 +164,14 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         };
 
         TriggerPreviewUpdate();
+    }
+
+    private void SyncNamingPreset()
+    {
+        SelectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
+
+        OnPropertyChanged(nameof(SelectedNamingPreset));
+        OnPropertyChanged(nameof(IsNamingFormatReadOnly));
     }
 
     public void AddPatchSlot()
@@ -492,6 +410,80 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         }
 
         return sourceMainFileName;
+    }
+
+    private void TriggerPreviewUpdate()
+    {
+        _previewCts?.Cancel();
+
+        _previewCts = new CancellationTokenSource();
+
+        var token = _previewCts.Token;
+
+        Task.Delay(100, token).ContinueWith(t =>
+        {
+            if (t.IsCanceled)
+                return;
+
+            string baseFileName = ResolvePreviewBaseFileName();
+
+            if (!NamingEnabled)
+            {
+                NamingPreview = baseFileName;
+                return;
+            }
+
+            string? namingPatchPath = NamingPatchPath;
+
+            if (namingPatchPath != _lastProcessedPatchPath)
+            {
+                _lastProcessedPatchPath = namingPatchPath;
+
+                var (v, d, l) = VersionInfoExtractor.GetPatchMetadata(namingPatchPath);
+
+                _cachedPatchVersion = v;
+                _cachedPatchDate = d;
+                _cachedPatchLanguage = l;
+            }
+
+            string version = _cachedPatchVersion ?? "1.0";
+            string date = _cachedPatchDate ?? DateTime.Now.ToString("yyMMdd");
+            string? language = _cachedPatchLanguage;
+            string result = VersionInfoExtractor.ApplyFormat(baseFileName, version, date, language, NamingFormat, AppConfig.Instance.Common.Language);
+
+            NamingPreview = result;
+
+        }, TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
+    private string ResolvePreviewBaseFileName()
+    {
+        if (SourcePath is null)
+            return "원본.bin";
+
+        if (!File.Exists(SourcePath) || SourceArchiveExtractor.IsArchivePath(SourcePath))
+            return Path.GetFileName(SourcePath);
+
+        string ext = Path.GetExtension(SourcePath);
+
+        if (ext.Equals(".chd", StringComparison.OrdinalIgnoreCase) || ext.Equals(".rvz", StringComparison.OrdinalIgnoreCase))
+            return Path.GetFileName(SourcePath);
+
+        string baseFileName = ResolveOutputBaseFileName(SourcePath);
+
+        if (AutoCompress)
+        {
+            try
+            {
+                var detected = FormatDetector.Detect(SourcePath);
+
+                if (detected.Direction == ConvertDirection.Compress && !string.IsNullOrEmpty(detected.OutputExtension))
+                    baseFileName = Path.ChangeExtension(baseFileName, detected.OutputExtension);
+            }
+            catch { }
+        }
+
+        return baseFileName;
     }
 
     public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && PatchPaths.Count > 0;

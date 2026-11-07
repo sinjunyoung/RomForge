@@ -166,7 +166,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         }
     }
 
-    public override string? HelpPageUrl => "https://sinjunyoung.github.io/RomForge/wiiu-repack/";
+    public override string? HelpPageKey => "wiiu-repack";
 
     private static bool LooksLikeSupportedFolder(string path) => WupTitleSource.LooksLikeWupFolder(path) || (Directory.Exists(Path.Combine(path, "code")) && Directory.Exists(Path.Combine(path, "content")) && Directory.Exists(Path.Combine(path, "meta")));
 

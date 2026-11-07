@@ -38,6 +38,8 @@ public class ConverterMainViewModel : ToolTabViewModel
         }
     }
 
+    public override string? HelpPageKey => "wiiu-format";
+
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public Visibility OutputHintVisibility => string.IsNullOrEmpty(OutputPath) ? Visibility.Visible : Visibility.Collapsed;

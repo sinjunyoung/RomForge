@@ -23,12 +23,6 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 
     public PopsOptionsViewModel PopsOptions { get; }
 
-    public ICommand RunCommand { get; }
-
-    public ICommand SettingsCommand { get; }
-
-    public event EventHandler? RunNavigateSettings;
-
     public string GameTitle { get; set { SetProperty(ref field, value); } } = string.Empty;
 
     public bool CanEditPopsConfig => IsUnlocked && !Files.HasPresetConfig;
@@ -36,6 +30,14 @@ public class PackingMainViewModel : ProgressToolTabViewModel
     public bool CanAdd => !IsLocked && Files.FileItems.Count < DiscListViewModel.MaxItems;
 
     public bool CanRun => !IsLocked && Files.FileItems.Count > 0 && !Images.IsDownloading;
+
+    public override string? HelpPageKey => "psp-pbp-convert";
+
+    public ICommand RunCommand { get; }
+
+    public ICommand SettingsCommand { get; }
+
+    public event EventHandler? RunNavigateSettings;
 
     public PackingMainViewModel()
     {

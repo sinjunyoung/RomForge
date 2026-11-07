@@ -69,6 +69,8 @@ namespace RomForge.ViewModels.Switch
 
         public bool IsConverting { get => _isConverting; set { _isConverting = value; OnPropertyChanged(); } }
 
+        public override string? HelpPageKey => "switch-nsp-convert";
+
         public Visibility CueHintVisibility => string.IsNullOrEmpty(CuePath) ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility NspHintVisibility => string.IsNullOrEmpty(NspPath) ? Visibility.Visible : Visibility.Collapsed;

@@ -20,6 +20,8 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     public ObservableCollection<ConverterFileItem> FileItems { get; } = [];
 
+    public override string? HelpPageKey => "switch-format";
+
     public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }

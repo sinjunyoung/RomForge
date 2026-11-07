@@ -66,7 +66,6 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 
     public bool CanRun() => !string.IsNullOrEmpty(SourcePath) && !string.IsNullOrEmpty(PatchPath);
 
-
     public void Clear()
     {
         CancellationTokenSource?.Cancel();

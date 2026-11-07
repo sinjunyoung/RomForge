@@ -120,7 +120,7 @@
                         <Style TargetType="Button" BasedOn="{StaticResource CaptionButtonStyle}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding HasHelpPage}" Value="True">
+                                <DataTrigger Binding="{Binding HasHelpKey}" Value="True">
                                     <Setter Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                             </Style.Triggers>

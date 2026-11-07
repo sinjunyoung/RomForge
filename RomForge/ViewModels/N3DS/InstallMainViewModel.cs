@@ -14,6 +14,8 @@ public class InstallMainViewModel : ToolTabViewModel
 
     public ObservableCollection<TitleViewModel> Items { get; } = [];
 
+    public override string? HelpPageKey => "3ds-pc-install";
+
     public Visibility HintVisibility => Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public bool IsNotInstalling => !IsInstalling;

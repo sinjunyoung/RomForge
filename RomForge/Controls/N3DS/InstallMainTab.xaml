@@ -47,7 +47,7 @@
             </DockPanel>
         </Border>
 
-        <TabControl Grid.Row="1" x:Name="Tab" Background="Transparent" BorderThickness="0">
+        <TabControl Grid.Row="1" x:Name="Tab" SelectedIndex="{Binding SubTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0">
             <TabControl.Template>
                 <ControlTemplate TargetType="TabControl">
                     <Grid>

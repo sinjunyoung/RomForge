@@ -166,5 +166,5 @@ public partial class MainWindow : Window
 
     private void UrlButton_Click(object sender, RoutedEventArgs e) => "https://github.com/sinjunyoung/RomForge/releases/latest".OpenUrl();
 
-    private void HelpButton_Click(object sender, RoutedEventArgs e) => ViewModel.HelpPageUrl?.OpenUrl();
+    private void HelpButton_Click(object sender, RoutedEventArgs e) => (ViewModel.HelpPageKey != null ? "https://sinjunyoung.github.io/RomForge/" + ViewModel.HelpPageKey : null)?.OpenUrl();
 }

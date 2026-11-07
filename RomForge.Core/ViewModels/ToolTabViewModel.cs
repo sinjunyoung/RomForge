@@ -23,9 +23,9 @@ public abstract class ToolTabViewModel : ViewModelBase
 
     public ObservableCollection<LogEntry> LogEntries { get; } = [];
 
-    public virtual bool HasHelpPage => HelpPageUrl != null;
+    public virtual bool HasHelpKey => HelpPageKey != null;
 
-    public virtual string? HelpPageUrl => null;
+    public virtual string? HelpPageKey => null;
 
     protected CancellationTokenSource? CancellationTokenSource { get; set; }
 

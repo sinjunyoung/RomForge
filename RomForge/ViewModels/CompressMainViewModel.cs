@@ -29,15 +29,7 @@ public class CompressMainViewModel : ToolTabViewModel
         ".3ds", ".cci", ".cia", ".zcci"
     };
 
-    public ObservableCollection<FileItem> FileItems { get; } = [];
-
-    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-    public ICommand RunCommand { get; }
-
-    public ICommand BrowseOutputCommand { get; }
-
-    public event Action<FileItem>? ScrollToItemRequested;
+    public ObservableCollection<FileItem> FileItems { get; } = [];    
 
     public bool UseCustomOutputPath
     {
@@ -64,6 +56,16 @@ public class CompressMainViewModel : ToolTabViewModel
             OnPropertyChanged();
         }
     }
+
+    public override string? HelpPageKey => "compression";
+
+    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public ICommand RunCommand { get; }
+
+    public ICommand BrowseOutputCommand { get; }
+
+    public event Action<FileItem>? ScrollToItemRequested;
 
     public CompressMainViewModel()
     {

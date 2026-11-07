@@ -35,8 +35,6 @@ namespace RomForge.ViewModels;
 
 public class ConvertMainViewModel : ToolTabViewModel
 {
-    private CancellationTokenSource _cts = new();
-
     public static readonly HashSet<string> SupportedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".nsp", ".xci", ".nsz", ".xcz",
@@ -51,15 +49,10 @@ public class ConvertMainViewModel : ToolTabViewModel
 
     private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
 
-    public ObservableCollection<object> FileItems { get; } = [];
-
-    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-
-    public ICommand RunCommand { get; }
-
-    public ICommand BrowseOutputCommand { get; }
-
     private string? _outputDir;
+    private CancellationTokenSource _cts = new();
+
+    public ObservableCollection<object> FileItems { get; } = [];    
 
     public bool UseCustomOutputPath
     {
@@ -76,18 +69,18 @@ public class ConvertMainViewModel : ToolTabViewModel
         }
     }
 
-    public string? OutputPath
-    {
-        get => AppConfig.Instance.OutputFolders.ConvertOutputPath;
-        set
-        {
-            AppConfig.Instance.OutputFolders.ConvertOutputPath = value;
+    public string? OutputPath { get => AppConfig.Instance.OutputFolders.ConvertOutputPath; set {  AppConfig.Instance.OutputFolders.ConvertOutputPath = value; OnPropertyChanged(); } }
 
-            OnPropertyChanged();
-        }
-    }
+    public override string? HelpPageKey => "convert";
+
+    public Visibility HintVisibility => FileItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    public ICommand RunCommand { get; }
+
+    public ICommand BrowseOutputCommand { get; }
 
     public event Action<object>? ScrollToItemRequested;
+
     public event EventHandler? RunNavigateCerts;
 
     public ConvertMainViewModel()
