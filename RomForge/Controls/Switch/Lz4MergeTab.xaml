@@ -16,7 +16,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <local:GroupedSwitchListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}" ShowProgressColumns="True"/>
+        <local:GroupedSwitchCompressionListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
         <local:SwitchOutputFormatSelector Grid.Row="1" Margin="10,0,0,5" Format="{Binding OutputFormat, Mode=TwoWay}" IsEnabled="{Binding IsIdle}"/>
         <Grid Grid.Row="2" Margin="0,0,0,5">
             <Grid.ColumnDefinitions>

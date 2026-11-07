@@ -61,7 +61,7 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="70">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="No">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -88,7 +88,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,12,0">
                                             <Border.Background>
                                                 <ImageBrush ImageSource="{Binding Icon}" Stretch="UniformToFill"/>
@@ -103,7 +103,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="90">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="TypeLabel">
                                     <StackPanel Orientation="Horizontal">
@@ -154,7 +154,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="90">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileSizeBytes">
                                     <StackPanel Orientation="Horizontal">
@@ -173,10 +173,7 @@
                         <GridViewColumn Width="120">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Progress">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="진행률" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>

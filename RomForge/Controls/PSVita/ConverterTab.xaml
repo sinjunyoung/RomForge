@@ -62,7 +62,7 @@
                         </ListView.GroupStyle>
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Width="80">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Height="24" Margin="0,0,4,0" Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24"/>
@@ -114,7 +114,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="80">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>

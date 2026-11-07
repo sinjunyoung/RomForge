@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="900">
-    
+
     <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#12FFFFFF" Padding="10">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -38,7 +38,7 @@
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="70">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Categories.png"/>
                                 </GridViewColumn.Header>
@@ -50,13 +50,15 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Width="300">
+                            <GridViewColumn Width="370">
                                 <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
+                                    <GridViewColumnHeader Tag="TitleName">
+                                        <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
+                                    </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,12,0">
                                                 <Border.Background>
                                                     <ImageBrush ImageSource="{Binding Icon}" Stretch="UniformToFill"/>
@@ -64,23 +66,19 @@
                                             </Border>
                                             <StackPanel VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding TitleName}" FontWeight="Bold" FontSize="12" ToolTip="{Binding FilePath}"/>
-                                                <TextBlock Text="{Binding TitleID}" FontSize="10" Foreground="Gray"/>
+                                                <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                    <TextBlock Text="{Binding TitleID}" FontSize="10" Foreground="Gray"/>
+                                                    <Border Background="{Binding ExtensionBackground}" CornerRadius="2" Padding="3,0" Margin="6,0,0,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="{Binding Extension}" Foreground="{Binding ExtensionForeground}" FontSize="9" FontWeight="Bold"/>
+                                                    </Border>
+                                                    <TextBlock Text="{Binding Version}" FontSize="10" Foreground="Gray" Margin="6,0,0,0" VerticalAlignment="Center" ToolTip="{Binding Version}"/>
+                                                </StackPanel>
                                             </StackPanel>
                                         </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Width="90">
-                                <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Version.png" Text="버전"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding Version}" FontWeight="Bold" FontSize="12" HorizontalAlignment="Right"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Width="80">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <local:IconHeader Icon="/Assets/Images/Patch.png" Text="패치"/>
                                 </GridViewColumn.Header>
@@ -112,19 +110,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Width="50">
-                                <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/Assets/Images/Extension.png"/>
-                                </GridViewColumn.Header>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding ExtensionBackground}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding Extension}" Foreground="{Binding ExtensionForeground}" FontSize="11" FontWeight="Bold"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-                            <GridViewColumn Width="80">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="용량"/>
                                 </GridViewColumn.Header>
@@ -134,7 +120,7 @@
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Width="70">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <StackPanel Orientation="Horizontal">
                                         <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="False" IsThreeState="False" Margin="0,0,5,0" Checked="HeaderCheckBox_Checked" Unchecked="HeaderCheckBox_Unchecked"/>

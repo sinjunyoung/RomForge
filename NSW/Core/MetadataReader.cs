@@ -65,7 +65,12 @@ public static class MetadataReader
         {
             using var storage = new LocalStorage(path, FileAccess.Read);
             using var fs = storage.OpenFileSystem(keySet, path);
-            var foundTypes = new HashSet<string>();
+
+            bool hasBase = false;
+            bool hasUpdate = false;
+            int dlcCount = 0;
+            bool hasUnknown = false;
+
             var entries = fs.EnumerateEntries("/", "*.nca")
                 .Concat(fs.EnumerateEntries("/", "*.ncz"))
                 .Where(e => e.Type == DirectoryEntryType.File);
@@ -81,18 +86,32 @@ public static class MetadataReader
 
                 if (cnmt != null)
                 {
-                    var letter = GetContentMetaTypeTag(cnmt.Type)[..1];
+                    var tag = GetContentMetaTypeTag(cnmt.Type);
 
-                    if (letter != "?")
-                        foundTypes.Add(letter);
+                    if (tag == "Base")
+                        hasBase = true;
+                    else if (tag == "Update")
+                        hasUpdate = true;
+                    else if (tag == "DLC")
+                        dlcCount++;
+                    else
+                        hasUnknown = true;
                 }
             }
 
-            return foundTypes.Count == 0 ? "?" : string.Join("+", sourceArray.Where(foundTypes.Contains));
+            var parts = new List<string>();
+            if (hasBase) parts.Add("B");
+            if (hasUpdate) parts.Add("U");
+            if (dlcCount > 0) parts.Add(dlcCount == 1 ? "D" : $"{dlcCount}D");
+
+            if (parts.Count == 0)
+                return hasUnknown ? "?" : "?";
+
+            return string.Join("+", parts);
         }
-        catch 
-        { 
-            return "?"; 
+        catch
+        {
+            return "?";
         }
     }
 
@@ -108,7 +127,12 @@ public static class MetadataReader
             using var storage = new LocalStorage(path, FileAccess.Read);
             string ext = System.IO.Path.GetExtension(path).ToLowerInvariant();
             using IFileSystem fs = storage.OpenFileSystem(keySet, path);
-            var types = new HashSet<string>();
+
+            bool hasBase = false;
+            bool hasUpdate = false;
+            int dlcCount = 0;
+            bool hasUnknown = false;
+
             var entries = fs.EnumerateEntries("/", "*.nca").ToList();
             string? baseTitleId = null;
             string? anyTitleId = null;
@@ -140,10 +164,16 @@ public static class MetadataReader
                             if (cnmt.Type == ContentMetaType.Application)
                                 baseTitleId = thisTitleId;
 
-                            string? t = GetContentMetaTypeTag(cnmt.Type)[..1];
+                            var tag = GetContentMetaTypeTag(cnmt.Type);
 
-                            if (t != null)
-                                types.Add(t);
+                            if (tag == "Base")
+                                hasBase = true;
+                            else if (tag == "Update")
+                                hasUpdate = true;
+                            else if (tag == "DLC")
+                                dlcCount++;
+                            else
+                                hasUnknown = true;
                         }
                     }
                 }
@@ -172,7 +202,12 @@ public static class MetadataReader
             if (baseTitleId != null || anyTitleId != null)
                 info.TitleId = baseTitleId ?? anyTitleId!;
 
-            info.Type = types.Count == 0 ? "?" : string.Join("+", sourceArray.Where(types.Contains));
+            var types = new List<string>();
+            if (hasBase) types.Add("B");
+            if (hasUpdate) types.Add("U");
+            if (dlcCount > 0) types.Add(dlcCount == 1 ? "D" : $"{dlcCount}D");
+
+            info.Type = types.Count > 0 ? string.Join("+", types) : (hasUnknown ? "?" : "?");
         }
         catch (Exception ex)
         {
@@ -419,8 +454,11 @@ public static class MetadataReader
         if (metas.Any(m => m.Type == ContentMetaType.Patch))
             types.Add("U");
 
-        if (metas.Any(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta))
-            types.Add("D");
+        int dlcCount = metas.Count(m => m.Type is ContentMetaType.AddOnContent or ContentMetaType.Delta);
+        if (dlcCount > 0)
+        {
+            types.Add(dlcCount == 1 ? "D" : $"{dlcCount}D");
+        }
 
         var main = metas.FirstOrDefault(m => m.Type == ContentMetaType.Patch) ?? metas.FirstOrDefault(m => m.Type == ContentMetaType.Application) ?? metas[0];
 

@@ -61,7 +61,7 @@
 
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="50">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Image Source="/Assets/Images/List.png" Width="24" Height="24" Margin="0,0,4,0"/>
@@ -126,7 +126,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="90">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                     <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
@@ -142,10 +142,7 @@
 
                         <GridViewColumn Width="120">
                             <GridViewColumn.Header>
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                    <TextBlock Text="진행률" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                </StackPanel>
+                                <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,4,0"/>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>

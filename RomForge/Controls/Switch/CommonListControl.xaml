@@ -40,7 +40,7 @@
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Width="70">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="FileType">
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Categories.png"/>
@@ -55,7 +55,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="380">
+                            <GridViewColumn Width="370">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="TitleName">
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
@@ -63,7 +63,7 @@
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,12,0">
                                                 <Border.Background>
                                                     <ImageBrush ImageSource="{Binding Icon}" Stretch="UniformToFill"/>
@@ -78,7 +78,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="120">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Version">
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Version.png" Text="버전"/>
@@ -93,7 +93,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="50">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Extension">
                                         <local:IconHeader Icon="/Assets/Images/Extension.png"/>
@@ -108,7 +108,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="75">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="FileSize">
                                         <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="{x:Static l:Resources.Header_Size}"/>

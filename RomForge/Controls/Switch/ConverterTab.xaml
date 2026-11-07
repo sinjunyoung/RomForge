@@ -54,7 +54,7 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="60">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="No">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -81,7 +81,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Border Width="36" Height="36" CornerRadius="6" Margin="0,0,12,0">
                                             <Border.Background>
                                                 <ImageBrush ImageSource="{Binding Icon}" Stretch="UniformToFill"/>
@@ -96,7 +96,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="70">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileType">
                                     <Image Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
@@ -142,7 +142,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="80">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Version">
                                     <StackPanel Orientation="Horizontal">
@@ -158,7 +158,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="90">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileSize">
                                     <StackPanel Orientation="Horizontal">
@@ -177,23 +177,20 @@
                         <GridViewColumn Width="110">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Status">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="상태" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/Assets/Images/Progress.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Margin="6,0">
+                                        <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor}" FontSize="10" HorizontalAlignment="Center" Margin="0,0,0,2"/>
                                         <Grid>
                                             <ProgressBar Value="{Binding Progress}" Maximum="100" Style="{StaticResource ProgressBarStyle}" Height="14"/>
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Progress}" Foreground="White" FontSize="10" FontWeight="Bold"/>
                                                 <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
                                             </StackPanel>
-                                        </Grid>
-                                        <TextBlock Text="{Binding Status}" Foreground="{Binding StatusColor}" FontSize="10" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        </Grid>                                        
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>

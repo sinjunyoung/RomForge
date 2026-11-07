@@ -22,24 +22,6 @@ public partial class GroupedSwitchListControl : CommonListControlBase
 
     public Action? ExtraButton2Clicked;
 
-    public bool ShowProgressColumns
-    {
-        get;
-        set
-        {
-            field = value;
-
-            //gridView.Columns.Remove(colEstimatedRatio);
-            gridView.Columns.Remove(colProgress);
-
-            if (value)
-            {
-                //gridView.Columns.Add(colEstimatedRatio);
-                gridView.Columns.Add(colProgress);
-            }
-        }
-    }
-
     protected override ListView? TargetListView => lvFiles;
 
     protected override FrameworkElement? DropHintElement => dropHint;
@@ -47,18 +29,15 @@ public partial class GroupedSwitchListControl : CommonListControlBase
     public GroupedSwitchListControl()
     {
         InitializeComponent();
-        ShowProgressColumns = false;
 
         if (CollectionViewSource.GetDefaultView(GameFiles) is ListCollectionView view)
         {
             view.GroupDescriptions.Clear();
             view.GroupDescriptions.Add(new PropertyGroupDescription(nameof(GameFile.TitleID), new TitleIdGroupConverter()));
-
             view.CustomSort = new SwitchItemSortComparer();
         }
 
         lvFiles.ItemsSource = GameFiles;
-
         UpdateDropHint();
     }
 
@@ -71,9 +50,7 @@ public partial class GroupedSwitchListControl : CommonListControlBase
         try
         {
             var keySet = KeySetProvider.Instance.KeySet;
-
-            if (keySet == null)
-                return;
+            if (keySet == null) return;
 
             var targets = GameFiles.Where(f => f.IsKeyMissing).ToList();
 
@@ -121,8 +98,6 @@ public partial class GroupedSwitchListControl : CommonListControlBase
     }
 
     private void BtnExtra1_Click(object sender, RoutedEventArgs e) => ExtraButton1Clicked?.Invoke();
-
     private void BtnExtra2_Click(object sender, RoutedEventArgs e) => ExtraButton2Clicked?.Invoke();
-
     private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 }

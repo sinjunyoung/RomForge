@@ -75,7 +75,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="70">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Categories.png"/>
                                     </GridViewColumn.Header>
@@ -94,7 +94,7 @@
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,5">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Border x:Name="iconBorder" Width="36" Height="36" CornerRadius="6" Margin="0,0,12,0">
                                                     <Border.Background>
                                                         <ImageBrush ImageSource="{Binding Icon}" Stretch="UniformToFill"/>
@@ -114,7 +114,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="120">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Version.png" Text="버전"/>
                                     </GridViewColumn.Header>
@@ -125,7 +125,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="50">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <local:IconHeader Icon="/Assets/Images/Extension.png"/>
                                     </GridViewColumn.Header>
@@ -143,7 +143,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="75">
+                                <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/FileSizeBytes.png" Text="{x:Static l:Resources.Header_Size}"/>
                                     </GridViewColumn.Header>
