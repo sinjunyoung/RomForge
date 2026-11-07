@@ -161,8 +161,6 @@
     <ProjectReference Include="..\RomForge.Core\RomForge.Core.csproj" />
     <ProjectReference Include="..\Vita\Vita.csproj" />
     <ProjectReference Include="..\WiiU\WiiU.csproj" />
-    <!-- RomZip.Core는 기존 프로젝트 경로로 교체 -->
-    <!-- <ProjectReference Include="..\..\RomZip\RomZip.Core\RomZip.Core.csproj"/> -->
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\Images\Azahar.png" />

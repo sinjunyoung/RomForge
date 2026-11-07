@@ -26,13 +26,7 @@
   <ItemGroup>
     <None Remove=".gitattributes" />
     <None Remove=".gitignore" />
-    <None Remove="250824_ImageWriter.zip" />
-    <None Remove="250824_PickPack.Disk.zip" />
-    <None Remove="250825_ImageWriter.zip" />
-    <None Remove="250825_PickPack.Disk.zip" />
-    <None Remove="250825_PickPack.Disk_.zip" />
     <None Remove="LICENSE.txt" />
-    <None Remove="PickPack.Disk.zip" />
   </ItemGroup>
 
   <ItemGroup>
