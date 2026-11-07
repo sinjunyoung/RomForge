@@ -85,7 +85,7 @@ public class ConvertFileItem(string filePath) : FileItemBase(filePath), Interfac
         ["ccd"] = "#A6C8E2",
     };
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 
     protected override long CalculateSize(string filePath)
     {

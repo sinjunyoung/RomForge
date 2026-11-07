@@ -48,5 +48,5 @@ public class DecryptorFileItem(string filePath) : FileItemBase(filePath)
         ["cia"] = "#C96F2C",
     };
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 }

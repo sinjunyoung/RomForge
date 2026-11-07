@@ -90,7 +90,7 @@ public class FileItem(string filePath) : FileItemBase(filePath)
         };
     }
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 
     private static List<string> SplitGdiLine(string line)
     {

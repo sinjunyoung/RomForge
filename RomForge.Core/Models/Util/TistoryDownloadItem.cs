@@ -21,7 +21,7 @@ public class TistoryDownloadItem(string url) : ProcessableItemBase("대기 중")
         }
     }
 
-    public string FileSize => FileSizeBytes > 0 ? PickPack.Disk.Helpers.FileSize.FormatSize(FileSizeBytes) : "-";
+    public string FileSize => FileSizeBytes > 0 ? Common.Services.FileSize.FormatSize(FileSizeBytes) : "-";
 
     public string? SavedPath { get; set => SetProperty(ref field, value); }
 

@@ -1,6 +1,6 @@
 ﻿using System.Management;
 
-namespace PickPack.Disk.Helpers
+namespace Common.Services
 {
     public class DriveInfos(string devicePath, string model, long sizeBytes, int diskNumber, string? driveLetter)
     {

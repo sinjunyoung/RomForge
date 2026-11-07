@@ -156,7 +156,6 @@
     <ProjectReference Include="..\CD\CD.csproj" />
     <ProjectReference Include="..\NSW\NSW.csproj" />
     <ProjectReference Include="..\Patch\Patch.csproj" />
-    <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
     <ProjectReference Include="..\PSP\PSP.csproj" />
     <ProjectReference Include="..\RomForge.Core\RomForge.Core.csproj" />
     <ProjectReference Include="..\Vita\Vita.csproj" />

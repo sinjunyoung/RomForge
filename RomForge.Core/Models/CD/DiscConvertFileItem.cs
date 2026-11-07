@@ -98,5 +98,5 @@ public class DiscConvertFileItem : ConvertibleFileItemBase
         }
     }
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 }

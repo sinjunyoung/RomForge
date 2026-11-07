@@ -33,7 +33,6 @@
     <ProjectReference Include="..\CHD\CHD.csproj" />
     <ProjectReference Include="..\NSW\NSW.csproj" />
     <ProjectReference Include="..\Patch\Patch.csproj" />
-    <ProjectReference Include="..\PickPack.Disk\PickPack.Disk.csproj" />
     <ProjectReference Include="..\PSP\PSP.csproj" />
     <ProjectReference Include="..\Vita\Vita.csproj" />
     <ProjectReference Include="..\WiiGC\WiiGC.csproj" />

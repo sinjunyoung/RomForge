@@ -37,7 +37,7 @@ public class PbpFileItem(string filePath) : FileItemBase(filePath), Interfaces.I
 
     public List<string> Languages { get; set => SetProperty(ref field, value); } = [];
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 
     public List<string> AvailableFormats { get; } = ["CUE"];
 

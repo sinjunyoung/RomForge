@@ -5,8 +5,6 @@ namespace RomForge.ViewModels.Util;
 
 public class UtilMainViewModel : MultiToolTabViewModel
 {
-    public ZipImageToolMainViewModel ZipImageToolVM { get; } = new();
-
     public CertsMainViewModel CertsVM { get; } = new();
 
     public CueMainViewModel CueVM { get; } = new();
@@ -36,7 +34,6 @@ public class UtilMainViewModel : MultiToolTabViewModel
 
         Tools.Add(HashVM);
         Tools.Add(TistoryVM);
-        Tools.Add(ZipImageToolVM);
         Tools.Add(CertsVM);
         Tools.Add(CueVM);        
 

@@ -24,5 +24,5 @@ public class FileItem(string filePath) : ConvertibleFileItemBase(filePath, "ып╕ь
         _ => []
     };
 
-    protected override string FormatSize(long bytes) => PickPack.Disk.Helpers.FileSize.FormatSize(bytes);
+    protected override string FormatSize(long bytes) => Common.Services.FileSize.FormatSize(bytes);
 }

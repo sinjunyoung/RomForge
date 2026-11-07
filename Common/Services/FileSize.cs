@@ -1,4 +1,4 @@
-﻿namespace PickPack.Disk.Helpers
+﻿namespace Common.Services
 {
     public static class FileSize
     {
