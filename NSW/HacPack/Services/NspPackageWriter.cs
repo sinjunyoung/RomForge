@@ -44,7 +44,7 @@ public sealed class NspPackageWriter : IDisposable
         _output.Write(new byte[_headerSize]);
     }
 
-    public (string Name, byte[] Hash, long Size) AddNca(string extension, Func<Stream, (byte[] Hash, long Size)> write)
+    public (string Name, byte[] Hash, long Size) AddNca(string extension, Func<Stream, (byte[] Hash, long Size)> write, bool compress = false)
     {
         if (_completed)
             throw new InvalidOperationException("이미 완료된 패키지입니다.");
@@ -52,7 +52,7 @@ public sealed class NspPackageWriter : IDisposable
         if (_files.Count >= MaxFiles)
             throw new InvalidOperationException($"패키지에 담을 수 있는 파일 수({MaxFiles})를 초과했습니다.");
 
-        bool toNcz = Ncz != null && extension == ".nca";
+        bool toNcz = compress && Ncz != null && extension == ".nca";
         long entryStart = _output.Length;
         long ncaStart = toNcz ? entryStart + NczInPlaceConverter.Gap : entryStart;
 

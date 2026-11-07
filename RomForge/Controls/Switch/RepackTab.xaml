@@ -42,6 +42,7 @@
                 </TabItem>
             </TabControl>
             <StackPanel Grid.Row="1" Margin="5,0,5,5">
+                <local:SwitchOutputFormatSelector Margin="5,0,0,5" Format="{Binding OutputFormat, Mode=TwoWay}" IsEnabled="{Binding IsIdle}"/>
                 <Grid Height="36">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

@@ -73,7 +73,7 @@ public static class DlcNspBuilder
 
                 if (hasRomfs)
                 {
-                    var (_, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, dlcSettings, compressLevel, null, progress, ct));
+                    var (_, hash, size) = package.AddNca(".nca", output => NcaGenerator.GenerateRomfsNcaInto(output, dlcSettings, compressLevel, null, progress, ct), compress: true);
 
                     contents.Add(new CnmtContent(0x2, 0, hash, size));
                 }

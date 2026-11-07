@@ -210,7 +210,7 @@ public static class NspBuildService
         settings.NcaType = LibHac.FsSystem.NcaHeader.ContentType.Program;
 
         var (name, hash, size) = await Task.Run(() =>
-            package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct)), ct);
+            package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct), compress: true), ct);
 
         log($"프로그램 빌드 완료: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
 
@@ -363,7 +363,7 @@ public static class NspBuildService
     private static string StepFinalize(BuildRequest req, UnpackResult unpackResult, string tempNsp, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
         string extension = req.OutputNsz ? "nsz" : "nsp";
-        string suffix = req.HasPatch ? $"Patched_Repack.{extension}" : $"Repack.{extension}";
+        string suffix = !string.IsNullOrWhiteSpace(req.OutputSuffix) ? $"{req.OutputSuffix}.{extension}" : req.HasPatch ? $"Patched_Repack.{extension}" : $"Repack.{extension}";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = string.IsNullOrWhiteSpace(req.OutputFileName) ? NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount) : req.OutputFileName;
         string finalNsp = Common.Services.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));

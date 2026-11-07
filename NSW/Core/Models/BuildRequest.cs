@@ -39,6 +39,8 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public string? OutputFileName { get; init; }
 
+    public string? OutputSuffix { get; init; }
+
     public IReadOnlyDictionary<string, bool> DlcCompressRomfs { get; init; } = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
     public IReadOnlyDictionary<string, HashSet<string>>? DlcTitleIdsByFile { get; init; }

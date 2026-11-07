@@ -147,7 +147,7 @@ public static class Lz4MergeService
             OutputNsz = nsz != null,
             NszCompressLevel = nsz?.CompressLevel ?? 18,
             NszUseBlockMode = nsz?.UseBlockMode ?? true,
-            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + (nsz != null ? "_lz4.nsz" : "_lz4.nsp")
+            OutputSuffix = "lz4"
         };
     }
 

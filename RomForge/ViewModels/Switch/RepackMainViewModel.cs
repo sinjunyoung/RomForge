@@ -6,6 +6,7 @@ using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.HacPack.Models;
 using RomForge.Core;
+using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
@@ -19,13 +20,20 @@ namespace RomForge.ViewModels.Switch
 {
     public class RepackMainViewModel : ProgressToolTabViewModel
     {
+        private static int NszCompressLevel => AppConfig.Instance.Switch.CompressLevel;
+        private static bool NszUseBlockMode => AppConfig.Instance.Switch.UseBlockMode;
+
         private readonly Stopwatch _totalSw = new();
 
         private BuildMode? _currentMode;
 
+        private bool UseNsz => OutputFormat == OutputFormat.NSZ;
+
         public bool IsIndeterminate { get; set { SetProperty(ref field, value); } } = false;
 
         public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchRepackOutputPath = value; } } = string.Empty;
+
+        public OutputFormat OutputFormat { get; set { SetProperty(ref field, value); } } = OutputFormat.NSP;
 
         public bool IsUnpackRunning => IsLocked && _currentMode == BuildMode.UnpackOnly;
 
@@ -113,7 +121,7 @@ namespace RomForge.ViewModels.Switch
             });
         }
 
-        private async Task ExecuteBuildAsync(BuildMode mode, BuildRequest req)
+        private async Task ExecuteBuildAsync(BuildMode mode, NSW.Core.Models.BuildRequest req)
         {
             CancellationTokenSource = new CancellationTokenSource();
 
@@ -191,7 +199,7 @@ namespace RomForge.ViewModels.Switch
             }, token);
         }
 
-        private bool TryGetBuildRequest(BuildMode mode, out BuildRequest? req, out string errorMsg)
+        private bool TryGetBuildRequest(BuildMode mode, out NSW.Core.Models.BuildRequest? req, out string errorMsg)
         {
             req = null;
             errorMsg = string.Empty;
@@ -217,10 +225,13 @@ namespace RomForge.ViewModels.Switch
                 if (!Directory.Exists(tempPath))
                     Directory.CreateDirectory(tempPath);
 
-                req = new BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath)
+                req = new NSW.Core.Models.BuildRequest(string.Empty, string.Empty, [], string.Empty, OutputPath)
                 {
                     CompressRomfs = RepackLz4Sync.ResolveProgramOverride(Context?.GameFiles, rebuildOnly: true),
-                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true)
+                    DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true),
+                    OutputNsz = UseNsz,
+                    NszCompressLevel = NszCompressLevel,
+                    NszUseBlockMode = NszUseBlockMode
                 };
 
                 return true;
@@ -273,7 +284,7 @@ namespace RomForge.ViewModels.Switch
                     .GroupBy(f => f.FilePath, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.Select(f => f.TitleID!).ToHashSet(StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase);
 
-            req = new BuildRequest(baseEntry.FilePath, updateEntry?.FilePath ?? string.Empty, [.. dlcEntries.Select(f => f.FilePath)], mainPatch, OutputPath)
+            req = new NSW.Core.Models.BuildRequest(baseEntry.FilePath, updateEntry?.FilePath ?? string.Empty, [.. dlcEntries.Select(f => f.FilePath)], mainPatch, OutputPath)
             {
                 DlcTitleIdsByFile = dlcTitleIds,
                 DlcPatchDirs = dlcPatchDirs,
@@ -281,7 +292,10 @@ namespace RomForge.ViewModels.Switch
                 DlcPatchPasswords = dlcPatchPasswords,
                 CompressRomfs = RepackLz4Sync.ResolveProgramOverride(gameFiles, rebuildOnly: false),
                 DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(gameFiles, rebuildOnly: false),
-                StreamRomfs = mode == BuildMode.FullProcess
+                StreamRomfs = mode == BuildMode.FullProcess,
+                OutputNsz = UseNsz,
+                NszCompressLevel = NszCompressLevel,
+                NszUseBlockMode = NszUseBlockMode
             };
 
             return true;
