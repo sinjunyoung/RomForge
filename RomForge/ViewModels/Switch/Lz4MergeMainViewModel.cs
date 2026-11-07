@@ -18,8 +18,8 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 {
     private readonly Stopwatch _totalSw = new();
 
+    private int _successCount;
     private bool _hadFailure;
-    private int _handledWithoutOutput;
 
     public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchLz4MergeOutputPath = value; } } = string.Empty;
 
@@ -68,7 +68,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
                 _hadFailure = false;
-                _handledWithoutOutput = 0;
+                _successCount = 0;
 
                 foreach (var file in gameFiles.Where(f => !completedPaths.Contains(f.FilePath)))
                 {
@@ -81,16 +81,12 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild, hasNsz), (paths, result) => FinishJob(rowsByPath, paths, result), (paths, outputPath) => ApplyActual(rowsByPath, paths, outputPath),
                     (msg, level) => AppendLog(msg, level), token), token);
 
-                if (results.Count > 0 || (!_hadFailure && _handledWithoutOutput > 0))
+                if (_successCount > 0)
                 {
                     AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
-
-                    if (results.Count > 0)
-                        outputDir.OpenFolder();
+                    outputDir.OpenFolder();
                 }
-                else
-                    await SoundPlayer.PlayErrorAsync();
             }
             catch (OperationCanceledException)
             {
@@ -158,11 +154,11 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
         if (result == Lz4JobResult.Failed)
             _hadFailure = true;
 
-        if (result is Lz4JobResult.Skipped or Lz4JobResult.AlreadyDone)
-            _handledWithoutOutput++;
-
         if (result != Lz4JobResult.AlreadyDone)
         {
+            if (result == Lz4JobResult.Done)
+                _successCount++;
+
             var rows = SelectRows(rowsByPath, paths);
 
             Application.Current.Dispatcher.InvokeAsync(() =>

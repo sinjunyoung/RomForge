@@ -112,7 +112,7 @@
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0">
                                             <TextBlock Text="{Binding FileSize}" FontSize="11" HorizontalAlignment="Right"/>
-                                            <TextBlock Text="{Binding Lz4.CompressedSizeText}" FontSize="10" Foreground="#8888A8" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding Lz4.CompressedSizeText}" FontSize="11" Foreground="#54FFB5" HorizontalAlignment="Right" Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -132,7 +132,7 @@
                                                 <Run Text="{Binding Lz4.EstimatedRatioText, Mode=OneWay}"/>
                                             </TextBlock>
                                             <TextBlock FontSize="11" HorizontalAlignment="Right" Margin="0,2,0,0">
-                                                <Run Text="실제 " Foreground="#8888A8"/>
+                                                <Run Text="실제 " Foreground="#54FFB5"/>
                                                 <Run Text="{Binding Lz4.ActualRatioText, Mode=OneWay}"/>
                                             </TextBlock>
                                         </StackPanel>
