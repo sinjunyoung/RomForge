@@ -15,7 +15,7 @@ public static class Lz4MergeService
     private sealed record Job(MergePlan? Plan, string? File, int Order);
 
     public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, OutputFormat outputFormat, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
-        Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
+        Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<IReadOnlyList<string>, string> outputCreated, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var routing = BuildRouting(keySet, inputPaths, ct);
@@ -103,6 +103,7 @@ public static class Lz4MergeService
                 }
 
                 results.Add(path);
+                outputCreated(jobPaths, path);
                 jobFinished(jobPaths, Lz4JobResult.Done);
                 log($"완료: {Path.GetFileName(path)}", LogLevel.Ok);
             }

@@ -15,7 +15,8 @@ namespace NSW.HacPack.Services;
 
 public static class CompressedRomfsWriter
 {
-    private const int ChunkSize = 0x10000;
+    public const int ChunkSize = 0x10000;
+
     private const int RawHeaderSize = 0x200;
     private const int NodeSize = 0x4000;
     private const int PhysicalAlignment = 0x10;

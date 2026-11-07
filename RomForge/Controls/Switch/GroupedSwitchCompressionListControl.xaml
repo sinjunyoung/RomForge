@@ -102,7 +102,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="Auto">
+                            <GridViewColumn Width="95">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="FileSize">
                                         <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="{x:Static l:Resources.Header_Size}"/>
@@ -110,12 +110,15 @@
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding FileSize}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0">
+                                            <TextBlock Text="{Binding FileSize}" FontSize="11" HorizontalAlignment="Right"/>
+                                            <TextBlock Text="{Binding Lz4.CompressedSizeText}" FontSize="10" Foreground="#8888A8" HorizontalAlignment="Right" Margin="0,2,0,0"/>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="Auto">
+                            <GridViewColumn Width="115">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="EstimatedRatio">
                                         <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="압축률"/>
@@ -123,7 +126,16 @@
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding EstimatedRatioText}" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+                                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0">
+                                            <TextBlock FontSize="11" HorizontalAlignment="Right">
+                                                <Run Text="예상 " Foreground="#8888A8"/>
+                                                <Run Text="{Binding Lz4.EstimatedRatioText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                            <TextBlock FontSize="11" HorizontalAlignment="Right" Margin="0,2,0,0">
+                                                <Run Text="실제 " Foreground="#8888A8"/>
+                                                <Run Text="{Binding Lz4.ActualRatioText, Mode=OneWay}"/>
+                                            </TextBlock>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

@@ -12,7 +12,12 @@ public partial class Lz4MergeTab : UserControl
 {
     private Lz4MergeMainViewModel ViewModel => (Lz4MergeMainViewModel)DataContext;
 
-    public Lz4MergeTab() => InitializeComponent();
+    public Lz4MergeTab()
+    {
+        InitializeComponent();
+
+        fileMgr.LogRequested += (message, level) => ViewModel?.AppendLog(message, level);
+    }
 
     protected override void OnVisualParentChanged(DependencyObject oldParent)
     {

@@ -74,10 +74,12 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 {
                     file.Progress = 0;
                     file.Status = "대기중";
+                    file.Lz4.ResetActual();
                 }
 
                 var results = await Task.Run(() => Lz4MergeService.RunAsync(inputPaths, outputDir, compressLevel, outputFormat, BeginBatch, paths => paths.All(completedPaths.Contains),
-                    (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild, hasNsz), (paths, result) => FinishJob(rowsByPath, paths, result), (msg, level) => AppendLog(msg, level), token), token);
+                    (paths, isBuild) => CreateJobProgress(rowsByPath, paths, isBuild, hasNsz), (paths, result) => FinishJob(rowsByPath, paths, result), (paths, outputPath) => ApplyActual(rowsByPath, paths, outputPath),
+                    (msg, level) => AppendLog(msg, level), token), token);
 
                 if (results.Count > 0 || (!_hadFailure && _handledWithoutOutput > 0))
                 {
@@ -179,6 +181,34 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
         }
 
         BatchItemCompleted(paths, result != Lz4JobResult.Failed);
+    }
+
+    private static void ApplyActual(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, string outputPath)
+    {
+        var info = new FileInfo(outputPath);
+
+        if (!info.Exists)
+            return;
+
+        long outputBytes = info.Length;
+        var rows = SelectRows(rowsByPath, paths).Distinct().ToList();
+
+        if (rows.Count == 0)
+            return;
+
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            long inputBytes = rows.Sum(r => r.FileSizeBytes);
+            var baseRow = rows.FirstOrDefault(r => r.FileType.Contains('B')) ?? rows[0];
+
+            foreach (var row in rows)
+            {
+                if (rows.Count == 1)
+                    row.Lz4.ApplyActual(row.FileSizeBytes, outputBytes, Utils.FormatFileSize(outputBytes));
+                else
+                    row.Lz4.ApplyActual(inputBytes, outputBytes, row == baseRow ? Utils.FormatFileSize(outputBytes) : "병합");
+            }
+        });
     }
 
     private static List<GameFile> SelectRows(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths)

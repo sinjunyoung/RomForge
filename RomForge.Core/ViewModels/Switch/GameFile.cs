@@ -27,6 +27,10 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기 중")
 
     public bool IsUnpacked { get; init; }
 
+    public Lz4Stats Lz4 { get; } = new();
+
+    public double EstimatedRatio => Lz4.EstimatedRatio;
+
     public bool SourceHasCompressedRomfs { get; set; }
 
     public bool SourceLz4 { get; private set; }
