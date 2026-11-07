@@ -166,21 +166,34 @@ public class SplitMainViewModel : ProgressToolTabViewModel
         var updateMeta = ordered.FirstOrDefault(m => m.GetTypeTag().ToString().Contains("Patch", StringComparison.OrdinalIgnoreCase) || m.GetTypeTag().ToString().Contains("Update", StringComparison.OrdinalIgnoreCase));
 
         row.Version = updateMeta != null ? updateMeta.GetEffectiveDisplayVersion() : main.GetEffectiveDisplayVersion();
-        row.TypeText = string.Join("+", ordered.Select(m => Letter(m.GetTypeTag())).Distinct());
+        row.TypeText = string.Join("+", ordered
+            .Select(m => Letter(m.GetTypeTag()))
+            .GroupBy(x => x)
+            .Select(g => g.Count() > 1 ? $"{g.Count()}{g.Key}" : g.Key));
 
         row.Children.Clear();
 
         if (ordered.Count > 1)
         {
+            int dlcIndex = 0;
+
             foreach (var meta in ordered)
             {
                 string childName = TitleOf(meta);
+                string letter = Letter(meta.GetTypeTag());
+                string typeText = letter;
+
+                if (letter.Equals("D", StringComparison.OrdinalIgnoreCase))
+                {
+                    dlcIndex++;
+                    typeText = $"D{dlcIndex}";
+                }
 
                 row.Children.Add(new SplitRowViewModel(row.FilePath, row)
                 {
                     Name = string.IsNullOrEmpty(childName) ? row.Name : childName,
                     TitleId = meta.TitleId,
-                    TypeText = Letter(meta.GetTypeTag()),
+                    TypeText = typeText,
                     Version = meta.GetEffectiveDisplayVersion(),
                     SizeBytes = meta.Size,
                 });

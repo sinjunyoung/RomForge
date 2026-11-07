@@ -1,4 +1,5 @@
-﻿using RomForge.Core.ViewModels.Switch;
+﻿using RomForge.Core;
+using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +8,8 @@ namespace RomForge.Controls.Switch;
 
 public partial class SplitListControl : SwitchListControlBase
 {
+    private readonly ListViewColumnSorter _sorter = new();
+
     private SplitMainViewModel ViewModel => (SplitMainViewModel)DataContext;
 
     public SplitListControl() => InitializeComponent();
@@ -44,4 +47,6 @@ public partial class SplitListControl : SwitchListControlBase
 
         e.Handled = true;
     }
+
+    private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e) => _sorter.HandleHeaderClick(e, lvFiles);
 }
