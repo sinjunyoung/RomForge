@@ -47,5 +47,5 @@ public class Lz4Stats : ViewModelBase
         CompressedSizeText = "-";
     }
 
-    private static string FormatRatio(double fraction) => $"{fraction * 100:F1}%";
+    private static string FormatRatio(double fraction) => $"{100 - fraction * 100:F1}%";
 }
