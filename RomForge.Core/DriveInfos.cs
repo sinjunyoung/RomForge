@@ -1,6 +1,8 @@
-﻿using System.Management;
+﻿using Common.Services;
+using System.IO;
+using System.Management;
 
-namespace Common.Services
+namespace RomForge.Core
 {
     public class DriveInfos(string devicePath, string model, long sizeBytes, int diskNumber, string? driveLetter)
     {

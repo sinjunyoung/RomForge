@@ -1,5 +1,5 @@
-﻿using Common.Services;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
+using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.ViewModels.N3DS;
 using System.Windows;
