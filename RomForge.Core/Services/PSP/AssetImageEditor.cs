@@ -1,33 +1,27 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using System.IO;
+﻿using System.IO;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace RomForge.Core.Services.PSP;
 
 public static class AssetImageEditor
 {
-    public static (byte[] Bytes, BitmapImage Image) Resize(byte[] rawBytes, int targetWidth, int targetHeight)
+    public static (byte[] Bytes, BitmapImage? Image) Resize(byte[] rawBytes, int targetWidth, int targetHeight)
     {
-        using var image = Image.Load<Bgra32>(rawBytes);
+        using var input = new MemoryStream(rawBytes);
+        var decoder = BitmapDecoder.Create(input, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+        var source = decoder.Frames[0];
+        var transformed = new TransformedBitmap(source, new ScaleTransform((double)targetWidth / source.PixelWidth, (double)targetHeight / source.PixelHeight));
+        var encoder = new PngBitmapEncoder();
 
-        image.Mutate(x => x.Resize(targetWidth, targetHeight));
+        encoder.Frames.Add(BitmapFrame.Create(transformed));
 
-        using var ms = new MemoryStream();
+        using var output = new MemoryStream();
 
-        image.SaveAsPng(ms, new PngEncoder
-        {
-            CompressionLevel = PngCompressionLevel.BestCompression
-        });
+        encoder.Save(output);
 
-        var finalBytes = ms.ToArray();
+        byte[] finalBytes = output.ToArray();
 
-        ms.Position = 0;
-
-        BitmapImage bitmapImage = ms.ToBitmapImage()!;
-
-        return (finalBytes, bitmapImage);
+        return (finalBytes, finalBytes.ToBitmapImage());
     }
 }

@@ -1,4 +1,4 @@
-﻿using SixLabors.ImageSharp.PixelFormats;
+﻿using Darnelix.Webp.Decoding;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -58,42 +58,65 @@ public static class Extensions
 
     public static byte[] ToImageBytes(this string filePath)
     {
-        using var image = SixLabors.ImageSharp.Image.Load<Bgra32>(filePath);
-        byte[] pixels = new byte[image.Width * image.Height * 4];
+        using var tempBitmap = new Bitmap(256, 256, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-        image.CopyPixelDataTo(pixels);
-
-        using var tempBitmap = new Bitmap(image.Width, image.Height, PixelFormat.Format32bppArgb);
-        var bitmapData = tempBitmap.LockBits(new Rectangle(0, 0, tempBitmap.Width, tempBitmap.Height), ImageLockMode.WriteOnly, tempBitmap.PixelFormat);
-
-        Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
-        tempBitmap.UnlockBits(bitmapData);
-
-        using var cleanBitmap = new Bitmap(256, 256, PixelFormat.Format32bppArgb);
-        using (var graphics = Graphics.FromImage(cleanBitmap))
+        if (Path.GetExtension(filePath).Equals(".webp", StringComparison.OrdinalIgnoreCase))
         {
+            var image = WebpDecoder.Decode(File.ReadAllBytes(filePath));
+            byte[] pixels = image.Pixels.ToArray();
+
+            for (int i = 0; i < pixels.Length; i += 4)
+                (pixels[i], pixels[i + 2]) = (pixels[i + 2], pixels[i]);
+
+            using var sourceBitmap = new Bitmap(image.Width, image.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bitmapData = sourceBitmap.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.WriteOnly, sourceBitmap.PixelFormat);
+
+            try
+            {
+                Marshal.Copy(pixels, 0, bitmapData.Scan0, pixels.Length);
+            }
+            finally
+            {
+                sourceBitmap.UnlockBits(bitmapData);
+            }
+
+            using var graphics = Graphics.FromImage(tempBitmap);
+
             graphics.CompositingQuality = CompositingQuality.HighQuality;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
             graphics.SmoothingMode = SmoothingMode.HighQuality;
             graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
             graphics.Clear(Color.Transparent);
-            graphics.DrawImage(tempBitmap, 0, 0, 256, 256);
+            graphics.DrawImage(sourceBitmap, 0, 0, 256, 256);
+        }
+        else
+        {
+            using var sourceBitmap = new Bitmap(filePath);
+            using var graphics = Graphics.FromImage(tempBitmap);
+
+            graphics.CompositingQuality = CompositingQuality.HighQuality;
+            graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+            graphics.Clear(Color.Transparent);
+            graphics.DrawImage(sourceBitmap, 0, 0, 256, 256);
         }
 
         using var ms = new MemoryStream();
-        var encoder = ImageCodecInfo.GetImageEncoders()
-            .FirstOrDefault(c => c.FormatID == ImageFormat.Jpeg.Guid);
+        var encoder = ImageCodecInfo.GetImageEncoders().FirstOrDefault(c => c.FormatID == ImageFormat.Jpeg.Guid);
 
         if (encoder != null)
         {
-            var encoderParameters = new EncoderParameters(1);
+            using var encoderParameters = new EncoderParameters(1);
 
             encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, 95L);
 
-            cleanBitmap.Save(ms, encoder, encoderParameters);
+            tempBitmap.Save(ms, encoder, encoderParameters);
         }
         else
-            cleanBitmap.Save(ms, ImageFormat.Jpeg);
+            tempBitmap.Save(ms, ImageFormat.Jpeg);
 
         return ms.ToArray();
     }
