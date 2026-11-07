@@ -90,7 +90,7 @@ public partial class LanguageTabControl : UserControl
             BindMetadataToUI(metadata);
         }
 
-        txtOverrideTitleId.Text = (gameFiles.FirstOrDefault(f => f.FileType.Contains('B')) ?? gameFiles.FirstOrDefault(f => !string.IsNullOrEmpty(f.TitleID)))?.TitleID ?? string.Empty;
+        txtOverrideTitleId.Text = (gameFiles.FirstOrDefault(f => f.FileType.Contains('B') && !f.IsUnpacked) ?? gameFiles.FirstOrDefault(f => !string.IsNullOrEmpty(f.TitleID) && !f.IsUnpacked))?.TitleID ?? string.Empty;
     }
 
     public void SyncMetadataFromUI()
@@ -103,8 +103,7 @@ public partial class LanguageTabControl : UserControl
             var target = CurrentMetadata.Languages
                 .FirstOrDefault(l => l.Language == item.Language);
 
-            if (target != null) 
-                target.Flag = item.IsSelected;
+            target?.Flag = item.IsSelected;
         }
     }
 
@@ -126,7 +125,7 @@ public partial class LanguageTabControl : UserControl
             return null;
 
         var validPaths = gameFiles
-            .Where(f => !f.IsKeyMissing)
+            .Where(f => !f.IsKeyMissing && !f.IsUnpacked)
             .Select(f => f.FilePath)
             .ToList();
 
@@ -181,7 +180,7 @@ public partial class LanguageTabControl : UserControl
         var target = CurrentMetadata.Languages
             .FirstOrDefault(l => l.Language == selectedItem.Language);
 
-        if (target != null) target.TitleName = txtGameName.Text;
+        target?.TitleName = txtGameName.Text;
     }
 
     private void TxtPublisher_TextChanged(object sender, TextChangedEventArgs e)
@@ -194,8 +193,7 @@ public partial class LanguageTabControl : UserControl
         var target = CurrentMetadata.Languages
             .FirstOrDefault(l => l.Language == selectedItem.Language);
 
-        if (target != null) 
-            target.Publisher = txtPublisher.Text;
+        target?.Publisher = txtPublisher.Text;
     }
 
     private void BtnForceLanguage_Click(object sender, RoutedEventArgs e)
@@ -260,8 +258,7 @@ public partial class LanguageTabControl : UserControl
 
                 var target = CurrentMetadata.Languages.FirstOrDefault(l => l.Language == selectedItem.Language);
 
-                if (target != null)
-                    target.LogoData = finalBytes;
+                target?.LogoData = finalBytes;
             }
         }
         catch (Exception ex)

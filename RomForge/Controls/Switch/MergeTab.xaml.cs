@@ -59,7 +59,9 @@ public partial class MergeTab : UserControl
         if (fileMgr.GameFiles.Any(f => f.IsKeyMissing))
             await RecalcKeyMissingAsync();
 
-        await ViewModel.MergeAsync(fileMgr.GameFiles);
+        var orderedFiles = System.Windows.Data.CollectionViewSource.GetDefaultView(fileMgr.GameFiles).OfType<RomForge.Core.ViewModels.Switch.GameFile>().ToList();
+
+        await ViewModel.MergeAsync(orderedFiles);
     }
 
     private Task RecalcKeyMissingAsync()

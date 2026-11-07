@@ -239,6 +239,12 @@ namespace RomForge.ViewModels.Switch
 
             var gameFiles = Context?.GameFiles;
 
+            if (gameFiles != null && gameFiles.Any(f => f.IsUnpacked))
+            {
+                errorMsg = "언팩 폴더 항목입니다. 원본 파일(nsp/xci 등)을 다시 추가하세요.";
+                return false;
+            }
+
             if (gameFiles == null || !gameFiles.Any(f => f.FileType.Contains('B')))
             {
                 errorMsg = "원본 파일(BASE)이 리스트에 없습니다.";

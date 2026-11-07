@@ -206,7 +206,11 @@ public partial class RepackTab : UserControl
                 string? folderPath = Directory.Exists(droppedPath) ? droppedPath : Path.GetDirectoryName(droppedPath);
 
                 if (!string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath))
+                {
                     ViewModel.OutputPath = folderPath;
+
+                    _ = ViewModel.LoadExistingUnpackedAsync();
+                }
             }
         }
 

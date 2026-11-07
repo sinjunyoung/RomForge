@@ -5,6 +5,7 @@ using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 
 namespace RomForge.Core.ViewModels.Switch;
@@ -30,7 +31,58 @@ public class RepackRowViewModel : ToolTabViewModel
 
     public void UpdateDropHint() => FileListChanged?.Invoke();
 
-    public async Task AddFilesAsync(IEnumerable<string> paths) => await _importer.AddFilesAsync(paths, UpdateDropHint);
+    public async Task AddFilesAsync(IEnumerable<string> paths)
+    {
+        var pathList = paths.ToList();
+
+        if (pathList.Any(p => _supportedExtensions.Contains(Path.GetExtension(p))))
+            RemoveUnpackedFiles();
+
+        await _importer.AddFilesAsync(pathList, UpdateDropHint);
+    }
+
+    public async Task LoadUnpackedAsync(string unpackedDir, CancellationToken ct = default)
+    {
+        if (GameFiles.Any(f => !f.IsUnpacked))
+            return;
+
+        var rows = await Task.Run(() => UnpackedGameFileLoader.Load(unpackedDir), ct);
+
+        if (ct.IsCancellationRequested || GameFiles.Any(f => !f.IsUnpacked))
+            return;
+
+        int removed = DetachAndRemoveUnpackedFiles();
+
+        foreach (var row in rows)
+            GameFiles.Add(row);
+
+        GameFileListOrganizer.Reorganize(GameFiles);
+
+        if (rows.Count > 0 || removed > 0)
+            UpdateDropHint();
+
+        if (rows.Count > 0)
+            AppendLog($"언팩 폴더에서 {rows.Count}개 항목을 불러왔습니다.");
+    }
+
+    private void RemoveUnpackedFiles()
+    {
+        if (DetachAndRemoveUnpackedFiles() > 0)
+            AppendLog("언팩 폴더 항목을 목록에서 제거했습니다.");
+    }
+
+    private int DetachAndRemoveUnpackedFiles()
+    {
+        var unpackedRows = GameFiles.Where(f => f.IsUnpacked).ToList();
+
+        foreach (var row in unpackedRows)
+        {
+            _patchSync.Detach(row);
+            GameFiles.Remove(row);
+        }
+
+        return unpackedRows.Count;
+    }
 
     public void RecalcKeyMissingFiles(Action onCompleted)
     {
@@ -110,6 +162,7 @@ public class RepackRowViewModel : ToolTabViewModel
         else
         {
             string detailMsg = $"프로그램 {coveredCount}/{totalCount} 패치 확인 ({lineStr})";
+
             AppendLog($"[패치 지정 완료] {title}\n  ㄴ {detailMsg}", LogLevel.Ok);
         }
     }
@@ -192,9 +245,7 @@ public class RepackRowViewModel : ToolTabViewModel
                         AppendLog($"    ㄴ 일부 프로그램은 패치가 없어 원본 그대로 빌드됩니다.", LogLevel.Warning);
                     }
                     else
-                    {
                         AppendLog($"    ㄴ {detailContent}", LogLevel.Ok);
-                    }
                 }
             }
         }

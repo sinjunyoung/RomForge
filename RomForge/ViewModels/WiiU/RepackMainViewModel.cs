@@ -24,20 +24,20 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     public bool IsWuaFormat
     {
         get => OutputFormat == RepackOutputFormat.Wua;
-        set 
-        { 
-            if (value) 
-                OutputFormat = RepackOutputFormat.Wua; 
+        set
+        {
+            if (value)
+                OutputFormat = RepackOutputFormat.Wua;
         }
     }
 
     public bool IsWupFormat
     {
         get => OutputFormat == RepackOutputFormat.Wup;
-        set 
+        set
         {
-            if (value) 
-                OutputFormat = RepackOutputFormat.Wup; 
+            if (value)
+                OutputFormat = RepackOutputFormat.Wup;
         }
     }
 
@@ -89,6 +89,43 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             if (e.PropertyName == nameof(IsLocked))
                 NotifyButtonStates();
         };
+
+        _ = LoadExistingUnpackedAsync();
+    }
+
+    public async Task LoadExistingUnpackedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(OutputPath) || Entries.Any(e => !e.IsUnpacked))
+            return;
+
+        string outputPath = OutputPath;
+        var scanned = await Task.Run(() => RepackService.ScanUnpacked(outputPath));
+
+        if (Entries.Any(e => !e.IsUnpacked) || !string.Equals(outputPath, OutputPath, StringComparison.Ordinal))
+            return;
+
+        RemoveUnpackedEntries();
+
+        foreach (var row in scanned)
+            Entries.Add(row);
+
+        EntryListOrganizer.Reorganize(Entries);
+
+        if (scanned.Count > 0)
+            AppendLog($"언팩 폴더에서 {scanned.Count}개 타이틀을 불러왔습니다.", LogLevel.Info);
+    }
+
+    private void RemoveUnpackedEntries()
+    {
+        var unpackedEntries = Entries.Where(e => e.IsUnpacked).ToList();
+
+        if (unpackedEntries.Count == 0)
+            return;
+
+        foreach (var entry in unpackedEntries)
+            Entries.Remove(entry);
+
+        AppendLog("언팩 폴더 항목을 목록에서 제거했습니다.", LogLevel.Info);
     }
 
     private bool IsDuplicate(string path) => Entries.Any(e => string.Equals(e.FilePath, path, StringComparison.OrdinalIgnoreCase));
@@ -127,6 +164,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
                 var row = RepackService.PeekFolder(path);
 
+                RemoveUnpackedEntries();
                 AssignByGuessedRole(row);
                 EntryListOrganizer.Reorganize(Entries);
                 return;
@@ -151,6 +189,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             }
 
             var rows = await RepackService.PeekFileAsync(path, KeysPath, CancellationToken.None);
+
+            RemoveUnpackedEntries();
 
             foreach (var row in rows)
                 AssignByGuessedRole(row);
@@ -200,7 +240,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 await ExecuteAsync(mode, CancellationTokenSource.Token);
             }
             finally
-            {                
+            {
                 _currentMode = null;
 
                 CleanupTask();
@@ -291,10 +331,10 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (!isCompleted && mode == BuildMode.UnpackOnly && Directory.Exists(unpackedRoot))
             {
-                try 
+                try
                 {
                     Directory.Delete(unpackedRoot, true);
-                } 
+                }
                 catch { }
             }
         }
@@ -307,6 +347,12 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         if (mode != BuildMode.RebuildOnly && Entries.Count == 0)
         {
             error = "타이틀을 하나 이상 추가하세요.";
+            return false;
+        }
+
+        if (mode == BuildMode.UnpackOnly && Entries.Any(e => e.IsUnpacked))
+        {
+            error = "언팩 폴더 항목입니다. 원본 파일(wud/wux/wua)이나 WUP 폴더를 다시 추가하세요.";
             return false;
         }
 
@@ -352,9 +398,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
 
-        if (dlg.ShowDialog() == true)
-            OutputPath = dlg.FolderName;
+        if (dlg.ShowDialog() != true)
+            return;
 
-        await Task.CompletedTask;
+        OutputPath = dlg.FolderName;
+
+        await LoadExistingUnpackedAsync();
     }
 }

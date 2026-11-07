@@ -9,6 +9,8 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 {
     public bool IsFolder { get; init; }
 
+    public bool IsUnpacked { get; set; }
+
     public int SubTitleIndex { get; init; }
 
     public string TitleIdHex { get; init; } = titleIdHex;

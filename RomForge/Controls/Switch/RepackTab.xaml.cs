@@ -2,6 +2,7 @@
 using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels.Switch;
 using RomForge.ViewModels.Switch;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,8 @@ public partial class RepackTab : UserControl
     RepackMainViewModel ViewModel => (RepackMainViewModel)DataContext;
 
     private CancellationTokenSource? _cts;
+    private CancellationTokenSource? _unpackedCts;
+    private bool _unpackedWatchStarted;
 
     public RepackTab()
     {
@@ -31,7 +34,42 @@ public partial class RepackTab : UserControl
 
         titleList.FileListChanged += SyncAll;
 
+        if (!_unpackedWatchStarted)
+        {
+            _unpackedWatchStarted = true;
+            ViewModel.PropertyChanged += ViewModel_PropertyChanged;
+
+            _ = LoadUnpackedAsync(0);
+        }
+
         SyncAll();
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(RepackMainViewModel.OutputPath))
+            _ = LoadUnpackedAsync(500);
+    }
+
+    private async Task LoadUnpackedAsync(int delayMs)
+    {
+        _unpackedCts?.Cancel();
+
+        _unpackedCts = new CancellationTokenSource();
+
+        var token = _unpackedCts.Token;
+
+        try
+        {
+            if (delayMs > 0)
+                await Task.Delay(delayMs, token);
+
+            if (string.IsNullOrWhiteSpace(ViewModel.OutputPath))
+                return;
+
+            await titleList.LoadUnpackedAsync(Path.Combine(ViewModel.OutputPath, "unpacked"), token);
+        }
+        catch (OperationCanceledException) { }
     }
 
     private async void SyncAll()
@@ -47,7 +85,6 @@ public partial class RepackTab : UserControl
             string unpackedPath = Path.Combine(ViewModel.OutputPath, "unpacked");
 
             RepackLz4Sync.Refresh(titleList.GameFiles, unpackedPath);
-
             await langTab.UpdateLanguageTabAsync(titleList.GameFiles, unpackedPath);
             SyncContext();
         }
@@ -58,8 +95,8 @@ public partial class RepackTab : UserControl
 
     private async void BtnStart_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsLocked) 
-        { 
+        if (ViewModel.IsLocked)
+        {
             ViewModel.Cancel();
             return;
         }
@@ -67,31 +104,28 @@ public partial class RepackTab : UserControl
         await RecalcIfNeededAsync();
         langTab.SyncMetadataFromUI();
         SyncContext();
-
         await ViewModel.StartAsync(BuildMode.FullProcess);
     }
 
     private async void BtnUnpack_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsLocked) 
-        { 
-            ViewModel.Cancel(); 
-            return; 
+        if (ViewModel.IsLocked)
+        {
+            ViewModel.Cancel();
+            return;
         }
 
         await RecalcIfNeededAsync();
         SyncContext();
-
         await ViewModel.StartAsync(BuildMode.UnpackOnly);
-
         RepackLz4Sync.Refresh(titleList.GameFiles, Path.Combine(ViewModel.OutputPath, "unpacked"));
     }
 
     private void BtnRebuild_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.IsLocked) 
-        { 
-            ViewModel.Cancel(); 
+        if (ViewModel.IsLocked)
+        {
+            ViewModel.Cancel();
             return;
         }
 

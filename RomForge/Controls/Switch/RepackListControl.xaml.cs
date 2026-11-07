@@ -45,6 +45,8 @@ public partial class RepackListControl : SwitchListControlBase
 
     public void RecalcKeyMissingFiles(Action onCompleted) => _viewModel.RecalcKeyMissingFiles(onCompleted);
 
+    public Task LoadUnpackedAsync(string unpackedDir, CancellationToken ct = default) => _viewModel.LoadUnpackedAsync(unpackedDir, ct);
+
     private void UpdateDropHint() => dropHint.Visibility = _viewModel.GameFiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     protected override ListView? FileListView => lvFiles;

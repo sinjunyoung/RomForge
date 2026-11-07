@@ -25,6 +25,8 @@ public class GameFile(string filePath) : FileItemBase(filePath, "대기 중")
         }
     } = string.Empty;
 
+    public bool IsUnpacked { get; init; }
+
     public bool SourceHasCompressedRomfs { get; set; }
 
     public bool SourceLz4 { get; private set; }
