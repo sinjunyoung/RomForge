@@ -149,7 +149,10 @@ public static class NspBuildService
 
             int maxFiles = settingsList.Count * 4 + DlcNspBuilder.CountItems(req, unpackResult, dirs) * 2 + 1;
             var contents = settingsList.ToDictionary(s => s, _ => new TitleContents());
-            using (var package = new NspPackageWriter(new FileStream(tempNsp, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20), maxFiles))
+            using (var package = new NspPackageWriter(new FileStream(tempNsp, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20), maxFiles)
+            {
+                Ncz = req.OutputNsz ? new NczOptions(KeySetProvider.Instance.KeySet, req.NszCompressLevel, req.NszUseBlockMode, progress, null, ct) : null
+            })
             {
                 foreach (var settings in settingsList)
                 {
@@ -359,7 +362,8 @@ public static class NspBuildService
 
     private static string StepFinalize(BuildRequest req, UnpackResult unpackResult, string tempNsp, IProgress<ProgressInfo> progress, Action<string, LogLevel> log)
     {
-        string suffix = req.HasPatch ? "Patched_Repack.nsp" : "Repack.nsp";
+        string extension = req.OutputNsz ? "nsz" : "nsp";
+        string suffix = req.HasPatch ? $"Patched_Repack.{extension}" : $"Repack.{extension}";
         string displayVersion = string.IsNullOrWhiteSpace(unpackResult.DisplayVersion) ? "1.0.0" : unpackResult.DisplayVersion;
         string fileName = string.IsNullOrWhiteSpace(req.OutputFileName) ? NameBuilder.FileNameBuild(suffix, unpackResult.KrTitle, unpackResult.EnTitle, unpackResult.TitleIdStr.ToUpper(), displayVersion, unpackResult.GameVersion, unpackResult.DlcCount) : req.OutputFileName;
         string finalNsp = Common.Services.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));

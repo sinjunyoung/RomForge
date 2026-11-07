@@ -21,6 +21,8 @@ public sealed class NspPackageWriter : IDisposable
 
     public int MaxFiles { get; }
 
+    public NczOptions? Ncz { get; set; }
+
     public NspPackageWriter(Stream output, int maxFiles)
     {
         if (!output.CanSeek || !output.CanRead || !output.CanWrite)
@@ -50,31 +52,44 @@ public sealed class NspPackageWriter : IDisposable
         if (_files.Count >= MaxFiles)
             throw new InvalidOperationException($"패키지에 담을 수 있는 파일 수({MaxFiles})를 초과했습니다.");
 
-        long start = _output.Length;
+        bool toNcz = Ncz != null && extension == ".nca";
+        long entryStart = _output.Length;
+        long ncaStart = toNcz ? entryStart + NczInPlaceConverter.Gap : entryStart;
 
-        _output.Position = start;
+        _output.Position = ncaStart;
 
         try
         {
             var (hash, size) = write(_output);
 
-            if (_output.Length != start + size)
-                throw new InvalidOperationException($"NCA 크기가 일치하지 않습니다. 기록된 크기={_output.Length - start}, 보고된 크기={size}");
+            if (_output.Length != ncaStart + size)
+                throw new InvalidOperationException($"NCA 크기가 일치하지 않습니다. 기록된 크기={_output.Length - ncaStart}, 보고된 크기={size}");
+
+            long storedSize = size;
+
+            if (toNcz)
+            {
+                storedSize = NczInPlaceConverter.Convert(_output, entryStart, ncaStart, size, Ncz!);
+
+                Truncate(entryStart + storedSize);
+
+                extension = ".ncz";
+            }
 
             string name = Convert.ToHexString(hash, 0, 16).ToLowerInvariant() + extension;
 
             if (name.Length >= NameSlotSize)
                 throw new InvalidOperationException($"파일명이 너무 깁니다: {name}");
 
-            _files.Add(new PackedFile(name, start - _headerSize, size));
+            _files.Add(new PackedFile(name, entryStart - _headerSize, storedSize));
 
-            _output.Position = start + size;
+            _output.Position = entryStart + storedSize;
 
             return (name, hash, size);
         }
         catch
         {
-            Truncate(start);
+            Truncate(entryStart);
             throw;
         }
     }

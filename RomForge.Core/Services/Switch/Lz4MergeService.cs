@@ -15,7 +15,7 @@ public static class Lz4MergeService
     private sealed record Job(MergePlan? Plan, string? File, int Order);
 
     public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, OutputFormat outputFormat, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
-        Func<IReadOnlyList<string>, Lz4Stage, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
+        Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<string, LogLevel> log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet;
         var routing = BuildRouting(keySet, inputPaths, ct);
@@ -55,6 +55,8 @@ public static class Lz4MergeService
         Directory.CreateDirectory(outputDir);
         jobsPlanned(total);
 
+        NszSettings? nsz = outputFormat == OutputFormat.NSZ ? new NszSettings(AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.UseBlockMode) : null;
+
         void quietLog(string message, LogLevel level)
         {
             if (level is LogLevel.Warning or LogLevel.Error)
@@ -90,7 +92,9 @@ public static class Lz4MergeService
 
             try
             {
-                string? path = await OutputFormatPipeline.RunAsync(outputFormat, outputDir, workDir => BuildNspAsync(job, workDir, compressLevel, jobPaths, progressFactory, quietLog, ct), () => progressFactory(jobPaths, Lz4Stage.Nsz), quietLog, ct);
+                string? path = job.Plan != null
+                    ? await NspBuildService.Run(CreateRequest(job.Plan, outputDir, nsz), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, true), quietLog, ct)
+                    : await NspLz4Service.CompressAsync(job.File!, outputDir, compressLevel, nsz, progressFactory(jobPaths, false), (message, level, _) => quietLog(message, level), ct);
 
                 if (path == null)
                 {
@@ -121,15 +125,7 @@ public static class Lz4MergeService
         return results;
     }
 
-    private static async Task<string?> BuildNspAsync(Job job, string workDir, int compressLevel, IReadOnlyList<string> jobPaths, Func<IReadOnlyList<string>, Lz4Stage, IProgress<ProgressInfo>> progressFactory, Action<string, LogLevel> quietLog, CancellationToken ct)
-    {
-        if (job.Plan != null)
-            return await NspBuildService.Run(CreateRequest(job.Plan, workDir), BuildMode.FullProcess, compressLevel, progressFactory(jobPaths, Lz4Stage.Build), quietLog, ct);
-
-        return await NspLz4Service.CompressAsync(job.File!, workDir, compressLevel, progressFactory(jobPaths, Lz4Stage.Single), (message, level, _) => quietLog(message, level), ct);
-    }
-
-    private static NSW.Core.Models.BuildRequest CreateRequest(MergePlan plan, string outputDir)
+    private static NSW.Core.Models.BuildRequest CreateRequest(MergePlan plan, string outputDir, NszSettings? nsz)
     {
         string basePath = plan.Base.Path;
         string updatePath = plan.Update != null && !plan.Update.Path.Equals(basePath, StringComparison.OrdinalIgnoreCase) ? plan.Update.Path : string.Empty;
@@ -148,7 +144,10 @@ public static class Lz4MergeService
             CompressRomfs = true,
             DlcCompressRomfs = dlcCompress,
             StreamRomfs = true,
-            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + "_lz4.nsp"
+            OutputNsz = nsz != null,
+            NszCompressLevel = nsz?.CompressLevel ?? 18,
+            NszUseBlockMode = nsz?.UseBlockMode ?? true,
+            OutputFileName = Path.GetFileNameWithoutExtension(basePath) + (nsz != null ? "_lz4.nsz" : "_lz4.nsp")
         };
     }
 

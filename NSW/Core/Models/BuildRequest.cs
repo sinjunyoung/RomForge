@@ -31,6 +31,12 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public bool StreamRomfs { get; init; }
 
+    public bool OutputNsz { get; init; }
+
+    public int NszCompressLevel { get; init; } = 18;
+
+    public bool NszUseBlockMode { get; init; } = true;
+
     public string? OutputFileName { get; init; }
 
     public IReadOnlyDictionary<string, bool> DlcCompressRomfs { get; init; } = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);

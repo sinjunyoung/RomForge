@@ -45,13 +45,13 @@ public static class NspLz4Service
         public long Size { get; set; }
     }
 
-    public static Task<string?> CompressAsync(string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
+    public static Task<string?> CompressAsync(string inputPath, string? outputDir, int lz4Level, NszSettings? nsz, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
-        return ConvertAsync(keySet.Clone(), inputPath, outputDir, lz4Level, progress, log, ct);
+        return ConvertAsync(keySet.Clone(), inputPath, outputDir, lz4Level, nsz, progress, log, ct);
     }
 
-    internal static async Task<string?> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
+    internal static async Task<string?> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, NszSettings? nsz, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         if (!SwitchFileTypes.Extensions.Contains(Path.GetExtension(inputPath)))
             throw new NotSupportedException("NSP, NSZ, XCI, XCZ 파일만 지원합니다.");
@@ -113,7 +113,7 @@ public static class NspLz4Service
 
             Directory.CreateDirectory(directory);
 
-            finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + "_Lz4.nsp"));
+            finalPath = Utils.GetUniqueFilePath(Path.Combine(directory, Path.GetFileNameWithoutExtension(inputPath) + (nsz != null ? "_lz4.nsz" : "_lz4.nsp")));
 
             string label = primary.KrTitle ?? primary.EnTitle;
             var replaced = new HashSet<string>(jobs.SelectMany(j => j.Targets.Select(t => t.EntryName).Append(NormalizeName(j.Meta.FileName))), StringComparer.OrdinalIgnoreCase);
@@ -153,7 +153,7 @@ public static class NspLz4Service
             int placeholderIndex = 0;
 
             foreach (var job in jobs)
-                AddJobEntries(job, keySet, lz4Level, label, fileEntries, deferredNames, ref placeholderIndex, log, ct);
+                AddJobEntries(job, keySet, lz4Level, nsz, label, fileEntries, deferredNames, ref placeholderIndex, log, ct);
 
             var fout = new FileStream(finalPath, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20);
 
@@ -238,10 +238,11 @@ public static class NspLz4Service
         return job;
     }
 
-    private static void AddJobEntries(MetaJob job, KeySet keySet, int lz4Level, string label, List<FileEntry> fileEntries, Dictionary<string, Func<string>> deferredNames, ref int placeholderIndex, Action<string, LogLevel, string>? log, CancellationToken ct)
+    private static void AddJobEntries(MetaJob job, KeySet keySet, int lz4Level, NszSettings? nsz, string label, List<FileEntry> fileEntries, Dictionary<string, Func<string>> deferredNames, ref int placeholderIndex, Action<string, LogLevel, string>? log, CancellationToken ct)
     {
         bool isApplication = job.Meta.Type == ContentMetaType.Application;
         string kind = isApplication ? "Program" : "DLC";
+        string extension = nsz != null ? ".ncz" : ".nca";
 
         for (int i = 0; i < job.Targets.Count; i++)
         {
@@ -251,14 +252,31 @@ public static class NspLz4Service
             var built = new BuiltResult();
             string placeholder = PlaceholderName(placeholderIndex++);
 
-            deferredNames[placeholder] = () => Convert.ToHexString(built.NcaId).ToLowerInvariant() + ".nca";
+            deferredNames[placeholder] = () => Convert.ToHexString(built.NcaId).ToLowerInvariant() + extension;
 
             fileEntries.Add((placeholder, (output, onRead) =>
             {
                 ct.ThrowIfCancellationRequested();
+
                 log?.Invoke($"{kind} NCA Lz4 압축 중 ({number}/{total}, {job.Meta.TitleId})", LogLevel.Highlight, job.Meta.TitleId);
 
-                var (NcaId, Hash, Size) = isApplication ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct) : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
+                long entryStart = output.Position;
+                long ncaStart = nsz != null ? entryStart + NSW.HacPack.Services.NczInPlaceConverter.Gap : entryStart;
+
+                output.Position = ncaStart;
+
+                var (NcaId, Hash, Size) = isApplication
+                    ? Lz4ProgramNcaBuilder.BuildInto(output, target.Nca, job.TitleId, target.Record.IdOffset, keySet, lz4Level, onRead, ct)
+                    : Lz4DataNcaBuilder.BuildInto(output, target.Nca, job.TitleId, keySet, lz4Level, onRead, ct);
+
+                if (nsz != null)
+                {
+                    var options = new NSW.HacPack.Models.NczOptions(keySet, nsz.CompressLevel, nsz.UseBlockMode, null, onRead, ct);
+                    long nczSize = NSW.HacPack.Services.NczInPlaceConverter.Convert(output, entryStart, ncaStart, Size, options);
+
+                    output.SetLength(entryStart + nczSize);
+                    output.Position = entryStart + nczSize;
+                }
 
                 built.NcaId = NcaId;
                 built.Hash = Hash;
@@ -266,7 +284,7 @@ public static class NspLz4Service
                 job.Cnmt = CnmtRecordPatcher.Replace(job.Cnmt, target.Record.NcaId, NcaId, Hash, Size);
 
                 return Task.CompletedTask;
-            }, (long)target.Nca.Header.NcaSize, $"{label} [{kind} Lz4]"));
+            }, (long)target.Nca.Header.NcaSize * (nsz != null ? 2 : 1), $"{label} [{kind} Lz4]"));
         }
 
         var metaBuilt = new BuiltResult();

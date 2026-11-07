@@ -2,56 +2,41 @@
 
 public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
 {
-    private const int BuildStageCount = 3;
+    private readonly int _stageCount = hasNsz ? 4 : 3;
 
     private int _stage;
     private int _last;
     private int _max;
-    private bool _nsz;
 
-    public string Label
+    public string Label { get; private set; } = isBuild ? "준비 중" : "압축 중";
+
+    public int Update(int percent, string? label)
     {
-        get
-        {
-            if (_nsz)
-                return "NSZ 압축 중";
+        if (isBuild)
+            UpdateLabel(label);
 
-            if (!isBuild)
-                return "압축 중";
+        if (percent < _last)
+            _stage++;
 
-            if (_stage == 0)
-                return "준비 중";
+        _last = percent;
 
-            return _stage % 2 == 1 ? "압축 중" : "해시 계산 중";
-        }
-    }
-
-    public void StartNsz()
-    {
-        _nsz = true;
-        _last = 0;
-    }
-
-    public int Combine(int percent)
-    {
-        int value;
-
-        if (_nsz)
-            value = 50 + percent / 2;
-        else
-        {
-            if (percent < _last)
-                _stage++;
-
-            _last = percent;
-
-            int lz4 = isBuild ? (Math.Min(_stage, BuildStageCount - 1) * 100 + percent) / BuildStageCount : percent;
-
-            value = hasNsz ? lz4 / 2 : lz4;
-        }
+        int value = isBuild ? (Math.Min(_stage, _stageCount - 1) * 100 + percent) / _stageCount : percent;
 
         _max = Math.Max(_max, value);
 
         return _max;
+    }
+
+    private void UpdateLabel(string? label)
+    {
+        if (string.IsNullOrEmpty(label))
+            return;
+
+        if (label.Contains("해시"))
+            Label = "해시 계산 중";
+        else if (label.Contains("NSZ", StringComparison.OrdinalIgnoreCase))
+            Label = "NSZ 압축 중";
+        else if (label.Contains("압축"))
+            Label = "압축 중";
     }
 }
