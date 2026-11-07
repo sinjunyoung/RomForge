@@ -1,4 +1,5 @@
-﻿using LibHac.Common;
+﻿using K4os.Compression.LZ4;
+using LibHac.Common;
 using LibHac.Diag;
 using LibHac.Fs;
 using LibHac.FsSystem;
@@ -37,6 +38,11 @@ internal class CompressedStorage : IStorage
 
     private readonly BucketTree _bucketTree;
     private ValueSubStorage _dataStorage;
+
+    private readonly object _decodeLock = new();
+    private byte[] _decodedBuffer;
+    private long _decodedEntryOffset = -1;
+    private int _decodedLength;
 
     public CompressedStorage()
     {
@@ -104,83 +110,101 @@ internal class CompressedStorage : IStorage
         long endOffset = offset + destination.Length;
 
         byte[] workBufferEnc = null;
-        byte[] workBufferDec = null;
 
-        while (currentOffset < endOffset)
+        try
         {
-            // Get the current entry
-            Entry currentEntry = visitor.Get<Entry>();
-
-            // Get and validate the entry's offset
-            long currentEntryOffset = currentEntry.VirtualOffset;
-            if (currentEntryOffset > currentOffset)
-                return ResultFs.UnexpectedInCompressedStorageA.Log();
-
-            // Get and validate the next entry offset
-            long nextEntryOffset;
-            if (visitor.CanMoveNext())
+            while (currentOffset < endOffset)
             {
-                res = visitor.MoveNext();
-                if (res.IsFailure()) return res.Miss();
+                // Get the current entry
+                Entry currentEntry = visitor.Get<Entry>();
 
-                nextEntryOffset = visitor.Get<Entry>().VirtualOffset;
-                if (!offsets.IsInclude(nextEntryOffset))
+                // Get and validate the entry's offset
+                long currentEntryOffset = currentEntry.VirtualOffset;
+                if (currentEntryOffset > currentOffset)
                     return ResultFs.UnexpectedInCompressedStorageA.Log();
+
+                // Get and validate the next entry offset
+                long nextEntryOffset;
+                if (visitor.CanMoveNext())
+                {
+                    res = visitor.MoveNext();
+                    if (res.IsFailure()) return res.Miss();
+
+                    nextEntryOffset = visitor.Get<Entry>().VirtualOffset;
+                    if (!offsets.IsInclude(nextEntryOffset))
+                        return ResultFs.UnexpectedInCompressedStorageA.Log();
+                }
+                else
+                {
+                    nextEntryOffset = offsets.EndOffset;
+                }
+
+                if (currentOffset >= nextEntryOffset)
+                    return ResultFs.UnexpectedInCompressedStorageA.Log();
+
+                // Get the offset of the data we need in the entry 
+                long dataOffsetInEntry = currentOffset - currentEntryOffset;
+                long currentEntrySize = nextEntryOffset - currentEntryOffset;
+
+                // Determine how much is left
+                long remainingSize = endOffset - currentOffset;
+                long toWriteSize = Math.Min(remainingSize, currentEntrySize - dataOffsetInEntry);
+                Assert.SdkLessEqual(toWriteSize, destination.Length);
+
+                Span<byte> entryDestination = destination.Slice((int)(currentOffset - offset), (int)toWriteSize);
+
+                if (currentEntry.CompressionType == CompressionType.Lz4)
+                {
+                    int decodedSize = (int)currentEntrySize;
+
+                    lock (_decodeLock)
+                    {
+                        if (_decodedEntryOffset != currentEntryOffset || _decodedLength != decodedSize)
+                        {
+                            _decodedEntryOffset = -1;
+
+                            EnsureBufferSize(ref workBufferEnc, (int)currentEntry.PhysicalSize);
+
+                            if (_decodedBuffer is null || _decodedBuffer.Length < decodedSize)
+                                _decodedBuffer = new byte[decodedSize];
+
+                            Span<byte> encBuffer = workBufferEnc.AsSpan(0, (int)currentEntry.PhysicalSize);
+
+                            res = _dataStorage.Read(currentEntry.PhysicalOffset, encBuffer);
+                            if (res.IsFailure()) return res.Miss();
+
+                            Span<byte> decodeTarget = _decodedBuffer.AsSpan(0, decodedSize);
+
+                            if (LZ4Codec.Decode(encBuffer, decodeTarget) != decodedSize)
+                                Lz4.Decompress(encBuffer, decodeTarget);
+
+                            _decodedEntryOffset = currentEntryOffset;
+                            _decodedLength = decodedSize;
+                        }
+
+                        _decodedBuffer.AsSpan((int)dataOffsetInEntry, (int)toWriteSize).CopyTo(entryDestination);
+                    }
+                }
+                else if (currentEntry.CompressionType == CompressionType.None)
+                {
+                    res = _dataStorage.Read(currentEntry.PhysicalOffset + dataOffsetInEntry, entryDestination);
+                    if (res.IsFailure()) return res.Miss();
+                }
+                else if (currentEntry.CompressionType == CompressionType.Zeroed)
+                {
+                    entryDestination.Clear();
+                }
+
+                currentOffset += toWriteSize;
             }
-            else
-            {
-                nextEntryOffset = offsets.EndOffset;
-            }
 
-            if (currentOffset >= nextEntryOffset)
-                return ResultFs.UnexpectedInCompressedStorageA.Log();
-
-            // Get the offset of the data we need in the entry 
-            long dataOffsetInEntry = currentOffset - currentEntryOffset;
-            long currentEntrySize = nextEntryOffset - currentEntryOffset;
-
-            // Determine how much is left
-            long remainingSize = endOffset - currentOffset;
-            long toWriteSize = Math.Min(remainingSize, currentEntrySize - dataOffsetInEntry);
-            Assert.SdkLessEqual(toWriteSize, destination.Length);
-
-            Span<byte> entryDestination = destination.Slice((int)(currentOffset - offset), (int)toWriteSize);
-
-            if (currentEntry.CompressionType == CompressionType.Lz4)
-            {
-                EnsureBufferSize(ref workBufferEnc, (int)currentEntry.PhysicalSize);
-                EnsureBufferSize(ref workBufferDec, (int)currentEntrySize);
-
-                Span<byte> encBuffer = workBufferEnc.AsSpan(0, (int)currentEntry.PhysicalSize);
-                Span<byte> decBuffer = workBufferDec.AsSpan(0, (int)currentEntrySize);
-
-                res = _dataStorage.Read(currentEntry.PhysicalOffset, encBuffer);
-                if (res.IsFailure()) return res.Miss();
-
-                Lz4.Decompress(encBuffer, decBuffer);
-
-                decBuffer.Slice((int)dataOffsetInEntry, (int)toWriteSize).CopyTo(entryDestination);
-            }
-            else if (currentEntry.CompressionType == CompressionType.None)
-            {
-                res = _dataStorage.Read(currentEntry.PhysicalOffset + dataOffsetInEntry, entryDestination);
-                if (res.IsFailure()) return res.Miss();
-            }
-            else if (currentEntry.CompressionType == CompressionType.Zeroed)
-            {
-                entryDestination.Clear();
-            }
-
-            currentOffset += toWriteSize;
+            return Result.Success;
         }
-
-        if (workBufferDec is not null)
-            ArrayPool<byte>.Shared.Return(workBufferDec);
-
-        if (workBufferEnc is not null)
-            ArrayPool<byte>.Shared.Return(workBufferEnc);
-
-        return Result.Success;
+        finally
+        {
+            if (workBufferEnc is not null)
+                ArrayPool<byte>.Shared.Return(workBufferEnc);
+        }
 
         static void EnsureBufferSize(ref byte[] buffer, int requiredSize)
         {

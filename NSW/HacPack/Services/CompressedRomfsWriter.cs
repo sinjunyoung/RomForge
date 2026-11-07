@@ -5,8 +5,10 @@ using LibHac;
 using LibHac.Fs;
 using LibHac.FsSystem;
 using NSW.HacPack.Models;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 
 namespace NSW.HacPack.Services;
@@ -17,6 +19,7 @@ public static class CompressedRomfsWriter
     private const int RawHeaderSize = 0x200;
     private const int NodeSize = 0x4000;
     private const int PhysicalAlignment = 0x10;
+    private const int PipelineDepth = 4;
     private const byte TypeNone = 0;
     private const byte TypeLz4 = 3;
 
@@ -32,6 +35,29 @@ public static class CompressedRomfsWriter
         public sbyte CompressionLevel;
 
         public uint PhysicalSize;
+    }
+
+    private sealed class Batch
+    {
+        public readonly byte[][] Sources;
+        public readonly byte[][] Targets;
+        public readonly int[] Lengths;
+        public readonly int[] Encoded;
+        public int Count;
+
+        public Batch(int size)
+        {
+            Sources = new byte[size][];
+            Targets = new byte[size][];
+            Lengths = new int[size];
+            Encoded = new int[size];
+
+            for (int i = 0; i < size; i++)
+            {
+                Sources[i] = new byte[ChunkSize];
+                Targets[i] = new byte[ChunkSize];
+            }
+        }
     }
 
     public static CompressedRomfsInfo Compress(Stream input, Stream output, int compressLevel, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -56,97 +82,166 @@ public static class CompressedRomfsWriter
         });
 
         long physical = headerLength;
-        long virtualOffset = headerLength;
-        bool canMergeNone = false;
-        int batchSize = Math.Clamp(Environment.ProcessorCount * 4, 8, 64);
-        var sources = new byte[batchSize][];
-        var targets = new byte[batchSize][];
-        var lengths = new int[batchSize];
-        var encoded = new int[batchSize];
-
-        for (int i = 0; i < batchSize; i++)
-        {
-            sources[i] = new byte[ChunkSize];
-            targets[i] = new byte[ChunkSize];
-        }
+        int batchSize = Math.Clamp(Environment.ProcessorCount * 8, 32, 128);
 
         var reporter = new ProgressReporter("RomFS 압축 중", string.Empty, totalSize, progress);
         var report = reporter.CreateAction();
 
-        while (virtualOffset < totalSize)
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var token = linked.Token;
+        var failureLock = new object();
+        Exception? failure = null;
+
+        void Fail(Exception ex)
         {
-            ct.ThrowIfCancellationRequested();
-
-            int count = 0;
-
-            while (count < batchSize && virtualOffset + (long)count * ChunkSize < totalSize)
+            if (ex is not OperationCanceledException)
             {
-                long start = virtualOffset + (long)count * ChunkSize;
-                int length = (int)Math.Min(ChunkSize, totalSize - start);
-
-                input.ReadExactly(sources[count], 0, length);
-
-                lengths[count] = length;
-                count++;
+                lock (failureLock)
+                    failure ??= ex;
             }
 
-            Parallel.For(0, count, i =>
+            linked.Cancel();
+        }
+
+        using var free = new BlockingCollection<Batch>();
+        using var readQueue = new BlockingCollection<Batch>(PipelineDepth);
+        using var writeQueue = new BlockingCollection<Batch>(PipelineDepth);
+
+        for (int i = 0; i < PipelineDepth; i++)
+            free.Add(new Batch(batchSize), ct);
+
+        var reader = Task.Factory.StartNew(() =>
+        {
+            try
             {
-                int length = lengths[i];
-                int size = LZ4Codec.Encode(sources[i].AsSpan(0, length), targets[i].AsSpan(0, length), (LZ4Level)compressLevel);
+                long offset = headerLength;
 
-                encoded[i] = size > 0 && size <= length ? size : 0;
-            });
-
-            for (int i = 0; i < count; i++)
-            {
-                long chunkStart = virtualOffset;
-
-                if (encoded[i] > 0)
+                while (offset < totalSize)
                 {
-                    physical = AlignPhysical(output, physical);
+                    token.ThrowIfCancellationRequested();
 
-                    entries.Add(new Entry
+                    var batch = free.Take(token);
+                    int count = 0;
+
+                    while (count < batchSize && offset < totalSize)
                     {
-                        VirtualOffset = chunkStart,
-                        PhysicalOffset = physical,
-                        CompressionType = TypeLz4,
-                        CompressionLevel = (sbyte)compressLevel,
-                        PhysicalSize = (uint)encoded[i]
-                    });
-                    output.Write(targets[i], 0, encoded[i]);
+                        int length = (int)Math.Min(ChunkSize, totalSize - offset);
 
-                    physical += encoded[i];
-                    canMergeNone = false;
-                }
-                else
-                {
-                    if (!canMergeNone)
-                    {
-                        physical = AlignPhysical(output, physical);
+                        input.ReadExactly(batch.Sources[count], 0, length);
 
-                        entries.Add(new Entry
-                        {
-                            VirtualOffset = chunkStart,
-                            PhysicalOffset = physical,
-                            CompressionType = TypeNone,
-                            CompressionLevel = 0,
-                            PhysicalSize = uint.MaxValue
-                        });
-
-                        canMergeNone = true;
+                        batch.Lengths[count] = length;
+                        count++;
+                        offset += length;
                     }
 
-                    output.Write(sources[i], 0, lengths[i]);
-
-                    physical += lengths[i];
+                    batch.Count = count;
+                    readQueue.Add(batch, token);
                 }
 
-                virtualOffset += lengths[i];
+                readQueue.CompleteAdding();
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
+            }
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        var writer = Task.Factory.StartNew(() =>
+        {
+            try
+            {
+                long virtualOffset = headerLength;
+                bool canMergeNone = false;
+
+                foreach (var batch in writeQueue.GetConsumingEnumerable(token))
+                {
+                    for (int i = 0; i < batch.Count; i++)
+                    {
+                        long chunkStart = virtualOffset;
+
+                        if (batch.Encoded[i] > 0)
+                        {
+                            physical = AlignPhysical(output, physical);
+
+                            entries.Add(new Entry
+                            {
+                                VirtualOffset = chunkStart,
+                                PhysicalOffset = physical,
+                                CompressionType = TypeLz4,
+                                CompressionLevel = (sbyte)compressLevel,
+                                PhysicalSize = (uint)batch.Encoded[i]
+                            });
+                            output.Write(batch.Targets[i], 0, batch.Encoded[i]);
+
+                            physical += batch.Encoded[i];
+                            canMergeNone = false;
+                        }
+                        else
+                        {
+                            if (!canMergeNone)
+                            {
+                                physical = AlignPhysical(output, physical);
+
+                                entries.Add(new Entry
+                                {
+                                    VirtualOffset = chunkStart,
+                                    PhysicalOffset = physical,
+                                    CompressionType = TypeNone,
+                                    CompressionLevel = 0,
+                                    PhysicalSize = uint.MaxValue
+                                });
+
+                                canMergeNone = true;
+                            }
+
+                            output.Write(batch.Sources[i], 0, batch.Lengths[i]);
+
+                            physical += batch.Lengths[i];
+                        }
+
+                        virtualOffset += batch.Lengths[i];
+                    }
+
+                    report(virtualOffset, totalSize);
+                    free.Add(batch);
+                }
+            }
+            catch (Exception ex)
+            {
+                Fail(ex);
+            }
+        }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        try
+        {
+            var options = new ParallelOptions { CancellationToken = token };
+
+            foreach (var batch in readQueue.GetConsumingEnumerable(token))
+            {
+                Parallel.For(0, batch.Count, options, i =>
+                {
+                    int length = batch.Lengths[i];
+                    int size = LZ4Codec.Encode(batch.Sources[i].AsSpan(0, length), batch.Targets[i].AsSpan(0, length), (LZ4Level)compressLevel);
+
+                    batch.Encoded[i] = size > 0 && size <= length ? size : 0;
+                });
+
+                writeQueue.Add(batch, token);
             }
 
-            report(virtualOffset, totalSize);
+            writeQueue.CompleteAdding();
         }
+        catch (Exception ex)
+        {
+            Fail(ex);
+        }
+
+        Task.WaitAll(reader, writer);
+
+        if (failure is not null)
+            ExceptionDispatchInfo.Capture(failure).Throw();
+
+        ct.ThrowIfCancellationRequested();
 
         report(totalSize, totalSize);
 

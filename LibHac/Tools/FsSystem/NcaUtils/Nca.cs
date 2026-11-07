@@ -535,7 +535,7 @@ public class Nca(KeySet keySet, IStorage storage)
 
     private static CachedStorage OpenCompressedStorage(NcaFsHeader header, IStorage baseStorage)
     {
-        return new CachedStorage(CreateCompressedStorage(header, baseStorage), 0x4000, 32, true);
+        return new CachedStorage(CreateCompressedStorage(header, baseStorage), 0x10000, 32, true);
     }
 
     public List<(long VirtualOffset, long PhysicalOffset, byte Type, sbyte Level, uint PhysicalSize)> ReadCompressionEntries(int index)
