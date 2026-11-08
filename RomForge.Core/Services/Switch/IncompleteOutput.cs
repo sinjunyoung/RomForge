@@ -1,6 +1,6 @@
 ﻿using Common.Models;
+using Common.Localization;
 using System.IO;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -12,7 +12,7 @@ internal static class IncompleteOutput
             try 
             { 
                 File.Delete(finalPath); 
-                log?.Invoke(Res.Log_DeleteIncompleteFile, LogLevel.Info, titleId); 
+                log?.Invoke(Loc.S.LogDeleteIncompleteFile, LogLevel.Info, titleId); 
             }
             catch { }
     }

@@ -8,12 +8,12 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;
-using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
-using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using System.IO;
 using Common.Models;
 using Common.Services;
+using Common.Localization;
+using Path = System.IO.Path;
+using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 
 namespace RomForge.Core.Services.Switch;
 
@@ -21,7 +21,7 @@ internal static class ContainerMerger
 {
     private static List<MetadataResult> ReadAllMetadata(KeySet keySet, IReadOnlyList<string> inputPaths, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        log?.Invoke(Res.Log_AnalyzeMetadata, LogLevel.Info, string.Empty);
+        log?.Invoke(Loc.S.LogAnalyzeMetadata, LogLevel.Info, string.Empty);
 
         var allMeta = new List<MetadataResult>();
 
@@ -32,7 +32,7 @@ internal static class ContainerMerger
         }
 
         if (allMeta.Count == 0)
-            throw new InvalidOperationException(Res.Error_NoMetadata);
+            throw new InvalidOperationException(Loc.S.ErrorNoMetadata);
 
         return allMeta;
     }
@@ -43,7 +43,7 @@ internal static class ContainerMerger
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var groups = MergePlanner.BuildTitleGroups(allMeta);
 
-        log?.Invoke(string.Format(Res.Log_TitleGroupDetected, groups.Count), LogLevel.Info, string.Empty);
+        log?.Invoke(Loc.S.LogTitleGroupDetected( groups.Count), LogLevel.Info, string.Empty);
 
         var results = new List<string>();
         int idx = 0;
@@ -88,7 +88,7 @@ internal static class ContainerMerger
                                                   group.DlcMetas.GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase).Count(), Type: group.BaseMetas.Count > 0 ? ContentMetaType.Application : baseMeta.Type),
             };
 
-            log?.Invoke($"{group.BaseTitleName} {Res.Button_MergeStart} ({idx}/{groups.Count})", LogLevel.Highlight, group.BaseTitleId);
+            log?.Invoke($"{group.BaseTitleName} {Loc.S.ButtonMergeStart} ({idx}/{groups.Count})", LogLevel.Highlight, group.BaseTitleId);
 
             try
             {
@@ -110,7 +110,7 @@ internal static class ContainerMerger
             }
             catch (Exception ex)
             {
-                log?.Invoke(string.Format(Res.Log_MergeFailed, group.BaseTitleId, ex.Message), LogLevel.Error, group.BaseTitleId);
+                log?.Invoke(Loc.S.LogMergeFailed( group.BaseTitleId, ex.Message), LogLevel.Error, group.BaseTitleId);
             }
         }
 
@@ -123,7 +123,7 @@ internal static class ContainerMerger
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, useBlockMode);
 
-        log?.Invoke($"{req.TargetBaseTitleName} {Res.Button_MergeStart} (1/1)", LogLevel.Highlight, req.TargetBaseTitleId);
+        log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.ButtonMergeStart} (1/1)", LogLevel.Highlight, req.TargetBaseTitleId);
 
         var results = new List<string>();
 
@@ -137,7 +137,7 @@ internal static class ContainerMerger
         }
         catch (Exception ex)
         {
-            log?.Invoke(string.Format(Res.Log_MergeFailed, req.TargetBaseTitleId, ex.Message), LogLevel.Error, req.TargetBaseTitleId);
+            log?.Invoke(Loc.S.LogMergeFailed(req.TargetBaseTitleId, ex.Message), LogLevel.Error, req.TargetBaseTitleId);
         }
 
         return results;
@@ -247,7 +247,7 @@ internal static class ContainerMerger
 
             var meta = req.ResolvedMeta ?? MergePlanner.ExtractFinalMetadata(keySet, allPaths, req.TargetBaseTitleId);
 
-            log?.Invoke(string.Format(Res.Log_FinalId, meta.TitleId, meta.DisplayVersion), LogLevel.Ok, req.TargetBaseTitleId);
+            log?.Invoke(Loc.S.LogFinalId( meta.TitleId, meta.DisplayVersion), LogLevel.Ok, req.TargetBaseTitleId);
 
             var format = output.Format(req.UseCompression);
             string finalFileName = NameBuilder.FileNameBuild("Merged", meta.KrTitle, meta.EnTitle, meta.TitleId, meta.DisplayVersion, meta.TitleVersion, meta.DlcCount, hasBase, hasUpdate, format);
@@ -257,21 +257,21 @@ internal static class ContainerMerger
             string displayName = NameBuilder.DisplayNameBuild(meta.EnTitle, meta.TitleId, meta.DisplayVersion, meta.DlcCount, hasBase, hasUpdate, format);
             using var fout = File.Open(finalPath, FileMode.Create, FileAccess.ReadWrite);
 
-            await output.WriteAsync(source, $"{Res.Log_Merging} {displayName}", meta.TitleId, 0x20, fileEntries, fout, progress, disposables, ct);
+            await output.WriteAsync(source, $"{Loc.S.LogMerging} {displayName}", meta.TitleId, 0x20, fileEntries, fout, progress, disposables, ct);
 
             if (req.UseCompression && converters.Count > 0 && isValidationEnabled)
             {
-                log?.Invoke($"{req.TargetBaseTitleName} {Res.Log_ValidationStart} ({index}/{groupCount})", LogLevel.Highlight, req.TargetBaseTitleId);
+                log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.LogValidationStart} ({index}/{groupCount})", LogLevel.Highlight, req.TargetBaseTitleId);
 
                 var validationFs = output.OpenForValidation(fout, keySet);
 
-                await NczValidator.ValidateAsync(validationFs, converters, fileEntries, req.TargetBaseTitleId, entryName => DescribeNcaEntry(entryName, ncaIdToMeta), Res.ToolTip_ValidateCompress, "OK", progress, log, req.TargetBaseTitleId, ct);
-                log?.Invoke($"{req.TargetBaseTitleName} {Res.Log_ValidationComplete} ({index}/{groupCount})", LogLevel.Ok, req.TargetBaseTitleId);
+                await NczValidator.ValidateAsync(validationFs, converters, fileEntries, req.TargetBaseTitleId, entryName => DescribeNcaEntry(entryName, ncaIdToMeta), Loc.S.ToolTipValidateCompress, "OK", progress, log, req.TargetBaseTitleId, ct);
+                log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.LogValidationComplete} ({index}/{groupCount})", LogLevel.Ok, req.TargetBaseTitleId);
             }
 
             isCompleted = true;
 
-            log?.Invoke(string.Format($"{Res.Log_MergeComplete} ({index}/{groupCount})", finalFileName), LogLevel.Ok, req.TargetBaseTitleId);
+            log?.Invoke(string.Format($"{Loc.S.LogMergeComplete} ({index}/{groupCount})", finalFileName), LogLevel.Ok, req.TargetBaseTitleId);
 
             return finalPath;
         }
@@ -281,7 +281,7 @@ internal static class ContainerMerger
         }
         catch (Exception ex)
         {
-            log?.Invoke(string.Format($"{Res.Log_Error} ({index}/{groupCount})", ex.Message), LogLevel.Error, req.TargetBaseTitleId);
+            log?.Invoke(string.Format($"{Loc.S.LogError} ({index}/{groupCount})", ex.Message), LogLevel.Error, req.TargetBaseTitleId);
 
             throw;
         }
@@ -310,8 +310,8 @@ internal static class ContainerMerger
         bool canCompress = nca.Header.ContentType is NcaContentType.Program or NcaContentType.PublicData;
 
         if (originalExt == ".ncz")
-            return useCompression && canCompress ? Res.Log_CompressAndMerge : Res.Log_DecompressAndMerge;
+            return useCompression && canCompress ? Loc.S.LogCompressAndMerge : Loc.S.LogDecompressAndMerge;
 
-        return useCompression && canCompress ? Res.Log_CompressAndMerge : Res.Log_Merging;
+        return useCompression && canCompress ? Loc.S.LogCompressAndMerge : Loc.S.LogMerging;
     }
 }

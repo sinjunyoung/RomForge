@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
 using RomForge.Core.Models.Switch;
@@ -6,7 +7,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
@@ -34,7 +34,7 @@ public class SwitchListControlBase : UserControl
     {
         var dlg = new OpenFileDialog
         {
-            Title = Res.Dialog_SelectGameFile,
+            Title = Loc.S.DialogSelectGameFile,
             Filter = SwitchFileTypes.OpenFileFilter,
             Multiselect = true
         };

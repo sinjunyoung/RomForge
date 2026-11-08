@@ -5,12 +5,12 @@ using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
 using NSW.Core.Utils;
-using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
-using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using System.IO;
 using Common.Models;
 using Common.Services;
+using Common.Localization;
+using Path = System.IO.Path;
+using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 
 namespace RomForge.Core.Services.Switch;
 
@@ -18,7 +18,7 @@ internal static class ContainerConverter
 {
     public static Task<string> CompressOrDecompressAsync(OutputContainer output, string inputPath, string? outputDir, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         var profile = ConvertProfile.ForCompression(inputPath, isCompressMode);
         return ConvertAsync(inputPath, outputDir, output, isCompressMode, isCompressMode && validation, isCompressMode && useBlockMode, isCompressMode ? compressionLevel : 0, profile, keySet.Clone(), progress, log, ct);
     }
@@ -38,7 +38,7 @@ internal static class ContainerConverter
             var metas = MetadataReader.GetMetadataFromContainer(keySet, inputPath);
 
             if (metas.Count == 0)
-                throw new InvalidOperationException(Res.Error_NoMetadata);
+                throw new InvalidOperationException(Loc.S.ErrorNoMetadata);
 
             var meta = metas.First();
             var source = new SourceSet([inputPath], profile.DropXciUpdatePartition);
@@ -84,7 +84,7 @@ internal static class ContainerConverter
                 long originalSize = new FileInfo(inputPath).Length;
                 long compressedSize = fout.Length;
 
-                log?.Invoke($"{Res.Log_CompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight, meta.TitleId);
+                log?.Invoke($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight, meta.TitleId);
             }
 
             if (useCompression && validation && converters.Count > 0)

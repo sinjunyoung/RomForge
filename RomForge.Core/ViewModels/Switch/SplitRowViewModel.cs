@@ -1,7 +1,7 @@
 ﻿using Common.Services;
+using Common.Localization;
 using System.IO;
 using System.Windows.Media;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.ViewModels.Switch;
 
@@ -161,7 +161,7 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (TypeText == Res.Status_NoKey)
+            if (TypeText == Loc.S.StatusNoKey)
                 return new SolidColorBrush(Color.FromArgb(60, 220, 50, 50));
 
             if (TypeText == "?")
@@ -192,7 +192,7 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (TypeText == Res.Status_NoKey)
+            if (TypeText == Loc.S.StatusNoKey)
                 return new SolidColorBrush(Color.FromRgb(255, 100, 100));
 
             if (TypeText == "?")

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW"
-             xmlns:l="clr-namespace:NSW.Properties;assembly=NSW"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
              xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core"
              mc:Ignorable="d" 
@@ -45,7 +45,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" x:Name="btnWorkSpace" Background="Transparent" BorderThickness="0" Command="{Binding OpenWorkSpaceCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}">
                 <Button.ToolTip>
-                    <ToolTip Content="{x:Static l:Resources.ToolTip_OpenWorkSpace}"/>
+                    <ToolTip Content="{Binding ToolTipOpenWorkSpace, Source={x:Static l:Loc.S}}"/>
                 </Button.ToolTip>
             </Button>
             <Border Grid.Column="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6">
@@ -58,14 +58,14 @@
             <Button Grid.Column="3" x:Name="btnBrowseOutput" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Center" IsEnabled="{Binding IsIdle}" Margin="5,0,5,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center"
                         Click="BtnBrowseOutput_Click">
                 <Button.ToolTip>
-                    <ToolTip Content="{x:Static l:Resources.ToolTip_BrowseOutput}"/>
+                    <ToolTip Content="{Binding ToolTipBrowseOutput, Source={x:Static l:Loc.S}}"/>
                 </Button.ToolTip>
                 <Image RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Stretch="Uniform"/>
             </Button>
         </Grid>
 
         <Grid Grid.Row="3" Margin="5,0,0,5">
-            <core:IconButton x:Name="btnSplitStart" Margin="0,0,5,0" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{x:Static l:Resources.Button_Cancel}" CancelIcon="/Assets/Images/Cancel.png" 
+            <core:IconButton x:Name="btnSplitStart" Margin="0,0,5,0" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding ButtonCancel, Source={x:Static l:Loc.S}}" CancelIcon="/Assets/Images/Cancel.png" 
                                  IsRunning="{Binding IsLocked, Mode=OneWay}" Click="BtnSplitStart_Click"/>
         </Grid>
         <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">

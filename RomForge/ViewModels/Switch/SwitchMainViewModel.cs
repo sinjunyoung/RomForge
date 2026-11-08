@@ -2,7 +2,7 @@
 using RomForge.Core;
 using RomForge.Core.ViewModels;
 using RomForge.Core.ViewModels.Settings;
-using Res = NSW.Properties.Resources;
+using Common.Localization;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -34,7 +34,7 @@ public class SwitchMainViewModel : MultiToolTabViewModel
     {
         var keyFiles = AppConfig.Instance.KeyFiles;
 
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", "prod.keys 파일이 없습니다", Res.Main_Err_NoKeys, [KeyFileItems.SwitchProdKeys(keyFiles)], () => KeysAvailable);
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", "prod.keys 파일이 없습니다", Loc.S.MainErrNoKeys, [KeyFileItems.SwitchProdKeys(keyFiles)], () => KeysAvailable);
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();
 
         Tools.Add(RepackVM);

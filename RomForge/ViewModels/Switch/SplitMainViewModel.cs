@@ -8,12 +8,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using Res = NSW.Properties.Resources;
 using RomForge.Core.UI.Command;
 using RomForge.Core.Services;
 using RomForge.Core.ViewModels.Switch;
 using Common.Models;
 using Common.Services;
+using Common.Localization;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -77,7 +77,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             var row = new SplitRowViewModel(path)
             {
                 SizeBytes = GetFileLength(path),
-                TypeText = hasKey ? Res.Status_Analyzing : Res.Status_NoKey
+                TypeText = hasKey ? Loc.S.StatusAnalyzing : Loc.S.StatusNoKey
             };
 
             _files.Add(row);
@@ -129,11 +129,11 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 
         if (keySet == null)
         {
-            row.TypeText = Res.Status_NoKey;
+            row.TypeText = Loc.S.StatusNoKey;
             return;
         }
 
-        row.TypeText = Res.Status_Analyzing;
+        row.TypeText = Loc.S.StatusAnalyzing;
 
         var metas = await Task.Run(() =>
         {
@@ -296,7 +296,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 
         if (string.IsNullOrEmpty(outputDir))
         {
-            AppendLog(Res.Main_Err_NoOutput, LogLevel.Error);
+            AppendLog(Loc.S.MainErrNoOutput, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -325,11 +325,11 @@ public class SplitMainViewModel : ProgressToolTabViewModel
                     resultCount += await SplitService.Split(jobs[i].FilePath, outputDir, compress, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, asXci, i + 1, jobs.Count, progress, Log, jobs[i].TitleIds, CancellationTokenSource.Token);
                 }
 
-                AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
+                AppendLog(Loc.S.MainLogAllComplete( _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
 
                 if (resultCount > 0)
                 {
-                    AppendLog(Res.Main_Msg_SplitDone);
+                    AppendLog(Loc.S.MainMsgSplitDone);
                     AppConfig.Instance.OutputFolders.SwitchSplitOutputPath?.OpenFolder();
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
@@ -342,7 +342,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
+                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }

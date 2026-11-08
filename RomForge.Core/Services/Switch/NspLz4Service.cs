@@ -9,11 +9,11 @@ using NSW.Core.Services;
 using NSW.Core.Utils;
 using RomForge.Core.Models.Switch;
 using System.IO;
-using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
-using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 using Common.Models;
 using Common.Services;
+using Common.Localization;
+using Path = System.IO.Path;
+using FileEntry = (string Name, System.Func<System.IO.Stream, System.Action<long>, System.Threading.Tasks.Task> Writer, long EstimatedSize, string Label);
 
 namespace RomForge.Core.Services.Switch;
 
@@ -47,7 +47,7 @@ public static class NspLz4Service
 
     public static Task<string?> CompressAsync(string inputPath, string? outputDir, int lz4Level, NszSettings? nsz, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return ConvertAsync(keySet.Clone(), inputPath, outputDir, lz4Level, nsz, progress, log, ct);
     }
 
@@ -166,7 +166,7 @@ public static class NspLz4Service
 
             long originalSize = new FileInfo(inputPath).Length;
 
-            log?.Invoke($"{Res.Log_CompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, primary.TitleId);
+            log?.Invoke($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(fout.Length)} ({fout.Length * 100.0 / originalSize:F1}%)", LogLevel.Highlight, primary.TitleId);
 
             isCompleted = true;
 

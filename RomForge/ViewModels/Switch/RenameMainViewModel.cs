@@ -1,10 +1,10 @@
 ﻿using Common.Models;
+using Common.Localization;
 using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;
 using RomForge.Core;
 using RomForge.Core.Models.Naming;
-using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Naming;
@@ -19,7 +19,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -77,7 +76,7 @@ public class RenameMainViewModel : ToolTabViewModel
         {
             var item = new RenameFileItem(path)
             {
-                FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing,
+                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
                 TitleName = Path.GetFileNameWithoutExtension(path)
             };
 
@@ -143,7 +142,7 @@ public class RenameMainViewModel : ToolTabViewModel
 
         if (Items.Count == 0)
         {
-            AppendLog(Res.Main_Err_NoFiles, LogLevel.Error);
+            AppendLog(Loc.S.MainErrNoFiles, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -209,7 +208,7 @@ public class RenameMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
+                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
             finally
@@ -280,10 +279,10 @@ public class RenameMainViewModel : ToolTabViewModel
 
     private static string? GetStatusOverride(GameFile file)
     {
-        if (file.FileType == Res.Status_Analyzing)
+        if (file.FileType == Loc.S.StatusAnalyzing)
             return "분석 중";
 
-        if (file.FileType == Res.Status_NoKey)
+        if (file.FileType == Loc.S.StatusNoKey)
             return "키 없음";
 
         return null;
@@ -300,7 +299,7 @@ public class RenameMainViewModel : ToolTabViewModel
         return new RenameSource(file.FilePath, name, naming?.KoreanTitle, naming?.DefaultTitle, file.TitleID, tag, naming?.DisplayVersion ?? file.Version, naming?.TitleVersion.ToString(), HasMetadata(file));
     }
 
-    private static bool HasMetadata(GameFile file) => file.Naming is not null && !string.IsNullOrEmpty(file.TitleID) && file.FileType != Res.Status_NoKey && file.FileType != Res.Status_Analyzing && file.FileType != "?";
+    private static bool HasMetadata(GameFile file) => file.Naming is not null && !string.IsNullOrEmpty(file.TitleID) && file.FileType != Loc.S.StatusNoKey && file.FileType != Loc.S.StatusAnalyzing && file.FileType != "?";
 
     private static int CountSkipped(IEnumerable<RenamePlan> plans) => plans.Count(p => p.State is not (RenameState.Ready or RenameState.Unchanged));
 

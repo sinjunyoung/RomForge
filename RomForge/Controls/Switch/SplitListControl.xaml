@@ -4,7 +4,7 @@
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:l="clr-namespace:NSW.Properties;assembly=NSW"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="800">
     <Border BorderBrush="#33FFFFFF" BorderThickness="1" CornerRadius="8" Background="#12FFFFFF" Padding="10">
@@ -153,7 +153,7 @@
                                 <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <GridViewColumnHeader Tag="Size">
-                                            <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/FileSizeBytes.png" Text="{x:Static l:Resources.Header_Size}"/>
+                                            <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/FileSizeBytes.png" Text="{Binding HeaderSize, Source={x:Static l:Loc.S}}"/>
                                         </GridViewColumnHeader>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -168,16 +168,16 @@
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="1" Margin="10,2,0,0" VerticalAlignment="Top">
-                <Button ToolTip="{x:Static l:Resources.ToolTip_AddFile}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
+                <Button ToolTip="{Binding ToolTipAddFile, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button ToolTip="폴더 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{x:Static l:Resources.ToolTip_RemoveSelected}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
+                <Button ToolTip="{Binding ToolTipRemoveSelected, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{x:Static l:Resources.ToolTip_RemoveAll}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
+                <Button ToolTip="{Binding ToolTipRemoveAll, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
             </StackPanel>

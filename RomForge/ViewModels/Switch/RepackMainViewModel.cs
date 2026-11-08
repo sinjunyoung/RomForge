@@ -1,8 +1,8 @@
 ﻿using Common.Models;
 using Common.Services;
+using Common.Localization;
 using LibHac.Ns;
 using NSW.Core.Exceptions;
-using NSW.Core.Models;
 using NSW.Core.Services;
 using NSW.HacPack.Models;
 using RomForge.Core;
@@ -253,7 +253,7 @@ namespace RomForge.ViewModels.Switch
 
             if (gameFiles.Any(f => f.IsKeyMissing))
             {
-                errorMsg = NSW.Properties.Resources.Main_Err_NoKeys;
+                errorMsg = Loc.S.MainErrNoKeys;
                 return false;
             }
 

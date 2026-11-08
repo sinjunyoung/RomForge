@@ -7,7 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Res = NSW.Properties.Resources;
+using Common.Localization;
 
 namespace RomForge.Controls.Switch;
 
@@ -59,7 +59,7 @@ public class CommonListControlBase : SwitchListControlBase
 
             var vm = new GameFile(path)
             {
-                FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing,
+                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
                 TitleName = Path.GetFileNameWithoutExtension(path)
             };
 

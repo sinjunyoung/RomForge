@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using Common.Services;
+using Common.Localization;
 using NSW.Core;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
@@ -11,7 +12,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -76,8 +76,8 @@ public class MergeMainViewModel : ProgressToolTabViewModel
 
                 if (results?.Count > 0)
                 {
-                    AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
-                    AppendLog(Res.Main_Msg_Done);
+                    AppendLog(Loc.S.MainLogAllComplete( _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
+                    AppendLog(Loc.S.MainMsgDone);
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
                 }
@@ -89,7 +89,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
+                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }
@@ -110,7 +110,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
 
         if (gameFiles.Any(f => f.IsKeyMissing))
         {
-            errorMsg = Res.Main_Err_NoKeys;
+            errorMsg = Loc.S.MainErrNoKeys;
             return false;
         }
 
@@ -118,7 +118,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
 
         if (string.IsNullOrEmpty(outputDir))
         {
-            errorMsg = Res.Main_Err_NoOutput;
+            errorMsg = Loc.S.MainErrNoOutput;
             return false;
         }
 

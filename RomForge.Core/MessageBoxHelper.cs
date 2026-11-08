@@ -1,15 +1,15 @@
 ﻿using System.Windows;
-using Res = NSW.Properties.Resources;
+using Common.Localization;
 
 namespace RomForge.Core;
 
 public class MessageBoxHelper
 {
-    public static void ShowInfo(string msg) => MessageBox.Show(msg, Res.Msg_Title_Info, MessageBoxButton.OK, MessageBoxImage.Information);
+    public static void ShowInfo(string msg) => MessageBox.Show(msg, Loc.S.MsgTitleInfo, MessageBoxButton.OK, MessageBoxImage.Information);
 
-    public static void ShowWarning(string msg) => MessageBox.Show(msg, Res.Msg_Title_Warning, MessageBoxButton.OK, MessageBoxImage.Warning);
+    public static void ShowWarning(string msg) => MessageBox.Show(msg, Loc.S.MsgTitleWarning, MessageBoxButton.OK, MessageBoxImage.Warning);
 
-    public static void ShowError(string msg) => MessageBox.Show(msg, Res.Msg_Title_Error, MessageBoxButton.OK, MessageBoxImage.Error);
+    public static void ShowError(string msg) => MessageBox.Show(msg, Loc.S.MsgTitleError, MessageBoxButton.OK, MessageBoxImage.Error);
 
-    public static bool ShowQuestion(string msg) => MessageBox.Show(msg, Res.Msg_Title_Question, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+    public static bool ShowQuestion(string msg) => MessageBox.Show(msg, Loc.S.MsgTitleQuestion, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
 }

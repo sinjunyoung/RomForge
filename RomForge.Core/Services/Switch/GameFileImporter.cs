@@ -4,7 +4,7 @@ using NSW.Core.Models;
 using RomForge.Core.ViewModels.Switch;
 using System.Collections.ObjectModel;
 using System.IO;
-using Res = NSW.Properties.Resources;
+using Common.Localization;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -158,7 +158,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
 
             var vm = new GameFile(path)
             {
-                FileType = keySet == null ? Res.Status_NoKey : Res.Status_Analyzing,
+                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
                 CustomSizeBytes = fileLength,
                 TitleName = titleName,
                 Icon = icon

@@ -1,10 +1,10 @@
 ﻿using Common.Models;
+using Common.Localization;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels.Switch;
 using System.Diagnostics;
 using System.IO;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -29,7 +29,7 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
         }
 
         if (gameFiles.Any(f => f.IsKeyMissing))
-            ProgressLabel = Res.Main_Log_Recalculating;
+            ProgressLabel = Loc.S.MainLogRecalculating;
 
         _totalSw.Restart();
 
@@ -44,9 +44,9 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
 
                 if (results != null && results.Count > 0)
                 {
-                    AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
+                    AppendLog(Loc.S.MainLogAllComplete( _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
-                    AppendLog(Res.Main_Msg_Done);
+                    AppendLog(Loc.S.MainMsgDone);
                 }
             }
             catch (OperationCanceledException)
@@ -56,7 +56,7 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
+                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }
@@ -74,13 +74,13 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
 
         if (gameFiles.Count == 0)
         {
-            errorMsg = Res.Main_Err_NoFiles;
+            errorMsg = Loc.S.MainErrNoFiles;
             return false;
         }
 
         if (gameFiles.Any(f => f.IsKeyMissing))
         {
-            errorMsg = Res.Main_Err_NoKeys;
+            errorMsg = Loc.S.MainErrNoKeys;
             return false;
         }
 
@@ -91,7 +91,7 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
 
         if (inputPaths.Count == 0)
         {
-            errorMsg = Res.Main_Err_NoFiles;
+            errorMsg = Loc.S.MainErrNoFiles;
             return false;
         }
 

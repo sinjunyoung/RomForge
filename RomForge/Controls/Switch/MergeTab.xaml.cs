@@ -1,10 +1,10 @@
 ﻿using Common.Models;
+using Common.Localization;
 using RomForge.Core.Services;
 using RomForge.ViewModels.Switch;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Controls.Switch;
 
@@ -26,7 +26,7 @@ public partial class MergeTab : UserControl
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = Res.Hint_SelectOutput,
+            Description = Loc.S.HintSelectOutput,
             UseDescriptionForTitle = true
         };
 
@@ -44,14 +44,14 @@ public partial class MergeTab : UserControl
 
         if (!fileMgr.GameFiles.Any())
         {
-            ViewModel.AppendLog(Res.Main_Err_NoFiles, LogLevel.Error);
+            ViewModel.AppendLog(Loc.S.MainErrNoFiles, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (!CommonListControl.KeyExists())
         {
-            ViewModel.AppendLog(Res.Main_Err_NoKeys, LogLevel.Error);
+            ViewModel.AppendLog(Loc.S.MainErrNoKeys, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }

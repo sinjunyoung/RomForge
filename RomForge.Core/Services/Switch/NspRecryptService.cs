@@ -11,8 +11,8 @@ using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
 using NSW.Core.Utils;
 using System.IO;
+using Common.Localization;
 using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -31,7 +31,7 @@ public class NspRecryptService
 
             try
             {
-                log?.Invoke($"[{i + 1}/{inputPaths.Count}] Recrypt {Res.Log_ProcessStart}: {Path.GetFileName(path)}", LogLevel.Info, path);
+                log?.Invoke($"[{i + 1}/{inputPaths.Count}] Recrypt {Loc.S.LogProcessStart}: {Path.GetFileName(path)}", LogLevel.Info, path);
 
                 string resultPath = await RunCoreAsync(path, forceKeyGen0, ks.Clone(), progress, log, ct);
 
@@ -44,7 +44,7 @@ public class NspRecryptService
             }
             catch (Exception ex)
             {
-                log?.Invoke($"{Path.GetFileName(path)} {Res.Log_ProcessError}: {ex.Message}", LogLevel.Error, string.Empty);
+                log?.Invoke($"{Path.GetFileName(path)} {Loc.S.LogProcessError}: {ex.Message}", LogLevel.Error, string.Empty);
             }
         }
 
@@ -62,7 +62,7 @@ public class NspRecryptService
             var metas = MetadataReader.GetMetadataFromContainer(keySet, inputPath);
 
             if (metas.Count == 0)
-                throw new InvalidOperationException(Res.Error_NoMetadata);
+                throw new InvalidOperationException(Loc.S.ErrorNoMetadata);
 
             var meta = metas.First();
             var sourceStorage = new LocalStorage(inputPath, FileAccess.Read);
@@ -181,7 +181,7 @@ public class NspRecryptService
 
             isCompleted = true;
 
-            log?.Invoke($"{Path.GetFileName(finalPath)} Recrypt {Res.Log_StatusDone}", LogLevel.Ok, meta.TitleId);
+            log?.Invoke($"{Path.GetFileName(finalPath)} Recrypt {Loc.S.LogStatusDone}", LogLevel.Ok, meta.TitleId);
 
             return finalPath;
         }
@@ -191,7 +191,7 @@ public class NspRecryptService
         }
         catch (Exception ex)
         {
-            log?.Invoke($"{Path.GetFileName(inputPath)} {Res.Log_ProcessError}: {ex.Message}", LogLevel.Error, string.Empty);
+            log?.Invoke($"{Path.GetFileName(inputPath)} {Loc.S.LogProcessError}: {ex.Message}", LogLevel.Error, string.Empty);
             throw;
         }
         finally

@@ -1,7 +1,7 @@
 ﻿using Common.Models;
+using Common.Localization;
 using LibHac.Common.Keys;
 using NSW.Core;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -11,49 +11,49 @@ public static class NspXciConvertService
 
     public static Task<string> NspToXciAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Xci, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> XciToNspAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Nsp, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> NspToXczAsync(string inputPath, string? outputDir, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Xci, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> XciToNszAsync(string inputPath, string? outputDir, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Nsp, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> NszToXciAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Xci, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> XczToNspAsync(string inputPath, string? outputDir, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Nsp, false, false, false, 0, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> NszToXczAsync(string inputPath, string? outputDir, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Xci, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 
     public static Task<string> XczToNszAsync(string inputPath, string? outputDir, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         return RunAsync(inputPath, outputDir, ContainerFormat.Nsp, true, validation, useBlockMode, compressionLevel, keySet.Clone(), progress, log, ct);
     }
 

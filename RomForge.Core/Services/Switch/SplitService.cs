@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using Common.Services;
+using Common.Localization;
 using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
@@ -17,7 +18,6 @@ using NSW.Core.Models;
 using NSW.Core.Utils;
 using System.IO;
 using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -137,7 +137,7 @@ public class SplitService
         {
             string typeTag = meta.GetTypeTag();
 
-            log?.Invoke($"{string.Format(Res.Log_SplitPreparing, $"{baseTitle} [{typeTag}]")} ({index}/{groupCount})", LogLevel.Highlight, meta.TitleId);
+            log?.Invoke($"{Loc.S.LogSplitPreparing( $"{baseTitle} [{typeTag}]")} ({index}/{groupCount})", LogLevel.Highlight, meta.TitleId);
 
             if (!fileRegistry.TryGetValue(meta.FileName, out var cnmtEntry))
                 return false;
@@ -235,7 +235,7 @@ public class SplitService
                 if (result == null) 
                     continue;
 
-                log?.Invoke($"- {label} {(result.Value.FinalName.EndsWith(".ncz") ? Res.Log_CompressAndSplit : Res.Log_Splitting)}", LogLevel.Info, meta.TitleId);
+                log?.Invoke($"- {label} {(result.Value.FinalName.EndsWith(".ncz") ? Loc.S.LogCompressAndSplit : Loc.S.LogSplitting)}", LogLevel.Info, meta.TitleId);
                 fileEntries.Add((result.Value.FinalName, result.Value.Writer, result.Value.Size, result.Value.Label));
             }
 
@@ -251,22 +251,22 @@ public class SplitService
                 await XciWriter.WriteAsync(displayName, meta.TitleId, xciPrefixBuffer!, rootEntriesTemplate!, srcStream, fileEntries, fout, progress, ct);
             else
             {
-                await Pfs0Builder.WriteAsync($"{Res.Log_Splitting} {displayName}", meta.TitleId, fileEntries, fout, 0x20, false, null, progress, ct);
+                await Pfs0Builder.WriteAsync($"{Loc.S.LogSplitting} {displayName}", meta.TitleId, fileEntries, fout, 0x20, false, null, progress, ct);
 
                 if (useCompression && converters.Count > 0 && isValidationEnabled)
                 {
-                    log?.Invoke($"{baseTitle} [{typeTag}] {Res.Log_ValidationStart} ({index}/{groupCount})", LogLevel.Highlight, meta.TitleId);
+                    log?.Invoke($"{baseTitle} [{typeTag}] {Loc.S.LogValidationStart} ({index}/{groupCount})", LogLevel.Highlight, meta.TitleId);
 
                     var validationFs = OutputContainer.AsNsp.OpenForValidation(fout, keySet);
 
-                    await NczValidator.ValidateAsync(validationFs, converters, fileEntries, meta.TitleId, _ => $"{baseTitle} [{typeTag}]", Res.ToolTip_ValidateCompress, "OK", progress, log, meta.TitleId, ct);
-                    log?.Invoke($"{baseTitle} [{typeTag}] {Res.Log_ValidationComplete} ({index}/{groupCount})", LogLevel.Ok, meta.TitleId);
+                    await NczValidator.ValidateAsync(validationFs, converters, fileEntries, meta.TitleId, _ => $"{baseTitle} [{typeTag}]", Loc.S.ToolTipValidateCompress, "OK", progress, log, meta.TitleId, ct);
+                    log?.Invoke($"{baseTitle} [{typeTag}] {Loc.S.LogValidationComplete} ({index}/{groupCount})", LogLevel.Ok, meta.TitleId);
                 }
             }
 
             isCompleted = true;
 
-            log?.Invoke($"{string.Format(Res.Log_SplitComplete, outName)} ({index}/{groupCount})", LogLevel.Ok, meta.TitleId);
+            log?.Invoke($"{Loc.S.LogSplitComplete( outName)} ({index}/{groupCount})", LogLevel.Ok, meta.TitleId);
 
             return true;
         }
@@ -276,7 +276,7 @@ public class SplitService
         }
         catch (Exception ex)
         {
-            log?.Invoke($"{string.Format(Res.Log_SplitFailed, meta.TitleId, ex.Message)} ({index}/{groupCount})", LogLevel.Error, meta.TitleId);
+            log?.Invoke($"{Loc.S.LogSplitFailed( meta.TitleId, ex.Message)} ({index}/{groupCount})", LogLevel.Error, meta.TitleId);
             return false;
         }
         finally

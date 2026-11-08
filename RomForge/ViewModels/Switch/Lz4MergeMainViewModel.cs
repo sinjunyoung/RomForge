@@ -1,5 +1,6 @@
 ﻿using Common.Models;
 using Common.Services;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
@@ -10,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
-using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
 
@@ -81,7 +81,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
                 if (_successCount > 0)
                 {
-                    AppendLog(string.Format(Res.Main_Log_AllComplete, _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
+                    AppendLog(Loc.S.MainLogAllComplete( _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     outputDir.OpenFolder();
                 }
@@ -104,7 +104,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
             {
                 failed = true;
 
-                AppendLog($"{Res.Log_Error}: {ex.Message}", LogLevel.Error);
+                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
             finally
@@ -223,7 +223,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
         if (gameFiles.Any(f => f.IsKeyMissing))
         {
-            errorMsg = Res.Main_Err_NoKeys;
+            errorMsg = Loc.S.MainErrNoKeys;
             return false;
         }
 
@@ -231,7 +231,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
         if (string.IsNullOrEmpty(outputDir))
         {
-            errorMsg = Res.Main_Err_NoOutput;
+            errorMsg = Loc.S.MainErrNoOutput;
             return false;
         }
 

@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW" 
-             xmlns:l="clr-namespace:NSW.Properties;assembly=NSW" 
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common" 
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <local:CommonListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
-        <core:IconButton Grid.Row="1" x:Name="btnStartWork" Margin="5,0,5,5" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{x:Static l:Resources.Button_Cancel}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}"
+        <core:IconButton Grid.Row="1" x:Name="btnStartWork" Margin="5,0,5,5" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding ButtonCancel, Source={x:Static l:Loc.S}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}"
                 Click="BtnStartWork_Click"/>
 
         <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">

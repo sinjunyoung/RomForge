@@ -13,9 +13,9 @@ using System.Buffers.Binary;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using Common.Localization;
 using static LibHac.Ns.ApplicationControlProperty;
 using Path = System.IO.Path;
-using Res = NSW.Properties.Resources;
 
 namespace NSW.Core;
 
@@ -208,7 +208,7 @@ public static class LibHacHelper
 
         using var controlFs = new FileStream(ncaPath, FileMode.Open, FileAccess.Read);
         var storage = new StreamStorage(controlFs, false);
-        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Res.Main_Err_NoKeys);
+        var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         var nca = new Nca(keySet, storage);
 
         return (nca.Header.KeyGeneration, nca.Header.SdkVersion.Version);
