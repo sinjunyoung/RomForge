@@ -49,7 +49,7 @@ public static class NspBuildService
 
     public static async Task<string> Run(BuildRequest req, BuildMode mode, int compressLevel, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet;
+        var keySet = KeySetProvider.Instance.KeySet!;
         var dirs = new WorkDirs(req.OutputDir);
 
         if (mode == BuildMode.UnpackOnly)
@@ -95,6 +95,9 @@ public static class NspBuildService
             var unpacker = new NspUnpacker(keySet);
             unpackResult = await unpacker.Unpack(req, dirs.Unpacked, progress, ct);
         }
+
+        if (req.OnUnpacked != null)
+            req.UserMetadata = req.OnUnpacked(unpackResult) ?? req.UserMetadata;
 
         if (req.CompressRomfs.HasValue)
             RomfsCompression.Apply(unpackResult, req.CompressRomfs.Value);

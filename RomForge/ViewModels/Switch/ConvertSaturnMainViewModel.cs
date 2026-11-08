@@ -1,7 +1,6 @@
 ﻿using Common.Models;
 using Common.Services;
 using LibHac.Ns;
-using NSW.Core;
 using NSW.Core.Services;
 using RomForge.Core;
 using RomForge.Core.Services;
@@ -22,7 +21,6 @@ namespace RomForge.ViewModels.Switch
         public ObservableCollection<string> SoundVolumeItems { get; } = ["60%", "80%", "100%", "120%"];
 
         private byte[]? _coverBytes;
-        private bool _isConverting;
         private readonly Stopwatch _totalSw = new();
 
         public string GameTitle { get; set { SetProperty(ref field, value); } } = string.Empty;
@@ -67,7 +65,7 @@ namespace RomForge.ViewModels.Switch
             CoverImageSource = bytes?.ToBitmapImage();
         }
 
-        public bool IsConverting { get => _isConverting; set { _isConverting = value; OnPropertyChanged(); } }
+        public bool IsConverting { get; set { SetProperty(ref field, value); } }
 
         public override string? HelpPageKey => "switch-nsp-convert";
 
@@ -146,9 +144,7 @@ namespace RomForge.ViewModels.Switch
                 byte[] header;
 
                 if (string.Equals(Path.GetExtension(inputPath), ".chd", StringComparison.OrdinalIgnoreCase))
-                {
                     header = await Task.Run(() => TryReadChdFirstSectorHeader(inputPath)) ?? throw new InvalidOperationException("CHD 헤더를 읽을 수 없습니다.");
-                }
                 else
                 {
                     string cuePath = inputPath;
@@ -265,6 +261,7 @@ namespace RomForge.ViewModels.Switch
                         else
                         {
                             ProgressPercent = string.Empty;
+
                             if (!string.IsNullOrEmpty(p.Label))
                                 ProgressLabel = p.Label;
                         }
@@ -297,10 +294,7 @@ namespace RomForge.ViewModels.Switch
                 string finalNspPath = await NspBuildService.Run(request, BuildMode.FullProcess, AppConfig.Instance.Switch.Lz4CompressLevel, progress, (msg, lvl) => Log(msg), token);
                 string finalRenamedPath = RenameOutputFile(finalNspPath, GameTitle, NspTitleId);
 
-                Application.Current?.Dispatcher.Invoke(() =>
-                {
-                    Path.GetDirectoryName(finalRenamedPath)!.OpenFolder();
-                });
+            Application.Current?.Dispatcher.Invoke(() => Path.GetDirectoryName(finalRenamedPath)!.OpenFolder());
             }, token);
         }
 
@@ -312,7 +306,6 @@ namespace RomForge.ViewModels.Switch
             byte idOffset = unpackResult.VirtualRomfsPrograms.Keys.Min();
 
             log(string.Equals(Path.GetExtension(CuePath), ".chd", StringComparison.OrdinalIgnoreCase) ? "CHD를 스트리밍으로 연결 중..." : "BIN/CUE를 스트리밍으로 연결 중...");
-
             SaturnRomfsInjector.Inject(unpackResult.VirtualRomfsPrograms[idOffset], CuePath, WideScreen, volumeMultiplier);
 
             if (!unpackResult.VirtualParts.TryGetValue(idOffset, out var parts) || parts.Control == null)

@@ -70,8 +70,24 @@ public static partial class SaturnRomfsInjector
 
         cue.Entries[0].FileName = binName;
 
+        for (int i = 0; i < cue.Entries[0].Tracks.Count; i++)
+            cue.Entries[0].Tracks[i].DataType = MapTrackType(info.Tracks[i].TrackType);
+
         romfs.WriteAllBytes(dir + cueFileName, Encoding.UTF8.GetBytes(BuildCueText(cue)));
         romfs.Add(dir + binName, length, () => OpenChd(chdPath, length, info));
+    }
+
+    private static string MapTrackType(string? chdTrackType)
+    {
+        string type = chdTrackType?.ToUpperInvariant() ?? string.Empty;
+
+        if (type.Contains("AUDIO"))
+            return "AUDIO";
+
+        if (type.StartsWith("MODE1"))
+            return "MODE1/2352";
+
+        return "MODE2/2352";
     }
 
     private static ChdReadStream OpenChd(string chdPath, long length, ChdInfo info)

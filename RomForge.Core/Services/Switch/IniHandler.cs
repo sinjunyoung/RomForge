@@ -6,11 +6,10 @@ namespace RomForge.Core.Services.Switch
     public class IniHandler(string filePath)
     {
         private readonly Dictionary<string, Dictionary<string, string>> _data = new(StringComparer.OrdinalIgnoreCase);
+
         private string _currentSection = "Default";
 
-        public IniHandler() : this(string.Empty)
-        {
-        }
+        public IniHandler() : this(string.Empty) { }
 
         public async Task LoadAsync()
         {
