@@ -3,9 +3,11 @@ using NSW.Core;
 using NSW.Core.Models;
 using NSW.Core.Utils;
 using RomForge.Core;
+using RomForge.Core.Models.Naming;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.Services;
+using RomForge.Core.Services.Naming;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.UI.Command;
 using RomForge.Core.ViewModels;
@@ -30,29 +32,11 @@ public class RenameMainViewModel : ToolTabViewModel
 
     public ObservableCollection<RenameFileItem> Items { get; } = [];
 
-    public static IReadOnlyList<NamingFormatPreset> NamingPresets => RenamePresets.All;
+    public static IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Rename;
 
     public Visibility HintVisibility => Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
     public ICommand RunCommand { get; }
-
-    public NamingFormatPreset SelectedNamingPreset
-    {
-        get;
-        set
-        {
-            if (value is null || value.IsSeparator || ReferenceEquals(field, value))
-                return;
-
-            SetProperty(ref field, value);
-            OnPropertyChanged(nameof(IsFormatReadOnly));
-
-            if (!value.IsCustom)
-                FormatText = value.Format!;
-        }
-    } = RenamePresets.Default;
-
-    public bool IsFormatReadOnly => !SelectedNamingPreset.IsCustom;
 
     public string FormatText
     {
@@ -62,7 +46,7 @@ public class RenameMainViewModel : ToolTabViewModel
             if (SetProperty(ref field, value))
                 ScheduleRefresh();
         }
-    } = RenamePresets.Default.Format!;
+    } = RenameService.DefaultFormat;
 
     public string Summary { get; private set => SetProperty(ref field, value); } = string.Empty;
 

@@ -1,0 +1,14 @@
+﻿<UserControl x:Class="RomForge.Controls.Naming.NamingFormatEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel>
+        <WrapPanel x:Name="palette" Margin="0,0,0,2"/>
+        <RichTextBox x:Name="editor" AllowDrop="True" IsDocumentEnabled="True" AcceptsReturn="False" MinHeight="30" MaxHeight="66" FontSize="12" Foreground="#DCDCDC" CaretBrush="White" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" Padding="6,3"
+                     VerticalContentAlignment="Center" VerticalScrollBarVisibility="Disabled" HorizontalContentAlignment="Center" 
+                     TextChanged="Editor_TextChanged" PreviewDragEnter="Editor_PreviewDragOver" PreviewDragOver="Editor_PreviewDragOver" PreviewDrop="Editor_PreviewDrop" PreviewKeyDown="Editor_PreviewKeyDown">
+            <FlowDocument PagePadding="0">
+                <Paragraph Margin="0"/>
+            </FlowDocument>
+        </RichTextBox>
+    </StackPanel>
+</UserControl>

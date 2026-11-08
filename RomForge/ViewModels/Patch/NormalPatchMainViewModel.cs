@@ -5,9 +5,11 @@ using Patch.Core.Formats;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Compression;
+using RomForge.Core.Models.Naming;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Compression;
+using RomForge.Core.Services.Naming;
 using RomForge.Core.Services.Patch;
 using System.Diagnostics;
 using System.IO;
@@ -98,25 +100,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         }
     }
 
-    public static IReadOnlyList<NamingFormatPreset> NamingPresets => NamingFormatPresets.All;
-
-    public NamingFormatPreset SelectedNamingPreset
-    {
-        get;
-        set
-        {
-            if (value is null || ReferenceEquals(field, value))
-                return;
-
-            SetProperty(ref field, value);
-            OnPropertyChanged(nameof(IsNamingFormatReadOnly));
-
-            if (!value.IsCustom)
-                NamingFormat = value.Format!;
-        }
-    } = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
-
-    public bool IsNamingFormatReadOnly => !SelectedNamingPreset.IsCustom;
+    public static IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Patch;
 
     public string? NamingPreview { get; private set { SetProperty(ref field, value); } }
 
@@ -137,7 +121,6 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
                 OnPropertyChanged(nameof(AutoCompress));
                 OnPropertyChanged(nameof(NamingEnabled));
                 OnPropertyChanged(nameof(NamingFormat));
-                SyncNamingPreset();
                 TriggerPreviewUpdate();
             }
         };
@@ -164,14 +147,6 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         };
 
         TriggerPreviewUpdate();
-    }
-
-    private void SyncNamingPreset()
-    {
-        SelectedNamingPreset = NamingFormatPresets.Resolve(AppConfig.Instance.Patch.NamingFormat);
-
-        OnPropertyChanged(nameof(SelectedNamingPreset));
-        OnPropertyChanged(nameof(IsNamingFormatReadOnly));
     }
 
     public void AddPatchSlot()
