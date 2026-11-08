@@ -12,12 +12,15 @@ public class SettingsMainViewModel : MultiToolTabViewModel
 
     public PSSettingsMainViewModel PS1 { get; } = new();
 
+    public KeyFileSettingsMainViewModel KeyFiles { get; } = new();
+
     public SettingsMainViewModel()
     {
         Tools.Add(General);
         Tools.Add(Patch);
         Tools.Add(Compress);
         Tools.Add(PS1);
+        Tools.Add(KeyFiles);
 
         InitializeMultiTools();
     }

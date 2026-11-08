@@ -1,3 +1,4 @@
+using RomForge.Core.Services;
 using RomForge.Core.ViewModels;
 using System.ComponentModel;
 using System.IO;
@@ -134,6 +135,19 @@ public class OutputFoldersConfig : ViewModelBase
     public string? SwitchLz4MergeOutputPath { get; set { SetProperty(ref field, value); } }
 }
 
+public class KeyFilesConfig : ViewModelBase
+{
+    public string? SwitchProdKeysPath { get; set { SetProperty(ref field, value); } }
+
+    public string? WiiUKeysPath { get; set { SetProperty(ref field, value); } }
+
+    public string? N3dsAesKeysPath { get; set { SetProperty(ref field, value); } }
+
+    public string? N3dsBoot9Path { get; set { SetProperty(ref field, value); } }
+
+    public string? N3dsSeedDbPath { get; set { SetProperty(ref field, value); } }
+}
+
 public class AppConfig : ViewModelBase
 {
     private static readonly string DefaultFilePath = Path.ChangeExtension(Environment.ProcessPath!, "config.json");
@@ -161,6 +175,8 @@ public class AppConfig : ViewModelBase
     public TistoryConfig Tistory { get; set { SetProperty(ref field, value); } } = new();
 
     public OutputFoldersConfig OutputFolders { get; set { SetProperty(ref field, value); } } = new();
+
+    public KeyFilesConfig KeyFiles { get; set { SetProperty(ref field, value); } } = new();
 
     [JsonConstructor]
     private AppConfig() { }
@@ -191,6 +207,7 @@ public class AppConfig : ViewModelBase
                 PS1 = loaded.PS1 ?? new();
                 Tistory = loaded.Tistory ?? new();
                 OutputFolders = loaded.OutputFolders ?? new();
+                KeyFiles = loaded.KeyFiles ?? new();
             }
         }
         catch
@@ -216,6 +233,10 @@ public class AppConfig : ViewModelBase
         PS1.PropertyChanged += AutoSave;
         Tistory.PropertyChanged += AutoSave;
         OutputFolders.PropertyChanged += AutoSave;
+        KeyFiles.PropertyChanged += AutoSave;
+        KeyFiles.PropertyChanged += (_, _) => KeyFileService.Apply(KeyFiles);
+
+        KeyFileService.Apply(KeyFiles);
     }
 
     public void Save() => File.WriteAllText(DefaultFilePath, JsonSerializer.Serialize(this, JsonOptions));

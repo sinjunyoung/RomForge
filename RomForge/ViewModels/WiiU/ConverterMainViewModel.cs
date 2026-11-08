@@ -17,11 +17,11 @@ namespace RomForge.ViewModels.WiiU;
 
 public class ConverterMainViewModel : ToolTabViewModel
 {
-    private CancellationTokenSource _cts = new();
-
     private static readonly HashSet<string> SupportedExtensions = [".wud", ".wux", ".wua"];
 
-    private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
+    private static string KeysPath => WiiUKeyLocator.KeysPath;
+
+    private CancellationTokenSource _cts = new();
 
     public ObservableCollection<FileItem> FileItems { get; } = [];
 

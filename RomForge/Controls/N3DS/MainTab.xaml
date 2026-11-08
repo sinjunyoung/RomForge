@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.expression/blend/2008" 
              xmlns:local="clr-namespace:RomForge.Controls.N3DS"
+             xmlns:controls="clr-namespace:RomForge.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
@@ -45,5 +46,6 @@
                 <local:DecryptorTab DataContext="{Binding DecryptorVM}"/>
             </TabItem>
         </TabControl>
+        <controls:KeyMissingOverlay DataContext="{Binding KeyOverlay}"/>
     </Grid>
 </UserControl>

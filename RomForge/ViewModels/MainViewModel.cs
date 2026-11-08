@@ -85,8 +85,14 @@ public class MainViewModel : ToolTabViewModel
             OnPropertyChanged(nameof(ActiveLogEntries));
             OnPropertyChanged(nameof(HasHelpKey));
 
-            if (Tools[field] == SwitchMainVM)
+            var selected = Tools[field];
+
+            if (selected == SwitchMainVM)
                 SwitchMainVM?.RefreshKeysStatus();
+            else if (selected == WiiUMainVM)
+                WiiUMainVM?.RefreshKeysStatus();
+            else if (selected == Main3DsVM)
+                Main3DsVM?.RefreshKeysStatus();
         }
     }
 

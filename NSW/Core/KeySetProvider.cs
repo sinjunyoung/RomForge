@@ -8,6 +8,19 @@ public sealed class KeySetProvider
 {
     private static readonly Lock _lock = new();
 
+    public string? CustomKeysPath { get; private set; }
+
+    public string KeysPath
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(CustomKeysPath) && File.Exists(CustomKeysPath))
+                return CustomKeysPath;
+
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "prod.keys");
+        }
+    }
+
     public KeySet? KeySet
     {
         set;
@@ -24,22 +37,28 @@ public sealed class KeySetProvider
     {
         get
         {
-            lock (_lock) 
+            lock (_lock)
                 return field ??= new KeySetProvider();
         }
     }
 
     private KeySetProvider() { }
 
+    public void SetCustomKeysPath(string? path)
+    {
+        CustomKeysPath = path;
+        KeySet = null;
+    }
+
     public void TryLoadKeys()
     {
-        string keysPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "prod.keys");
+        string keysPath = KeysPath;
 
         if (File.Exists(keysPath))
         {
-            try 
+            try
             {
-                KeySet = ExternalKeyReader.ReadKeyFile(keysPath); 
+                KeySet = ExternalKeyReader.ReadKeyFile(keysPath);
             }
             catch (Exception ex)
             {

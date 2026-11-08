@@ -14,12 +14,10 @@ public class KeyStore
     {
         for (int i = 0; i < _slots.Length; i++)
             _slots[i] = new KeySlot();
-
-        string baseDir = AppContext.BaseDirectory;
-
-        TryLoadAesKeys(Path.Combine(baseDir, "aes_keys.txt"));
-        TryLoadBoot9(Path.Combine(baseDir, "boot9.bin"));
-        TryLoadSeedDb(Path.Combine(baseDir, "seeddb.bin"));
+        
+        TryLoadAesKeys(KeyStorePaths.AesKeys);
+        TryLoadBoot9(KeyStorePaths.Boot9);
+        TryLoadSeedDb(KeyStorePaths.SeedDb);
     }
 
     private void TryLoadAesKeys(string path)

@@ -1,0 +1,15 @@
+﻿<UserControl x:Class="RomForge.Controls.KeyMissingOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Border Background="#DD1E1E1E" Visibility="{Binding OverlayVisibility}" AllowDrop="True" PreviewDragOver="Overlay_PreviewDragOver" Drop="Overlay_Drop">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
+            <Image Source="{Binding IconSource}" Width="48" Height="48" Margin="0,0,0,16" HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding Title}" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+            <TextBlock Text="{Binding Message}" Foreground="#CCCCCC" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center"/>
+            <Button Content="키 파일 선택" Command="{Binding BrowseCommand}" Style="{StaticResource GrayButton}" Padding="20,8" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+            <TextBlock Text="키 파일을 이 화면에 드래그&amp;드롭해도 됩니다" Foreground="#80FFFFFF" FontSize="11" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+            <TextBlock Text="{Binding ErrorMessage}" Visibility="{Binding ErrorVisibility}" Foreground="#FF6B6B" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+            <Button Content="키 없이 계속" Command="{Binding SkipCommand}" Visibility="{Binding SkipVisibility}" Style="{StaticResource GrayButton}" Padding="20,8" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+        </StackPanel>
+    </Border>
+</UserControl>

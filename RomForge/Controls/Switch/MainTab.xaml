@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
+             xmlns:controls="clr-namespace:RomForge.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
@@ -82,12 +83,6 @@
             </TabItem>
         </TabControl>
 
-        <Border Background="#DD1E1E1E" Visibility="{Binding KeysAvailable, Converter={StaticResource InverseBooleanToVisibilityConverter}}"  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" d:IsHidden="True">
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="480">
-                <Image Source="/Assets/Images/Switch.png" Width="48" Height="48" Margin="0,0,0,16" HorizontalAlignment="Center"/>
-                <TextBlock Text="prod.keys 파일이 없습니다" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,8"/>
-                <TextBlock Text="{Binding KeysMissingMessage}" Foreground="#CCCCCC" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Border>
+        <controls:KeyMissingOverlay DataContext="{Binding KeyOverlay}"/>
     </Grid>
 </UserControl>

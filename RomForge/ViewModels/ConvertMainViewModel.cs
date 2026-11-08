@@ -47,7 +47,7 @@ public class ConvertMainViewModel : ToolTabViewModel
         ".cso", ".zso",
     };
 
-    private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
+    private static string KeysPath => WiiUKeyLocator.KeysPath;
 
     private string? _outputDir;
     private CancellationTokenSource _cts = new();

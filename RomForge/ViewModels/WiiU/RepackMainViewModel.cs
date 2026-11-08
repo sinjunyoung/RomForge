@@ -15,9 +15,9 @@ namespace RomForge.ViewModels.WiiU;
 
 public class RepackMainViewModel : ProgressToolTabViewModel
 {
-    private BuildMode? _currentMode;
+    private static string KeysPath => WiiUKeyLocator.KeysPath;
 
-    private static string KeysPath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "keys.txt");
+    private BuildMode? _currentMode;
 
     public RepackOutputFormat OutputFormat { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IsWuaFormat)); OnPropertyChanged(nameof(IsWupFormat)); } } = RepackOutputFormat.Wua;
 
@@ -183,7 +183,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (!isWua && !File.Exists(KeysPath))
             {
-                AppendLog("keys.txt가 exe 폴더에 없습니다. keys.txt를 exe와 같은 폴더에 넣어주세요 (wud/wux 입력에는 필요합니다).", LogLevel.Error);
+                AppendLog("keys.txt를 찾을 수 없습니다. exe와 같은 폴더에 넣거나 설정의 키 파일 탭에서 지정해주세요 (wud/wux 입력에는 필요합니다).", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 return;
             }
@@ -358,7 +358,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (mode != BuildMode.RebuildOnly && KeysPathRequired && !File.Exists(KeysPath))
         {
-            error = "keys.txt가 exe 폴더에 없습니다. keys.txt를 exe와 같은 폴더에 넣어주세요 (wud/wux 입력에는 필요합니다).";
+            error = "keys.txt를 찾을 수 없습니다. exe와 같은 폴더에 넣거나 설정의 키 파일 탭에서 지정해주세요 (wud/wux 입력에는 필요합니다).";
             return false;
         }
 
