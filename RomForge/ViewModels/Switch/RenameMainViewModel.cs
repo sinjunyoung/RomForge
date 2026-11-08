@@ -40,13 +40,17 @@ public class RenameMainViewModel : ToolTabViewModel
 
     public string FormatText
     {
-        get;
+        get => AppConfig.Instance.Switch.RenameFormat;
         set
         {
-            if (SetProperty(ref field, value))
-                ScheduleRefresh();
+            if (AppConfig.Instance.Switch.RenameFormat == value)
+                return;
+
+            AppConfig.Instance.Switch.RenameFormat = value;
+            OnPropertyChanged(nameof(FormatText));
+            ScheduleRefresh();
         }
-    } = RenameService.DefaultFormat;
+    }
 
     public string Summary { get; private set => SetProperty(ref field, value); } = string.Empty;
 

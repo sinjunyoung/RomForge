@@ -4,12 +4,15 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace RomForge.Controls.Naming;
 
 public partial class NamingFormatEditor : UserControl
 {
+    private static readonly BitmapImage ClearIcon = LoadIcon("Clear.png");
+
     public static readonly DependencyProperty FormatProperty = DependencyProperty.Register(nameof(Format), typeof(string), typeof(NamingFormatEditor), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnFormatChanged));
 
     public static readonly DependencyProperty TokensProperty = DependencyProperty.Register(nameof(Tokens), typeof(IReadOnlyList<NamingTokenDefinition>), typeof(NamingFormatEditor), new PropertyMetadata(Array.Empty<NamingTokenDefinition>(), OnTokensChanged));
@@ -50,6 +53,10 @@ public partial class NamingFormatEditor : UserControl
         control.Rebuild();
     }
 
+    private static string StripLineBreaks(string? text) => (text ?? string.Empty).Replace("\r", string.Empty).Replace("\n", string.Empty);
+
+    private static Paragraph CreateParagraph() => new() { Margin = new Thickness(0) };
+
     private void BuildPalette()
     {
         palette.Children.Clear();
@@ -60,21 +67,22 @@ public partial class NamingFormatEditor : UserControl
 
     private void Rebuild()
     {
-        var paragraph = GetParagraph();
-
         _syncing = true;
 
         try
         {
-            paragraph.Inlines.Clear();
+            var paragraph = CreateParagraph();
 
-            foreach (var segment in NamingFormatSerializer.Parse(Format, Tokens))
+            foreach (var segment in NamingFormatSerializer.Parse(StripLineBreaks(Format), Tokens))
             {
                 if (segment.Token is null)
                     paragraph.Inlines.Add(new Run(segment.Text));
                 else
                     paragraph.Inlines.Add(CreateContainer(new NamingBadge(segment.Token, segment.Option), null));
             }
+
+            editor.Document.Blocks.Clear();
+            editor.Document.Blocks.Add(paragraph);
         }
         finally
         {
@@ -82,22 +90,9 @@ public partial class NamingFormatEditor : UserControl
         }
     }
 
-    private Paragraph GetParagraph()
-    {
-        if (editor.Document.Blocks.FirstBlock is Paragraph paragraph)
-            return paragraph;
-
-        paragraph = new Paragraph { Margin = new Thickness(0) };
-
-        editor.Document.Blocks.Add(paragraph);
-
-        return paragraph;
-    }
-
     private InlineUIContainer CreateContainer(NamingBadge badge, TextPointer? position)
     {
         var container = position is null ? new InlineUIContainer(badge) : new InlineUIContainer(badge, position);
-
         container.BaselineAlignment = BaselineAlignment.Center;
         badge.Host = container;
         badge.ContextMenu = CreateMenu(badge);
@@ -130,10 +125,11 @@ public partial class NamingFormatEditor : UserControl
         if (optionItems.Count > 0)
         {
             UpdateChecks(optionItems, badge);
+
             menu.Items.Add(new Separator());
         }
 
-        var remove = new MenuItem { Header = "삭제" };
+        var remove = new MenuItem { Header = "삭제", Icon = new Image { Source = ClearIcon, Width = 20, Height = 20 } };
 
         remove.Click += (_, _) => RemoveBadge(badge);
 
@@ -215,9 +211,7 @@ public partial class NamingFormatEditor : UserControl
             return;
         }
 
-        string singleLine = text.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ');
-
-        e.DataObject = new DataObject(DataFormats.UnicodeText, singleLine);
+        e.DataObject = new DataObject(DataFormats.UnicodeText, StripLineBreaks(text));
         e.FormatToApply = DataFormats.UnicodeText;
     }
 
@@ -230,7 +224,7 @@ public partial class NamingFormatEditor : UserControl
 
         try
         {
-            Format = NamingFormatSerializer.Serialize(Collect(GetParagraph().Inlines));
+            Format = NamingFormatSerializer.Serialize(editor.Document.Blocks.OfType<Paragraph>().SelectMany(p => Collect(p.Inlines)));
         }
         finally
         {
@@ -243,7 +237,7 @@ public partial class NamingFormatEditor : UserControl
         foreach (var inline in inlines)
         {
             if (inline is Run run)
-                yield return NamingFormatSegment.Literal(run.Text);
+                yield return NamingFormatSegment.Literal(StripLineBreaks(run.Text));
             else if (inline is InlineUIContainer { Child: NamingBadge badge })
                 yield return badge.ToSegment();
             else if (inline is Span span)
@@ -252,5 +246,13 @@ public partial class NamingFormatEditor : UserControl
                     yield return segment;
             }
         }
+    }
+
+    private static BitmapImage LoadIcon(string name)
+    {
+        var image = new BitmapImage(new Uri($"pack://application:,,,/Assets/Images/{name}"));
+        image.Freeze();
+
+        return image;
     }
 }

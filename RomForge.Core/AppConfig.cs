@@ -1,4 +1,5 @@
 using RomForge.Core.Services;
+using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels;
 using System.ComponentModel;
 using System.IO;
@@ -72,6 +73,10 @@ public class SwitchConfig : ViewModelBase
     public bool UseBlocklessMode { get; set { SetProperty(ref field, value); } } = false;
 
     public bool ForceKeyGen0 { get; set { SetProperty(ref field, value); } } = false;
+
+    public string? SaturnNspPath { get; set { SetProperty(ref field, value); } }
+
+    public string RenameFormat { get; set { SetProperty(ref field, value); } } = RenameService.DefaultFormat;
 }
 
 public class AzaharConfig : ViewModelBase

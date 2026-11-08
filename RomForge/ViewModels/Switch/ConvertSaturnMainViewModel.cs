@@ -41,7 +41,20 @@ namespace RomForge.ViewModels.Switch
 
         public string CuePath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(CueHintVisibility)); _ = ParseSaturnDataAsync(value); } } = string.Empty;
 
-        public string NspPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(NspHintVisibility)); } } = string.Empty;
+        public string NspPath
+        {
+            get;
+            set
+            {
+                if (!SetProperty(ref field, value))
+                    return;
+
+                OnPropertyChanged(nameof(NspHintVisibility));
+
+                if (string.IsNullOrEmpty(value) || File.Exists(value))
+                    AppConfig.Instance.Switch.SaturnNspPath = value;
+            }
+        } = string.Empty;
 
         public string WorkPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(WorkHintVisibility)); } } = string.Empty;
 
@@ -88,6 +101,9 @@ namespace RomForge.ViewModels.Switch
             BrowseCueCommand = new RelayCommand(_ => BrowseCue());
             BrowseNspCommand = new RelayCommand(_ => BrowseNsp());
             BrowseWorkCommand = new RelayCommand(_ => BrowseWork());
+
+            if (AppConfig.Instance.Switch.SaturnNspPath is { Length: > 0 } saved && File.Exists(saved))
+                NspPath = saved;
         }
 
         private void BrowseCue()
@@ -101,6 +117,9 @@ namespace RomForge.ViewModels.Switch
         private void BrowseNsp()
         {
             var dlg = new Microsoft.Win32.OpenFileDialog { Filter = "NSP/NSZ 파일|*.nsp;*.nsz" };
+
+            if (Path.GetDirectoryName(NspPath) is { Length: > 0 } directory && Directory.Exists(directory))
+                dlg.InitialDirectory = directory;
 
             if (dlg.ShowDialog() == true)
                 NspPath = dlg.FileName;

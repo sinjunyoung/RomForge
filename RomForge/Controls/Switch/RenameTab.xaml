@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:naming="clr-namespace:RomForge.Controls.Naming"
+             xmlns:namin="clr-namespace:RomForge.Controls.Naming"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
              Background="#1E1E1E">
@@ -154,8 +154,7 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="파일명 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Top" Margin="0,6,10,0"/>
-                    <naming:NamingFormatEditor Grid.Column="1" Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
+                    <namin:NamingFormatEditor Grid.Column="1" Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
                 </Grid>
             </StackPanel>
         </Border>
