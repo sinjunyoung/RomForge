@@ -17,7 +17,7 @@ public static class Lz4MergeService
     public static async Task<List<string>> RunAsync(IReadOnlyList<string> inputPaths, string outputDir, int compressLevel, OutputFormat outputFormat, Action<int> jobsPlanned, Func<IReadOnlyList<string>, bool> isCompleted,
         Func<IReadOnlyList<string>, bool, IProgress<ProgressInfo>> progressFactory, Action<IReadOnlyList<string>, Lz4JobResult> jobFinished, Action<IReadOnlyList<string>, string> outputCreated, Action<string, LogLevel> log, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet;
+        var keySet = KeySetProvider.Instance.KeySet!;
         var routing = BuildRouting(keySet, inputPaths, ct);
         var results = new List<string>();
         int failed = 0;

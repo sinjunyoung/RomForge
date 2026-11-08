@@ -143,7 +143,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
         if (isZipTarget)
         {
             progress?.Report(new ProgressInfo { Label = "압축 중...", Percent = 0 });
-            await _zipCompressor.CompressFromFileAsync(sourcePath, outputPath, outputDir, ct);
+            await _zipCompressor.CompressFromFileAsync(outputPath, outputDir, ct);
         }
         else
             await _compressKnownConverter.ConvertAsync(detected, outputPath, _outputCuePath, _copiedTrackPaths, _outputCcdPath, _outputGdiPath, outputDir, ct);

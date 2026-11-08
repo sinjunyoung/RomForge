@@ -7,11 +7,11 @@ namespace RomForge.Core.Services.Patch;
 
 public class ZipCompressor(Action<string, LogLevel>? log, IProgress<ProgressInfo>? progress)
 {
-    public async Task CompressFromFileAsync(string? sourcePath, string outputPath, string outputDir, CancellationToken ct)
+    public async Task CompressFromFileAsync(string outputPath, string outputDir, CancellationToken ct)
     {
-        log?.Invoke($"압축 시작: {Path.GetFileName(sourcePath)}", LogLevel.Highlight);
+        log?.Invoke($"압축 시작: {Path.GetFileName(outputPath)}", LogLevel.Highlight);
 
-        string zipPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(sourcePath) + ".zip");
+        string zipPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(outputPath) + ".zip");
 
         zipPath = Utils.GetUniqueFilePath(zipPath);
 
@@ -19,7 +19,7 @@ public class ZipCompressor(Action<string, LogLevel>? log, IProgress<ProgressInfo
         {
             using var zipStream = new FileStream(zipPath, FileMode.Create);
             using var archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
-            var entry = archive.CreateEntry(Path.GetFileName(sourcePath) ?? throw new NullReferenceException());
+            var entry = archive.CreateEntry(Path.GetFileName(outputPath));
             using var entryStream = entry.Open();
             using var sourceStream = new FileStream(outputPath, FileMode.Open, FileAccess.Read);
             byte[] buffer = new byte[81920];

@@ -26,7 +26,7 @@ public class SplitService
     public static async Task<int> Split(string sourcePath, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, int index, int groupCount, 
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, IReadOnlySet<string>? onlyTitleIds = null, CancellationToken ct = default)
     {
-        var keySet = KeySetProvider.Instance.KeySet.Clone();
+        var keySet = KeySetProvider.Instance.KeySet!.Clone();
         var allMetas = MetadataReader.GetMetadataFromContainer(keySet, sourcePath);
         var disposables = new List<IDisposable>();
         int successCount = 0;

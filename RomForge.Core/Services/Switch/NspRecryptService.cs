@@ -20,7 +20,7 @@ public class NspRecryptService
 {
     public static async Task<List<string>> Recrypt(IReadOnlyList<string> inputPaths, bool forceKeyGen0, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
-        var ks = KeySetProvider.Instance.KeySet.Clone();
+        var ks = KeySetProvider.Instance.KeySet!.Clone();
         var processedFiles = new List<string>();
 
         for (int i = 0; i < inputPaths.Count; i++)

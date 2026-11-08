@@ -58,7 +58,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
                 bool useCompression = OutputFormat is OutputFormat.NSZ or OutputFormat.XCZ;
                 bool asXci = OutputFormat is OutputFormat.XCI or OutputFormat.XCZ;
                 var config = AppConfig.Instance.Switch;
-                var keySet = KeySetProvider.Instance.KeySet.Clone();
+                var keySet = KeySetProvider.Instance.KeySet!.Clone();
                 var results = new List<string>();
                 bool mergeAll = MergeMode == MergeMode.AllInOne;
                 void Log(string msg, LogLevel level, string? id) => AppendLog(msg, level);
