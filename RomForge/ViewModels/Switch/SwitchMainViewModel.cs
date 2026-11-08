@@ -1,6 +1,7 @@
 ﻿using NSW.Core;
 using RomForge.Core;
 using RomForge.Core.ViewModels;
+using RomForge.Core.ViewModels.Settings;
 using Res = NSW.Properties.Resources;
 
 namespace RomForge.ViewModels.Switch;
@@ -33,8 +34,7 @@ public class SwitchMainViewModel : MultiToolTabViewModel
     {
         var keyFiles = AppConfig.Instance.KeyFiles;
 
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", "prod.keys 파일이 없습니다", Res.Main_Err_NoKeys, "prod.keys|*.keys|모든 파일|*.*", () => KeysAvailable, () => keyFiles.SwitchProdKeysPath, path => keyFiles.SwitchProdKeysPath = path);
-
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", "prod.keys 파일이 없습니다", Res.Main_Err_NoKeys, [KeyFileItems.SwitchProdKeys(keyFiles)], () => KeysAvailable);
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();
 
         Tools.Add(RepackVM);

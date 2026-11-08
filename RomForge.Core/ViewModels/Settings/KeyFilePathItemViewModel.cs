@@ -11,25 +11,32 @@ public class KeyFilePathItemViewModel : ViewModelBase
 {
     private readonly Func<string?> _getPath;
     private readonly Action<string?> _setPath;
+    private readonly Func<bool>? _validate;
     private readonly string _fileFilter;
 
     public string Label { get; }
 
     public string DefaultFileName { get; }
 
-    public bool IsOptional { get; }
-
     public string Hint => $"비워두면 exe 폴더의 {DefaultFileName}을(를) 사용합니다";
 
     public string? FilePath
     {
         get => _getPath();
-        set
+        set => Accept(value);
+    }
+
+    public string? ErrorMessage
+    {
+        get;
+        private set
         {
-            _setPath(string.IsNullOrWhiteSpace(value) ? null : value.Trim());
-            Refresh();
+            SetProperty(ref field, value);
+            OnPropertyChanged(nameof(ErrorVisibility));
         }
     }
+
+    public Visibility ErrorVisibility => string.IsNullOrEmpty(ErrorMessage) ? Visibility.Collapsed : Visibility.Visible;
 
     public Visibility HintVisibility => string.IsNullOrWhiteSpace(FilePath) ? Visibility.Visible : Visibility.Collapsed;
 
@@ -47,14 +54,11 @@ public class KeyFilePathItemViewModel : ViewModelBase
             if (!string.IsNullOrWhiteSpace(FilePath))
                 return defaultFound ? "지정한 파일이 없어 exe 폴더의 파일 사용 중" : "지정한 파일을 찾을 수 없음";
 
-            if (defaultFound)
-                return "exe 폴더에서 찾음";
-
-            return IsOptional ? "파일 없음 (선택 사항)" : "파일 없음";
+            return defaultFound ? "exe 폴더에서 찾음" : "파일 없음";
         }
     }
 
-    public Brush StatusBrush => IsFound ? Brushes.LightGreen : IsOptional ? Brushes.Gray : Brushes.IndianRed;
+    public Brush StatusBrush => IsFound ? Brushes.LightGreen : Brushes.IndianRed;
 
     public ICommand BrowseCommand { get; }
 
@@ -64,16 +68,37 @@ public class KeyFilePathItemViewModel : ViewModelBase
 
     private bool IsCustomFound => !string.IsNullOrWhiteSpace(FilePath) && File.Exists(FilePath);
 
-    public KeyFilePathItemViewModel(string label, string defaultFileName, string fileFilter, bool isOptional, Func<string?> getPath, Action<string?> setPath)
+    public KeyFilePathItemViewModel(string label, string defaultFileName, string fileFilter, KeyFilesConfig config, Func<string?> getPath, Action<string?> setPath, Func<bool>? validate = null)
     {
         Label = label;
         DefaultFileName = defaultFileName;
-        IsOptional = isOptional;
         _fileFilter = fileFilter;
         _getPath = getPath;
         _setPath = setPath;
+        _validate = validate;
         BrowseCommand = new RelayCommand(_ => Browse());
-        ClearCommand = new RelayCommand(_ => FilePath = null);
+        ClearCommand = new RelayCommand(_ => Accept(null));
+        config.PropertyChanged += (_, _) => Refresh();
+    }
+
+    public void Accept(string? path)
+    {
+        string? previousPath = _getPath();
+        string? newPath = string.IsNullOrWhiteSpace(path) ? null : path.Trim();
+
+        _setPath(newPath);
+
+        if (newPath != null && _validate != null && !_validate())
+        {
+            _setPath(previousPath);
+            ErrorMessage = "선택한 파일을 키 파일로 사용할 수 없습니다. 올바른 파일인지 확인하세요.";
+        }
+        else
+        {
+            ErrorMessage = null;
+        }
+
+        Refresh();
     }
 
     public void Refresh()
@@ -94,6 +119,6 @@ public class KeyFilePathItemViewModel : ViewModelBase
         };
 
         if (dialog.ShowDialog() == true)
-            FilePath = dialog.FileName;
+            Accept(dialog.FileName);
     }
 }

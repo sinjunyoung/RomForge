@@ -14,7 +14,7 @@ public static class KeyStorePaths
 
     public static string SeedDb => Resolve(CustomSeedDb, "seeddb.bin");
 
-    public static bool HasUsableKeys => File.Exists(AesKeys);
+    public static bool HasUsableKeys => File.Exists(AesKeys) && File.Exists(Boot9) && File.Exists(SeedDb);
 
     private static string Resolve(string? customPath, string defaultFileName)
     {
