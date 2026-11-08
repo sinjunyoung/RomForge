@@ -107,9 +107,8 @@ public partial class NamingFormatEditor : UserControl
         badge.MouseDoubleClick += (s, e) =>
         {
             if (s is NamingBadge clickedBadge)
-            {
                 InsertBadgeAtCaret(clickedBadge.Definition, clickedBadge.Option);
-            }
+
             e.Handled = true;
         };
 
@@ -136,6 +135,7 @@ public partial class NamingFormatEditor : UserControl
     private InlineUIContainer CreateContainer(NamingBadge badge, TextPointer? position)
     {
         var container = position is null ? new InlineUIContainer(badge) : new InlineUIContainer(badge, position);
+
         container.BaselineAlignment = BaselineAlignment.Center;
         badge.Host = container;
         badge.ContextMenu = CreateMenu(badge);
@@ -168,7 +168,6 @@ public partial class NamingFormatEditor : UserControl
         if (optionItems.Count > 0)
         {
             UpdateChecks(optionItems, badge);
-
             menu.Items.Add(new Separator());
         }
 
@@ -294,6 +293,7 @@ public partial class NamingFormatEditor : UserControl
     private static BitmapImage LoadIcon(string name)
     {
         var image = new BitmapImage(new Uri($"pack://application:,,,/Assets/Images/{name}"));
+
         image.Freeze();
 
         return image;

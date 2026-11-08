@@ -94,10 +94,7 @@ public sealed class NamingBadge : Border
         _ => Color.FromRgb(0x6A, 0xA9, 0xFF)
     };
 
-    private static Color Lighten(Color color, double amount) => Color.FromRgb(
-        (byte)(color.R + (255 - color.R) * amount),
-        (byte)(color.G + (255 - color.G) * amount),
-        (byte)(color.B + (255 - color.B) * amount));
+    private static Color Lighten(Color color, double amount) => Color.FromRgb((byte)(color.R + (255 - color.R) * amount), (byte)(color.G + (255 - color.G) * amount), (byte)(color.B + (255 - color.B) * amount));
 
     private static SolidColorBrush Freeze(Color color)
     {
@@ -140,7 +137,6 @@ public sealed class NamingBadge : Border
         }
 
         _dragStart = e.GetPosition(null);
-
         _pressed = true;
         e.Handled = true;
 
@@ -163,8 +159,7 @@ public sealed class NamingBadge : Border
 
         Point position = e.GetPosition(null);
 
-        if (Math.Abs(position.X - _dragStart.X) < SystemParameters.MinimumHorizontalDragDistance
-            && Math.Abs(position.Y - _dragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
+        if (Math.Abs(position.X - _dragStart.X) < SystemParameters.MinimumHorizontalDragDistance && Math.Abs(position.Y - _dragStart.Y) < SystemParameters.MinimumVerticalDragDistance)
             return;
 
         _pressed = false;
