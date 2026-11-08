@@ -19,7 +19,6 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
     private readonly Stopwatch _totalSw = new();
 
     private int _successCount;
-    private bool _hadFailure;
 
     public string OutputPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(OutputHintVisibility)); AppConfig.Instance.OutputFolders.SwitchLz4MergeOutputPath = value; } } = string.Empty;
 
@@ -67,7 +66,6 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     .Select(p => p.Key)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                _hadFailure = false;
                 _successCount = 0;
 
                 foreach (var file in gameFiles.Where(f => !completedPaths.Contains(f.FilePath)))
@@ -151,9 +149,6 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
     private void FinishJob(Dictionary<string, List<GameFile>> rowsByPath, IReadOnlyList<string> paths, Lz4JobResult result)
     {
-        if (result == Lz4JobResult.Failed)
-            _hadFailure = true;
-
         if (result != Lz4JobResult.AlreadyDone)
         {
             if (result == Lz4JobResult.Done)

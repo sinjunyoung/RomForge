@@ -115,6 +115,18 @@ public sealed class VirtualRomfs : IPatchTarget, IFileStore, IDisposable
         return memory.ToArray();
     }
 
+    public void Add(string relativePath, long size, Func<Stream> open)
+    {
+        lock (_lock)
+            _files[relativePath] = new Entry(size, open);
+    }
+
+    public bool Remove(string relativePath)
+    {
+        lock (_lock)
+            return _files.Remove(relativePath);
+    }
+
     public void WriteAllBytes(string relativePath, byte[] data)
     {
         lock (_lock)

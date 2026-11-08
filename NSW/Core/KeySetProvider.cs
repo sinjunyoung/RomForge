@@ -8,7 +8,7 @@ public sealed class KeySetProvider
 {
     private static readonly Lock _lock = new();
 
-    public KeySet KeySet
+    public KeySet? KeySet
     {
         set;
         get
@@ -16,7 +16,7 @@ public sealed class KeySetProvider
             if (field == null)
                 TryLoadKeys();
 
-            return field ?? throw new NullReferenceException();
+            return field;
         }
     }
 

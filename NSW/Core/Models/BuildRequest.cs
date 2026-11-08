@@ -31,6 +31,8 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public bool StreamRomfs { get; init; }
 
+    public Func<UnpackResult, GameMetadata?>? OnUnpacked { get; init; }
+
     public bool OutputNsz { get; init; }
 
     public int NszCompressLevel { get; init; } = 18;

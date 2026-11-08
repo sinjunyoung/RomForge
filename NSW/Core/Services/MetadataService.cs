@@ -161,6 +161,52 @@ public static class MetadataService
         };
     }
 
+    public static GameMetadata? GetGameMetadataFromControl(NSW.HacPack.IFileStore control)
+    {
+        const string nacpName = "control.nacp";
+
+        if (!control.Exists(nacpName))
+            return null;
+
+        var langs = new List<LanguageInfo>();
+
+        try
+        {
+            byte[] nacpData = control.ReadAllBytes(nacpName);
+            var property = new ApplicationControlProperty();
+
+            nacpData.AsSpan().CopyTo(SpanHelpers.AsByteSpan(ref property));
+
+            var titles = property.Title;
+            bool isCompressed = property.TitleCompression == TitleCompressionValue.Enable;
+            int langCount = isCompressed ? Constants.ExtendedLanguageCount : Constants.LegacyLanguageCount;
+
+            for (int i = 0; i < langCount; i++)
+            {
+                string iconName = $"icon_{(Language)i}.dat";
+                byte[]? iconData = control.Exists(iconName) ? control.ReadAllBytes(iconName) : null;
+
+                langs.Add(new LanguageInfo
+                {
+                    Language = (Language)i,
+                    Flag = (property.SupportedLanguageFlag & (1u << i)) != 0,
+                    TitleName = titles[i].NameString.ToString().Trim('\0', ' '),
+                    Publisher = titles[i].PublisherString.ToString().Trim('\0', ' '),
+                    LogoData = iconData
+                });
+            }
+        }
+        catch { }
+
+        return new GameMetadata
+        {
+            Languages = langs,
+            Type = ContentMetaType.Application,
+            Version = 0,
+            Indices = [0]
+        };
+    }
+
     private static List<byte> GetMultiRomIndicesFromUnpacked(string unpackedDir)
     {
         var indices = new List<byte>();

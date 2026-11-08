@@ -3,7 +3,7 @@ using CHD.Core.Models;
 
 namespace PSP.PBP.Services;
 
-public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo? info) : Stream
+public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo? info, bool ownsWrapper = false) : Stream
 {
     private byte[]? _currentHunk;
     private uint _cachedHunkIndex = uint.MaxValue;
@@ -84,7 +84,12 @@ public class ChdReadStream(LibChdrWrapper wrapper, long totalLength, ChdInfo? in
     protected override void Dispose(bool disposing)
     {
         if (disposing)
+        {
             _currentHunk = null;
+
+            if (ownsWrapper)
+                wrapper.Dispose();
+        }
 
         base.Dispose(disposing);
     }

@@ -1,48 +1,41 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace RomForge.Core.Services.Switch
 {
     public class IniHandler(string filePath)
     {
         private readonly Dictionary<string, Dictionary<string, string>> _data = new(StringComparer.OrdinalIgnoreCase);
+        private string _currentSection = "Default";
+
+        public IniHandler() : this(string.Empty)
+        {
+        }
 
         public async Task LoadAsync()
         {
             if (!File.Exists(filePath))
                 return;
 
-            string currentSection = "Default";
+            _currentSection = "Default";
+
             using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var reader = new StreamReader(stream);
             string? line;
 
             while ((line = await reader.ReadLineAsync()) != null)
-            {
-                string trimmed = line.Trim();
+                ParseLine(line);
+        }
 
-                if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(';'))
-                    continue;
+        public void LoadFromBytes(byte[] data)
+        {
+            _currentSection = "Default";
 
-                if (trimmed.StartsWith('[') && trimmed.EndsWith(']'))
-                {
-                    currentSection = trimmed[1..^1];
+            using var reader = new StreamReader(new MemoryStream(data, false));
+            string? line;
 
-                    if (!_data.ContainsKey(currentSection))
-                        _data[currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                }
-                else
-                {
-                    var parts = trimmed.Split(['='], 2);
-
-                    if (parts.Length == 2)
-                    {
-                        if (!_data.ContainsKey(currentSection))
-                            _data[currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                        _data[currentSection][parts[0].Trim()] = parts[1].Trim('\"');
-                    }
-                }
-            }
+            while ((line = reader.ReadLine()) != null)
+                ParseLine(line);
         }
 
         public string GetValue(string section, string key, string defaultValue = "")
@@ -61,25 +54,51 @@ namespace RomForge.Core.Services.Switch
             _data[section][key] = value;
         }
 
-        public async Task SaveAsync()
+        public byte[] ToBytes()
         {
-            var lines = new List<string>();
+            var sb = new StringBuilder();
 
             foreach (var section in _data)
             {
-                lines.Add($"[{section.Key}]");
+                sb.AppendLine($"[{section.Key}]");
 
                 foreach (var kvp in section.Value)
-                    lines.Add($"{kvp.Key}=\"{kvp.Value}\"");
+                    sb.AppendLine($"{kvp.Key}=\"{kvp.Value}\"");
 
-                lines.Add(string.Empty);
+                sb.AppendLine();
             }
 
-            using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-            using var writer = new StreamWriter(stream);
+            return new UTF8Encoding(false).GetBytes(sb.ToString());
+        }
 
-            foreach (var line in lines)
-                await writer.WriteLineAsync(line);
+        public async Task SaveAsync() => await File.WriteAllBytesAsync(filePath, ToBytes());
+
+        private void ParseLine(string line)
+        {
+            string trimmed = line.Trim();
+
+            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(';'))
+                return;
+
+            if (trimmed.StartsWith('[') && trimmed.EndsWith(']'))
+            {
+                _currentSection = trimmed[1..^1];
+
+                if (!_data.ContainsKey(_currentSection))
+                    _data[_currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                return;
+            }
+
+            var parts = trimmed.Split(['='], 2);
+
+            if (parts.Length != 2)
+                return;
+
+            if (!_data.ContainsKey(_currentSection))
+                _data[_currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            _data[_currentSection][parts[0].Trim()] = parts[1].Trim('\"');
         }
     }
 }
