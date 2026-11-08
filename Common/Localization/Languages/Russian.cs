@@ -5,98 +5,121 @@ public sealed class Russian : LocalizedStrings
     public override string Code => "ru-RU";
     public override string DisplayName => "Русский";
 
-    public override string MainTitle => "Инструмент объединения NSW";
-    public override string HintSelectOutput => "Выберите папку вывода...";
-    public override string ButtonStart => "Начать";
-    public override string StatusProcessing => "Обработка...";
-    public override string HintDragAndDrop => "Перетащите файлы NSP, NSZ, XCI, XCZ сюда";
-    public override string HeaderType => "Тип";
-    public override string HeaderFileName => "Имя файла";
-    public override string HeaderFilePath => "Путь";
-    public override string ToolTipAddFile => "Добавить файл";
-    public override string ToolTipRemoveSelected => "Удалить выбранные";
-    public override string ToolTipRemoveAll => "Удалить всё";
-    public override string DialogSelectGameFile => "Выберите файл игры";
-    public override string FilterSwitchFiles => "Файлы Switch";
-    public override string FilterAllFiles => "Все файлы";
-    public override string StatusAnalyzing => "Анализ...";
-    public override string MsgTitleInfo => "Информация";
-    public override string MsgTitleWarning => "Предупреждение";
-    public override string MsgTitleError => "Ошибка";
-    public override string MsgTitleQuestion => "Подтверждение";
-    public override string LogAnalyzeMetadata => "━━ Анализ метаданных... ━━";
-    public override string LogFinalId(object arg0, object arg1) => $"Итоговый ID: {arg0} / Версия: {arg1}";
-    public override string LogMergeStart => "━━ Запуск объединения Super NSP ━━";
-    public override string LogMergeComplete(object arg0) => $"Объединение завершено: {arg0}";
-    public override string LogError(object arg0) => $"Произошла ошибка: {arg0}";
-    public override string LogSplitNoTarget => "Контент уже единый или нет целей для разделения.";
-    public override string LogSplitComplete(object arg0) => $"Разделение завершено: {arg0}";
-    public override string LogSplitFailed(object arg0, object arg1) => $"Ошибка разделения (ID: {arg0}): {arg1}";
-    public override string LogWriteNspFailed(object arg0) => $"Ошибка записи NSP: {arg0}";
-    public override string MainSelectFolder => "Выберите рабочую папку";
-    public override string MainLogElapsed(object arg0) => $"Прошло времени: {arg0}";
-    public override string MainLogAllComplete(object arg0) => $"✓ Все задачи завершены. Общее время: {arg0}";
-    public override string MainMsgDone => "Готово!";
-    public override string MainErrNoBase => "Добавьте файл с базовой игрой.";
-    public override string MainErrNoOutput => "Укажите рабочую папку.";
-    public override string MainErrNoFiles => "Добавьте файлы и попробуйте снова.";
-    public override string MainLogSplitStart(object arg0) => $"━━ Запуск анализа разделения: {arg0} ━━";
-    public override string MainLogAllSplitDone(object arg0) => $"✓ Все разделения завершены! Общее время: {arg0}";
-    public override string MainMsgSplitDone => "Разделение завершено.";
+    // Button
     public override string ButtonCancel => "Отмена";
-    public override string StatusNoKey => "Нет ключа";
-    public override string MainErrNoKeys => "Файл prod.keys не найден. Поместите файл ключей в папку приложения.";
-    public override string MainLogRecalculating => "Повторный анализ типов файлов...";
-    public override string HeaderExt => "Расш.";
-    public override string HeaderSize => "Размер";
-    public override string ErrorNoMetadata => "Нет доступных анализируемых метаданных.";
-    public override string LogTitleGroupDetected(object arg0) => $"Обнаружено групп заголовков: {arg0}";
-    public override string LogBaseMissingSkip(object arg0) => $"[{arg0}] Отсутствует Base (основная версия) — пропуск";
-    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] Ошибка объединения: {arg1}";
-    public override string LogDecompressAndMerge => "Распаковка и объединение";
-    public override string LogDeleteIncompleteFile => "Неполный созданный файл удалён.";
-    public override string LogSplitPreparing(object arg0) => $"{arg0} Начало разделения";
-    public override string LogSplitDecompressing(object arg0) => $"- {arg0} Распаковка и разделение...";
-    public override string LogSplitExtracting(object arg0) => $"- {arg0} Разделение...";
-    public override string MainErrNoKeysAndroid => "Файл prod.keys не найден. Поместите файл ключей в папку Download.";
-    public override string LabelCompression => "Сжатие";
-    public override string ToolTipBrowseOutput => "Обзор папки вывода";
-    public override string ToolTipOpenWorkSpace => "Открыть папку вывода";
-    public override string ToolTipCompress => "Сжимать в NSZ при выборе (только объединение)";
-    public override string MainCompressTitle => "Инструмент сжатия NSW";
-    public override string ButtonStartCompress => "Начать сжатие";
-    public override string ButtonStartDecompress => "Начать распаковку";
-    public override string LogValidationStart => "Начало проверки";
-    public override string LogValidationComplete => "Проверка завершена";
-    public override string LogValidating => "Валидация...";
-    public override string LogCompressionRatio => "Коэффициент сжатия";
-    public override string LogModeCompress => "Сжатие";
-    public override string LogModeDecompress => "Распаковка";
-    public override string LogProcessStart => "Начало";
-    public override string LogProcessError => "Ошибка обработки";
-    public override string LogStatusCompressing => "Сжатие...";
-    public override string LogStatusDecompressing => "Распаковка...";
-    public override string LogStatusCopying => "Копирование...";
-    public override string LogStatusDone => "Готово";
-    public override string LogMerging => "Идёт объединение...";
+    public override string ButtonSettings => "Настройки";
+    public override string ButtonStart => "Начать";
+
+    // Dialog
+    public override string DialogSelectGameFile => "Выберите файл игры";
+
+    // Error
     public override string ErrorNoCompressFiles => "Нет файлов для сжатия.";
     public override string ErrorNoDecompressFiles => "Нет файлов для распаковки.";
+    public override string ErrorNoMetadata => "Нет доступных анализируемых метаданных.";
+
+    // Filter
+    public override string FilterAllFiles => "Все файлы";
+    public override string FilterSwitchFiles => "Файлы Switch";
+
+    // Hint
+    public override string HintDragAndDrop => "Перетащите файлы NSP, NSZ, XCI, XCZ сюда";
+    public override string HintSelectOutput => "Выберите папку вывода...";
+
+    // Header
+    public override string HeaderExt => "Расш.";
+    public override string HeaderFileName => "Имя файла";
+    public override string HeaderFilePath => "Путь";
+    public override string HeaderSize => "Размер";
+    public override string HeaderType => "Тип";
+
+    // Label
+    public override string LabelCompression => "Сжатие";
     public override string LabelOutputPath => "Папка вывода";
-    public override string ToolTipCompressLevel => "3: Максимальная скорость | 9: Сбалансировано | 18: Рекомендуется";
-    public override string ToolTipValidateCompress => "Выполняет дополнительную валидацию после сжатия";
+
+    // Log
+    public override string LogAnalyzeMetadata => "━━ Анализ метаданных... ━━";
+    public override string LogBaseMissingSkip(object arg0) => $"[{arg0}] Отсутствует Base (основная версия) — пропуск";
     public override string LogCompressAndMerge => "Сжатие и объединение...";
-    public override string LogSplitting => "Идёт разделение...";
-    public override string ButtonValidate => "Валидировать";
-    public override string LogStatusValidating => "Валидация...";
-    public override string ToolTipBlockMode => "Случайный доступ (приоритет скорости)";
-    public override string ToolTipBlocklessMode => "Последовательный доступ (приоритет объёма)";
-    public override string ButtonSettings => "Настройки";
-    public override string SettingsTabGeneral => "Общие";
-    public override string ToolTipForceKeyGen0 => "Принудительно установить Firmware KeyGen в 0";
-    public override string SettingsForceKeyGen0 => "Принудительно KeyGen 0";
-    public override string SettingsCompressMode => "Режим сжатия";
-    public override string ButtonStartWork => "Начать работу";
     public override string LogCompressAndSplit => "Сжатие и разделение...";
+    public override string LogCompressionRatio => "Коэффициент сжатия";
+    public override string LogDecompressAndMerge => "Распаковка и объединение";
     public override string LogDecompressAndSplit => "Распаковка и разделение";
+    public override string LogDeleteIncompleteFile => "Неполный созданный файл удалён.";
+    public override string LogError(object arg0) => $"Произошла ошибка: {arg0}";
+    public override string LogFinalId(object arg0, object arg1) => $"Итоговый ID: {arg0} / Версия: {arg1}";
+    public override string LogMergeComplete(object arg0) => $"Объединение завершено: {arg0}";
+    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] Ошибка объединения: {arg1}";
+    public override string LogMergeStart => "━━ Запуск объединения Super NSP ━━";
+    public override string LogMerging => "Идёт объединение...";
+    public override string LogModeCompress => "Сжатие";
+    public override string LogModeDecompress => "Распаковка";
+    public override string LogProcessError => "Ошибка обработки";
+    public override string LogProcessStart => "Начало";
+    public override string LogSplitComplete(object arg0) => $"Разделение завершено: {arg0}";
+    public override string LogSplitDecompressing(object arg0) => $"- {arg0} Распаковка и разделение...";
+    public override string LogSplitExtracting(object arg0) => $"- {arg0} Разделение...";
+    public override string LogSplitFailed(object arg0, object arg1) => $"Ошибка разделения (ID: {arg0}): {arg1}";
+    public override string LogSplitNoTarget => "Контент уже единый или нет целей для разделения.";
+    public override string LogSplitPreparing(object arg0) => $"{arg0} Начало разделения";
+    public override string LogSplitting => "Идёт разделение...";
+    public override string LogStatusCompressing => "Сжатие...";
+    public override string LogStatusCopying => "Копирование...";
+    public override string LogStatusDecompressing => "Распаковка...";
+    public override string LogStatusDone => "Готово";
+    public override string LogStatusValidating => "Валидация...";
+    public override string LogTitleGroupDetected(object arg0) => $"Обнаружено групп заголовков: {arg0}";
+    public override string LogValidating => "Валидация...";
+    public override string LogValidationComplete => "Проверка завершена";
+    public override string LogValidationStart => "Начало проверки";
+    public override string LogWriteNspFailed(object arg0) => $"Ошибка записи NSP: {arg0}";
+
+    // Main
+    public override string MainCompressTitle => "Инструмент сжатия NSW";
+    public override string MainErrNoBase => "Добавьте файл с базовой игрой.";
+    public override string MainErrNoFiles => "Добавьте файлы и попробуйте снова.";
+    public override string MainErrNoKeys => "Файл prod.keys не найден. Поместите файл ключей в папку приложения.";
+    public override string MainErrNoKeysAndroid => "Файл prod.keys не найден. Поместите файл ключей в папку Download.";
+    public override string MainErrNoOutput => "Укажите рабочую папку.";
+    public override string MainLogAllComplete(object arg0) => $"✓ Все задачи завершены. Общее время: {arg0}";
+    public override string MainLogAllSplitDone(object arg0) => $"✓ Все разделения завершены! Общее время: {arg0}";
+    public override string MainLogElapsed(object arg0) => $"Прошло времени: {arg0}";
+    public override string MainLogRecalculating => "Повторный анализ типов файлов...";
+    public override string MainLogSplitStart(object arg0) => $"━━ Запуск анализа разделения: {arg0} ━━";
+    public override string MainMsgDone => "Готово!";
+    public override string MainMsgSplitDone => "Разделение завершено.";
+    public override string MainSelectFolder => "Выберите рабочую папку";
+    public override string MainTitle => "Инструмент объединения NSW";
+
+    // Menu
     public override string MenuOpenFolder => "Открыть папку";
+
+    // Msg
+    public override string MsgTitleError => "Ошибка";
+    public override string MsgTitleInfo => "Информация";
+    public override string MsgTitleQuestion => "Подтверждение";
+    public override string MsgTitleWarning => "Предупреждение";
+
+    // Settings
+    public override string SettingsCompressMode => "Режим сжатия";
+    public override string SettingsForceKeyGen0 => "Принудительно KeyGen 0";
+    public override string SettingsTabGeneral => "Общие";
+
+    // Status
+    public override string StatusAnalyzing => "Анализ...";
+    public override string StatusNoKey => "Нет ключа";
+    public override string StatusProcessing => "Обработка...";
+
+    // ToolTip
+    public override string ToolTipAddFile => "Добавить файл";
+    public override string ToolTipBlocklessMode => "Последовательный доступ (приоритет объёма)";
+    public override string ToolTipBlockMode => "Случайный доступ (приоритет скорости)";
+    public override string ToolTipBrowseOutput => "Обзор папки вывода";
+    public override string ToolTipCompress => "Сжимать в NSZ при выборе (только объединение)";
+    public override string ToolTipCompressLevel => "3: Максимальная скорость | 9: Сбалансировано | 18: Рекомендуется";
+    public override string ToolTipForceKeyGen0 => "Принудительно установить Firmware KeyGen в 0";
+    public override string ToolTipOpenWorkSpace => "Открыть папку вывода";
+    public override string ToolTipRemoveAll => "Удалить всё";
+    public override string ToolTipRemoveSelected => "Удалить выбранные";
+    public override string ToolTipValidateCompress => "Выполняет дополнительную валидацию после сжатия";
 }

@@ -5,98 +5,121 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string Code => "zh-TW";
     public override string DisplayName => "繁體中文";
 
-    public override string MainTitle => "NSW 合併工具";
-    public override string HintSelectOutput => "請選擇輸出資料夾...";
-    public override string ButtonStart => "開始";
-    public override string StatusProcessing => "正在處理...";
-    public override string HintDragAndDrop => "拖放 NSP, NSZ, XCI, XCZ 檔案至此";
-    public override string HeaderType => "類型";
-    public override string HeaderFileName => "檔案名稱";
-    public override string HeaderFilePath => "路徑";
-    public override string ToolTipAddFile => "新增檔案";
-    public override string ToolTipRemoveSelected => "移除選取項";
-    public override string ToolTipRemoveAll => "清空列表";
-    public override string DialogSelectGameFile => "選擇遊戲檔案";
-    public override string FilterSwitchFiles => "Switch 檔案";
-    public override string FilterAllFiles => "所有檔案";
-    public override string StatusAnalyzing => "正在解析...";
-    public override string MsgTitleInfo => "資訊";
-    public override string MsgTitleWarning => "警告";
-    public override string MsgTitleError => "錯誤";
-    public override string MsgTitleQuestion => "確認";
-    public override string LogAnalyzeMetadata => "━━ 正在解析元數據... ━━";
-    public override string LogFinalId(object arg0, object arg1) => $"最終 ID: {arg0} / 版本: {arg1}";
-    public override string LogMergeStart => "━━ 開始合併 Super NSP ━━";
-    public override string LogMergeComplete(object arg0) => $"合併完成: {arg0}";
-    public override string LogError(object arg0) => $"發生錯誤: {arg0}";
-    public override string LogSplitNoTarget => "已經是單個內容或沒有可拆分的目標。";
-    public override string LogSplitComplete(object arg0) => $"拆分完成: {arg0}";
-    public override string LogSplitFailed(object arg0, object arg1) => $"拆分失敗 (ID: {arg0}): {arg1}";
-    public override string LogWriteNspFailed(object arg0) => $"寫入 NSP 失敗: {arg0}";
-    public override string MainSelectFolder => "選擇工作區資料夾";
-    public override string MainLogElapsed(object arg0) => $"耗時 {arg0}";
-    public override string MainLogAllComplete(object arg0) => $"✓ 所有任務已完成。總耗時: {arg0}";
-    public override string MainMsgDone => "完成！";
-    public override string MainErrNoBase => "請新增包含本體遊戲(Base)的檔案。";
-    public override string MainErrNoOutput => "請設置工作區資料夾。";
-    public override string MainErrNoFiles => "請新增檔案後再試一次。";
-    public override string MainLogSplitStart(object arg0) => $"━━ 開始拆分解析: {arg0} ━━";
-    public override string MainLogAllSplitDone(object arg0) => $"✓ 所有拆分任務已完成！總耗時: {arg0}";
-    public override string MainMsgSplitDone => "拆分已完成。";
+    // Button
     public override string ButtonCancel => "取消";
-    public override string StatusNoKey => "無金鑰";
-    public override string MainErrNoKeys => "找不到 prod.keys 檔案。請將金鑰檔案放入應用程式資料夾中。";
-    public override string MainLogRecalculating => "正在重新分析檔案類型...";
-    public override string HeaderExt => "副檔名";
-    public override string HeaderSize => "大小";
-    public override string ErrorNoMetadata => "沒有可解析的中繼資料。";
-    public override string LogTitleGroupDetected(object arg0) => $"偵測到 {arg0} 個標題群組";
-    public override string LogBaseMissingSkip(object arg0) => $"[{arg0}] 缺少 Base（本體）- 已跳過";
-    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] 合併失敗：{arg1}";
-    public override string LogDecompressAndMerge => "正在解壓並合併";
-    public override string LogDeleteIncompleteFile => "已刪除未完整產生的檔案。";
-    public override string LogSplitPreparing(object arg0) => $"{arg0} 開始分割";
-    public override string LogSplitDecompressing(object arg0) => $"- {arg0} 正在解壓並分割...";
-    public override string LogSplitExtracting(object arg0) => $"- {arg0} 正在分割...";
-    public override string MainErrNoKeysAndroid => "找不到 prod.keys 檔案。請將金鑰檔案放入 Download 資料夾中。";
-    public override string LabelCompression => "壓縮";
-    public override string ToolTipBrowseOutput => "瀏覽輸出資料夾";
-    public override string ToolTipOpenWorkSpace => "開啟輸出資料夾";
-    public override string ToolTipCompress => "勾選時壓縮為NSZ（僅限合併）";
-    public override string MainCompressTitle => "NSW壓縮工具";
-    public override string ButtonStartCompress => "開始壓縮";
-    public override string ButtonStartDecompress => "開始解壓";
-    public override string LogValidationStart => "開始驗證";
-    public override string LogValidationComplete => "驗證完成";
-    public override string LogValidating => "校驗中...";
-    public override string LogCompressionRatio => "壓縮率";
-    public override string LogModeCompress => "壓縮";
-    public override string LogModeDecompress => "解壓";
-    public override string LogProcessStart => "開始";
-    public override string LogProcessError => "處理錯誤";
-    public override string LogStatusCompressing => "壓縮中...";
-    public override string LogStatusDecompressing => "解壓中...";
-    public override string LogStatusCopying => "複製中...";
-    public override string LogStatusDone => "完成";
-    public override string LogMerging => "正在合併...";
+    public override string ButtonSettings => "設定";
+    public override string ButtonStart => "開始";
+
+    // Dialog
+    public override string DialogSelectGameFile => "選擇遊戲檔案";
+
+    // Error
     public override string ErrorNoCompressFiles => "沒有可壓縮的?案。";
     public override string ErrorNoDecompressFiles => "沒有可解壓的?案。";
+    public override string ErrorNoMetadata => "沒有可解析的中繼資料。";
+
+    // Filter
+    public override string FilterAllFiles => "所有檔案";
+    public override string FilterSwitchFiles => "Switch 檔案";
+
+    // Hint
+    public override string HintDragAndDrop => "拖放 NSP, NSZ, XCI, XCZ 檔案至此";
+    public override string HintSelectOutput => "請選擇輸出資料夾...";
+
+    // Header
+    public override string HeaderExt => "副檔名";
+    public override string HeaderFileName => "檔案名稱";
+    public override string HeaderFilePath => "路徑";
+    public override string HeaderSize => "大小";
+    public override string HeaderType => "類型";
+
+    // Label
+    public override string LabelCompression => "壓縮";
     public override string LabelOutputPath => "輸出資料夾";
-    public override string ToolTipCompressLevel => "3：最快 | 9：平衡 | 18：建議";
-    public override string ToolTipValidateCompress => "壓縮後執行額外校驗";
+
+    // Log
+    public override string LogAnalyzeMetadata => "━━ 正在解析元數據... ━━";
+    public override string LogBaseMissingSkip(object arg0) => $"[{arg0}] 缺少 Base（本體）- 已跳過";
     public override string LogCompressAndMerge => "正在壓縮並合併...";
-    public override string LogSplitting => "正在分離...";
-    public override string ButtonValidate => "校驗";
-    public override string LogStatusValidating => "校驗中...";
-    public override string ToolTipBlockMode => "隨機存取（速度優先）";
-    public override string ToolTipBlocklessMode => "循序存取（容量優先）";
-    public override string ButtonSettings => "設定";
-    public override string SettingsTabGeneral => "一般";
-    public override string ToolTipForceKeyGen0 => "將韌體KeyGen強制為0";
-    public override string SettingsForceKeyGen0 => "強制 KeyGen 0";
-    public override string SettingsCompressMode => "壓縮模式";
-    public override string ButtonStartWork => "開始工作";
     public override string LogCompressAndSplit => "正在壓縮並分割...";
+    public override string LogCompressionRatio => "壓縮率";
+    public override string LogDecompressAndMerge => "正在解壓並合併";
     public override string LogDecompressAndSplit => "正在解壓並分割";
+    public override string LogDeleteIncompleteFile => "已刪除未完整產生的檔案。";
+    public override string LogError(object arg0) => $"發生錯誤: {arg0}";
+    public override string LogFinalId(object arg0, object arg1) => $"最終 ID: {arg0} / 版本: {arg1}";
+    public override string LogMergeComplete(object arg0) => $"合併完成: {arg0}";
+    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] 合併失敗：{arg1}";
+    public override string LogMergeStart => "━━ 開始合併 Super NSP ━━";
+    public override string LogMerging => "正在合併...";
+    public override string LogModeCompress => "壓縮";
+    public override string LogModeDecompress => "解壓";
+    public override string LogProcessError => "處理錯誤";
+    public override string LogProcessStart => "開始";
+    public override string LogSplitComplete(object arg0) => $"拆分完成: {arg0}";
+    public override string LogSplitDecompressing(object arg0) => $"- {arg0} 正在解壓並分割...";
+    public override string LogSplitExtracting(object arg0) => $"- {arg0} 正在分割...";
+    public override string LogSplitFailed(object arg0, object arg1) => $"拆分失敗 (ID: {arg0}): {arg1}";
+    public override string LogSplitNoTarget => "已經是單個內容或沒有可拆分的目標。";
+    public override string LogSplitPreparing(object arg0) => $"{arg0} 開始分割";
+    public override string LogSplitting => "正在分離...";
+    public override string LogStatusCompressing => "壓縮中...";
+    public override string LogStatusCopying => "複製中...";
+    public override string LogStatusDecompressing => "解壓中...";
+    public override string LogStatusDone => "完成";
+    public override string LogStatusValidating => "校驗中...";
+    public override string LogTitleGroupDetected(object arg0) => $"偵測到 {arg0} 個標題群組";
+    public override string LogValidating => "校驗中...";
+    public override string LogValidationComplete => "驗證完成";
+    public override string LogValidationStart => "開始驗證";
+    public override string LogWriteNspFailed(object arg0) => $"寫入 NSP 失敗: {arg0}";
+
+    // Main
+    public override string MainCompressTitle => "NSW壓縮工具";
+    public override string MainErrNoBase => "請新增包含本體遊戲(Base)的檔案。";
+    public override string MainErrNoFiles => "請新增檔案後再試一次。";
+    public override string MainErrNoKeys => "找不到 prod.keys 檔案。請將金鑰檔案放入應用程式資料夾中。";
+    public override string MainErrNoKeysAndroid => "找不到 prod.keys 檔案。請將金鑰檔案放入 Download 資料夾中。";
+    public override string MainErrNoOutput => "請設置工作區資料夾。";
+    public override string MainLogAllComplete(object arg0) => $"✓ 所有任務已完成。總耗時: {arg0}";
+    public override string MainLogAllSplitDone(object arg0) => $"✓ 所有拆分任務已完成！總耗時: {arg0}";
+    public override string MainLogElapsed(object arg0) => $"耗時 {arg0}";
+    public override string MainLogRecalculating => "正在重新分析檔案類型...";
+    public override string MainLogSplitStart(object arg0) => $"━━ 開始拆分解析: {arg0} ━━";
+    public override string MainMsgDone => "完成！";
+    public override string MainMsgSplitDone => "拆分已完成。";
+    public override string MainSelectFolder => "選擇工作區資料夾";
+    public override string MainTitle => "NSW 合併工具";
+
+    // Menu
     public override string MenuOpenFolder => "開啟資料夾";
+
+    // Msg
+    public override string MsgTitleError => "錯誤";
+    public override string MsgTitleInfo => "資訊";
+    public override string MsgTitleQuestion => "確認";
+    public override string MsgTitleWarning => "警告";
+
+    // Settings
+    public override string SettingsCompressMode => "壓縮模式";
+    public override string SettingsForceKeyGen0 => "強制 KeyGen 0";
+    public override string SettingsTabGeneral => "一般";
+
+    // Status
+    public override string StatusAnalyzing => "正在解析...";
+    public override string StatusNoKey => "無金鑰";
+    public override string StatusProcessing => "正在處理...";
+
+    // ToolTip
+    public override string ToolTipAddFile => "新增檔案";
+    public override string ToolTipBlocklessMode => "循序存取（容量優先）";
+    public override string ToolTipBlockMode => "隨機存取（速度優先）";
+    public override string ToolTipBrowseOutput => "瀏覽輸出資料夾";
+    public override string ToolTipCompress => "勾選時壓縮為NSZ（僅限合併）";
+    public override string ToolTipCompressLevel => "3：最快 | 9：平衡 | 18：建議";
+    public override string ToolTipForceKeyGen0 => "將韌體KeyGen強制為0";
+    public override string ToolTipOpenWorkSpace => "開啟輸出資料夾";
+    public override string ToolTipRemoveAll => "清空列表";
+    public override string ToolTipRemoveSelected => "移除選取項";
+    public override string ToolTipValidateCompress => "壓縮後執行額外校驗";
 }
