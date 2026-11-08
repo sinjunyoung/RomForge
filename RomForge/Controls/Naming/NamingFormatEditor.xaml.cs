@@ -62,7 +62,11 @@ public partial class NamingFormatEditor : UserControl
         palette.Children.Clear();
 
         foreach (var definition in Tokens)
-            palette.Children.Add(new NamingBadge(definition, definition.DefaultOption?.Value) { Margin = new Thickness(0, 0, 4, 4) });
+        {
+            var badge = CreateBadgeInstance(definition, definition.DefaultOption?.Value);
+
+            palette.Children.Add(badge);
+        }
     }
 
     private void Rebuild()
@@ -78,7 +82,10 @@ public partial class NamingFormatEditor : UserControl
                 if (segment.Token is null)
                     paragraph.Inlines.Add(new Run(segment.Text));
                 else
-                    paragraph.Inlines.Add(CreateContainer(new NamingBadge(segment.Token, segment.Option), null));
+                {
+                    var badge = CreateBadgeInstance(segment.Token, segment.Option);
+                    paragraph.Inlines.Add(CreateContainer(badge, null));
+                }
             }
 
             editor.Document.Blocks.Clear();
@@ -88,6 +95,42 @@ public partial class NamingFormatEditor : UserControl
         {
             _syncing = false;
         }
+    }
+
+    private NamingBadge CreateBadgeInstance(NamingTokenDefinition definition, string? option)
+    {
+        var badge = new NamingBadge(definition, option)
+        {
+            Margin = new Thickness(2, 0, 2, 0)
+        };
+
+        badge.MouseDoubleClick += (s, e) =>
+        {
+            if (s is NamingBadge clickedBadge)
+            {
+                InsertBadgeAtCaret(clickedBadge.Definition, clickedBadge.Option);
+            }
+            e.Handled = true;
+        };
+
+        return badge;
+    }
+
+    private void InsertBadgeAtCaret(NamingTokenDefinition definition, string? option)
+    {
+        editor.Focus();
+
+        var position = editor.CaretPosition.GetInsertionPosition(LogicalDirection.Forward);
+
+        position ??= editor.Document.ContentEnd;
+
+        var newBadge = new NamingBadge(definition, option);
+
+        CreateContainer(newBadge, position);
+
+        editor.CaretPosition = newBadge?.Host?.ElementEnd.GetInsertionPosition(LogicalDirection.Forward);
+
+        Commit();
     }
 
     private InlineUIContainer CreateContainer(NamingBadge badge, TextPointer? position)

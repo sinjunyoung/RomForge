@@ -149,13 +149,8 @@
 
         <Border Grid.Row="1" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Margin="5,5,5,0" Padding="10,8" IsEnabled="{Binding IsIdle}">
             <StackPanel>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <namin:NamingFormatEditor Grid.Column="1" Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
-                </Grid>
+                <namin:NamingFormatEditor Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
+                <TextBlock Text="{Binding Summary}" Foreground="#54FFB5" Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 

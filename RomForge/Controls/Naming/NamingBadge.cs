@@ -29,6 +29,8 @@ public sealed class NamingBadge : Border
     private Point _dragStart;
     private bool _pressed;
 
+    public event MouseButtonEventHandler? MouseDoubleClick;
+
     public NamingBadge(NamingTokenDefinition definition, string? option)
     {
         Definition = definition;
@@ -124,7 +126,21 @@ public sealed class NamingBadge : Border
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
     {
+        if (e.ClickCount == 2)
+        {
+            _pressed = false;
+            
+            MouseDoubleClick?.Invoke(this, e);
+
+            e.Handled = true;
+
+            base.OnMouseLeftButtonDown(e);
+
+            return;
+        }
+
         _dragStart = e.GetPosition(null);
+
         _pressed = true;
         e.Handled = true;
 
