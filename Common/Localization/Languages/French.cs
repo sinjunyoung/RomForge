@@ -7,8 +7,7 @@ public sealed class French : LocalizedStrings
 
     public override string MainTitle => "Outil de fusion NSW";
     public override string HintSelectOutput => "Sélectionner le dossier de sortie...";
-    public override string ButtonMergeStart => "Démarrer la fusion";
-    public override string ButtonSplitStart => "Démarrer la division";
+    public override string ButtonStart => "Démarrer";
     public override string StatusProcessing => "Traitement en cours...";
     public override string HintDragAndDrop => "Glissez-déposez les fichiers NSP, NSZ, XCI, XCZ ici";
     public override string HeaderType => "Type";
@@ -99,4 +98,5 @@ public sealed class French : LocalizedStrings
     public override string ButtonStartWork => "Démarrer le travail";
     public override string LogCompressAndSplit => "Compression et fractionnement en cours...";
     public override string LogDecompressAndSplit => "Décompression et division";
+    public override string MenuOpenFolder => "Ouvrir le dossier";
 }

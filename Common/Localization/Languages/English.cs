@@ -7,8 +7,7 @@ public sealed class English : LocalizedStrings
 
     public override string MainTitle => "NSW Merge Tool";
     public override string HintSelectOutput => "Select the output folder.";
-    public override string ButtonMergeStart => "Start Merge";
-    public override string ButtonSplitStart => "Start Split";
+    public override string ButtonStart => "Start";
     public override string StatusProcessing => "Processing...";
     public override string HintDragAndDrop => "Drag & drop files here (NSP, NSZ, XCI, XCZ)";
     public override string HeaderType => "Type";
@@ -99,4 +98,5 @@ public sealed class English : LocalizedStrings
     public override string ButtonStartWork => "Start Work";
     public override string LogCompressAndSplit => "Compressing & Splitting...";
     public override string LogDecompressAndSplit => "Decompressing and splitting";
+    public override string MenuOpenFolder => "Open folder";
 }

@@ -7,8 +7,7 @@ public sealed class Japanese : LocalizedStrings
 
     public override string MainTitle => "NSW Merge Tool";
     public override string HintSelectOutput => "出力フォルダーを選択してください。";
-    public override string ButtonMergeStart => "マージ開始";
-    public override string ButtonSplitStart => "分割開始";
+    public override string ButtonStart => "開始";
     public override string StatusProcessing => "処理中...";
     public override string HintDragAndDrop => "ここにファイルをドラッグ＆ドロップしてください（NSP, NSZ, XCI, XCZ）";
     public override string HeaderType => "種類";
@@ -99,4 +98,5 @@ public sealed class Japanese : LocalizedStrings
     public override string ButtonStartWork => "作業開始";
     public override string LogCompressAndSplit => "圧縮して分割中...";
     public override string LogDecompressAndSplit => "解凍および分割中";
+    public override string MenuOpenFolder => "フォルダーを開く";
 }

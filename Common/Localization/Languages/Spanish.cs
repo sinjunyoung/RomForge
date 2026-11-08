@@ -7,8 +7,7 @@ public sealed class Spanish : LocalizedStrings
 
     public override string MainTitle => "Herramienta de combinación NSW";
     public override string HintSelectOutput => "Seleccionar carpeta de salida...";
-    public override string ButtonMergeStart => "Iniciar combinación";
-    public override string ButtonSplitStart => "Iniciar división";
+    public override string ButtonStart => "Iniciar";
     public override string StatusProcessing => "Procesando...";
     public override string HintDragAndDrop => "Arrastra archivos NSP, NSZ, XCI, XCZ aquí";
     public override string HeaderType => "Tipo";
@@ -99,4 +98,5 @@ public sealed class Spanish : LocalizedStrings
     public override string ButtonStartWork => "Iniciar trabajo";
     public override string LogCompressAndSplit => "Comprimiendo y dividiendo...";
     public override string LogDecompressAndSplit => "Descomprimiendo y dividiendo";
+    public override string MenuOpenFolder => "Abrir carpeta";
 }

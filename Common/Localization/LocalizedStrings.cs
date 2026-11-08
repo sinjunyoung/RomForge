@@ -7,8 +7,7 @@ public abstract class LocalizedStrings
 
     public abstract string MainTitle { get; }
     public abstract string HintSelectOutput { get; }
-    public abstract string ButtonMergeStart { get; }
-    public abstract string ButtonSplitStart { get; }
+    public abstract string ButtonStart { get; }
     public abstract string StatusProcessing { get; }
     public abstract string HintDragAndDrop { get; }
     public abstract string HeaderType { get; }
@@ -99,4 +98,5 @@ public abstract class LocalizedStrings
     public abstract string ButtonStartWork { get; }
     public abstract string LogCompressAndSplit { get; }
     public abstract string LogDecompressAndSplit { get; }
+    public abstract string MenuOpenFolder { get; }
 }

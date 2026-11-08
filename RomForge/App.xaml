@@ -34,7 +34,8 @@
             <converters:BoolToPlayStopTextConverter x:Key="BoolToPlayStopTextConverter" />
             <converters:TitleIdGroupConverter x:Key="TitleIdGroupConverter" />
             <converters:RepresentativeTitleNameConverter x:Key="RepresentativeTitleNameConverter" />
-            
+            <converters:LanquageCodeToImageConverter x:Key="LanquageCodeToImageConverter"/>
+
             <Style TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="1"/>

@@ -7,8 +7,7 @@ public sealed class Russian : LocalizedStrings
 
     public override string MainTitle => "Инструмент объединения NSW";
     public override string HintSelectOutput => "Выберите папку вывода...";
-    public override string ButtonMergeStart => "Начать объединение";
-    public override string ButtonSplitStart => "Начать разделение";
+    public override string ButtonStart => "Начать";
     public override string StatusProcessing => "Обработка...";
     public override string HintDragAndDrop => "Перетащите файлы NSP, NSZ, XCI, XCZ сюда";
     public override string HeaderType => "Тип";
@@ -99,4 +98,5 @@ public sealed class Russian : LocalizedStrings
     public override string ButtonStartWork => "Начать работу";
     public override string LogCompressAndSplit => "Сжатие и разделение...";
     public override string LogDecompressAndSplit => "Распаковка и разделение";
+    public override string MenuOpenFolder => "Открыть папку";
 }

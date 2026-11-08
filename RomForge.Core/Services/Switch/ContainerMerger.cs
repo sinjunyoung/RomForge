@@ -88,7 +88,7 @@ internal static class ContainerMerger
                                                   group.DlcMetas.GroupBy(m => m.TitleId, StringComparer.OrdinalIgnoreCase).Count(), Type: group.BaseMetas.Count > 0 ? ContentMetaType.Application : baseMeta.Type),
             };
 
-            log?.Invoke($"{group.BaseTitleName} {Loc.S.ButtonMergeStart} ({idx}/{groups.Count})", LogLevel.Highlight, group.BaseTitleId);
+            log?.Invoke($"{group.BaseTitleName} {Loc.S.ButtonStart} ({idx}/{groups.Count})", LogLevel.Highlight, group.BaseTitleId);
 
             try
             {
@@ -123,7 +123,7 @@ internal static class ContainerMerger
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
         var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, useBlockMode);
 
-        log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.ButtonMergeStart} (1/1)", LogLevel.Highlight, req.TargetBaseTitleId);
+        log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.ButtonStart} (1/1)", LogLevel.Highlight, req.TargetBaseTitleId);
 
         var results = new List<string>();
 

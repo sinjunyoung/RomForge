@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:namin="clr-namespace:RomForge.Controls.Naming"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
              Background="#1E1E1E">
@@ -36,18 +37,18 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
@@ -192,7 +193,7 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemoveFile_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -200,7 +201,7 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnClear_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemoveAllFiles_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>

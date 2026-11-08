@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:RomForge.ViewModels.Switch"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:converters2="clr-namespace:RomForge.Core.Converters;assembly=RomForge.Core"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
@@ -34,18 +35,18 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
@@ -190,7 +191,7 @@
                                                 <TextBlock Text="{Binding Progress}" Foreground="White" FontSize="10" FontWeight="Bold"/>
                                                 <TextBlock Text="%" Foreground="White" FontSize="10" FontWeight="Bold" Margin="1,0,0,0"/>
                                             </StackPanel>
-                                        </Grid>                                        
+                                        </Grid>
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
@@ -255,7 +256,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Run.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="시작" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonStart, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -263,7 +264,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="취소" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -274,7 +275,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="파일 추가" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -286,19 +287,19 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemoveFile_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="선택 삭제" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnClear_Click" Margin="0,0,6,0">
+                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemoveAllFiles_Click" Margin="0,0,6,0">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="전체 삭제" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>

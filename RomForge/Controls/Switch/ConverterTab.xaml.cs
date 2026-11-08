@@ -98,14 +98,9 @@ public partial class ConverterTab : UserControl
         await ViewModel.AddPathsAsync(Utils.ExpandPaths([dialog.SelectedPath]));
     }
 
-    private void BtnRemove_Click(object sender, RoutedEventArgs e)
-    {
-        var selected = lvFiles.SelectedItems.Cast<ConverterFileItem>().ToList();
+    private void BtnRemoveFile_Click(object sender, RoutedEventArgs e) => ViewModel?.RemoveItems([..lvFiles.SelectedItems.Cast<ConverterFileItem>()]);
 
-        ViewModel?.RemoveItems(selected);
-    }
-
-    private void BtnClear_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearItems();
+    private void BtnRemoveAllFiles_Click(object sender, RoutedEventArgs e) => ViewModel?.ClearItems();
 
     private void LvFiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {

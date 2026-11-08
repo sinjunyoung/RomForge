@@ -22,18 +22,18 @@
                     <ListView x:Name="lvFiles" ItemsSource="{Binding Rows}" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                         <ListView.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                                <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
-                                <MenuItem Header="선택 삭제" Click="BtnRemoveFile_Click">
+                                <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="전체 삭제" Click="BtnRemoveAllFiles_Click">
+                                <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
@@ -153,7 +153,7 @@
                                 <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
                                         <GridViewColumnHeader Tag="Size">
-                                            <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/FileSizeBytes.png" Text="{Binding HeaderSize, Source={x:Static l:Loc.S}}"/>
+                                            <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/FileSizeBytes.png" Text="{Binding Path=Current.HeaderSize, Source={x:Static l:Loc.Instance}}"/>
                                         </GridViewColumnHeader>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -168,16 +168,16 @@
                 </Grid>
             </Grid>
             <StackPanel Grid.Column="1" Margin="10,2,0,0" VerticalAlignment="Top">
-                <Button ToolTip="{Binding ToolTipAddFile, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button ToolTip="폴더 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{Binding ToolTipRemoveSelected, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{Binding ToolTipRemoveAll, Source={x:Static l:Loc.S}}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
             </StackPanel>

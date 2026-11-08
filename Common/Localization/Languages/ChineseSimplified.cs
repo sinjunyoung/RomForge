@@ -7,8 +7,7 @@ public sealed class ChineseSimplified : LocalizedStrings
 
     public override string MainTitle => "NSW 合并工具";
     public override string HintSelectOutput => "请选择输出文件夹。";
-    public override string ButtonMergeStart => "开始合并";
-    public override string ButtonSplitStart => "开始拆分";
+    public override string ButtonStart => "开始";
     public override string StatusProcessing => "处理中...";
     public override string HintDragAndDrop => "将文件拖放到此处（NSP, NSZ, XCI, XCZ）";
     public override string HeaderType => "类型";
@@ -99,4 +98,5 @@ public sealed class ChineseSimplified : LocalizedStrings
     public override string ButtonStartWork => "开始工作";
     public override string LogCompressAndSplit => "正在压缩并分割...";
     public override string LogDecompressAndSplit => "正在解压并分割";
+    public override string MenuOpenFolder => "打开文件夹";
 }

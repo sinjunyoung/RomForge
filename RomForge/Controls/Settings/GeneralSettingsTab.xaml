@@ -9,23 +9,45 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ToggleButton Grid.Row="0" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding Topmost}" Margin="0,0,0,6">
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Language.png"/>
+                <TextBlock Text="언어 설정 (Language)" Style="{StaticResource SettingTextStyle}" VerticalAlignment="Center"/>
+            </StackPanel>
+            <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" Height="32" VerticalContentAlignment="Center">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Image Width="20" Height="20" Margin="0,0,8,0" Source="{Binding Code, Converter={StaticResource LanquageCodeToImageConverter}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontSize="12"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </Grid>
+
+        <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding Topmost}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Pin.png"/>
                 <TextBlock Text="항상 다른 창 위에 표시" Style="{StaticResource SettingTextStyle}"/>
             </StackPanel>
         </ToggleButton>
 
-        <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding AutoCheckUpdate}" Margin="0,0,0,6">
+        <ToggleButton Grid.Row="2" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding AutoCheckUpdate}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Loading.png"/>
                 <TextBlock Text="앱 구동 시 업데이트 확인" Style="{StaticResource SettingTextStyle}"/>
             </StackPanel>
         </ToggleButton>
 
-        <ToggleButton x:Name="SoundToggle" Grid.Row="2" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding IsMuted, Converter={StaticResource InverseBool}}">
+        <ToggleButton x:Name="SoundToggle" Grid.Row="3" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding IsMuted, Converter={StaticResource InverseBool}}">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Sound.png"/>
                 <TextBlock Text="효과음" Style="{StaticResource SettingTextStyle}"/>
@@ -40,7 +62,7 @@
             </StackPanel>
         </ToggleButton>
 
-        <StackPanel Grid.Row="3" Visibility="{Binding IsMuted, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+        <StackPanel Grid.Row="4" Visibility="{Binding IsMuted, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid Margin="0,2,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -88,7 +110,6 @@
                     <Image Height="20" RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20"/>
                 </Button>
             </Grid>
-
         </StackPanel>
     </Grid>
 </UserControl>

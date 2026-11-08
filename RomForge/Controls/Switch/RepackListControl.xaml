@@ -4,6 +4,7 @@
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              mc:Ignorable="d"
              d:DesignHeight="400" d:DesignWidth="900">
 
@@ -18,18 +19,18 @@
                 <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening">
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="선택 삭제" Click="BtnRemoveFile_Click">
+                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="전체 삭제" Click="BtnRemoveAllFiles_Click">
+                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
@@ -139,7 +140,7 @@
             </Grid>
 
             <StackPanel Grid.Column="1" Margin="10,2,0,0" VerticalAlignment="Top">
-                <Button ToolTip="파일 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button ToolTip="폴더 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
@@ -162,10 +163,10 @@
                     </Button.ContextMenu>
                     <Image Source="/Assets/Images/Patch.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="선택 삭제" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="전체 삭제" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
             </StackPanel>

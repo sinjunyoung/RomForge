@@ -7,8 +7,7 @@ public sealed class Korean : LocalizedStrings
 
     public override string MainTitle => "NSW 병합 도구";
     public override string HintSelectOutput => "출력 폴더를 선택하세요";
-    public override string ButtonMergeStart => "병합 시작";
-    public override string ButtonSplitStart => "분리 시작";
+    public override string ButtonStart => "시작";
     public override string StatusProcessing => "처리 중...";
     public override string HintDragAndDrop => "NSP, NSZ, XCI, XCZ 파일을 드래그&드롭하세요";
     public override string HeaderType => "종류";
@@ -99,4 +98,5 @@ public sealed class Korean : LocalizedStrings
     public override string ButtonStartWork => "작업 시작";
     public override string LogCompressAndSplit => "압축하며 분리 중...";
     public override string LogDecompressAndSplit => "압축 해제 및 분리 중";
+    public override string MenuOpenFolder => "폴더 열기";
 }

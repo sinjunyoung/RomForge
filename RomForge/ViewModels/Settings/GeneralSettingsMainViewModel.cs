@@ -5,11 +5,28 @@ using RomForge.Core.UI.Command;
 using RomForge.Core.ViewModels;
 using System.Windows;
 using System.Windows.Input;
+using Common.Localization;
 
 namespace RomForge.ViewModels.Settings;
 
 public class GeneralSettingsMainViewModel : ToolTabViewModel
 {
+    public static IReadOnlyList<LocalizedStrings> AvailableLanguages => Loc.Available;
+
+    public LocalizedStrings SelectedLanguage
+    {
+        get => Loc.Instance.Current;
+        set
+        {
+            if (value != null && !ReferenceEquals(Loc.Instance.Current, value))
+            {
+                Loc.Instance.Set(value.Code);
+                AppConfig.Instance.Common.Language = value.Code;
+                OnPropertyChanged();
+            }
+        }
+    }
+
     public bool Topmost
     {
         get => AppConfig.Instance.Common.Topmost;
@@ -47,12 +64,12 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
     public double SoundVolume
     {
         get => AppConfig.Instance.Common.SoundVolume;
-        set 
-        { 
+        set
+        {
             AppConfig.Instance.Common.SoundVolume = value;
 
             _ = SoundPlayer.PlayCompleteAsync();
-            OnPropertyChanged(); 
+            OnPropertyChanged();
         }
     }
 
@@ -109,9 +126,20 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
 
     public GeneralSettingsMainViewModel()
     {
+        if (!string.IsNullOrEmpty(AppConfig.Instance.Common.Language))
+            Loc.Instance.Set(AppConfig.Instance.Common.Language);
+
+        Loc.Instance.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Instance.Current))
+                OnPropertyChanged(nameof(SelectedLanguage));
+        };
+
         AppConfig.Instance.Common.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(CommonConfig.Topmost))
+            if (e.PropertyName == nameof(CommonConfig.Language))
+                OnPropertyChanged(nameof(SelectedLanguage));
+            else if (e.PropertyName == nameof(CommonConfig.Topmost))
                 OnPropertyChanged(nameof(Topmost));
             else if (e.PropertyName == nameof(CommonConfig.AutoCheckUpdate))
                 OnPropertyChanged(nameof(AutoCheckUpdate));

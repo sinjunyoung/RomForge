@@ -7,8 +7,7 @@ public sealed class ChineseTraditional : LocalizedStrings
 
     public override string MainTitle => "NSW 合併工具";
     public override string HintSelectOutput => "請選擇輸出資料夾...";
-    public override string ButtonMergeStart => "開始合併";
-    public override string ButtonSplitStart => "開始拆分";
+    public override string ButtonStart => "開始";
     public override string StatusProcessing => "正在處理...";
     public override string HintDragAndDrop => "拖放 NSP, NSZ, XCI, XCZ 檔案至此";
     public override string HeaderType => "類型";
@@ -99,4 +98,5 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string ButtonStartWork => "開始工作";
     public override string LogCompressAndSplit => "正在壓縮並分割...";
     public override string LogDecompressAndSplit => "正在解壓並分割";
+    public override string MenuOpenFolder => "開啟資料夾";
 }
