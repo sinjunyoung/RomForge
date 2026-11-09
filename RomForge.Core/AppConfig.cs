@@ -10,15 +10,13 @@ namespace RomForge.Core;
 
 public class CommonConfig : ViewModelBase
 {
-    public const string DefaultLanguage = "Korean";
-
     public double LogBoxHeight { get; set { SetProperty(ref field, value); } } = 130;
 
     public bool Topmost { get; set { SetProperty(ref field, value); } }
     
     public bool AutoCheckUpdate { get; set { SetProperty(ref field, value); } } = true;
 
-    public string? Language { get; set { SetProperty(ref field, value); } } = "ko-KR";
+    public string? Language { get; set { SetProperty(ref field, value); } } = null;
 
     public bool IsMuted { get; set { SetProperty(ref field, value); } }
 
@@ -50,7 +48,7 @@ public class PatchConfig : ViewModelBase
 
     public bool NamingEnabled { get; set { SetProperty(ref field, value); } } = true;
 
-    public string NamingFormat { get; set { SetProperty(ref field, value); } } = "{fileName} (v{Version}_{Date:yyMMdd})";
+    public string NamingFormat { get; set { SetProperty(ref field, value); } } = "{fileName} ({Lan1:code1}-{Lan2:code1}_v{Version}_{Date:yyMMdd})";
 
     public bool UseNormalPatchCustomOutputPath { get; set { SetProperty(ref field, value); } }
 

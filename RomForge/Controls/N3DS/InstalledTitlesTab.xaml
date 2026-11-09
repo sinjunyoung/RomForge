@@ -105,10 +105,7 @@
                         <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="TypeLabel">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="종류" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
@@ -168,10 +165,7 @@
                             </GridViewColumn.Header>
                             <GridViewColumn.HeaderTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </DataTemplate>
                             </GridViewColumn.HeaderTemplate>
                             <GridViewColumn.CellTemplate>

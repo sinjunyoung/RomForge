@@ -143,7 +143,7 @@
                 <Button ToolTip="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="폴더 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button ToolTip="한글패치 일괄 지정 (루트 폴더 또는 압축파일)" Style="{StaticResource ListToolButton}" Click="BtnBulkPatch_Click">

@@ -14,6 +14,7 @@
         xmlns:settings="clr-namespace:RomForge.Controls.Settings"
         xmlns:vm="clr-namespace:RomForge.ViewModels"
         xmlns:helpers="clr-namespace:RomForge.Core.UI.Helpers;assembly=RomForge.Core"
+        xmlns:l="clr-namespace:Common.Localization;assembly=Common"
         Title="{Binding AppVersion}" Height="730" Width="900" MinHeight="730" MinWidth="900" Background="#1E1E1E" AllowDrop="True" FontFamily="Segoe UI">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="32" ResizeBorderThickness="5" GlassFrameThickness="1" CornerRadius="5"/>
@@ -174,7 +175,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Compressed.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="압축" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.LabelCompression, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:CompressTab/>
@@ -255,7 +256,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/RomForge.Core;component/Assets/Images/Settings.png" Width="20" Height="20" Margin="0,0,6,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                        <TextBlock Text="설정" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.ButtonSettings, Source={x:Static l:Loc.Instance}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <settings:MainTab DataContext="{Binding Settings}" />

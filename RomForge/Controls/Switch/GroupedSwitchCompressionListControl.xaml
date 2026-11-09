@@ -118,10 +118,10 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="115">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="EstimatedRatio">
-                                        <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="압축률"/>
+                                        <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="{Binding Path=Current.LabelCompressionRatio, Source={x:Static l:Loc.Instance}}"/>
                                     </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
@@ -170,7 +170,7 @@
                 <Button x:Name="btnAddFile" ToolTip="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFile_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button x:Name="btnAddFolder" ToolTip="폴더 추가" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
+                <Button x:Name="btnAddFolder" ToolTip="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button x:Name="btnRemoveFile" ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">

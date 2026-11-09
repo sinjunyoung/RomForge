@@ -77,7 +77,7 @@
         </Grid>
 
         <Grid Grid.Row="3" Margin="5,0,0,5">
-            <core:IconButton x:Name="btnMergeStart" Margin="0,0,5,0" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" 
+            <core:IconButton x:Name="btnMergeStart" Margin="0,0,5,0" DefaultText="{Binding Path=Current.ButtonStart, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" 
                              IsRunning="{Binding IsLocked, Mode=OneWay}" Click="BtnMergeStart_Click"/>
         </Grid>
         <Border Grid.Row="4" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">

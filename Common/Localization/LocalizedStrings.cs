@@ -4,25 +4,27 @@ public abstract class LocalizedStrings
 {
     public abstract string Code { get; }
     public abstract string DisplayName { get; }
+    public abstract string EnglishName { get; }
 
     public abstract string ButtonCancel { get; }
     public abstract string ButtonSettings { get; }
     public abstract string ButtonStart { get; }
+
     public abstract string DialogSelectGameFile { get; }
-    public abstract string ErrorNoCompressFiles { get; }
-    public abstract string ErrorNoDecompressFiles { get; }
+
     public abstract string ErrorNoMetadata { get; }
+
     public abstract string FilterAllFiles { get; }
     public abstract string FilterSwitchFiles { get; }
-    public abstract string HintDragAndDrop { get; }
+
     public abstract string HintSelectOutput { get; }
-    public abstract string HeaderExt { get; }
+
     public abstract string HeaderFileName { get; }
     public abstract string HeaderFilePath { get; }
-    public abstract string HeaderSize { get; }
-    public abstract string HeaderType { get; }
+
     public abstract string LabelCompression { get; }
-    public abstract string LabelOutputPath { get; }
+    public abstract string LabelCompressionRatio { get; }
+
     public abstract string LogAnalyzeMetadata { get; }
     public abstract string LogBaseMissingSkip(object arg0);
     public abstract string LogCompressAndMerge { get; }
@@ -84,7 +86,9 @@ public abstract class LocalizedStrings
     public abstract string StatusAnalyzing { get; }
     public abstract string StatusNoKey { get; }
     public abstract string StatusProcessing { get; }
+
     public abstract string ToolTipAddFile { get; }
+    public abstract string ToolTipAddFolder { get; }
     public abstract string ToolTipBlockMode { get; }
     public abstract string ToolTipBlocklessMode { get; }
     public abstract string ToolTipBrowseOutput { get; }

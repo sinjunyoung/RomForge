@@ -6,6 +6,7 @@
              xmlns:helpers="clr-namespace:RomForge.Core.UI.Helpers;assembly=RomForge.Core"
              xmlns:converters="clr-namespace:RomForge.Converters"
              xmlns:converters2="clr-namespace:RomForge.Core.Converters;assembly=RomForge.Core"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              mc:Ignorable="d"
              d:DesignHeight="650" d:DesignWidth="1016"
              Background="#1E1E1E">
@@ -134,10 +135,7 @@
                         <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="FileSizeBytes">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
                             <GridViewColumn.CellTemplate>
@@ -204,7 +202,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Run.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="시작" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonStart, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -212,7 +210,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="취소" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -223,7 +221,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="파일 추가" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -231,7 +229,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="폴더 추가" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -239,7 +237,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="선택 삭제" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -247,7 +245,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="전체 삭제" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>

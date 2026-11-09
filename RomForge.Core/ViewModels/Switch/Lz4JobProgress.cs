@@ -36,7 +36,7 @@ public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
             Label = "해시 계산 중";
         else if (label.Contains("NSZ", StringComparison.OrdinalIgnoreCase))
             Label = "NSZ 압축 중";
-        else if (label.Contains("압축"))
+        else if (label.Contains(Common.Localization.Loc.Instance.Current.LabelCompression))
             Label = "압축 중";
     }
 }

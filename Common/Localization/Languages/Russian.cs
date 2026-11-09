@@ -4,6 +4,7 @@ public sealed class Russian : LocalizedStrings
 {
     public override string Code => "ru-RU";
     public override string DisplayName => "Русский";
+    public override string EnglishName => "Russian";
 
     // Button
     public override string ButtonCancel => "Отмена";
@@ -14,8 +15,6 @@ public sealed class Russian : LocalizedStrings
     public override string DialogSelectGameFile => "Выберите файл игры";
 
     // Error
-    public override string ErrorNoCompressFiles => "Нет файлов для сжатия.";
-    public override string ErrorNoDecompressFiles => "Нет файлов для распаковки.";
     public override string ErrorNoMetadata => "Нет доступных анализируемых метаданных.";
 
     // Filter
@@ -23,19 +22,15 @@ public sealed class Russian : LocalizedStrings
     public override string FilterSwitchFiles => "Файлы Switch";
 
     // Hint
-    public override string HintDragAndDrop => "Перетащите файлы NSP, NSZ, XCI, XCZ сюда";
     public override string HintSelectOutput => "Выберите папку вывода...";
 
     // Header
-    public override string HeaderExt => "Расш.";
     public override string HeaderFileName => "Имя файла";
     public override string HeaderFilePath => "Путь";
-    public override string HeaderSize => "Размер";
-    public override string HeaderType => "Тип";
 
     // Label
     public override string LabelCompression => "Сжатие";
-    public override string LabelOutputPath => "Папка вывода";
+    public override string LabelCompressionRatio => "Коэффициент сжатия";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ Анализ метаданных... ━━";
@@ -111,7 +106,8 @@ public sealed class Russian : LocalizedStrings
     public override string StatusProcessing => "Обработка...";
 
     // ToolTip
-    public override string ToolTipAddFile => "Добавить файл";
+    public override string ToolTipAddFile => "+ Файл";
+    public override string ToolTipAddFolder => "+ Папка";
     public override string ToolTipBlocklessMode => "Последовательный доступ (приоритет объёма)";
     public override string ToolTipBlockMode => "Случайный доступ (приоритет скорости)";
     public override string ToolTipBrowseOutput => "Обзор папки вывода";
@@ -119,7 +115,7 @@ public sealed class Russian : LocalizedStrings
     public override string ToolTipCompressLevel => "3: Максимальная скорость | 9: Сбалансировано | 18: Рекомендуется";
     public override string ToolTipForceKeyGen0 => "Принудительно установить Firmware KeyGen в 0";
     public override string ToolTipOpenWorkSpace => "Открыть папку вывода";
-    public override string ToolTipRemoveAll => "Удалить всё";
-    public override string ToolTipRemoveSelected => "Удалить выбранные";
+    public override string ToolTipRemoveAll => "Очистить";
+    public override string ToolTipRemoveSelected => "Удалить";
     public override string ToolTipValidateCompress => "Выполняет дополнительную валидацию после сжатия";
 }

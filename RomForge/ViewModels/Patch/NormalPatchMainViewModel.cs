@@ -271,7 +271,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
             if ((Path.GetExtension(actualSourcePath).Equals(".chd", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(actualSourcePath).Equals(".rvz", StringComparison.OrdinalIgnoreCase)) && patchPaths.All(XdeltaAppHeaderReader.TargetsCompressedContainer))
             {
-                string directOutputName = VersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, CommonConfig.DefaultLanguage);
+                string directOutputName = VersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, Common.Localization.Loc.S.EnglishName);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
 
                 AppendLog("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);
@@ -307,7 +307,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
             bool sourceIsTemporary = Path.GetFullPath(Path.GetDirectoryName(actualSourcePath)!)
                 .Equals(Path.GetFullPath(extractDir), StringComparison.OrdinalIgnoreCase);
-            string outputFileName = VersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, CommonConfig.DefaultLanguage);
+            string outputFileName = VersionInfoExtractor.ApplySuffix(ResolveOutputBaseFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, Common.Localization.Loc.S.EnglishName);
 
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
@@ -424,7 +424,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
             string version = _cachedPatchVersion ?? "1.0";
             string date = _cachedPatchDate ?? DateTime.Now.ToString("yyMMdd");
             string? language = _cachedPatchLanguage;
-            string result = VersionInfoExtractor.ApplyFormat(baseFileName, version, date, language, NamingFormat, CommonConfig.DefaultLanguage);
+            string result = VersionInfoExtractor.ApplyFormat(baseFileName, version, date, language, NamingFormat, Common.Localization.Loc.S.EnglishName);
 
             NamingPreview = result;
 

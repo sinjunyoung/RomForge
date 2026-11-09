@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:core="clr-namespace:NSW.Core.UI;assembly=NSW"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              mc:Ignorable="d" 
              d:DesignHeight="640" d:DesignWidth="800">
     <Grid>
@@ -64,10 +65,7 @@
                             <GridView>
                                 <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Image Height="24" Margin="0,0,4,0" Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24"/>
-                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="종류" VerticalAlignment="Center"/>
-                                        </StackPanel>
+                                        <Image Height="24" Margin="0,0,4,0" Source="/RomForge.Core;component/Assets/Images/Categories.png" Width="24"/>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
@@ -116,10 +114,7 @@
 
                                 <GridViewColumn Width="Auto">
                                     <GridViewColumn.Header>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="용량" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        </StackPanel>
+                                        <Image Source="/Assets/Images/FileSizeBytes.png" Width="24" Height="24" Margin="0,0,4,0"/>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
@@ -132,7 +127,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="경로" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.HeaderFilePath, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -192,7 +187,7 @@
             </Button>
         </Grid>
 
-        <core:IconButton Grid.Row="3" Margin="5,0,5,5" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="취소" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}" Click="BtnStart_Click"/>
+        <core:IconButton Grid.Row="3" Margin="5,0,5,5" DefaultText="{Binding Path=Current.ButtonStart, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}" Click="BtnStart_Click"/>
 
         <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Grid.Row="4" Margin="5,0,5,5" Padding="8,0">
             <Grid Height="28">

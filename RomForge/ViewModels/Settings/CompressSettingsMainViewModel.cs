@@ -34,9 +34,7 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
         set
         {
             AppConfig.Instance.Switch.UseBlockMode = value;
-
-            if (value)
-                AppConfig.Instance.Switch.UseBlocklessMode = false;
+            AppConfig.Instance.Switch.UseBlocklessMode = !value;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(SwitchUseBlocklessMode));
@@ -48,10 +46,8 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
         get => AppConfig.Instance.Switch.UseBlocklessMode;
         set
         {
+            AppConfig.Instance.Switch.UseBlockMode = !value;
             AppConfig.Instance.Switch.UseBlocklessMode = value;
-
-            if (value) 
-                AppConfig.Instance.Switch.UseBlockMode = false;
 
             OnPropertyChanged();
             OnPropertyChanged(nameof(SwitchUseBlockMode));

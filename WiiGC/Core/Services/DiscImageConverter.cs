@@ -22,7 +22,7 @@ public class DiscImageConverter
             bool rvzToWbfs = format == "rvz" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
             string workType = rvzToWbfs ? "변환" : wbfsToIso ? "해제" : format switch
             {
-                "wii" or "gcm" => "압축",
+                "wii" or "gcm" => Common.Localization.Loc.Instance.Current.LabelCompression,
                 "gcz" or "wbfs" or "wia" => "재압축",
                 "rvz" => "해제",
                 _ => "미지원"
@@ -63,7 +63,7 @@ public class DiscImageConverter
                 throw new InvalidOperationException($"{workType} 실패 (에러 코드: {result})");
             }
 
-            if (workType == "재압축" || workType == "압축")
+            if (workType == "재압축" || workType == Common.Localization.Loc.Instance.Current.LabelCompression)
             {
                 long originalSize = new FileInfo(inputPath).Length;
                 long compressedSize = new FileInfo(outputPath).Length;

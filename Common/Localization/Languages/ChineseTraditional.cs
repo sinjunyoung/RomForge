@@ -4,6 +4,7 @@ public sealed class ChineseTraditional : LocalizedStrings
 {
     public override string Code => "zh-TW";
     public override string DisplayName => "繁體中文";
+    public override string EnglishName => "Chinese";
 
     // Button
     public override string ButtonCancel => "取消";
@@ -14,8 +15,6 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string DialogSelectGameFile => "選擇遊戲檔案";
 
     // Error
-    public override string ErrorNoCompressFiles => "沒有可壓縮的?案。";
-    public override string ErrorNoDecompressFiles => "沒有可解壓的?案。";
     public override string ErrorNoMetadata => "沒有可解析的中繼資料。";
 
     // Filter
@@ -23,19 +22,15 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string FilterSwitchFiles => "Switch 檔案";
 
     // Hint
-    public override string HintDragAndDrop => "拖放 NSP, NSZ, XCI, XCZ 檔案至此";
     public override string HintSelectOutput => "請選擇輸出資料夾...";
 
     // Header
-    public override string HeaderExt => "副檔名";
     public override string HeaderFileName => "檔案名稱";
     public override string HeaderFilePath => "路徑";
-    public override string HeaderSize => "大小";
-    public override string HeaderType => "類型";
 
     // Label
     public override string LabelCompression => "壓縮";
-    public override string LabelOutputPath => "輸出資料夾";
+    public override string LabelCompressionRatio => "壓縮率";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ 正在解析元數據... ━━";
@@ -111,7 +106,8 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string StatusProcessing => "正在處理...";
 
     // ToolTip
-    public override string ToolTipAddFile => "新增檔案";
+    public override string ToolTipAddFile => "加檔案";
+    public override string ToolTipAddFolder => "加資料夾";
     public override string ToolTipBlocklessMode => "循序存取（容量優先）";
     public override string ToolTipBlockMode => "隨機存取（速度優先）";
     public override string ToolTipBrowseOutput => "瀏覽輸出資料夾";
@@ -119,7 +115,7 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string ToolTipCompressLevel => "3：最快 | 9：平衡 | 18：建議";
     public override string ToolTipForceKeyGen0 => "將韌體KeyGen強制為0";
     public override string ToolTipOpenWorkSpace => "開啟輸出資料夾";
-    public override string ToolTipRemoveAll => "清空列表";
-    public override string ToolTipRemoveSelected => "移除選取項";
+    public override string ToolTipRemoveAll => "清空";
+    public override string ToolTipRemoveSelected => "刪除選取";
     public override string ToolTipValidateCompress => "壓縮後執行額外校驗";
 }

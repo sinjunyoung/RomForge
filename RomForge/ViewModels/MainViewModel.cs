@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using RomForge.Controls.Settings;
 using RomForge.Controls.Util;
 using RomForge.Core;
 using RomForge.Core.Models;
@@ -183,14 +184,18 @@ public class MainViewModel : ToolTabViewModel
 
     private void MainVM_RunNavigateCerts(object? sender, EventArgs e)
     {
-        SelectedViewModel = UtilMainVM;
-        UtilMainVM.SelectedViewModel = UtilMainVM.CertsVM;
+        var tab = new CertsTab();
+        var window = new BaseToolWindow(UtilMainVM.CertsVM, tab, "CertsVM");
+
+        window.Show();
     }
 
     private void PS1MainVM_RunNavigatePackingSettings(object? sender, EventArgs e)
     {
-        SelectedViewModel = Settings;
-        Settings.SelectedViewModel = Settings.PS1;
+        var tab = new PSSettingsTab();
+        var window = new BaseToolWindow(Settings.PS1, tab, "PSP 설정");
+
+        window.Show();
     }
 
     public static void SaveConfig() => AppConfig.Instance.Save();

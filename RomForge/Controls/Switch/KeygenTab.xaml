@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <local:CommonListControl x:Name="fileMgr" Grid.Row="0" Margin="5,0,5,5" IsEnabled="{Binding IsIdle}"/>
-        <core:IconButton Grid.Row="1" x:Name="btnStartWork" Margin="5,0,5,5" DefaultText="시작" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}"
+        <core:IconButton Grid.Row="1" x:Name="btnStartWork" Margin="5,0,5,5" DefaultText="{Binding Path=Current.ButtonStart, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Run.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsLocked}"
                 Click="BtnStartWork_Click"/>
 
         <Border Grid.Row="2" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">

@@ -4,6 +4,7 @@ public sealed class Japanese : LocalizedStrings
 {
     public override string Code => "ja-JP";
     public override string DisplayName => "日本語";
+    public override string EnglishName => "Japanese";
 
     // Button
     public override string ButtonCancel => "キャンセル";
@@ -14,8 +15,6 @@ public sealed class Japanese : LocalizedStrings
     public override string DialogSelectGameFile => "ゲームファイルを選択";
 
     // Error
-    public override string ErrorNoCompressFiles => "圧縮するファイルがありません。";
-    public override string ErrorNoDecompressFiles => "解凍するファイルがありません。";
     public override string ErrorNoMetadata => "解析可能なメタデータがありません。";
 
     // Filter
@@ -23,19 +22,15 @@ public sealed class Japanese : LocalizedStrings
     public override string FilterSwitchFiles => "Nintendo Switchファイル";
 
     // Hint
-    public override string HintDragAndDrop => "ここにファイルをドラッグ＆ドロップしてください（NSP, NSZ, XCI, XCZ）";
     public override string HintSelectOutput => "出力フォルダーを選択してください。";
 
     // Header
-    public override string HeaderExt => "拡張子";
     public override string HeaderFileName => "ファイル名";
     public override string HeaderFilePath => "パス";
-    public override string HeaderSize => "サイズ";
-    public override string HeaderType => "種類";
 
     // Label
     public override string LabelCompression => "圧縮";
-    public override string LabelOutputPath => "出力フォルダー";
+    public override string LabelCompressionRatio => "圧縮率";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ メタデータ解析中 ━━";
@@ -112,6 +107,7 @@ public sealed class Japanese : LocalizedStrings
 
     // ToolTip
     public override string ToolTipAddFile => "ファイルを追加";
+    public override string ToolTipAddFolder => "フォルダーを追加";
     public override string ToolTipBlocklessMode => "シーケンシャルアクセス（容量優先）";
     public override string ToolTipBlockMode => "ランダムアクセス（速度優先）";
     public override string ToolTipBrowseOutput => "出力フォルダーを選択します";
@@ -119,7 +115,7 @@ public sealed class Japanese : LocalizedStrings
     public override string ToolTipCompressLevel => "3: 最速 | 9: バランス | 18: 推奨";
     public override string ToolTipForceKeyGen0 => "ファームウェアKeyGenを0に固定";
     public override string ToolTipOpenWorkSpace => "出力フォルダーを開きます";
-    public override string ToolTipRemoveAll => "すべて削除";
-    public override string ToolTipRemoveSelected => "選択項目を削除";
+    public override string ToolTipRemoveAll => "クリア";
+    public override string ToolTipRemoveSelected => "選択削除";
     public override string ToolTipValidateCompress => "圧縮後に追加の検証を実行します";
 }

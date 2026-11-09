@@ -4,6 +4,7 @@ public sealed class English : LocalizedStrings
 {
     public override string Code => "en-US";
     public override string DisplayName => "English";
+    public override string EnglishName => "English";
 
     // Button
     public override string ButtonCancel => "Cancel";
@@ -14,8 +15,6 @@ public sealed class English : LocalizedStrings
     public override string DialogSelectGameFile => "Select Game File";
 
     // Error
-    public override string ErrorNoCompressFiles => "No files to compress.";
-    public override string ErrorNoDecompressFiles => "No files to decompress.";
     public override string ErrorNoMetadata => "No analyzable metadata found.";
 
     // Filter
@@ -23,19 +22,15 @@ public sealed class English : LocalizedStrings
     public override string FilterSwitchFiles => "Switch Files";
 
     // Hint
-    public override string HintDragAndDrop => "Drag & drop files here (NSP, NSZ, XCI, XCZ)";
     public override string HintSelectOutput => "Select the output folder.";
 
     // Header
-    public override string HeaderExt => "Ext";
     public override string HeaderFileName => "File Name";
     public override string HeaderFilePath => "Path";
-    public override string HeaderSize => "Size";
-    public override string HeaderType => "Type";
 
     // Label
     public override string LabelCompression => "Compression";
-    public override string LabelOutputPath => "Output Path";
+    public override string LabelCompressionRatio => "Compression Ratio";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ Analyzing metadata... ━━";
@@ -112,6 +107,7 @@ public sealed class English : LocalizedStrings
 
     // ToolTip
     public override string ToolTipAddFile => "Add File";
+    public override string ToolTipAddFolder => "Add Folder";
     public override string ToolTipBlocklessMode => "Sequential Access (Space Priority)";
     public override string ToolTipBlockMode => "Random Access (Speed Priority)";
     public override string ToolTipBrowseOutput => "Select Output Folder";
@@ -119,7 +115,7 @@ public sealed class English : LocalizedStrings
     public override string ToolTipCompressLevel => "3: Fastest | 9: Balanced | 18: Recommended";
     public override string ToolTipForceKeyGen0 => "Force Firmware KeyGen to 0";
     public override string ToolTipOpenWorkSpace => "Open Output Folder";
-    public override string ToolTipRemoveAll => "Remove All Items";
-    public override string ToolTipRemoveSelected => "Remove Selected Items";
+    public override string ToolTipRemoveAll => "Clear";
+    public override string ToolTipRemoveSelected => "Delete";
     public override string ToolTipValidateCompress => "Runs an additional validation after compression";
 }

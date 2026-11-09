@@ -4,6 +4,7 @@ public sealed class German : LocalizedStrings
 {
     public override string Code => "de-DE";
     public override string DisplayName => "Deutsch";
+    public override string EnglishName => "German";
 
     // Button
     public override string ButtonCancel => "Abbrechen";
@@ -14,8 +15,6 @@ public sealed class German : LocalizedStrings
     public override string DialogSelectGameFile => "Spieldatei auswählen";
 
     // Error
-    public override string ErrorNoCompressFiles => "Keine Dateien zum Komprimieren vorhanden.";
-    public override string ErrorNoDecompressFiles => "Keine Dateien zum Dekomprimieren vorhanden.";
     public override string ErrorNoMetadata => "Keine analysierbaren Metadaten vorhanden.";
 
     // Filter
@@ -23,19 +22,15 @@ public sealed class German : LocalizedStrings
     public override string FilterSwitchFiles => "Switch-Dateien";
 
     // Hint
-    public override string HintDragAndDrop => "Dateien hierher ziehen & ablegen (NSP, NSZ, XCI, XCZ)";
     public override string HintSelectOutput => "Wählen Sie den Ausgabeordner aus.";
 
     // Header
-    public override string HeaderExt => "Ext";
     public override string HeaderFileName => "Dateiname";
     public override string HeaderFilePath => "Pfad";
-    public override string HeaderSize => "Größe";
-    public override string HeaderType => "Typ";
 
     // Label
     public override string LabelCompression => "Komprimierung";
-    public override string LabelOutputPath => "Ausgabeordner";
+    public override string LabelCompressionRatio => "Kompressionsrate";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ Metadaten werden analysiert... ━━";
@@ -111,7 +106,8 @@ public sealed class German : LocalizedStrings
     public override string StatusProcessing => "Verarbeitung läuft...";
 
     // ToolTip
-    public override string ToolTipAddFile => "Datei hinzufügen";
+    public override string ToolTipAddFile => "Datei+";
+    public override string ToolTipAddFolder => "Ordner+";
     public override string ToolTipBlocklessMode => "Sequentieller Zugriff (Speicher priorisiert)\t";
     public override string ToolTipBlockMode => "Zufälliger Zugriff (Geschwindigkeit priorisiert)";
     public override string ToolTipBrowseOutput => "Ausgabeordner auswählen";
@@ -119,7 +115,7 @@ public sealed class German : LocalizedStrings
     public override string ToolTipCompressLevel => "3: Am schnellsten | 9: Ausgewogen | 18: Empfohlen";
     public override string ToolTipForceKeyGen0 => "Firmware-KeyGen auf 0 erzwingen";
     public override string ToolTipOpenWorkSpace => "Ausgabeordner öffnen";
-    public override string ToolTipRemoveAll => "Alle Elemente entfernen";
-    public override string ToolTipRemoveSelected => "Ausgewählte Elemente entfernen";
+    public override string ToolTipRemoveAll => "Leeren";
+    public override string ToolTipRemoveSelected => "Löschen";
     public override string ToolTipValidateCompress => "Führt nach der Komprimierung eine zusätzliche Validierung durch";
 }
