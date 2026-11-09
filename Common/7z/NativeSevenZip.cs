@@ -12,7 +12,7 @@ public static partial class NativeSevenZip
     [LibraryImport("7z.dll")]
     private static partial int GetNumberOfFormats(out uint numFormats);
 
-    [LibraryImport("kernel32.dll", SetLastError = true, StringMarshalling = StringMarshalling.Utf16)]
+    [LibraryImport("kernel32.dll", SetLastError = true, EntryPoint = "GetModuleHandleW", StringMarshalling = StringMarshalling.Utf16)]
     private static partial IntPtr GetModuleHandle(string lpModuleName);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
