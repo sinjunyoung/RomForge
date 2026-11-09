@@ -11,6 +11,7 @@ using RomForge.Core.Services;
 using RomForge.Core.Services.Compression;
 using RomForge.Core.Services.Naming;
 using RomForge.Core.Services.Patch;
+using RomForge.Core.ViewModels.Patch;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Input;

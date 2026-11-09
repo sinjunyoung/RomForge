@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.UI.Helpers;
+using RomForge.Core.ViewModels.Patch;
 using RomForge.ViewModels;
 using RomForge.ViewModels.Patch;
 using System.IO;

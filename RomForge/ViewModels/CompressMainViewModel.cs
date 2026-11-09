@@ -66,6 +66,7 @@ public class CompressMainViewModel : ToolTabViewModel
     public ICommand BrowseOutputCommand { get; }
 
     public event Action<FileItem>? ScrollToItemRequested;
+    public event Action? RunNavigatePackingSettings;
 
     public CompressMainViewModel()
     {
@@ -120,6 +121,8 @@ public class CompressMainViewModel : ToolTabViewModel
         FileItems.Clear();
         OnPropertyChanged(nameof(HintVisibility));
     }
+
+    public void RunCompressSettings() => RunNavigatePackingSettings?.Invoke();
 
     private void BrowseOutput()
     {
@@ -198,10 +201,10 @@ public class CompressMainViewModel : ToolTabViewModel
                         switch (detected.Format)
                         {
                             case RomFormat.Nsp:
-                                await NspCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, CancellationTokenSource.Token);
+                                await NspCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Xci:
-                                await XciCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progressHandler, Log, CancellationTokenSource.Token);
+                                await XciCompressService.CompressAsync(item.FilePath, outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progressHandler, Log, CancellationTokenSource.Token);
                                 break;
                             case RomFormat.Nsz:
                                 await NspCompressService.DecompressAsync(item.FilePath, outputDir, progressHandler, Log, CancellationTokenSource.Token);

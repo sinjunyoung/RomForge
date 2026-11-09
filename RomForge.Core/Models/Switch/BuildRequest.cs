@@ -1,4 +1,5 @@
-﻿using NSW.Core.Models;
+﻿using Common.Models;
+using NSW.Core.Models;
 
 namespace RomForge.Core.Models.Switch;
 
@@ -8,7 +9,7 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public int CompressionLevel { get; set; } = 18;
 
-    public bool UseBlockMode { get; set; }
+    public SwitchCompressionMode CompressionMode { get; set; } = SwitchCompressionMode.Block;
 
     public IReadOnlyList<string>? AllSourcePaths { get; set; }
 

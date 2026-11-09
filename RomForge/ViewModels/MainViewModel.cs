@@ -141,9 +141,10 @@ public class MainViewModel : ToolTabViewModel
         Current = this;
 
         PatchVM = new PatchMainViewModel(async (file) => await MapsToHashAndProcess(file));
+        CompressVM.RunNavigatePackingSettings += CompressVM_RunNavigatePackingSettings;
         Main3DsVM.RunNavigateCerts += MainVM_RunNavigateCerts;
         UnifiedConvertVM.RunNavigateCerts += MainVM_RunNavigateCerts;
-        PSPMainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;
+        PSPMainVM.RunNavigatePackingSettings += PS1MainVM_RunNavigatePackingSettings;        
 
         Tools.Add(PatchVM);
         Tools.Add(CompressVM);
@@ -180,6 +181,14 @@ public class MainViewModel : ToolTabViewModel
 
         if (UtilMainVM.HashVM.RunCommand.CanExecute(null))
             UtilMainVM.HashVM.RunCommand.Execute(null);
+    }
+
+    private void CompressVM_RunNavigatePackingSettings()
+    {
+        var tab = new CompressSettingsTab();
+        var window = new BaseToolWindow(Settings.Compress, tab, "압축 설정");
+
+        window.Show();
     }
 
     private void MainVM_RunNavigateCerts(object? sender, EventArgs e)

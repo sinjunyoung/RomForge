@@ -11,15 +11,7 @@ public class PatchSettingsMainViewModel : ToolTabViewModel
 {
     public ICommand BrowseOutputCommand { get; }
 
-    public bool AutoCompress
-    {
-        get => AppConfig.Instance.Patch.AutoCompress;
-        set
-        {
-            AppConfig.Instance.Patch.AutoCompress = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool AutoCompress { get => AppConfig.Instance.Patch.AutoCompress; set { AppConfig.Instance.Patch.AutoCompress = value; OnPropertyChanged(); } }
 
     public bool UseCustomOutputPath
     {
@@ -34,15 +26,7 @@ public class PatchSettingsMainViewModel : ToolTabViewModel
         }
     }
 
-    public string? OutputPath
-    {
-        get => AppConfig.Instance.Patch.OutputPath;
-        set
-        {
-            AppConfig.Instance.Patch.OutputPath = value;
-            OnPropertyChanged();
-        }
-    }
+    public string? OutputPath { get => AppConfig.Instance.Patch.OutputPath; set { AppConfig.Instance.Patch.OutputPath = value; OnPropertyChanged(); } }
 
     public Visibility OutputPathVisibility => UseCustomOutputPath ? Visibility.Visible : Visibility.Collapsed;
 

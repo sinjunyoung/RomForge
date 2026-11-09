@@ -1,4 +1,5 @@
-﻿using NSW.HacPack.Models;
+﻿using Common.Models;
+using NSW.HacPack.Models;
 using Patch.Core.Services;
 using System.IO;
 using static LibHac.Ns.ApplicationControlProperty;
@@ -35,9 +36,9 @@ public sealed record BuildRequest(string BaseFilePath, string UpdateFilePath, IR
 
     public bool OutputNsz { get; init; }
 
-    public int NszCompressLevel { get; init; } = 18;
+    public int CompressLevel { get; init; } = 18;
 
-    public bool NszUseBlockMode { get; init; } = true;
+    public SwitchCompressionMode CompressionMode { get; init; } = SwitchCompressionMode.Blockless;
 
     public string? OutputFileName { get; init; }
 

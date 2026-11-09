@@ -1,7 +1,6 @@
-﻿using RomForge.Core.ViewModels;
-using System.IO;
+﻿using System.IO;
 
-namespace RomForge.ViewModels.Patch;
+namespace RomForge.Core.ViewModels.Patch;
 
 public class PatchSlotViewModel : ViewModelBase
 {

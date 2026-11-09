@@ -1,3 +1,4 @@
+using Common.Models;
 using RomForge.Core.Services;
 using RomForge.Core.Services.Switch;
 using RomForge.Core.ViewModels;
@@ -68,9 +69,7 @@ public class SwitchConfig : ViewModelBase
 
     public bool VerifyCompress { get; set { SetProperty(ref field, value); } } = false;
 
-    public bool UseBlockMode { get; set { SetProperty(ref field, value); } } = true;
-
-    public bool UseBlocklessMode { get; set { SetProperty(ref field, value); } } = false;
+    public SwitchCompressionMode CompressionMode { get; set { SetProperty(ref field, value); } } = SwitchCompressionMode.Block;
 
     public bool ForceKeyGen0 { get; set { SetProperty(ref field, value); } } = false;
 

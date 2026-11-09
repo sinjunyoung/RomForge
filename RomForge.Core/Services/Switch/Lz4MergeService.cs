@@ -55,7 +55,7 @@ public static class Lz4MergeService
         Directory.CreateDirectory(outputDir);
         jobsPlanned(total);
 
-        NszSettings? nsz = outputFormat == OutputFormat.NSZ ? new NszSettings(AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.UseBlockMode) : null;
+        NszSettings? nsz = outputFormat == OutputFormat.NSZ ? new NszSettings(AppConfig.Instance.Switch.CompressLevel, AppConfig.Instance.Switch.CompressionMode) : null;
 
         void quietLog(string message, LogLevel level)
         {
@@ -146,8 +146,8 @@ public static class Lz4MergeService
             DlcCompressRomfs = dlcCompress,
             StreamRomfs = true,
             OutputNsz = nsz != null,
-            NszCompressLevel = nsz?.CompressLevel ?? 18,
-            NszUseBlockMode = nsz?.UseBlockMode ?? true,
+            CompressLevel = nsz?.CompressLevel ?? 18,
+            CompressionMode = nsz?.CompressionMode ?? SwitchCompressionMode.Block,
             OutputSuffix = "lz4"
         };
     }

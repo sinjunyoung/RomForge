@@ -20,8 +20,8 @@ namespace RomForge.ViewModels.Switch
 {
     public class RepackMainViewModel : ProgressToolTabViewModel
     {
-        private static int NszCompressLevel => AppConfig.Instance.Switch.CompressLevel;
-        private static bool NszUseBlockMode => AppConfig.Instance.Switch.UseBlockMode;
+        private static int CompressLevel => AppConfig.Instance.Switch.CompressLevel;
+        private static SwitchCompressionMode CompressionMode => AppConfig.Instance.Switch.CompressionMode;
 
         private readonly Stopwatch _totalSw = new();
 
@@ -230,8 +230,8 @@ namespace RomForge.ViewModels.Switch
                     CompressRomfs = RepackLz4Sync.ResolveProgramOverride(Context?.GameFiles, rebuildOnly: true),
                     DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(Context?.GameFiles, rebuildOnly: true),
                     OutputNsz = UseNsz,
-                    NszCompressLevel = NszCompressLevel,
-                    NszUseBlockMode = NszUseBlockMode
+                    CompressLevel = CompressLevel,
+                    CompressionMode = CompressionMode
                 };
 
                 return true;
@@ -300,8 +300,8 @@ namespace RomForge.ViewModels.Switch
                 DlcCompressRomfs = RepackLz4Sync.ResolveDlcOverrides(gameFiles, rebuildOnly: false),
                 StreamRomfs = mode == BuildMode.FullProcess,
                 OutputNsz = UseNsz,
-                NszCompressLevel = NszCompressLevel,
-                NszUseBlockMode = NszUseBlockMode
+                CompressLevel = CompressLevel,
+                CompressionMode = CompressionMode
             };
 
             return true;

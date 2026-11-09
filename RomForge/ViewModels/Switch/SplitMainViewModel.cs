@@ -322,7 +322,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
                 for (int i = 0; i < jobs.Count; i++)
                 {
                     CancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    resultCount += await SplitService.Split(jobs[i].FilePath, outputDir, compress, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, asXci, i + 1, jobs.Count, progress, Log, jobs[i].TitleIds, CancellationTokenSource.Token);
+                    resultCount += await SplitService.Split(jobs[i].FilePath, outputDir, compress, config.CompressLevel, config.CompressionMode, config.VerifyCompress, config.ForceKeyGen0, asXci, i + 1, jobs.Count, progress, Log, jobs[i].TitleIds, CancellationTokenSource.Token);
                 }
 
                 AppendLog(Loc.S.MainLogAllComplete( _totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);

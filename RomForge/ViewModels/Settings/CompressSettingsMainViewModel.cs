@@ -1,9 +1,10 @@
-﻿using RomForge.Core;
+﻿using Common.Models;
+using RomForge.Core;
 using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels.Settings;
 
-public class CompressSettingsMainViewModel() : ToolTabViewModel
+public class CompressSettingsMainViewModel : ToolTabViewModel
 {
     public int SelectedTabIndex { get; set { SetProperty(ref field, value); } }
 
@@ -28,29 +29,16 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
         set { AppConfig.Instance.Switch.CompressLevel = (int)value; OnPropertyChanged(); }
     }
 
-    public bool SwitchUseBlockMode
+    public SwitchCompressionMode SwitchCompressionMode
     {
-        get => AppConfig.Instance.Switch.UseBlockMode;
+        get => AppConfig.Instance.Switch.CompressionMode;
         set
         {
-            AppConfig.Instance.Switch.UseBlockMode = value;
-            AppConfig.Instance.Switch.UseBlocklessMode = !value;
+            if (AppConfig.Instance.Switch.CompressionMode == value)
+                return;
 
+            AppConfig.Instance.Switch.CompressionMode = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(SwitchUseBlocklessMode));
-        }
-    }
-
-    public bool SwitchUseBlocklessMode
-    {
-        get => AppConfig.Instance.Switch.UseBlocklessMode;
-        set
-        {
-            AppConfig.Instance.Switch.UseBlockMode = !value;
-            AppConfig.Instance.Switch.UseBlocklessMode = value;
-
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(SwitchUseBlockMode));
         }
     }
 
@@ -64,5 +52,14 @@ public class CompressSettingsMainViewModel() : ToolTabViewModel
     {
         get => AppConfig.Instance.WiiGC.CompressLevel;
         set { AppConfig.Instance.WiiGC.CompressLevel = (int)value; OnPropertyChanged(); }
+    }
+
+    public CompressSettingsMainViewModel()
+    {
+        AppConfig.Instance.Switch.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(SwitchConfig.CompressionMode))
+                OnPropertyChanged(nameof(SwitchCompressionMode));
+        };
     }
 }

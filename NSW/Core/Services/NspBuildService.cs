@@ -154,7 +154,7 @@ public static class NspBuildService
             var contents = settingsList.ToDictionary(s => s, _ => new TitleContents());
             using (var package = new NspPackageWriter(new FileStream(tempNsp, FileMode.Create, FileAccess.ReadWrite, FileShare.None, 1 << 20), maxFiles)
             {
-                Ncz = req.OutputNsz ? new NczOptions(KeySetProvider.Instance.KeySet!, req.NszCompressLevel, req.NszUseBlockMode, progress, null, ct) : null
+                Ncz = req.OutputNsz ? new NczOptions(KeySetProvider.Instance.KeySet!, req.CompressLevel, req.CompressionMode, progress, null, ct) : null
             })
             {
                 foreach (var settings in settingsList)

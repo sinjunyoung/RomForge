@@ -141,7 +141,7 @@ public static class NspLz4Service
                 }
 
                 var nca = new Nca(keySet, storage);
-                var copied = ContainerEntryBuilder.BuildNcaEntry(entryName, entryExt, storage, size, nca, $"{label} [{nca.Header.ContentType}]", false, false, 0, false, keySet, converters, null, ct);
+                var copied = ContainerEntryBuilder.BuildNcaEntry(entryName, entryExt, storage, size, nca, $"{label} [{nca.Header.ContentType}]", false, SwitchCompressionMode.None, 0, false, keySet, converters, null, ct);
 
                 if (copied.HasValue)
                     fileEntries.Add(copied.Value);
@@ -271,7 +271,7 @@ public static class NspLz4Service
 
                 if (nsz != null)
                 {
-                    var options = new NSW.HacPack.Models.NczOptions(keySet, nsz.CompressLevel, nsz.UseBlockMode, null, onRead, ct);
+                    var options = new NSW.HacPack.Models.NczOptions(keySet, nsz.CompressLevel, nsz.CompressionMode, null, onRead, ct);
                     long nczSize = NSW.HacPack.Services.NczInPlaceConverter.Convert(output, entryStart, ncaStart, Size, options);
 
                     output.SetLength(entryStart + nczSize);

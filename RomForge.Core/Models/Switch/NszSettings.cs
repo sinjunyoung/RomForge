@@ -1,3 +1,5 @@
-﻿namespace RomForge.Core.Models.Switch;
+﻿using Common.Models;
 
-public sealed record NszSettings(int CompressLevel, bool UseBlockMode);
+namespace RomForge.Core.Models.Switch;
+
+public sealed record NszSettings(int CompressLevel, SwitchCompressionMode CompressionMode);

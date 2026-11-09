@@ -419,19 +419,19 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.NspToXciAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("nsp", "nsz"):
-                            await NspCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await NspCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         case ("nsp", "xcz"):
-                            await NspXciConvertService.NspToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await NspXciConvertService.NspToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         case ("xci", "zsp"):
                             await NspXciConvertService.XciToNspAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("xci", "xcz"):
-                            await XciCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await XciCompressService.CompressAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         case ("xci", "nsz"):
-                            await NspXciConvertService.XciToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await NspXciConvertService.XciToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "nsp"):
                             await NspCompressService.DecompressAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
@@ -440,7 +440,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.NszToXciAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("nsz", "xcz"):
-                            await NspXciConvertService.NszToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await NspXciConvertService.NszToXczAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "xci"):
                             await XciCompressService.DecompressAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
@@ -449,7 +449,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.XczToNspAsync(sw.FilePath, _outputDir, progress, Log, _cts.Token);
                             break;
                         case ("xcz", "nsz"):
-                            await NspXciConvertService.XczToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.UseBlockMode, progress, Log, _cts.Token);
+                            await NspXciConvertService.XczToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         default:
                             throw new NotSupportedException($"{sw.Extension} → {sw.SelectedTargetFormat}: 지원하지 않는 변환입니다.");

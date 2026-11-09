@@ -1,10 +1,9 @@
 ﻿using RomForge.Core.Models.Patch;
 using RomForge.Core.Services.Patch;
-using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
 
-namespace RomForge.ViewModels.Patch;
+namespace RomForge.Core.ViewModels.Patch;
 
 public class SourceHashViewModel : ViewModelBase
 {

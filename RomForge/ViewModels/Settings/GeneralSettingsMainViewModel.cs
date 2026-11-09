@@ -37,15 +37,7 @@ public class GeneralSettingsMainViewModel : ToolTabViewModel
         }
     }
 
-    public bool AutoCheckUpdate
-    {
-        get => AppConfig.Instance.Common.AutoCheckUpdate;
-        set
-        {
-            AppConfig.Instance.Common.AutoCheckUpdate = value;
-            OnPropertyChanged();
-        }
-    }
+    public bool AutoCheckUpdate { get => AppConfig.Instance.Common.AutoCheckUpdate; set { AppConfig.Instance.Common.AutoCheckUpdate = value; OnPropertyChanged(); } }
 
     public bool IsMuted
     {

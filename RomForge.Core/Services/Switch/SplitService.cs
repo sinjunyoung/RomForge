@@ -23,7 +23,7 @@ namespace RomForge.Core.Services.Switch;
 
 public class SplitService
 {
-    public static async Task<int> Split(string sourcePath, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, int index, int groupCount, 
+    public static async Task<int> Split(string sourcePath, string outputDir, bool useCompression, int compressionLevel, SwitchCompressionMode compressionMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, int index, int groupCount, 
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, IReadOnlySet<string>? onlyTitleIds = null, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet!.Clone();
@@ -111,7 +111,7 @@ public class SplitService
                 if (onlyTitleIds != null && !onlyTitleIds.Contains(meta.TitleId))
                     continue;
 
-                if (await ProcessSplitItem(meta, fileRegistry, tikRegistry, fs, keySet, cachedBaseTitle, outputDir, useCompression, compressionLevel, useBlockMode, isValidationEnabled, forceKeyGen0, outputAsXci, xciPrefixBuffer, rootEntriesTemplate, srcStream, index, groupCount, progress, log, ct))
+                if (await ProcessSplitItem(meta, fileRegistry, tikRegistry, fs, keySet, cachedBaseTitle, outputDir, useCompression, compressionLevel, compressionMode, isValidationEnabled, forceKeyGen0, outputAsXci, xciPrefixBuffer, rootEntriesTemplate, srcStream, index, groupCount, progress, log, ct))
                     successCount++;
             }
         }
@@ -125,7 +125,7 @@ public class SplitService
     }
 
     private static async Task<bool> ProcessSplitItem(MetadataResult meta, Dictionary<string, (string EntryName, string Ext)> fileRegistry, Dictionary<string, (string EntryName, string Ext)> tikRegistry, IFileSystem fs, KeySet keySet, string baseTitle, string outputDir, 
-        bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, byte[]? xciPrefixBuffer, List<(string Name, ulong AbsOffset, ulong Size, byte[] Hash, uint HashTargetSize)>? rootEntriesTemplate, Stream? srcStream, int index, int groupCount, 
+        bool useCompression, int compressionLevel, SwitchCompressionMode compressionMode, bool isValidationEnabled, bool forceKeyGen0, bool outputAsXci, byte[]? xciPrefixBuffer, List<(string Name, ulong AbsOffset, ulong Size, byte[] Hash, uint HashTargetSize)>? rootEntriesTemplate, Stream? srcStream, int index, int groupCount, 
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct)
     {
         var disposables = new List<IDisposable>();
@@ -230,7 +230,7 @@ public class SplitService
                 var nca = new Nca(keySet, currentStorage);
                 string ncaContentType = nca.Header.ContentType.ToString();
                 string label = $"{baseTitle} [{typeTag}/{ncaContentType}]";
-                var result = ContainerEntryBuilder.BuildNcaEntry(entryName, originalExt, currentStorage, size, nca, label, useCompression, useBlockMode, compressionLevel, forceKeyGen0, keySet, converters, null, ct);
+                var result = ContainerEntryBuilder.BuildNcaEntry(entryName, originalExt, currentStorage, size, nca, label, useCompression, compressionMode, compressionLevel, forceKeyGen0, keySet, converters, null, ct);
 
                 if (result == null) 
                     continue;

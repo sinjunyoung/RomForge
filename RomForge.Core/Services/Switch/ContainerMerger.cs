@@ -37,7 +37,7 @@ internal static class ContainerMerger
         return allMeta;
     }
 
-    public static async Task<List<string>> MergeAllAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
+    public static async Task<List<string>> MergeAllAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, SwitchCompressionMode compressionMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
@@ -79,7 +79,7 @@ internal static class ContainerMerger
             {
                 UseCompression = useCompression,
                 CompressionLevel = compressionLevel,
-                UseBlockMode = useBlockMode,
+                CompressionMode = compressionMode,
                 AllSourcePaths = allSources,
                 TargetBaseTitleId = group.BaseTitleId,
                 TargetBaseTitleName = group.BaseTitleName,
@@ -117,11 +117,11 @@ internal static class ContainerMerger
         return results;
     }
 
-    public static async Task<List<string>> MergeSingleAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
+    public static async Task<List<string>> MergeSingleAsync(OutputContainer output, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, SwitchCompressionMode compressionMode, bool isValidationEnabled, bool forceKeyGen0, KeySet keySet,
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var allMeta = ReadAllMetadata(keySet, inputPaths, log, ct);
-        var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, useBlockMode);
+        var (req, hasBase, hasUpdate) = MergePlanner.BuildSingleRequest(allMeta, inputPaths, outputDir, useCompression, compressionLevel, compressionMode);
 
         log?.Invoke($"{req.TargetBaseTitleName} {Loc.S.ButtonStart} (1/1)", LogLevel.Highlight, req.TargetBaseTitleId);
 
@@ -233,7 +233,7 @@ internal static class ContainerMerger
                 string ncaContentType = nca.Header.ContentType.ToString();
                 string titleName = !string.IsNullOrEmpty(metaInfo?.KrTitle) ? metaInfo.KrTitle : !string.IsNullOrEmpty(metaInfo?.EnTitle) ? metaInfo.EnTitle : nca.Header.TitleId.ToString("X16");
                 string label = $"{titleName} [{typeTag}/{ncaContentType}]";
-                var result = ContainerEntryBuilder.BuildNcaEntry(entryName, originalExt, currentStorage, size, nca, label, req.UseCompression, req.UseBlockMode, req.CompressionLevel, forceKeyGen0, keySet, converters, null, ct);
+                var result = ContainerEntryBuilder.BuildNcaEntry(entryName, originalExt, currentStorage, size, nca, label, req.UseCompression, req.CompressionMode, req.CompressionLevel, forceKeyGen0, keySet, converters, null, ct);
 
                 if (result == null)
                     continue;

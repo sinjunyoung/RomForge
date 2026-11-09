@@ -29,7 +29,7 @@ public static class NczInPlaceConverter
             onRead = reporter.AddProgress;
         }
 
-        converter.ConvertAsync(null!, storage, writer, options.UseBlockMode, options.CompressionLevel, onRead, options.Cancellation).GetAwaiter().GetResult();
+        converter.ConvertAsync(null!, storage, writer, options.CompressionMode, options.CompressionLevel, onRead, options.Cancellation).GetAwaiter().GetResult();
         reporter?.ForceReport();
 
         return writer.Length;

@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Models;
+using Common.Services;
 using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
@@ -15,7 +16,7 @@ namespace RomForge.Core.Services.Switch;
 internal static class ContainerEntryBuilder
 {
     public static (string FinalName, Func<Stream, Action<long>, Task> Writer, long Size, string Label)? BuildNcaEntry(string entryName, string originalExt, IStorage currentStorage, long size, Nca nca, 
-        string label, bool useCompression, bool useBlockMode, int compressionLevel, bool forceKeyGen0, KeySet keySet, Dictionary<string, NcaToNczConverter> converters, string? copyStatus = null, CancellationToken ct = default)
+        string label, bool useCompression, SwitchCompressionMode compressionMode, int compressionLevel, bool forceKeyGen0, KeySet keySet, Dictionary<string, NcaToNczConverter> converters, string? copyStatus = null, CancellationToken ct = default)
     {
         string copyLabel = copyStatus == null ? label : $"{label} [{copyStatus}]";
         int keyGen = forceKeyGen0 ? 0 : (int)nca.Header.KeyGeneration;
@@ -41,7 +42,7 @@ internal static class ContainerEntryBuilder
                     var header = await NcaRecryptService.GetRecryptedHeaderAsync(cap, keyGen, keySet, ct);
                     using var hs = new MemoryStream(header);
 
-                    await converter.ConvertAsync(hs, cap, s, useBlockMode, compressionLevel, onRead, ct);
+                    await converter.ConvertAsync(hs, cap, s, compressionMode, compressionLevel, onRead, ct);
                 }, decSize, label);
             }
             else
@@ -70,7 +71,7 @@ internal static class ContainerEntryBuilder
                 var header = await NcaRecryptService.GetRecryptedHeaderAsync(cap, keyGen, keySet, ct);
                 using var hs = new MemoryStream(header);
 
-                await converter.ConvertAsync(hs, cap, s, useBlockMode, compressionLevel, onRead, ct);
+                await converter.ConvertAsync(hs, cap, s, compressionMode, compressionLevel, onRead, ct);
             }, size, label);
         }
         else

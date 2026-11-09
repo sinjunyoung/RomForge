@@ -66,11 +66,11 @@ public class MergeMainViewModel : ProgressToolTabViewModel
                 List<string> output =
                     asXci
                     ? (mergeAll
-                        ? await XciMergeService.RunMergeSingle(inputPaths, outputDir, useCompression, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token)
-                        : await XciMergeService.RunMergeAll(inputPaths, outputDir, useCompression, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token))
+                        ? await XciMergeService.RunMergeSingle(inputPaths, outputDir, useCompression, config.CompressLevel, config.CompressionMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token)
+                        : await XciMergeService.RunMergeAll(inputPaths, outputDir, useCompression, config.CompressLevel, config.CompressionMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token))
                     : (mergeAll
-                        ? await NspMergeService.RunMergeSingle(inputPaths, outputDir, useCompression, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token)
-                        : await NspMergeService.RunMergeAll(inputPaths, outputDir, useCompression, config.CompressLevel, config.UseBlockMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token));
+                        ? await NspMergeService.RunMergeSingle(inputPaths, outputDir, useCompression, config.CompressLevel, config.CompressionMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token)
+                        : await NspMergeService.RunMergeAll(inputPaths, outputDir, useCompression, config.CompressLevel, config.CompressionMode, config.VerifyCompress, config.ForceKeyGen0, keySet.Clone(), progress, Log, CancellationTokenSource.Token));
 
                 results.AddRange(output);
 

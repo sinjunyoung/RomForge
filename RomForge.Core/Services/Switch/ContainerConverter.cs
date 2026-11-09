@@ -16,14 +16,14 @@ namespace RomForge.Core.Services.Switch;
 
 internal static class ContainerConverter
 {
-    public static Task<string> CompressOrDecompressAsync(OutputContainer output, string inputPath, string? outputDir, bool isCompressMode, int compressionLevel, bool validation, bool useBlockMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
+    public static Task<string> CompressOrDecompressAsync(OutputContainer output, string inputPath, string? outputDir, bool isCompressMode, int compressionLevel, bool validation, SwitchCompressionMode compressionMode, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.MainErrNoKeys);
         var profile = ConvertProfile.ForCompression(inputPath, isCompressMode);
-        return ConvertAsync(inputPath, outputDir, output, isCompressMode, isCompressMode && validation, isCompressMode && useBlockMode, isCompressMode ? compressionLevel : 0, profile, keySet.Clone(), progress, log, ct);
+        return ConvertAsync(inputPath, outputDir, output, isCompressMode, isCompressMode && validation, compressionMode, isCompressMode ? compressionLevel : 0, profile, keySet.Clone(), progress, log, ct);
     }
 
-    public static async Task<string> ConvertAsync(string inputPath, string? outputDir, OutputContainer output, bool useCompression, bool validation, bool useBlockMode, int compressionLevel, ConvertProfile profile, KeySet keySet, 
+    public static async Task<string> ConvertAsync(string inputPath, string? outputDir, OutputContainer output, bool useCompression, bool validation, SwitchCompressionMode compressionMode, int compressionLevel, ConvertProfile profile, KeySet keySet, 
         IProgress<ProgressInfo>? progress, Action<string, LogLevel, string?>? log, CancellationToken ct = default)
     {
         var disposables = new List<IDisposable>();
@@ -67,7 +67,7 @@ internal static class ContainerConverter
 
                 var nca = new Nca(keySet, currentStorage);
                 string label = $"{meta.KrTitle ?? meta.EnTitle} [{nca.Header.ContentType}]";
-                var built = ContainerEntryBuilder.BuildNcaEntry(entryName, entryExt, currentStorage, size, nca, label, useCompression, useBlockMode, compressionLevel, false, keySet, converters, profile.CopyStatus, ct);
+                var built = ContainerEntryBuilder.BuildNcaEntry(entryName, entryExt, currentStorage, size, nca, label, useCompression, compressionMode, compressionLevel, false, keySet, converters, profile.CopyStatus, ct);
 
                 if (built.HasValue)
                     fileEntries.Add(built.Value);

@@ -1,4 +1,5 @@
-﻿using LibHac.Common.Keys;
+﻿using Common.Models;
+using LibHac.Common.Keys;
 using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
@@ -40,7 +41,7 @@ internal static class MergePlanner
         return groups;
     }
 
-    public static (Models.Switch.BuildRequest Request, bool HasBase, bool HasUpdate) BuildSingleRequest(List<MetadataResult> allMeta, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, bool useBlockMode)
+    public static (Models.Switch.BuildRequest Request, bool HasBase, bool HasUpdate) BuildSingleRequest(List<MetadataResult> allMeta, IReadOnlyList<string> inputPaths, string outputDir, bool useCompression, int compressionLevel, SwitchCompressionMode compressionMode)
     {
         var bases = allMeta.Where(m => m.Type == ContentMetaType.Application).ToList();
         var patches = allMeta.Where(m => m.Type == ContentMetaType.Patch).ToList();
@@ -75,7 +76,7 @@ internal static class MergePlanner
         {
             UseCompression = useCompression,
             CompressionLevel = compressionLevel,
-            UseBlockMode = useBlockMode,
+            CompressionMode = compressionMode,
             AllSourcePaths = sources,
             TargetBaseTitleId = baseTitleId,
             TargetBaseTitleName = baseMeta.KrTitle,
