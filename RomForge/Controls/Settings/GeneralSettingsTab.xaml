@@ -12,26 +12,34 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="200"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Language.png"/>
-                <TextBlock Text="언어 설정 (Language)" Style="{StaticResource SettingTextStyle}" VerticalAlignment="Center"/>
-            </StackPanel>
-            <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" Height="32" VerticalContentAlignment="Center">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Image Width="20" Height="20" Margin="0,0,8,0" Source="{Binding Code, Converter={StaticResource LanquageCodeToImageConverter}}" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontSize="12"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
-        </Grid>
+        <Border Grid.Row="0" Background="#2A2A2A" BorderBrush="#3F3F3F" BorderThickness="1" CornerRadius="6" Margin="0,0,0,6" Padding="10,5">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Language.png"/>
+                    <TextBlock Text="언어" Style="{StaticResource SettingTextStyle}" VerticalAlignment="Center"/>
+                </StackPanel>
+                <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="36">
+                    <ComboBox.ItemContainerStyle>
+                        <Style TargetType="ComboBoxItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="10,6"/>
+                        </Style>
+                    </ComboBox.ItemContainerStyle>
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Left" Width="90">
+                                <Image Width="24" Height="24" Margin="0,0,12,0" Source="{Binding Code, Converter={StaticResource LanquageCodeToImageConverter}}" VerticalAlignment="Center" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center" FontSize="12" Foreground="White"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+        </Border>
 
         <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding Topmost}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">

@@ -2,15 +2,14 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel>
-        <WrapPanel x:Name="palette" Margin="0,6,0,4"/>
-        <RichTextBox x:Name="editor" AllowDrop="True" IsDocumentEnabled="True" AcceptsReturn="False" MaxHeight="66" FontSize="12"
-                     Foreground="#DCDCDC" CaretBrush="White" Background="#12FFFFFF" BorderBrush="#30FFFFFF"
-                     BorderThickness="1" Padding="6,5"
-                     VerticalScrollBarVisibility="Disabled"
-                     TextChanged="Editor_TextChanged" PreviewDragEnter="Editor_PreviewDragOver" PreviewDragOver="Editor_PreviewDragOver" PreviewDrop="Editor_PreviewDrop" PreviewKeyDown="Editor_PreviewKeyDown">
-            <FlowDocument PagePadding="0">
-                <Paragraph Margin="0"/>
-            </FlowDocument>
-        </RichTextBox>
+        <WrapPanel x:Name="palette" Margin="0,3,0,3"/>
+        <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Padding="0,5">
+            <RichTextBox x:Name="editor" AllowDrop="True" IsDocumentEnabled="True" AcceptsReturn="False" MaxHeight="66" FontSize="12" Foreground="#DCDCDC" CaretBrush="White" Background="Transparent" BorderThickness="0" VerticalScrollBarVisibility="Disabled"
+                         TextChanged="Editor_TextChanged" PreviewDragEnter="Editor_PreviewDragOver" PreviewDragOver="Editor_PreviewDragOver" PreviewDrop="Editor_PreviewDrop" PreviewKeyDown="Editor_PreviewKeyDown">
+                <FlowDocument PagePadding="0">
+                    <Paragraph Margin="0"/>
+                </FlowDocument>
+            </RichTextBox>
+        </Border>
     </StackPanel>
 </UserControl>

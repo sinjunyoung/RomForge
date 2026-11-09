@@ -362,23 +362,19 @@
             </ToggleButton>
 
             <StackPanel Background="Transparent">
-                <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,2" Height="30">
+                <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,1" Height="30">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
                         <TextBlock Text="결과 파일명에 버전/날짜 자동 표기" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                         <TextBlock Text="패치 파일명에서 버전과 날짜를 읽어와 결과 파일명에 표시합니다" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
                     </StackPanel>
                 </ToggleButton>
-                <StackPanel Visibility="{Binding  PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel>
-                        <namin:NamingFormatEditor Tokens="{Binding PatchVM.NormalVM.NamingTokens}" Format="{Binding PatchVM.NormalVM.NamingFormat, Mode=TwoWay}" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}"/>
-                    </StackPanel>
-                    <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,2,0,3">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="예상 파일명: " Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
-                            <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
-                        </StackPanel>
-                    </Border>
+                <StackPanel Visibility="{Binding  PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">                    
+                    <namin:NamingFormatEditor Tokens="{Binding PatchVM.NormalVM.NamingTokens}" Format="{Binding PatchVM.NormalVM.NamingFormat, Mode=TwoWay}" IsEnabled="{Binding PatchVM.NormalVM.NamingEnabled}"/>                    
+                    <StackPanel Orientation="Horizontal" Margin="2">
+                        <TextBlock Text="예상 파일명: " Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
+                        <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
+                    </StackPanel>                    
                 </StackPanel>
             </StackPanel>
         </StackPanel>
