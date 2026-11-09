@@ -63,7 +63,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Height="24" Width="24" Margin="0,0,4,0" Source="/Assets/Images/VitaCartridge.png"/>
-                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="타이틀" VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="{Binding Path=Current.HeaderTitle, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -99,7 +99,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/Patch.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="패치" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -191,7 +191,7 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,10,0" Text="출력 포맷:" VerticalAlignment="Center"/>
+                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,10,0" Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     <RadioButton Content="에뮬 (app, addcont)" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildEmu}" IsEnabled="{Binding IsIdle}" Margin="0,0,15,0" VerticalAlignment="Center"/>
                     <RadioButton Content="실기 (rePatch, reAddcont)" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildRetail}" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center"/>
                 </StackPanel>

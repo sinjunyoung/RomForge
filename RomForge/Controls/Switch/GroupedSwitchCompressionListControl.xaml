@@ -46,7 +46,7 @@
                                     <StackPanel Margin="4,4,4,2" Orientation="Horizontal">
                                         <TextBlock FontSize="12" FontWeight="Bold" Foreground="#D4AF37" Text="{Binding Items, Converter={StaticResource RepresentativeTitleNameConverter}}" />
                                         <TextBlock FontSize="11" Foreground="#8888A8" Margin="10,0,0,0">
-                                            <Run Text="파일"/>
+                                            <Run Text="{Binding Path=Current.LabelFile, Source={x:Static l:Loc.Instance}}"/>
                                             <Run Text="{Binding ItemCount, Mode=OneWay}"/>
                                             <Run Text="개"/>
                                         </TextBlock>
@@ -76,7 +76,7 @@
                             <GridViewColumn Width="370">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="TitleName">
-                                        <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
+                                        <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="{Binding Path=Current.HeaderTitle, Source={x:Static l:Loc.Instance}}"/>
                                     </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>

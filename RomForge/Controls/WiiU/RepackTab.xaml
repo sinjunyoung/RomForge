@@ -65,7 +65,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/Blu-ray.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.HeaderTitle, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -86,7 +86,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/Patch.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="패치" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -216,7 +216,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5,0,0,5">
-                <TextBlock Text="출력 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,5,10,0"/>
+                <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,5,10,0"/>
                 <RadioButton Content="WUA ( 에뮬레이터 )" GroupName="OutputFormat" IsChecked="{Binding IsWuaFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="WUP ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsWupFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
             </StackPanel>

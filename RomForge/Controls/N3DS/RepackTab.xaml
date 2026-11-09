@@ -69,7 +69,7 @@
                             <TextBlock Text="패치 폴더 또는 zip/7z파일을 드래그하거나 클릭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
+                    <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
         </Grid>
@@ -153,7 +153,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,5,5">
-                <TextBlock Text="출력 포맷:" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
+                <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
                 <RadioButton Content="CCI ( 에뮬레이터 )" GroupName="OutputFormat" IsChecked="{Binding IsCciFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="CIA ( 실기 )" GroupName="OutputFormat" IsChecked="{Binding IsCiaFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="ZCCI ( Azahar 전용 압축 )" GroupName="OutputFormat" IsChecked="{Binding IsZcciFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>

@@ -27,10 +27,17 @@ public sealed class Russian : LocalizedStrings
     // Header
     public override string HeaderFileName => "Имя файла";
     public override string HeaderFilePath => "Путь";
+    public override string HeaderTitle => "Title";
+    public override string HeaderPatch => "Patch";
+    public override string HeaderVersion => "Version";
+    public override string HeaderInput => "Input";
+    public override string HeaderOutput => "Output";
 
     // Label
+    public override string LabelFile => "Файл";
     public override string LabelCompression => "Сжатие";
     public override string LabelCompressionRatio => "Коэффициент сжатия";
+    public override string LabelOutputFormat => "Формат вывода:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ Анализ метаданных... ━━";

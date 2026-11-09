@@ -36,7 +36,7 @@
 
                         <Border Width="1" Height="18" Background="#444" Margin="0,0,15,0"/>
 
-                        <TextBlock Text="출력 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <RadioButton Content="NSP" GroupName="MergeFormat" IsChecked="{Binding OutputFormat, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:OutputFormat.NSP}}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <RadioButton Content="NSZ" GroupName="MergeFormat" IsChecked="{Binding OutputFormat, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:OutputFormat.NSZ}}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <RadioButton Content="XCI" GroupName="MergeFormat" IsChecked="{Binding OutputFormat, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:OutputFormat.XCI}}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>

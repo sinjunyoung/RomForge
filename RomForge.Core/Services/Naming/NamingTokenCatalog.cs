@@ -31,6 +31,6 @@ public static class NamingTokenCatalog
         new("TitleID", "타이틀ID", "타이틀 ID"),
         new("Tag", "구성", "구성 (B+U+10D)"),
         new("DisplayVersion", "표시버전", "표시 버전 (1.0.0)"),
-        new("Version", "버전", "버전 (65536)")
+        new("Version", Common.Localization.Loc.Instance.Current.HeaderVersion, "버전 (65536)")
     ];
 }

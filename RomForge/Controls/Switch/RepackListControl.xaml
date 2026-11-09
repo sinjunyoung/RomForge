@@ -54,7 +54,7 @@
                             <GridViewColumn Width="370">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="TitleName">
-                                        <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="타이틀"/>
+                                        <local:IconHeader Icon="/RomForge.Core;component/Assets/Images/Title.png" Text="{Binding Path=Current.HeaderTitle, Source={x:Static l:Loc.Instance}}"/>
                                     </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
@@ -81,7 +81,7 @@
                             </GridViewColumn>
                             <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/Assets/Images/Patch.png" Text="패치"/>
+                                    <local:IconHeader Icon="/Assets/Images/Patch.png" Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -113,7 +113,7 @@
                             </GridViewColumn>
                             <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
-                                    <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="용량"/>
+                                    <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png"/>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>

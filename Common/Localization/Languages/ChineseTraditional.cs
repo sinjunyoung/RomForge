@@ -27,10 +27,17 @@ public sealed class ChineseTraditional : LocalizedStrings
     // Header
     public override string HeaderFileName => "檔案名稱";
     public override string HeaderFilePath => "路徑";
+    public override string HeaderTitle => "標題";
+    public override string HeaderPatch => "封包";
+    public override string HeaderVersion => "版本";
+    public override string HeaderInput => "輸入";
+    public override string HeaderOutput => "輸出";
 
     // Label
+    public override string LabelFile => "檔案";
     public override string LabelCompression => "壓縮";
     public override string LabelCompressionRatio => "壓縮率";
+    public override string LabelOutputFormat => "輸出格式:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ 正在解析元數據... ━━";

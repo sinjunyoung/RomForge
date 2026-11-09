@@ -192,7 +192,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
             PatchSlots.RemoveAt(PatchSlots.Count - 1);
 
         PatchSlots[0].FilePath = null;
-        PatchSlots[0].Title = "패치";
+        PatchSlots[0].Title = Common.Localization.Loc.Instance.Current.HeaderPatch;
         _patchAdded = false;
 
         OnPropertyChanged(nameof(CanAddPatch));

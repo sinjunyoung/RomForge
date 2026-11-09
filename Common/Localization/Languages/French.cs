@@ -27,10 +27,17 @@ public sealed class French : LocalizedStrings
     // Header
     public override string HeaderFileName => "Nom du fichier";
     public override string HeaderFilePath => "Chemin";
+    public override string HeaderTitle => "Titre";
+    public override string HeaderPatch => "Patch";
+    public override string HeaderVersion => "Version";
+    public override string HeaderInput => "Entrée";
+    public override string HeaderOutput => "Sortie";
 
     // Label
+    public override string LabelFile => "Fichier";
     public override string LabelCompression => "Compression";
     public override string LabelCompressionRatio => "Taux de compression";
+    public override string LabelOutputFormat => "Format de sortie:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ Analyse des métadonnées...";

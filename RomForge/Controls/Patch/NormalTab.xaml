@@ -55,7 +55,7 @@
                             <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
                             <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.PatchSlots[0].Label}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
                         </Grid>
-                        <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
+                        <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.PatchSlots[0].FilePath}"/>
                     </Grid>
                 </Border>
                 <ItemsControl Visibility="{Binding PatchVM.NormalVM.IsMultiPatch, Converter={StaticResource BooleanToVisibilityConverter}}" ItemsSource="{Binding PatchVM.NormalVM.PatchSlots}" Margin="0,0,0,-3">

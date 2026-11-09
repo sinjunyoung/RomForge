@@ -27,10 +27,17 @@ public sealed class ChineseSimplified : LocalizedStrings
     // Header
     public override string HeaderFileName => "文件名";
     public override string HeaderFilePath => "路径";
+    public override string HeaderTitle => "标题";
+    public override string HeaderPatch => "补丁";
+    public override string HeaderVersion => "版本";
+    public override string HeaderInput => "输入";
+    public override string HeaderOutput => "输出";
 
     // Label
+    public override string LabelFile => "文件";
     public override string LabelCompression => "压缩";
     public override string LabelCompressionRatio => "压缩率";
+    public override string LabelOutputFormat => "输出格式:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ 正在解析元数据... ━━";

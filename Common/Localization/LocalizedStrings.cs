@@ -21,9 +21,16 @@ public abstract class LocalizedStrings
 
     public abstract string HeaderFileName { get; }
     public abstract string HeaderFilePath { get; }
+    public abstract string HeaderTitle { get; }
+    public abstract string HeaderPatch { get; }
+    public abstract string HeaderVersion { get; }
+    public abstract string HeaderInput { get; }
+    public abstract string HeaderOutput { get; }
 
+    public abstract string LabelFile { get; }
     public abstract string LabelCompression { get; }
     public abstract string LabelCompressionRatio { get; }
+    public abstract string LabelOutputFormat { get; }    
 
     public abstract string LogAnalyzeMetadata { get; }
     public abstract string LogCompressAndMerge { get; }

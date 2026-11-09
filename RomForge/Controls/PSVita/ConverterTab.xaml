@@ -80,7 +80,7 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Height="24" Width="24" Margin="0,0,4,0" Source="/Assets/Images/VitaCartridge.png"/>
-                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="타이틀" VerticalAlignment="Center"/>
+                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="{Binding Path=Current.HeaderTitle, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>

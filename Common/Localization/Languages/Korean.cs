@@ -27,10 +27,17 @@ public sealed class Korean : LocalizedStrings
     // Header
     public override string HeaderFileName => "파일명";
     public override string HeaderFilePath => "경로";
+    public override string HeaderTitle => "타이틀";
+    public override string HeaderPatch => "패치";
+    public override string HeaderVersion => "버전";
+    public override string HeaderInput => "입력";
+    public override string HeaderOutput => "출력";
 
     // Label    
+    public override string LabelFile => "파일";
     public override string LabelCompression => "압축";
     public override string LabelCompressionRatio => "압축률";
+    public override string LabelOutputFormat => "출력 포맷:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ 메타데이터 통합 분석 중... ━━";

@@ -27,10 +27,17 @@ public sealed class Japanese : LocalizedStrings
     // Header
     public override string HeaderFileName => "ファイル名";
     public override string HeaderFilePath => "パス";
+    public override string HeaderTitle => "タイトル";
+    public override string HeaderPatch => "パッチ";
+    public override string HeaderVersion => "バージョン";
+    public override string HeaderInput => "入力";
+    public override string HeaderOutput => "出力";
 
     // Label
+    public override string LabelFile => "ファイル";
     public override string LabelCompression => "圧縮";
     public override string LabelCompressionRatio => "圧縮率";
+    public override string LabelOutputFormat => "出力形式:";
 
     // Log
     public override string LogAnalyzeMetadata => "━━ メタデータ解析中 ━━";

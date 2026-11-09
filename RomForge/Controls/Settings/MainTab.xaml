@@ -18,7 +18,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Patch.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="패치" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <local:PatchSettingsTab DataContext="{Binding Patch}"/>

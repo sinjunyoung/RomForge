@@ -68,7 +68,7 @@
                             <TextBlock Text="Riivolution 패치 폴더 또는 zip/7z/xml을 드래그하거나 클릭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="패치" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
+                    <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
         </Grid>
@@ -143,7 +143,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,5,5">
-                <TextBlock Text="출력 포맷:" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
+                <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
                 <RadioButton Content="ISO" GroupName="WiiOutputFormat" IsChecked="{Binding IsIsoFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="WBFS ( USB 로더 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsWbfsFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
                 <RadioButton Content="RVZ ( Dolphin 전용 압축 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsRvzFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>

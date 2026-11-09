@@ -2,9 +2,10 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:RomForge.Controls.Switch"
-             xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core">
+             xmlns:models="clr-namespace:RomForge.Core.Models.Switch;assembly=RomForge.Core"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common">
     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-        <TextBlock Text="출력 포맷:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+        <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
         <RadioButton Content="NSP" IsChecked="{Binding Format, RelativeSource={RelativeSource AncestorType=local:SwitchOutputFormatSelector}, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:OutputFormat.NSP}}" 
                      Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
         <RadioButton Content="NSZ" IsChecked="{Binding Format, RelativeSource={RelativeSource AncestorType=local:SwitchOutputFormatSelector}, Mode=TwoWay, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:OutputFormat.NSZ}}" 
