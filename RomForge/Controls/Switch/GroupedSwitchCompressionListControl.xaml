@@ -26,12 +26,12 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
@@ -46,9 +46,12 @@
                                     <StackPanel Margin="4,4,4,2" Orientation="Horizontal">
                                         <TextBlock FontSize="12" FontWeight="Bold" Foreground="#D4AF37" Text="{Binding Items, Converter={StaticResource RepresentativeTitleNameConverter}}" />
                                         <TextBlock FontSize="11" Foreground="#8888A8" Margin="10,0,0,0">
-                                            <Run Text="{Binding Path=Current.LabelFile, Source={x:Static l:Loc.Instance}}"/>
-                                            <Run Text="{Binding ItemCount, Mode=OneWay}"/>
-                                            <Run Text="개"/>
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource LocFormat}" ConverterParameter="LabelFileCount">
+                                                    <Binding Path="ItemCount" Mode="OneWay"/>
+                                                    <Binding Path="Current" Source="{x:Static l:Loc.Instance}" Mode="OneWay"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
                                         </TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
@@ -121,19 +124,17 @@
                             <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="EstimatedRatio">
-                                        <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="{Binding Path=Current.LabelCompressionRatio, Source={x:Static l:Loc.Instance}}"/>
+                                        <local:IconHeader Icon="/Assets/Images/Compressed.png" Text="{Binding Path=Current.HeaderCompressionRatio, Source={x:Static l:Loc.Instance}}"/>
                                     </GridViewColumnHeader>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Right" Margin="4,0">
                                             <TextBlock FontSize="11" HorizontalAlignment="Right">
-                                                <Run Text="예상 " Foreground="#8888A8"/>
-                                                <Run Text="{Binding Lz4.EstimatedRatioText, Mode=OneWay}"/>
+                                                <Run Text="{Binding Path=Current.LabelEstimated, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#8888A8"/><Run Text=" "/><Run Text="{Binding Lz4.EstimatedRatioText, Mode=OneWay}"/>
                                             </TextBlock>
                                             <TextBlock FontSize="11" HorizontalAlignment="Right" Margin="0,2,0,0">
-                                                <Run Text="실제 " Foreground="#54FFB5"/>
-                                                <Run Text="{Binding Lz4.ActualRatioText, Mode=OneWay}"/>
+                                                <Run Text="{Binding Path=Current.LabelActual, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#54FFB5"/><Run Text=" "/><Run Text="{Binding Lz4.ActualRatioText, Mode=OneWay}"/>
                                             </TextBlock>
                                         </StackPanel>
                                     </DataTemplate>
@@ -176,7 +177,7 @@
                 <Button x:Name="btnRemoveFile" ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button x:Name="btnRemoveAllFiles" ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
+                <Button x:Name="btnRemoveAllFiles" ToolTip="{Binding Path=Current.ToolTipClear, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button x:Name="btnExtra1" Visibility="Collapsed" ToolTip="Extra" Style="{StaticResource ListToolButton}" Click="BtnExtra1_Click"/>

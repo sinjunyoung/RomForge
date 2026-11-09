@@ -26,12 +26,12 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
@@ -135,7 +135,7 @@
                 <Button x:Name="btnRemoveFile" ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button x:Name="btnRemoveAllFiles" ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
+                <Button x:Name="btnRemoveAllFiles" ToolTip="{Binding Path=Current.ToolTipClear, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
                 <Button x:Name="btnExtra1" Visibility="Collapsed" ToolTip="Extra" Style="{StaticResource ListToolButton}" Click="BtnExtra1_Click"/>

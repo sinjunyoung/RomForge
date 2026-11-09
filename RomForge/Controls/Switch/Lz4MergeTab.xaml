@@ -34,7 +34,7 @@
                 <Grid>
                     <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Height="30" IsEnabled="{Binding IsIdle}" Text="{Binding OutputPath, Mode=TwoWay}" VerticalContentAlignment="Center" x:Name="txtOutput" AllowDrop="True" 
                              PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                    <TextBlock Text="출력 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding Path=Current.HintDragOrSelectOutputFolder, Source={x:Static l:Loc.Instance}}" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
                 </Grid>
             </Border>
             <Button Grid.Column="3" x:Name="btnBrowseOutput" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Center" IsEnabled="{Binding IsIdle}" Margin="5,0,5,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center"

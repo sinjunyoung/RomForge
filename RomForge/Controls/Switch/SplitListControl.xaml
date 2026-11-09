@@ -18,7 +18,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid Grid.Row="1">
-                    <local:SwitchDropHint x:Name="dropHint" Title="게임 파일 / 폴더를 여기에 드래그&amp;드롭하세요" Subtitle="통합롬은 + 버튼으로 펼쳐서 본편/업데이트/DLC를 골라 분리할 수 있습니다" Visibility="{Binding HasFiles, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                    <local:SwitchDropHint x:Name="dropHint" Title="{Binding Path=Current.HintDropGameFileOrFolder, Source={x:Static l:Loc.Instance}}" Subtitle="{Binding Path=Current.HintSplitExpandRule, Source={x:Static l:Loc.Instance}}" Visibility="{Binding HasFiles, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                     <ListView x:Name="lvFiles" ItemsSource="{Binding Rows}" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
                         <ListView.ContextMenu>
                             <ContextMenu>
@@ -28,12 +28,12 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
-                                <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
+                                <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
+                                <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
@@ -44,13 +44,13 @@
                             <GridView>
                                 <GridViewColumn Width="64">
                                     <GridViewColumn.Header>
-                                        <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True" ToolTip="전체 선택 / 해제" Click="HeaderCheckBox_Click"/>
+                                        <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True" ToolTip="{Binding Path=Current.ToolTipSelectAllToggle, Source={x:Static l:Loc.Instance}}" Click="HeaderCheckBox_Click"/>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <StackPanel x:Name="selectPanel" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
                                                 <Grid Width="24" Height="22">
-                                                    <Button Style="{StaticResource SplitExpanderStyle}" ToolTip="펼치기 / 접기" Click="BtnExpand_Click" Visibility="{Binding CanExpand, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                    <Button Style="{StaticResource SplitExpanderStyle}" ToolTip="{Binding Path=Current.ToolTipExpandCollapse, Source={x:Static l:Loc.Instance}}" Click="BtnExpand_Click" Visibility="{Binding CanExpand, Converter={StaticResource BooleanToVisibilityConverter}}">
                                                         <Path x:Name="chevron" Data="M 0,0 L 4,4 L 0,8" Stroke="#BBBBBB" StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="0.5,0.5">
                                                             <Path.RenderTransform>
                                                                 <RotateTransform Angle="0"/>
@@ -177,7 +177,7 @@
                 <Button ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipClear, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Margin="0" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
             </StackPanel>

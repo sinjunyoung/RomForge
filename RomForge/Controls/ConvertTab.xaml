@@ -357,25 +357,25 @@
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFiles_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFolder_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonAddFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding UnifiedConvertVM.IsLocked, Converter={StaticResource InverseBool}}" Click="BtnClear_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

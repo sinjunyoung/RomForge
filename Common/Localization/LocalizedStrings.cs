@@ -29,7 +29,7 @@ public abstract class LocalizedStrings
 
     public abstract string LabelFile { get; }
     public abstract string LabelCompression { get; }
-    public abstract string LabelCompressionRatio { get; }
+    public abstract string HeaderCompressionRatio { get; }
     public abstract string LabelOutputFormat { get; }    
 
     public abstract string LogAnalyzeMetadata { get; }
@@ -83,7 +83,73 @@ public abstract class LocalizedStrings
     public abstract string ToolTipBlockMode { get; }
     public abstract string ToolTipBlocklessMode { get; }
     public abstract string ToolTipOpenWorkSpace { get; }
-    public abstract string ToolTipRemoveAll { get; }
+    public abstract string ToolTipClear { get; }
     public abstract string ToolTipRemoveSelected { get; }
     public abstract string ToolTipValidateCompress { get; }
+    public abstract string ButtonAddFile { get; }
+    public abstract string ButtonAddFolder { get; }
+    public abstract string ButtonRemoveSelected { get; }
+    public abstract string ButtonClear { get; }
+    public abstract string MenuRemoveSelected { get; }
+    public abstract string MenuClear { get; }
+    public abstract string TabPatch { get; }
+    public abstract string LabelPatch { get; }
+    public abstract string TabSettings { get; }
+    public abstract string LabelSettings { get; }
+    public abstract string LabelVersion { get; }
+    public abstract string HintDropCueChd { get; }
+    public abstract string HintDropSourceNsp { get; }
+    public abstract string HintDragOrSelectWorkFolder { get; }
+    public abstract string HintDragOrSelectOutputFolder { get; }
+    public abstract string HintDropImageFile { get; }
+    public abstract string HintDropFileOrFolder { get; }
+    public abstract string HintDropGameFileOrFolder { get; }
+    public abstract string HintRepackReplaceRule { get; }
+    public abstract string HintSplitExpandRule { get; }
+    public abstract string LabelGameName { get; }
+    public abstract string LabelPublisher { get; }
+    public abstract string LabelGameId { get; }
+    public abstract string LabelNspTitleId { get; }
+    public abstract string LabelWideScreen { get; }
+    public abstract string LabelSoundVolume { get; }
+    public abstract string LabelLz4Compression { get; }
+    public abstract string LabelSupportedLanguages { get; }
+    public abstract string LabelMultiRomIndex { get; }
+    public abstract string LabelMergeMode { get; }
+    public abstract string LabelEstimated { get; }
+    public abstract string LabelActual { get; }
+    public abstract string LabelFileCount(object arg0);
+    public abstract string HeaderFileNameCompare { get; }
+    public abstract string DescConvertFormats { get; }
+    public abstract string DescRenameByFormat { get; }
+    public abstract string ButtonForceLanguage { get; }
+    public abstract string ButtonCancelForceLanguage { get; }
+    public abstract string ButtonUnpack { get; }
+    public abstract string ButtonRepackFolderBased { get; }
+    public abstract string ButtonUnpackAndRepackStreaming { get; }
+    public abstract string TabRepack { get; }
+    public abstract string TabMerge { get; }
+    public abstract string TabSplit { get; }
+    public abstract string TabLz4Compression { get; }
+    public abstract string TabFormatConvert { get; }
+    public abstract string TabSaturnNspConvert { get; }
+    public abstract string TabIgnoreVersion { get; }
+    public abstract string TabRename { get; }
+    public abstract string RadioMergeGroupByTitleId { get; }
+    public abstract string RadioMergeAll { get; }
+    public abstract string MenuSelectFolder { get; }
+    public abstract string MenuSelectArchive { get; }
+    public abstract string MenuDeselect { get; }
+    public abstract string MenuFindInFolder { get; }
+    public abstract string MenuFindInArchive { get; }
+    public abstract string ToolTipTitleIdInput { get; }
+    public abstract string ToolTipForceLanguage { get; }
+    public abstract string ToolTipMergeGroupByTitleId { get; }
+    public abstract string ToolTipMergeAll { get; }
+    public abstract string ToolTipRomFsLz4 { get; }
+    public abstract string ToolTipBatchKoreanPatch { get; }
+    public abstract string ToolTipSelectAllToggle { get; }
+    public abstract string ToolTipExpandCollapse { get; }
+    public abstract string HeaderSize { get; }
+    public abstract string ToolTipBrowseOutput { get; }
 }

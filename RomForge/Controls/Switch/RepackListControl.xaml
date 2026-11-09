@@ -15,7 +15,7 @@
                 <ColumnDefinition Width="40"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <local:SwitchDropHint x:Name="dropHint" Title="게임 파일 / 폴더를 여기에 드래그&amp;드롭하세요" Subtitle="본편/업데이트는 자동 교체, DLC는 계속 추가됩니다"/>
+                <local:SwitchDropHint x:Name="dropHint" Title="{Binding Path=Current.HintDropGameFileOrFolder, Source={x:Static l:Loc.Instance}}" Subtitle="{Binding Path=Current.HintRepackReplaceRule, Source={x:Static l:Loc.Instance}}"/>
                 <ListView x:Name="lvFiles" AllowDrop="True" DragEnter="LvFiles_DragEnter" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" SelectionMode="Extended" ContextMenuOpening="LvFiles_ContextMenuOpening">
                     <ListView.ContextMenu>
                         <ContextMenu>
@@ -25,12 +25,12 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
@@ -89,17 +89,17 @@
                                                 DragEnter="PatchDropTarget_DragEnter" DragLeave="PatchDropTarget_DragLeave" Drop="PatchDropTarget_Drop" MouseLeftButtonUp="PatchDropTarget_Click">
                                             <Border.ContextMenu>
                                                 <ContextMenu>
-                                                    <MenuItem Header="폴더 선택..." Click="PatchMenu_SelectFolder_Click">
+                                                    <MenuItem Header="{Binding Path=Current.MenuSelectFolder, Source={x:Static l:Loc.Instance}}" Click="PatchMenu_SelectFolder_Click">
                                                         <MenuItem.Icon>
                                                             <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem Header="압축파일 선택(zip/7z)..." Click="PatchMenu_SelectArchive_Click">
+                                                    <MenuItem Header="{Binding Path=Current.MenuSelectArchive, Source={x:Static l:Loc.Instance}}" Click="PatchMenu_SelectArchive_Click">
                                                         <MenuItem.Icon>
                                                             <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
                                                         </MenuItem.Icon>
                                                     </MenuItem>
-                                                    <MenuItem Header="선택 취소" Click="MenuItem_RemovePatch_Click">
+                                                    <MenuItem Header="{Binding Path=Current.MenuDeselect, Source={x:Static l:Loc.Instance}}" Click="MenuItem_RemovePatch_Click">
                                                         <MenuItem.Icon>
                                                             <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24"/>
                                                         </MenuItem.Icon>
@@ -125,7 +125,7 @@
                                 <GridViewColumn.Header>
                                     <StackPanel Orientation="Horizontal">
                                         <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="False" IsThreeState="False" Margin="0,0,5,0" Checked="HeaderCheckBox_Checked" Unchecked="HeaderCheckBox_Unchecked"/>
-                                        <TextBlock Text="Lz4" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" ToolTip="RomFS Lz4 압축 (리팩 시 적용). 본편과 업데이트는 하나로 합쳐지므로 둘 중 하나라도 체크하면 압축됩니다."/>
+                                        <TextBlock Text="Lz4" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" ToolTip="{Binding Path=Current.ToolTipRomFsLz4, Source={x:Static l:Loc.Instance}}"/>
                                     </StackPanel>
                                 </GridViewColumn.Header>
                                 <GridViewColumn.CellTemplate>
@@ -146,15 +146,15 @@
                 <Button ToolTip="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnAddFolder_Click">
                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="한글패치 일괄 지정 (루트 폴더 또는 압축파일)" Style="{StaticResource ListToolButton}" Click="BtnBulkPatch_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipBatchKoreanPatch, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnBulkPatch_Click">
                     <Button.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="폴더에서 찾기..." Click="BulkPatchMenu_FromFolder_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuFindInFolder, Source={x:Static l:Loc.Instance}}" Click="BulkPatchMenu_FromFolder_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="압축파일에서 찾기(zip/7z)..." Click="BulkPatchMenu_FromArchive_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuFindInArchive, Source={x:Static l:Loc.Instance}}" Click="BulkPatchMenu_FromArchive_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
                                 </MenuItem.Icon>
@@ -166,7 +166,7 @@
                 <Button ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveFile_Click">
                     <Image Source="/Assets/Images/Delete.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
-                <Button ToolTip="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
+                <Button ToolTip="{Binding Path=Current.ToolTipClear, Source={x:Static l:Loc.Instance}}" Style="{StaticResource ListToolButton}" Click="BtnRemoveAllFiles_Click">
                     <Image Source="/Assets/Images/Clear.png" Style="{StaticResource ListToolIcon}"/>
                 </Button>
             </StackPanel>

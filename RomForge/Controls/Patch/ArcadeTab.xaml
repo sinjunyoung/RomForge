@@ -49,7 +49,7 @@
                         <Image Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                         <TextBlock Text="{Binding PatchVM.ArcadeVM.PatchLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.PatchPath}"/>
                 </Grid>
             </Border>
         </Grid>

@@ -201,13 +201,13 @@
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnClear_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

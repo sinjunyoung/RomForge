@@ -43,12 +43,12 @@
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveFile_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnRemoveAllFiles_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
@@ -75,7 +75,7 @@
                                 <GridViewColumnHeader Tag="OldName">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                         <Image Source="/RomForge.Core;component/Assets/Images/Title.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                        <TextBlock Text="파일명 비교 (현재 / 변경)" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Path=Current.HeaderFileNameCompare, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
@@ -105,8 +105,8 @@
                 </Border.Background>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                     <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                    <TextBlock Text="파일 또는 폴더를 여기에 드래그하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="선택한 포맷에 맞춰 파일명을 일괄 변경합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.HintDropFileOrFolder, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.DescRenameByFormat, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                     <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -148,10 +148,12 @@
             </Border>
         </Grid>
 
-        <StackPanel Grid.Row="1" Margin="5,0,5,0" IsEnabled="{Binding IsIdle}">
-            <namin:NamingFormatEditor Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
-            <TextBlock Text="{Binding Summary}" Foreground="#4CAF50" Padding="2" Margin="0,6,0,0"/>
-        </StackPanel>
+        <Border Grid.Row="1" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Margin="5,5,5,0" Padding="10,8" IsEnabled="{Binding IsIdle}">
+            <StackPanel>
+                <namin:NamingFormatEditor Tokens="{Binding NamingTokens}" Format="{Binding FormatText, Mode=TwoWay}"/>
+                <TextBlock Text="{Binding Summary}" Foreground="#54FFB5" Margin="0,6,0,0"/>
+            </StackPanel>
+        </Border>
 
         <Border Grid.Row="2" Margin="5,5,5,5" Background="#252526" Padding="8,6" BorderBrush="#2D2D30" BorderThickness="0,1,0,0">
             <DockPanel>
@@ -179,7 +181,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="{Binding Path=Current.ToolTipAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonAddFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -187,7 +189,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="{Binding Path=Current.ToolTipAddFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonAddFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -195,7 +197,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Delete.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonRemoveSelected, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>
@@ -203,7 +205,7 @@
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                <TextBlock Text="{Binding Path=Current.ToolTipRemoveAll, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button.Content>
                     </Button>

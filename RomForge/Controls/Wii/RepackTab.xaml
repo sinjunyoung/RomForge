@@ -68,7 +68,7 @@
                             <TextBlock Text="Riivolution 패치 폴더 또는 zip/7z/xml을 드래그하거나 클릭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="{Binding Path=Current.HeaderPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
         </Grid>

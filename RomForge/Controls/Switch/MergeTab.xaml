@@ -28,11 +28,11 @@
             <Border Grid.Column="0" IsEnabled="{Binding IsIdle}">
                 <StackPanel VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Margin="10,0">
-                        <TextBlock Text="병합 방식:" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <RadioButton Content="타이틀 ID 별 그룹핑 (기존 방식)" GroupName="MergeMode" IsChecked="{Binding MergeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:MergeMode.ByTitleId}}" 
-                                     Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0" ToolTip="타이틀 ID별로 항목을 그룹화하여 각각 별도의 파일로 병합합니다."/>
-                        <RadioButton Content="전체" GroupName="MergeMode" IsChecked="{Binding MergeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:MergeMode.AllInOne}}" 
-                                     Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0" ToolTip="전체 항목을 하나의 파일로 병합합니다."/>
+                        <TextBlock Text="{Binding Path=Current.LabelMergeMode, Source={x:Static l:Loc.Instance}}" Foreground="White" FontWeight="SemiBold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <RadioButton Content="{Binding Path=Current.RadioMergeGroupByTitleId, Source={x:Static l:Loc.Instance}}" GroupName="MergeMode" IsChecked="{Binding MergeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:MergeMode.ByTitleId}}" 
+                                     Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0" ToolTip="{Binding Path=Current.ToolTipMergeGroupByTitleId, Source={x:Static l:Loc.Instance}}"/>
+                        <RadioButton Content="{Binding Path=Current.RadioMergeAll, Source={x:Static l:Loc.Instance}}" GroupName="MergeMode" IsChecked="{Binding MergeMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static models:MergeMode.AllInOne}}" 
+                                     Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,0,16,0" ToolTip="{Binding Path=Current.ToolTipMergeAll, Source={x:Static l:Loc.Instance}}"/>
 
                         <Border Width="1" Height="18" Background="#444" Margin="0,0,15,0"/>
 
@@ -64,7 +64,7 @@
                 <Grid>
                     <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Height="30" IsEnabled="{Binding IsIdle}" Text="{Binding OutputPath, Mode=TwoWay}" VerticalContentAlignment="Center" x:Name="txtOutput" AllowDrop="True" 
                          PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                    <TextBlock Text="출력 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
+                    <TextBlock Text="{Binding Path=Current.HintDragOrSelectOutputFolder, Source={x:Static l:Loc.Instance}}" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
                 </Grid>
             </Border>
             <Button Grid.Column="3" x:Name="btnBrowseOutput" Background="Transparent" BorderThickness="0" HorizontalContentAlignment="Center" IsEnabled="{Binding IsIdle}" Margin="5,0,5,0" Padding="0" Style="{StaticResource GrayButton}" VerticalContentAlignment="Center"

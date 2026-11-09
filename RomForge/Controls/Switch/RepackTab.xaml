@@ -30,7 +30,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="/RomForge.Core;component/Assets/Images/Settings.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path=Current.ButtonSettings, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.TabSettings, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
                     <Grid>
@@ -53,7 +53,7 @@
                         <Grid>
                             <TextBox x:Name="txtOutput" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" AllowDrop="True" 
                                      PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                            <TextBlock Text="작업 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
+                            <TextBlock Text="{Binding Path=Current.HintDragOrSelectWorkFolder, Source={x:Static l:Loc.Instance}}" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="5,0,0,0"/>
                         </Grid>
                     </Border>
                     <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}">
@@ -67,9 +67,9 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
-                <core:IconButton Grid.Column="0" DefaultText="언팩" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
-                <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="리팩 (폴더 기반)" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
-                <core:IconButton Grid.Column="2" Margin="5,0,5,0" DefaultText="언팩 + 리팩 (스트리밍 기반)" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
+                <core:IconButton Grid.Column="0" DefaultText="{Binding Path=Current.ButtonUnpack, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
+                <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="{Binding Path=Current.ButtonRepackFolderBased, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
+                <core:IconButton Grid.Column="2" Margin="5,0,5,0" DefaultText="{Binding Path=Current.ButtonUnpackAndRepackStreaming, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
             </Grid>
 
             <Border Grid.Row="3" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Margin="5,0,5,5" Padding="8,0">
