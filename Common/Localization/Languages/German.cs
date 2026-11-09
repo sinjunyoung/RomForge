@@ -22,7 +22,7 @@ public sealed class German : LocalizedStrings
     public override string FilterSwitchFiles => "Switch-Dateien";
 
     // Hint
-    public override string HintSelectOutput => "Wählen Sie den Ausgabeordner aus.";
+    public override string HintSelectOutput => "Wählen Sie den Ausgabeordner aus";
 
     // Header
     public override string HeaderFileName => "Dateiname";
@@ -48,20 +48,20 @@ public sealed class German : LocalizedStrings
     public override string LogDeleteIncompleteFile => "Unvollständig erstellte Datei wurde gelöscht.";
     public override string LogError(object arg0) => $"Fehler: {arg0}";
     public override string LogFinalId(object arg0, object arg1) => $"Endgültige ID: {arg0} / Version: {arg1}";
-    public override string LogMergeComplete(object arg0) => $"Merge abgeschlossen: {arg0}";
+    public override string LogMergeComplete(object arg0) => $"Zusammenführung abgeschlossen: {arg0}";
     public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] Zusammenführung fehlgeschlagen: {arg1}";
     public override string LogMerging => "Zusammenführen...";
     public override string LogModeCompress => "Komprimieren";
     public override string LogModeDecompress => "Dekomprimieren";
-    public override string LogProcessError => "Fehler bei Verarbeitung";
+    public override string LogProcessError => "Fehler bei der Verarbeitung";
     public override string LogProcessStart => "Start";
-    public override string LogSplitComplete(object arg0) => $"Split abgeschlossen: {arg0}";
-    public override string LogSplitFailed(object arg0, object arg1) => $"Split fehlgeschlagen (ID: {arg0}): {arg1}";
+    public override string LogSplitComplete(object arg0) => $"Aufteilung abgeschlossen: {arg0}";
+    public override string LogSplitFailed(object arg0, object arg1) => $"Aufteilung fehlgeschlagen (ID: {arg0}): {arg1}";
     public override string LogSplitPreparing(object arg0) => $"{arg0} Aufteilen wird gestartet";
-    public override string LogSplitting => "Trennen...";
-    public override string LogStatusCompressing => "Komprimiere...";
+    public override string LogSplitting => "Aufteilen...";
+    public override string LogStatusCompressing => "Komprimieren...";
     public override string LogStatusCopying => "Kopieren...";
-    public override string LogStatusDecompressing => "Dekomprimiere...";
+    public override string LogStatusDecompressing => "Dekomprimieren...";
     public override string LogStatusDone => "Fertig";
     public override string LogStatusValidating => "Validierung...";
     public override string LogTitleGroupDetected(object arg0) => $"{arg0} Titelgruppen erkannt";
@@ -75,7 +75,7 @@ public sealed class German : LocalizedStrings
     public override string MainLogAllComplete(object arg0) => $"✓ Alle Aufgaben abgeschlossen. Gesamtzeit: {arg0}";
     public override string MainLogRecalculating => "Dateitypen werden neu analysiert...";
     public override string MainMsgDone => "Fertig!";
-    public override string MainMsgSplitDone => "Split abgeschlossen.";
+    public override string MainMsgSplitDone => "Aufteilung abgeschlossen.";
 
     // Menu
     public override string MenuOpenFolder => "Ordner öffnen";
@@ -91,9 +91,9 @@ public sealed class German : LocalizedStrings
     public override string StatusNoKey => "Kein Schlüssel";
 
     // ToolTip
-    public override string ToolTipAddFile => "Datei+";
-    public override string ToolTipAddFolder => "Ordner+";
-    public override string ToolTipBlocklessMode => "Sequentieller Zugriff (Speicher priorisiert)\t";
+    public override string ToolTipAddFile => "Datei hinzufügen";
+    public override string ToolTipAddFolder => "Ordner hinzufügen";
+    public override string ToolTipBlocklessMode => "Sequentieller Zugriff (Speicher priorisiert)";
     public override string ToolTipBlockMode => "Zufälliger Zugriff (Geschwindigkeit priorisiert)";
     public override string ToolTipOpenWorkSpace => "Ausgabeordner öffnen";
     public override string ToolTipRemoveAll => "Leeren";

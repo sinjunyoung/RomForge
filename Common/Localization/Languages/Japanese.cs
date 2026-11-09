@@ -22,7 +22,7 @@ public sealed class Japanese : LocalizedStrings
     public override string FilterSwitchFiles => "Nintendo Switchファイル";
 
     // Hint
-    public override string HintSelectOutput => "出力フォルダーを選択してください。";
+    public override string HintSelectOutput => "出力フォルダーを選択してください";
 
     // Header
     public override string HeaderFileName => "ファイル名";
@@ -40,7 +40,7 @@ public sealed class Japanese : LocalizedStrings
     public override string LabelOutputFormat => "出力形式:";
 
     // Log
-    public override string LogAnalyzeMetadata => "━━ メタデータ解析中 ━━";
+    public override string LogAnalyzeMetadata => "━━ メタデータ解析中... ━━";
     public override string LogCompressAndMerge => "圧縮してマージ中...";
     public override string LogCompressAndSplit => "圧縮して分割中...";
     public override string LogCompressionRatio => "圧縮率";
@@ -58,7 +58,7 @@ public sealed class Japanese : LocalizedStrings
     public override string LogSplitComplete(object arg0) => $"分割完了: {arg0}";
     public override string LogSplitFailed(object arg0, object arg1) => $"分割失敗 (ID: {arg0}): {arg1}";
     public override string LogSplitPreparing(object arg0) => $"{arg0} 分割を開始";
-    public override string LogSplitting => "分離中...";
+    public override string LogSplitting => "分割中...";
     public override string LogStatusCompressing => "圧縮中...";
     public override string LogStatusCopying => "コピー中...";
     public override string LogStatusDecompressing => "解凍中...";
@@ -95,7 +95,7 @@ public sealed class Japanese : LocalizedStrings
     public override string ToolTipAddFolder => "フォルダーを追加";
     public override string ToolTipBlocklessMode => "シーケンシャルアクセス（容量優先）";
     public override string ToolTipBlockMode => "ランダムアクセス（速度優先）";
-    public override string ToolTipOpenWorkSpace => "出力フォルダーを開きます";
+    public override string ToolTipOpenWorkSpace => "出力フォルダーを開く";
     public override string ToolTipRemoveAll => "クリア";
     public override string ToolTipRemoveSelected => "選択削除";
     public override string ToolTipValidateCompress => "圧縮後に追加の検証を実行します";

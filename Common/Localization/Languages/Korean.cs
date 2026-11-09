@@ -71,10 +71,10 @@ public sealed class Korean : LocalizedStrings
     // Main
     public override string MainErrNoFiles => "파일을 추가한 후 다시 시도하세요.";
     public override string MainErrNoKeys => "prod.keys 파일이 없습니다. 키 파일을 실행 폴더에 넣어주세요.";
-    public override string MainErrNoOutput => "작업 폴더를 설정하세요.";
+    public override string MainErrNoOutput => "출력 폴더를 설정하세요.";
     public override string MainLogAllComplete(object arg0) => $"✓ 모든 작업 완료  총 소요: {arg0}";
     public override string MainLogRecalculating => "파일 타입 재분석 중...";
-    public override string MainMsgDone => "작업완료!";
+    public override string MainMsgDone => "작업 완료!";
     public override string MainMsgSplitDone => "분리가 완료되었습니다.";
 
     // Menu

@@ -22,7 +22,7 @@ public sealed class ChineseSimplified : LocalizedStrings
     public override string FilterSwitchFiles => "Switch 文件";
 
     // Hint
-    public override string HintSelectOutput => "请选择输出文件夹。";
+    public override string HintSelectOutput => "请选择输出文件夹";
 
     // Header
     public override string HeaderFileName => "文件名";
@@ -42,14 +42,14 @@ public sealed class ChineseSimplified : LocalizedStrings
     // Log
     public override string LogAnalyzeMetadata => "━━ 正在解析元数据... ━━";
     public override string LogCompressAndMerge => "正在压缩并合并...";
-    public override string LogCompressAndSplit => "正在压缩并分割...";
+    public override string LogCompressAndSplit => "正在压缩并拆分...";
     public override string LogCompressionRatio => "压缩率";
     public override string LogDecompressAndMerge => "正在解压并合并";
     public override string LogDeleteIncompleteFile => "已删除未完整生成的文件。";
     public override string LogError(object arg0) => $"错误: {arg0}";
     public override string LogFinalId(object arg0, object arg1) => $"最终ID: {arg0} / 版本: {arg1}";
     public override string LogMergeComplete(object arg0) => $"合并完成: {arg0}";
-    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] 合并失败：{arg1}";
+    public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] 合并失败: {arg1}";
     public override string LogMerging => "正在合并...";
     public override string LogModeCompress => "压缩";
     public override string LogModeDecompress => "解压";
@@ -57,13 +57,13 @@ public sealed class ChineseSimplified : LocalizedStrings
     public override string LogProcessStart => "开始";
     public override string LogSplitComplete(object arg0) => $"拆分完成: {arg0}";
     public override string LogSplitFailed(object arg0, object arg1) => $"拆分失败 (ID: {arg0}): {arg1}";
-    public override string LogSplitPreparing(object arg0) => $"{arg0} 开始分割";
-    public override string LogSplitting => "正在分离...";
+    public override string LogSplitPreparing(object arg0) => $"{arg0} 开始拆分";
+    public override string LogSplitting => "正在拆分...";
     public override string LogStatusCompressing => "压缩中...";
     public override string LogStatusCopying => "复制中...";
     public override string LogStatusDecompressing => "解压中...";
     public override string LogStatusDone => "完成";
-    public override string LogStatusValidating => "校验中...";
+    public override string LogStatusValidating => "验证中...";
     public override string LogTitleGroupDetected(object arg0) => $"检测到 {arg0} 个标题组";
     public override string LogValidationComplete => "验证完成";
     public override string LogValidationStart => "开始验证";
@@ -91,12 +91,12 @@ public sealed class ChineseSimplified : LocalizedStrings
     public override string StatusNoKey => "无密钥";
 
     // ToolTip
-    public override string ToolTipAddFile => "加文件";
-    public override string ToolTipAddFolder => "加文件夹";
+    public override string ToolTipAddFile => "添加文件";
+    public override string ToolTipAddFolder => "添加文件夹";
     public override string ToolTipBlocklessMode => "顺序访问（容量优先）";
     public override string ToolTipBlockMode => "随机访问（速度优先）";
     public override string ToolTipOpenWorkSpace => "打开输出文件夹";
     public override string ToolTipRemoveAll => "清空";
     public override string ToolTipRemoveSelected => "删除选中";
-    public override string ToolTipValidateCompress => "压缩后执行额外校验";
+    public override string ToolTipValidateCompress => "压缩后执行额外验证";
 }

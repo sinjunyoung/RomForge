@@ -22,13 +22,13 @@ public sealed class Spanish : LocalizedStrings
     public override string FilterSwitchFiles => "Archivos de Switch";
 
     // Hint
-    public override string HintSelectOutput => "Seleccionar carpeta de salida...";
+    public override string HintSelectOutput => "Selecciona la carpeta de salida";
 
     // Header
     public override string HeaderFileName => "Nombre del archivo";
     public override string HeaderFilePath => "Ruta";
     public override string HeaderTitle => "Título";
-    public override string HeaderPatch => "Patch";
+    public override string HeaderPatch => "Parche";
     public override string HeaderVersion => "Versión";
     public override string HeaderInput => "Entrada";
     public override string HeaderOutput => "Salida";
@@ -48,14 +48,14 @@ public sealed class Spanish : LocalizedStrings
     public override string LogDeleteIncompleteFile => "Se eliminó el archivo creado de forma incompleta.";
     public override string LogError(object arg0) => $"Ocurrió un error: {arg0}";
     public override string LogFinalId(object arg0, object arg1) => $"ID final: {arg0} / Versión: {arg1}";
-    public override string LogMergeComplete(object arg0) => $"Combinación completada: {arg0}";
+    public override string LogMergeComplete(object arg0) => $"Fusión completada: {arg0}";
     public override string LogMergeFailed(object? arg0, object arg1) => $"[{arg0}] Error al fusionar: {arg1}";
     public override string LogMerging => "Fusionando...";
     public override string LogModeCompress => "Comprimir";
     public override string LogModeDecompress => "Descomprimir";
     public override string LogProcessError => "Error de procesamiento";
     public override string LogProcessStart => "Iniciar";
-    public override string LogSplitComplete(object arg0) => $"dividido correctamente: {arg0}";
+    public override string LogSplitComplete(object arg0) => $"División completada: {arg0}";
     public override string LogSplitFailed(object arg0, object arg1) => $"Error al dividir (ID: {arg0}): {arg1}";
     public override string LogSplitPreparing(object arg0) => $"{arg0} Iniciando división";
     public override string LogSplitting => "Separando...";
@@ -70,8 +70,8 @@ public sealed class Spanish : LocalizedStrings
 
     // Main
     public override string MainErrNoFiles => "Agrega archivos y vuelve a intentarlo.";
-    public override string MainErrNoKeys => "No se encontró el archivo prod.keys. Coloque el archivo de claves en la carpeta de la aplicación.";
-    public override string MainErrNoOutput => "Configura la carpeta de trabajo.";
+    public override string MainErrNoKeys => "No se encontró el archivo prod.keys. Coloca el archivo de claves en la carpeta de la aplicación.";
+    public override string MainErrNoOutput => "Configura la carpeta de salida.";
     public override string MainLogAllComplete(object arg0) => $"✓ Todas las tareas completadas. Tiempo total: {arg0}";
     public override string MainLogRecalculating => "Reanalizando tipos de archivo...";
     public override string MainMsgDone => "¡Completado!";

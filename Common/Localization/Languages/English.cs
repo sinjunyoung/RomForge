@@ -22,7 +22,7 @@ public sealed class English : LocalizedStrings
     public override string FilterSwitchFiles => "Switch Files";
 
     // Hint
-    public override string HintSelectOutput => "Select the output folder.";
+    public override string HintSelectOutput => "Select the output folder";
 
     // Header
     public override string HeaderFileName => "File Name";
@@ -55,10 +55,10 @@ public sealed class English : LocalizedStrings
     public override string LogModeDecompress => "Decompress";
     public override string LogProcessError => "Error processing";
     public override string LogProcessStart => "Start";
-    public override string LogSplitComplete(object arg0) => $"split complete: {arg0}";
+    public override string LogSplitComplete(object arg0) => $"Split complete: {arg0}";
     public override string LogSplitFailed(object arg0, object arg1) => $"Split failed (ID: {arg0}): {arg1}";
-    public override string LogSplitPreparing(object arg0) => $"{arg0} Starting splitting";
-    public override string LogSplitting => "Separating...";
+    public override string LogSplitPreparing(object arg0) => $"{arg0} Starting split";
+    public override string LogSplitting => "Splitting...";
     public override string LogStatusCompressing => "Compressing...";
     public override string LogStatusCopying => "Copying...";
     public override string LogStatusDecompressing => "Decompressing...";
