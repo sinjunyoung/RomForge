@@ -25,9 +25,9 @@ public static class NamingTokenCatalog
     ];
 
     public static IReadOnlyList<NamingTokenDefinition> Rename { get; } = [
-        new("Name", "한글+영어 파일명", "한글 + 영어 제목 (병합 파일명과 동일)"),
-        new("KTitleName", "한글파일명", "한글 제목"),
-        new("TitleName", "파일명", "한글 → 영어 → 첫 번째 제목 순"),
+        new("Name", "한글+영어 타이틀", "한글 + 영어 게임명 (병합 파일명과 동일)"),
+        new("KTitleName", "한글 타이틀", "한글 게임명"),
+        new("TitleName", "타이틀", "한글 → 영어 → 첫 번째 게임명 순"),
         new("TitleID", "타이틀ID", "타이틀 ID"),
         new("Tag", "구성", "구성 (B+U+10D)"),
         new("DisplayVersion", "표시버전", "표시 버전 (1.0.0)"),
