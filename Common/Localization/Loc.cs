@@ -24,7 +24,7 @@ public sealed class Loc : INotifyPropertyChanged
     public static LocalizedStrings S => Instance.Current;
 
     public LocalizedStrings Current { get; private set; } = GetInitialLanguage();
-    
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public void Set(string? code)
