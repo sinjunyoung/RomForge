@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="RomForge.Controls.Util.MainTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.expression/blend/2008" 
              xmlns:local="clr-namespace:RomForge.Controls.Util"
@@ -12,7 +13,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Hash.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="해시 계산" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabCalculateHash, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <Grid>
@@ -23,7 +24,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Tistory.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="티스토리 다운로더" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabTistoryDownloader, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <Grid>
@@ -34,7 +35,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Certs.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="certs.bin 추출" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabExtractCertsBin, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <Grid>
@@ -45,7 +46,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/CUE.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="Cue 생성" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabCreateCue, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <Grid>

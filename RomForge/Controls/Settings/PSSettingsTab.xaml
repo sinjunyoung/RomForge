@@ -1,13 +1,14 @@
 ﻿<UserControl x:Class="RomForge.Controls.Settings.PSSettingsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:converters="clr-namespace:RomForge.Converters">
     <TabControl Background="Transparent" BorderThickness="0">
         <TabItem>
             <TabItem.Header>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Source="/Assets/Images/Repack.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="PBP 패킹" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.LabelPbpPacking, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                 </StackPanel>
             </TabItem.Header>
             <Grid>
@@ -19,12 +20,12 @@
                 <Border Margin="5,0,5,0" Grid.Row="0" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="압축 레벨" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
-                            <TextBlock FontSize="11" Foreground="White">0: 무압축</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.LabelCompressionLevel, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel0None, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="White"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#66FFAD">5: 균형</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel5Balanced, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#66FFAD"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#FFFF33">9: 최대</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel9Max, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#FFFF33"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -48,15 +49,20 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Grid.Column="0" Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="20" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Text="출력 옵션" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Path=Current.LabelOutputOptions, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,4"/>
                         <StackPanel Grid.Column="3" Orientation="Vertical" VerticalAlignment="Center" Margin="8,4">
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                                 <RadioButton GroupName="PS1OutputMode" IsChecked="{Binding UseFileNameMode}" FontSize="11" VerticalAlignment="Center">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock Text="일반 ( 타이틀명." FontSize="11" VerticalAlignment="Center"/>
-                                        <TextBlock Text="{Binding ExtensionText, FallbackValue=pbp}" FontSize="11" FontWeight="Bold" VerticalAlignment="Center"/>
-                                        <TextBlock Text=" )" FontSize="11" VerticalAlignment="Center"/>
+                                        <TextBlock FontSize="11" VerticalAlignment="Center">
+                                            <TextBlock.Text>
+                                                <MultiBinding Converter="{StaticResource LocFormat}" ConverterParameter="RadioOutputNormal">
+                                                    <Binding Path="ExtensionText" FallbackValue="pbp"/>
+                                                    <Binding Path="Current" Source="{x:Static l:Loc.Instance}" Mode="OneWay"/>
+                                                </MultiBinding>
+                                            </TextBlock.Text>
+                                        </TextBlock>
                                     </StackPanel>
                                 </RadioButton>
                                 <Border Width="1" Background="#3F3F46" Margin="12,2" Height="14" VerticalAlignment="Center"/>
@@ -64,18 +70,18 @@
                                     <RadioButton IsChecked="{Binding UseUpperCase, Converter={StaticResource InverseBool}, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/LowerA.png" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="소문자" FontSize="11" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.RadioLowercase, Source={x:Static l:Loc.Instance}}" FontSize="11" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </RadioButton>
                                     <RadioButton IsChecked="{Binding UseUpperCase, Mode=TwoWay}" FontSize="11" VerticalAlignment="Center" Margin="10,0,0,0">
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/Assets/Images/UpperA.png" Width="16" Height="16" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                            <TextBlock Text="대문자" FontSize="11" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Path=Current.RadioUppercase, Source={x:Static l:Loc.Instance}}" FontSize="11" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </RadioButton>                                    
                                 </StackPanel>
                             </StackPanel>
-                            <RadioButton Content="실기 ( 타이틀ID / EBOOT.PBP )" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
+                            <RadioButton Content="{Binding Path=Current.RadioOutputGameId, Source={x:Static l:Loc.Instance}}" GroupName="PS1OutputMode" IsChecked="{Binding UseGameIdMode}" FontSize="11"/>
                         </StackPanel>
                     </Grid>
                 </Border>

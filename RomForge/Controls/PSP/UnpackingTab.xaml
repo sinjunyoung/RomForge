@@ -40,18 +40,18 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemove_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnClear_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
@@ -107,7 +107,7 @@
                                 <GridViewColumnHeader Tag="TitleLocalName">
                                     <StackPanel Orientation="Horizontal">
                                         <Image Source="/Assets/Images/CD.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="로컬 타이틀" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding Path=Current.HeaderLocalTitle, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                     </StackPanel>
                                 </GridViewColumnHeader>
                             </GridViewColumn.Header>
@@ -173,8 +173,8 @@
                 </Border.Background>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                     <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                    <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="PBP를 원본 BIN+CUE로 복원합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.HintDropFileOrFolder, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.DescRestorePbpToBinCue, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                     <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

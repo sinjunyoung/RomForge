@@ -25,18 +25,18 @@
                 <ListView x:Name="lvFiles" Margin="5,0,0,0" ItemsSource="{Binding Files.FileItems}" AllowDrop="True" Drop="LvFiles_Drop" KeyUp="LvFiles_KeyUp" IsEnabled="{Binding IsUnlocked}" ContextMenuOpening="LvFiles_ContextMenuOpening">
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemove_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                            <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnClear_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                 </MenuItem.Icon>
@@ -117,8 +117,8 @@
                 <Border IsHitTestVisible="False" Visibility="{Binding Files.HintVisibility}" BorderBrush="#333337" BorderThickness="1" Margin="15,55,15,15" CornerRadius="6" Background="#E6181818">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                         <Image Source="/Assets/Images/drag.png" Width="32" Height="32" Margin="0,0,0,12"/>
-                        <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                        <TextBlock Text="최대 5개의 파일까지 패킹 가능" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.HintDropFileOrFolder, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.DescPackMax5, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                         <ItemsControl HorizontalAlignment="Center" Margin="0,4,0,0">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -159,7 +159,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="/Assets/Images/Image.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock Text="기본 이미지" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.LabelDefaultImage, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
                     <StackPanel>
@@ -201,7 +201,7 @@
                                 </Grid>
                             </Border>
                         </Viewbox>
-                        <Button Style="{StaticResource CancelButton}" Content="비우기" Click="BaseImage_Reset_Click" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
+                        <Button Style="{StaticResource CancelButton}" Content="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" Click="BaseImage_Reset_Click" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
                     </StackPanel>
                 </TabItem>
 
@@ -209,7 +209,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="/Assets/Images/Image.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock Text="부트 로고" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.LabelBootLogo, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
                     <StackPanel>
@@ -236,7 +236,7 @@
                                             </Style>
                                         </StackPanel.Style>
                                         <Image Source="/Assets/Images/Drag.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                                        <TextBlock Text="이미지 파일을 드래그&amp;드롭하세요" FontSize="12" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{Binding Path=Current.HintDropImageFile, Source={x:Static l:Loc.Instance}}" FontSize="12" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
                                         <ItemsControl HorizontalAlignment="Center">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
@@ -285,7 +285,7 @@
                                 </Grid>
                             </Border>
                         </Viewbox>
-                        <Button Style="{StaticResource CancelButton}" Content="비우기" Click="BootLogo_Reset_Click" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
+                        <Button Style="{StaticResource CancelButton}" Content="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" Click="BootLogo_Reset_Click" HorizontalAlignment="Center" Margin="0,0,0,0" FontSize="11" Padding="10,4" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
                     </StackPanel>
                 </TabItem>
 
@@ -293,7 +293,7 @@
                     <TabItem.Header>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="/Assets/Images/Sound.png" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
-                            <TextBlock Text="배경음" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.LabelBackgroundMusic, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </TabItem.Header>
                     <StackPanel>
@@ -304,8 +304,8 @@
 
                                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Visibility="{Binding Bgm.HasBgm, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                                         <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8" HorizontalAlignment="Center"/>
-                                        <TextBlock Text="오디오 파일을 드래그&amp;드롭하거나 클릭하세요" FontSize="12" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
-                                        <TextBlock Text="MP3, WAV 파일 추가 시 자동으로 AT3 포맷으로 변환됩니다." FontSize="12" Foreground="#D4AF37" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{Binding Path=Current.HintDropOrClickAudio, Source={x:Static l:Loc.Instance}}" FontSize="12" FontWeight="Bold" TextAlignment="Center" HorizontalAlignment="Center" Foreground="#40FFFFFF" Margin="0,0,0,6"/>
+                                        <TextBlock Text="{Binding Path=Current.DescMp3WavAutoConvertAt3, Source={x:Static l:Loc.Instance}}" FontSize="12" Foreground="#D4AF37" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,0,0,6"/>
 
                                         <ItemsControl HorizontalAlignment="Center" Margin="0,4,0,0">
                                             <ItemsControl.ItemsPanel>
@@ -350,7 +350,7 @@
                                         </StackPanel>
 
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,6">
-                                            <Button Command="{Binding Bgm.Preview.TogglePlayCommand}" Background="#208FA3FF" BorderBrush="#508FA3FF" BorderThickness="1" Width="36" Height="36" Cursor="Hand" Margin="4,0" ToolTip="재생/일시정지">
+                                            <Button Command="{Binding Bgm.Preview.TogglePlayCommand}" Background="#208FA3FF" BorderBrush="#508FA3FF" BorderThickness="1" Width="36" Height="36" Cursor="Hand" Margin="4,0" ToolTip="{Binding Path=Current.ToolTipPlayPause, Source={x:Static l:Loc.Instance}}">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
                                                         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="18">
@@ -384,11 +384,11 @@
                                                 </ContentControl>
                                             </Button>
                                         </StackPanel>
-                                        <TextBlock Text="클릭하거나 파일을 드롭하여 변경할 수 있습니다." FontSize="11" Foreground="#D4AF37" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Text="{Binding Path=Current.DescClickOrDropToChange, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#D4AF37" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                     </StackPanel>                                    
                                     <Border Background="#CC000000" CornerRadius="18" Visibility="{Binding Bgm.IsConverting, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
-                                            <TextBlock Text="AT3로 변환 중..." FontSize="14" FontWeight="Bold" Foreground="White" TextAlignment="Center" Margin="0,0,0,10"/>
+                                            <TextBlock Text="{Binding Path=Current.StatusConvertingToAt3, Source={x:Static l:Loc.Instance}}" FontSize="14" FontWeight="Bold" Foreground="White" TextAlignment="Center" Margin="0,0,0,10"/>
                                             <Border Height="10" Background="#33FFFFFF" CornerRadius="5" ClipToBounds="True">
                                                 <Border Background="#4CAF50" CornerRadius="5" RenderTransformOrigin="0,0.5">
                                                     <Border.RenderTransform>
@@ -407,12 +407,12 @@
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,8,0,6">
                             <Border Background="#0DFFFFFF" BorderBrush="#20FFFFFF" BorderThickness="1" CornerRadius="6" Padding="10,4" Margin="0,0,8,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="품질" Foreground="#D4AF37" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                    <RadioButton Content="30초 (132k)" IsChecked="{Binding Bgm.IsHighQualityMode}" IsEnabled="{Binding Bgm.IsConverting, Converter={StaticResource InverseBool}}" Foreground="#8FA3FF" FontSize="11" Margin="0,0,10,0" VerticalAlignment="Center" Cursor="Hand"/>
-                                    <RadioButton Content="60초 (66k)" IsChecked="{Binding Bgm.IsHighQualityMode, Converter={StaticResource InverseBool}}" IsEnabled="{Binding Bgm.IsConverting, Converter={StaticResource InverseBool}}" Foreground="#FFA254" FontSize="11" VerticalAlignment="Center" Cursor="Hand"/>
+                                    <TextBlock Text="{Binding Path=Current.LabelQuality, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="11" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                    <RadioButton Content="{Binding Path=Current.RadioQuality30s, Source={x:Static l:Loc.Instance}}" IsChecked="{Binding Bgm.IsHighQualityMode}" IsEnabled="{Binding Bgm.IsConverting, Converter={StaticResource InverseBool}}" Foreground="#8FA3FF" FontSize="11" Margin="0,0,10,0" VerticalAlignment="Center" Cursor="Hand"/>
+                                    <RadioButton Content="{Binding Path=Current.RadioQuality60s, Source={x:Static l:Loc.Instance}}" IsChecked="{Binding Bgm.IsHighQualityMode, Converter={StaticResource InverseBool}}" IsEnabled="{Binding Bgm.IsConverting, Converter={StaticResource InverseBool}}" Foreground="#FFA254" FontSize="11" VerticalAlignment="Center" Cursor="Hand"/>
                                 </StackPanel>
                             </Border>
-                            <Button Style="{StaticResource CancelButton}" Content="비우기" Click="Bgm_Reset_Click" VerticalAlignment="Center" FontSize="11" Padding="10,5" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
+                            <Button Style="{StaticResource CancelButton}" Content="{Binding Path=Current.ButtonClear, Source={x:Static l:Loc.Instance}}" Click="Bgm_Reset_Click" VerticalAlignment="Center" FontSize="11" Padding="10,5" Background="Transparent" Foreground="#8FA3FF" BorderThickness="1" BorderBrush="#308FA3FF" Cursor="Hand"/>
                         </StackPanel>
 
                     </StackPanel>
@@ -425,8 +425,8 @@
         <Border Grid.Row="2" Margin="5,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="12,8" IsEnabled="{Binding CanEditPopsConfig}">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="POPS 에뮬레이터 설정" Foreground="#D4AF37" FontSize="12" FontWeight="Bold"/>
-                    <TextBlock Text="프리셋 설정 로드됨 (수동 설정 비활성화)"  Foreground="#4CAF50" FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="{Binding Files.HasPresetConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelPopsEmulatorSettings, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="12" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Path=Current.StatusPresetLoaded, Source={x:Static l:Loc.Instance}}"  Foreground="#4CAF50" FontSize="12" Margin="10,0,0,0" VerticalAlignment="Center" Visibility="{Binding Files.HasPresetConfig, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 </StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -436,7 +436,7 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <CheckBox Grid.Column="0" Style="{StaticResource SplitCheckBoxStyle}" Content="동영상 프리징 픽스 (cmd 0x00)" IsChecked="{Binding PopsOptions.UseFmvFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11" />
+                    <CheckBox Grid.Column="0" Style="{StaticResource SplitCheckBoxStyle}" Content="{Binding Path=Current.CheckVideoFreezeFix, Source={x:Static l:Loc.Instance}}" IsChecked="{Binding PopsOptions.UseFmvFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11" />
                     <ComboBox Grid.Column="2" ItemsSource="{Binding PopsOptions.FmvFixPresets}" DisplayMemberPath="Label" SelectedItem="{Binding PopsOptions.SelectedFmvFix}" IsEnabled="{Binding PopsOptions.UseFmvFix}" VerticalAlignment="Center" FontSize="11">
                         <ComboBox.ItemContainerStyle>
                             <Style TargetType="ComboBoxItem">
@@ -446,7 +446,7 @@
                             </Style>
                         </ComboBox.ItemContainerStyle>
                     </ComboBox>
-                    <CheckBox Grid.Column="4" Style="{StaticResource SplitCheckBoxStyle}" Content="추가 옵션 (cmd 0x0B)" IsChecked="{Binding PopsOptions.UseCdTimingFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11"/>
+                    <CheckBox Grid.Column="4" Style="{StaticResource SplitCheckBoxStyle}" Content="{Binding Path=Current.CheckExtraOption, Source={x:Static l:Loc.Instance}}" IsChecked="{Binding PopsOptions.UseCdTimingFix}" VerticalAlignment="Center" Foreground="#DDDDDD" FontSize="11"/>
                 </Grid>
             </StackPanel>
         </Border>
@@ -486,7 +486,7 @@
                             </StackPanel>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource CancelButton}" IsEnabled="{Binding IsConverting}" Command="{Binding CancelCommand}">
+                    <Button Style="{StaticResource CancelButton}" Command="{Binding CancelCommand}">
                         <Button.Content>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
@@ -543,7 +543,7 @@
             <Rectangle Fill="#CC1E1E2E"/>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="⏳" FontSize="36" HorizontalAlignment="Center"/>
-                <TextBlock Text="이미지 다운로드 중..." Foreground="#8888A8" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                <TextBlock Text="{Binding Path=Current.StatusDownloadingImage, Source={x:Static l:Loc.Instance}}" Foreground="#8888A8" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
                 <ProgressBar IsIndeterminate="True" Width="240" Height="3" Margin="0,16,0,0" Background="#2A2A3A" Foreground="#4F8EF7" BorderThickness="0"/>
             </StackPanel>
         </Grid>

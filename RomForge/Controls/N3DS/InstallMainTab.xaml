@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="RomForge.Controls.N3DS.InstallMainTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RomForge.Controls.N3DS"
@@ -35,9 +36,9 @@
 
                     <DockPanel Grid.Column="2">
                         <Image DockPanel.Dock="Left" Source="/Assets/Images/Seed.png" Width="24" Height="24" VerticalAlignment="Center" Margin="0,0,6,0" 
-                               ToolTip="1. GodMode9 실행 ( START + POWER )&#x0a;2. SYSNAND CTRNAND → private → movable.sed 선택&#x0a;3. 가장 하단 Copy to 0:/gm9/out 실행"/>
+                               ToolTip="{Binding Path=Current.ToolTipMovableSedGuide, Source={x:Static l:Loc.Instance}}"/>
                         <TextBlock DockPanel.Dock="Left" Text="movable.sed" Foreground="#8888A8" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,15,0" 
-                                   ToolTip="1. GodMode9 실행 ( START + POWER )&#x0a;2. SYSNAND CTRNAND → private → movable.sed 선택&#x0a;3. 가장 하단 Copy to 0:/gm9/out 실행"/>
+                                   ToolTip="{Binding Path=Current.ToolTipMovableSedGuide, Source={x:Static l:Loc.Instance}}"/>
                         <Button x:Name="BrowseMovableButton" DockPanel.Dock="Right" Height="32" Width="32" Margin="15,0,0,0" Click="BrowseMovable_Click" Background="Transparent" BorderBrush="Transparent" Padding="0" IsEnabled="{Binding IsIdle}">
                             <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="32" Height="32" Stretch="UniformToFill"/>
                         </Button>
@@ -66,7 +67,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/List.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="설치된 게임목록" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabInstalledGames, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <local:InstalledTitlesTab x:Name="InstalledTitlesTab"/>
@@ -75,7 +76,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Installer.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="신규 게임 설치" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabInstallNewGame, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <local:InstallTab x:Name="InstallTab"/>
@@ -94,7 +95,7 @@
                 <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                 <TextBlock Grid.Column="1" Margin="0,0,10,0" Text="{Binding ProgressSpeed}" Foreground="Gray" FontSize="11" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}"/>
                 <TextBlock Grid.Column="2" Margin="0,0,10,0" Text="{Binding ProgressTime}" Foreground="#4CAF50" FontSize="11" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}"/>
-                <Button Grid.Column="3" Content="취소" Style="{StaticResource SecondaryButton}" Visibility="{Binding CancelButtonVisibility}" Margin="0,0,10,0" Padding="8,2" Click="Cancel_Click" VerticalAlignment="Center"/>
+                <Button Grid.Column="3" Content="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" Style="{StaticResource SecondaryButton}" Visibility="{Binding CancelButtonVisibility}" Margin="0,0,10,0" Padding="8,2" Click="Cancel_Click" VerticalAlignment="Center"/>
                 <Grid Grid.Column="4" Height="10" VerticalAlignment="Center" Visibility="{Binding ProgressPanelVisibility}">
                     <Border Background="#25FFFFFF" CornerRadius="5"/>
                     <Border CornerRadius="5" ClipToBounds="True">

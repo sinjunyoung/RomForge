@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="RomForge.Controls.Settings.GeneralSettingsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
              xmlns:converters="clr-namespace:RomForge.Converters">
 
     <Grid>
@@ -20,7 +21,7 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Language.png"/>
-                    <TextBlock Text="언어" Style="{StaticResource SettingTextStyle}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.LabelLanguage, Source={x:Static l:Loc.Instance}}" Foreground="#888888" FontWeight="Bold" VerticalAlignment="Center"/>
                 </StackPanel>
                 <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableLanguages}" SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" Background="Transparent" BorderThickness="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="36">
                     <ComboBox.ItemContainerStyle>
@@ -44,21 +45,21 @@
         <ToggleButton Grid.Row="1" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding Topmost}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Pin.png"/>
-                <TextBlock Text="항상 다른 창 위에 표시" Style="{StaticResource SettingTextStyle}"/>
+                <TextBlock Text="{Binding Path=Current.ToggleAlwaysOnTop, Source={x:Static l:Loc.Instance}}" Style="{StaticResource SettingTextStyle}"/>
             </StackPanel>
         </ToggleButton>
 
         <ToggleButton Grid.Row="2" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding AutoCheckUpdate}" Margin="0,0,0,6">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Loading.png"/>
-                <TextBlock Text="앱 구동 시 업데이트 확인" Style="{StaticResource SettingTextStyle}"/>
+                <TextBlock Text="{Binding Path=Current.ToggleCheckUpdateOnStart, Source={x:Static l:Loc.Instance}}" Style="{StaticResource SettingTextStyle}"/>
             </StackPanel>
         </ToggleButton>
 
         <ToggleButton x:Name="SoundToggle" Grid.Row="3" Style="{StaticResource SlideToggleStyle}" IsChecked="{Binding IsMuted, Converter={StaticResource InverseBool}}">
             <StackPanel Orientation="Horizontal">
                 <Image Width="24" Margin="0,0,10,0" Source="/Assets/Images/Sound.png"/>
-                <TextBlock Text="효과음" Style="{StaticResource SettingTextStyle}"/>
+                <TextBlock Text="{Binding Path=Current.ToggleSoundEffects, Source={x:Static l:Loc.Instance}}" Style="{StaticResource SettingTextStyle}"/>
                 <Grid Height="30" Margin="15,4,0,4">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="650"/>
@@ -79,7 +80,7 @@
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Grid.Column="0" Height="36">
                     <Grid>
                         <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding CompleteSoundPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" AllowDrop="True" PreviewDragOver="SoundTextBox_PreviewDragOver" Drop="CompleteSoundTextBox_Drop"/>
-                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="완료 (.mp3, .wav 파일을 드래그&amp;드롭하세요)" VerticalAlignment="Center" Visibility="{Binding CompleteSoundHintVisibility}"/>
+                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="{Binding Path=Current.HintSoundComplete, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Visibility="{Binding CompleteSoundHintVisibility}"/>
                     </Grid>
                 </Border>
                 <Button BorderThickness="1" Command="{Binding BrowseCompleteSoundCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
@@ -95,7 +96,7 @@
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Grid.Column="0" Height="36">
                     <Grid>
                         <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding CancelSoundPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" AllowDrop="True" PreviewDragOver="SoundTextBox_PreviewDragOver" Drop="CancelSoundTextBox_Drop"/>
-                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="취소 (.mp3, .wav 파일을 드래그&amp;드롭하세요)" VerticalAlignment="Center" Visibility="{Binding CancelSoundHintVisibility}"/>
+                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="{Binding Path=Current.HintSoundCancel, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Visibility="{Binding CancelSoundHintVisibility}"/>
                     </Grid>
                 </Border>
                 <Button BorderThickness="1" Command="{Binding BrowseCancelSoundCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
@@ -111,7 +112,7 @@
                 <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="6" Grid.Column="0" Height="36">
                     <Grid>
                         <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" Padding="10,0" Text="{Binding ErrorSoundPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" AllowDrop="True" PreviewDragOver="SoundTextBox_PreviewDragOver" Drop="ErrorSoundTextBox_Drop"/>
-                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="에러 (.mp3, .wav 파일을 드래그&amp;드롭하세요)" VerticalAlignment="Center" Visibility="{Binding ErrorSoundHintVisibility}"/>
+                        <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="{Binding Path=Current.HintSoundError, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Visibility="{Binding ErrorSoundHintVisibility}"/>
                     </Grid>
                 </Border>
                 <Button BorderThickness="1" Command="{Binding BrowseErrorSoundCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">

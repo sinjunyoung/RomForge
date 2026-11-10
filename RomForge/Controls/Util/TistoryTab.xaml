@@ -25,24 +25,24 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="티스토리 URL" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" Margin="0,4,10,6"/>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Path=Current.LabelTistoryUrl, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Top" Margin="0,4,10,6"/>
                 <TextBox x:Name="txtUrl" Grid.Row="0" Grid.Column="1" Text="{Binding PageUrls, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" 
                          AcceptsReturn="True" AcceptsTab="False" TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="70" Margin="0,0,10,6" Padding="6,4" VerticalContentAlignment="Top" PreviewKeyDown="TxtUrl_PreviewKeyDown" 
-                         ToolTip="티스토리 게시글 URL을 한 줄에 하나씩 입력하세요 (여러 개 입력 가능, Ctrl+Enter로 분석 실행)"/>
+                         ToolTip="{Binding Path=Current.ToolTipTistoryUrlInput, Source={x:Static l:Loc.Instance}}"/>
                 <Button Grid.Row="0" Grid.Column="2" Style="{StaticResource RunButton}" Command="{Binding AnalyzeCommand}" Height="70" Margin="0,0,0,6">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/Search.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="분석" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                        <TextBlock Text="{Binding Path=Current.ButtonAnalyze, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                     </StackPanel>
                 </Button>
 
-                <TextBlock Grid.Row="1" Grid.Column="0" Text="다운로드 위치" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Path=Current.LabelDownloadLocation, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SaveDirectory, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,10,0" Padding="6,4" VerticalContentAlignment="Center" Foreground="#AAAAAA" AllowDrop="True" 
-                         PreviewDragOver="TxtSaveDirectory_PreviewDragOver" Drop="TxtSaveDirectory_Drop" ToolTip="폴더를 이곳에 드래그하여 다운로드 위치를 변경할 수 있습니다."/>
+                         PreviewDragOver="TxtSaveDirectory_PreviewDragOver" Drop="TxtSaveDirectory_Drop" ToolTip="{Binding Path=Current.ToolTipDragFolderToChangeDownload, Source={x:Static l:Loc.Instance}}"/>
                 <Button Grid.Row="1" Grid.Column="2" Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnChangeFolder_Click">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text=" 변경" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.ButtonChange, Source={x:Static l:Loc.Instance}}" Margin="3,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Grid>
@@ -52,18 +52,18 @@
                   KeyUp="LvFiles_KeyUp" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                         <MenuItem.Icon>
                             <Image Source="/Assets/Images/OpenFolder.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemove_Click">
                         <MenuItem.Icon>
                             <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnClear_Click">
                         <MenuItem.Icon>
                             <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
@@ -152,7 +152,7 @@
 
                     <GridViewColumn Width="64">
                         <GridViewColumn.Header>
-                            <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True" ToolTip="전체 선택 / 해제" Click="HeaderCheckBox_Click"/>
+                            <CheckBox Style="{StaticResource SplitCheckBoxStyle}" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="True" ToolTip="{Binding Path=Current.ToolTipSelectAllToggle, Source={x:Static l:Loc.Instance}}" Click="HeaderCheckBox_Click"/>
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
@@ -170,8 +170,8 @@
             </Border.Background>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.85">
                 <Image Source="/Assets/Images/Search.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                <TextBlock Text="티스토리 URL을 입력하고 분석 버튼을 눌러주세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="첨부파일 링크를 찾아 목록에 추가합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=Current.DescTistoryEnterUrl, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=Current.DescTistoryFindAttachments, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
             </StackPanel>
         </Border>
 
@@ -181,7 +181,7 @@
                     <Button Style="{StaticResource RunButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Command="{Binding RunCommand}" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Run.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="다운로드" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonDownload, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked}" Command="{Binding CancelCommand}">
@@ -193,9 +193,9 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <ToggleButton Style="{StaticResource LeftSlideToggleStyle}" Background="Transparent" BorderThickness="0" IsChecked="{Binding AutoExtractAfterDownload}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" 
-                                  VerticalAlignment="Center" Height="40" Margin="0,0,20,0" ToolTip="다운로드한 파일이 압축파일(zip/7z/rar)이면 자동으로 압축을 풀고 원본 압축파일을 삭제합니다">
+                                  VerticalAlignment="Center" Height="40" Margin="0,0,20,0" ToolTip="{Binding Path=Current.ToolTipAutoExtractDelete, Source={x:Static l:Loc.Instance}}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="압축 자동 해제 (완료 후 원본 삭제)" VerticalAlignment="Center" Foreground="#BBBBBB" FontWeight="Bold" Margin="0,0,10,0"/>
+                            <TextBlock Text="{Binding Path=Current.ToggleAutoExtractDelete, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="#BBBBBB" FontWeight="Bold" Margin="0,0,10,0"/>
                         </StackPanel>
                     </ToggleButton>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnRemove_Click" Margin="0,0,6,0">

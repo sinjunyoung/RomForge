@@ -18,7 +18,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Image Source="/Assets/Images/Neural.png" Width="20" Margin="0,0,8,0"/>
-                            <TextBlock Text="압축 알고리즘 (ISO: PSP, PS2)" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.LabelCompressionAlgorithmIso, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         </StackPanel>
                         <ComboBox Margin="0,6,0,0" VerticalAlignment="Center" ItemsSource="{Binding ChdmanCompressionOptions}" SelectedItem="{Binding ChdmanCompression}" DisplayMemberPath="Display"/>
                     </StackPanel>
@@ -50,12 +50,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <Image Grid.Column="0" Source="/Assets/Images/BlockMode.png" Width="20" Margin="0,0,8,0"/>
-                        <TextBlock Grid.Column="1" Text="압축 모드" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Path=Current.LabelCompressionMode, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" VerticalAlignment="Center"/>
                         <Border Grid.Column="2" Width="1" Background="#3F3F46" Margin="12,8"/>
                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
-                            <RadioButton Content="블록" Margin="0,0,16,0" IsChecked="{Binding SwitchCompressionMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static common:SwitchCompressionMode.Block}}" 
+                            <RadioButton Content="{Binding Path=Current.RadioBlock, Source={x:Static l:Loc.Instance}}" Margin="0,0,16,0" IsChecked="{Binding SwitchCompressionMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static common:SwitchCompressionMode.Block}}" 
                                          ToolTip="{Binding Path=Current.ToolTipBlockMode, Source={x:Static l:Loc.Instance}}"/>
-                            <RadioButton Content="블록리스" IsChecked="{Binding SwitchCompressionMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static common:SwitchCompressionMode.Blockless}}"
+                            <RadioButton Content="{Binding Path=Current.RadioBlockless, Source={x:Static l:Loc.Instance}}" IsChecked="{Binding SwitchCompressionMode, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static common:SwitchCompressionMode.Blockless}}"
                                          ToolTip="{Binding Path=Current.ToolTipBlocklessMode, Source={x:Static l:Loc.Instance}}"/>
                         </StackPanel>
                     </Grid>
@@ -64,12 +64,12 @@
                 <Border Margin="5,0,5,0" Grid.Row="2" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="압축 레벨 (NSZ, XCZ)" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
-                            <TextBlock FontSize="11" Foreground="#00FFFF">3: 최대 속도</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.LabelCompressionLevelNszXcz, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel3Fastest, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#00FFFF"/>
                             <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
-                            <TextBlock FontSize="11" Foreground="#66FFAD">9: 균형</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel9Balanced, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#66FFAD"/>
                             <Border Width="1" Height="12" Background="#444" Margin="15,0,15,0"/>
-                            <TextBlock FontSize="11" Foreground="#FFFF33">18: 권장</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel18Recommended, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#FFFF33"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -97,12 +97,12 @@
                 <Border  Margin="5,0,5,5" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="압축 레벨" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
-                            <TextBlock FontSize="11" Foreground="#00FFFF">3: 최대 속도</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.LabelCompressionLevel, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel3Fastest, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#00FFFF"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#66FFAD">9: 균형</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel9Balanced, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#66FFAD"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#FFFF33">18: 권장</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel18Recommended, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#FFFF33"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -130,12 +130,12 @@
                 <Border Margin="5,0,5,5" Style="{StaticResource OptionBorder}" Height="Auto" Padding="12,6">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="압축 레벨" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
-                            <TextBlock FontSize="11" Foreground="#00FFFF">3: 최대 속도</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.LabelCompressionLevel, Source={x:Static l:Loc.Instance}}" Foreground="#A0A0A0" FontSize="11" Margin="0,0,20,0"/>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel3Fastest, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#00FFFF"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#66FFAD">9: 균형</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel9Balanced, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#66FFAD"/>
                             <TextBlock FontSize="11" Foreground="Gray" Margin="20,0,20,0">|</TextBlock>
-                            <TextBlock FontSize="11" Foreground="#FFFF33">18: 권장</TextBlock>
+                            <TextBlock Text="{Binding Path=Current.OptionLevel18Recommended, Source={x:Static l:Loc.Instance}}" FontSize="11" Foreground="#FFFF33"/>
                         </StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>

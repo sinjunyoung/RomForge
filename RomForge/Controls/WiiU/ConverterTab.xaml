@@ -41,18 +41,18 @@
                 </ListView.ItemContainerStyle>
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
                         <Separator/>
-                        <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemove_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnClear_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                             </MenuItem.Icon>
@@ -164,8 +164,8 @@
                 </Border.Background>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                     <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                    <TextBlock Text="WUP/Loadiine 폴더, wud/wux/wua 파일을 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                    <TextBlock Text="하기 기준으로 상호 변환합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.HintDropWiiUFiles, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.DescConvertByRuleMutual, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                     <TextBlock TextAlignment="Left" Foreground="#A0A0A0" FontSize="11" Margin="0,15,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -190,27 +190,27 @@
                             <TextBlock Grid.Row="3" Grid.Column="1" Text="WUA" Foreground="#54FFB5" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
                             <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
-                                <Run Text="(폴더)" Foreground="#888888"/>
+                                <Run Text="{Binding Path=Current.LabelNoteFolder, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#888888"/>
                                 <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                                <Run Text="Loadiine 폴더, WUA" Foreground="#FFFFFF" FontWeight="Bold"/>
+                                <Run Text="{Binding Path=Current.LabelFormatListLoadiineFolderWua, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#FFFFFF" FontWeight="Bold"/>
                             </TextBlock>
 
                             <TextBlock Grid.Row="1" Grid.Column="2" Margin="0,0,0,4">
-                                <Run Text="(폴더)" Foreground="#888888"/>
+                                <Run Text="{Binding Path=Current.LabelNoteFolder, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#888888"/>
                                 <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                                <Run Text="WUP 폴더, WUA" Foreground="#FFFFFF" FontWeight="Bold"/>
+                                <Run Text="{Binding Path=Current.LabelFormatListWupFolderWua, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#FFFFFF" FontWeight="Bold"/>
                             </TextBlock>
 
                             <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
-                                <Run Text="(디스크 이미지)" Foreground="#888888"/>
+                                <Run Text="{Binding Path=Current.LabelNoteDiscImage, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#888888"/>
                                 <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                                <Run Text="WUA, WUP 폴더, Loadiine 폴더" Foreground="#FFFFFF" FontWeight="Bold"/>
+                                <Run Text="{Binding Path=Current.LabelFormatListWuaWupLoadiine, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#FFFFFF" FontWeight="Bold"/>
                             </TextBlock>
 
                             <TextBlock Grid.Row="3" Grid.Column="2" Margin="0,0,0,4">
-                                <Run Text="(Cemu 아카이브)" Foreground="#888888"/>
+                                <Run Text="{Binding Path=Current.LabelNoteCemuArchive, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#888888"/>
                                 <Run Text=" ➔ " Foreground="#00BCD4" FontWeight="Bold"/>
-                                <Run Text="WUP 폴더, Loadiine 폴더" Foreground="#FFFFFF" FontWeight="Bold"/>
+                                <Run Text="{Binding Path=Current.LabelFormatListWupLoadiine, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#FFFFFF" FontWeight="Bold"/>
                             </TextBlock>
                         </Grid>
                     </TextBlock>
@@ -228,7 +228,7 @@
                     <Grid>
                         <TextBox Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0"
                                  AllowDrop="True" PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                        <TextBlock Text="출력 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding Path=Current.HintDragOrSelectOutputFolder, Source={x:Static l:Loc.Instance}}" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsConverting, Converter={StaticResource InverseBool}}">

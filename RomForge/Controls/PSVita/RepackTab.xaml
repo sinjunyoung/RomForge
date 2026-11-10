@@ -26,18 +26,18 @@
                               KeyUp="LvPkg_KeyUp" DragEnter="Root_DragEnter" Drop="Root_Drop">
                         <ListView.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                                <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                                     <MenuItem.Icon>
                                         <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <Separator/>
-                                <MenuItem Header="선택 삭제" Command="{Binding RemoveSelectedCommand}">
+                                <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Command="{Binding RemoveSelectedCommand}">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
                                 </MenuItem>
-                                <MenuItem Header="전체 삭제" Command="{Binding RemoveAllCommand}">
+                                <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Command="{Binding RemoveAllCommand}">
                                     <MenuItem.Icon>
                                         <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                                     </MenuItem.Icon>
@@ -84,8 +84,8 @@
                                 <GridViewColumn Width="150">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Image Height="24" Margin="0,0,4,0" Source="/Assets/Images/zRIF.png" Width="24" ToolTip="라이선스 파일 경로(work.bin, *.rif) / zRIF 문자열"/>
-                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="키" VerticalAlignment="Center" ToolTip="라이선스 파일 경로(work.bin, *.rif) / zRIF 문자열"/>
+                                            <Image Height="24" Margin="0,0,4,0" Source="/Assets/Images/zRIF.png" Width="24" ToolTip="{Binding Path=Current.ToolTipLicenseKey, Source={x:Static l:Loc.Instance}}"/>
+                                            <TextBlock FontSize="13" FontWeight="Bold" Foreground="#BBBBBB" Text="{Binding Path=Current.HeaderKey, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" ToolTip="{Binding Path=Current.ToolTipLicenseKey, Source={x:Static l:Loc.Instance}}"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
@@ -108,17 +108,17 @@
                                                     DragEnter="PatchDropTarget_DragEnter" DragLeave="PatchDropTarget_DragLeave" Drop="PatchDropTarget_Drop" MouseLeftButtonUp="PatchDropTarget_Click">
                                                 <Border.ContextMenu>
                                                     <ContextMenu>
-                                                        <MenuItem Header="폴더 선택..." Click="PatchMenu_SelectFolder_Click">
+                                                        <MenuItem Header="{Binding Path=Current.MenuSelectFolder, Source={x:Static l:Loc.Instance}}" Click="PatchMenu_SelectFolder_Click">
                                                             <MenuItem.Icon>
                                                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem Header="압축파일 선택(zip/7z)..." Click="PatchMenu_SelectArchive_Click">
+                                                        <MenuItem Header="{Binding Path=Current.MenuSelectArchive, Source={x:Static l:Loc.Instance}}" Click="PatchMenu_SelectArchive_Click">
                                                             <MenuItem.Icon>
                                                                 <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
                                                             </MenuItem.Icon>
                                                         </MenuItem>
-                                                        <MenuItem Header="선택 취소" Click="MenuItem_RemovePatch_Click">
+                                                        <MenuItem Header="{Binding Path=Current.MenuDeselect, Source={x:Static l:Loc.Instance}}" Click="MenuItem_RemovePatch_Click">
                                                             <MenuItem.Icon>
                                                                 <Image Source="/Assets/Images/Cancel.png" Width="24" Height="24"/>
                                                             </MenuItem.Icon>
@@ -166,19 +166,19 @@
                         </Border.Background>
                         <StackPanel HorizontalAlignment="Center" Opacity="0.85" VerticalAlignment="Center">
                             <Image Height="28" Margin="0,0,0,8" Source="/Assets/Images/Info.png" Width="28"/>
-                            <TextBlock FontSize="14" FontWeight="Bold" Foreground="LightGray" HorizontalAlignment="Center" Text="PS Vita 파일(pkg, zip)/폴더를 여기에 드래그&amp;드롭하세요"/>
-                            <TextBlock FontSize="12" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,6,0,0" Text="App/Patch/AddCont는 자동으로 분류됩니다"/>
-                            <TextBlock FontSize="12" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,6,0,0" Text="pkg의 경우 키(work.bin, *.rif / zRIF 문자열)가 필요합니다"/>                            
+                            <TextBlock FontSize="14" FontWeight="Bold" Foreground="LightGray" HorizontalAlignment="Center" Text="{Binding Path=Current.HintDropVitaFiles, Source={x:Static l:Loc.Instance}}"/>
+                            <TextBlock FontSize="12" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,6,0,0" Text="{Binding Path=Current.DescVitaAutoClassify, Source={x:Static l:Loc.Instance}}"/>
+                            <TextBlock FontSize="12" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,6,0,0" Text="{Binding Path=Current.DescVitaPkgKeyRequired, Source={x:Static l:Loc.Instance}}"/>                            
                         </StackPanel>
                     </Border>
                 </Grid>
 
                 <StackPanel Grid.Column="1" Margin="5" VerticalAlignment="Top">
                     <Button BorderThickness="1" Command="{Binding RemoveSelectedCommand}" Height="30" Margin="0,0,0,8" Padding="0" Style="{StaticResource GrayButton}" Width="30">
-                        <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Delete.png" ToolTip="선택 삭제" Width="30"/>
+                        <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Delete.png" ToolTip="{Binding Path=Current.ToolTipRemoveSelected, Source={x:Static l:Loc.Instance}}" Width="30"/>
                     </Button>
                     <Button BorderThickness="1" Command="{Binding RemoveAllCommand}" Height="30" Margin="0,0,0,8" Padding="0" Style="{StaticResource GrayButton}" Width="30">
-                        <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Clear.png" ToolTip="모두 삭제" Width="30"/>
+                        <Image Height="30" RenderOptions.BitmapScalingMode="HighQuality" Source="/Assets/Images/Clear.png" ToolTip="{Binding Path=Current.ToolTipClear, Source={x:Static l:Loc.Instance}}" Width="30"/>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -192,16 +192,16 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="White" Margin="0,0,10,0" Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
-                    <RadioButton Content="에뮬 (app, addcont)" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildEmu}" IsEnabled="{Binding IsIdle}" Margin="0,0,15,0" VerticalAlignment="Center"/>
-                    <RadioButton Content="실기 (rePatch, reAddcont)" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildRetail}" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center"/>
+                    <RadioButton Content="{Binding Path=Current.RadioEmulatorAppAddcont, Source={x:Static l:Loc.Instance}}" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildEmu}" IsEnabled="{Binding IsIdle}" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                    <RadioButton Content="{Binding Path=Current.RadioConsoleRepatch, Source={x:Static l:Loc.Instance}}" FontSize="12" Foreground="White" GroupName="VitaOutputTargetGroup" IsChecked="{Binding BuildRetail}" IsEnabled="{Binding IsIdle}" VerticalAlignment="Center"/>
                 </StackPanel>
             </Grid>
 
             <ToggleButton Height="30" IsChecked="{Binding MergePatchIntoGame}" IsEnabled="{Binding IsIdle}" Margin="0,2,0,0" Style="{StaticResource ToggleStyle}">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Margin="0,0,5,0" Source="{Binding MergePatchIntoGame, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center" Width="18"/>
-                    <TextBlock FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,12,0" Text="게임에 패치 병합" VerticalAlignment="Center"/>
-                    <TextBlock FontSize="11" Foreground="#D4AF37" Text="에뮬: 복호화 후 app/addcont 덮어씌우기 / 실기: rePatch/reAddcont 추가" VerticalAlignment="Center"/>
+                    <TextBlock FontWeight="Bold" Foreground="#FFFFFF" Margin="0,0,12,0" Text="{Binding Path=Current.ToggleMergePatchToGame, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
+                    <TextBlock FontSize="11" Foreground="#D4AF37" Text="{Binding Path=Current.DescVitaPatchMerge, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                 </StackPanel>
             </ToggleButton>
         </StackPanel>
@@ -215,7 +215,7 @@
                 <Grid>
                     <TextBox Background="Transparent" BorderThickness="0" FontSize="11" Foreground="#DCDCDC" IsEnabled="{Binding IsIdle}" Padding="10,0" Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center"
                      AllowDrop="True" PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                    <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="작업 폴더를 드래그하거나 선택하세요" VerticalAlignment="Center" Visibility="{Binding OutputHintVisibility}"/>
+                    <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="{Binding Path=Current.HintDragOrSelectWorkFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Visibility="{Binding OutputHintVisibility}"/>
                 </Grid>
             </Border>
             <Button BorderThickness="1" Command="{Binding BrowseOutputCommand}" Grid.Column="1" Height="30" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30">
@@ -229,9 +229,9 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <core:IconButton Grid.Column="0" DefaultText="언팩" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
-            <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="리팩 (폴더 기반)" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
-            <core:IconButton Grid.Column="2" Margin="5,0,0,0" DefaultText="언팩 + 리팩 (Full)" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
+            <core:IconButton Grid.Column="0" DefaultText="{Binding Path=Current.ButtonUnpack, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
+            <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="{Binding Path=Current.ButtonRepackFolderBased, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
+            <core:IconButton Grid.Column="2" Margin="5,0,0,0" DefaultText="{Binding Path=Current.ButtonUnpackAndRepackFull, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
         </Grid>
 
         <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="0,1,0,0" CornerRadius="8" Grid.Row="4" Margin="5,0,5,5" Padding="8,0">

@@ -33,10 +33,10 @@
                         <Image Grid.Column="0" Source="/Assets/Images/DVD.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding InputPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
-                            <TextBlock Text="Wii 디스크(.iso, .wbfs, .wia, .rvz)를 드래그하거나 클릭하세요" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
+                            <TextBlock Text="{Binding Path=Current.HintDragOrClickWiiDisc, Source={x:Static l:Loc.Instance}}" Visibility="{Binding InputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
-                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelSource, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding InputPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                 </Grid>
             </Border>
 
@@ -44,12 +44,12 @@
                     PreviewDragEnter="Drag_Over" PreviewDragOver="Drag_Over" PreviewDrop="TxtPatch_Drop" MouseLeftButtonDown="TxtPatch_MouseLeftButtonDown">
                 <Border.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 선택..." Click="SelectFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuSelectFolder, Source={x:Static l:Loc.Instance}}" Click="SelectFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="파일 선택 (*.zip, *.7z, *.xml)..." Click="SelectFile_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuSelectFileZip7zXml, Source={x:Static l:Loc.Instance}}" Click="SelectFile_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
                             </MenuItem.Icon>
@@ -65,7 +65,7 @@
                         <Image Grid.Column="0" Source="/Assets/Images/Patch.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
                         <Grid Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="{Binding PatchPath}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
-                            <TextBlock Text="Riivolution 패치 폴더 또는 zip/7z/xml을 드래그하거나 클릭하세요" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
+                            <TextBlock Text="{Binding Path=Current.HintDragOrClickRiivolutionPatch, Source={x:Static l:Loc.Instance}}" Visibility="{Binding PatchHintVisibility}" Foreground="#50FFFFFF" FontSize="11" IsHitTestVisible="False"/>
                         </Grid>
                     </Grid>
                     <TextBlock Text="{Binding Path=Current.LabelPatch, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchPath}" ToolTipService.IsEnabled="{Binding InputPath, Converter={StaticResource StringHasValueConverter}}"/>
@@ -80,9 +80,9 @@
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
 
-            <core:IconButton Grid.Column="0" DefaultText="언팩" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
-            <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="리팩 (폴더 기반)" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
-            <core:IconButton Grid.Column="2" Margin="5,0,0,0" DefaultText="언팩 + 리팩 (스트리밍 기반)" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
+            <core:IconButton Grid.Column="0" DefaultText="{Binding Path=Current.ButtonUnpack, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Unpack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsUnpackRunning}" IsEnabled="{Binding UnpackEnabled}" Click="BtnUnpack_Click"/>
+            <core:IconButton Grid.Column="1" Margin="5,0,0,0" DefaultText="{Binding Path=Current.ButtonRepackFolderBased, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/Repack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsRebuildRunning}" IsEnabled="{Binding RebuildEnabled}" Click="BtnRebuild_Click"/>
+            <core:IconButton Grid.Column="2" Margin="5,0,0,0" DefaultText="{Binding Path=Current.ButtonUnpackAndRepackStreaming, Source={x:Static l:Loc.Instance}}" DefaultIcon="/Assets/Images/UnRepack.png" CancelText="{Binding Path=Current.ButtonCancel, Source={x:Static l:Loc.Instance}}" CancelIcon="/Assets/Images/Cancel.png" IsRunning="{Binding IsFullRunning}" IsEnabled="{Binding StartEnabled}" Click="BtnStart_Click"/>
             <Border Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="#30FFFFFF" VerticalAlignment="Bottom" Margin="0,0,0,-5"/>
         </Grid>
 
@@ -111,7 +111,7 @@
 
             <Border Grid.Column="1" Margin="5,0,5,0" Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Visibility="{Binding PatchInfoVisibility}">
                 <StackPanel Margin="12,10">
-                    <TextBlock Text="패치 정보" Foreground="#8888A8" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <TextBlock Text="{Binding Path=Current.LabelPatchInfo, Source={x:Static l:Loc.Instance}}" Foreground="#8888A8" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,6"/>
                     <StackPanel Orientation="Horizontal">
                         <Border Background="#1A4D56B2" BorderBrush="#4D4D56B2" BorderThickness="1" CornerRadius="4" Padding="8,2" Margin="0,0,8,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding PatchInfo.KindText}" Foreground="#8FA3FF" FontSize="11" FontWeight="Bold"/>
@@ -145,8 +145,8 @@
             <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,5,5">
                 <TextBlock Text="{Binding Path=Current.LabelOutputFormat, Source={x:Static l:Loc.Instance}}" Foreground="White" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,5,10,0"/>
                 <RadioButton Content="ISO" GroupName="WiiOutputFormat" IsChecked="{Binding IsIsoFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
-                <RadioButton Content="WBFS ( USB 로더 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsWbfsFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
-                <RadioButton Content="RVZ ( Dolphin 전용 압축 )" GroupName="WiiOutputFormat" IsChecked="{Binding IsRvzFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
+                <RadioButton Content="{Binding Path=Current.RadioWbfsUsbLoader, Source={x:Static l:Loc.Instance}}" GroupName="WiiOutputFormat" IsChecked="{Binding IsWbfsFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
+                <RadioButton Content="{Binding Path=Current.RadioRvzDolphin, Source={x:Static l:Loc.Instance}}" GroupName="WiiOutputFormat" IsChecked="{Binding IsRvzFormat}" Foreground="White" FontSize="12" VerticalAlignment="Center" Margin="0,5,15,0" IsEnabled="{Binding IsIdle}"/>
             </StackPanel>
         </Grid>
 
@@ -160,7 +160,7 @@
                     <Grid>
                         <TextBox Text="{Binding OutputPath, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsIdle}" Background="Transparent" BorderThickness="0" Foreground="#DCDCDC" FontSize="11" VerticalContentAlignment="Center" Padding="10,0" AllowDrop="True" 
                                  PreviewDragOver="TxtOutputPath_PreviewDragOver" Drop="TxtOutputPath_Drop"/>
-                        <TextBlock Text="작업 폴더를 드래그하거나 선택하세요" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding Path=Current.HintDragOrSelectWorkFolder, Source={x:Static l:Loc.Instance}}" Visibility="{Binding OutputHintVisibility}" Foreground="#50FFFFFF" FontSize="11" VerticalAlignment="Center" IsHitTestVisible="False" Margin="10,0,0,0"/>
                     </Grid>
                 </Border>
                 <Button Grid.Column="1" Width="30" Height="30" Padding="0" BorderThickness="1" Style="{StaticResource GrayButton}" Command="{Binding BrowseOutputCommand}" IsEnabled="{Binding IsIdle}" Margin="5,0,0,0">

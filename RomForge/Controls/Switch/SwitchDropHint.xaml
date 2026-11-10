@@ -1,15 +1,11 @@
 ﻿<UserControl x:Class="RomForge.Controls.Switch.SwitchDropHint"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Name="root"
-             VerticalAlignment="Center"
-             HorizontalAlignment="Center"
-             Opacity="0.9"
-             IsHitTestVisible="False"
-             Panel.ZIndex="1">
+             xmlns:l="clr-namespace:Common.Localization;assembly=Common"
+             x:Name="root" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.9" IsHitTestVisible="False" Panel.ZIndex="1">
     <StackPanel>
         <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8"/>
-        <TextBlock Text="{Binding Title, ElementName=root}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+        <TextBlock Text="{Binding Path=Current.HintDropFileOrFolder, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
         <TextBlock x:Name="txtSubtitle" Text="{Binding Subtitle, ElementName=root}" Foreground="#D4AF37" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center" Visibility="Collapsed"/>
         <ItemsControl HorizontalAlignment="Center" Margin="0,5,0,0">
             <ItemsControl.ItemsPanel>

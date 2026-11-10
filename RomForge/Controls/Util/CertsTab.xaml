@@ -27,10 +27,10 @@
                                 </TextBlock.Effect>
                             </TextBlock>
                         </Border>
-                        <TextBlock Text="파일을 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.HintDropFile, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock Text="실행파일 위치에 certs.bin을 추출합니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,4,0,0" HorizontalAlignment="Center"/>
-                    <TextBlock Text="certs.bin 파일은 cia파일 생성시에 사용됩니다" Foreground="#54FFB5" FontSize="13" FontWeight="Bold" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.DescExtractCertsBin, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,4,0,0" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding Path=Current.DescCertsBinUsedForCia, Source={x:Static l:Loc.Instance}}" Foreground="#54FFB5" FontSize="13" FontWeight="Bold" Margin="0,4,0,0" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <Grid Visibility="{Binding FileInfoVisibility}">
@@ -119,13 +119,13 @@
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Command="{Binding ClearFileCommand}" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="초기화" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonReset, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" Click="BtnAddFile_Click">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="파일 선택" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonSelectFile, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
