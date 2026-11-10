@@ -39,22 +39,20 @@ public partial class MainWindow : Window
 
         try
         {
-            var isUpdateAvailable = await VersionHelper.IsUpdateAvailableAsync();
+            var update = await VersionHelper.GetUpdateAsync();
+            if (update == null)
+                return;
 
-            if (isUpdateAvailable)
+            var updateWindow = new UpdateWindow(update) { Owner = this };
+            if (updateWindow.ShowDialog() == true)
             {
-                var result = MessageBoxHelper.ShowQuestion("새 버전이 있습니다. 다운로드 페이지를 여시겠습니까?");
-
-                if (result == true)
+                try
                 {
-                    try
-                    {
-                        "https://github.com/sinjunyoung/RomForge/releases/latest".OpenUrl();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBoxHelper.ShowError($"다운로드 페이지를 열 수 없습니다.\n\n오류 내용: {ex.Message}");
-                    }
+                    (update.HtmlUrl ?? "https://github.com/sinjunyoung/RomForge/releases/latest").OpenUrl();
+                }
+                catch (Exception ex)
+                {
+                    MessageBoxHelper.ShowError($"다운로드 페이지를 열 수 없습니다.\n\n오류 내용: {ex.Message}");
                 }
             }
         }

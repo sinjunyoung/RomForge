@@ -12,20 +12,26 @@ public static class VersionHelper
 
     static VersionHelper() => _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("RomForge", "1.0.0"));
 
-    public static async Task<bool> IsUpdateAvailableAsync()
+    public static async Task<GitHubRelease?> GetUpdateAsync()
     {
         var latestRelease = await GetLatestReleaseAsync();
+
+        if (latestRelease == null)
+            return null;
+
         var currentVersion = GetAppVersion();
-        return IsNewerVersion(currentVersion, latestRelease.TagName);
+
+        return IsNewerVersion(currentVersion, latestRelease.TagName) ? latestRelease : null;
     }
 
-    private static async Task<GitHubRelease> GetLatestReleaseAsync()
+    private static async Task<GitHubRelease?> GetLatestReleaseAsync()
     {
-        var url = $"https://api.github.com/repos/sinjunyoung/RomForge/releases/latest";
-        var json = await _httpClient.GetStringAsync(url);
-        return JsonSerializer.Deserialize<GitHubRelease>(json)!;
-    }
+        const string url = "https://api.github.com/repos/sinjunyoung/RomForge/releases/latest";
 
+        var json = await _httpClient.GetStringAsync(url);
+
+        return JsonSerializer.Deserialize<GitHubRelease>(json);
+    }
 
     private static string GetAppVersion()
     {
@@ -33,35 +39,14 @@ public static class VersionHelper
         return version != null ? $"{version.Major}.{version.Minor}.{version.Revision}" : "1.0.0";
     }
 
-    private static bool IsNewerVersion(string current, string? latest)
+    private static bool IsNewerVersion(string? current, string? latest)
     {
-        current = current?.TrimStart('v') ?? "0.0.0";
-        latest = latest?.TrimStart('v') ?? "0.0.0";
+        if (!Version.TryParse(current?.TrimStart('v'), out var currentVersion))
+            currentVersion = new Version(0, 0, 0);
 
-        var currentParts = current.Split('.').Select(s => int.TryParse(s, out var n) ? n : 0).ToArray();
-        var latestParts = latest.Split('.').Select(s => int.TryParse(s, out var n) ? n : 0).ToArray();
-        var currentVersion = new int[]
-        {
-            currentParts.Length > 0 ? currentParts[0] : 0,
-            currentParts.Length > 1 ? currentParts[1] : 0,
-            currentParts.Length > 2 ? currentParts[2] : 0
-        };
-        var latestVersion = new int[]
-        {
-            latestParts.Length > 0 ? latestParts[0] : 0,
-            latestParts.Length > 1 ? latestParts[1] : 0,
-            latestParts.Length > 2 ? latestParts[2] : 0
-        };
+        if (!Version.TryParse(latest?.TrimStart('v'), out var latestVersion))
+            return false;
 
-        for (int i = 0; i < 3; i++)
-        {
-            if (latestVersion[i] > currentVersion[i]) 
-                return true;
-
-            if (latestVersion[i] < currentVersion[i]) 
-                return false;
-        }
-
-        return false;
+        return latestVersion > currentVersion;
     }
 }
