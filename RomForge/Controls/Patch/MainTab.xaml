@@ -13,7 +13,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Patch.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="일반" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabGeneral, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:NormalTab/>
@@ -22,7 +22,7 @@
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Source="/Assets/Images/Arcade.png" Width="20" Height="20" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                        <TextBlock Text="아케이드" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding Path=Current.TabArcade, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                     </StackPanel>
                 </TabItem.Header>
                 <controls:ArcadeTab/>
@@ -57,13 +57,13 @@
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding PatchVM.IsLocked, Converter={StaticResource InverseBool}}" Command="{Binding PatchVM.ClearCommand}" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Clear.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="초기화" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonReset, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Style="{StaticResource GrayButton}" IsEnabled="{Binding PatchVM.IsLocked, Converter={StaticResource InverseBool}}" Command="{Binding PatchVM.CalculateHashCommand}" Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Assets/Images/Hash.png" Width="24" Height="24" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="해시 계산" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Path=Current.ButtonCalculateHash, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>

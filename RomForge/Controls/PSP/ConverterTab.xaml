@@ -90,7 +90,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="75">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="Extension">
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -108,7 +108,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
 
-                        <GridViewColumn Width="80">
+                        <GridViewColumn Width="Auto">
                             <GridViewColumn.Header>
                                 <GridViewColumnHeader Tag="TargetFormat">
                                     <StackPanel Orientation="Horizontal">

@@ -132,7 +132,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="140">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="ProductCode">
                                 <TextBlock Text="제품 코드" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -163,7 +163,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="ForcedLanguage">
                                 <TextBlock Text="언어 고정" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>

@@ -81,7 +81,7 @@
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
 
-                                <GridViewColumn Width="100">
+                                <GridViewColumn Width="150">
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Height="24" Margin="0,0,4,0" Source="/Assets/Images/zRIF.png" Width="24" ToolTip="라이선스 파일 경로(work.bin, *.rif) / zRIF 문자열"/>

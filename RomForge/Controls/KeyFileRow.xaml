@@ -1,6 +1,6 @@
 ﻿<UserControl x:Class="RomForge.Controls.KeyFileRow"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:l="clr-namespace:Common.Localization;assembly=Common">
     <StackPanel>
         <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
             <TextBlock Text="{Binding Label}" Foreground="#FFFFFF" FontWeight="Bold" VerticalAlignment="Center" Margin="2,0,12,0"/>
@@ -18,10 +18,10 @@
                     <TextBlock FontSize="11" Foreground="#50FFFFFF" IsHitTestVisible="False" Margin="10,0,0,0" Text="{Binding Hint}" VerticalAlignment="Center" Visibility="{Binding HintVisibility}"/>
                 </Grid>
             </Border>
-            <Button BorderThickness="1" Command="{Binding BrowseCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30" ToolTip="파일 선택">
+            <Button BorderThickness="1" Command="{Binding BrowseCommand}" Grid.Column="1" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30" ToolTip="{Binding Path=Current.ToolTipSelectFile, Source={x:Static l:Loc.Instance}}">
                 <Image Height="20" RenderOptions.BitmapScalingMode="HighQuality" Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="20"/>
             </Button>
-            <Button BorderThickness="1" Command="{Binding ClearCommand}" Grid.Column="2" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30" ToolTip="기본 위치로 되돌리기" Content="✕"/>
+            <Button BorderThickness="1" Command="{Binding ClearCommand}" Grid.Column="2" Height="30" Margin="5,0,0,0" Padding="0" Style="{StaticResource GrayButton}" Width="30" ToolTip="{Binding Path=Current.ToolTipRestoreDefaultPath, Source={x:Static l:Loc.Instance}}" Content="✕"/>
         </Grid>
         <TextBlock Text="{Binding ErrorMessage}" Visibility="{Binding ErrorVisibility}" Foreground="#FF6B6B" FontSize="11" TextWrapping="Wrap" Margin="2,4,0,0"/>
     </StackPanel>

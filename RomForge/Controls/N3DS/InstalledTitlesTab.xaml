@@ -118,7 +118,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         
-                        <GridViewColumn Header="제품 코드" Width="140">
+                        <GridViewColumn Header="제품 코드" Width="Auto">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel>

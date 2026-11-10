@@ -41,7 +41,7 @@
                         <Image Grid.Column="0" Source="/Assets/Images/Resource.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                         <TextBlock Grid.Column="1" Text="{Binding PatchVM.NormalVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                     </Grid>
-                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelSource, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.NormalVM.SourcePath}"/>
                 </Grid>
             </Border>
             <Grid Grid.Column="2" IsEnabled="{Binding IsIdle}">
@@ -81,7 +81,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                <Button Width="26" Height="26" Padding="0" HorizontalAlignment="Right" IsEnabled="{Binding PatchVM.NormalVM.CanAddPatch}" ToolTip="연속으로 적용할 패치 추가" Cursor="Hand" Click="AddPatch_Click">
+                <Button Width="26" Height="26" Padding="0" HorizontalAlignment="Right" IsEnabled="{Binding PatchVM.NormalVM.CanAddPatch}" ToolTip="{Binding Path=Current.ToolTipAddSequentialPatch, Source={x:Static l:Loc.Instance}}" Cursor="Hand" Click="AddPatch_Click">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border x:Name="border" Background="Transparent">
@@ -134,8 +134,8 @@
                     </Style>
                 </StackPanel.Resources>
                 <TextBlock Text="{Binding CalculatingText}" Visibility="{Binding IsCalculating, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" Margin="0,0,0,3"/>
-                <TextBlock Text="패치 시작으로 해시 계산이 취소되었습니다" Visibility="{Binding IsCancelled, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" Margin="0,0,0,3"/>
-                <TextBlock Text="해시 계산 실패" Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#E06C75" FontSize="12" Margin="0,0,0,3"/>
+                <TextBlock Text="{Binding Path=Current.StatusHashCancelledByPatch, Source={x:Static l:Loc.Instance}}" Visibility="{Binding IsCancelled, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#888888" FontSize="12" Margin="0,0,0,3"/>
+                <TextBlock Text="{Binding Path=Current.StatusHashFailed, Source={x:Static l:Loc.Instance}}" Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}" Foreground="#E06C75" FontSize="12" Margin="0,0,0,3"/>
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="130" Visibility="{Binding HasEntries, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Grid.IsSharedSizeScope="True">
                         <Border BorderBrush="#333337" BorderThickness="0,0,0,1" Padding="0,0,0,3" Margin="0,0,0,3">
@@ -179,7 +179,7 @@
         <Border Grid.Row="2" Visibility="{Binding PatchVM.NormalVM.SourceHintVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,0" VerticalAlignment="Top" Height="30">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Images/Resource.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <TextBlock Text="원본 자동 압축해제 지원 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding Path=Current.LabelSourceAutoExtractFormats, Source={x:Static l:Loc.Instance}}" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
                 <ItemsControl VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -230,7 +230,7 @@
         <Border Grid.Row="4" Visibility="{Binding PatchVM.NormalVM.HintsVisible, Converter={StaticResource BooleanToVisibilityConverter}}" BorderBrush="#333337" BorderThickness="1" CornerRadius="5" Padding="8,6" Margin="0,5,0,2" VerticalAlignment="Top" Height="30">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Images/Patch.png" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <TextBlock Text="지원 패치 포맷:" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBlock Text="{Binding Path=Current.LabelSupportedPatchFormats, Source={x:Static l:Loc.Instance}}" Foreground="#888888" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
                 <ItemsControl VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -289,7 +289,7 @@
             <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.AutoCompress}" Margin="0,2,0,3" Height="30">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.AutoCompress, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
-                    <TextBlock Text="패치 후 자동 압축" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                    <TextBlock Text="{Binding Path=Current.ToggleAutoCompressAfterPatch, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
                     <Grid VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -344,7 +344,7 @@
                         </StackPanel>
                         <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                             <Border Background="#1A555555" BorderBrush="#4DFFFFFF" BorderThickness="1" CornerRadius="5" Padding="6,2" Margin="0,0,4,0">
-                                <TextBlock Text="이외 기타" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Path=Current.LabelOthers, Source={x:Static l:Loc.Instance}}" Foreground="#CCCCCC" FontWeight="Bold" VerticalAlignment="Center">
                                     <TextBlock.Effect>
                                         <DropShadowEffect BlurRadius="4" ShadowDepth="0" Color="#FFFFFF" Opacity="0.2"/>
                                     </TextBlock.Effect></TextBlock>
@@ -365,8 +365,8 @@
                 <ToggleButton Style="{StaticResource ToggleStyle}" IsChecked="{Binding PatchVM.NormalVM.NamingEnabled}" Margin="0,2,0,2" Height="30">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image Width="18" Margin="0,0,5,0" Source="{Binding PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BoolToImageConverter}}" VerticalAlignment="Center"/>
-                        <TextBlock Text="결과 파일명에 버전/날짜 자동 표기" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
-                        <TextBlock Text="패치 파일명에서 버전과 날짜를 읽어와 결과 파일명에 표시합니다" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
+                        <TextBlock Text="{Binding Path=Current.ToggleAutoVersionDateInName, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,12,0"/>
+                        <TextBlock Text="{Binding Path=Current.DescAutoVersionDateInName, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="#888888" FontSize="11"/>
                     </StackPanel>
                 </ToggleButton>
                 <StackPanel Visibility="{Binding  PatchVM.NormalVM.NamingEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -375,7 +375,7 @@
                     </StackPanel>
                     <Border Background="#12FFFFFF" BorderBrush="#30FFFFFF" BorderThickness="1" CornerRadius="8" Padding="10,8" Margin="0,2,0,3">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="예상 파일명: " Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
+                            <TextBlock Text="{Binding Path=Current.LabelExpectedFileName, Source={x:Static l:Loc.Instance}}" Margin="0,0,4,0" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                             <TextBlock Text="{Binding PatchVM.NormalVM.NamingPreview}" Foreground="#4CAF50" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PatchVM.NormalVM.NamingPreview}"/>
                         </StackPanel>
                     </Border>

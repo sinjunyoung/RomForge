@@ -26,18 +26,18 @@
                         <Image Source="/Assets/Images/ArcadeCartridge.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                         <TextBlock Text="{Binding PatchVM.ArcadeVM.SourceLabel}" Foreground="#888888" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                     </StackPanel>
-                    <TextBlock Text="원본" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
+                    <TextBlock Text="{Binding Path=Current.LabelSource, Source={x:Static l:Loc.Instance}}" Foreground="#888" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,-8,0" ToolTip="{Binding PatchVM.ArcadeVM.SourcePath}"/>
                 </Grid>
             </Border>
             <Border IsEnabled="{Binding IsIdle}" Grid.Column="2" Style="{StaticResource DropZone}" Height="65" AllowDrop="True" Drop="ArcadePatchDrop_Drop" MouseLeftButtonDown="ArcadePatchDrop_MouseLeftButtonDown" Cursor="Hand">
                 <Border.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="폴더 선택..." Click="SelectFolder_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuSelectFolder, Source={x:Static l:Loc.Instance}}" Click="SelectFolder_Click">
                             <MenuItem.Icon>
                                 <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="24" Height="24"/>
                             </MenuItem.Icon>
                             </MenuItem>
-                        <MenuItem Header="파일 선택 (*.ips, *.zip)..." Click="SelectFile_Click">
+                        <MenuItem Header="{Binding Path=Current.MenuSelectFileIpsZip, Source={x:Static l:Loc.Instance}}" Click="SelectFile_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Assets/Images/ZipFolder.png" Width="24" Height="24"/>
                             </MenuItem.Icon>
@@ -59,9 +59,9 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="패치 선택:" Foreground="#DCDCDC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
+            <TextBlock Grid.Column="0" Text="{Binding Path=Current.LabelSelectPatch, Source={x:Static l:Loc.Instance}}" Foreground="#DCDCDC" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="11"/>
             <ComboBox Grid.Column="1" Height="30" Padding="2,0" FontSize="11" VerticalAlignment="Center" ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AvailablePatchPackages, RelativeSource={RelativeSource AncestorType=ItemsControl}}" DisplayMemberPath="DisplayName" 
-                                  SelectedItem="{Binding DataContext.PatchVM.ArcadeVM.SelectedPatchPackage, RelativeSource={RelativeSource AncestorType=ItemsControl}}" SelectionChanged="PatchPicker_SelectionChanged"  Tag="{Binding}" ToolTip="다른 패치 패키지로 변경">
+                                  SelectedItem="{Binding DataContext.PatchVM.ArcadeVM.SelectedPatchPackage, RelativeSource={RelativeSource AncestorType=ItemsControl}}" SelectionChanged="PatchPicker_SelectionChanged"  Tag="{Binding}" ToolTip="{Binding Path=Current.ToolTipChangePatchPackage, Source={x:Static l:Loc.Instance}}">
                 <ComboBox.ItemContainerStyle>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Foreground" Value="White"/>
@@ -112,7 +112,7 @@
                                                     <Setter Property="Foreground" Value="#DCDCDC"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding PatchFileName}" Value="{x:Null}">
-                                                            <Setter Property="Text" Value="패치 파일을 드래그&amp;드롭하세요"/>
+                                                            <Setter Property="Text" Value="{Binding Path=Current.HintDropPatchFile, Source={x:Static l:Loc.Instance}}"/>
                                                             <Setter Property="Foreground" Value="#555555"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -121,7 +121,7 @@
                                         </TextBlock>
                                     </Border>
                                     <ComboBox Grid.Column="3" Width="140" Height="22" Margin="4,0,0,0" Padding="2,0" FontSize="11" VerticalAlignment="Center" ItemsSource="{Binding DataContext.PatchVM.ArcadeVM.AllPatchEntries, RelativeSource={RelativeSource AncestorType=ItemsControl}}" 
-                                                          DisplayMemberPath="DisplayName" SelectedItem="{Binding PatchEntry, Mode=OneWay}" SelectionChanged="PatchPicker_SelectionChanged" Tag="{Binding}" ToolTip="다른 패치 파일로 변경">
+                                                          DisplayMemberPath="DisplayName" SelectedItem="{Binding PatchEntry, Mode=OneWay}" SelectionChanged="PatchPicker_SelectionChanged" Tag="{Binding}" ToolTip="{Binding Path=Current.ToolTipChangePatchFile, Source={x:Static l:Loc.Instance}}">
                                         <ComboBox.ItemContainerStyle>
                                             <Style TargetType="ComboBoxItem">
                                                 <Setter Property="Foreground" Value="White"/>
@@ -142,11 +142,11 @@
                                         <TextBlock FontWeight="Bold" FontSize="11">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
-                                                    <Setter Property="Text" Value="매칭"/>
+                                                    <Setter Property="Text" Value="{Binding Path=Current.StatusMatched, Source={x:Static l:Loc.Instance}}"/>
                                                     <Setter Property="Foreground" Value="#AAFFAA"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsMatched}" Value="False">
-                                                            <Setter Property="Text" Value="미매칭"/>
+                                                            <Setter Property="Text" Value="{Binding Path=Current.StatusUnmatched, Source={x:Static l:Loc.Instance}}"/>
                                                             <Setter Property="Foreground" Value="#FFAAAA"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
@@ -187,8 +187,8 @@
             </Border.Background>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.90">
                 <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                <TextBlock Text="원본 ZIP, 패치(IPS, 폴더, ZIP)를 위에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="확장자 기준으로 자동 매칭됩니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                <TextBlock Text="{Binding Path=Current.HintDropArcadeFiles, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=Current.DescAutoMatchByExtension, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,6,0,0"/>
             </StackPanel>
         </Border>
 

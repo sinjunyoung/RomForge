@@ -18,18 +18,18 @@
                   KeyUp="LvFiles_KeyUp" Drop="LvFiles_Drop" DragOver="LvFiles_DragOver" GridViewColumnHeader.Click="GridViewColumnHeader_Click" ContextMenuOpening="LvFiles_ContextMenuOpening">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="폴더 열기" Click="MenuItem_OpenFolder_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuOpenFolder, Source={x:Static l:Loc.Instance}}" Click="MenuItem_OpenFolder_Click">
                         <MenuItem.Icon>
                             <Image Source="/RomForge.Core;component/Assets/Images/AddFolder.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <Separator/>
-                    <MenuItem Header="선택 삭제" Click="BtnRemove_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuRemoveSelected, Source={x:Static l:Loc.Instance}}" Click="BtnRemove_Click">
                         <MenuItem.Icon>
                             <Image Source="/Assets/Images/Delete.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="전체 삭제" Click="BtnClear_Click">
+                    <MenuItem Header="{Binding Path=Current.MenuClear, Source={x:Static l:Loc.Instance}}" Click="BtnClear_Click">
                         <MenuItem.Icon>
                             <Image Source="/Assets/Images/Clear.png" Width="20" Height="20"/>
                         </MenuItem.Icon>
@@ -69,12 +69,12 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="90">
+                    <GridViewColumn Width="Auto">
                         <GridViewColumn.Header>
                             <GridViewColumnHeader Tag="Extension">
                                 <StackPanel Orientation="Horizontal">
                                     <Image Source="/Assets/Images/Convert.png" Width="24" Height="24" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                                    <TextBlock Text="변환" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Path=Current.HeaderConvert, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </GridViewColumnHeader>
                         </GridViewColumn.Header>
@@ -128,8 +128,8 @@
             </Border.Background>
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9">
                 <Image Source="/Assets/Images/Info.png" Width="28" Height="28" Margin="0,0,0,8"/>
-                <TextBlock Text="파일 또는 폴더를 여기에 드래그&amp;드롭하세요" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Text="하기 기준에 따라 포맷이 자동 선택되고 압축 또는 해제됩니다" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=Current.HintDropFileOrFolder, Source={x:Static l:Loc.Instance}}" Foreground="LightGray" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=Current.DescAutoCompressByRule, Source={x:Static l:Loc.Instance}}" Foreground="#D4AF37" FontSize="13" FontWeight="Bold" Margin="0,8,0,0" HorizontalAlignment="Center"/>
                 <TextBlock TextAlignment="Left" Foreground="#A0A0A0" FontSize="11" Margin="0,15,0,0">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -155,7 +155,7 @@
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="Dolphin" Foreground="#FFFFFF" FontWeight="Bold" HorizontalAlignment="Left" Margin="0,0,8,4"/>
 
                         <TextBlock Grid.Row="0" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": ISO(표준), CUE+BIN, GDI+BIN+RAW, CCD+IMG+SUB" Foreground="#CCCCCC"/>
+                            <Run Text=": " Foreground="#CCCCCC"/><Run Text="{Binding Path=Current.LabelFormatListIsoStandard, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="CHD" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
@@ -175,7 +175,7 @@
                         </TextBlock>
 
                         <TextBlock Grid.Row="2" Grid.Column="2" Margin="0,0,0,4">
-                            <Run Text=": 3DS(CCI와 같은 포맷), CCI, CIA" Foreground="#CCCCCC"/>
+                            <Run Text=": " Foreground="#CCCCCC"/><Run Text="{Binding Path=Current.LabelFormatList3dsCciCia, Source={x:Static l:Loc.Instance}, Mode=OneWay}" Foreground="#CCCCCC"/>
                             <Run Text=" ➔ " Foreground="#FF9800" FontWeight="Bold"/>
                             <Run Text="ZCCI" Foreground="#FFFFFF" FontWeight="Bold"/>
                             <Run Text="  |  " Foreground="#555555"/>
@@ -222,7 +222,7 @@
 
                 <ToggleButton Grid.Column="0" Style="{StaticResource LeftSlideToggleStyle}" Background="Transparent" BorderThickness="0" IsChecked="{Binding CompressVM.UseCustomOutputPath}" VerticalAlignment="Center" Height="40" Margin="0">
                     <StackPanel Orientation="Horizontal">                        
-                        <TextBlock Text="출력 폴더 변경" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
+                        <TextBlock Text="{Binding Path=Current.ToggleChangeOutputFolder, Source={x:Static l:Loc.Instance}}" VerticalAlignment="Center" Foreground="#FFFFFF" FontWeight="Bold" Margin="0,0,10,0"/>
                     </StackPanel>
                 </ToggleButton>
 

@@ -233,16 +233,16 @@
                     <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
                         <TextBlock Text="{Binding Path=Current.LabelGameName, Source={x:Static l:Loc.Instance}}" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBox x:Name="txtGameName" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch"/>
-                    <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
+                    <TextBox x:Name="txtGameName" FontSize="11" Margin="10,1,0,0" HorizontalAlignment="Stretch"/>
+                    <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
                         <TextBlock Text="ID" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBox x:Name="txtOverrideTitleId" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch" MaxLength="16" CharacterCasing="Upper" ToolTip="{Binding Path=Current.ToolTipTitleIdInput, Source={x:Static l:Loc.Instance}}"/>
-                    <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
+                    <TextBox x:Name="txtOverrideTitleId" FontSize="11" Margin="10,1,0,0" HorizontalAlignment="Stretch" MaxLength="16" CharacterCasing="Upper" ToolTip="{Binding Path=Current.ToolTipTitleIdInput, Source={x:Static l:Loc.Instance}}"/>
+                    <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
                         <TextBlock Text="{Binding Path=Current.LabelPublisher, Source={x:Static l:Loc.Instance}}" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBox x:Name="txtPublisher" FontSize="11" Margin="10,5,0,0" HorizontalAlignment="Stretch"/>
-                    <StackPanel Orientation="Horizontal" Margin="10,10,0,0">
+                    <TextBox x:Name="txtPublisher" FontSize="11" Margin="10,1,0,0" HorizontalAlignment="Stretch"/>
+                    <StackPanel Orientation="Horizontal" Margin="10,2,0,0">
                         <TextBlock Text="{Binding Path=Current.LabelMultiRomIndex, Source={x:Static l:Loc.Instance}}" FontSize="12" FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
                     <ComboBox x:Name="cbxMultiRom" Grid.Column="1" FontSize="11" Margin="10,5,0,0" Height ="25" VerticalAlignment="Center">

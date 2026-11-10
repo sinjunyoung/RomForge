@@ -105,7 +105,7 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="95">
+                            <GridViewColumn Width="Auto">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="FileSize">
                                         <local:IconHeader Icon="/Assets/Images/FileSizeBytes.png" Text="{Binding Path=Current.HeaderSize, Source={x:Static l:Loc.Instance}}"/>
