@@ -397,4 +397,34 @@ public sealed class German : LocalizedStrings
     public override string RenameStatusNameTooLong => "Name zu lang";
     public override string RenameStatusDuplicate => "Name doppelt";
     public override string RenameStatusTargetExists => "Datei vorhanden";
+
+    public override string ProgressElapsed(object arg0) => $"{arg0} vergangen";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} fertig";
+    public override string ProgressHashingPercent(object arg0) => $"Hash wird berechnet... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "Patch-Infos werden analysiert...";
+    public override string ProgressExtractingPatch => "Patch wird entpackt...";
+    public override string ProgressUnpackingFile(object arg0) => $"Wird entpackt: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"Repack läuft: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"Patch wird angewendet: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"Partitions-Hashes werden berechnet: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"WBFS wird komprimiert: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"RVZ wird komprimiert: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"ISO wird erstellt: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP erstellt: {arg0}_v{arg1}";
+    public override string MsgCancelled => "Abgebrochen.";
+    public override string StatusInitializing => "Wird initialisiert...";
+    public override string StatusSelectSdAndMovable => "SD-Karte und movable.sed auswählen";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"Wird geladen... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"Wird gescannt... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "title.db wird wiederhergestellt...";
+    public override string StatusRecoveryDone(object arg0) => $"Wiederherstellung abgeschlossen: {arg0} Titel";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"Wird extrahiert: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"Installation gestartet: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"Installation abgeschlossen: {arg0}";
+    public override string StatusScanningTitles => "Titel werden gescannt...";
+    public override string StatusLoadingMetadata(object arg0) => $"Metadaten werden geladen... ({arg0} insgesamt)";
+    public override string StatusTitlesLoaded(object arg0) => $"{arg0} Titel geladen";
+    public override string ProgressPreparing => "Wird vorbereitet";
+    public override string ProgressHashing => "Hash-Berechnung";
+    public override string ProgressCompressingNsz => "NSZ-Komprimierung";
 }

@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using RomForge.Core.ViewModels;
 
 namespace RomForge.ViewModels;
@@ -7,11 +8,11 @@ public abstract class ProgressToolTabViewModel : ToolTabViewModel
 {
     public int ProgressPct { get; set { SetProperty(ref field, value); MainViewModel.SetTaskbarProgress(field); } }
 
-    public string ProgressLabel { get; set { SetProperty(ref field, value); } } = "대기 중...";
+    public string ProgressLabel { get; set { SetProperty(ref field, value); } } = Loc.S.StatusWaiting;
 
     public string ProgressPercent { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    public string ProgressTime { get; set { SetProperty(ref field, value); } } = "00:00 경과";
+    public string ProgressTime { get; set { SetProperty(ref field, value); } } = Loc.S.ProgressElapsed("00:00");
 
     public string ProgressSpeed { get; set { SetProperty(ref field, value); } } = string.Empty;
 

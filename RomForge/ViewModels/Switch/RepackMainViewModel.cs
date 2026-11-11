@@ -135,7 +135,7 @@ namespace RomForge.ViewModels.Switch
                 ProgressLabel = p.Label;
                 ProgressPercent = isIndeterminate ? string.Empty : $"{p.Percent}%";
                 ProgressSpeed = p.Speed;
-                ProgressTime = isIndeterminate ? string.Empty : (string.IsNullOrEmpty(p.TimeInfo) ? $"{_totalSw.Elapsed:mm\\:ss} 경과" : p.TimeInfo);
+                ProgressTime = isIndeterminate ? string.Empty : (string.IsNullOrEmpty(p.TimeInfo) ? Loc.S.ProgressElapsed(_totalSw.Elapsed.ToString(@"mm\:ss")) : p.TimeInfo);
             });
 
             await Task.Run(async () =>

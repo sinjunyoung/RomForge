@@ -415,4 +415,34 @@ public abstract class LocalizedStrings
         ItemStatus.Skipped => StatusSkipped,
         _ => string.Empty
     };
+
+    public abstract string ProgressElapsed(object arg0);
+    public abstract string ProgressCompletedCount(object arg0, object arg1);
+    public abstract string ProgressHashingPercent(object arg0);
+    public abstract string ProgressAnalyzingPatchInfo { get; }
+    public abstract string ProgressExtractingPatch { get; }
+    public abstract string ProgressUnpackingFile(object arg0);
+    public abstract string ProgressRepackingFile(object arg0);
+    public abstract string ProgressApplyingPatchTo(object arg0);
+    public abstract string ProgressHashingPartitions(object arg0);
+    public abstract string ProgressCompressingWbfs(object arg0);
+    public abstract string ProgressCompressingRvz(object arg0);
+    public abstract string ProgressCreatingIso(object arg0);
+    public abstract string ProgressWupCreated(object arg0, object arg1);
+    public abstract string MsgCancelled { get; }
+    public abstract string StatusInitializing { get; }
+    public abstract string StatusSelectSdAndMovable { get; }
+    public abstract string ProgressLoadingCount(object arg0, object arg1);
+    public abstract string ProgressScanningCount(object arg0, object arg1);
+    public abstract string StatusRecoveringTitleDb { get; }
+    public abstract string StatusRecoveryDone(object arg0);
+    public abstract string StatusExtractingTitle(object arg0, object arg1);
+    public abstract string StatusInstallStarted(object arg0);
+    public abstract string StatusInstallDone(object arg0);
+    public abstract string StatusScanningTitles { get; }
+    public abstract string StatusLoadingMetadata(object arg0);
+    public abstract string StatusTitlesLoaded(object arg0);
+    public abstract string ProgressPreparing { get; }
+    public abstract string ProgressHashing { get; }
+    public abstract string ProgressCompressingNsz { get; }
 }

@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using N3DS.Core.Crypto;
 using RomForge.Core;
@@ -302,7 +303,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             try
             {
-                ProgressLabel = "패치 정보 분석 중...";
+                ProgressLabel = Loc.S.ProgressAnalyzingPatchInfo;
 
                 var patch = await Task.Run(() => PatchParser.Parse(path, ct), ct);
 
@@ -318,7 +319,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             {
                 if (version == _patchVersion)
                 {
-                    PatchInfo = PatchDisplay.Failed("취소되었습니다.");
+                    PatchInfo = PatchDisplay.Failed(Loc.S.MsgCancelled);
 
                     AppendLog("패치 읽기가 취소되었습니다.", LogLevel.Error);
                 }

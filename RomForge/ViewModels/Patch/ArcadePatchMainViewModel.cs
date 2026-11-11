@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.Services;
@@ -61,7 +62,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public string TotalProgressText => $"{TotalProgress}%";
 
-    public string ProgressSummary { get; set { SetProperty(ref field, value); } } = "대기 중...";
+    public string ProgressSummary { get; set { SetProperty(ref field, value); } } = Loc.S.StatusWaiting;
 
     public string? MismatchReason { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(MismatchVisibility)); } }
 
@@ -190,7 +191,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         var matchedItems = MatchItems.Where(x => x.IsMatched).ToList();
         int completedCount = matchedItems.Count(x => x.Progress >= 100);
 
-        ProgressSummary = $"{completedCount} / {matchedItems.Count} 완료";
+        ProgressSummary = Loc.S.ProgressCompletedCount(completedCount, matchedItems.Count);
     }
 
     public void Clear()

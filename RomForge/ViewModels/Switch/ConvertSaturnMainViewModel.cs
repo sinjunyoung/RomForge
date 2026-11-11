@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using LibHac.Ns;
 using NSW.Core.Services;
@@ -288,7 +289,7 @@ namespace RomForge.ViewModels.Switch
                         if (!string.IsNullOrEmpty(p.Speed))
                             ProgressSpeed = p.Speed;
 
-                        ProgressTime = string.IsNullOrEmpty(p.TimeInfo) ? $"{_totalSw.Elapsed:mm\\:ss} 경과" : p.TimeInfo;
+                        ProgressTime = string.IsNullOrEmpty(p.TimeInfo) ? Loc.S.ProgressElapsed(_totalSw.Elapsed.ToString(@"mm\:ss")) : p.TimeInfo;
                     });
                 });
 

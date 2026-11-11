@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Wii;
@@ -236,9 +237,9 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             {
                 string source = InputPath;
 
-                void progress(double value) => SetProgress(value, $"언팩 중: {Path.GetFileName(source)}", sw);
+                void progress(double value) => SetProgress(value, Loc.S.ProgressUnpackingFile(Path.GetFileName(source)), sw);
 
-                SetProgress(0, $"언팩 중: {Path.GetFileName(source)}", sw);
+                SetProgress(0, Loc.S.ProgressUnpackingFile(Path.GetFileName(source)), sw);
                 AppendLog($"언팩을 시작합니다. → {unpackedPath}", LogLevel.Highlight);
 
                 int count = await Task.Run(() => IsoUnpacker.Unpack(source, unpackedPath, progress, ct), ct);
@@ -325,12 +326,12 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         string target = Path.GetFileName(finalPath);
         var format = OutputFormat;
         var overlay = _patch?.Replacements;
-        string prepareLabel = overlay != null ? $"패치 적용 중: {target}" : $"파티션 해시 계산 중: {target}";
+        string prepareLabel = overlay != null ? Loc.S.ProgressApplyingPatchTo(target) : Loc.S.ProgressHashingPartitions(target);
         string convertLabel = format switch
         {
-            OutputFormat.Wbfs => $"WBFS 압축 중: {target}",
-            OutputFormat.Rvz => $"RVZ 압축 중: {target}",
-            _ => $"ISO 생성 중: {target}"
+            OutputFormat.Wbfs => Loc.S.ProgressCompressingWbfs(target),
+            OutputFormat.Rvz => Loc.S.ProgressCompressingRvz(target),
+            _ => Loc.S.ProgressCreatingIso(target)
         };
         PatchResult result;
 
@@ -363,7 +364,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (format == OutputFormat.Iso)
             {
-                void rebuildProgress(double value) => SetProgress(value, $"리팩 중: {Path.GetFileName(source)}", sw);
+                void rebuildProgress(double value) => SetProgress(value, Loc.S.ProgressRepackingFile(Path.GetFileName(source)), sw);
 
                 result = await Task.Run(() => IsoRebuilder.RebuildWithReplacements(source, finalPath, replacements, rebuildProgress, LogPatchEntry, ct), ct);
             }
@@ -521,7 +522,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 }
 
                 _workspace = workspace;
-                ProgressLabel = "패치 정보 분석 중...";
+                ProgressLabel = Loc.S.ProgressAnalyzingPatchInfo;
 
                 var patch = await Task.Run(() => RiivolutionParser.Parse(workspace.RootPath), ct);
 
@@ -539,7 +540,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 {
                     ReleaseWorkspace();
 
-                    PatchInfo = PatchDisplay.Failed("취소되었습니다.");
+                    PatchInfo = PatchDisplay.Failed(Loc.S.MsgCancelled);
 
                     AppendLog("패치 읽기가 취소되었습니다.", LogLevel.Error);
                     await SoundPlayer.PlayCancelAsync();
@@ -582,9 +583,9 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             return null;
         }
 
-        SetProgress(0, "패치 압축 해제 중...", sw);
+        SetProgress(0, Loc.S.ProgressExtractingPatch, sw);
 
-        return await RiivolutionWorkspace.ExtractAsync(path, opened.Value.Archive, value => SetProgress(value, "패치 압축 해제 중...", sw), ct);
+        return await RiivolutionWorkspace.ExtractAsync(path, opened.Value.Archive, value => SetProgress(value, Loc.S.ProgressExtractingPatch, sw), ct);
     }
 
     private void RebuildPatchDisplay()
@@ -614,7 +615,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             ProgressPct = pct;
             ProgressLabel = label;
             ProgressPercent = $"{pct}%";
-            ProgressTime = $"{sw.Elapsed:mm\\:ss} 경과";
+            ProgressTime = Loc.S.ProgressElapsed(sw.Elapsed.ToString(@"mm\:ss"));
         });
     }
 

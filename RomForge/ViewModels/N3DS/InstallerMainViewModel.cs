@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Crypto;
 using N3DS.Core.Enums;
 using N3DS.Core.FileSystem;
@@ -98,7 +99,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         }
     } = string.Empty;
 
-    public string StatusMessage { get; set { SetProperty(ref field, value); } } = "SD 카드와 movable.sed를 선택하세요";
+    public string StatusMessage { get; set { SetProperty(ref field, value); } } = Loc.S.StatusSelectSdAndMovable;
 
     public bool IsPathValid => !string.IsNullOrEmpty(SdPath) && !string.IsNullOrEmpty(MovablePath);
 
@@ -178,7 +179,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "취소되었습니다.";
+            StatusMessage = Loc.S.MsgCancelled;
 
             MainViewModel.SetTaskbarProgress(0);
             AppendLog("추출이 취소되었습니다.", LogLevel.Error);
@@ -186,7 +187,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         }
         catch (Exception ex)
         {
-            StatusMessage = $"오류: {ex.Message}";
+            StatusMessage = Loc.S.LogError(ex.Message);
 
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             AppendLog($"오류: {ex.Message}", LogLevel.Error);
@@ -204,7 +205,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
     {
         SetLoading(true);
 
-        StatusMessage = "초기화 중...";
+        StatusMessage = Loc.S.StatusInitializing;
 
         ClearLog();
         AppendLog("3DS 타이틀 스캔을 시작합니다.", LogLevel.Highlight);
@@ -223,7 +224,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
                         MainViewModel.SetTaskbarProgress(ProgressPct);
 
-                        ProgressLabel = $"로딩 중... {current} / {total}";
+                        ProgressLabel = Loc.S.ProgressLoadingCount(current, total);
 
                         onProgress?.Invoke(current, total);
                     }, ct);
@@ -232,7 +233,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                StatusMessage = $"오류: {ex.Message}";
+                StatusMessage = Loc.S.LogError(ex.Message);
 
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
@@ -252,7 +253,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
         SetLoading(true);
 
-        StatusMessage = "초기화 중...";
+        StatusMessage = Loc.S.StatusInitializing;
 
         ClearLog();
         AppendLog("title.db 복구를 시작합니다.", LogLevel.Highlight);
@@ -272,17 +273,17 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 var scanProgress = new Progress<(int current, int total)>(p =>
                 {
                     ProgressPct = p.total == 0 ? 0 : (int)((double)p.current / p.total * 100);
-                    ProgressLabel = $"스캔 중... {p.current} / {p.total}";
+                    ProgressLabel = Loc.S.ProgressScanningCount(p.current, p.total);
                     MainViewModel.SetTaskbarProgress(ProgressPct);
                 });
 
                 void Report(int current, int total) => ((IProgress<(int, int)>)scanProgress).Report((current, total));
 
-                StatusMessage = "title.db 복구 중...";
+                StatusMessage = Loc.S.StatusRecoveringTitleDb;
 
                 var (rebuilt, skipped) = await rebuilder.RebuildAsync(Report, ct);
 
-                StatusMessage = $"복구 완료: {rebuilt}개 타이틀";
+                StatusMessage = Loc.S.StatusRecoveryDone(rebuilt);
                 
                 AppendLog($"복구 완료: {rebuilt}개 등록", LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
@@ -292,14 +293,14 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                StatusMessage = "취소되었습니다.";
+                StatusMessage = Loc.S.MsgCancelled;
                 MainViewModel.SetTaskbarProgress(0);
                 AppendLog("복구가 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
-                StatusMessage = $"오류: {ex.Message}";                
+                StatusMessage = Loc.S.LogError(ex.Message);                
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
@@ -328,7 +329,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 ProgressLabel = $"{p.Percent}%";
                 ProgressTime = p.TimeInfo;
                 ProgressSpeed = p.Speed;
-                StatusMessage = $"추출 중: {selected.ShortDescription} - {p.Label}";
+                StatusMessage = Loc.S.StatusExtractingTitle(selected.ShortDescription, p.Label);
             });
 
             try
@@ -396,7 +397,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
 
             SetLoading(true);
-            StatusMessage = $"설치 시작: {selected.ShortDescription}";
+            StatusMessage = Loc.S.StatusInstallStarted(selected.ShortDescription);
             AppendLog($"설치 시작: {selected.FilePath}", LogLevel.Highlight);
 
             try
@@ -438,7 +439,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                         throw new NotSupportedException($"지원하지 않는 파일 형식: {ext}");
                 }
 
-                StatusMessage = $"설치 완료: {selected.ShortDescription}";                
+                StatusMessage = Loc.S.StatusInstallDone(selected.ShortDescription);                
                 AppendLog($"설치 완료: {selected.ShortDescription}", LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
                 AppendLog($"3DS에서 [홈브루 런처]를 이용해, 3ds 폴더 내부의 'custom-install-finalize'를 실행해야 게임 아이콘이 생성됩니다.", LogLevel.Highlight);
@@ -459,7 +460,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                StatusMessage = "취소되었습니다.";
+                StatusMessage = Loc.S.MsgCancelled;
 
                 AppendLog("설치가 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
@@ -474,7 +475,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                StatusMessage = $"오류: {ex.Message}";
+                StatusMessage = Loc.S.LogError(ex.Message);
                 
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);

@@ -397,4 +397,34 @@ public sealed class French : LocalizedStrings
     public override string RenameStatusNameTooLong => "Nom trop long";
     public override string RenameStatusDuplicate => "Nom en double";
     public override string RenameStatusTargetExists => "Fichier existant";
+
+    public override string ProgressElapsed(object arg0) => $"{arg0} écoulé";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} terminé";
+    public override string ProgressHashingPercent(object arg0) => $"Calcul du hash... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "Analyse des infos du patch...";
+    public override string ProgressExtractingPatch => "Décompression du patch...";
+    public override string ProgressUnpackingFile(object arg0) => $"Extraction : {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"Repack en cours : {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"Application du patch : {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"Calcul des hash des partitions : {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"Compression WBFS : {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"Compression RVZ : {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"Création de l'ISO : {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP créé : {arg0}_v{arg1}";
+    public override string MsgCancelled => "Annulé.";
+    public override string StatusInitializing => "Initialisation...";
+    public override string StatusSelectSdAndMovable => "Sélectionnez la carte SD et movable.sed";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"Chargement... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"Analyse... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "Récupération de title.db...";
+    public override string StatusRecoveryDone(object arg0) => $"Récupération terminée : {arg0} titres";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"Extraction : {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"Installation démarrée : {arg0}";
+    public override string StatusInstallDone(object arg0) => $"Installation terminée : {arg0}";
+    public override string StatusScanningTitles => "Analyse des titres...";
+    public override string StatusLoadingMetadata(object arg0) => $"Chargement des métadonnées... ({arg0} au total)";
+    public override string StatusTitlesLoaded(object arg0) => $"{arg0} titres chargés";
+    public override string ProgressPreparing => "Préparation";
+    public override string ProgressHashing => "Calcul du hash";
+    public override string ProgressCompressingNsz => "Compression NSZ";
 }

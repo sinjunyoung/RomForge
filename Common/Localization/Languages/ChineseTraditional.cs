@@ -397,4 +397,34 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string RenameStatusNameTooLong => "名稱過長";
     public override string RenameStatusDuplicate => "名稱重複";
     public override string RenameStatusTargetExists => "檔案已存在";
+
+    public override string ProgressElapsed(object arg0) => $"已耗時 {arg0}";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} 完成";
+    public override string ProgressHashingPercent(object arg0) => $"正在計算雜湊... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "正在分析修補檔資訊...";
+    public override string ProgressExtractingPatch => "正在解壓縮修補檔...";
+    public override string ProgressUnpackingFile(object arg0) => $"正在解包: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"正在重新打包: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"正在套用修補檔: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"正在計算分割區雜湊: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"正在壓縮 WBFS: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"正在壓縮 RVZ: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"正在建立 ISO: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP 建立完成: {arg0}_v{arg1}";
+    public override string MsgCancelled => "已取消。";
+    public override string StatusInitializing => "正在初始化...";
+    public override string StatusSelectSdAndMovable => "請選擇 SD 卡和 movable.sed";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"正在載入... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"正在掃描... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "正在還原 title.db...";
+    public override string StatusRecoveryDone(object arg0) => $"還原完成: {arg0} 個標題";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"正在提取: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"開始安裝: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"安裝完成: {arg0}";
+    public override string StatusScanningTitles => "正在掃描標題...";
+    public override string StatusLoadingMetadata(object arg0) => $"正在載入中繼資料... (共 {arg0} 個)";
+    public override string StatusTitlesLoaded(object arg0) => $"已載入 {arg0} 個標題";
+    public override string ProgressPreparing => "準備中";
+    public override string ProgressHashing => "計算雜湊中";
+    public override string ProgressCompressingNsz => "NSZ 壓縮中";
 }

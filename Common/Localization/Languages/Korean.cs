@@ -397,4 +397,34 @@ public sealed class Korean : LocalizedStrings
     public override string RenameStatusNameTooLong => "이름 너무 김";
     public override string RenameStatusDuplicate => "이름 중복";
     public override string RenameStatusTargetExists => "파일 존재";
+
+    public override string ProgressElapsed(object arg0) => $"{arg0} 경과";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} 완료";
+    public override string ProgressHashingPercent(object arg0) => $"해시 계산 중... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "패치 정보 분석 중...";
+    public override string ProgressExtractingPatch => "패치 압축 해제 중...";
+    public override string ProgressUnpackingFile(object arg0) => $"언팩 중: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"리팩 중: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"패치 적용 중: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"파티션 해시 계산 중: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"WBFS 압축 중: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"RVZ 압축 중: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"ISO 생성 중: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP 생성 완료: {arg0}_v{arg1}";
+    public override string MsgCancelled => "취소되었습니다.";
+    public override string StatusInitializing => "초기화 중...";
+    public override string StatusSelectSdAndMovable => "SD 카드와 movable.sed를 선택하세요";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"로딩 중... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"스캔 중... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "title.db 복구 중...";
+    public override string StatusRecoveryDone(object arg0) => $"복구 완료: {arg0}개 타이틀";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"추출 중: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"설치 시작: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"설치 완료: {arg0}";
+    public override string StatusScanningTitles => "타이틀 스캔 중...";
+    public override string StatusLoadingMetadata(object arg0) => $"메타데이터 로딩 중... (총 {arg0}개)";
+    public override string StatusTitlesLoaded(object arg0) => $"{arg0}개 타이틀 로드 완료";
+    public override string ProgressPreparing => "준비 중";
+    public override string ProgressHashing => "해시 계산 중";
+    public override string ProgressCompressingNsz => "NSZ 압축 중";
 }

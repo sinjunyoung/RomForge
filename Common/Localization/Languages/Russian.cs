@@ -397,4 +397,34 @@ public sealed class Russian : LocalizedStrings
     public override string RenameStatusNameTooLong => "Слишком длинное имя";
     public override string RenameStatusDuplicate => "Имя дублируется";
     public override string RenameStatusTargetExists => "Файл существует";
+
+    public override string ProgressElapsed(object arg0) => $"Прошло {arg0}";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"Готово: {arg0} / {arg1}";
+    public override string ProgressHashingPercent(object arg0) => $"Вычисление хеша... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "Анализ информации о патче...";
+    public override string ProgressExtractingPatch => "Распаковка патча...";
+    public override string ProgressUnpackingFile(object arg0) => $"Распаковка: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"Перепаковка: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"Применение патча: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"Вычисление хешей разделов: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"Сжатие WBFS: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"Сжатие RVZ: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"Создание ISO: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP создан: {arg0}_v{arg1}";
+    public override string MsgCancelled => "Отменено.";
+    public override string StatusInitializing => "Инициализация...";
+    public override string StatusSelectSdAndMovable => "Выберите SD-карту и movable.sed";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"Загрузка... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"Сканирование... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "Восстановление title.db...";
+    public override string StatusRecoveryDone(object arg0) => $"Восстановление завершено: {arg0} назв.";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"Извлечение: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"Установка начата: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"Установка завершена: {arg0}";
+    public override string StatusScanningTitles => "Сканирование названий...";
+    public override string StatusLoadingMetadata(object arg0) => $"Загрузка метаданных... (всего {arg0})";
+    public override string StatusTitlesLoaded(object arg0) => $"Загружено названий: {arg0}";
+    public override string ProgressPreparing => "Подготовка";
+    public override string ProgressHashing => "Вычисление хеша";
+    public override string ProgressCompressingNsz => "Сжатие NSZ";
 }

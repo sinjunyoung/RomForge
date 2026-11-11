@@ -397,4 +397,34 @@ public sealed class English : LocalizedStrings
     public override string RenameStatusNameTooLong => "Name too long";
     public override string RenameStatusDuplicate => "Duplicate name";
     public override string RenameStatusTargetExists => "File exists";
+
+    public override string ProgressElapsed(object arg0) => $"{arg0} elapsed";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} done";
+    public override string ProgressHashingPercent(object arg0) => $"Calculating hash... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "Analyzing patch info...";
+    public override string ProgressExtractingPatch => "Extracting patch...";
+    public override string ProgressUnpackingFile(object arg0) => $"Unpacking: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"Repacking: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"Applying patch: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"Hashing partitions: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"Compressing WBFS: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"Compressing RVZ: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"Creating ISO: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP created: {arg0}_v{arg1}";
+    public override string MsgCancelled => "Cancelled.";
+    public override string StatusInitializing => "Initializing...";
+    public override string StatusSelectSdAndMovable => "Select the SD card and movable.sed";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"Loading... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"Scanning... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "Recovering title.db...";
+    public override string StatusRecoveryDone(object arg0) => $"Recovery complete: {arg0} titles";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"Extracting: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"Install started: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"Install complete: {arg0}";
+    public override string StatusScanningTitles => "Scanning titles...";
+    public override string StatusLoadingMetadata(object arg0) => $"Loading metadata... ({arg0} total)";
+    public override string StatusTitlesLoaded(object arg0) => $"{arg0} titles loaded";
+    public override string ProgressPreparing => "Preparing";
+    public override string ProgressHashing => "Hashing";
+    public override string ProgressCompressingNsz => "Compressing NSZ";
 }

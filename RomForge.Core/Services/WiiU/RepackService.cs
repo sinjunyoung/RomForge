@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using Patch.Core.Services;
@@ -249,7 +250,7 @@ public sealed class RepackService()
                         {
                             Percent = grandTotal > 0 ? (int)(overall * 100.0 / grandTotal) : 100,
                             Label = $"[{entry.Kind}] {filePath}",
-                            TimeInfo = $"{sw.Elapsed:mm\\:ss} 경과",
+                            TimeInfo = Loc.S.ProgressElapsed(sw.Elapsed.ToString(@"mm\:ss")),
                             Speed = string.Empty,
                         });
                     },
@@ -299,7 +300,7 @@ public sealed class RepackService()
                             {
                                 Percent = total > 0 ? (int)(done * 100.0 / total) : 100,
                                 Label = path,
-                                TimeInfo = $"{sw.Elapsed:mm\\:ss} 경과",
+                                TimeInfo = Loc.S.ProgressElapsed(sw.Elapsed.ToString(@"mm\:ss")),
                                 Speed = string.Empty,
                             });
                         },
@@ -389,7 +390,7 @@ public sealed class RepackService()
                         {
                             Percent = grandTotal > 0 ? (int)(overall * 100.0 / grandTotal) : 100,
                             Label = $"[{i + 1}/{sources.Count}] {label}",
-                            TimeInfo = $"{sw.Elapsed:mm\\:ss} 경과",
+                            TimeInfo = Loc.S.ProgressElapsed(sw.Elapsed.ToString(@"mm\:ss")),
                             Speed = string.Empty,
                         });
                     },
@@ -413,7 +414,7 @@ public sealed class RepackService()
             progress?.Report(new ProgressInfo
             {
                 Percent = grandTotal > 0 ? (int)(offset * 100.0 / grandTotal) : 100,
-                Label = $"WUP 생성 완료: {titleId:x16}_v{titleVersion}",
+                Label = Loc.S.ProgressWupCreated(titleId.ToString("x16"), titleVersion),
                 TimeInfo = string.Empty,
                 Speed = string.Empty,
             });

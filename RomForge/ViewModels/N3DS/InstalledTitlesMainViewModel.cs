@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Common.Localization;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -40,12 +41,12 @@ public class InstalledTitlesMainViewModel(Action<string> setStatus) : ToolTabVie
         AllTitles.Clear();
         FilteredTitles.Clear();
 
-        setStatus("타이틀 스캔 중...");
+        setStatus(Loc.S.StatusScanningTitles);
 
         var titles = await Task.Run(() =>
             scanner.ScanTitles(new Progress<string>(msg => setStatus(msg))), ct);
 
-        setStatus($"메타데이터 로딩 중... (총 {titles.Count}개)");
+        setStatus(Loc.S.StatusLoadingMetadata(titles.Count));
 
         for (int i = 0; i < titles.Count; i++)
         {
@@ -57,7 +58,7 @@ public class InstalledTitlesMainViewModel(Action<string> setStatus) : ToolTabVie
 
         RefreshFilter(_searchQuery);
         SetLoading(false);
-        setStatus($"{titles.Count}개 타이틀 로드 완료");
+        setStatus(Loc.S.StatusTitlesLoaded(titles.Count));
     }
 
     public void SetFilter(string filterType, string query)

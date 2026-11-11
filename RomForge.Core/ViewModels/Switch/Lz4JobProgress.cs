@@ -1,4 +1,6 @@
-﻿namespace RomForge.Core.ViewModels.Switch;
+﻿using Common.Localization;
+
+namespace RomForge.Core.ViewModels.Switch;
 
 public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
 {
@@ -8,7 +10,7 @@ public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
     private int _last;
     private int _max;
 
-    public string Label { get; private set; } = isBuild ? "준비 중" : "압축 중";
+    public string Label { get; private set; } = isBuild ? Loc.S.ProgressPreparing : Loc.S.LogStatusCompressing;
 
     public int Update(int percent, string? label)
     {
@@ -33,10 +35,10 @@ public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
             return;
 
         if (label.Contains("해시"))
-            Label = "해시 계산 중";
+            Label = Loc.S.ProgressHashing;
         else if (label.Contains("NSZ", StringComparison.OrdinalIgnoreCase))
-            Label = "NSZ 압축 중";
+            Label = Loc.S.ProgressCompressingNsz;
         else if (label.Contains(Common.Localization.Loc.Instance.Current.LabelCompression))
-            Label = "압축 중";
+            Label = Loc.S.LogStatusCompressing;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.Models.Patch;
+using Common.Localization;
 using RomForge.Core.Services.Patch;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -31,7 +32,7 @@ public class SourceHashViewModel : ViewModelBase
         }
     }
 
-    public string CalculatingText => $"해시 계산 중... {ProgressPercent}%";
+    public string CalculatingText => Loc.S.ProgressHashingPercent(ProgressPercent);
 
     public int SkippedCount
     {

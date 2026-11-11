@@ -397,4 +397,34 @@ public sealed class Japanese : LocalizedStrings
     public override string RenameStatusNameTooLong => "名前が長すぎ";
     public override string RenameStatusDuplicate => "名前重複";
     public override string RenameStatusTargetExists => "ファイルあり";
+
+    public override string ProgressElapsed(object arg0) => $"{arg0} 経過";
+    public override string ProgressCompletedCount(object arg0, object arg1) => $"{arg0} / {arg1} 完了";
+    public override string ProgressHashingPercent(object arg0) => $"ハッシュ計算中... {arg0}%";
+    public override string ProgressAnalyzingPatchInfo => "パッチ情報を解析中...";
+    public override string ProgressExtractingPatch => "パッチを解凍中...";
+    public override string ProgressUnpackingFile(object arg0) => $"アンパック中: {arg0}";
+    public override string ProgressRepackingFile(object arg0) => $"リパック中: {arg0}";
+    public override string ProgressApplyingPatchTo(object arg0) => $"パッチ適用中: {arg0}";
+    public override string ProgressHashingPartitions(object arg0) => $"パーティションのハッシュ計算中: {arg0}";
+    public override string ProgressCompressingWbfs(object arg0) => $"WBFS圧縮中: {arg0}";
+    public override string ProgressCompressingRvz(object arg0) => $"RVZ圧縮中: {arg0}";
+    public override string ProgressCreatingIso(object arg0) => $"ISO作成中: {arg0}";
+    public override string ProgressWupCreated(object arg0, object arg1) => $"WUP作成完了: {arg0}_v{arg1}";
+    public override string MsgCancelled => "キャンセルされました。";
+    public override string StatusInitializing => "初期化中...";
+    public override string StatusSelectSdAndMovable => "SDカードとmovable.sedを選択してください";
+    public override string ProgressLoadingCount(object arg0, object arg1) => $"読み込み中... {arg0} / {arg1}";
+    public override string ProgressScanningCount(object arg0, object arg1) => $"スキャン中... {arg0} / {arg1}";
+    public override string StatusRecoveringTitleDb => "title.dbを復旧中...";
+    public override string StatusRecoveryDone(object arg0) => $"復旧完了: {arg0}タイトル";
+    public override string StatusExtractingTitle(object arg0, object arg1) => $"抽出中: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object arg0) => $"インストール開始: {arg0}";
+    public override string StatusInstallDone(object arg0) => $"インストール完了: {arg0}";
+    public override string StatusScanningTitles => "タイトルをスキャン中...";
+    public override string StatusLoadingMetadata(object arg0) => $"メタデータを読み込み中... (全{arg0}件)";
+    public override string StatusTitlesLoaded(object arg0) => $"{arg0}タイトルの読み込み完了";
+    public override string ProgressPreparing => "準備中";
+    public override string ProgressHashing => "ハッシュ計算中";
+    public override string ProgressCompressingNsz => "NSZ圧縮中";
 }
