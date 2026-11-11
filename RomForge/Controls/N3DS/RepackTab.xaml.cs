@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core;
@@ -73,7 +74,7 @@ public partial class RepackTab : UserControl
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "패치 폴더 선택"
+            Title = Loc.S.DialogSelectPatchFolder
         };
 
         if (dialog.ShowDialog() == true)
@@ -84,8 +85,8 @@ public partial class RepackTab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "패치 파일 (*.zip;*.7z)|*.zip;*.7z|ZIP 파일 (*.zip)|*.zip|7Z 파일 (*.7z)|*.7z",
-            Title = "패치 파일 선택"
+            Filter = $"{Loc.S.FilterPatchFiles} (*.zip;*.7z)|*.zip;*.7z|{Loc.S.FilterFilesOfType("ZIP")} (*.zip)|*.zip|{Loc.S.FilterFilesOfType("7Z")} (*.7z)|*.7z",
+            Title = Loc.S.DialogSelectPatchFile
         };
 
         if (dialog.ShowDialog() == true)
@@ -96,8 +97,8 @@ public partial class RepackTab : UserControl
     {
         var dlg = new OpenFileDialog
         {
-            Filter = "3DS 롬 파일|*.3ds;*.cci;*.zcci;*.cia|모든 파일|*.*",
-            Title = "3DS 롬 파일 선택"
+            Filter = $"{Loc.S.FilterRomFiles3ds}|*.3ds;*.cci;*.zcci;*.cia|{Loc.S.FilterAllFiles}|*.*",
+            Title = Loc.S.DialogSelect3dsRom
         };
 
         if (dlg.ShowDialog() == true)

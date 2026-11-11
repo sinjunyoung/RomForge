@@ -32,7 +32,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
     private async Task<string> BuildCiaAsync(RepackedNcsdSource repackedSource, string outputBasePath, KeyStore? keyStore, byte[]? exHeaderPart0, byte[]? exefsBlockPart0, Action<long, long>? reporter, IProgress<ProgressInfo>? stageProgress, Action<string>? onOutputPathKnown, CancellationToken ct)
     {
         if (keyStore == null)
-            throw new InvalidOperationException("CIA를 생성하려면 키가 필요합니다.");
+            throw new InvalidOperationException(Loc.S.ErrCiaNeedsKeys);
 
         string outputCia = Utils.GetUniqueFilePath(Path.ChangeExtension(outputBasePath, RepackOutputFormat.Cia.ToFileExtension()));
         await using var ciaStream = File.Open(outputCia, FileMode.Create, FileAccess.ReadWrite);
@@ -157,7 +157,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
 
             if (entryIndex < 0)
             {
-                log("⚠️ exefs 헤더에서 icon 엔트리를 찾지 못해 해시를 갱신하지 못했습니다.", LogLevel.Error);
+                log($"⚠️ {Loc.S.LogExefsIconEntryNotFound}", LogLevel.Error);
                 return;
             }
 
@@ -166,7 +166,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
 
             Array.Copy(newHash, 0, exefsBlock, hashBase, newHash.Length);
 
-            log("게임명/배급사 정보를 변경했습니다.", LogLevel.Ok);
+            log(Loc.S.LogGameInfoChanged, LogLevel.Ok);
             return;
         }
     }

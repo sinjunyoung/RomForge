@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.Models.N3DS;
 using RomForge.ViewModels.N3DS;
@@ -68,9 +69,9 @@ public partial class DecryptorTab : UserControl
 
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "복호화할 파일 선택",
+            Title = Loc.S.DialogSelectFileToDecrypt,
             Multiselect = true,
-            Filter = "3DS ROM 파일|*.3ds;*.cci;*.cia"
+            Filter = $"{Loc.S.FilterRomFiles3ds}|*.3ds;*.cci;*.cia"
         };
 
         if (dialog.ShowDialog() == true)
@@ -84,7 +85,7 @@ public partial class DecryptorTab : UserControl
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

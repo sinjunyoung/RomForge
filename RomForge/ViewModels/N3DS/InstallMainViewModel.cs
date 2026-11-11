@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.Models.N3DS;
+using Common.Localization;
 using RomForge.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -73,6 +74,6 @@ public class InstallMainViewModel : ToolTabViewModel
     public static string GetFileDialogFilter()
     {
         string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
+        return $"{Loc.S.FilterSupportedFiles}|{wildcards}|{Loc.S.FilterAllFiles}|*.*";
     }
 }

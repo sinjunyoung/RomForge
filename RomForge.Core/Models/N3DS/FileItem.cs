@@ -46,14 +46,7 @@ public class FileItem(string filePath) : ConvertibleFileItemBase(filePath)
         }
     }
 
-    public string TypeLabel => Type switch
-    {
-        TitleType.Application => "본편",
-        TitleType.SystemApplication => "시스템",
-        TitleType.Patch => "업데이트",
-        TitleType.DlcContent => "DLC",
-        _ => "기타",
-    };
+    public string TypeLabel => TitleTypeText.Of(Type);
 
     public SolidColorBrush TypeBadgeColor => Type switch
     {

@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using N3DS.Core.Crypto;
 using N3DS.Core.Interfaces;
@@ -17,7 +18,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
 
     public async Task UnpackAsync(string inputPath, string unpackedPath, KeyStore keyStore, Action<long, long>? reporter = null, CancellationToken ct = default)
     {
-        log("언팩 시작...", LogLevel.Highlight);
+        log(Loc.S.LogUnpackStart, LogLevel.Highlight);
 
         await using var source = await OpenSourceAsync(inputPath, keyStore, ct);
 
@@ -77,7 +78,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
                 }
 
                 await NcchUnpacker.SaveToDirectoryAsync(ncchStream, unpack, partDir, content, partitionReporter, ct);
-                log($"파티션 {idx} 언팩 완료", LogLevel.Ok);
+                log(Loc.S.LogPartitionUnpackDone(idx), LogLevel.Ok);
             }
         }
 
@@ -87,7 +88,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
 
     public async Task<string> RepackAsync(string unpackedPath, string outputPath, string? displayName, string? gameName, string? publisher = null, KeyStore? keyStore = null, RepackOutputFormat format = RepackOutputFormat.Cci, Action<long, long>? reporter = null, IProgress<ProgressInfo>? stageProgress = null, Action<string>? onOutputPathKnown = null, CancellationToken ct = default)
     {
-        log("리팩 시작...", LogLevel.Highlight);
+        log(Loc.S.LogRepackStart, LogLevel.Highlight);
 
         var repackedNcchs = new Dictionary<int, (NcchUnpackResult, byte[], Stream, RomFsUnpackResult?, IRomFsFileSource?)>();
         var contentsList = new List<Contents>();
@@ -112,14 +113,14 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
             string headerPath = Path.Combine(partDir, "header.bin");
 
             if (!File.Exists(headerPath))
-                throw new FileNotFoundException($"header.bin 없음: {partDir}");
+                throw new FileNotFoundException(Loc.S.ErrHeaderBinMissing(partDir));
 
             byte[] headerRaw = await File.ReadAllBytesAsync(headerPath, ct);
             var ncchHeader = NcchHeader.Parse(headerRaw);
             string contentPath = Path.Combine(partDir, "content.bin");
 
             if (!File.Exists(contentPath))
-                throw new FileNotFoundException($"content.bin 없음: {partDir}");
+                throw new FileNotFoundException(Loc.S.ErrContentBinMissing(partDir));
 
             byte[] contentRaw = await File.ReadAllBytesAsync(contentPath, ct);
             using var cms = new MemoryStream(contentRaw);
@@ -157,7 +158,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
                 exHeader = await exHeaderPatchFile.ReadSmallFileBytesAsync(ct);
                 exefsPatchedCount++;
 
-                log("exheader 교체: exheader.bin", LogLevel.Ok);
+                log(Loc.S.LogExheaderReplaced, LogLevel.Ok);
             }
 
             string exefsDir = Path.Combine(partDir, "exefs");
@@ -216,7 +217,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         }
 
         if (repackedNcchs.Count == 0)
-            throw new InvalidOperationException("언팩된 파티션이 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNoUnpackedPartitions);
 
         string safeFileName = Utils.SafeFileName(displayName);
         string fileName = string.IsNullOrEmpty(safeFileName) ? "output" : safeFileName;
@@ -226,24 +227,24 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputBasePath, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, stageProgress, onOutputPathKnown, ct);
 
         if (patchDirSpecified && exefsPatchedCount == 0 && (romfsPatchSource == null || romfsPatchSource.AppliedCount == 0))
-            log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
+            log(Loc.S.LogPatchTargetMissing, LogLevel.Error);
         else
         {
             if (exefsPatchedCount > 0)
-                log($"exefs 패치 적용 완료: {exefsPatchedCount}개 파일", LogLevel.Ok);
+                log(Loc.S.LogExefsPatchApplied(exefsPatchedCount), LogLevel.Ok);
 
             if (romfsPatchSource is { AppliedCount: > 0 })
-                log($"romfs 패치 적용 완료: {romfsPatchSource.AppliedCount}개 파일", LogLevel.Ok);
+                log(Loc.S.LogRomfsPatchApplied(romfsPatchSource.AppliedCount), LogLevel.Ok);
         }
 
-        log($"완료: {outputFilePath}", LogLevel.Ok);
+        log(Loc.S.LogDone(outputFilePath), LogLevel.Ok);
 
         return outputFilePath;
     }
 
     public async Task<string> RepackDirectAsync(string inputPath, string outputBasePath, KeyStore keyStore, string? gameName = null, string? publisher = null, RepackOutputFormat format = RepackOutputFormat.Cci, Action<long, long>? reporter = null, IProgress<ProgressInfo>? stageProgress = null, Action<string>? onOutputPathKnown = null, CancellationToken ct = default)
     {
-        log("스트리밍 기반 리팩 시작...", LogLevel.Highlight);
+        log(Loc.S.LogStreamingRepackStart, LogLevel.Highlight);
 
         await using var source = await OpenSourceAsync(inputPath, keyStore, ct);
         var repackedNcchs = new Dictionary<int, (NcchUnpackResult, byte[], Stream, RomFsUnpackResult?, IRomFsFileSource?)>();
@@ -287,7 +288,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
 
                 exefsPatchedCount++;
 
-                log("exheader 교체: exheader.bin", LogLevel.Ok);
+                log(Loc.S.LogExheaderReplaced, LogLevel.Ok);
             }
 
             if (unpack.ExeFs != null)
@@ -325,17 +326,17 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         string outputFilePath = await _outputBuilder.BuildOutputAsync(repackedSource, outputBasePath, keyStore, format, exHeaderPart0, exefsBlockPart0, reporter, stageProgress, onOutputPathKnown, ct);
 
         if (patchDirSpecified && exefsPatchedCount == 0 && (romfsPatchSource == null || romfsPatchSource.AppliedCount == 0))
-            log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
+            log(Loc.S.LogPatchTargetMissing, LogLevel.Error);
         else
         {
             if (exefsPatchedCount > 0)
-                log($"ExeFS 패치 적용 완료: {exefsPatchedCount}개 파일", LogLevel.Ok);
+                log(Loc.S.LogExefsPatchApplied(exefsPatchedCount), LogLevel.Ok);
 
             if (romfsPatchSource is { AppliedCount: > 0 })
-                log($"RomFS 패치 적용 완료: {romfsPatchSource.AppliedCount}개 파일", LogLevel.Ok);
+                log(Loc.S.LogRomfsPatchApplied(romfsPatchSource.AppliedCount), LogLevel.Ok);
         }
 
-        log($"완료: {outputFilePath}", LogLevel.Ok);
+        log(Loc.S.LogDone(outputFilePath), LogLevel.Ok);
 
         return outputFilePath;
     }
@@ -350,7 +351,7 @@ public class RepackService(Action<string, LogLevel> log, Func<string?> getPatchP
         {
             ".cia" => await new CiaReader(keyStore).OpenAsync(inputPath, (msg, level) => log(msg, level), ct),
             ".cci" or ".zcci" or ".3ds" => await CciSource.OpenAsync(inputPath, keyStore, (msg, level) => log(msg, level), ct),
-            _ => throw new NotSupportedException($"지원하지 않는 파일 형식: {ext}")
+            _ => throw new NotSupportedException(Loc.S.ErrUnsupportedFormat(ext))
         };
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core.Models.N3DS;
@@ -41,7 +42,7 @@ public partial class InstallTab : UserControl
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -62,7 +63,7 @@ public partial class InstallTab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Title = "설치할 파일 선택",
+            Title = Loc.S.DialogSelectFileToInstall,
             Filter = InstallMainViewModel.GetFileDialogFilter(),
             Multiselect = true
         };
@@ -76,7 +77,7 @@ public partial class InstallTab : UserControl
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -85,7 +86,7 @@ public partial class InstallTab : UserControl
     {
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 
@@ -97,7 +98,7 @@ public partial class InstallTab : UserControl
             }
             catch (Exception ex)
             {
-                Vm.AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                Vm.AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -129,7 +130,7 @@ public partial class InstallTab : UserControl
         catch (OperationCanceledException) { }
         catch (Exception ex)
         {
-            Vm.AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
         finally

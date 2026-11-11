@@ -182,7 +182,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             StatusMessage = Loc.S.MsgCancelled;
 
             MainViewModel.SetTaskbarProgress(0);
-            AppendLog("추출이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogExtractCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
         }
         catch (Exception ex)
@@ -190,7 +190,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             StatusMessage = Loc.S.LogError(ex.Message);
 
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-            AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             throw;
         }
@@ -208,8 +208,8 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         StatusMessage = Loc.S.StatusInitializing;
 
         ClearLog();
-        AppendLog("3DS 타이틀 스캔을 시작합니다.", LogLevel.Highlight);
-        AppendLog($"SD 경로: {SdPath}, Movable 경로: {MovablePath}", LogLevel.Info);
+        AppendLog(Loc.S.LogScanStarting, LogLevel.Highlight);
+        AppendLog(Loc.S.LogSdAndMovablePaths(SdPath, MovablePath), LogLevel.Info);
 
         using (InstalledTitles.BeginWork())
         {
@@ -229,14 +229,14 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                         onProgress?.Invoke(current, total);
                     }, ct);
 
-                AppendLog($"타이틀 목록 로드 완료.", LogLevel.Ok);
+                AppendLog(Loc.S.LogTitleListLoaded, LogLevel.Ok);
             }
             catch (Exception ex)
             {
                 StatusMessage = Loc.S.LogError(ex.Message);
 
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 throw;
             }
@@ -248,7 +248,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
     public async Task RecoverTitleDbAsync(CancellationToken ct = default)
     {
-        if (!MessageBoxHelper.ShowQuestion("기존 title.db와 import.db를 삭제하고,\nSD 카드에 설치된 타이틀로 새로 만듭니다.\n\n계속 진행하시겠습니까?"))
+        if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmRebuildTitleDb))
             return;
 
         SetLoading(true);
@@ -256,8 +256,8 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         StatusMessage = Loc.S.StatusInitializing;
 
         ClearLog();
-        AppendLog("title.db 복구를 시작합니다.", LogLevel.Highlight);
-        AppendLog($"SD 경로: {SdPath}, Movable 경로: {MovablePath}", LogLevel.Info);
+        AppendLog(Loc.S.LogRecoveryStarting, LogLevel.Highlight);
+        AppendLog(Loc.S.LogSdAndMovablePaths(SdPath, MovablePath), LogLevel.Info);
 
         using (InstalledTitles.BeginWork())
         using (Install.BeginWork())
@@ -285,24 +285,24 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
                 StatusMessage = Loc.S.StatusRecoveryDone(rebuilt);
                 
-                AppendLog($"복구 완료: {rebuilt}개 등록", LogLevel.Ok);
+                AppendLog(Loc.S.LogRecoveryRegistered(rebuilt), LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
 
                 if (skipped > 0)
-                    AppendLog($"{skipped}개는 읽을 수 없어 제외되었습니다. 위 로그를 확인하세요.", LogLevel.Error);
+                    AppendLog(Loc.S.LogRecoverySkipped(skipped), LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
                 StatusMessage = Loc.S.MsgCancelled;
                 MainViewModel.SetTaskbarProgress(0);
-                AppendLog("복구가 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogRecoveryCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
                 StatusMessage = Loc.S.LogError(ex.Message);                
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -334,9 +334,9 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
             try
             {
-                AppendLog($"타이틀 추출 준비 완료: {selected.ShortDescription} (ID: {selected.TitleId})", LogLevel.Info);
-                AppendLog($"출력 경로: {outputPath} (형식: {(asCci ? "CCI" : "CIA")})", LogLevel.Info);
-                await RunOperationAsync(_extractCts, $"추출 시작: {selected.ShortDescription}",
+                AppendLog(Loc.S.LogExtractReady(selected.ShortDescription, selected.TitleId), LogLevel.Info);
+                AppendLog(Loc.S.LogOutputPathAndFormat(outputPath, asCci ? "CCI" : "CIA"), LogLevel.Info);
+                await RunOperationAsync(_extractCts, Loc.S.LogExtractStarted(selected.ShortDescription),
                     async ct =>
                     {
                         if (asCci)
@@ -344,7 +344,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                         else
                             await extractor.ExtractToCiaAsync(selected.Title, outputPath, extractProgress, ct);
                     },
-                    $"추출 완료: {selected.ShortDescription}");
+                    Loc.S.LogExtractDone(selected.ShortDescription));
                 await SoundPlayer.PlayCompleteAsync();
             }
             catch (CertsBinNotFoundException)
@@ -373,8 +373,8 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
             if (string.IsNullOrEmpty(selected.TitleId) || selected.TitleId.Length < 16)
             {
-                AppendLog("설정된 타이틀 ID가 비어있거나 올바르지 않습니다.", LogLevel.Error);
-                throw new InvalidOperationException("타이틀 ID가 올바르지 않습니다.");
+                AppendLog(Loc.S.LogInvalidTitleIdConfigured, LogLevel.Error);
+                throw new InvalidOperationException(Loc.S.ErrInvalidTitleId);
             }
 
             string tidHigh = selected.TitleId[..8];
@@ -383,22 +383,22 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
             if (Directory.Exists(titleRoot))
             {
-                AppendLog($"이미 동일한 타이틀이 존재합니다. 경로: {titleRoot}", LogLevel.Info);
-                var result = MessageBoxHelper.ShowQuestion($"{selected.ShortDescription} 이(가) 이미 설치되어 있습니다.\n재설치하시겠습니까?");
+                AppendLog(Loc.S.LogTitleAlreadyExists(titleRoot), LogLevel.Info);
+                var result = MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmReinstall(selected.ShortDescription));
 
                 if (!result)
                 {
-                    AppendLog("사용자가 재설치를 거부하여 작업을 중단합니다.", LogLevel.Info);
+                    AppendLog(Loc.S.LogReinstallDeclined, LogLevel.Info);
                     return;
                 }
 
-                AppendLog("기존에 설치된 타이틀 폴더를 완전히 삭제합니다.", LogLevel.Info);
+                AppendLog(Loc.S.LogDeletingInstalledTitleFolder, LogLevel.Info);
                 Directory.Delete(titleRoot, true);
             }
 
             SetLoading(true);
             StatusMessage = Loc.S.StatusInstallStarted(selected.ShortDescription);
-            AppendLog($"설치 시작: {selected.FilePath}", LogLevel.Highlight);
+            AppendLog(Loc.S.StatusInstallStarted(selected.FilePath), LogLevel.Highlight);
 
             try
             {
@@ -435,26 +435,26 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                             break;
                         }
                     default:
-                        AppendLog($"지원하지 않는 확장자 포맷입니다: {ext}", LogLevel.Error);
-                        throw new NotSupportedException($"지원하지 않는 파일 형식: {ext}");
+                        AppendLog(Loc.S.ErrUnsupportedFormat(ext), LogLevel.Error);
+                        throw new NotSupportedException(Loc.S.ErrUnsupportedFormat(ext));
                 }
 
                 StatusMessage = Loc.S.StatusInstallDone(selected.ShortDescription);                
-                AppendLog($"설치 완료: {selected.ShortDescription}", LogLevel.Ok);
+                AppendLog(Loc.S.StatusInstallDone(selected.ShortDescription), LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
-                AppendLog($"3DS에서 [홈브루 런처]를 이용해, 3ds 폴더 내부의 'custom-install-finalize'를 실행해야 게임 아이콘이 생성됩니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogHomebrewFinalizeHint, LogLevel.Highlight);
 
                 if (selected.ForcedLanguage != LocaleLanguage.None)
                 {
                     if (selected.LocaleRegionCode == LocaleRegion.None)
                     {
-                        AppendLog("제품 코드에서 지역을 판별할 수 없어 로케일 고정을 건너뜁니다.", LogLevel.Error);
+                        AppendLog(Loc.S.LogLocaleFixSkippedNoRegion, LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                     }
                     else
                     {
                         await LocaleTxtWriter.WriteAsync(_scanner!.SdRoot, selected.TitleId, selected.ForcedLanguage, ct);
-                        AppendLog($"로케일 고정 완료: {LocaleTxtWriter.LanguageToRegion[selected.ForcedLanguage]} {selected.ForcedLanguage} (locale.txt)", LogLevel.Ok);
+                        AppendLog(Loc.S.LogLocaleFixed(LocaleTxtWriter.LanguageToRegion[selected.ForcedLanguage], selected.ForcedLanguage), LogLevel.Ok);
                     }
                 }
             }
@@ -462,7 +462,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             {
                 StatusMessage = Loc.S.MsgCancelled;
 
-                AppendLog("설치가 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogInstallCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
                 if (Directory.Exists(titleRoot))
@@ -478,7 +478,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 StatusMessage = Loc.S.LogError(ex.Message);
                 
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 throw;
             }

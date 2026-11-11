@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.Services;
 using RomForge.ViewModels.N3DS;
@@ -112,8 +113,8 @@ public partial class InstallMainTab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Title = "movable.sed 선택",
-            Filter = "movable.sed|movable.sed|모든 파일|*.*",
+            Title = Loc.S.DialogSelectMovableSed,
+            Filter = $"movable.sed|movable.sed|{Loc.S.FilterAllFiles}|*.*",
             FileName = "movable.sed",
         };
 

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Common.Localization;
 using System.Text.RegularExpressions;
 using RomForge.Core.Models.N3DS;
 
@@ -15,7 +16,7 @@ public static partial class PatchParser
     public static PatchSet Parse(string path, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(path))
-            throw new ArgumentException("패치 경로가 비어 있습니다.", nameof(path));
+            throw new ArgumentException(Loc.S.ErrPatchPathEmpty, nameof(path));
 
         if (File.Exists(path))
         {
@@ -25,14 +26,14 @@ public static partial class PatchParser
             {
                 ".zip" => ParseArchive(path, PatchKind.Zip, ct),
                 ".7z" => ParseArchive(path, PatchKind.SevenZip, ct),
-                _ => throw new InvalidDataException("지원하지 않는 패치 파일 형식입니다 (zip, 7z만 지원).")
+                _ => throw new InvalidDataException(Loc.S.ErrUnsupportedPatchFormat)
             };
         }
 
         if (Directory.Exists(path))
             return ParseFolder(path, ct);
 
-        throw new FileNotFoundException("패치 파일 또는 폴더를 찾을 수 없습니다.", path);
+        throw new FileNotFoundException(Loc.S.ErrPatchNotFound, path);
     }
 
     private static PatchSet ParseFolder(string path, CancellationToken ct)

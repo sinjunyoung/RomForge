@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Common.Localization;
 using RomForge.Core.Models.N3DS;
 
 namespace RomForge.Core.Services.N3DS;
@@ -11,27 +12,27 @@ public sealed record PatchDisplay(string KindText, string Name, string TargetTex
         bool isError = false;
 
         if (string.IsNullOrEmpty(titleId) && string.IsNullOrEmpty(productCode))
-            status = "원본 롬을 지정하면 일치 여부를 확인합니다.";
+            status = Loc.S.MsgPatchSpecifyRomToVerify;
         else if (patch.MatchesRom(titleId, productCode))
-            status = "원본 롬과 일치합니다.";
+            status = Loc.S.MsgPatchRomMatches;
         else
         {
-            status = "원본 롬과 패치 대상 정보가 맞지 않습니다.";
+            status = Loc.S.MsgPatchRomMismatch;
             isError = true;
         }
 
         string kindText = patch.Kind switch
         {
-            PatchKind.Folder => "폴더",
+            PatchKind.Folder => Loc.S.LabelFolder,
             PatchKind.Zip => "ZIP",
             PatchKind.SevenZip => "7Z",
-            _ => "기타"
+            _ => Loc.S.LabelOther
         };
 
-        string target = patch.TargetIds.Count == 0 ? "제한 없음" : string.Join(", ", patch.TargetIds);
+        string target = patch.TargetIds.Count == 0 ? Loc.S.LabelUnlimited : string.Join(", ", patch.TargetIds);
 
-        return new PatchDisplay(kindText, Path.GetFileName(patch.Path), $"대상 타이틀 ID: {target}", $"파일: {patch.FileCount:N0}개", status, isError);
+        return new PatchDisplay(kindText, Path.GetFileName(patch.Path), Loc.S.LabelTargetTitleId(target), Loc.S.LabelFileCountN(patch.FileCount.ToString("N0")), status, isError);
     }
 
-    public static PatchDisplay Failed(string message) => new("오류", "-", string.Empty, string.Empty, message, true);
+    public static PatchDisplay Failed(string message) => new(Loc.S.MsgTitleError, "-", string.Empty, string.Empty, message, true);
 }

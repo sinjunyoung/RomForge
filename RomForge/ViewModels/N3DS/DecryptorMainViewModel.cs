@@ -82,7 +82,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -124,7 +124,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
             {
                 int totalCount = FileItems.Count;
 
-                AppendLog($"총 {totalCount}개의 복호화 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobsStartingDecrypt(totalCount), LogLevel.Highlight);
 
                 int cnt = 0;
 
@@ -137,7 +137,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
 
                     if (!item.Crypto)
                     {
-                        AppendLog($"[{item.FileName}] 이미 복호화된 파일입니다.", LogLevel.Info);
+                        AppendLog(Loc.S.LogAlreadyDecrypted(item.FileName), LogLevel.Info);
 
                         item.State = ItemStatus.Unsupported;
 
@@ -169,7 +169,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                     }
                     catch (Exception ex)
                     {
-                        AppendLog($"[{item.FileName}] 복호화 실패: {ex.Message}", LogLevel.Error);
+                        AppendLog(Loc.S.LogDecryptFailed(item.FileName, ex.Message), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -182,16 +182,16 @@ public class DecryptorMainViewModel : ToolTabViewModel
 
                 if (cnt > 0)
                 {
-                    AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     MainViewModel.SetTaskbarProgress(100);
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Decrypting))
@@ -199,7 +199,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
 
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Decrypting))
@@ -223,7 +223,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"미완성 파일 삭제 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogDeleteIncompleteFailed(ex.Message), LogLevel.Error);
         }
     }
 

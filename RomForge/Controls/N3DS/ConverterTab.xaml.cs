@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.Models.N3DS;
 using RomForge.ViewModels.N3DS;
@@ -68,7 +69,7 @@ public partial class ConverterTab : UserControl
 
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "변환할 파일 선택",
+            Title = Loc.S.DialogSelectFileToConvert,
             Multiselect = true,
             Filter = InstallMainViewModel.GetFileDialogFilter()
         };
@@ -84,7 +85,7 @@ public partial class ConverterTab : UserControl
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Microsoft.Win32;
 using RomForge.Core.Models.N3DS;
 using RomForge.Core.Services;
@@ -33,12 +34,12 @@ public partial class InstalledTitlesTab : UserControl
                 {
                     LoadingProgress.Maximum = total;
                     LoadingProgress.Value = current;
-                    LoadingText.Text = $"로딩 중... {current} / {total}";
+                    LoadingText.Text = Loc.S.ProgressLoadingCount(current, total);
                 }));
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"로드 실패: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogLoadFailed(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -51,7 +52,7 @@ public partial class InstalledTitlesTab : UserControl
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"복구 실패: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogRecoverFailed(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -98,8 +99,8 @@ public partial class InstalledTitlesTab : UserControl
 
         var dialog = new SaveFileDialog
         {
-            Title = $"{desc} 저장 위치 선택",
-            Filter = $"{desc} 파일|*.{ext}",
+            Title = Loc.S.DialogSelectSaveLocation(desc),
+            Filter = $"{Loc.S.FilterFilesOfType(desc)}|*.{ext}",
             FileName = $"{selected.ShortDescription}.{ext}",
         };
 
@@ -111,11 +112,11 @@ public partial class InstalledTitlesTab : UserControl
             await Vm.ExtractTitleAsync(selected, dialog.FileName, asCci);
 
             if (File.Exists(dialog.FileName))
-                Vm.AppendLog($"추출 완료: {dialog.FileName}", LogLevel.Ok);
+                Vm.AppendLog(Loc.S.LogExtractDone(dialog.FileName), LogLevel.Ok);
         }
         catch (Exception ex)
         {
-            Vm.AppendLog($"추출 실패: {ex.Message}", LogLevel.Error);
+            Vm.AppendLog(Loc.S.LogExtractFailed(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }

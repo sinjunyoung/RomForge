@@ -495,4 +495,116 @@ public abstract class LocalizedStrings
     public abstract string ProgressGdAligningSectors { get; }
     public abstract string ProgressGdWritingRawSectors { get; }
     public abstract string ProgressGdTrackWritten { get; }
+
+    public abstract string RegionJapan { get; }
+    public abstract string RegionNorthAmerica { get; }
+    public abstract string RegionEurope { get; }
+    public abstract string RegionKorea { get; }
+    public abstract string RegionWorld { get; }
+    public abstract string RegionChina { get; }
+    public abstract string RegionTaiwan { get; }
+    public abstract string RegionGermany { get; }
+    public abstract string RegionFrance { get; }
+    public abstract string RegionSpain { get; }
+    public abstract string RegionItaly { get; }
+    public abstract string RegionNetherlands { get; }
+    public abstract string RegionRussia { get; }
+    public abstract string LabelUnknown { get; }
+    public abstract string TitleTypeSystem { get; }
+    public abstract string LabelOther { get; }
+    public abstract string MsgPatchSpecifyRomToVerify { get; }
+    public abstract string MsgPatchRomMatches { get; }
+    public abstract string MsgPatchRomMismatch { get; }
+    public abstract string LabelFolder { get; }
+    public abstract string LabelUnlimited { get; }
+    public abstract string LabelTargetTitleId(object arg0);
+    public abstract string LabelFileCountN(object arg0);
+    public abstract string ErrSdRootEmpty { get; }
+    public abstract string ErrInvalidTitleId { get; }
+    public abstract string ErrPatchPathEmpty { get; }
+    public abstract string ErrUnsupportedPatchFormat { get; }
+    public abstract string ErrPatchNotFound { get; }
+    public abstract string LogCannotOpenKoreanPatchArchive(object arg0);
+    public abstract string LogKoreanPatchPathNotFound(object arg0);
+    public abstract string ErrCiaNeedsKeys { get; }
+    public abstract string LogExefsIconEntryNotFound { get; }
+    public abstract string LogGameInfoChanged { get; }
+    public abstract string ErrUnsupportedFormat(object arg0);
+    public abstract string LogUnpackStart { get; }
+    public abstract string LogPartitionUnpackDone(object arg0);
+    public abstract string LogRepackStart { get; }
+    public abstract string ErrHeaderBinMissing(object arg0);
+    public abstract string ErrContentBinMissing(object arg0);
+    public abstract string LogExheaderReplaced { get; }
+    public abstract string ErrNoUnpackedPartitions { get; }
+    public abstract string LogPatchTargetMissing { get; }
+    public abstract string LogExefsPatchApplied(object arg0);
+    public abstract string LogRomfsPatchApplied(object arg0);
+    public abstract string LogDone(object arg0);
+    public abstract string LogStreamingRepackStart { get; }
+    public abstract string DialogSelectFileToConvert { get; }
+    public abstract string DialogSelectFolderToAdd { get; }
+    public abstract string DialogSelectFileToDecrypt { get; }
+    public abstract string FilterRomFiles3ds { get; }
+    public abstract string DialogSelectMovableSed { get; }
+    public abstract string DialogSelectFileToInstall { get; }
+    public abstract string LogLoadFailed(object arg0);
+    public abstract string LogRecoverFailed(object arg0);
+    public abstract string LogExtractFailed(object arg0);
+    public abstract string LogExtractDone(object arg0);
+    public abstract string DialogSelectSaveLocation(object arg0);
+    public abstract string FilterFilesOfType(object arg0);
+    public abstract string DialogSelectPatchFolder { get; }
+    public abstract string DialogSelectPatchFile { get; }
+    public abstract string FilterPatchFiles { get; }
+    public abstract string DialogSelect3dsRom { get; }
+    public abstract string DialogSelectSourceFile { get; }
+    public abstract string DialogSelectKoreanPatchFolder { get; }
+    public abstract string DialogSelectKoreanPatch { get; }
+    public abstract string FilterKoreanPatchArchive { get; }
+    public abstract string DialogSelectWorkFolder { get; }
+    public abstract string FilterSupportedFiles { get; }
+    public abstract string LogJobsStartingConvert(object arg0);
+    public abstract string ErrInvalidOutputFormat { get; }
+    public abstract string LogConvertFailed(object arg0, object arg1);
+    public abstract string LogJobsCompleted(object arg0);
+    public abstract string LogNoSuccessfulJobs { get; }
+    public abstract string LogJobCancelled { get; }
+    public abstract string LogJobsStartingDecrypt(object arg0);
+    public abstract string LogAlreadyDecrypted(object arg0);
+    public abstract string LogDecryptFailed(object arg0, object arg1);
+    public abstract string LogDeleteIncompleteFailed(object arg0);
+    public abstract string LogExtractCancelled { get; }
+    public abstract string LogScanStarting { get; }
+    public abstract string LogSdAndMovablePaths(object arg0, object arg1);
+    public abstract string LogTitleListLoaded { get; }
+    public abstract string MsgConfirmRebuildTitleDb { get; }
+    public abstract string LogRecoveryStarting { get; }
+    public abstract string LogRecoveryRegistered(object arg0);
+    public abstract string LogRecoverySkipped(object arg0);
+    public abstract string LogRecoveryCancelled { get; }
+    public abstract string LogExtractReady(object arg0, object arg1);
+    public abstract string LogOutputPathAndFormat(object arg0, object arg1);
+    public abstract string LogExtractStarted(object arg0);
+    public abstract string LogInvalidTitleIdConfigured { get; }
+    public abstract string LogTitleAlreadyExists(object arg0);
+    public abstract string MsgConfirmReinstall(object arg0);
+    public abstract string LogReinstallDeclined { get; }
+    public abstract string LogDeletingInstalledTitleFolder { get; }
+    public abstract string LogHomebrewFinalizeHint { get; }
+    public abstract string LogLocaleFixSkippedNoRegion { get; }
+    public abstract string LogLocaleFixed(object arg0, object arg1);
+    public abstract string LogInstallCancelled { get; }
+    public abstract string MsgNo3dsKeyFilesTitle { get; }
+    public abstract string MsgNo3dsKeyFilesDesc { get; }
+    public abstract string MsgConfirmDiscardUnpacked { get; }
+    public abstract string LogDoneTotalTime(object arg0);
+    public abstract string LogPatchInfoRead(object arg0);
+    public abstract string LogPatchReadCancelled { get; }
+    public abstract string LogPatchReadFailed(object arg0);
+    public abstract string ErrSelectSourceFile { get; }
+    public abstract string ErrSelectWorkFolder { get; }
+    public abstract string ErrNoUnpackedData { get; }
+    public abstract string ErrPatchInfoUnreadable { get; }
+    public abstract string ErrPatchTargetMismatch(object arg0);
 }

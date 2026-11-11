@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Services;
 using Patch.Core.Interfaces;
 using Patch.Core.Services;
@@ -34,14 +35,14 @@ public sealed class PatchSourceContext : IDisposable
             }
             catch (Exception ex)
             {
-                log($"⚠️ 한글패치 압축파일을 열 수 없습니다: {ex.Message}", LogLevel.Error);
+                log($"⚠️ {Loc.S.LogCannotOpenKoreanPatchArchive(ex.Message)}", LogLevel.Error);
                 return new PatchSourceContext(null, null, false);
             }
         }
 
         if (!Directory.Exists(rawPath))
         {
-            log($"⚠️ 한글패치 경로를 찾을 수 없습니다: {rawPath}", LogLevel.Error);
+            log($"⚠️ {Loc.S.LogKoreanPatchPathNotFound(rawPath)}", LogLevel.Error);
             return new PatchSourceContext(null, null, false);
         }
 

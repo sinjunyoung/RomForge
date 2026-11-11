@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using N3DS.Core.Enums;
 using N3DS.Core.Models;
 using RomForge.Core.ViewModels;
@@ -57,14 +58,7 @@ public class TitleViewModel : ViewModelBase
 
     public string ProgressText => $"{Progress:F0}";
 
-    public string TypeLabel => Title.Type switch
-    {
-        TitleType.Application => "본편",
-        TitleType.SystemApplication => "시스템",
-        TitleType.Patch => "업데이트",
-        TitleType.DlcContent => "DLC",
-        _ => "기타",
-    };
+    public string TypeLabel => TitleTypeText.Of(Title.Type);
 
     public SolidColorBrush TypeBadgeColor => Title.Type switch
     {
@@ -90,25 +84,20 @@ public class TitleViewModel : ViewModelBase
 
         return region switch
         {
-            'J' => "일본",
-            'E' => "북미",
-            'P' => "유럽",
-            'K' => "한국",
-            'A' => "세계",
-            'C' => "중국",
-            'T' => "대만",
-            'W' => "세계",
-            'G' => "독일",
-            'F' => "프랑스",
-            'S' => "스페인",
-            'I' => "이탈리아",
-            'H' => "네덜란드",
-            'R' => "러시아",
-            'U' => "북미",
-            'N' => "북미",
-            'X' => "세계",
-            'Z' => "세계",
-            _ => "알 수 없음"
+            'J' => Loc.S.RegionJapan,
+            'E' or 'U' or 'N' => Loc.S.RegionNorthAmerica,
+            'P' => Loc.S.RegionEurope,
+            'K' => Loc.S.RegionKorea,
+            'A' or 'W' or 'X' or 'Z' => Loc.S.RegionWorld,
+            'C' => Loc.S.RegionChina,
+            'T' => Loc.S.RegionTaiwan,
+            'G' => Loc.S.RegionGermany,
+            'F' => Loc.S.RegionFrance,
+            'S' => Loc.S.RegionSpain,
+            'I' => Loc.S.RegionItaly,
+            'H' => Loc.S.RegionNetherlands,
+            'R' => Loc.S.RegionRussia,
+            _ => Loc.S.LabelUnknown
         };
     }
 

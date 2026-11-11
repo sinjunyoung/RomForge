@@ -76,7 +76,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -121,7 +121,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             {
                 int totalCount = FileItems.Count;
 
-                AppendLog($"총 {totalCount}개의 3DS 변환 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobsStartingConvert(totalCount), LogLevel.Highlight);
 
                 int cnt = 0;
 
@@ -175,7 +175,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                                 }
                                 break;
                             default:
-                                throw new NotSupportedException("잘못된 출력 포맷 설정입니다.");
+                                throw new NotSupportedException(Loc.S.ErrInvalidOutputFormat);
                         }
 
                         item.Progress = 100;
@@ -197,7 +197,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                     }
                     catch (Exception ex)
                     {
-                        AppendLog($"[{item.FileName}.{item.Extension}] 변환 실패: {ex.Message}", LogLevel.Error);
+                        AppendLog(Loc.S.LogConvertFailed($"{item.FileName}.{item.Extension}", ex.Message), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -208,17 +208,17 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                 if (cnt > 0)
                 {
-                    AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     MainViewModel.SetTaskbarProgress(100);
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
 
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
@@ -227,7 +227,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 

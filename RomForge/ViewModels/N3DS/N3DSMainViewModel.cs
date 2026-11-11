@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Crypto;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.ViewModels;
 using RomForge.Core.ViewModels.Settings;
@@ -27,7 +28,7 @@ public class N3DSMainViewModel : MultiToolTabViewModel
         var keyFiles = AppConfig.Instance.KeyFiles;
 
         _keysWereAvailable = KeyStorePaths.HasUsableKeys;
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/3DS.png", "3DS 키 파일이 없습니다", "aes_keys.txt, boot9.bin, seeddb.bin이 모두 필요합니다. 없는 파일은 exe와 같은 폴더에 넣거나 직접 지정해주세요.",
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/3DS.png", Loc.S.MsgNo3dsKeyFilesTitle, Loc.S.MsgNo3dsKeyFilesDesc,
                     [KeyFileItems.N3dsAesKeys(keyFiles), KeyFileItems.N3dsBoot9(keyFiles), KeyFileItems.N3dsSeedDb(keyFiles)], () => KeyStorePaths.HasUsableKeys);
 
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();

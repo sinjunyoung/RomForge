@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Enums;
+using Common.Localization;
 using System.IO;
 
 namespace RomForge.Core.Services.N3DS;
@@ -24,10 +25,10 @@ public static class LocaleTxtWriter
     public static async Task WriteAsync(string sdRoot, string titleId, LocaleLanguage language, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(sdRoot))
-            throw new ArgumentException("SD 루트 경로가 비어있습니다.", nameof(sdRoot));
+            throw new ArgumentException(Loc.S.ErrSdRootEmpty, nameof(sdRoot));
 
         if (string.IsNullOrEmpty(titleId) || titleId.Length != 16)
-            throw new ArgumentException("타이틀 ID가 올바르지 않습니다.", nameof(titleId));
+            throw new ArgumentException(Loc.S.ErrInvalidTitleId, nameof(titleId));
 
         if (language == LocaleLanguage.None)
             return;
