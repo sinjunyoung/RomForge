@@ -1,4 +1,5 @@
 ﻿using CD.Core.Services.Readers;
+using Common.Localization;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common.Models;
@@ -174,17 +175,17 @@ public class CompressMainViewModel : ToolTabViewModel
                         break;
                     }
 
-                    if (item.Status is "완료" or "미지원")
+                    if (item.State is ItemStatus.Done or ItemStatus.Unsupported)
                         continue;
 
                     try
                     {
-                        item.Status = "대기 중";
+                        item.State = ItemStatus.Waiting;
                         item.Progress = 0;
 
                         var detected = FormatDetector.Detect(item.FilePath);
 
-                        item.Status = "변환 중";
+                        item.State = ItemStatus.Converting;
 
                         ScrollToItemRequested?.Invoke(item);
 
@@ -285,7 +286,7 @@ public class CompressMainViewModel : ToolTabViewModel
                                 break;
                             case RomFormat.Unknown:
                             default:
-                                item.Status = "미지원";
+                                item.State = ItemStatus.Unsupported;
 
                                 AppendLog($"[{item.FileName}] 지원하지 않는 포맷", LogLevel.Error);
                                 await SoundPlayer.PlayErrorAsync();
@@ -293,7 +294,7 @@ public class CompressMainViewModel : ToolTabViewModel
                         }
 
                         item.Progress = 100;
-                        item.Status = "완료";
+                        item.State = ItemStatus.Done;
                         cnt++;
                     }
                     catch (OperationCanceledException)
@@ -310,7 +311,7 @@ public class CompressMainViewModel : ToolTabViewModel
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                        item.Status = "실패";
+                        item.State = ItemStatus.Failed;
                     }
                 }
 
@@ -332,9 +333,9 @@ public class CompressMainViewModel : ToolTabViewModel
 
     private void CancelRemainingItems()
     {
-        foreach (var remainingItem in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
+        foreach (var remainingItem in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
         {
-            remainingItem.Status = "취소";
+            remainingItem.State = ItemStatus.Cancelled;
             remainingItem.Progress = 0;
         }
     }

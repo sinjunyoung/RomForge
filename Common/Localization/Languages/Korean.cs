@@ -376,4 +376,25 @@ public sealed class Korean : LocalizedStrings
     public override string UpdateAvailable => "새로운 업데이트";
     public override string UpdateDescription => "RomForge의 새로운 버전이 릴리즈 되었습니다.";
     public override string UpdateTitle => "RomForge 업데이트";
+
+    public override string StatusWaiting => "대기 중";
+    public override string StatusConverting => "변환 중";
+    public override string StatusDecrypting => "복호화 중";
+    public override string StatusExtracting => "추출 중";
+    public override string StatusDownloading => "다운로드 중";
+    public override string StatusUnzipping => "압축 해제 중";
+    public override string StatusUnzipDone => "압축 해제 완료";
+    public override string StatusUnzipFailed => "압축 해제 실패";
+    public override string StatusDone => "완료";
+    public override string StatusFailed => "실패";
+    public override string StatusCancelled => "취소";
+    public override string StatusUnsupported => "미지원";
+    public override string StatusSkipped => "건너뜀";
+    public override string RenameStatusReady => "변경 예정";
+    public override string RenameStatusUnchanged => "변경 없음";
+    public override string RenameStatusMissingInfo => "정보 없음";
+    public override string RenameStatusEmptyName => "이름 없음";
+    public override string RenameStatusNameTooLong => "이름 너무 김";
+    public override string RenameStatusDuplicate => "이름 중복";
+    public override string RenameStatusTargetExists => "파일 존재";
 }

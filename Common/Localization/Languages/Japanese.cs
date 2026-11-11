@@ -376,4 +376,25 @@ public sealed class Japanese : LocalizedStrings
     public override string UpdateAvailable => "新しいアップデート";
     public override string UpdateDescription => "RomForgeの新しいバージョンがリリースされました。";
     public override string UpdateTitle => "RomForgeアップデート";
+
+    public override string StatusWaiting => "待機中";
+    public override string StatusConverting => "変換中";
+    public override string StatusDecrypting => "復号中";
+    public override string StatusExtracting => "抽出中";
+    public override string StatusDownloading => "ダウンロード中";
+    public override string StatusUnzipping => "解凍中";
+    public override string StatusUnzipDone => "解凍完了";
+    public override string StatusUnzipFailed => "解凍失敗";
+    public override string StatusDone => "完了";
+    public override string StatusFailed => "失敗";
+    public override string StatusCancelled => "キャンセル";
+    public override string StatusUnsupported => "非対応";
+    public override string StatusSkipped => "スキップ";
+    public override string RenameStatusReady => "変更予定";
+    public override string RenameStatusUnchanged => "変更なし";
+    public override string RenameStatusMissingInfo => "情報なし";
+    public override string RenameStatusEmptyName => "名前なし";
+    public override string RenameStatusNameTooLong => "名前が長すぎ";
+    public override string RenameStatusDuplicate => "名前重複";
+    public override string RenameStatusTargetExists => "ファイルあり";
 }

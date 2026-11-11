@@ -5,7 +5,7 @@ using System.Windows.Media.Imaging;
 
 namespace RomForge.Core.Models.N3DS;
 
-public class FileItem(string filePath) : ConvertibleFileItemBase(filePath, "미지원")
+public class FileItem(string filePath) : ConvertibleFileItemBase(filePath)
 {
     public BitmapSource? Icon { get; set => SetProperty(ref field, value); }
 

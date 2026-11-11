@@ -280,10 +280,10 @@ public class RenameMainViewModel : ToolTabViewModel
     private static string? GetStatusOverride(GameFile file)
     {
         if (file.FileType == Loc.S.StatusAnalyzing)
-            return "분석 중";
+            return Loc.S.StatusAnalyzing;
 
         if (file.FileType == Loc.S.StatusNoKey)
-            return "키 없음";
+            return Loc.S.StatusNoKey;
 
         return null;
     }

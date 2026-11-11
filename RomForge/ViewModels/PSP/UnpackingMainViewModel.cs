@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.UI.Command;
+using Common.Localization;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
@@ -118,13 +119,13 @@ public class UnpackingMainViewModel : ToolTabViewModel
                 {
                     _cts.Token.ThrowIfCancellationRequested();
 
-                    if (item.Status == "완료" || item.Status == "미지원")
+                    if (item.State is ItemStatus.Done or ItemStatus.Unsupported)
                         continue;
 
-                    item.Status = "대기 중";
+                    item.State = ItemStatus.Waiting;
                     item.Progress = 0;
                     MainViewModel.SetTaskbarProgress(0);
-                    item.Status = "변환 중";
+                    item.State = ItemStatus.Converting;
                     ScrollToItemRequested?.Invoke(item);
 
                     var progressHandler = new Progress<ProgressInfo>(p => { item.Progress = p.Percent; });
@@ -149,7 +150,7 @@ public class UnpackingMainViewModel : ToolTabViewModel
 
                         item.Progress = 100;
                         MainViewModel.SetTaskbarProgress(100);
-                        item.Status = "완료";
+                        item.State = ItemStatus.Done;
                         cnt++;
                     }
                     catch (OperationCanceledException)
@@ -161,7 +162,7 @@ public class UnpackingMainViewModel : ToolTabViewModel
                         AppendLog($"[{item.FileName}.{item.Extension}] 변환 실패: {ex.Message}", LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                        item.Status = "실패";
+                        item.State = ItemStatus.Failed;
                         item.Progress = 0;                        
                     }
                 }
@@ -182,8 +183,8 @@ public class UnpackingMainViewModel : ToolTabViewModel
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
-                    item.Status = "취소";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
+                    item.State = ItemStatus.Cancelled;
             }
             catch (Exception ex)
             {
@@ -191,8 +192,8 @@ public class UnpackingMainViewModel : ToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
-                    item.Status = "실패";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting))
+                    item.State = ItemStatus.Failed;
             }
             finally
             {

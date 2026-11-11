@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
@@ -88,7 +89,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
             var item = new FileItem(path);
 
-            if (item.SelectedTargetFormat == "미지원")
+            if (string.IsNullOrEmpty(item.SelectedTargetFormat))
                 continue;
 
             await LoadMetadataAsync(item);
@@ -257,13 +258,13 @@ public class ConverterMainViewModel : ToolTabViewModel
                     {
                         _cts.Token.ThrowIfCancellationRequested();
 
-                        if (item.Status is "완료" or "미지원")
+                        if (item.State is ItemStatus.Done or ItemStatus.Unsupported)
                             continue;
 
-                        item.Status = "대기 중";
+                        item.State = ItemStatus.Waiting;
                         item.Progress = 0;
                         MainViewModel.SetTaskbarProgress(0);
-                        item.Status = "변환 중";
+                        item.State = ItemStatus.Converting;
 
                         ScrollToItemRequested?.Invoke(item);
 
@@ -273,7 +274,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                             item.Progress = 100;
                             MainViewModel.SetTaskbarProgress(100);
-                            item.Status = "완료";
+                            item.State = ItemStatus.Done;
                             cnt++;
                         }
                         catch (OperationCanceledException)
@@ -284,7 +285,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                         {
                             AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
                             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                            item.Status = "실패";
+                            item.State = ItemStatus.Failed;
                             item.Progress = 0;                            
                         }
                     }
@@ -305,8 +306,8 @@ public class ConverterMainViewModel : ToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
-                    item.Status = "취소";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
+                    item.State = ItemStatus.Cancelled;
             }
             catch (Exception ex)
             {
@@ -314,8 +315,8 @@ public class ConverterMainViewModel : ToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
-                    item.Status = "실패";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting))
+                    item.State = ItemStatus.Failed;
             }
             finally
             {

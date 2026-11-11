@@ -1,9 +1,10 @@
+using Common.Localization;
 using RomForge.Core.ViewModels;
 using System.IO;
 
 namespace RomForge.Core.Models.Util;
 
-public class TistoryDownloadItem(string url) : ProcessableItemBase("대기 중")
+public class TistoryDownloadItem(string url) : ProcessableItemBase(ItemStatus.Waiting)
 {
     public string Url { get; } = url;
 

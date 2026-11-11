@@ -376,4 +376,25 @@ public sealed class German : LocalizedStrings
     public override string UpdateAvailable => "Update verfügbar";
     public override string UpdateDescription => "Eine neue Version von RomForge wurde veröffentlicht.";
     public override string UpdateTitle => "RomForge-Update";
+
+    public override string StatusWaiting => "Wartet";
+    public override string StatusConverting => "Wird konvertiert";
+    public override string StatusDecrypting => "Wird entschlüsselt";
+    public override string StatusExtracting => "Wird extrahiert";
+    public override string StatusDownloading => "Wird heruntergeladen";
+    public override string StatusUnzipping => "Wird entpackt";
+    public override string StatusUnzipDone => "Entpackt";
+    public override string StatusUnzipFailed => "Entpacken fehlgeschlagen";
+    public override string StatusDone => "Fertig";
+    public override string StatusFailed => "Fehlgeschlagen";
+    public override string StatusCancelled => "Abgebrochen";
+    public override string StatusUnsupported => "Nicht unterstützt";
+    public override string StatusSkipped => "Übersprungen";
+    public override string RenameStatusReady => "Wird umbenannt";
+    public override string RenameStatusUnchanged => "Unverändert";
+    public override string RenameStatusMissingInfo => "Keine Info";
+    public override string RenameStatusEmptyName => "Kein Name";
+    public override string RenameStatusNameTooLong => "Name zu lang";
+    public override string RenameStatusDuplicate => "Name doppelt";
+    public override string RenameStatusTargetExists => "Datei vorhanden";
 }

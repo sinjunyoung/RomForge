@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core.Models;
 using RomForge.Core.Models.Util;
@@ -133,7 +134,7 @@ public class HashMainViewModel : BatchToolTabViewModel
 
                     PostUi(() =>
                     {
-                        item.Status = "변환 중";
+                        item.State = ItemStatus.Converting;
                         item.Progress = 0;
                         item.HashResult = string.Empty;
                     });
@@ -158,7 +159,7 @@ public class HashMainViewModel : BatchToolTabViewModel
                         {
                             item.HashResult = formatted;
                             item.Progress = 100;
-                            item.Status = "완료";
+                            item.State = ItemStatus.Done;
                         });
 
                         Interlocked.Increment(ref successCount);
@@ -167,7 +168,7 @@ public class HashMainViewModel : BatchToolTabViewModel
                     }
                     else
                     {
-                        PostUi(() => item.Status = "실패");
+                        PostUi(() => item.State = ItemStatus.Failed);
 
                         AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
@@ -188,9 +189,9 @@ public class HashMainViewModel : BatchToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "변환 중" or "대기 중"))
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting or ItemStatus.Waiting))
                 {
-                    item.Status = "취소";
+                    item.State = ItemStatus.Cancelled;
                     item.Progress = 0;
                 }
             }

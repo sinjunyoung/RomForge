@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.UI.Command;
+using Common.Localization;
 using RomForge.Core.Models.Util;
 using System.IO;
 using System.Windows;
@@ -146,7 +147,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
         {
             try
             {
-                SelectedFile.Status = "추출 중";
+                SelectedFile.State = ItemStatus.Extracting;
                 SelectedFile.Progress = 0;
 
                 BeginBatch(1);
@@ -160,7 +161,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
                 if (success)
                 {
                     SelectedFile.Progress = 100;
-                    SelectedFile.Status = "완료";
+                    SelectedFile.State = ItemStatus.Done;
 
                     CompleteBatchItem();
                     await SoundPlayer.PlayCompleteAsync();
@@ -174,8 +175,8 @@ public class CertsMainViewModel : BatchToolTabViewModel
                     CompleteBatchItem(false);
                     await SoundPlayer.PlayErrorAsync();
 
-                    if (SelectedFile.Status is "추출 중")
-                        SelectedFile.Status = "실패";
+                    if (SelectedFile.State is ItemStatus.Extracting)
+                        SelectedFile.State = ItemStatus.Failed;
                 }
             }
             catch (OperationCanceledException)
@@ -184,9 +185,9 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
 
-                if (SelectedFile.Status is "추출 중")
+                if (SelectedFile.State is ItemStatus.Extracting)
                 {
-                    SelectedFile.Status = "취소";
+                    SelectedFile.State = ItemStatus.Cancelled;
                     SelectedFile.Progress = 0;
                 }
             }
@@ -196,7 +197,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
 
-                SelectedFile.Status = "실패";
+                SelectedFile.State = ItemStatus.Failed;
             }
             finally
             {
@@ -219,7 +220,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
             if (fs.Length < CertOffset + CertSize)
             {
                 AppendLog($"[실패] 파일 크기가 너무 작습니다. (필요: 0x{CertOffset + CertSize:X}바이트, 실제: 0x{fs.Length:X}바이트)", LogLevel.Error);
-                item.Status = "실패";
+                item.State = ItemStatus.Failed;
 
                 return false;
             }
@@ -244,7 +245,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
             if (totalRead != CertSize)
             {
                 AppendLog($"[실패] 읽기 불완전: 예상 0x{CertSize:X}바이트, 실제 0x{totalRead:X}바이트", LogLevel.Error);
-                item.Status = "실패";
+                item.State = ItemStatus.Failed;
 
                 return false;
             }

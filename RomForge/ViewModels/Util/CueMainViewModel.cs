@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core.Models.Util;
 using RomForge.Core.Services;
@@ -110,7 +111,7 @@ public class CueMainViewModel : BatchToolTabViewModel
 
                 AppendLog($"총 {totalCount}개의 CUE 파일 검증 및 생성 작업을 시작합니다.", LogLevel.Highlight);
 
-                var targets = FileItems.Where(i => i.Status != "완료").ToList();
+                var targets = FileItems.Where(i => i.State != ItemStatus.Done).ToList();
 
                 BeginBatch(targets.Count);
 
@@ -119,7 +120,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                     _cts.Token.ThrowIfCancellationRequested();
 
                     item.Progress = 0;
-                    item.Status = "변환 중";
+                    item.State = ItemStatus.Converting;
 
                     StartBatchItem();
 
@@ -130,7 +131,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                     if (success)
                     {
                         item.Progress = 100;
-                        item.Status = "완료";
+                        item.State = ItemStatus.Done;
                         successCount++;
 
                         CompleteBatchItem();
@@ -142,8 +143,8 @@ public class CueMainViewModel : BatchToolTabViewModel
                         CompleteBatchItem(false);
                         await SoundPlayer.PlayErrorAsync();
 
-                        if (item.Status is "변환 중")
-                            item.Status = "실패";
+                        if (item.State is ItemStatus.Converting)
+                            item.State = ItemStatus.Failed;
                     }
                 }
 
@@ -163,9 +164,9 @@ public class CueMainViewModel : BatchToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
                 {
-                    item.Status = "취소";
+                    item.State = ItemStatus.Cancelled;
                     item.Progress = 0;
                 }
             }
@@ -175,8 +176,8 @@ public class CueMainViewModel : BatchToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
 
-                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
-                    item.Status = "실패";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting))
+                    item.State = ItemStatus.Failed;
             }
             finally
             {
@@ -198,7 +199,7 @@ public class CueMainViewModel : BatchToolTabViewModel
 
             if (File.Exists(targetCuePath))
             {
-                item.Status = "미지원";
+                item.State = ItemStatus.Unsupported;
 
                 AppendLog($"[패스] 이미 {item.TargetName} 파일이 존재하므로 생성을 건너뜁니다. (덮어쓰기 방지)", LogLevel.Error);
                 return false;

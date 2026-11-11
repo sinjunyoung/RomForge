@@ -1,4 +1,5 @@
 ﻿using CD.Core.Services.Readers;
+using Common.Localization;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common.Models;
@@ -186,7 +187,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             case "cia":
             case "zcci":
                 var ds = new Core.Models.N3DS.FileItem(path);
-                return ds.SelectedTargetFormat is "" or "미지원" ? null : ds;
+                return string.IsNullOrEmpty(ds.SelectedTargetFormat) ? null : ds;
             case "wud":
             case "wux":
             case "wua":
@@ -213,7 +214,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                 if (Directory.Exists(path))
                 {
                     var wiiu = new Core.Models.WiiU.FileItem(path);
-                    return wiiu.SelectedTargetFormat == "미지원" ? null : wiiu;
+                    return string.IsNullOrEmpty(wiiu.SelectedTargetFormat) ? null : wiiu;
                 }
                 return null;
         }
@@ -325,12 +326,12 @@ public class ConvertMainViewModel : ToolTabViewModel
 
                     var tracker = (IProgressTrackable)item;
 
-                    if (tracker.Status is "완료" or "미지원")
+                    if (tracker.State is ItemStatus.Done or ItemStatus.Unsupported)
                         continue;
 
-                    tracker.Status = "대기 중";
+                    tracker.State = ItemStatus.Waiting;
                     tracker.Progress = 0;
-                    tracker.Status = "변환 중";
+                    tracker.State = ItemStatus.Converting;
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -340,7 +341,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         MainViewModel.SetTaskbarProgress(100);
 
                         tracker.Progress = 100;
-                        tracker.Status = "완료";
+                        tracker.State = ItemStatus.Done;
                         cnt++;
                     }
                     catch (CertsBinNotFoundException e)
@@ -350,7 +351,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                         RunNavigateCerts?.Invoke(this, EventArgs.Empty);
 
-                        tracker.Status = "실패";                        
+                        tracker.State = ItemStatus.Failed;                        
                     }
                     catch (OperationCanceledException)
                     {
@@ -362,7 +363,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                        tracker.Status = "실패";
+                        tracker.State = ItemStatus.Failed;
                         tracker.Progress = 0;                        
                     }
                 }
@@ -386,8 +387,8 @@ public class ConvertMainViewModel : ToolTabViewModel
                 {
                     var tracker = (IProgressTrackable)item;
 
-                    if (tracker.Status is "대기 중" or "변환 중")
-                        tracker.Status = "취소";
+                    if (tracker.State is ItemStatus.Waiting or ItemStatus.Converting)
+                        tracker.State = ItemStatus.Cancelled;
                 }
             }
             finally

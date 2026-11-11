@@ -376,4 +376,43 @@ public abstract class LocalizedStrings
     public abstract string UpdateAvailable { get; }
     public abstract string UpdateDescription { get; }
     public abstract string UpdateTitle { get; }
+
+    public abstract string StatusWaiting { get; }
+    public abstract string StatusConverting { get; }
+    public abstract string StatusDecrypting { get; }
+    public abstract string StatusExtracting { get; }
+    public abstract string StatusDownloading { get; }
+    public abstract string StatusUnzipping { get; }
+    public abstract string StatusUnzipDone { get; }
+    public abstract string StatusUnzipFailed { get; }
+    public abstract string StatusDone { get; }
+    public abstract string StatusFailed { get; }
+    public abstract string StatusCancelled { get; }
+    public abstract string StatusUnsupported { get; }
+    public abstract string StatusSkipped { get; }
+    public abstract string RenameStatusReady { get; }
+    public abstract string RenameStatusUnchanged { get; }
+    public abstract string RenameStatusMissingInfo { get; }
+    public abstract string RenameStatusEmptyName { get; }
+    public abstract string RenameStatusNameTooLong { get; }
+    public abstract string RenameStatusDuplicate { get; }
+    public abstract string RenameStatusTargetExists { get; }
+
+    public string GetItemStatus(ItemStatus status) => status switch
+    {
+        ItemStatus.Waiting => StatusWaiting,
+        ItemStatus.Converting => StatusConverting,
+        ItemStatus.Decrypting => StatusDecrypting,
+        ItemStatus.Extracting => StatusExtracting,
+        ItemStatus.Downloading => StatusDownloading,
+        ItemStatus.Unzipping => StatusUnzipping,
+        ItemStatus.UnzipDone => StatusUnzipDone,
+        ItemStatus.UnzipFailed => StatusUnzipFailed,
+        ItemStatus.Done => StatusDone,
+        ItemStatus.Failed => StatusFailed,
+        ItemStatus.Cancelled => StatusCancelled,
+        ItemStatus.Unsupported => StatusUnsupported,
+        ItemStatus.Skipped => StatusSkipped,
+        _ => string.Empty
+    };
 }

@@ -1,4 +1,6 @@
-﻿using RomForge.Core.ViewModels.Switch;
+﻿using Common.Localization;
+
+using RomForge.Core.ViewModels.Switch;
 
 namespace RomForge.Core.Models.Switch;
 
@@ -14,12 +16,12 @@ public class ConverterFileItem : GameFile, Interfaces.IConvertible
 
     public string SelectedTargetFormat { get; set => SetProperty(ref field, value); }
 
-    public string StatusColor => Status switch
+    public string StatusColor => State switch
     {
-        "완료" => "#4CAF50",
-        "실패" => "#F44336",
-        "취소" => "#FF9800",
-        "변환 중" => "#2196F3",
+        ItemStatus.Done => "#4CAF50",
+        ItemStatus.Failed => "#F44336",
+        ItemStatus.Cancelled => "#FF9800",
+        ItemStatus.Converting => "#2196F3",
         _ => "#888888"
     };
 

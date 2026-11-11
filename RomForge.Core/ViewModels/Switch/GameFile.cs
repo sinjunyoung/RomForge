@@ -1,10 +1,11 @@
+using Common.Localization;
 using Common.Services;
 using NSW.Core.Models;
 using System.Windows.Media;
 
 namespace RomForge.Core.ViewModels.Switch;
 
-public class GameFile(string filePath) : FileItemBase(filePath, "대기 중")
+public class GameFile(string filePath) : FileItemBase(filePath, ItemStatus.Waiting)
 {
     private long? _overrideSizeBytes;
     private bool _isLz4;

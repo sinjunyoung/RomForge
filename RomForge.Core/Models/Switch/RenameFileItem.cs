@@ -1,10 +1,12 @@
-﻿using RomForge.Core.ViewModels.Switch;
+﻿using Common.Localization;
+using RomForge.Core.ViewModels.Switch;
 using System.IO;
 
 namespace RomForge.Core.Models.Switch;
 
 public class RenameFileItem(string filePath) : GameFile(filePath)
 {
+    private RenameState? _planState;
 
     public string OldName => Path.GetFileName(FilePath);
 
@@ -12,29 +14,23 @@ public class RenameFileItem(string filePath) : GameFile(filePath)
 
     public string StatusColor { get; private set => SetProperty(ref field, value); } = "#888888";
 
+    public override string Status => _planState is { } state ? DescribePlan(state) : base.Status;
+
     public void ApplyPlan(RenamePlan plan, string? statusOverride = null)
     {
         if (statusOverride is not null)
         {
             NewName = "-";
-            Status = statusOverride;
+            _planState = null;
+            SetStatusText(statusOverride);
             StatusColor = "#888888";
             return;
         }
 
         NewName = plan.State is RenameState.MissingInfo or RenameState.EmptyName ? "-" : plan.NewName;
 
-        Status = plan.State switch
-        {
-            RenameState.Ready => "변경 예정",
-            RenameState.Unchanged => "변경 없음",
-            RenameState.MissingInfo => "정보 없음",
-            RenameState.EmptyName => "이름 없음",
-            RenameState.NameTooLong => "이름 너무 김",
-            RenameState.Duplicate => "이름 중복",
-            RenameState.TargetExists => "파일 존재",
-            _ => string.Empty
-        };
+        _planState = plan.State;
+        OnPropertyChanged(nameof(Status));
 
         StatusColor = plan.State switch
         {
@@ -44,4 +40,16 @@ public class RenameFileItem(string filePath) : GameFile(filePath)
             _ => "#FF6464"
         };
     }
+
+    private static string DescribePlan(RenameState state) => state switch
+    {
+        RenameState.Ready => Loc.S.RenameStatusReady,
+        RenameState.Unchanged => Loc.S.RenameStatusUnchanged,
+        RenameState.MissingInfo => Loc.S.RenameStatusMissingInfo,
+        RenameState.EmptyName => Loc.S.RenameStatusEmptyName,
+        RenameState.NameTooLong => Loc.S.RenameStatusNameTooLong,
+        RenameState.Duplicate => Loc.S.RenameStatusDuplicate,
+        RenameState.TargetExists => Loc.S.RenameStatusTargetExists,
+        _ => string.Empty
+    };
 }

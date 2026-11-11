@@ -376,4 +376,25 @@ public sealed class English : LocalizedStrings
     public override string UpdateAvailable => "Update available";
     public override string UpdateDescription => "A new version of RomForge has been released.";
     public override string UpdateTitle => "RomForge Update";
+
+    public override string StatusWaiting => "Waiting";
+    public override string StatusConverting => "Converting";
+    public override string StatusDecrypting => "Decrypting";
+    public override string StatusExtracting => "Extracting";
+    public override string StatusDownloading => "Downloading";
+    public override string StatusUnzipping => "Decompressing";
+    public override string StatusUnzipDone => "Decompressed";
+    public override string StatusUnzipFailed => "Decompress failed";
+    public override string StatusDone => "Done";
+    public override string StatusFailed => "Failed";
+    public override string StatusCancelled => "Cancelled";
+    public override string StatusUnsupported => "Unsupported";
+    public override string StatusSkipped => "Skipped";
+    public override string RenameStatusReady => "Will rename";
+    public override string RenameStatusUnchanged => "No change";
+    public override string RenameStatusMissingInfo => "No info";
+    public override string RenameStatusEmptyName => "No name";
+    public override string RenameStatusNameTooLong => "Name too long";
+    public override string RenameStatusDuplicate => "Duplicate name";
+    public override string RenameStatusTargetExists => "File exists";
 }

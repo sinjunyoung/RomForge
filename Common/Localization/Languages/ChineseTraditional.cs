@@ -376,4 +376,25 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string UpdateAvailable => "有可用的更新";
     public override string UpdateDescription => "RomForge 已發布新版本。";
     public override string UpdateTitle => "RomForge 更新";
+
+    public override string StatusWaiting => "等待中";
+    public override string StatusConverting => "轉換中";
+    public override string StatusDecrypting => "解密中";
+    public override string StatusExtracting => "提取中";
+    public override string StatusDownloading => "下載中";
+    public override string StatusUnzipping => "解壓縮中";
+    public override string StatusUnzipDone => "解壓縮完成";
+    public override string StatusUnzipFailed => "解壓縮失敗";
+    public override string StatusDone => "完成";
+    public override string StatusFailed => "失敗";
+    public override string StatusCancelled => "已取消";
+    public override string StatusUnsupported => "不支援";
+    public override string StatusSkipped => "已略過";
+    public override string RenameStatusReady => "將重新命名";
+    public override string RenameStatusUnchanged => "無變更";
+    public override string RenameStatusMissingInfo => "無資訊";
+    public override string RenameStatusEmptyName => "無名稱";
+    public override string RenameStatusNameTooLong => "名稱過長";
+    public override string RenameStatusDuplicate => "名稱重複";
+    public override string RenameStatusTargetExists => "檔案已存在";
 }

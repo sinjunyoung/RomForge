@@ -5,7 +5,7 @@ using WiiU.Core.Services;
 
 namespace RomForge.Core.Models.WiiU;
 
-public class FileItem(string filePath) : ConvertibleFileItemBase(filePath, "미지원")
+public class FileItem(string filePath) : ConvertibleFileItemBase(filePath)
 {
     public string? TitleName { get; set; }
 

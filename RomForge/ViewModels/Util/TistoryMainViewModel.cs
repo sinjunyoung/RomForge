@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using RomForge.Core;
@@ -209,7 +210,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
 
                 AppendLog($"선택된 총 {totalCount}개의 첨부파일 다운로드를 시작합니다. (최대 5개 병렬)", LogLevel.Highlight);
 
-                BeginBatch(targetItems.Count(i => i.Status != "완료"));
+                BeginBatch(targetItems.Count(i => i.State != ItemStatus.Done));
 
                 var options = new ParallelOptions
                 {
@@ -221,10 +222,10 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 {
                     token.ThrowIfCancellationRequested();
 
-                    if (item.Status == "완료")
+                    if (item.State == ItemStatus.Done)
                         return;
 
-                    item.Status = "다운로드 중";
+                    item.State = ItemStatus.Downloading;
                     item.Progress = 0;
                     BatchItemStarted(item);
 
@@ -244,7 +245,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                         item.FileName = Path.GetFileName(savedPath);
                         item.FileSizeBytes = sizeBytes;
                         item.Progress = 100;
-                        item.Status = "완료";
+                        item.State = ItemStatus.Done;
                         BatchItemCompleted(item);
 
                         lock (lockObj)
@@ -257,7 +258,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     catch (Exception)
                     {
                         item.Progress = 0;
-                        item.Status = "실패";
+                        item.State = ItemStatus.Failed;
                         failed = true;
                         BatchItemCompleted(item, false);
                     }
@@ -290,9 +291,9 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "다운로드 중"))
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Downloading))
                 {
-                    item.Status = "취소";
+                    item.State = ItemStatus.Cancelled;
                     item.Progress = 0;
                 }
             }
@@ -309,7 +310,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
     private async Task<(int success, int total)> ExtractCompletedArchivesAsync(List<TistoryDownloadItem> targetItems, CancellationToken token)
     {
         int successCount = 0;
-        var downloaded = targetItems.Where(i => i.Status == "완료" && !string.IsNullOrWhiteSpace(i.SavedPath)).ToList();
+        var downloaded = targetItems.Where(i => i.State == ItemStatus.Done && !string.IsNullOrWhiteSpace(i.SavedPath)).ToList();
         var groups = downloaded.GroupBy(i => TistoryArchiveExtractor.GetGroupKey(i.FileName)).ToList();
         int totalGroups = groups.Count;
 
@@ -335,7 +336,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 AppendLog($"[압축해제 건너뜀] {representative.FileName} 계열의 볼륨 파일이 일부만 선택되어 있습니다.", LogLevel.Error);
 
                 foreach (var item in items)
-                    item.Status = "압축해제실패";
+                    item.State = ItemStatus.UnzipFailed;
 
                 BatchItemCompleted(group, false);
 
@@ -351,7 +352,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 foreach (var item in items)
                 {
                     item.Progress = 0;
-                    item.Status = "압축해제 중";
+                    item.State = ItemStatus.Unzipping;
                 }
 
                 BatchItemStarted(group);
@@ -374,7 +375,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     item.SavedPath = extractDir;
                     item.FileName = displayName;
                     item.Progress = 100;
-                    item.Status = "압축해제완료";
+                    item.State = ItemStatus.UnzipDone;
                 }
 
                 successCount++;
@@ -386,7 +387,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 foreach (var item in items)
                 {
                     item.Progress = 0;
-                    item.Status = "압축해제실패";
+                    item.State = ItemStatus.UnzipFailed;
                 }
 
                 AppendLog($"[압축해제 실패] {representative.FileName}: {ex.Message}", LogLevel.Error);

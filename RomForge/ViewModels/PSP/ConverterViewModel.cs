@@ -1,4 +1,5 @@
 ﻿using PSP.Core.Models;
+using Common.Localization;
 using PSP.Core.Services;
 using RomForge.Core;
 using RomForge.Core.UI.Command;
@@ -104,13 +105,13 @@ public class ConverterViewModel : ToolTabViewModel
                 {
                     _cts.Token.ThrowIfCancellationRequested();
 
-                    if (item.Status == "완료" || item.Status == "미지원")
+                    if (item.State is ItemStatus.Done or ItemStatus.Unsupported)
                         continue;
 
-                    item.Status = "대기 중";
+                    item.State = ItemStatus.Waiting;
                     item.Progress = 0;
                     MainViewModel.SetTaskbarProgress(0);
-                    item.Status = "변환 중";
+                    item.State = ItemStatus.Converting;
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -185,7 +186,7 @@ public class ConverterViewModel : ToolTabViewModel
 
                         item.Progress = 100;
                         MainViewModel.SetTaskbarProgress(100);
-                        item.Status = "완료";                        
+                        item.State = ItemStatus.Done;                        
                         cnt++;
                     }
                     catch (OperationCanceledException)
@@ -205,7 +206,7 @@ public class ConverterViewModel : ToolTabViewModel
 
                         AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
-                        item.Status = "실패";
+                        item.State = ItemStatus.Failed;
                         item.Progress = 0;
                         MainViewModel.SetTaskbarProgress(0);
                     }
@@ -226,8 +227,8 @@ public class ConverterViewModel : ToolTabViewModel
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "변환 중"))
-                    item.Status = "취소";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
+                    item.State = ItemStatus.Cancelled;
             }
             catch (Exception ex)
             {
@@ -235,8 +236,8 @@ public class ConverterViewModel : ToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                foreach (var item in FileItems.Where(i => i.Status is "변환 중"))
-                    item.Status = "실패";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting))
+                    item.State = ItemStatus.Failed;
             }
             finally
             {

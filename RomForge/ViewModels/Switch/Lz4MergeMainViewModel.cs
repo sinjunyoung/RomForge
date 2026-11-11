@@ -62,7 +62,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                     .GroupBy(f => f.FilePath, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
                 var completedPaths = rowsByPath
-                    .Where(p => p.Value.All(r => r.Status == "완료"))
+                    .Where(p => p.Value.All(r => r.State == ItemStatus.Done))
                     .Select(p => p.Key)
                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
@@ -71,7 +71,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 foreach (var file in gameFiles.Where(f => !completedPaths.Contains(f.FilePath)))
                 {
                     file.Progress = 0;
-                    file.Status = "대기중";
+                    file.State = ItemStatus.Waiting;
                     file.Lz4.ResetActual();
                 }
 
@@ -92,9 +92,9 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
 
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
 
-                foreach (var file in gameFiles.Where(f => f.Status is not ("완료" or "실패" or "건너뜀")))
+                foreach (var file in gameFiles.Where(f => f.State is not (ItemStatus.Done or ItemStatus.Failed or ItemStatus.Skipped)))
                 {
-                    file.Status = "취소";
+                    file.State = ItemStatus.Cancelled;
                     file.Progress = 0;
                 }
 
@@ -126,7 +126,8 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
             foreach (var row in rows)
             {
                 row.Progress = 0;
-                row.Status = jobProgress.Label;
+                row.State = ItemStatus.Converting;
+                row.SetStatusText(jobProgress.Label);
             }
 
             return new Progress<ProgressInfo>(info =>
@@ -139,7 +140,8 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 foreach (var row in rows)
                 {
                     row.Progress = info.Percent;
-                    row.Status = jobProgress.Label;
+                    row.State = ItemStatus.Converting;
+                    row.SetStatusText(jobProgress.Label);
                 }
 
                 BatchItemProgress(paths, overall);
@@ -161,11 +163,11 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 foreach (var row in rows)
                 {
                     row.Progress = result == Lz4JobResult.Done ? 100 : 0;
-                    row.Status = result switch
+                    row.State = result switch
                     {
-                        Lz4JobResult.Done => "완료",
-                        Lz4JobResult.Skipped => "건너뜀",
-                        _ => "실패"
+                        Lz4JobResult.Done => ItemStatus.Done,
+                        Lz4JobResult.Skipped => ItemStatus.Skipped,
+                        _ => ItemStatus.Failed
                     };
                 }
             });

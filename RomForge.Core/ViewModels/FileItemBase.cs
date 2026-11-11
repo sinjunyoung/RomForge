@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.Interfaces;
+using Common.Localization;
 using System.IO;
 
 namespace RomForge.Core.ViewModels;
@@ -19,7 +20,7 @@ public abstract class FileItemBase : ProcessableItemBase, IFileMetadata
 
     public virtual long FileSizeBytes => _fileSizeBytes.Value;
 
-    protected FileItemBase(string filePath, string initialStatus = "") : base(initialStatus)
+    protected FileItemBase(string filePath, ItemStatus initialState = ItemStatus.None) : base(initialState)
     {
         FilePath = filePath;
         _fileSizeBytes = new Lazy<long>(() => CalculateSize(filePath));

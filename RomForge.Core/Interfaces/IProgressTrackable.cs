@@ -1,4 +1,6 @@
-﻿namespace RomForge.Core.Interfaces;
+﻿using Common.Localization;
+
+namespace RomForge.Core.Interfaces;
 
 public interface IProgressTrackable
 {
@@ -6,5 +8,5 @@ public interface IProgressTrackable
 
     int Progress { get; set; }
 
-    string Status { get; set; }
+    ItemStatus State { get; set; }
 }

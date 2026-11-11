@@ -6,12 +6,12 @@ public abstract class ConvertibleFileItemBase : FileItemBase, Interfaces.IConver
 
     public string SelectedTargetFormat { get; set => SetProperty(ref field, value); } = string.Empty;
 
-    protected ConvertibleFileItemBase(string filePath, string unsupportedLabel = "미지원") : base(filePath)
+    protected ConvertibleFileItemBase(string filePath) : base(filePath)
     {
         var formats = GetAvailableFormats(Extension);
 
         AvailableFormats.AddRange(formats);
-        SelectedTargetFormat = formats.Count > 0 ? formats[0] : unsupportedLabel;
+        SelectedTargetFormat = formats.Count > 0 ? formats[0] : string.Empty;
     }
 
     protected abstract IReadOnlyList<string> GetAvailableFormats(string extension);

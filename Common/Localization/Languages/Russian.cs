@@ -376,4 +376,25 @@ public sealed class Russian : LocalizedStrings
     public override string UpdateAvailable => "Доступно обновление";
     public override string UpdateDescription => "Выпущена новая версия RomForge.";
     public override string UpdateTitle => "Обновление RomForge";
+
+    public override string StatusWaiting => "Ожидание";
+    public override string StatusConverting => "Конвертация";
+    public override string StatusDecrypting => "Расшифровка";
+    public override string StatusExtracting => "Извлечение";
+    public override string StatusDownloading => "Загрузка";
+    public override string StatusUnzipping => "Распаковка";
+    public override string StatusUnzipDone => "Распаковано";
+    public override string StatusUnzipFailed => "Ошибка распаковки";
+    public override string StatusDone => "Готово";
+    public override string StatusFailed => "Ошибка";
+    public override string StatusCancelled => "Отменено";
+    public override string StatusUnsupported => "Не поддерживается";
+    public override string StatusSkipped => "Пропущено";
+    public override string RenameStatusReady => "Будет переименован";
+    public override string RenameStatusUnchanged => "Без изменений";
+    public override string RenameStatusMissingInfo => "Нет данных";
+    public override string RenameStatusEmptyName => "Нет имени";
+    public override string RenameStatusNameTooLong => "Слишком длинное имя";
+    public override string RenameStatusDuplicate => "Имя дублируется";
+    public override string RenameStatusTargetExists => "Файл существует";
 }

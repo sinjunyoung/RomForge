@@ -3,7 +3,7 @@ using System.Windows.Media;
 
 namespace RomForge.Core.Models.PSP;
 
-public class FileItem(string filePath) : ConvertibleFileItemBase(filePath, "미지원")
+public class FileItem(string filePath) : ConvertibleFileItemBase(filePath)
 {
     public Brush ExtensionBackground => ExtensionColorMap.Resolve(Extension, ColorMap);
 

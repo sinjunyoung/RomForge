@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.UI.Command;
+using Common.Localization;
 using System.Buffers.Binary;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -131,20 +132,20 @@ public class DecryptorMainViewModel : ToolTabViewModel
                 {
                     _cts.Token.ThrowIfCancellationRequested();
 
-                    if (item.Status is "완료" or "미지원")
+                    if (item.State is ItemStatus.Done or ItemStatus.Unsupported)
                         continue;
 
                     if (!item.Crypto)
                     {
                         AppendLog($"[{item.FileName}] 이미 복호화된 파일입니다.", LogLevel.Info);
 
-                        item.Status = "미지원";
+                        item.State = ItemStatus.Unsupported;
 
                         continue;
                     }
 
                     item.Progress = 0;
-                    item.Status = "복호화 중";
+                    item.State = ItemStatus.Decrypting;
 
                     ScrollToItemRequested?.Invoke(item);
 
@@ -157,7 +158,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                         MainViewModel.SetTaskbarProgress(100);
 
                         item.Progress = 100;
-                        item.Status = "완료";
+                        item.State = ItemStatus.Done;
                         cnt++;
                     }
                     catch (OperationCanceledException)
@@ -172,7 +173,7 @@ public class DecryptorMainViewModel : ToolTabViewModel
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
-                        item.Status = "실패";                        
+                        item.State = ItemStatus.Failed;                        
                         item.Progress = 0;
 
                         DeletePartialOutput(outputPath);
@@ -193,16 +194,16 @@ public class DecryptorMainViewModel : ToolTabViewModel
                 AppendLog("작업이 취소되었습니다.", LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "대기 중" or "복호화 중"))
-                    item.Status = "취소";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Decrypting))
+                    item.State = ItemStatus.Cancelled;
             }
             catch (Exception ex)
             {
                 AppendLog($"오류: {ex.Message}", LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
 
-                foreach (var item in FileItems.Where(i => i.Status is "복호화 중"))
-                    item.Status = "실패";
+                foreach (var item in FileItems.Where(i => i.State is ItemStatus.Decrypting))
+                    item.State = ItemStatus.Failed;
             }
             finally
             {
