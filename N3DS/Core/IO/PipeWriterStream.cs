@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.IO.Pipelines;
 
 namespace N3DS.Core.IO;
@@ -33,7 +34,7 @@ public sealed class PipeWriterStream(PipeWriter writer) : Stream
             ct.ThrowIfCancellationRequested();
 
         if (result.IsCompleted) 
-            throw new IOException("PipeReader가 완료되었습니다.");
+            throw new IOException(Loc.S.ErrPipeReaderCompleted);
     }
 
     public override async Task FlushAsync(CancellationToken ct)
@@ -46,7 +47,7 @@ public sealed class PipeWriterStream(PipeWriter writer) : Stream
 
     public override void Flush()
     {
-        throw new NotSupportedException("PipeWriterStream에서는 FlushAsync를 사용하세요.");
+        throw new NotSupportedException(Loc.S.ErrUseFlushAsync);
     }
 
     public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();

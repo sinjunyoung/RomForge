@@ -24,17 +24,17 @@ public class SdTitleScanner
         string id0Path = Path.Combine(SdRoot, "Nintendo 3DS", id0Hex);
 
         if (!Directory.Exists(id0Path))
-            throw new DirectoryNotFoundException($"id0 디렉토리를 찾을 수 없음: {id0Path}");
+            throw new DirectoryNotFoundException(Loc.S.ErrId0DirNotFound(id0Path));
 
         var id1Dirs = Directory.GetDirectories(id0Path)
             .Where(d => IsHex32(Path.GetFileName(d)))
             .ToList();
 
         if (id1Dirs.Count == 0)
-            throw new DirectoryNotFoundException($"id1 디렉토리를 찾을 수 없음");
+            throw new DirectoryNotFoundException(Loc.S.ErrId1DirNotFound);
 
         if (id1Dirs.Count > 1)
-            throw new InvalidOperationException($"id1 디렉토리가 여러 개 존재함: {string.Join(", ", id1Dirs.Select(Path.GetFileName))}");
+            throw new InvalidOperationException(Loc.S.ErrMultipleId1Dirs(string.Join(", ", id1Dirs.Select(Path.GetFileName))));
 
         return id1Dirs[0];
     }

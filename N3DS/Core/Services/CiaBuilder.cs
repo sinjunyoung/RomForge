@@ -23,7 +23,7 @@ public static class CiaBuilder
     public static async Task BuildAsync(INcsdSource ctx, KeyStore keyStore, Stream output, byte[]? exHeaderPart0, byte[]? smdhDataPart0, Action<long, long>? progress = null, IProgress<ProgressInfo>? hashProgress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         if (!output.CanSeek || !output.CanRead)
-            throw new NotSupportedException("CIA를 직접 생성하려면 읽기/탐색이 가능한 출력 스트림이 필요합니다(FileStream 등).");
+            throw new NotSupportedException(Loc.S.ErrCiaNeedsSeekableOutput);
 
         var partitions = new List<(int index, NcchHeader header, long size)>();
 
@@ -35,18 +35,18 @@ public static class CiaBuilder
         }
 
         if (partitions.Count == 0)
-            throw new InvalidOperationException("유효한 NCCH 파티션을 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNoValidNcchPartition);
 
         var part0 = partitions.First(p => p.index == 0);
         ulong titleId = part0.header.ProgramId;
         uint titleType = (uint)(titleId >> 32);
 
         if (titleType == 0x0004000E)
-            throw new NotSupportedException("이 파일은 [업데이트 패치]입니다. 업데이트 파일은 CIA로 만들 수 없습니다.");
+            throw new NotSupportedException(Loc.S.ErrUpdateCannotBuildCia);
         else if (titleType == 0x0004008C)
-            throw new NotSupportedException("이 파일은 [DLC] 콘텐츠입니다. DLC 파일은 CIA 변환을 지원하지 않습니다.");
+            throw new NotSupportedException(Loc.S.ErrDlcNoCiaConversion);
         else if (titleType != 0x00040000)
-            throw new NotSupportedException($"지원하지 않는 소프트웨어 타입입니다. (Title ID Type: 0x{titleType:X8})");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedSoftwareType(titleType.ToString("X8")));
 
         uint saveSize = exHeaderPart0 is { Length: > 0x1C3 } ? BinaryPrimitives.ReadUInt32LittleEndian(exHeaderPart0.AsSpan(0x1C0)) : 0;
         int contentCount = partitions.Count;
@@ -54,7 +54,7 @@ public static class CiaBuilder
         string certsPath = Path.Combine(AppContext.BaseDirectory, "certs.bin");
 
         if (!File.Exists(certsPath))
-            throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
+            throw new CertsBinNotFoundException(Loc.S.ErrCertsBinNeeded);
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
         uint certChainSize = (uint)certChain.Length;
@@ -153,7 +153,7 @@ public static class CiaBuilder
         output.SetLength(metaOffset + 0x3AC0);
         await output.WriteAsync(BuildMeta(smdhDataPart0, exHeaderPart0), ct);
 
-        log?.Invoke("CIA 직접 생성 완료 (중간 CCI 파일 없음)", LogLevel.Ok);
+        log?.Invoke(Loc.S.LogCiaDirectBuildDone, LogLevel.Ok);
     }
 
     private static async Task<byte[]> HashRangeAsync(Stream stream, long size, Action<long>? onProgress, CancellationToken ct)

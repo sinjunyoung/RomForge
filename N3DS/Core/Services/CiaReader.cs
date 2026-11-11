@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Crypto;
 using N3DS.Core.FileSystem;
 using N3DS.Core.Models;
@@ -126,7 +127,7 @@ public class CiaReader(KeyStore keyStore)
             case 0x010003: case 0x010000: padding = 0x3C; return 0x200;
             case 0x010004: case 0x010001: padding = 0x3C; return 0x100;
             case 0x010005: case 0x010002: padding = 0x40; return 0x3C;
-            default: throw new InvalidDataException($"알 수 없는 서명 타입: 0x{sigType:X8}");
+            default: throw new InvalidDataException(Loc.S.ErrUnknownSignatureType(sigType.ToString("X8")));
         }
     }
 

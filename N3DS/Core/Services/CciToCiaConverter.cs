@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using N3DS.Core.Models;
@@ -27,7 +28,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         {
             outputPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".cia", outputDir));
             
-            log?.Invoke($"{Path.GetFileName(inputPath)} → CIA 변환 시작", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogConvertToCiaStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
 
             Stream inputStream = File.Open(inputPath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
@@ -39,7 +40,7 @@ public class CciToCiaConverter(KeyStore keyStore)
 
             if (magic.AsSpan().SequenceEqual("Z3DS"u8))
             {
-                log?.Invoke("ZCCI 압축 감지, 스트리밍 압축 해제로 변환 진행", LogLevel.Info);
+                log?.Invoke(Loc.S.LogZcciDetectedStreaming, LogLevel.Info);
 
                 var z3dsHeader = Z3dsFormat.ParseZ3dsHeader(inputStream);
 
@@ -53,7 +54,7 @@ public class CciToCiaConverter(KeyStore keyStore)
 
             isCompleted = true;
 
-            log?.Invoke($"변환 완료: {outputPath}", LogLevel.Ok);
+            log?.Invoke(Loc.S.LogConvertDone(outputPath), LogLevel.Ok);
         }
         finally
         {
@@ -96,7 +97,7 @@ public class CciToCiaConverter(KeyStore keyStore)
 
                 if (!ncch.NoCrypto)
                 {
-                    log?.Invoke("암호화된 롬 감지, 복호화 파이프라인 구동...", LogLevel.Info);
+                    log?.Invoke(Loc.S.LogEncryptedRomDetected, LogLevel.Info);
 
                     exhdrStream = new NcchDecryptionStream(exhdrStream, 0, keyStore);
                 }
@@ -116,17 +117,17 @@ public class CciToCiaConverter(KeyStore keyStore)
         }
 
         if (partitions.Count == 0)
-            throw new InvalidDataException("유효한 NCCH 파티션을 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrNoValidNcchPartition);
 
         ulong titleId = partitions.First(p => p.index == 0).ncch.ProgramId;
         uint titleType = (uint)(titleId >> 32);
 
         if (titleType == 0x0004000E)
-            throw new NotSupportedException("이 파일은 [업데이트 패치]입니다. 업데이트 파일은 CCI로 변환하거나 본편과 합칠 수 없습니다.");
+            throw new NotSupportedException(Loc.S.ErrUpdateCannotConvertToCci);
         else if (titleType == 0x0004008C)
-            throw new NotSupportedException("이 파일은 [DLC] 콘텐츠입니다. DLC 파일은 CCI 변환을 지원하지 않습니다.");
+            throw new NotSupportedException(Loc.S.ErrDlcNoCciConversion);
         else if (titleType != 0x00040000)
-            throw new NotSupportedException($"지원하지 않는 소프트웨어 타입입니다. (Title ID Type: 0x{titleType:X8})");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedSoftwareType(titleType.ToString("X8")));
 
         byte[]? smdhData = null;
         var part0 = partitions.First(p => p.index == 0);
@@ -190,7 +191,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         string certsPath = Path.Combine(AppContext.BaseDirectory, "certs.bin");
 
         if (!File.Exists(certsPath))
-            throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
+            throw new CertsBinNotFoundException(Loc.S.ErrCertsBinNeeded);
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
         uint certChainSize = (uint)certChain.Length;
@@ -413,7 +414,7 @@ public class CciToCiaConverter(KeyStore keyStore)
         await input.ReadExactlyAsync(buf, ct);
 
         if (!buf.AsSpan(0x100, 4).SequenceEqual("NCSD"u8))
-            throw new InvalidDataException("NCSD 매직 번호 불일치");
+            throw new InvalidDataException(Loc.S.ErrNcsdMagicMismatch);
 
         ulong mediaId = BinaryPrimitives.ReadUInt64LittleEndian(buf.AsSpan(0x108));
         var partitionMap = new (uint offset, uint size)[8];

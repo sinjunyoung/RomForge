@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Globalization;
 using System.IO.Compression;
 using System.Security.Cryptography;
@@ -44,7 +45,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         }
 
         if (tmdFiles.Count > 0 && entries.Count == 0)
-            throw new InvalidOperationException("TMD를 하나도 읽지 못했습니다. movable.sed가 이 SD 카드의 것인지 확인하세요.");
+            throw new InvalidOperationException(Loc.S.ErrNoTmdRead);
 
         byte[] key = keyStore.GetNormalKey(0x30);
         byte[] titleDb = CreateCleanDb(DbType.SdTitle);
@@ -63,7 +64,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         int stored = new Db(new MemoryFile(titleDb), DbType.SdTitle, key).OpenRoot().ListSubFile().Count;
 
         if (stored != entries.Count)
-            throw new InvalidDataException($"title.db 검증 실패: 기대 {entries.Count}개, 실제 {stored}개");
+            throw new InvalidDataException(Loc.S.ErrTitleDbVerifyFailed(entries.Count, stored));
 
         string dbsDir = Path.Combine(scanner.Id1Path, "dbs");
 
@@ -76,7 +77,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
 
     private byte[] CreateCleanDb(DbType type)
     {
-        using var resource = typeof(TitleDbRebuilder).Assembly.GetManifestResourceStream("title.db.gz") ?? throw new InvalidOperationException("title.db.gz 리소스를 찾을 수 없습니다.");
+        using var resource = typeof(TitleDbRebuilder).Assembly.GetManifestResourceStream("title.db.gz") ?? throw new InvalidOperationException(Loc.S.ErrTitleDbResourceMissing);
         using var gzip = new GZipStream(resource, CompressionMode.Decompress);
         using var ms = new MemoryStream();
 
@@ -148,13 +149,13 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         }
         catch (Exception ex)
         {
-            Log($"TMD 읽기 실패 ({label}): {ex.Message}");
+            Log(Loc.S.LogTmdReadFailed(label, ex.Message));
             return null;
         }
 
         if (tmd.TitleId != titleId || tmd.Contents.Length == 0)
         {
-            Log($"TMD가 올바르지 않습니다 ({label}): 건너뜀");
+            Log(Loc.S.LogTmdInvalidSkipped(label));
             return null;
         }
 
@@ -171,7 +172,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         }
         catch (Exception ex)
         {
-            Log($"메인 콘텐츠 읽기 실패 ({label}): {ex.Message}");
+            Log(Loc.S.LogMainContentReadFailed(label, ex.Message));
             return null;
         }
 
@@ -179,7 +180,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
 
         if (cmdId is null)
         {
-            Log($"cmd 파일이 없습니다 ({label}): 건너뜀");
+            Log(Loc.S.LogCmdMissingSkipped(label));
             return null;
         }
 
@@ -211,12 +212,12 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         int read = sd.ReadAtLeast(buf, buf.Length, throwOnEndOfStream: false);
 
         if (read < NcchHeader.Size)
-            throw new InvalidDataException("NCCH 헤더가 너무 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrNcchHeaderTooShort);
 
         var header = NcchHeader.Parse(buf, 0);
 
         if (header.Magic != NcchMagic)
-            throw new InvalidDataException("NCCH 매직 번호가 일치하지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrNcchMagicMismatch);
 
         byte[] extdata = new byte[4];
 
@@ -226,7 +227,7 @@ public class TitleDbRebuilder(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScann
         byte[]? exHeader = read >= buf.Length ? ResolveExHeader(buf.AsSpan(0x200, 0x400).ToArray(), header) : null;
 
         if (exHeader is null)
-            Log($"경고: extdata ID를 확인하지 못해 0으로 기록합니다 ({label})");
+            Log(Loc.S.LogExtdataIdUnknown(label));
         else
             Array.Copy(exHeader, 0x230, extdata, 0, 4);
 

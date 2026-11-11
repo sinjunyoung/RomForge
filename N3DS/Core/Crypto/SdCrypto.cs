@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Common.Localization;
 using System.Text;
 
 namespace N3DS.Core.Crypto;
@@ -12,7 +13,7 @@ public class SdCrypto
         _keyStore = keyStore ?? throw new ArgumentNullException(nameof(keyStore));
 
         if (!keyStore.IsMovableLoaded)
-            throw new InvalidOperationException("LoadMovable 먼저 호출 필요");
+            throw new InvalidOperationException(Loc.S.ErrLoadMovableFirst);
     }
 
     public static byte[] PathToIv(string sdPath)

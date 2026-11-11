@@ -607,4 +607,91 @@ public abstract class LocalizedStrings
     public abstract string ErrNoUnpackedData { get; }
     public abstract string ErrPatchInfoUnreadable { get; }
     public abstract string ErrPatchTargetMismatch(object arg0);
+
+    public abstract string LogConvertDone(object arg0);
+    public abstract string LogCompressDone(object arg0);
+    public abstract string LogDecompressDone(object arg0);
+    public abstract string LogCompressStart(object arg0);
+    public abstract string LogDecompressStart(object arg0);
+    public abstract string LogConvertToCiaStart(object arg0);
+    public abstract string LogConvertToCciStart(object arg0);
+    public abstract string LogEncryptedRomDetected { get; }
+    public abstract string LogEncryptedContentDetected(object arg0);
+    public abstract string LogZcciDetectedStreaming { get; }
+    public abstract string LogCiaDirectBuildDone { get; }
+    public abstract string LogExefsFileReplaced(object arg0, object arg1, object arg2);
+    public abstract string LogExefsIpsApplied(object arg0, object arg1, object arg2);
+    public abstract string LogRomfsFileReplaced(object arg0);
+    public abstract string LogTmdReadFailed(object arg0, object arg1);
+    public abstract string LogTmdInvalidSkipped(object arg0);
+    public abstract string LogMainContentReadFailed(object arg0, object arg1);
+    public abstract string LogCmdMissingSkipped(object arg0);
+    public abstract string LogExtdataIdUnknown(object arg0);
+    public abstract string LogExtracting(object arg0);
+    public abstract string LogPatchingTmdHash { get; }
+    public abstract string LogExtractingCci(object arg0);
+    public abstract string LogExtractCciDone(object arg0);
+    public abstract string LogContentFileMissingSkip(object arg0);
+    public abstract string LogTmdSaved(object arg0);
+    public abstract string LogContentIndexMissingSkip(object arg0);
+    public abstract string LogContentSaved(object arg0);
+    public abstract string LogHashMismatch(object arg0);
+    public abstract string LogEmptySaveCreated(object arg0);
+    public abstract string LogCmdCreated(object arg0);
+    public abstract string LogUpdatingTitleDb { get; }
+    public abstract string LogCreatingTitleDbBackup(object arg0);
+    public abstract string ErrMovableTooShort { get; }
+    public abstract string ErrMovableMagicMismatch { get; }
+    public abstract string ErrSlotNormalKeyMissing(object arg0);
+    public abstract string ErrSlotKeyXMissing(object arg0);
+    public abstract string ErrCommonKeyMissing(object arg0);
+    public abstract string ErrLoadMovableFirst { get; }
+    public abstract string ErrCifinishMagicMismatch { get; }
+    public abstract string ErrCifinishVersionMismatch(object arg0);
+    public abstract string ErrId0DirNotFound(object arg0);
+    public abstract string ErrId1DirNotFound { get; }
+    public abstract string ErrMultipleId1Dirs(object arg0);
+    public abstract string ErrNcchMagicMismatch { get; }
+    public abstract string ErrPipeReaderCompleted { get; }
+    public abstract string ErrUseFlushAsync { get; }
+    public abstract string ErrLz77CodeTooSmall { get; }
+    public abstract string ErrLz77FooterInvalid { get; }
+    public abstract string ErrLz77OutOfRange { get; }
+    public abstract string ErrLz77VerifyFailed { get; }
+    public abstract string ErrNcsdMagicMismatch { get; }
+    public abstract string ErrPartition0NotFound { get; }
+    public abstract string ErrNoValidNcchPartition { get; }
+    public abstract string ErrUpdateCannotConvertToCci { get; }
+    public abstract string ErrDlcNoCciConversion { get; }
+    public abstract string ErrUpdateCannotBuildCia { get; }
+    public abstract string ErrDlcNoCiaConversion { get; }
+    public abstract string ErrUnsupportedSoftwareType(object arg0);
+    public abstract string ErrCertsBinNeeded { get; }
+    public abstract string ErrCiaNeedsSeekableOutput { get; }
+    public abstract string ErrUnknownSignatureType(object arg0);
+    public abstract string ErrContentIndexNotFound(object arg0);
+    public abstract string ErrContentFilePathMissing(object arg0);
+    public abstract string ErrContentSdPathMissing(object arg0);
+    public abstract string ErrUnsupportedContentType(object arg0);
+    public abstract string ErrCannotRestoreCci(object arg0);
+    public abstract string ErrInvalidNcsdStructure { get; }
+    public abstract string ErrExeFsNoFiles { get; }
+    public abstract string ErrExeFsTooManyEntries(object arg0);
+    public abstract string ErrNcchNoExeFs { get; }
+    public abstract string ErrExeFsHeaderCorrupt { get; }
+    public abstract string ErrRomfsPatchNoOriginalReader(object arg0);
+    public abstract string ErrRomfsOriginalNotFound(object arg0);
+    public abstract string ErrNcchNoRomFs { get; }
+    public abstract string ErrIvfcMagicMismatch { get; }
+    public abstract string ErrIvfcTypeIdInvalid { get; }
+    public abstract string ErrRomfsHeaderSizeInvalid(object arg0);
+    public abstract string ErrRomfsDirHashBucketInvalid { get; }
+    public abstract string ErrNoTmdRead { get; }
+    public abstract string ErrTitleDbVerifyFailed(object arg0, object arg1);
+    public abstract string ErrTitleDbResourceMissing { get; }
+    public abstract string ErrNcchHeaderTooShort { get; }
+    public abstract string ErrTmdFileNotFound { get; }
+    public abstract string ErrNoExtractableContent { get; }
+    public abstract string ErrSeekTableMismatch(object arg0, object arg1);
+    public abstract string ErrMetadataTooLarge(object arg0);
 }

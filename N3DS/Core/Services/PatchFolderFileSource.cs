@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Interfaces;
 using Patch.Core.Services;
 
@@ -21,7 +22,7 @@ public class PatchFolderFileSource(PatchFileIndex index, IEnumerable<string> tar
         if (_plan.TryGetOverwrite(relative, out var overwrite))
         {
             if (_appliedPaths.Add(relative))
-                log?.Invoke($"RomFS 교체: {relative}", LogLevel.Info);
+                log?.Invoke(Loc.S.LogRomfsFileReplaced(relative), LogLevel.Info);
 
             return OpenOverwrite(relative, overwrite);
         }
@@ -33,9 +34,9 @@ public class PatchFolderFileSource(PatchFileIndex index, IEnumerable<string> tar
             return null;
 
         if (getOriginal == null)
-            throw new InvalidOperationException($"RomFS 패치 대상 '{relative}'의 원본 파일을 읽을 방법이 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrRomfsPatchNoOriginalReader(relative));
 
-        var originalStream = await getOriginal(ct) ?? throw new FileNotFoundException($"RomFS 원본에서 '{relative}'를 찾을 수 없습니다.");
+        var originalStream = await getOriginal(ct) ?? throw new FileNotFoundException(Loc.S.ErrRomfsOriginalNotFound(relative));
         byte[] originalData;
 
         await using (originalStream)

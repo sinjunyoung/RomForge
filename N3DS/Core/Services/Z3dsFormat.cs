@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Models;
+using Common.Localization;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Text;
@@ -82,7 +83,7 @@ public static class Z3dsFormat
     private static void WriteMetaItem(Stream output, string name, byte[] data)
     {
         if (data.Length > MaxMetaDataLength)
-            throw new ArgumentOutOfRangeException(nameof(data), $"metadata 값 크기가 최대치를 초과합니다: {data.Length} bytes");
+            throw new ArgumentOutOfRangeException(nameof(data), Loc.S.ErrMetadataTooLarge(data.Length));
 
         byte[] nameBytes = Encoding.UTF8.GetBytes(name);
 

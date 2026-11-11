@@ -5,7 +5,8 @@
              xmlns:converters="clr-namespace:RomForge.Converters"
              xmlns:wpfconverters="clr-namespace:NSW.Core.Converters;assembly=NSW"
              xmlns:cmnconverters="clr-namespace:RomForge.Core.Converters;assembly=RomForge.Core"
-             StartupUri="Views/MainWindow.xaml">
+             StartupUri="Views/MainWindow.xaml"
+             ShutdownMode="OnMainWindowClose">
 
     <Application.Resources>
         <ResourceDictionary>
@@ -22,21 +23,22 @@
             <converters:LogLevelToColorConverter x:Key="LogColor"/>
             <converters:LevelToColorConverter x:Key="LevelToColorConverter"/>
             <converters:BoolToImageConverter x:Key="BoolToImageConverter"/>
+            <converters:BoolToPlayStopTextConverter x:Key="BoolToPlayStopTextConverter" />
             <converters:ProgressToStarConverter x:Key="ProgressToStarConverter"/>
-            <converters:ProgressToWidthConverter x:Key="ProgressToWidthConverter"/>
-            <wpfconverters:PbpLanguageToFlagConverter x:Key="PbpLanguageToFlagConverter"/>
-            <cmnconverters:LockIconConverter x:Key="LockIconConverter"/>
-            <cmnconverters:RegionToImageConverter x:Key="RegionToImageConverter"/>
+            <converters:ProgressToWidthConverter x:Key="ProgressToWidthConverter"/>            
             <converters:Locale3dsLanguageToLabelConverter x:Key="LanguageLabelConverter"/>
             <converters:PatchIconOpacityConverter x:Key="PatchIconOpacityConverter"/>
             <converters:CdOutputFormatLabelConverter x:Key="CdOutputFormatLabelConverter"/>
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
-            <converters:StringHasValueConverter x:Key="StringHasValueConverter" />
-            <converters:BoolToPlayStopTextConverter x:Key="BoolToPlayStopTextConverter" />
+            <converters:EnumRadioButtonConverter x:Key="EnumRadioButtonConverter"/>
+            <converters:StringHasValueConverter x:Key="StringHasValueConverter" />            
             <converters:TitleIdGroupConverter x:Key="TitleIdGroupConverter" />
             <converters:RepresentativeTitleNameConverter x:Key="RepresentativeTitleNameConverter" />
             <converters:LanquageCodeToImageConverter x:Key="LanquageCodeToImageConverter"/>
-
+            <wpfconverters:PbpLanguageToFlagConverter x:Key="PbpLanguageToFlagConverter"/>
+            <cmnconverters:LockIconConverter x:Key="LockIconConverter"/>
+            <cmnconverters:RegionToImageConverter x:Key="RegionToImageConverter"/>
+            
             <Style TargetType="TabControl">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="1"/>

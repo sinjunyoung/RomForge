@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Crypto;
 using N3DS.Core.Interfaces;
 using N3DS.Core.IO;
@@ -14,9 +15,9 @@ public class SdNcsdSource(IReadOnlyList<Contents> contents, KeyStore keyStore, S
 
     public ValueTask<(Stream ncchStream, long ncchSize)> OpenContentDecrypted(int contentIndex)
     {
-        var chunk = Contents.FirstOrDefault(c => c.ContentIndex == contentIndex) ?? throw new InvalidOperationException($"Content index {contentIndex}를 찾을 수 없습니다.");
-        string filePath = chunk.FilePath ?? throw new InvalidOperationException($"Content index {contentIndex}의 FilePath가 없습니다.");
-        string sdPath = chunk.SdPath ?? throw new InvalidOperationException($"Content index {contentIndex}의 SdPath가 없습니다.");
+        var chunk = Contents.FirstOrDefault(c => c.ContentIndex == contentIndex) ?? throw new InvalidOperationException(Loc.S.ErrContentIndexNotFound(contentIndex));
+        string filePath = chunk.FilePath ?? throw new InvalidOperationException(Loc.S.ErrContentFilePathMissing(contentIndex));
+        string sdPath = chunk.SdPath ?? throw new InvalidOperationException(Loc.S.ErrContentSdPathMissing(contentIndex));
         Stream? src = null;
 
         try

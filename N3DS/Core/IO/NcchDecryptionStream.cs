@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Crypto;
+using Common.Localization;
 using N3DS.Core.Models;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
@@ -42,7 +43,7 @@ public class NcchDecryptionStream : Stream
         _header = NcchHeader.Parse(headerData, 0);
 
         if (_header.Magic != 0x4843434E)
-            throw new InvalidDataException("NCCH 매직 번호가 일치하지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrNcchMagicMismatch);
 
         DeriveKeys(keyStore, out _primaryKey, out _secondaryKey);
         ComputeCtrs(out _exheaderCtr, out _exefsCtr, out _romfsCtr);

@@ -54,7 +54,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         string tmdSdPath = contentRootCmd + "/" + tmdFilename;
         string tmdOutputPath = Path.Combine(contentRoot, tmdFilename);
 
-        Log($"TMD 저장: {tmdSdPath}");
+        Log(Loc.S.LogTmdSaved(tmdSdPath));
         await WriteEncryptedAsync(tmdOutputPath, tmdSdPath, tmdRaw, ct);
 
         long totalBytes = tmd.Contents.Sum(c => c.ContentSize);
@@ -70,7 +70,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             if (!source.IsContentPresent(content.ContentIndex))
             {
-                Log($"경고: 콘텐츠 인덱스 {content.ContentIndex} 미포함, 건너뜀");
+                Log(Loc.S.LogContentIndexMissingSkip(content.ContentIndex));
                 continue;
             }
 
@@ -90,7 +90,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
                 contentOutputPath = Path.Combine(contentRoot, contentFilename);
             }
 
-            Log($"콘텐츠 저장: {contentSdPath}");
+            Log(Loc.S.LogContentSaved(contentSdPath));
 
             var (ncchStream, contentSize) = await openContent(content.ContentIndex);
 
@@ -104,7 +104,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
                     }, ct);
 
                 if (!hash.AsSpan().SequenceEqual(content.Sha256Hash))
-                    Log($"경고: 해시 불일치 {contentFilename}");
+                    Log(Loc.S.LogHashMismatch(contentFilename));
             }
         }
 
@@ -117,7 +117,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             if (!File.Exists(savOutPath))
             {
-                Log($"빈 세이브 생성: {savSdPath}");
+                Log(Loc.S.LogEmptySaveCreated(savSdPath));
 
                 byte[] encZeros = sdCrypto.Encrypt(savSdPath, new byte[0x20]);
                 await using var savFile = File.Create(savOutPath);
@@ -132,13 +132,13 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         string cmdSdPath = contentRootCmd + "/cmd/" + cmdFilename;
         string cmdOutputPath = Path.Combine(cmdRoot, cmdFilename);
 
-        Log($"CMD 생성: {cmdSdPath}");
+        Log(Loc.S.LogCmdCreated(cmdSdPath));
 
         byte[] cmdData = await BuildCmdAsync(source, cmdId, ct);
 
         await WriteEncryptedAsync(cmdOutputPath, cmdSdPath, cmdData, ct);
 
-        Log("title.db 업데이트...");
+        Log(Loc.S.LogUpdatingTitleDb);
         await UpdateTitleDbAsync(source, titleId, cmdId, isDlc, hasSave, ct);
 
         byte[]? seed = keyStore.GetSeed(titleId);
@@ -282,7 +282,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
             string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
             string backupPath = $"{dbPath}.{timestamp}.bak";
 
-            Log($"title.db 백업 생성 중: {backupPath}");
+            Log(Loc.S.LogCreatingTitleDbBackup(backupPath));
             File.Copy(dbPath, backupPath, overwrite: false);
         }
 

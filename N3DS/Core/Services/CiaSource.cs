@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using N3DS.Core.Interfaces;
 using N3DS.Core.Models;
 using N3DS.Core.Crypto;
@@ -58,13 +59,13 @@ public class CiaSource : IInstallSource
         }
 
         if (target is null)
-            throw new InvalidOperationException($"Content index {contentIndex}를 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrContentIndexNotFound(contentIndex));
 
         Stream rawStream;
 
         if (target.IsEncrypted)
         {
-            log?.Invoke($"[Content {contentIndex}] 암호화된 콘텐츠 감지, 복호화 파이프라인 구동...", LogLevel.Info, string.Empty);
+            log?.Invoke(Loc.S.LogEncryptedContentDetected(contentIndex), LogLevel.Info, string.Empty);
 
             byte[] iv = new byte[16];
             iv[0] = (byte)(target.ContentIndex >> 8);
@@ -100,7 +101,7 @@ public class CiaSource : IInstallSource
         }
 
         if (target is null)
-            throw new InvalidOperationException($"Content index {contentIndex}를 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrContentIndexNotFound(contentIndex));
 
         Stream stream = target.IsEncrypted ? new AesCbcSubStream(Stream, offset, target.ContentSize, TitleKey, new byte[] { (byte)(target.ContentIndex >> 8), (byte)(target.ContentIndex & 0xFF), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) : new SubStream(Stream, offset, target.ContentSize);
 

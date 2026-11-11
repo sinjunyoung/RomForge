@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using System.Buffers;
 
@@ -24,7 +25,7 @@ public static class Z3dsDecompressor
             long totalSize = header.UncompressedSize;
             long processed = 0;
 
-            log?.Invoke($"{Path.GetFileName(inputPath)} 해제 시작", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogDecompressStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
 
             long compressedDataOffset = header.HeaderSize + header.MetadataSize;
             long compressedDataLength = header.CompressedSize;
@@ -38,7 +39,7 @@ public static class Z3dsDecompressor
 
             isCompleted = true;
 
-            log?.Invoke($"해제 완료: {outputPath}", LogLevel.Ok);
+            log?.Invoke(Loc.S.LogDecompressDone(outputPath), LogLevel.Ok);
         }
         finally
         {
@@ -59,7 +60,7 @@ public static class Z3dsDecompressor
         long expectedDataLength = totalBlockBytes + seekTableSize;
 
         if (expectedDataLength != compressedDataLength)
-            throw new InvalidDataException($"Seek table 경계 불일치: 합산={totalBlockBytes}, 요청={compressedDataLength}");
+            throw new InvalidDataException(Loc.S.ErrSeekTableMismatch(totalBlockBytes, compressedDataLength));
 
         input.Position = dataOffset;
 

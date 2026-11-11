@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 
 namespace N3DS.Core.Crypto;
@@ -101,10 +102,10 @@ public class KeyStore
         byte[] movable = File.ReadAllBytes(path);
 
         if (movable.Length < 0x120)
-            throw new InvalidDataException("movable.sed가 너무 짧음");
+            throw new InvalidDataException(Loc.S.ErrMovableTooShort);
 
         if (!movable.AsSpan()[0..4].SequenceEqual("SEED"u8.ToArray()))
-            throw new InvalidDataException("movable.sed 매직 불일치");
+            throw new InvalidDataException(Loc.S.ErrMovableMagicMismatch);
 
         _sdKeyY = movable[0x110..0x120];
         _slots[0x34].SetKeyY(_sdKeyY);
@@ -132,11 +133,11 @@ public class KeyStore
 
     public void SetKeyY(int slotId, byte[] keyY) => _slots[slotId].SetKeyY(keyY);
 
-    public byte[] GetNormalKey(int slotId) => _slots[slotId].NormalKey ?? throw new InvalidOperationException($"Slot 0x{slotId:X2} NormalKey 없음 — aes_keys.txt 또는 boot9.bin 확인 필요");
+    public byte[] GetNormalKey(int slotId) => _slots[slotId].NormalKey ?? throw new InvalidOperationException(Loc.S.ErrSlotNormalKeyMissing(slotId.ToString("X2")));
 
     public byte[] DeriveNormalKey(int slotId, byte[] keyY)
     {
-        byte[] keyX = _slots[slotId].KeyX ?? throw new InvalidOperationException($"Slot 0x{slotId:X2} KeyX 없음 — aes_keys.txt 또는 boot9.bin 확인 필요");
+        byte[] keyX = _slots[slotId].KeyX ?? throw new InvalidOperationException(Loc.S.ErrSlotKeyXMissing(slotId.ToString("X2")));
 
         return KeySlot.ComputeNormalKey(keyX, keyY);
     }
@@ -146,7 +147,7 @@ public class KeyStore
     public byte[] GetCommonKey(int index)
     {
         if ((uint)index >= _commonKeys.Length || _commonKeys[index] is null)
-            throw new InvalidOperationException($"Common Key index {index} 없음 — aes_keys.txt에 common{index}=<hex> 추가 필요");
+            throw new InvalidOperationException(Loc.S.ErrCommonKeyMissing(index));
 
         return _commonKeys[index]!;
     }

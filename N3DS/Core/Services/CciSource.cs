@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 using N3DS.Core.Interfaces;
 using N3DS.Core.Models;
@@ -54,7 +55,7 @@ public class CciSource : IInstallSource
             await stream.ReadExactlyAsync(ncsdBuf, ct);
 
             if (!ncsdBuf.AsSpan(0, 4).SequenceEqual("NCSD"u8))
-                throw new InvalidDataException("NCSD 매직 불일치");
+                throw new InvalidDataException(Loc.S.ErrNcsdMagicMismatch);
 
             var partitionMap = new (uint offset, uint size)[8];
 
@@ -118,7 +119,7 @@ public class CciSource : IInstallSource
             }
 
             if (mainHeader is null)
-                throw new InvalidDataException("파티션 0을 찾을 수 없습니다.");
+                throw new InvalidDataException(Loc.S.ErrPartition0NotFound);
 
             var tmdHeader = new TmdHeader
             {

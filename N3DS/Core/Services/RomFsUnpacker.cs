@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Models;
+using Common.Localization;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Text;
@@ -12,7 +13,7 @@ public static class RomFsUnpacker
     public static async Task<RomFsUnpackResult> UnpackAsync(Stream ncchStream, NcchHeader ncchHeader, CancellationToken ct = default)
     {
         if (ncchHeader.RomfsOffset == 0 || ncchHeader.RomfsSize == 0)
-            throw new InvalidOperationException("이 NCCH에는 RomFS가 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNcchNoRomFs);
 
         long ivfcAbsOffset = (long)ncchHeader.RomfsOffset * MediaUnit;
         byte[] ivfcBuf = new byte[IvfcHeader.Size];
@@ -24,10 +25,10 @@ public static class RomFsUnpacker
         var ivfc = IvfcHeader.Parse(ivfcBuf);
 
         if (ivfc.Magic != 0x43465649)
-            throw new InvalidDataException("IVFC 매직 불일치");
+            throw new InvalidDataException(Loc.S.ErrIvfcMagicMismatch);
 
         if (ivfc.TypeId != 0x10000)
-            throw new InvalidDataException("IVFC TypeId가 CTR RomFS(0x10000)가 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrIvfcTypeIdInvalid);
 
         long dataLevel2AbsOffset = ivfcAbsOffset + ivfc.GetDataLevel2Offset();
         byte[] romfsBuf = new byte[RomFsHeader.Size];
@@ -39,10 +40,10 @@ public static class RomFsUnpacker
         var romfs = RomFsHeader.Parse(romfsBuf);
 
         if (romfs.HeaderSize != RomFsHeader.Size)
-            throw new InvalidDataException($"RomFS 헤더 크기 이상: 0x{romfs.HeaderSize:X}");
+            throw new InvalidDataException(Loc.S.ErrRomfsHeaderSizeInvalid(romfs.HeaderSize.ToString("X")));
 
         if (romfs.DirHashBucketOffset != RomFsHeader.Size)
-            throw new InvalidDataException("RomFS DirHashBucket 오프셋 이상");
+            throw new InvalidDataException(Loc.S.ErrRomfsDirHashBucketInvalid);
 
         byte[] dirTable = new byte[romfs.DirEntrySize];
         byte[] fileTable = new byte[romfs.FileEntrySize];

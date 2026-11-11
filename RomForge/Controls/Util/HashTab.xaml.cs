@@ -1,7 +1,6 @@
 ﻿using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core;
-using RomForge.Core.Models;
 using RomForge.Core.Models.Util;
 using RomForge.ViewModels.Util;
 using System.IO;
@@ -32,15 +31,6 @@ public partial class HashTab : UserControl
     }
 
     private void OnScrollToItemRequested(HashFileItem item) => Dispatcher.InvokeAsync(() => lvFiles.ScrollIntoView(item), DispatcherPriority.Background);
-
-    private void RadioButton_Checked(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is RadioButton rb && rb.Tag is string tag && ViewModel != null)
-        {
-            if (Enum.TryParse<HashAlgorithmType>(tag, out var algo))
-                ViewModel.SelectedAlgorithm = algo;
-        }
-    }
 
     private void LvFiles_DragOver(object sender, DragEventArgs e)
     {

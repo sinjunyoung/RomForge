@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using N3DS.Core.Crypto;
 
@@ -23,24 +24,24 @@ public class CiaToCciConverter(KeyStore keyStore)
             {
                 string typeDescription = titleType switch
                 {
-                    0x0004000E => "업데이트",
+                    0x0004000E => Loc.S.ButtonFilterUpdate,
                     0x0004008C => "DLC",
-                    _ => $"미지원 콘텐츠 타입 (Type ID: 0x{titleType:X8})"
+                    _ => Loc.S.ErrUnsupportedContentType(titleType.ToString("X8"))
                 };
 
-                throw new NotSupportedException($"{typeDescription} 파일은 CCI 복원이 불가능합니다. (본편만 가능)");
+                throw new NotSupportedException(Loc.S.ErrCannotRestoreCci(typeDescription));
             }
 
             outputPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, OutputExtension, outputDir));
             
             using var outputStream = File.Open(outputPath, FileMode.Create, FileAccess.ReadWrite);
 
-            log?.Invoke($"{Path.GetFileName(inputPath)} → CCI 변환 시작", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogConvertToCciStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
 
             long totalSize = NcsdBuilder.CalculateOutputSize(ctx);
 
             if (totalSize <= 0)
-                throw new InvalidDataException("유효한 NCSD(카트리지 롬) 구조를 빌드할 수 없습니다.");
+                throw new InvalidDataException(Loc.S.ErrInvalidNcsdStructure);
 
             void reporter(long written, long total)
             {
@@ -51,7 +52,7 @@ public class CiaToCciConverter(KeyStore keyStore)
 
             isCompleted = true;
 
-            log?.Invoke($"변환 완료: {outputPath}", LogLevel.Ok);
+            log?.Invoke(Loc.S.LogConvertDone(outputPath), LogLevel.Ok);
         }
         finally
         {

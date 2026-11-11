@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using N3DS.Core.Models;
 using Patch.Core;
 using Patch.Core.Enums;
@@ -18,10 +19,10 @@ public static class ExeFsPacker
     public static byte[] Pack(IReadOnlyList<ExeFsFile> files)
     {
         if (files.Count == 0)
-            throw new ArgumentException("ExeFS에 파일이 없습니다.");
+            throw new ArgumentException(Loc.S.ErrExeFsNoFiles);
 
         if (files.Count > MaxEntries)
-            throw new ArgumentException($"ExeFS 최대 파일 수({MaxEntries}) 초과");
+            throw new ArgumentException(Loc.S.ErrExeFsTooManyEntries(MaxEntries));
 
         uint totalSize = ExeFsHeader.Size;
 
@@ -126,7 +127,7 @@ public static class ExeFsPacker
 
                 patchedCount++;
 
-                log?.Invoke($"exefs 교체: {file.Name} ({file.Data.Length:N0} → {patchData.Length:N0} bytes)", LogLevel.Ok);
+                log?.Invoke(Loc.S.LogExefsFileReplaced(file.Name, file.Data.Length.ToString("N0"), patchData.Length.ToString("N0")), LogLevel.Ok);
             }
             else if (ipsRef != null)
             {
@@ -159,7 +160,7 @@ public static class ExeFsPacker
 
                 patchedCount++;
 
-                log?.Invoke($"exefs IPS 패치 적용: {file.Name} ({sourceData.Length:N0} → {patchedData.Length:N0} bytes)", LogLevel.Ok);
+                log?.Invoke(Loc.S.LogExefsIpsApplied(file.Name, sourceData.Length.ToString("N0"), patchedData.Length.ToString("N0")), LogLevel.Ok);
             }
             else
                 patchedFiles.Add(file);

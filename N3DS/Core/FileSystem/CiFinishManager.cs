@@ -1,4 +1,6 @@
-﻿using N3DS.Core.Models;
+﻿using Common.Localization;
+
+using N3DS.Core.Models;
 
 namespace N3DS.Core.FileSystem;
 
@@ -33,13 +35,13 @@ public class CiFinishManager
         string magic = new(br.ReadChars(8));
 
         if (magic != Magic)
-            throw new InvalidDataException("cifinish.bin 매직 불일치");
+            throw new InvalidDataException(Loc.S.ErrCifinishMagicMismatch);
 
         uint version = br.ReadUInt32();
         uint count = br.ReadUInt32();
 
         if (version != CurrentVersion)
-            throw new InvalidDataException($"cifinish.bin 버전 불일치: {version}");
+            throw new InvalidDataException(Loc.S.ErrCifinishVersionMismatch(version));
 
         var result = new Dictionary<ulong, CiFinishEntry>();
         ReadOnlySpan<byte> titleMagic = "TITLE\0"u8;

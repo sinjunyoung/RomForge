@@ -1,4 +1,5 @@
 ﻿using System.IO.Pipelines;
+using Common.Localization;
 using ZstdSharp;
 using ZstdSharp.Unsafe;
 using N3DS.Core.Models;
@@ -36,7 +37,7 @@ public static class Z3dsCompressor
 
             if (!header.NoCrypto)
             {
-                log?.Invoke("암호화된 롬 감지, 복호화 파이프라인 구동...", LogLevel.Info);
+                log?.Invoke(Loc.S.LogEncryptedRomDetected, LogLevel.Info);
 
                 var keyStore = KeyStoreProvider.Instance.KeyStore;
 
@@ -56,14 +57,14 @@ public static class Z3dsCompressor
 
                 using var outputStream = File.Open(outputPath, FileMode.Create, FileAccess.Write);
 
-                log?.Invoke($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
+                log?.Invoke(Loc.S.LogCompressStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
                 await CompressInternalAsync(inputStream, outputStream, fileStream.Length, compressionLevel, progress, ct);
 
                 long originalSize = new FileInfo(inputPath).Length;
                 long compressedSize = new FileInfo(outputPath).Length;
 
-                log?.Invoke($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight);
-                log?.Invoke($"압축 완료: {outputPath}", LogLevel.Ok);
+                log?.Invoke($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight);
+                log?.Invoke(Loc.S.LogCompressDone(outputPath), LogLevel.Ok);
             }
 
             isCompleted = true;
@@ -97,12 +98,12 @@ public static class Z3dsCompressor
             {
                 string typeDescription = titleType switch
                 {
-                    0x0004000E => "업데이트",
+                    0x0004000E => Loc.S.ButtonFilterUpdate,
                     0x0004008C => "DLC",
-                    _ => $"미지원 콘텐츠 타입 (Type ID: 0x{titleType:X8})"
+                    _ => Loc.S.ErrUnsupportedContentType(titleType.ToString("X8"))
                 };
 
-                throw new NotSupportedException($"{typeDescription} 파일은 CCI 복원이 불가능합니다. (본편만 가능)");
+                throw new NotSupportedException(Loc.S.ErrCannotRestoreCci(typeDescription));
             }
 
             outputPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, CompressExtension, outputDir));
@@ -120,7 +121,7 @@ public static class Z3dsCompressor
             }, ct);
             long uncompressedSize = NcsdBuilder.CalculateOutputSize(ctx);
 
-            log?.Invoke($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogCompressStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
             await CompressInternalAsync(new PipeReaderStream(pipe.Reader), outputStream, uncompressedSize, compressionLevel, progress, ct);
 
             await buildTask;
@@ -128,8 +129,8 @@ public static class Z3dsCompressor
             long originalSize = new FileInfo(inputPath).Length;
             long compressedSize = new FileInfo(outputPath).Length;
 
-            log?.Invoke($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight);
-            log?.Invoke($"압축 완료: {outputPath}", LogLevel.Ok);
+            log?.Invoke($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogCompressDone(outputPath), LogLevel.Ok);
 
             isCompleted = true;
         }

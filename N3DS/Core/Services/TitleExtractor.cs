@@ -26,7 +26,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
     public async Task ExtractToCiaAsync(InstalledTitle title, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        Log($"추출 중: {title.TitleId}");
+        Log(Loc.S.LogExtracting(title.TitleId));
 
         bool completed = false;
 
@@ -40,7 +40,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             completed = true;
 
-            Log($"추출 완료: {outputPath}");
+            Log(Loc.S.LogExtractDone(outputPath));
         }
         finally
         {
@@ -53,11 +53,11 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
     {
         string contentPath = title.ContentPath;
         string contentRootCmd = $"/title/{title.TitleIdHigh}/{title.TitleIdLow}/content";
-        string tmdFile = Directory.GetFiles(contentPath, "*.tmd").FirstOrDefault() ?? throw new FileNotFoundException("TMD 파일을 찾을 수 없음");
+        string tmdFile = Directory.GetFiles(contentPath, "*.tmd").FirstOrDefault() ?? throw new FileNotFoundException(Loc.S.ErrTmdFileNotFound);
         var (contents, tmd) = await BuildContentsAsync(title, ct);
 
         if (contents.Count == 0)
-            throw new InvalidOperationException("추출 가능한 콘텐츠 없음");
+            throw new InvalidOperationException(Loc.S.ErrNoExtractableContent);
 
         byte[]? exheader = null;
         byte[]? smdhData = null;
@@ -102,7 +102,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         string certsPath = Path.Combine(AppContext.BaseDirectory, "certs.bin");
 
         if (!File.Exists(certsPath))
-            throw new CertsBinNotFoundException("certs.bin 추출 필요 / 유틸 - certs.bin 추출을 진행하세요");
+            throw new CertsBinNotFoundException(Loc.S.ErrCertsBinNeeded);
 
         byte[] certChain = await File.ReadAllBytesAsync(certsPath, ct);
         uint certChainSize = (uint)certChain.Length;
@@ -147,7 +147,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             var entry = contents[i];
 
-            Log($"추출 중: {entry.ContentIdHex}.app");
+            Log(Loc.S.LogExtracting($"{entry.ContentIdHex}.app"));
 
             await using var src = File.OpenRead(entry.FilePath!);
             Stream decrypted = new SdDecryptStream(src, entry.SdPath!, sdCrypto, leaveOpen: true);
@@ -180,7 +180,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
                 await output.WriteAsync(new byte[padding], ct);
         }
 
-        Log("TMD 해시 패치 중...");
+        Log(Loc.S.LogPatchingTmdHash);
 
         byte[] tmdFinal = BuildTmd(tmd, contents, contentHashes);
 
@@ -199,7 +199,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
     public async Task ExtractToCciAsync(InstalledTitle title, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
-        Log($"CCI 추출 중: {title.TitleId}");
+        Log(Loc.S.LogExtractingCci(title.TitleId));
 
         bool completed = false;
 
@@ -218,7 +218,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
             completed = true;
 
-            Log($"CCI 추출 완료: {outputPath}");
+            Log(Loc.S.LogExtractCciDone(outputPath));
         }
         finally
         {
@@ -233,7 +233,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
     private async Task<(List<Contents> contents, TmdHeader tmd)> BuildContentsAsync(InstalledTitle title, CancellationToken ct)
     {
         string contentPath = title.ContentPath;
-        string tmdFile = Directory.GetFiles(contentPath, "*.tmd").FirstOrDefault() ?? throw new FileNotFoundException("TMD 파일을 찾을 수 없음");
+        string tmdFile = Directory.GetFiles(contentPath, "*.tmd").FirstOrDefault() ?? throw new FileNotFoundException(Loc.S.ErrTmdFileNotFound);
         string tmdSdPath = ToSdPath(tmdFile);
         byte[] tmdEncrypted = await File.ReadAllBytesAsync(tmdFile, ct);
         byte[] tmdDecrypted = sdCrypto.Decrypt(tmdSdPath, tmdEncrypted);
@@ -261,7 +261,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
             }
             else
             {
-                Log($"경고: 콘텐츠 파일 없음: {filename} (스킵)");
+                Log(Loc.S.LogContentFileMissingSkip(filename));
                 continue;
             }
 
@@ -278,7 +278,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         }
 
         if (contents.Count == 0)
-            throw new InvalidOperationException("추출 가능한 콘텐츠 없음");
+            throw new InvalidOperationException(Loc.S.ErrNoExtractableContent);
 
         return (contents, tmd);
     }

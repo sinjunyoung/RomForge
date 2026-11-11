@@ -6,6 +6,7 @@
              xmlns:local="clr-namespace:RomForge.Controls.Util"
              xmlns:util="clr-namespace:RomForge.ViewModels.Util"
              xmlns:l="clr-namespace:Common.Localization;assembly=Common"
+             xmlns:models="clr-namespace:RomForge.Core.Models;assembly=RomForge.Core"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000">
     <Grid>
@@ -16,34 +17,34 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Margin="5,0,5,5" Background="#252526" Padding="15,10" BorderBrush="#2D2D30" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}" RadioButton.Checked="RadioButton_Checked">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding IsLocked, Converter={StaticResource InverseBool}}">
                 <Image Source="/Assets/Images/Neural.png" Width="16" Height="16" Margin="0,0,5,0"/>
                 <TextBlock Text="{Binding Path=Current.LabelAlgorithm, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <RadioButton Tag="CRC32" GroupName="HashAlgoGroup" Margin="0,0,10,0">
+                <RadioButton GroupName="HashAlgorithmGroup" IsChecked="{Binding SelectedAlgorithm, Mode=TwoWay, Converter={StaticResource EnumRadioButtonConverter}, ConverterParameter={x:Static models:HashAlgorithmType.CRC32}}" Margin="0,0,10,0">
                     <TextBlock Text="CRC-32"/>
                 </RadioButton>
-                <RadioButton Tag="MD5" IsChecked="True" GroupName="HashAlgoGroup" Margin="0,0,10,0">
+                <RadioButton GroupName="HashAlgorithmGroup" IsChecked="{Binding SelectedAlgorithm, Mode=TwoWay, Converter={StaticResource EnumRadioButtonConverter}, ConverterParameter={x:Static models:HashAlgorithmType.MD5}}" Margin="0,0,10,0">
                     <TextBlock Text="MD5"/>
                 </RadioButton>
-                <RadioButton Tag="SHA1" GroupName="HashAlgoGroup" Margin="0,0,10,0">
+                <RadioButton GroupName="HashAlgorithmGroup" IsChecked="{Binding SelectedAlgorithm, Mode=TwoWay, Converter={StaticResource EnumRadioButtonConverter}, ConverterParameter={x:Static models:HashAlgorithmType.SHA1}}" Margin="0,0,10,0">
                     <TextBlock Text="SHA-1"/>
                 </RadioButton>
-                <RadioButton Tag="SHA256" GroupName="HashAlgoGroup" Margin="0,0,10,0">
+                <RadioButton GroupName="HashAlgorithmGroup" IsChecked="{Binding SelectedAlgorithm, Mode=TwoWay, Converter={StaticResource EnumRadioButtonConverter}, ConverterParameter={x:Static models:HashAlgorithmType.SHA256}}" Margin="0,0,10,0">
                     <TextBlock Text="SHA-256"/>
                 </RadioButton>
-                <RadioButton Tag="BLAKE3" GroupName="HashAlgoGroup" Margin="0,0,10,0">
+                <RadioButton GroupName="HashAlgorithmGroup" IsChecked="{Binding SelectedAlgorithm, Mode=TwoWay, Converter={StaticResource EnumRadioButtonConverter}, ConverterParameter={x:Static models:HashAlgorithmType.BLAKE3}}" Margin="0,0,10,0">
                     <TextBlock Text="BLAKE3"/>
                 </RadioButton>
                 <Border Width="1" Height="18" Background="#444" Margin="0,0,15,0"/>
                 <Image Source="/Assets/Images/FontSize.png" Width="16" Height="16" Margin="0,0,5,0"/>
                 <TextBlock Text="{Binding Path=Current.LabelOptions, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                <RadioButton IsChecked="{Binding UseUpperCase, Converter={StaticResource InverseBool}, Mode=TwoWay}">
+                <RadioButton GroupName="HashCaseGroup" IsChecked="{Binding UseUpperCase, Converter={StaticResource InverseBool}, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/LowerA.png" Width="16" Height="16"/>
                         <TextBlock Text="{Binding Path=Current.RadioLowercase, Source={x:Static l:Loc.Instance}}"/>
                     </StackPanel>
                 </RadioButton>
-                <RadioButton IsChecked="{Binding UseUpperCase, Mode=TwoWay}" Margin="10,0,0,0">
+                <RadioButton GroupName="HashCaseGroup" IsChecked="{Binding UseUpperCase, Mode=TwoWay}" Margin="10,0,0,0">
                     <StackPanel Orientation="Horizontal">
                         <Image Source="/Assets/Images/UpperA.png" Width="16" Height="16"/>
                         <TextBlock Text="{Binding Path=Current.RadioUppercase, Source={x:Static l:Loc.Instance}}"/>

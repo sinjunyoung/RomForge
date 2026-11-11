@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Models;
+using Common.Localization;
 using System.Security.Cryptography;
 
 namespace N3DS.Core.Services;
@@ -10,7 +11,7 @@ public static class ExeFsUnpacker
     public static async Task<ExeFsUnpackResult> UnpackAsync(Stream ncchStream, NcchHeader ncchHeader, CancellationToken ct = default)
     {
         if (ncchHeader.ExefsOffset == 0 || ncchHeader.ExefsSize == 0)
-            throw new InvalidOperationException("이 NCCH에는 ExeFS가 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNcchNoExeFs);
 
         long exefsAbsOffset = (long)ncchHeader.ExefsOffset * MediaUnit;
         byte[] headerBuf = new byte[ExeFsHeader.Size];
@@ -22,7 +23,7 @@ public static class ExeFsUnpacker
         var header = ExeFsHeader.Parse(headerBuf);
 
         if (header.Entries[0].Name.Length == 0 || header.Entries[0].Offset != 0)
-            throw new InvalidDataException("ExeFS 헤더가 손상되었습니다 (첫 번째 엔트리 이상).");
+            throw new InvalidDataException(Loc.S.ErrExeFsHeaderCorrupt);
 
         long dataBase = exefsAbsOffset + ExeFsHeader.Size;
         var files = new List<ExeFsFile>();
