@@ -436,9 +436,9 @@ public abstract class LocalizedStrings
     public abstract string ProgressScanningCount(object arg0, object arg1);
     public abstract string StatusRecoveringTitleDb { get; }
     public abstract string StatusRecoveryDone(object arg0);
-    public abstract string StatusExtractingTitle(object arg0, object arg1);
-    public abstract string StatusInstallStarted(object arg0);
-    public abstract string StatusInstallDone(object arg0);
+    public abstract string StatusExtractingTitle(object? arg0, object arg1);
+    public abstract string StatusInstallStarted(object? arg0);
+    public abstract string StatusInstallDone(object? arg0);
     public abstract string StatusScanningTitles { get; }
     public abstract string StatusLoadingMetadata(object arg0);
     public abstract string StatusTitlesLoaded(object arg0);

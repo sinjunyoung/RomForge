@@ -418,9 +418,9 @@ public sealed class Spanish : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"Escaneando... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "Recuperando title.db...";
     public override string StatusRecoveryDone(object arg0) => $"Recuperación completada: {arg0} títulos";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"Extrayendo: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"Instalación iniciada: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"Instalación completada: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"Extrayendo: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"Instalación iniciada: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"Instalación completada: {arg0}";
     public override string StatusScanningTitles => "Escaneando títulos...";
     public override string StatusLoadingMetadata(object arg0) => $"Cargando metadatos... ({arg0} en total)";
     public override string StatusTitlesLoaded(object arg0) => $"{arg0} títulos cargados";

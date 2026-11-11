@@ -418,9 +418,9 @@ public sealed class Japanese : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"スキャン中... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "title.dbを復旧中...";
     public override string StatusRecoveryDone(object arg0) => $"復旧完了: {arg0}タイトル";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"抽出中: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"インストール開始: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"インストール完了: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"抽出中: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"インストール開始: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"インストール完了: {arg0}";
     public override string StatusScanningTitles => "タイトルをスキャン中...";
     public override string StatusLoadingMetadata(object arg0) => $"メタデータを読み込み中... (全{arg0}件)";
     public override string StatusTitlesLoaded(object arg0) => $"{arg0}タイトルの読み込み完了";

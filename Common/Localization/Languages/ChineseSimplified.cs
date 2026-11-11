@@ -418,9 +418,9 @@ public sealed class ChineseSimplified : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"正在扫描... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "正在恢复 title.db...";
     public override string StatusRecoveryDone(object arg0) => $"恢复完成: {arg0} 个标题";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"正在提取: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"开始安装: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"安装完成: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"正在提取: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"开始安装: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"安装完成: {arg0}";
     public override string StatusScanningTitles => "正在扫描标题...";
     public override string StatusLoadingMetadata(object arg0) => $"正在加载元数据... (共 {arg0} 个)";
     public override string StatusTitlesLoaded(object arg0) => $"已加载 {arg0} 个标题";

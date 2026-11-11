@@ -1,7 +1,6 @@
 ﻿<Window x:Class="RomForge.Views.UpdateWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:l="clr-namespace:Common.Localization;assembly=Common"
         Title="{Binding Path=Current.UpdateTitle, Source={x:Static l:Loc.Instance}}"
         Height="650" Width="750"
@@ -15,21 +14,18 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="{Binding Path=Current.UpdateAvailable, Source={x:Static l:Loc.Instance}}" FontSize="24" FontWeight="Bold"/>
             <TextBlock Text="{Binding Path=Current.UpdateDescription, Source={x:Static l:Loc.Instance}}" Foreground="#AAAAAA" FontSize="13" Margin="0,6,0,0"/>
         </StackPanel>
-
         <Border Grid.Row="1" Background="#2D2D30" CornerRadius="6" Padding="16" Margin="0,0,0,16">
             <StackPanel>
                 <TextBlock Text="{Binding Path=Current.LatestVersion, Source={x:Static l:Loc.Instance}}" Foreground="#AAAAAA" FontSize="12"/>
                 <TextBlock Text="{Binding TagName}" FontSize="22" FontWeight="SemiBold" Foreground="#4DA6FF" Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
-
-        <Border Grid.Row="2" Background="#252526" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="6" Padding="8">
-            <wv2:WebView2 x:Name="ReleaseNotesBrowser"/>
+        <Border Grid.Row="2" Background="#252526" BorderBrush="#3E3E42" BorderThickness="1" CornerRadius="6" Padding="4">
+            <WebBrowser x:Name="ReleaseNotesBrowser" Loaded="ReleaseNotesBrowser_Loaded"/>
         </Border>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">

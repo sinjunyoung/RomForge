@@ -418,9 +418,9 @@ public sealed class Russian : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"Сканирование... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "Восстановление title.db...";
     public override string StatusRecoveryDone(object arg0) => $"Восстановление завершено: {arg0} назв.";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"Извлечение: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"Установка начата: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"Установка завершена: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"Извлечение: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"Установка начата: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"Установка завершена: {arg0}";
     public override string StatusScanningTitles => "Сканирование названий...";
     public override string StatusLoadingMetadata(object arg0) => $"Загрузка метаданных... (всего {arg0})";
     public override string StatusTitlesLoaded(object arg0) => $"Загружено названий: {arg0}";

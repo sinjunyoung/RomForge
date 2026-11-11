@@ -418,9 +418,9 @@ public sealed class ChineseTraditional : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"正在掃描... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "正在還原 title.db...";
     public override string StatusRecoveryDone(object arg0) => $"還原完成: {arg0} 個標題";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"正在提取: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"開始安裝: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"安裝完成: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"正在提取: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"開始安裝: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"安裝完成: {arg0}";
     public override string StatusScanningTitles => "正在掃描標題...";
     public override string StatusLoadingMetadata(object arg0) => $"正在載入中繼資料... (共 {arg0} 個)";
     public override string StatusTitlesLoaded(object arg0) => $"已載入 {arg0} 個標題";

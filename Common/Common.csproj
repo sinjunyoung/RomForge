@@ -39,7 +39,7 @@
 
   <ItemGroup>
     <PackageReference Include="Squid-Box.SevenZipSharp.Lite" Version="1.6.2.24" />
-    <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="System.Management" Version="11.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -418,9 +418,9 @@ public sealed class Korean : LocalizedStrings
     public override string ProgressScanningCount(object arg0, object arg1) => $"스캔 중... {arg0} / {arg1}";
     public override string StatusRecoveringTitleDb => "title.db 복구 중...";
     public override string StatusRecoveryDone(object arg0) => $"복구 완료: {arg0}개 타이틀";
-    public override string StatusExtractingTitle(object arg0, object arg1) => $"추출 중: {arg0} - {arg1}";
-    public override string StatusInstallStarted(object arg0) => $"설치 시작: {arg0}";
-    public override string StatusInstallDone(object arg0) => $"설치 완료: {arg0}";
+    public override string StatusExtractingTitle(object? arg0, object arg1) => $"추출 중: {arg0} - {arg1}";
+    public override string StatusInstallStarted(object? arg0) => $"설치 시작: {arg0}";
+    public override string StatusInstallDone(object? arg0) => $"설치 완료: {arg0}";
     public override string StatusScanningTitles => "타이틀 스캔 중...";
     public override string StatusLoadingMetadata(object arg0) => $"메타데이터 로딩 중... (총 {arg0}개)";
     public override string StatusTitlesLoaded(object arg0) => $"{arg0}개 타이틀 로드 완료";

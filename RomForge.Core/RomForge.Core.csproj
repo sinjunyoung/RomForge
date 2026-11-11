@@ -22,8 +22,8 @@
   <ItemGroup>
     <PackageReference Include="Darnelix.Webp" Version="1.1.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.13.1" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.14" />
-    <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="System.IO.Hashing" Version="11.0.0" />
+    <PackageReference Include="System.Management" Version="11.0.0" />
     <PackageReference Include="NAudio" Version="3.3.0" />
   </ItemGroup>
   <ItemGroup>

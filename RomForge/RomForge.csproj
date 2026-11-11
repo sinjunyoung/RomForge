@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <VersionPrefix>2.0.0.4</VersionPrefix>
+    <VersionPrefix>2.0.0.5</VersionPrefix>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
@@ -11,6 +11,9 @@
     <AssemblyName>RomForge</AssemblyName>
     <RootNamespace>RomForge</RootNamespace>
     <TieredCompilationQuickJitForLoops>false</TieredCompilationQuickJitForLoops>
+  </PropertyGroup>
+  <PropertyGroup>
+	<GenerateDocumentationFile>false</GenerateDocumentationFile> 
   </PropertyGroup>
   <PropertyGroup>
 	<Authors>YameSoft</Authors>
@@ -145,10 +148,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Markdig" Version="1.6.0" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
+    <PackageReference Include="Markdig.Wpf" Version="0.5.0.1" />
     <PackageReference Include="NAudio" Version="3.3.0" />
     <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-    <PackageReference Include="System.IO.Hashing" Version="10.0.14" />
+    <PackageReference Include="System.IO.Hashing" Version="11.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="App.xaml" />
