@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿
+using Common.Models;
 using Common.Localization;
 using N3DS.Core.Crypto;
 using N3DS.Core.Enums;
@@ -20,15 +21,14 @@ namespace RomForge.ViewModels.N3DS;
 
 public class InstallerMainViewModel : ProgressToolTabViewModel
 {
+    private IEnumerable<ToolTabViewModel> AllTabs => [InstalledTitles, Install];
+    private static readonly string[] MovableSearchPaths = ["movable.sed", @"gm9\out\movable.sed"];
+
     private bool _isLoading;
     private KeyStore? _keyStore;
     private SdCrypto? _sdCrypto;
     private SdTitleScanner? _scanner;
     private CancellationTokenSource? _extractCts;
-
-    private IEnumerable<ToolTabViewModel> AllTabs => [InstalledTitles, Install];
-
-    private static readonly string[] MovableSearchPaths = [ "movable.sed", @"gm9\out\movable.sed", ];
 
     public InstalledTitlesMainViewModel InstalledTitles { get; }
 
@@ -53,7 +53,6 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
     public ToolTabViewModel? SelectedViewModel
     {
         get => (SubTabIndex >= 0 && SubTabIndex < Tools.Count) ? Tools[SubTabIndex] : null;
-
         set
         {
             if (value == null)
@@ -64,6 +63,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             if (index != -1)
             {
                 SubTabIndex = index;
+
                 OnPropertyChanged(nameof(SelectedViewModel));
                 OnPropertyChanged(nameof(HasHelpKey));
                 OnPropertyChanged(nameof(HelpPageKey));
@@ -119,7 +119,6 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
         Tools.Add(InstalledTitles);
         Tools.Add(Install);
-
         InitializeMultiTools();
 
         InstalledTitles.PropertyChanged += (_, e) =>
@@ -127,7 +126,6 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             if (e.PropertyName is nameof(InstalledTitles.IsUnlocked))
                 OnPropertyChanged(nameof(CanLoad));
         };
-
         Install.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName is nameof(Install.IsInstalling) or nameof(Install.IsLocked))
@@ -137,7 +135,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         foreach (var tab in AllTabs)
             tab.PropertyChanged += (_, e) =>
             {
-                if (e.PropertyName == nameof(IsLocked))
+                if (e.PropertyName is nameof(IsLocked))
                     OnPropertyChanged(nameof(IsIdle));
             };
     }
@@ -165,7 +163,9 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
     private async Task RunOperationAsync(CancellationTokenSource cts, string startMsg, Func<CancellationToken, Task> operation, string successMsg)
     {
         SetLoading(true);
+
         StatusMessage = startMsg;
+
         AppendLog(startMsg, LogLevel.Info);
 
         try
@@ -177,7 +177,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             AppendLog(successMsg, LogLevel.Info);
             await SoundPlayer.PlayCompleteAsync();
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (cts.IsCancellationRequested)
         {
             StatusMessage = Loc.S.MsgCancelled;
 
@@ -196,7 +196,6 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
         }
         finally
         {
-            cts.Dispose();
             SetLoading(false);
         }
     }
@@ -216,20 +215,27 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             try
             {
                 EnsureInitialized();
+                await InstalledTitles.LoadAsync(_keyStore!, _sdCrypto!, _scanner!, (current, total) =>
+                {
+                    ProgressPct = total == 0 ? 0 : (int)((double)current / total * 100);
 
-                await InstalledTitles.LoadAsync(_keyStore!, _sdCrypto!, _scanner!,
-                    (current, total) =>
-                    {
-                        ProgressPct = (int)((double)current / total * 100);
+                    MainViewModel.SetTaskbarProgress(ProgressPct);
 
-                        MainViewModel.SetTaskbarProgress(ProgressPct);
+                    ProgressLabel = Loc.S.ProgressLoadingCount(current, total);
 
-                        ProgressLabel = Loc.S.ProgressLoadingCount(current, total);
-
-                        onProgress?.Invoke(current, total);
-                    }, ct);
+                    onProgress?.Invoke(current, total);
+                }, ct);
 
                 AppendLog(Loc.S.LogTitleListLoaded, LogLevel.Ok);
+            }
+            catch (OperationCanceledException)
+            {
+                StatusMessage = Loc.S.MsgCancelled;
+
+                MainViewModel.SetTaskbarProgress(0);
+                AppendLog(Loc.S.LogExtractCancelled, LogLevel.Error);
+                await SoundPlayer.PlayCancelAsync();
+                throw;
             }
             catch (Exception ex)
             {
@@ -240,10 +246,12 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 await SoundPlayer.PlayErrorAsync();
                 throw;
             }
+            finally
+            {
+                SetLoading(false);
+                OnPropertyChanged(nameof(CanLoad));
+            }
         }
-
-        SetLoading(false);
-        OnPropertyChanged(nameof(CanLoad));
     }
 
     public async Task RecoverTitleDbAsync(CancellationToken ct = default)
@@ -274,6 +282,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 {
                     ProgressPct = p.total == 0 ? 0 : (int)((double)p.current / p.total * 100);
                     ProgressLabel = Loc.S.ProgressScanningCount(p.current, p.total);
+
                     MainViewModel.SetTaskbarProgress(ProgressPct);
                 });
 
@@ -284,77 +293,92 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 var (rebuilt, skipped) = await rebuilder.RebuildAsync(Report, ct);
 
                 StatusMessage = Loc.S.StatusRecoveryDone(rebuilt);
-                
+
                 AppendLog(Loc.S.LogRecoveryRegistered(rebuilt), LogLevel.Ok);
-                await SoundPlayer.PlayCompleteAsync();
 
                 if (skipped > 0)
                     AppendLog(Loc.S.LogRecoverySkipped(skipped), LogLevel.Error);
+
+                await SoundPlayer.PlayCompleteAsync();
             }
             catch (OperationCanceledException)
             {
                 StatusMessage = Loc.S.MsgCancelled;
+
                 MainViewModel.SetTaskbarProgress(0);
                 AppendLog(Loc.S.LogRecoveryCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
-                StatusMessage = Loc.S.LogError(ex.Message);                
+                StatusMessage = Loc.S.LogError(ex.Message);
+
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
+            finally
+            {
+                SetLoading(false);
+                OnPropertyChanged(nameof(CanLoad));
+            }
         }
-
-        SetLoading(false);
-        OnPropertyChanged(nameof(CanLoad));
     }
 
     public async Task ExtractTitleAsync(TitleViewModel selected, string outputPath, bool asCci)
     {
+        if (_extractCts != null)
+            return;
+
         using (InstalledTitles.BeginWork())
         {
-            EnsureInitialized();
-
-            _extractCts = new CancellationTokenSource();
-
-            OnPropertyChanged(nameof(CancelButtonVisibility));
-
-            var extractor = new TitleExtractor(_keyStore!, _sdCrypto!, _scanner!);
-            var extractProgress = new Progress<ProgressInfo>(p =>
-            {
-                ProgressPct = p.Percent;
-                MainViewModel.SetTaskbarProgress(ProgressPct);
-                ProgressLabel = $"{p.Percent}%";
-                ProgressTime = p.TimeInfo;
-                ProgressSpeed = p.Speed;
-                StatusMessage = Loc.S.StatusExtractingTitle(selected.ShortDescription, p.Label);
-            });
-
             try
             {
+                EnsureInitialized();
+
+                var cts = new CancellationTokenSource();
+
+                _extractCts = cts;
+
+                OnPropertyChanged(nameof(CancelButtonVisibility));
+
+                var extractor = new TitleExtractor(_keyStore!, _sdCrypto!, _scanner!);
+                var extractProgress = new Progress<ProgressInfo>(p =>
+                {
+                    ProgressPct = p.Percent;
+
+                    MainViewModel.SetTaskbarProgress(ProgressPct);
+
+                    ProgressLabel = $"{p.Percent}%";
+                    ProgressTime = p.TimeInfo;
+                    ProgressSpeed = p.Speed;
+                    StatusMessage = Loc.S.StatusExtractingTitle(selected.ShortDescription, p.Label);
+                });
+
                 AppendLog(Loc.S.LogExtractReady(selected.ShortDescription, selected.TitleId), LogLevel.Info);
                 AppendLog(Loc.S.LogOutputPathAndFormat(outputPath, asCci ? "CCI" : "CIA"), LogLevel.Info);
-                await RunOperationAsync(_extractCts, Loc.S.LogExtractStarted(selected.ShortDescription),
-                    async ct =>
-                    {
-                        if (asCci)
-                            await extractor.ExtractToCciAsync(selected.Title, outputPath, extractProgress, ct);
-                        else
-                            await extractor.ExtractToCiaAsync(selected.Title, outputPath, extractProgress, ct);
-                    },
-                    Loc.S.LogExtractDone(selected.ShortDescription));
-                await SoundPlayer.PlayCompleteAsync();
+
+                await RunOperationAsync(cts, Loc.S.LogExtractStarted(selected.ShortDescription), async ct =>
+                {
+                    if (asCci)
+                        await extractor.ExtractToCciAsync(selected.Title, outputPath, extractProgress, ct);
+                    else
+                        await extractor.ExtractToCiaAsync(selected.Title, outputPath, extractProgress, ct);
+                }, Loc.S.LogExtractDone(selected.ShortDescription));
             }
             catch (CertsBinNotFoundException)
             {
+                StatusMessage = Loc.S.LogError(Loc.S.ErrInvalidTitleId);
+
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
+                AppendLog(Loc.S.LogError(Loc.S.ErrInvalidTitleId), LogLevel.Error);
                 RunNavigateCerts?.Invoke(this, EventArgs.Empty);
                 await SoundPlayer.PlayErrorAsync();
             }
             finally
             {
+                _extractCts?.Dispose();
+
                 _extractCts = null;
 
                 OnPropertyChanged(nameof(CancelButtonVisibility));
@@ -384,9 +408,8 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             if (Directory.Exists(titleRoot))
             {
                 AppendLog(Loc.S.LogTitleAlreadyExists(titleRoot), LogLevel.Info);
-                var result = MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmReinstall(selected.ShortDescription));
 
-                if (!result)
+                if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmReinstall(selected.ShortDescription)))
                 {
                     AppendLog(Loc.S.LogReinstallDeclined, LogLevel.Info);
                     return;
@@ -397,19 +420,23 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
             }
 
             SetLoading(true);
+
             StatusMessage = Loc.S.StatusInstallStarted(selected.ShortDescription);
+
             AppendLog(Loc.S.StatusInstallStarted(selected.FilePath), LogLevel.Highlight);
 
             try
             {
                 var installer = new TitleInstaller(_keyStore!, _sdCrypto!, _scanner!);
 
-                installer.OnLog += msg => AppendLog($"{msg}", LogLevel.Info);
+                installer.OnLog += msg => AppendLog(msg, LogLevel.Info);
 
                 var installProgress = new Progress<ProgressInfo>(p =>
                 {
                     ProgressPct = p.Percent;
+
                     MainViewModel.SetTaskbarProgress(ProgressPct);
+
                     selected.Progress = p.Percent;
                     ProgressLabel = $"{p.Percent}%";
                     ProgressTime = p.TimeInfo;
@@ -417,32 +444,30 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 });
 
                 string ext = Path.GetExtension(selected.FilePath).ToLowerInvariant();
+
                 switch (ext)
                 {
                     case ".cia":
-                        {
-                            var reader = new CiaReader(_keyStore!);
-                            await using var cia = await reader.OpenAsync(selected.FilePath, ct: ct);
+                        var reader = new CiaReader(_keyStore!);
+
+                        await using (var cia = await reader.OpenAsync(selected.FilePath, ct: ct))
                             await installer.InstallAsync(cia, installProgress, ct);
-                            break;
-                        }
+                        break;
                     case ".cci":
                     case ".3ds":
                     case ".zcci":
-                        {
-                            await using var cci = await CciSource.OpenAsync(selected.FilePath, _keyStore!, ct: ct);
+                        await using (var cci = await CciSource.OpenAsync(selected.FilePath, _keyStore!, ct: ct))
                             await installer.InstallAsync(cci, installProgress, ct);
-                            break;
-                        }
+                        break;
                     default:
-                        AppendLog(Loc.S.ErrUnsupportedFormat(ext), LogLevel.Error);
                         throw new NotSupportedException(Loc.S.ErrUnsupportedFormat(ext));
                 }
 
-                StatusMessage = Loc.S.StatusInstallDone(selected.ShortDescription);                
+                StatusMessage = Loc.S.StatusInstallDone(selected.ShortDescription);
+
                 AppendLog(Loc.S.StatusInstallDone(selected.ShortDescription), LogLevel.Ok);
-                await SoundPlayer.PlayCompleteAsync();
                 AppendLog(Loc.S.LogHomebrewFinalizeHint, LogLevel.Highlight);
+                await SoundPlayer.PlayCompleteAsync();
 
                 if (selected.ForcedLanguage != LocaleLanguage.None)
                 {
@@ -463,20 +488,24 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                 StatusMessage = Loc.S.MsgCancelled;
 
                 AppendLog(Loc.S.LogInstallCancelled, LogLevel.Error);
-                await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
+                await SoundPlayer.PlayCancelAsync();
+
                 if (Directory.Exists(titleRoot))
+                {
                     try
-                    { 
+                    {
                         Directory.Delete(titleRoot, true);
                     }
                     catch { }
+                }
+
                 throw;
             }
             catch (Exception ex)
             {
                 StatusMessage = Loc.S.LogError(ex.Message);
-                
+
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
@@ -493,9 +522,7 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
 
     public async Task CheckAndSetMovablePathAsync(string driveLetter)
     {
-        var found = await Task.Run(() => MovableSearchPaths
-        .Select(p => Path.Combine(driveLetter, p))
-        .FirstOrDefault(File.Exists));
+        var found = await Task.Run(() => MovableSearchPaths.Select(p => Path.Combine(driveLetter, p)).FirstOrDefault(File.Exists));
 
         MovablePath = found ?? string.Empty;
     }
@@ -555,13 +582,11 @@ public class InstallerMainViewModel : ProgressToolTabViewModel
                     foreach (LogEntry item in e.NewItems)
                         LogEntries.Add(item);
                 break;
-
             case NotifyCollectionChangedAction.Remove:
                 if (e.OldItems != null)
                     foreach (LogEntry item in e.OldItems)
                         LogEntries.Remove(item);
                 break;
-
             case NotifyCollectionChangedAction.Reset:
                 LogEntries.Clear();
                 break;

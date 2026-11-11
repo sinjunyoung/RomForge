@@ -1,10 +1,7 @@
-﻿using Common.Models;
-using Common.Localization;
+﻿using Common.Localization;
 using Microsoft.Win32;
 using RomForge.Core.Models.N3DS;
-using RomForge.Core.Services;
 using RomForge.ViewModels.N3DS;
-using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -18,6 +15,7 @@ public partial class InstalledTitlesTab : UserControl
     public InstalledTitlesTab()
     {
         InitializeComponent();
+
         DataContextChanged += (_, _) =>
         {
             if (DataContext is InstallerMainViewModel vm)
@@ -27,49 +25,31 @@ public partial class InstalledTitlesTab : UserControl
 
     private async void LoadTitles_Click(object sender, RoutedEventArgs e)
     {
-        try
+        await Vm.LoadTitlesAsync((current, total) => Dispatcher.Invoke(() =>
         {
-            await Vm.LoadTitlesAsync(onProgress: (current, total) =>
-                Dispatcher.Invoke(() =>
-                {
-                    LoadingProgress.Maximum = total;
-                    LoadingProgress.Value = current;
-                    LoadingText.Text = Loc.S.ProgressLoadingCount(current, total);
-                }));
-        }
-        catch (Exception ex)
-        {
-            Vm.AppendLog(Loc.S.LogLoadFailed(ex.Message), LogLevel.Error);
-            await SoundPlayer.PlayErrorAsync();
-        }
+            LoadingProgress.Maximum = total;
+            LoadingProgress.Value = current;
+            LoadingText.Text = Loc.S.ProgressLoadingCount(current, total);
+        }));
     }
 
-    private async void RecoverTitleDb_Click(object sender, RoutedEventArgs e)
+    private async void RecoverTitleDb_Click(object sender, RoutedEventArgs e) => await Vm.RecoverTitleDbAsync();
+
+    private void Search_TextChanged(object sender, TextChangedEventArgs e)
     {
-        try
-        {
-            await Vm.RecoverTitleDbAsync();
-        }
-        catch (Exception ex)
-        {
-            Vm.AppendLog(Loc.S.LogRecoverFailed(ex.Message), LogLevel.Error);
-            await SoundPlayer.PlayErrorAsync();
-        }
+        if (DataContext is InstallerMainViewModel vm)
+            vm.InstalledTitles.RefreshFilter(SearchBox.Text);
     }
-
-    private void Search_TextChanged(object sender, TextChangedEventArgs e) => Vm.InstalledTitles.RefreshFilter(SearchBox.Text);
 
     private ToggleButton[] FilterButtons => [FilterAll, FilterGame, FilterUpdate, FilterDlc];
 
     private void Filter_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is not ToggleButton btn) 
+        if (sender is not ToggleButton btn)
             return;
 
         foreach (var b in FilterButtons)
-            b.IsChecked = false;
-
-        btn.IsChecked = true;
+            b.IsChecked = b == btn;
 
         Vm.InstalledTitles.SetFilter(btn.Tag?.ToString() ?? "All", SearchBox.Text);
     }
@@ -91,33 +71,21 @@ public partial class InstalledTitlesTab : UserControl
 
     private async void ExtractTitle_Click(object sender, RoutedEventArgs e)
     {
-        if (TitleListView.SelectedItem is not TitleViewModel selected) 
+        if (TitleListView.SelectedItem is not TitleViewModel selected)
             return;
 
         bool asCci = sender == MenuExtractCci;
         var (ext, desc) = asCci ? ("cci", "CCI(CTR Cartridge Image)") : ("cia", "CIA(CTR Importable Archive)");
-
         var dialog = new SaveFileDialog
         {
             Title = Loc.S.DialogSelectSaveLocation(desc),
             Filter = $"{Loc.S.FilterFilesOfType(desc)}|*.{ext}",
-            FileName = $"{selected.ShortDescription}.{ext}",
+            FileName = $"{selected.ShortDescription}.{ext}"
         };
 
-        if (dialog.ShowDialog() != true) 
+        if (dialog.ShowDialog() != true)
             return;
 
-        try
-        {
-            await Vm.ExtractTitleAsync(selected, dialog.FileName, asCci);
-
-            if (File.Exists(dialog.FileName))
-                Vm.AppendLog(Loc.S.LogExtractDone(dialog.FileName), LogLevel.Ok);
-        }
-        catch (Exception ex)
-        {
-            Vm.AppendLog(Loc.S.LogExtractFailed(ex.Message), LogLevel.Error);
-            await SoundPlayer.PlayErrorAsync();
-        }
+        await Vm.ExtractTitleAsync(selected, dialog.FileName, asCci);
     }
 }
