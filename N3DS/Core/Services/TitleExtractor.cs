@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
@@ -137,7 +138,7 @@ public class TitleExtractor(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
         long totalBytes = contents.Sum(c => c.ContentSize);
         long written = 0;
         var contentHashes = new byte[contents.Count][];
-        var reporter = progress is null ? null : new ProgressReporter("CIA 추출 중...", string.Empty, totalBytes, progress);
+        var reporter = progress is null ? null : new ProgressReporter(Loc.S.StatusExtractingCia, string.Empty, totalBytes, progress);
         var report = reporter?.CreateAction();
 
         for (int i = 0; i < contents.Count; i++)

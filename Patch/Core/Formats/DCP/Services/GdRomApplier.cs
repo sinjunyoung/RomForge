@@ -1,4 +1,6 @@
-﻿using System.IO.Compression;
+﻿using Common.Localization;
+
+using System.IO.Compression;
 
 namespace Patch.Core.Formats.DCP.Services;
 
@@ -6,14 +8,14 @@ public static class GdRomApplier
 {
     public static async Task ApplyAsync(string? gdiPath, string? dcpPath, string outputDir, Action<double, string>? onProgress = null, Action<string>? onLog = null, CancellationToken ct = default)
     {
-        onProgress?.Invoke(0.0, "GDI 메타데이터 및 원본 구조 파싱 중...");
+        onProgress?.Invoke(0.0, Loc.S.ProgressGdParsingMetadata);
 
         var gdi = GdiFile.Parse(gdiPath);
         Dictionary<string, byte[]> replacedFiles = [];
 
         await PreparePatchedFilesAsync(gdi, dcpPath, replacedFiles, onProgress, onLog, ct);
         await Task.Run(() => GdRomRebuilder.RebuildFull(gdi, replacedFiles, outputDir, (p, msg) => onProgress?.Invoke(0.20 + 0.80 * p, msg), onLog, ct), ct);
-        onProgress?.Invoke(1.0, "모든 패치 적용 작업 완료!");
+        onProgress?.Invoke(1.0, Loc.S.ProgressGdPatchAllDone);
     }
 
     private static async Task PreparePatchedFilesAsync(GdiFile gdi, string? dcpPath, Dictionary<string, byte[]> replacedFiles, Action<double, string>? onProgress, Action<string>? onLog, CancellationToken ct)
@@ -35,7 +37,7 @@ public static class GdRomApplier
             if (relativePath.StartsWith("bootsector\\", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            onProgress?.Invoke(0.05 * entryDone / entries.Count, $"DCP 패키지 압축 해제 중: {entry.Name}");
+            onProgress?.Invoke(0.05 * entryDone / entries.Count, Loc.S.ProgressGdExtractingDcp(entry.Name));
 
             using var entryStream = entry.Open();
             using var ms = new MemoryStream();
@@ -62,7 +64,7 @@ public static class GdRomApplier
                 throw new InvalidOperationException($"DCP가 참조하는 원본 파일을 찾을 수 없습니다: {targetPath}");
             }
 
-            onProgress?.Invoke(0.05 + 0.15 * xdeltaDone / xdeltaEntries.Count, $"xdelta 델타 패치 적용 중: {fileName}");
+            onProgress?.Invoke(0.05 + 0.15 * xdeltaDone / xdeltaEntries.Count, Loc.S.ProgressGdApplyingXdelta(fileName));
 
             var originalData = Iso9660DirectoryReader.ReadFile(sourceFunc, originalEntry);
             var patched = await Task.Run(() => Xdelta3.ApplyPatch(originalData, kv.Value, null, ct), ct);

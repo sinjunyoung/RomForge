@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Services;
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using Patch.Core.Formats.DCP.Services;
@@ -53,13 +54,13 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
             if (sourceIsTemporary)
             {
                 await GdRomApplier.ApplyAsync(gdiPath, patchPath, workDir, (p, msg) => progress?.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log?.Invoke(msg, LogLevel.Info), ct);
-                progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
                 log?.Invoke($"패치 완료: {gdiPath}", LogLevel.Ok);
                 Directory.CreateDirectory(outputDir);
 
                 if (autoCompress)
                 {
-                    progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingChd, Percent = 0 });
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
@@ -105,7 +106,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
                     }
                 }
 
-                progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
                 log?.Invoke($"패치 완료: {_outputGdiPath}", LogLevel.Ok);
 
                 if (autoCompress && File.Exists(_outputGdiPath))
@@ -116,7 +117,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
         }
 
         await Chain.ApplyAsync(sourcePath, patchPaths, outputPath, outputDir, log, progress, ct);
-        progress?.Report(new ProgressInfo { Label = "패치 완료", Percent = 100 });
+        progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
         log?.Invoke($"패치 완료: {outputPath}", LogLevel.Ok);
 
         skipCompress = false;
@@ -142,7 +143,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
 
         if (isZipTarget)
         {
-            progress?.Report(new ProgressInfo { Label = "압축 중...", Percent = 0 });
+            progress?.Report(new ProgressInfo { Label = Loc.S.LogStatusCompressing, Percent = 0 });
             await _zipCompressor.CompressFromFileAsync(outputPath, outputDir, ct);
         }
         else

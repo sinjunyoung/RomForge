@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using NSW.HacPack;
 using Patch.Core;
@@ -132,7 +133,7 @@ public static class NspExefsPatchApplier
                 continue;
             }
 
-            progress.ReportStatus($"exefs_patches 적용 중... ({targetNso})", -1);
+            progress.ReportStatus(Loc.S.ProgressApplyingExefsPatches(targetNso), -1);
 
             byte[] nso = exefs.ReadAllBytes(targetNso);
             uint originalFlags = BitConverter.ToUInt32(nso, 0x0C);

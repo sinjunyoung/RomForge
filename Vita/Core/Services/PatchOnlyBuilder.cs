@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common;
 using Common.Models;
 using Common.Services;
@@ -34,7 +35,7 @@ public static class PatchOnlyBuilder
         foreach (var g in groups)
             totalBytes += g.Targets.Sum(t => t.EstimatedSize);
 
-        var reporter = new ProgressReporter("패치 적용 중", string.Empty, totalBytes, progress);
+        var reporter = new ProgressReporter(Loc.S.StatusApplyingPatch, string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int matched = 0;
         int success = 0;

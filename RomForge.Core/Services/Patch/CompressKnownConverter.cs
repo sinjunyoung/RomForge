@@ -1,4 +1,5 @@
 ﻿using CD.Core.Services.Readers;
+using Common.Localization;
 using CD.Core.Services.Writers;
 using CHD.Core.Services;
 using Common.Models;
@@ -17,7 +18,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
         {
             case RomFormat.Ccd:
                 {
-                    progress?.Report(new ProgressInfo { Label = "BIN/CUE 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingBinCue, Percent = 0 });
 
                     var discReader = DiscImageReaderFactory.Resolve(outputCcdPath!);
                     var discImage = discReader.Read(outputCcdPath!);
@@ -26,7 +27,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
 
                     try
                     {
-                        progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                        progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingChd, Percent = 0 });
 
                         FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
@@ -58,7 +59,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                 }
             case RomFormat.Bin:
                 {
-                    progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingChd, Percent = 0 });
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
@@ -82,7 +83,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                 }
             case RomFormat.Gdi:
                 {
-                    progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingChd, Percent = 0 });
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
@@ -106,7 +107,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                 }
             case RomFormat.Iso:
                 {
-                    progress?.Report(new ProgressInfo { Label = "CHD 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingChd, Percent = 0 });
 
                     FileConverter converter = new(AppConfig.Instance.Chdman.Compression);
 
@@ -123,7 +124,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                 }
             case RomFormat.Cci:
                 {
-                    progress?.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCompressingZcci, Percent = 0 });
 
                     await Z3dsCompressor.CompressAsync(outputPath, null, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
 
@@ -133,7 +134,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                 }
             case RomFormat.Cia:
                 {
-                    progress?.Report(new ProgressInfo { Label = "ZCCI 압축 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCompressingZcci, Percent = 0 });
 
                     await Z3dsCompressor.CompressFromCiaAsync(outputPath, null, AppConfig.Instance.Azahar.CompressLevel, progress, log, ct);
 
@@ -145,12 +146,12 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
             case RomFormat.Wii:
             case RomFormat.Wbfs:
                 {
-                    progress?.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = 0 });
+                    progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingFormat, Percent = 0 });
 
                     DiscImageConverter converter = new();
 
                     converter.LogMessage += (_, e) => log?.Invoke(e.Message, e.Level);
-                    converter.ProgressChanged += (_, e) => progress?.Report(new ProgressInfo { Label = "포맷 변환 중...", Percent = e.Progress });
+                    converter.ProgressChanged += (_, e) => progress?.Report(new ProgressInfo { Label = Loc.S.ProgressConvertingFormat, Percent = e.Progress });
 
                     await converter.ConvertFileAsync(outputPath, null, detected.Format.ToString(), detected.OutputExtension, wiiGcCompressLevel, ct);
                     File.Delete(outputPath);

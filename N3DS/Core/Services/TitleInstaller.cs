@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Localization;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
@@ -58,7 +59,7 @@ public class TitleInstaller(KeyStore keyStore, SdCrypto sdCrypto, SdTitleScanner
 
         long totalBytes = tmd.Contents.Sum(c => c.ContentSize);
         long written = 0;
-        var reporter = progress is null ? null : new ProgressReporter("설치 중...", string.Empty, totalBytes, progress);
+        var reporter = progress is null ? null : new ProgressReporter(Loc.S.StatusInstalling, string.Empty, totalBytes, progress);
         var report = reporter?.CreateAction();
 
         for (int i = 0; i < tmd.Contents.Length; i++)

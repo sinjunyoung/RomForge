@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Patch.Core.Formats.DCP.Services;
 using System.IO;
 using System.Text;
@@ -52,7 +53,7 @@ public class GdiTrackCopier(Action<string, LogLevel>? log)
                 return null;
             }
 
-            progress?.Report(new ProgressInfo { Label = $"트랙 복사 중 ({trackIndex}/{tracksToCopy.Count})", Percent = tracksToCopy.Count > 0 ? trackIndex * 100 / tracksToCopy.Count : 100 });
+            progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCopyingTrack(trackIndex, tracksToCopy.Count), Percent = tracksToCopy.Count > 0 ? trackIndex * 100 / tracksToCopy.Count : 100 });
 
             if (moveInsteadOfCopy)
                 File.Move(sourceTrackPath, targetTrackPath, true);

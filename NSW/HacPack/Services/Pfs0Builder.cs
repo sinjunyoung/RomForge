@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using NSW.HacPack.Models;
@@ -83,7 +84,7 @@ public static class Pfs0Builder
         long totalSize = (long)fileDataRelOffset;
         const int bufSize = 0x800000;
         byte[] buf = ArrayPool<byte>.Shared.Rent(bufSize);
-        var reporter = new ProgressReporter("PFS0 빌드 중", string.Empty, totalSize, progress);
+        var reporter = new ProgressReporter(Loc.S.ProgressBuildingPfs0, string.Empty, totalSize, progress);
 
         try
         {

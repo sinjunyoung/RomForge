@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Common.Localization;
 using WiiU.Core.Models;
 using WiiU.WUP.Crypto;
 using WiiU.WUP.Services;
@@ -127,7 +128,7 @@ public static class WupPacker
             long totalWork = (long)totalBytes * 3;
             long doneWork = 0;
 
-            onProgress?.Invoke(0, totalBytes, "패킹 중");
+            onProgress?.Invoke(0, totalBytes, Loc.S.ProgressPacking);
             nusPackage.PackContents(outputFolder, onContentPacked: null, onContentBytesProcessed: (content, phase, done, total) =>
             {
                 ct.ThrowIfCancellationRequested();
@@ -167,7 +168,7 @@ public static class WupPacker
                 File.Move(tempPath, dest, overwrite: true);
             }
 
-            onProgress?.Invoke(totalBytes, totalBytes, "완료");
+            onProgress?.Invoke(totalBytes, totalBytes, Loc.S.StatusDone);
         }
         finally
         {

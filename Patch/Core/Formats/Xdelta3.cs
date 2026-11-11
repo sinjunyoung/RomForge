@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -119,7 +120,7 @@ public static partial class Xdelta3
 
             try
             {
-                ProgressReporter? loadReporter = progress is null || size <= 0 ? null : new ProgressReporter("소스 로딩 중...", string.Empty, size, progress);
+                ProgressReporter? loadReporter = progress is null || size <= 0 ? null : new ProgressReporter(Loc.S.StatusLoadingSource, string.Empty, size, progress);
                 Action<long, long>? loadReport = loadReporter?.CreateAction();
 
                 using var sourceStream = openSource();
@@ -217,7 +218,7 @@ public static partial class Xdelta3
             try
             {
                 _patch = openPatch();
-                _report = progress is null ? null : new ProgressReporter("패치 중...", string.Empty, _estimatedTotal, progress).CreateAction();
+                _report = progress is null ? null : new ProgressReporter(Loc.S.StatusApplyingPatch, string.Empty, _estimatedTotal, progress).CreateAction();
                 _readBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
                 _outBuf = GC.AllocateArray<byte>(StreamChunkSize, pinned: true);
             }

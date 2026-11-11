@@ -1,4 +1,6 @@
 ﻿using Common.Services;
+using Common.Models;
+using Common.Localization;
 using LibHac.NSZ;
 using LibHac.Tools.FsSystem;
 using NSW.HacPack.IO;
@@ -25,7 +27,7 @@ public static class NczInPlaceConverter
 
         if (onRead == null && options.Progress != null)
         {
-            reporter = new ProgressReporter("NSZ 압축 중", string.Empty, Math.Max(1, ncaSize - HeaderSize), options.Progress);
+            reporter = new ProgressReporter(Loc.S.ProgressCompressingNsz, string.Empty, Math.Max(1, ncaSize - HeaderSize), options.Progress) { Stage = ProgressStage.Nsz };
             onRead = reporter.AddProgress;
         }
 

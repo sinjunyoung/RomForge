@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using K4os.Compression.LZ4;
 using LibHac;
@@ -85,7 +86,7 @@ public static class CompressedRomfsWriter
         long physical = headerLength;
         int batchSize = Math.Clamp(Environment.ProcessorCount * 8, 32, 128);
 
-        var reporter = new ProgressReporter("RomFS 압축 중", string.Empty, totalSize, progress);
+        var reporter = new ProgressReporter(Loc.S.ProgressCompressingRomfs, string.Empty, totalSize, progress) { Stage = ProgressStage.Compress };
         var report = reporter.CreateAction();
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);

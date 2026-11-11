@@ -1,4 +1,5 @@
 ﻿using Common.Localization;
+using Common.Models;
 
 namespace RomForge.Core.ViewModels.Switch;
 
@@ -12,10 +13,10 @@ public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
 
     public string Label { get; private set; } = isBuild ? Loc.S.ProgressPreparing : Loc.S.LogStatusCompressing;
 
-    public int Update(int percent, string? label)
+    public int Update(int percent, ProgressStage stage)
     {
         if (isBuild)
-            UpdateLabel(label);
+            UpdateLabel(stage);
 
         if (percent < _last)
             _stage++;
@@ -29,16 +30,19 @@ public sealed class Lz4JobProgress(bool isBuild, bool hasNsz)
         return _max;
     }
 
-    private void UpdateLabel(string? label)
+    private void UpdateLabel(ProgressStage stage)
     {
-        if (string.IsNullOrEmpty(label))
-            return;
-
-        if (label.Contains("해시"))
-            Label = Loc.S.ProgressHashing;
-        else if (label.Contains("NSZ", StringComparison.OrdinalIgnoreCase))
-            Label = Loc.S.ProgressCompressingNsz;
-        else if (label.Contains(Common.Localization.Loc.Instance.Current.LabelCompression))
-            Label = Loc.S.LogStatusCompressing;
+        switch (stage)
+        {
+            case ProgressStage.Hash:
+                Label = Loc.S.ProgressHashing;
+                break;
+            case ProgressStage.Nsz:
+                Label = Loc.S.ProgressCompressingNsz;
+                break;
+            case ProgressStage.Compress:
+                Label = Loc.S.LogStatusCompressing;
+                break;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using CD.Core.Constants;
+using Common.Localization;
 using CD.Core.Models;
 using Common.Models;
 using Common.Services;
@@ -69,7 +70,7 @@ public static class CookedIsoWriter
 
             remaining -= chunkSectors;
 
-            progress?.Report(new ProgressInfo((int)((long)(totalSectors - remaining) * 100 / totalSectors), "ISO 변환 중", label, string.Empty, string.Empty));
+            progress?.Report(new ProgressInfo((int)((long)(totalSectors - remaining) * 100 / totalSectors), Loc.S.ProgressConvertingIso, label, string.Empty, string.Empty));
         }
     }
 

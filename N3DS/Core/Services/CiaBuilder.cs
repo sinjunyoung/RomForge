@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using N3DS.Core.Crypto;
@@ -119,7 +120,7 @@ public static class CiaBuilder
         progress?.Invoke(totalBytes, totalBytes);
 
         var contentHashes = new byte[contentCount][];
-        var hashReporter = hashProgress == null ? null : new ProgressReporter("해시 계산 중...", string.Empty, totalBytes, hashProgress);
+        var hashReporter = hashProgress == null ? null : new ProgressReporter(Loc.S.ProgressHashing, string.Empty, totalBytes, hashProgress);
         var hashAction = hashReporter?.CreateAction();
         long hashedBytes = 0;
 

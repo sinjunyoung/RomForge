@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using LibHac.Common.Keys;
 using LibHac.Fs;
@@ -204,7 +205,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
                 }
             }
 
-            progress.ReportStatus("완료", 100);
+            progress.ReportStatus(Loc.S.StatusDone, 100);
 
             if (StreamRomfs)
                 streamResult = result;

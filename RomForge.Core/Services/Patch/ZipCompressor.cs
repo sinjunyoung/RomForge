@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using System.IO;
 using System.IO.Compression;
@@ -26,7 +27,7 @@ public class ZipCompressor(Action<string, LogLevel>? log, IProgress<ProgressInfo
             long totalBytes = sourceStream.Length;
             long bytesReadTotal = 0;
             int bytesRead;
-            var reporter = new ProgressReporter("압축 중...", string.Empty, totalBytes, progress);
+            var reporter = new ProgressReporter(Loc.S.LogStatusCompressing, string.Empty, totalBytes, progress);
             var report = reporter.CreateAction();
 
             while ((bytesRead = sourceStream.Read(buffer, 0, buffer.Length)) > 0)

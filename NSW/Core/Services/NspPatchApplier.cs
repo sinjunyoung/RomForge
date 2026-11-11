@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using NSW.Core.Models;
 using NSW.HacPack;
@@ -35,7 +36,7 @@ public static class NspPatchApplier
 
             try
             {
-                matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, "한글패치");
+                matchedCount += ApplyIndex(PatchIndex.FromArchive(archive), exefsTarget, romfsTarget, progress, log, Loc.S.LabelKoreanPatch);
                 matchedCount += NspExefsPatchApplier.ApplyArchiveExefsPatches(archive, exefsStore, progress, log);
             }
             finally
@@ -46,7 +47,7 @@ public static class NspPatchApplier
         }
         else if (Directory.Exists(patchPath))
         {
-            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), exefsTarget, romfsTarget, progress, log, "한글패치");
+            matchedCount += ApplyIndex(PatchIndex.FromFolder(patchPath), exefsTarget, romfsTarget, progress, log, Loc.S.LabelKoreanPatch);
             matchedCount += NspExefsPatchApplier.ApplyFolderExefsPatches(patchPath, exefsStore, progress, log);
         }
 
@@ -101,7 +102,7 @@ public static class NspPatchApplier
     public static void ApplyDlcPatch(string patchPath, string titleIdStr, IPatchTarget romfsTarget, ICollection<IDisposable> owner, IProgress<ProgressInfo> progress, Action<string, LogLevel> log, string? patchPassword = null)
     {
         int matchedCount = 0;
-        string label = $"DLC 패치 ({titleIdStr})";
+        string label = Loc.S.LabelDlcPatch(titleIdStr);
 
         if (ArchivePatchSourceFactory.IsArchivePath(patchPath))
         {
@@ -155,7 +156,7 @@ public static class NspPatchApplier
         if (targetsByPrefix.Count == 0)
             return 0;
 
-        progress.ReportStatus($"{label} 적용 중...", -1);
+        progress.ReportStatus(Loc.S.ProgressApplyingLabel(label), -1);
 
         var targets = targetsByPrefix.SelectMany(kv => kv.Value.EnumerateRelativeFiles().Select(f => $"{kv.Key}/{f}")).ToList();
         var plan = PatchPlan.Build(index, targets, StringComparer.OrdinalIgnoreCase);

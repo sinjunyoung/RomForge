@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using System.IO.Compression;
@@ -33,7 +34,7 @@ public static class PatchOutputBuilder
         foreach (var g in groups)
             totalBytes += g.Targets.Sum(t => t.EstimatedSize) + GetWriteTotal(g, target);
 
-        var reporter = new ProgressReporter("패치 적용 및 압축 중", string.Empty, totalBytes, progress);
+        var reporter = new ProgressReporter(Loc.S.StatusApplyingPatchAndCompressing, string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int patchCandidates = 0;
         int patchedSuccess = 0;

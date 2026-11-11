@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using NSW.HacPack.IO;
 using NSW.HacPack.Models;
@@ -177,7 +178,7 @@ public static class RomfsBuilder
         foreach (var file in layout.Files)
             totalSize += file.Size;
 
-        var reporter = new ProgressReporter("RomFS 빌드 중", string.Empty, (long)totalSize, progress);
+        var reporter = new ProgressReporter(Loc.S.ProgressBuildingRomfs, string.Empty, (long)totalSize, progress);
         const int bufSize = 0x800000;
         var buf = System.Buffers.ArrayPool<byte>.Shared.Rent(bufSize);
 

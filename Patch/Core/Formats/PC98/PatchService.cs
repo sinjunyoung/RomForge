@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common;
 using Common.Models;
 using Common.Services;
@@ -48,7 +49,7 @@ public static class PatchService
                 var missing = new List<string>();
                 int total = Math.Max(patchFiles.Count, 1);
                 int done = 0;
-                var reporter = new ProgressReporter("패치 중", string.Empty, total, progress);
+                var reporter = new ProgressReporter(Loc.S.StatusApplyingPatch, string.Empty, total, progress);
                 var report = reporter.CreateAction();
 
                 foreach (var rel in patchFiles)

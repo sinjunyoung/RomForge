@@ -1,4 +1,5 @@
 ﻿using CD.Core.Models;
+using Common.Localization;
 using Common.Models;
 
 namespace CD.Core.Services.Writers;
@@ -44,7 +45,7 @@ public static class BinCueWriter
                     {
                         sectorsDone += count;
 
-                        progress?.Report(new ProgressInfo((int)(totalSectors > 0 ? sectorsDone * 100 / totalSectors : 100), "BIN/CUE 변환 중", outputBaseName, string.Empty, string.Empty));
+                        progress?.Report(new ProgressInfo((int)(totalSectors > 0 ? sectorsDone * 100 / totalSectors : 100), Loc.S.ProgressConvertingBinCue, outputBaseName, string.Empty, string.Empty));
                     },
                     ct);
 

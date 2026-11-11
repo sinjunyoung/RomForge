@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using NSW.HacPack.IO;
 using NSW.HacPack.Models;
@@ -43,7 +44,7 @@ public static class UncompressedRomfsSectionWriter
                 ct.ThrowIfCancellationRequested();
                 IvfcGenerator.GenerateHashLevel(ivfcStreams[b], ivfcStreams[b + 1], out ulong lvlSize);
                 NcaHeaderService.SetIvfcLevel(ref ncaHeader, sectionIndex, b, lvlSize);
-                progress.ReportStatus($"IVFC 생성 중... {4 - b}/5", -1);
+                progress.ReportStatus(Loc.S.ProgressCreatingIvfc(4 - b, 5), -1);
             }
 
             for (int c = 0; c < 5; c++)
@@ -115,7 +116,7 @@ public static class UncompressedRomfsSectionWriter
 
     private static void CopyData(Stream source, Stream output, long expectedSize, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        var reporter = new ProgressReporter("RomFS 기록 중", string.Empty, expectedSize, progress);
+        var reporter = new ProgressReporter(Loc.S.ProgressWritingRomfs, string.Empty, expectedSize, progress);
         var buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(CopyBufferSize);
         long copied = 0;
 

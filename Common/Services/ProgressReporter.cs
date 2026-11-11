@@ -13,6 +13,8 @@ public class ProgressReporter(string gameTitle, string gameId, long totalEstimat
 
     public string Label { get; set; } = gameTitle;
 
+    public ProgressStage Stage { get; set; }
+
     public Action<long, long> CreateAction()
     {
         return (cur, total) =>
@@ -86,7 +88,7 @@ public class ProgressReporter(string gameTitle, string gameId, long totalEstimat
 
         var r = Utils.CalculateProgress(currentWritten, totalSize, Label);
 
-        progress?.Report(new ProgressInfo(pct, r.label, gameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}"));
+        progress?.Report(new ProgressInfo(pct, r.label, gameId, $"{mibPerSec:F1} MiB/s", $"{elapsed:mm\\:ss} / {totalEta:mm\\:ss}", Stage));
         _reportSw.Restart();
     }
 }

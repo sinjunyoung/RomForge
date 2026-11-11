@@ -445,4 +445,54 @@ public abstract class LocalizedStrings
     public abstract string ProgressPreparing { get; }
     public abstract string ProgressHashing { get; }
     public abstract string ProgressCompressingNsz { get; }
+
+    public abstract string StatusUnpacking { get; }
+    public abstract string StatusApplyingPatch { get; }
+    public abstract string StatusApplyingPatchAndCompressing { get; }
+    public abstract string StatusLoadingSource { get; }
+    public abstract string StatusInstalling { get; }
+    public abstract string StatusExtractingCia { get; }
+    public abstract string ProgressHashingNca { get; }
+    public abstract string ProgressCompressingRomfs { get; }
+    public abstract string ProgressBuildingPfs0 { get; }
+    public abstract string ProgressBuildingRomfs { get; }
+    public abstract string ProgressWritingRomfs { get; }
+    public abstract string ProgressCreatingIvfc(object arg0, object arg1);
+    public abstract string ProgressFinalizingNsp { get; }
+    public abstract string ProgressBuildingProgram { get; }
+    public abstract string ProgressApplyingExefsPatches(object arg0);
+    public abstract string ProgressApplyingLabel(object arg0);
+    public abstract string LabelDlcPatch(object arg0);
+    public abstract string LabelKoreanPatch { get; }
+    public abstract string ProgressUnpackingNcaEntry(object arg0, object arg1);
+    public abstract string ProgressExtractDone { get; }
+    public abstract string ProgressCompressDone { get; }
+    public abstract string ProgressConvertingBinCue { get; }
+    public abstract string ProgressConvertingIso { get; }
+    public abstract string ProgressPacking { get; }
+    public abstract string ProgressScanningTitle(object arg0);
+    public abstract string ProgressScanError(object arg0, object arg1);
+    public abstract string ProgressExtractingIso { get; }
+    public abstract string ProgressCopyingTrack(object arg0, object arg1);
+    public abstract string ProgressConvertingChd { get; }
+    public abstract string ProgressCompressingZcci { get; }
+    public abstract string ProgressConvertingFormat { get; }
+    public abstract string ProgressPatchDone { get; }
+    public abstract string ProgressExtractingSource { get; }
+    public abstract string ProgressGdParsingMetadata { get; }
+    public abstract string ProgressGdPatchAllDone { get; }
+    public abstract string ProgressGdExtractingDcp(object arg0);
+    public abstract string ProgressGdApplyingXdelta(object arg0);
+    public abstract string ProgressGdPreparingMedia { get; }
+    public abstract string ProgressApplyingPatchCount(object arg0, object arg1);
+    public abstract string ProgressGdRelocatingIso9660(object arg0, object arg1);
+    public abstract string ProgressGdMergingSectors { get; }
+    public abstract string ProgressGdCreatingTrack(object arg0, object arg1);
+    public abstract string ProgressGdAnalyzingTracks { get; }
+    public abstract string ProgressGdCopyingTrack(object arg0, object arg1, object arg2);
+    public abstract string ProgressGdUpdatingIndex { get; }
+    public abstract string ProgressGdRebuildAllDone { get; }
+    public abstract string ProgressGdAligningSectors { get; }
+    public abstract string ProgressGdWritingRawSectors { get; }
+    public abstract string ProgressGdTrackWritten { get; }
 }

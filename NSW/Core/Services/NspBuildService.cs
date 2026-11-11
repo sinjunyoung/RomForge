@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using LibHac.Common.Keys;
 using NSW.Core.Models;
@@ -66,7 +67,7 @@ public static class NspBuildService
         var sw = Stopwatch.StartNew();
 
         log("언팩 시작", LogLevel.Highlight);
-        progress.ReportStatus("언팩 진행 중...", 0);
+        progress.ReportStatus(Loc.S.StatusUnpacking, 0);
 
         var unpacker = new NspUnpacker(keySet);
         var result = await unpacker.Unpack(req, dirs.Unpacked, progress, ct);
@@ -78,7 +79,7 @@ public static class NspBuildService
         }
 
         log($"언팩 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
-        progress.ReportStatus("완료", 100);
+        progress.ReportStatus(Loc.S.StatusDone, 100);
         result.ReleaseResources();
 
         return dirs.Unpacked;
@@ -171,7 +172,7 @@ public static class NspBuildService
 
                 DlcNspBuilder.BuildDlcNsps(req, unpackResult, dirs, baseSettings, compressLevel, package, progress, log, ct);
                 StepMetaNca(settingsList, contents, package, ct);
-                progress.ReportStatus("NSP 마무리 중...", 0);
+                progress.ReportStatus(Loc.S.ProgressFinalizingNsp, 0);
                 package.Complete();
             }
 
@@ -199,7 +200,7 @@ public static class NspBuildService
         var sw = Stopwatch.StartNew();
 
         log($"프로그램 빌드 시작 (IdOffset={settings.IdOffset})", LogLevel.Highlight);
-        progress.ReportStatus("프로그램 빌드 중...", 0);
+        progress.ReportStatus(Loc.S.ProgressBuildingProgram, 0);
 
         if (req.HasPatch)
             NspPatchApplier.ApplyPatch(req.PatchDir, unpackResult, settings.SourceIdOffset, progress, log, req.PatchPassword);
@@ -372,7 +373,7 @@ public static class NspBuildService
         string finalNsp = Common.Services.Utils.GetUniqueFilePath(Path.Combine(req.OutputDir, fileName));
 
         File.Move(tempNsp, finalNsp);
-        progress.ReportStatus("완료", 100);
+        progress.ReportStatus(Loc.S.StatusDone, 100);
         log($"출력: {finalNsp}", LogLevel.Ok);
 
         return finalNsp;

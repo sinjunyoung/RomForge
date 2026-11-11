@@ -1,4 +1,6 @@
-﻿using Patch.Core.Formats.DCP.Models;
+﻿using Common.Localization;
+
+using Patch.Core.Formats.DCP.Models;
 
 namespace Patch.Core.Formats.DCP.Services;
 
@@ -7,7 +9,7 @@ public static class GdRomRebuilder
     public static void RebuildFull(GdiFile originalGdi, Dictionary<string, byte[]> replacedFiles, string outputDir, Action<double, string>? onProgress = null, Action<string>? onLog = null, CancellationToken ct = default)
     {
         Directory.CreateDirectory(outputDir);
-        onProgress?.Invoke(0.0, "기존 GD-ROM 미디어 해석 준비 중...");
+        onProgress?.Invoke(0.0, Loc.S.ProgressGdPreparingMedia);
 
         var sourceReader = new GdRomCompositeSectorReader(originalGdi);
         var sourceFunc = sourceReader.AsFunc();
@@ -50,7 +52,7 @@ public static class GdRomRebuilder
                 fileDataCache[entry] = data;
                 fileDone++;
 
-                onProgress?.Invoke(0.01 * fileDone / allFiles.Count, $"패치 적용 중 ({fileDone:N0}/{allFiles.Count:N0})");
+                onProgress?.Invoke(0.01 * fileDone / allFiles.Count, Loc.S.ProgressApplyingPatchCount(fileDone.ToString("N0"), allFiles.Count.ToString("N0")));
             }
         }
         finally
@@ -82,7 +84,7 @@ public static class GdRomRebuilder
 
             dirDone++;
 
-            onProgress?.Invoke(0.01 + 0.01 * dirDone / dirTotal, $"ISO9660 디렉토리 테이블 및 구조 재배치 중 ({dirDone}/{dirTotal})");
+            onProgress?.Invoke(0.01 + 0.01 * dirDone / dirTotal, Loc.S.ProgressGdRelocatingIso9660(dirDone, dirTotal));
 
             foreach (var child in dir.Children.Where(c => c.IsDirectory))
                 CollectDirRecords(child);
@@ -113,13 +115,13 @@ public static class GdRomRebuilder
             }
         }
 
-        onProgress?.Invoke(0.02, "중복 섹터 병합 및 정렬 프로세스 시작...");
+        onProgress?.Invoke(0.02, Loc.S.ProgressGdMergingSectors);
 
         var dedup = expanded.GroupBy(e => e.Lba).Select(g => g.Last()).OrderBy(e => e.Lba).ToList();
         var newDataTrackPath = Path.Combine(outputDir, firstDataTrack.FileName);
 
-        GdRomWriter.WriteDataTrack(newDataTrackPath, (uint)firstDataTrack.StartLba, dedup, (p, msg) => onProgress?.Invoke(0.02 + (p * 0.23), $"{firstDataTrack.FileName} 생성 중: {msg}"), ct);
-        onProgress?.Invoke(0.25, "나머지 트랙 분석 중...");
+        GdRomWriter.WriteDataTrack(newDataTrackPath, (uint)firstDataTrack.StartLba, dedup, (p, msg) => onProgress?.Invoke(0.02 + (p * 0.23), Loc.S.ProgressGdCreatingTrack(firstDataTrack.FileName, msg)), ct);
+        onProgress?.Invoke(0.25, Loc.S.ProgressGdAnalyzingTracks);
 
         var otherTracks = originalGdi.Tracks.Where(t => t != firstDataTrack).ToList();
         long totalBytesToCopy = 0;
@@ -168,14 +170,14 @@ public static class GdRomRebuilder
                     double copiedMb = totalBytesCopied / 1024.0 / 1024.0;
                     double totalMb = totalBytesToCopy / 1024.0 / 1024.0;
 
-                    onProgress?.Invoke(currentPercentage, $"자원 트랙 복사 중: {name} ({copiedMb:N1}MB / {totalMb:N1}MB)");
+                    onProgress?.Invoke(currentPercentage, Loc.S.ProgressGdCopyingTrack(name, copiedMb.ToString("N1"), totalMb.ToString("N1")));
                 }
             }
         }
 
-        onProgress?.Invoke(0.99, "GDI 인덱스 메타파일 최종 검증 및 갱신 중...");
+        onProgress?.Invoke(0.99, Loc.S.ProgressGdUpdatingIndex);
         WriteGdi(originalGdi, Path.Combine(outputDir, Path.GetFileName(originalGdi.GdiPath)));
-        onProgress?.Invoke(1.0, "모든 GD-ROM 리빌드 작업 완료!");
+        onProgress?.Invoke(1.0, Loc.S.ProgressGdRebuildAllDone);
     }
 
     private static int CountDirs(Iso9660Entry dir)

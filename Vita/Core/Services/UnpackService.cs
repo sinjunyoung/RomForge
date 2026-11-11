@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using Vita.Core.Models;
@@ -19,7 +20,7 @@ public static class UnpackService
             foreach (var o in g.Owners)
                 totalBytes += PatchShared.GetAllOwnedFiles(o).Sum(f => f.Size);
 
-        var reporter = new ProgressReporter("언팩 중", string.Empty, totalBytes, progress);
+        var reporter = new ProgressReporter(Loc.S.StatusUnpacking, string.Empty, totalBytes, progress);
         var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         int written = 0;
 

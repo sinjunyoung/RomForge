@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Services;
+using Common.Localization;
 using Common.Models;
 using Patch.Core.Formats.DCP.Services;
 using RomForge.Core.Models.Compression;
@@ -103,7 +104,7 @@ public static class CompressedSourceDecompressor
         var converter = new DiscImageConverter();
 
         converter.LogMessage += (_, e) => log(e.Message, e.Level);
-        converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = "압축 해제 중...", Percent = e.Progress });
+        converter.ProgressChanged += (_, e) => progress.Report(new ProgressInfo { Label = Loc.S.StatusUnzipping, Percent = e.Progress });
 
         await converter.ConvertFileAsync(rvzPath, outputDir, "rvz", "iso", 0, ct);
 

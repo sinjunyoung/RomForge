@@ -135,7 +135,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 if (info.Percent < 0)
                     return;
 
-                int overall = jobProgress.Update(info.Percent, info.Label);
+                int overall = jobProgress.Update(info.Percent, info.Stage);
 
                 foreach (var row in rows)
                 {

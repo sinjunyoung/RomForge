@@ -1,4 +1,5 @@
 ﻿using LibHac.Common;
+using Common.Localization;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -304,7 +305,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             var srcStream = src.Get.AsStream();
             int read;
 
-            ctx.Reporter.Label = $"{label} 언팩 중 - {entry.Name}";
+            ctx.Reporter.Label = Loc.S.ProgressUnpackingNcaEntry(label, entry.Name);
 
             while ((read = srcStream.Read(buf, 0, buf.Length)) > 0)
             {

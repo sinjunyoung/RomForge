@@ -1,4 +1,6 @@
-﻿namespace Patch.Core.Formats.DCP.Services;
+﻿using Common.Localization;
+
+namespace Patch.Core.Formats.DCP.Services;
 
 public static class GdRomWriter
 {
@@ -7,7 +9,7 @@ public static class GdRomWriter
         if (sectors.Count == 0)
             return;
 
-        onProgress?.Invoke(0.0, "데이터 트랙 섹터 정렬 중...");
+        onProgress?.Invoke(0.0, Loc.S.ProgressGdAligningSectors);
 
         var sortedSectors = sectors.OrderBy(s => s.Lba).ToList();
         uint maxLba = sortedSectors[^1].Lba;
@@ -16,7 +18,7 @@ public static class GdRomWriter
 
         try
         {
-            onProgress?.Invoke(0.0, "데이터 트랙 원시 섹터 생성 및 디스크 쓰기 중...");
+            onProgress?.Invoke(0.0, Loc.S.ProgressGdWritingRawSectors);
 
             int sectorSize = 2352;
             int writeBufferSize = 2000;
@@ -57,7 +59,7 @@ public static class GdRomWriter
                     }
 
                     if (i % 500 == 0)
-                        onProgress?.Invoke((double)i / totalRequiredSectors, "데이터 트랙 원시 섹터 생성 및 쓰기 중...");
+                        onProgress?.Invoke((double)i / totalRequiredSectors, Loc.S.ProgressGdWritingRawSectors);
                 }
 
                 if (bufferedCount > 0)
@@ -68,7 +70,7 @@ public static class GdRomWriter
                 File.Delete(outputPath);
 
             File.Move(tempPath, outputPath);
-            onProgress?.Invoke(1.0, "데이터 트랙 작성 완료.");
+            onProgress?.Invoke(1.0, Loc.S.ProgressGdTrackWritten);
         }
         finally
         {

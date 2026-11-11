@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Interop;
+using Common.Localization;
 using CHD.Core.Interop.Enums;
 using CHD.Core.Models;
 using CHD.Core.Services;
@@ -58,7 +59,7 @@ public class CsoService
 
             var compressed = new byte[header.BlockSize * 2];
             var blockBuf = new byte[header.BlockSize * 2];
-            var reporter = progress is null ? null : new ProgressReporter("압축 해제 중...", string.Empty, blockCount, progress);
+            var reporter = progress is null ? null : new ProgressReporter(Loc.S.StatusUnzipping, string.Empty, blockCount, progress);
             var report = reporter?.CreateAction();
             using var deflateDecompressor = new DeflateDecompressor();
             long expectedPos = -1;
@@ -167,7 +168,7 @@ public class CsoService
 
             var inputBuf = new byte[blockSize];
             var compBuf = new byte[blockSize * 2];
-            var reporter = progress is null ? null : new ProgressReporter("압축 중...", string.Empty, blockCount, progress);
+            var reporter = progress is null ? null : new ProgressReporter(Loc.S.LogStatusCompressing, string.Empty, blockCount, progress);
             var report = reporter?.CreateAction();
             using var compressor = isLz4 ? null : new DeflateCompressor(1);
 
@@ -296,7 +297,7 @@ public class CsoService
             var compressed = new byte[header.BlockSize * 2];
             var rawBuf = new byte[header.BlockSize];
             var compBuf = new byte[header.BlockSize * 2];
-            var reporter = progress is null ? null : new ProgressReporter("변환 중...", string.Empty, blockCount, progress);
+            var reporter = progress is null ? null : new ProgressReporter(Loc.S.StatusConverting, string.Empty, blockCount, progress);
             var report = reporter?.CreateAction();
             bool srcIsOldDeflate = header.Version != 2 && !isZso;
             bool dstIsOldDeflate = !targetIsLz4;
@@ -552,7 +553,7 @@ public class CsoService
 
                 written += read;
 
-                progress?.Report(new ProgressInfo { Percent = totalLength > 0 ? (int)(written * 100 / totalLength) : 100, Label = "ISO 추출 중..." });
+                progress?.Report(new ProgressInfo { Percent = totalLength > 0 ? (int)(written * 100 / totalLength) : 100, Label = Loc.S.ProgressExtractingIso });
             }
         }
         else

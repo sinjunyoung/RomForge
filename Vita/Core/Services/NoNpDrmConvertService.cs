@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using System.IO.Compression;
@@ -19,7 +20,7 @@ public static class NoNpDrmConvertService
         Directory.CreateDirectory(outputRoot);
 
         long totalBytes = entries.Sum(e => new FileInfo(e.Path!).Length);
-        var reporter = new ProgressReporter("변환 중", string.Empty, totalBytes, progress);
+        var reporter = new ProgressReporter(Loc.S.StatusConverting, string.Empty, totalBytes, progress);
         var outputs = new List<string>();
 
         foreach (var group in groups)

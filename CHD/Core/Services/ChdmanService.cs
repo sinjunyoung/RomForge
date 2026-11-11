@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Models;
+using Common.Localization;
 using Common;
 using Common.Models;
 using Common.Services;
@@ -61,7 +62,7 @@ public sealed partial class ChdmanService : IDisposable
         cuePath = Path.GetFullPath(cuePath!);
         chdPath = Path.GetFullPath(chdPath!);
 
-        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, "압축 중...", (i, o, p, l) => chdman_create_cd(i, o, compression, p, l), progress, ct);
+        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, Path.GetFileName(cuePath), chdPath, Loc.S.LogStatusCompressing, (i, o, p, l) => chdman_create_cd(i, o, compression, p, l), progress, ct);
     }
 
     public Task<bool> CreateDvdAsync(string isoPath, string chdPath, string compression = "zlib", IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -69,7 +70,7 @@ public sealed partial class ChdmanService : IDisposable
         isoPath = Path.GetFullPath(isoPath);
         chdPath = Path.GetFullPath(chdPath);
 
-        return RunLockedAsync(Path.GetDirectoryName(isoPath) ?? Path.GetPathRoot(isoPath)!, isoPath, chdPath, "압축 중...", (i, o, p, l) => chdman_create_dvd(i, o, compression, p, l), progress, ct);
+        return RunLockedAsync(Path.GetDirectoryName(isoPath) ?? Path.GetPathRoot(isoPath)!, isoPath, chdPath, Loc.S.LogStatusCompressing, (i, o, p, l) => chdman_create_dvd(i, o, compression, p, l), progress, ct);
     }
 
     public Task<bool> ExtractCdAsync(string? chdPath, string cuePath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -77,7 +78,7 @@ public sealed partial class ChdmanService : IDisposable
         chdPath = Path.GetFullPath(chdPath!);
         cuePath = Path.GetFullPath(cuePath);
 
-        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, chdPath, cuePath, "추출 중...", chdman_extract_cd, progress, ct);
+        return RunLockedAsync(Path.GetDirectoryName(cuePath)!, chdPath, cuePath, Loc.S.StatusExtracting, chdman_extract_cd, progress, ct);
     }
 
     public Task<bool> ExtractRawAsync(string? chdPath, string? isoPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
@@ -85,7 +86,7 @@ public sealed partial class ChdmanService : IDisposable
         chdPath = Path.GetFullPath(chdPath!);
         isoPath = Path.GetFullPath(isoPath!);
 
-        return RunLockedAsync(Path.GetDirectoryName(isoPath)!, chdPath, isoPath, "추출 중...", chdman_extract_raw, progress, ct);
+        return RunLockedAsync(Path.GetDirectoryName(isoPath)!, chdPath, isoPath, Loc.S.StatusExtracting, chdman_extract_raw, progress, ct);
     }
 
     private async Task<bool> RunLockedAsync(string workingDir, string input, string output, string label, Func<string, string, ProgressCallback, LogCallback, int> invoke, IProgress<ProgressInfo>? progress, CancellationToken ct)

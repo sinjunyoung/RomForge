@@ -1,4 +1,5 @@
 ﻿using N3DS.Core.Crypto;
+using Common.Localization;
 using N3DS.Core.Models;
 
 namespace N3DS.Core.FileSystem;
@@ -67,7 +68,7 @@ public class SdTitleScanner
 
                 string titleId = tidHigh + tidLow;
 
-                progress?.Report($"스캔 중: {titleId}");
+                progress?.Report(Loc.S.ProgressScanningTitle(titleId));
 
                 try
                 {
@@ -78,7 +79,7 @@ public class SdTitleScanner
                 }
                 catch (Exception ex)
                 {
-                    progress?.Report($"오류 ({titleId}): {ex.Message}");
+                    progress?.Report(Loc.S.ProgressScanError(titleId, ex.Message));
                 }
             }
         }

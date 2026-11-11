@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Models;
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 
@@ -80,7 +81,7 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = null;
 
-                progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = Loc.S.ProgressExtractDone, Percent = 100 });
 
                 return new ConversionResult
                 {
@@ -123,7 +124,7 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = null;
 
-                progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = Loc.S.ProgressExtractDone, Percent = 100 });
 
                 return new ConversionResult
                 {
@@ -162,7 +163,7 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = null;
 
-                progress?.Report(new ProgressInfo { Label = "추출 완료", Percent = 100 });
+                progress?.Report(new ProgressInfo { Label = Loc.S.ProgressExtractDone, Percent = 100 });
 
                 return new ConversionResult
                 {
@@ -269,7 +270,7 @@ public class FileConverter : IDisposable
                 VerificationPerformed = true
             };
 
-            progress?.Report(new ProgressInfo { Label = "압축 완료", Percent = 100 });
+            progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCompressDone, Percent = 100 });
 
             return result;
         }
@@ -323,7 +324,7 @@ public class FileConverter : IDisposable
             Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
             Log($"압축 완료: {chdPath}", LogLevel.Ok);
 
-            progress?.Report(new ProgressInfo { Label = "압축 완료", Percent = 100 });
+            progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCompressDone, Percent = 100 });
 
             return new ConversionResult
             {

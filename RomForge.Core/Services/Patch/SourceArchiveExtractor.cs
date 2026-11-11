@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Services;
+using Common.Localization;
 using Common;
 using Common.Models;
 using Common.Services;
@@ -489,7 +490,7 @@ public static partial class SourceArchiveExtractor
         {
             long totalBytes = keys.Sum(k => _byKey[k].Size);
             long writtenTotal = 0;
-            var reporter = new ProgressReporter("원본 압축 해제 중...", string.Empty, totalBytes, progress);
+            var reporter = new ProgressReporter(Loc.S.ProgressExtractingSource, string.Empty, totalBytes, progress);
             var report = reporter.CreateAction();
             var result = new Dictionary<string, string>();
             byte[] buffer = new byte[81920];
@@ -573,7 +574,7 @@ public static partial class SourceArchiveExtractor
         public Dictionary<string, string> Extract(List<string> keys, string extractDir, IProgress<ProgressInfo> progress, CancellationToken ct)
         {
             long totalBytes = keys.Sum(k => (long)_byKey[k].Size);
-            var reporter = new ProgressReporter("원본 압축 해제 중...", string.Empty, totalBytes, progress);
+            var reporter = new ProgressReporter(Loc.S.ProgressExtractingSource, string.Empty, totalBytes, progress);
 
             void OnExtracting(object? sender, ProgressEventArgs e)
             {

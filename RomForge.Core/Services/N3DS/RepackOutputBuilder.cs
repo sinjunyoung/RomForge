@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using N3DS.Core.Crypto;
 using N3DS.Core.FileSystem;
@@ -58,7 +59,7 @@ internal sealed class RepackOutputBuilder(Action<string, LogLevel> log)
 
             if (stageProgress != null)
             {
-                var compressReporter = new ProgressReporter("압축 중...", string.Empty, new FileInfo(tempCci).Length, stageProgress);
+                var compressReporter = new ProgressReporter(Loc.S.LogStatusCompressing, string.Empty, new FileInfo(tempCci).Length, stageProgress);
 
                 compressReporter.ForceReport();
 

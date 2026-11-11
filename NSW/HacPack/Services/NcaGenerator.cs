@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using Common.Models;
 using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Cryptography.Keys;
@@ -84,7 +85,7 @@ public static class NcaGenerator
         const int bufferSize = 4 << 20;
 
         using var hasher = System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
-        var reporter = new ProgressReporter("NCA 해시 계산 중", string.Empty, size, progress);
+        var reporter = new ProgressReporter(Loc.S.ProgressHashingNca, string.Empty, size, progress) { Stage = ProgressStage.Hash };
         byte[][] buffers = [ArrayPool<byte>.Shared.Rent(bufferSize), ArrayPool<byte>.Shared.Rent(bufferSize)];
 
         try
