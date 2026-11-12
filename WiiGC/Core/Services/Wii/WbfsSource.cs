@@ -1,3 +1,4 @@
+using Common.Localization;
 using System.Buffers.Binary;
 using Microsoft.Win32.SafeHandles;
 using WiiGC.Core.Interfaces;
@@ -81,27 +82,27 @@ internal sealed class WbfsSource : IRvzInputSource
             RvzIo.ReadExactly(primaryHandle, header, 0);
 
             if (BinaryPrimitives.ReadUInt32LittleEndian(header) != Magic)
-                throw new InvalidDataException("WBFS 파일이 아닙니다.");
+                throw new InvalidDataException(Loc.S.ErrNotFormatFile("WBFS"));
 
             uint hdSectorCount = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(4));
             int hdSectorShift = header[8];
             int wbfsSectorShift = header[9];
 
             if (hdSectorShift is < 0 or > 62)
-                throw new InvalidDataException("WBFS 헤더가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrHeaderInvalid("WBFS"));
 
             long hdSectorSize = 1L << hdSectorShift;
 
             if (totalSize != checked((long)hdSectorCount * hdSectorSize))
-                throw new InvalidDataException("WBFS 파일 크기가 헤더와 다릅니다. 파일이 잘렸을 수 있습니다.");
+                throw new InvalidDataException(Loc.S.ErrFileSizeDiffersFromHeader("WBFS"));
 
             if (wbfsSectorShift < hdSectorShift || wbfsSectorShift > 62)
-                throw new InvalidDataException("WBFS 헤더가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrHeaderInvalid("WBFS"));
 
             long wbfsSectorSize = 1L << wbfsSectorShift;
 
             if (wbfsSectorSize < WiiSectorSize)
-                throw new InvalidDataException("WBFS 섹터 크기가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsSectorSizeInvalid);
 
             int maxDisc = checked((int)Math.Min(hdSectorSize - 12, HeaderSize - 12));
             int discIndex = -1;
@@ -116,17 +117,17 @@ internal sealed class WbfsSource : IRvzInputSource
             }
 
             if (discIndex < 0)
-                throw new InvalidDataException("WBFS 파일에 디스크가 없습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsNoDisc);
 
             int wbfsToWiiShift = wbfsSectorShift - 15;
 
             if (wbfsToWiiShift < 0 || wbfsToWiiShift > 62)
-                throw new InvalidDataException("WBFS 섹터 크기가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsSectorSizeInvalid);
 
             long blocksPerDisc = Layout.DiscSectorCount >> wbfsToWiiShift;
 
             if (blocksPerDisc <= 0 || blocksPerDisc > ushort.MaxValue)
-                throw new InvalidDataException("WBFS 블록 수가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsBlockCountInvalid);
 
             long discInfoSizeRaw = WiiDiscHeaderSize + checked(blocksPerDisc * 2);
             long discInfoSize = (discInfoSizeRaw + hdSectorSize - 1) / hdSectorSize * hdSectorSize;
@@ -134,7 +135,7 @@ internal sealed class WbfsSource : IRvzInputSource
             long wlbaSize = checked(blocksPerDisc * 2);
 
             if (wlbaOffset < 0 || wlbaOffset + wlbaSize > totalSize)
-                throw new InvalidDataException("WBFS WLBA 테이블이 파일 범위를 벗어났습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsWlbaOutOfFile);
 
             byte[] wlbaBytes = new byte[checked((int)wlbaSize)];
 
@@ -200,7 +201,7 @@ internal sealed class WbfsSource : IRvzInputSource
             }
 
             if (selected is not FileEntry entry)
-                throw new EndOfStreamException("WBFS 파일 범위를 벗어난 읽기입니다.");
+                throw new EndOfStreamException(Loc.S.ErrWbfsReadOutOfRange);
 
             long fileOffset = currentOffset - entry.BaseAddress;
             int chunk = (int)Math.Min(entry.Size - fileOffset, destination.Length - written);
@@ -214,7 +215,7 @@ internal sealed class WbfsSource : IRvzInputSource
     public void Read(long offset, Span<byte> destination)
     {
         if (offset < 0 || destination.Length > Length - offset)
-            throw new EndOfStreamException("WBFS 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrWbfsReadOutOfRange);
 
         int written = 0;
 
@@ -224,7 +225,7 @@ internal sealed class WbfsSource : IRvzInputSource
             long baseCluster = currentOffset >> _wbfsSectorShift;
 
             if (baseCluster >= _blocksPerDisc)
-                throw new EndOfStreamException("WBFS 디스크 범위를 벗어난 읽기입니다.");
+                throw new EndOfStreamException(Loc.S.ErrWbfsReadOutOfRange);
 
             long clusterOffset = currentOffset & (_wbfsSectorSize - 1);
             int chunk = (int)Math.Min(_wbfsSectorSize - clusterOffset, destination.Length - written);
@@ -253,7 +254,7 @@ internal sealed class WbfsSource : IRvzInputSource
                 int actualChunk = (int)Math.Min(Math.Min(tillEndOfFile, _wbfsSectorSize - clusterOffset), destination.Length - written);
 
                 if (actualChunk <= 0)
-                    throw new EndOfStreamException("WBFS 파일이 예상보다 일찍 끝났습니다.");
+                    throw new EndOfStreamException(Loc.S.ErrWbfsFileEndedEarly);
 
                 RvzIo.ReadExactly(entry.Handle, destination.Slice( written, actualChunk), fileOffset);
 
@@ -264,7 +265,7 @@ internal sealed class WbfsSource : IRvzInputSource
 
             if (!found)
             {
-                throw new InvalidDataException("WBFS 클러스터 위치가 파일 범위를 벗어났습니다.");
+                throw new InvalidDataException(Loc.S.ErrWbfsClusterOutOfFile);
             }
         }
     }

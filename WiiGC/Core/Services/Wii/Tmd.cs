@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 
 namespace WiiGC.Core.Services.Wii;
@@ -25,6 +26,6 @@ internal static class Tmd
                 return;
         }
 
-        throw new InvalidOperationException("TMD 가짜 서명에 실패했습니다.");
+        throw new InvalidOperationException(Loc.S.ErrTmdFakeSignFailed);
     }
 }

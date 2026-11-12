@@ -1,3 +1,4 @@
+using Common.Localization;
 using System.Security.Cryptography;
 using WiiGC.Core.Models;
 using WiiGC.Core.Models.Wii;
@@ -19,7 +20,7 @@ internal sealed class GroupEncryptor : IDisposable
     public void Encrypt(byte[] key, byte[] decrypted, IReadOnlyList<HashException> exceptions, byte[] output)
     {
         if (decrypted.Length != Layout.GroupDataSize || output.Length != Layout.GroupTotalSize)
-            throw new ArgumentException("Wii 그룹 버퍼 크기가 올바르지 않습니다.");
+            throw new ArgumentException(Loc.S.ErrWiiGroupBufferSizeInvalid);
 
         if (_key == null || !_key.AsSpan().SequenceEqual(key))
         {
@@ -41,7 +42,7 @@ internal sealed class GroupEncryptor : IDisposable
             int offsetInBlock = exception.Offset % Layout.BlockHeaderSize;
 
             if (block >= Layout.BlocksPerGroup || offsetInBlock + Layout.HashSize > Layout.BlockHeaderSize)
-                throw new InvalidDataException("RVZ 해시 예외 오프셋이 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzHashExceptionOffsetInvalid);
 
             exception.Hash.CopyTo(_hashes, block * Layout.BlockHeaderSize + offsetInBlock);
         }

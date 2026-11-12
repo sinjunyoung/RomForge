@@ -1,4 +1,5 @@
 ﻿using WiiGC.Core.Enums;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Services.GameCube;
 using WiiGC.Core.Services.Wii;
@@ -27,7 +28,7 @@ public static class IsoToRvzConverter
             Span<byte> header = stackalloc byte[DiscHeader.Size];
 
             if (input.Length < header.Length)
-                throw new InvalidDataException("디스크 이미지가 너무 작습니다.");
+                throw new InvalidDataException(Loc.S.ErrDiscImageTooSmall);
 
             input.Read(0, header);
 
@@ -46,7 +47,7 @@ public static class IsoToRvzConverter
                 writer.Write(progress, ct);
             }
             else
-                throw new InvalidDataException("GameCube 또는 Wii 디스크 이미지가 아닙니다.");
+                throw new InvalidDataException(Loc.S.ErrNotGcOrWiiDisc);
 
             succeeded = true;
         }

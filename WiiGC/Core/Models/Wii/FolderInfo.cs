@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using Common.Localization;
+
+using System.Text.Json;
 
 namespace WiiGC.Core.Models.Wii;
 
@@ -31,7 +33,7 @@ public sealed record FolderInfo(int Version, long ContainerOffset, long DiscLeng
         }
     }
 
-    public static FolderInfo Read(string unpackedFolder) => TryRead(unpackedFolder) ?? throw new InvalidDataException("언팩 폴더 정보를 읽을 수 없습니다. 이 버전에서 다시 언팩해 주세요.");
+    public static FolderInfo Read(string unpackedFolder) => TryRead(unpackedFolder) ?? throw new InvalidDataException(Loc.S.ErrUnpackFolderInfoUnreadable);
 
     public void Write(string unpackedFolder)
     {

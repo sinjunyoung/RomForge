@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
@@ -13,14 +14,14 @@ public static class DiscInfoReader
         using var source = RvzInputSource.Open(path);
 
         if (source.Length < HeaderSize)
-            throw new InvalidDataException("디스크 헤더를 읽을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrDiscHeaderUnreadable);
 
         byte[] header = new byte[HeaderSize];
 
         source.Read(0, header);
 
         if (!DiscHeader.IsWii(header))
-            throw new InvalidDataException("Wii 디스크가 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotWiiDisc);
 
         string gameId = Encoding.ASCII.GetString(header, 0, 6);
         string title = Encoding.ASCII.GetString(header, 0x20, 0x40).TrimEnd('\0').Trim();

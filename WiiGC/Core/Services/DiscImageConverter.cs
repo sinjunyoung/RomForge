@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using WiiGC.Core.Models;
 using WiiGC.Core.Services.Wii;
@@ -20,27 +21,28 @@ public class DiscImageConverter
             bool wbfsToIso = format == "wbfs" && outputExtension.Equals("iso", StringComparison.OrdinalIgnoreCase);
             bool isoToWbfs = format == "wii" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
             bool rvzToWbfs = format == "rvz" && outputExtension.Equals("wbfs", StringComparison.OrdinalIgnoreCase);
-            string workType = rvzToWbfs ? "변환" : wbfsToIso ? "해제" : format switch
+            DiscWorkType workType = rvzToWbfs ? DiscWorkType.Convert : wbfsToIso ? DiscWorkType.Decompress : format switch
             {
-                "wii" or "gcm" => Common.Localization.Loc.Instance.Current.LabelCompression,
-                "gcz" or "wbfs" or "wia" => "재압축",
-                "rvz" => "해제",
-                _ => "미지원"
+                "wii" or "gcm" => DiscWorkType.Compress,
+                "gcz" or "wbfs" or "wia" => DiscWorkType.Recompress,
+                "rvz" => DiscWorkType.Decompress,
+                _ => DiscWorkType.Unsupported
             };
 
-            if (workType == "미지원")
+            if (workType == DiscWorkType.Unsupported)
             {
-                LogMessage?.Invoke(this, ($"지원하지 않는 포맷은 건너뜁니다: {Path.GetFileName(inputPath)}", LogLevel.Error));
+                LogMessage?.Invoke(this, (Loc.S.LogSkipUnsupportedFormat(Path.GetFileName(inputPath)), LogLevel.Error));
                 return;
             }
 
+            string workText = DescribeWork(workType);
             var dir = outputDir ?? Path.GetDirectoryName(inputPath)!;
             var name = Path.GetFileNameWithoutExtension(inputPath);
             string outputPath = Path.Combine(dir, $"{name}.{outputExtension}");
 
             outputPath = Utils.GetUniqueFilePath(outputPath);
 
-            LogMessage?.Invoke(this, ($"{Path.GetFileName(inputPath)} {workType} 시작", LogLevel.Highlight));
+            LogMessage?.Invoke(this, (Loc.S.LogWorkStart(Path.GetFileName(inputPath), workText), LogLevel.Highlight));
 
             int result = rvzToWbfs ? ConvertRvzToWbfs(inputPath, outputPath, ct) : wbfsToIso ? ConvertWbfsToIso(inputPath, outputPath, ct) : isoToWbfs ? ConvertIsoToWbfs(inputPath, outputPath, ct) 
             : format switch
@@ -52,28 +54,50 @@ public class DiscImageConverter
 
             if (result == -1)
             {
-                LogMessage?.Invoke(this, ($"{workType} 취소됨: {Path.GetFileName(inputPath)}", LogLevel.Error));
+                LogMessage?.Invoke(this, (Loc.S.LogWorkCancelled(workText, Path.GetFileName(inputPath)), LogLevel.Error));
                 throw new OperationCanceledException(ct);
             }
 
             if (result != 0)
             {
                 OutputGuard.TryDelete(outputPath);
-                LogMessage?.Invoke(this, ($"{workType} 실패 (에러 코드: {result})", LogLevel.Error));
-                throw new InvalidOperationException($"{workType} 실패 (에러 코드: {result})");
+                LogMessage?.Invoke(this, (Loc.S.LogWorkFailedCode(workText, result), LogLevel.Error));
+                throw new InvalidOperationException(Loc.S.LogWorkFailedCode(workText, result));
             }
 
-            if (workType == "재압축" || workType == Common.Localization.Loc.Instance.Current.LabelCompression)
+            if (workType is DiscWorkType.Compress or DiscWorkType.Recompress)
             {
                 long originalSize = new FileInfo(inputPath).Length;
                 long compressedSize = new FileInfo(outputPath).Length;
 
-                LogMessage?.Invoke(this, ($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight));
+                LogMessage?.Invoke(this, ($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({compressedSize * 100.0 / originalSize:F1}%)", LogLevel.Highlight));
             }
 
-            LogMessage?.Invoke(this, ($"{workType} 완료: {outputPath}", LogLevel.Ok));
+            LogMessage?.Invoke(this, (Loc.S.LogWorkDone(workText, outputPath), LogLevel.Ok));
         }, ct);
     }
+
+    private enum DiscWorkType
+    {
+        Convert,
+
+        Decompress,
+
+        Compress,
+
+        Recompress,
+
+        Unsupported
+    }
+
+    private static string DescribeWork(DiscWorkType workType) => workType switch
+    {
+        DiscWorkType.Convert => Loc.S.WorkTypeConvert,
+        DiscWorkType.Decompress => Loc.S.WorkTypeDecompress,
+        DiscWorkType.Compress => Loc.S.LabelCompression,
+        DiscWorkType.Recompress => Loc.S.WorkTypeRecompress,
+        _ => Loc.S.StatusUnsupported
+    };
 
     private int ConvertWbfsToIso(string inputPath, string outputPath, CancellationToken ct) => Run(report => WbfsToIsoConverter.Convert(inputPath, outputPath, report, ct));
 

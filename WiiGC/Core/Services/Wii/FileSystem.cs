@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Text;
 using WiiGC.Core.Models.Wii;
 
@@ -21,7 +22,7 @@ internal static class FileSystem
         long fstSize = (long)BinaryPrimitives.ReadUInt32BigEndian(boot.AsSpan(0x428)) << 2;
 
         if (fstSize < 12 || fstSize > MaxFstSize || fstOffset + fstSize > reader.Length)
-            throw new InvalidDataException("FST 위치 또는 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrFstPositionOrSizeInvalid);
 
         byte[] fst = new byte[fstSize];
 

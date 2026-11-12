@@ -1,3 +1,5 @@
+using Common.Localization;
+
 namespace WiiGC.Core.Services;
 
 internal sealed class LzmaRvzDecompressor : RvzDecompressor
@@ -7,7 +9,7 @@ internal sealed class LzmaRvzDecompressor : RvzDecompressor
     public LzmaRvzDecompressor(ReadOnlySpan<byte> compressorData)
     {
         if (compressorData.Length != 5)
-            throw new InvalidDataException("LZMA1 속성 데이터 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrLzmaPropsSize);
 
         _decoder = new LzmaFastDecoder(compressorData);
     }

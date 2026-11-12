@@ -1,3 +1,4 @@
+using Common.Localization;
 using System.Runtime.CompilerServices;
 
 namespace WiiGC.Core.Services;
@@ -36,12 +37,12 @@ internal sealed unsafe class LzmaFastDecoder
     public LzmaFastDecoder(ReadOnlySpan<byte> props)
     {
         if (props.Length < 5)
-            throw new InvalidDataException("LZMA1 속성 데이터 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrLzmaPropsSize);
 
         int d = props[0];
 
         if (d >= 9 * 5 * 5)
-            throw new InvalidDataException("LZMA1 속성이 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrLzmaPropsInvalid);
 
         _lc = d % 9;
         d /= 9;
@@ -54,7 +55,7 @@ internal sealed unsafe class LzmaFastDecoder
     public int Decode(ReadOnlySpan<byte> source, Span<byte> destination)
     {
         if (source.Length < 5)
-            throw new InvalidDataException("LZMA 데이터가 너무 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrLzmaDataTooShort);
 
         if (_input.Length < source.Length + InputPadding)
             _input = GC.AllocateUninitializedArray<byte>(source.Length + InputPadding, pinned: true);
@@ -122,7 +123,7 @@ internal sealed unsafe class LzmaFastDecoder
     private static int DecodeCore(ushort* probs, byte* buf, byte* bufEnd, byte* dst, int dstLength, int lc, int lp, int pb)
     {
         if (buf[0] != 0)
-            throw new InvalidDataException("LZMA 스트림 헤더가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrLzmaStreamHeaderInvalid);
 
         uint range = 0xFFFFFFFF;
         uint code = ((uint)buf[1] << 24) | ((uint)buf[2] << 16) | ((uint)buf[3] << 8) | buf[4];
@@ -140,7 +141,7 @@ internal sealed unsafe class LzmaFastDecoder
         while (pos < dstLength)
         {
             if (buf > bufEnd)
-                throw new InvalidDataException("LZMA 데이터가 잘렸습니다.");
+                throw new InvalidDataException(Loc.S.ErrLzmaDataTruncated);
 
             uint posState = (uint)pos & pbMask;
 
@@ -204,7 +205,7 @@ internal sealed unsafe class LzmaFastDecoder
             else
             {
                 if (pos == 0)
-                    throw new InvalidDataException("LZMA 데이터가 올바르지 않습니다.");
+                    throw new InvalidDataException(Loc.S.ErrLzmaDataInvalid);
 
                 isRep = true;
 
@@ -356,7 +357,7 @@ internal sealed unsafe class LzmaFastDecoder
                 }
 
                 if (distance >= (uint)pos)
-                    throw new InvalidDataException("LZMA 거리 값이 올바르지 않습니다.");
+                    throw new InvalidDataException(Loc.S.ErrLzmaDistanceInvalid);
 
                 rep3 = rep2;
                 rep2 = rep1;

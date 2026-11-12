@@ -1,3 +1,4 @@
+using Common.Localization;
 using Microsoft.Win32.SafeHandles;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models;
@@ -75,7 +76,7 @@ internal sealed class RvzDiscReader : IDisposable
         foreach (var region in _groups.BuildRegions())
         {
             if (region.Start != cursor)
-                throw new InvalidDataException($"RVZ 데이터 영역이 연속되지 않습니다. (0x{cursor:X} → 0x{region.Start:X})");
+                throw new InvalidDataException(Loc.S.ErrRvzRegionsNotContiguous(cursor.ToString("X"), region.Start.ToString("X")));
 
             if (region.PartitionIndex < 0)
                 AddRawItems(items, region.RawIndex, rawItemBytes);
@@ -86,7 +87,7 @@ internal sealed class RvzDiscReader : IDisposable
         }
 
         if (cursor != _file.IsoSize)
-            throw new InvalidDataException("RVZ 데이터가 ISO 크기만큼 채워지지 않았습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzDataNotFilled);
 
         return items;
     }
@@ -188,7 +189,7 @@ internal sealed class RvzDiscReader : IDisposable
         _groups.ReadFromGroups(context, ref offset, ref remaining, context.Output, ref position, _file.ChunkSize, Layout.BlockTotalSize, entry.DataOffset, entry.DataSize, entry.GroupIndex, entry.GroupCount, 0, null);
 
         if (remaining != 0)
-            throw new InvalidDataException("RVZ 원본 데이터 그룹이 부족합니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzSourceGroupsMissing);
 
         return new WorkResult(context.Output, size, item.Start);
     }
@@ -209,7 +210,7 @@ internal sealed class RvzDiscReader : IDisposable
             int validSectors = (int)Math.Min(Layout.BlocksPerGroup, partitionSectors - groupStart);
 
             if (validSectors <= 0)
-                throw new InvalidDataException("RVZ 파티션 섹터 범위가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzPartitionSectorRangeInvalid);
 
             _groups.ReadDecryptedGroup(context, partition, groupStart, validSectors);
             context.Encryptor.Encrypt(partition.Key, context.Decrypted, context.Exceptions, context.Encrypted);

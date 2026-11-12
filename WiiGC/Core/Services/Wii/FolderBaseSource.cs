@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models.Wii;
 
@@ -44,7 +45,7 @@ internal sealed class FolderBaseSource : IRvzInputSource
         string certPath = Path.Combine(meta, FolderLayout.Cert);
 
         if (!File.Exists(discPath) || !File.Exists(partitionPath) || !File.Exists(tmdPath) || !File.Exists(certPath))
-            throw new InvalidDataException("언팩 폴더의 meta 파일이 없습니다. 이 버전에서 다시 언팩해 주세요.");
+            throw new InvalidDataException(Loc.S.ErrUnpackMetaMissing);
 
         byte[] head = File.ReadAllBytes(discPath);
         byte[] partition = File.ReadAllBytes(partitionPath);
@@ -52,19 +53,19 @@ internal sealed class FolderBaseSource : IRvzInputSource
         byte[] cert = File.ReadAllBytes(certPath);
 
         if (head.Length != FolderLayout.DiscHeadSize || partition.Length != FolderLayout.PartitionHeaderSize)
-            throw new InvalidDataException("meta 파일 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrMetaSizeInvalid);
 
         int tmdSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(PartitionHeader.TmdSizeField));
         int certSize = (int)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(PartitionHeader.CertSizeField));
 
         if (tmd.Length != tmdSize || cert.Length != certSize || tmdSize < PartitionHeader.TmdMinimumSize)
-            throw new InvalidDataException("meta의 TMD/인증서 크기가 파티션 헤더와 맞지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrMetaTmdCertSizeMismatch);
 
         long dataOffset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(PartitionHeader.DataOffsetField)) << 2;
         long h3Offset = (long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(PartitionHeader.H3OffsetField)) << 2;
 
         if (h3Offset + PartitionHeader.H3TableSize > dataOffset)
-            throw new InvalidDataException("meta의 파티션 헤더 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrMetaPartitionHeaderOffsetInvalid);
 
         Array.Clear(head, Layout.PartitionTableOffset, RegionOffset - Layout.PartitionTableOffset);
         BinaryPrimitives.WriteUInt32BigEndian(head.AsSpan(Layout.PartitionTableOffset), 1);
@@ -83,7 +84,7 @@ internal sealed class FolderBaseSource : IRvzInputSource
     public void Read(long offset, Span<byte> destination)
     {
         if (offset < 0 || offset + destination.Length > Length)
-            throw new EndOfStreamException("디스크 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrDiscReadOutOfRange);
 
         destination.Clear();
         Overlay(offset, destination, 0, _head);

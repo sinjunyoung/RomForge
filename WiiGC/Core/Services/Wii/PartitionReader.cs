@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models.Wii;
 
@@ -30,7 +31,7 @@ internal sealed class PartitionReader : IWiiPartitionData, IDisposable
     public void Read(long offset, Span<byte> destination, bool[]? used)
     {
         if (offset < 0)
-            throw new EndOfStreamException("파티션 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrPartitionReadOutOfRange);
 
         int written = 0;
 
@@ -66,7 +67,7 @@ internal sealed class PartitionReader : IWiiPartitionData, IDisposable
         long position = _spec.DataStart + relative;
 
         if (relative + Layout.BlockTotalSize > _spec.DataSize || position + Layout.BlockTotalSize > _input.Length)
-            throw new EndOfStreamException("파티션 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrPartitionReadOutOfRange);
 
         _input.Read(position, _encrypted);
         _aes.DecryptCbc(_encrypted.AsSpan(Layout.BlockHeaderSize, Layout.BlockDataSize), _encrypted.AsSpan(Layout.IvOffset, IvSize), _plain, PaddingMode.None);

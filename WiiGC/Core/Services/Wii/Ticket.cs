@@ -1,3 +1,4 @@
+using Common.Localization;
 using System.Security.Cryptography;
 using WiiGC.Core.Models.Wii;
 
@@ -15,12 +16,12 @@ internal static class Ticket
     public static byte[] DecryptTitleKey(ReadOnlySpan<byte> ticket)
     {
         if (ticket.Length < TicketSize)
-            throw new InvalidDataException("Wii 티켓 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiTicketSizeInvalid);
 
         int index = ticket[CommonKeyIndexOffset];
 
         if (index >= Keys.CommonKeys.Length)
-            throw new NotSupportedException($"지원하지 않는 Wii 공용 키 인덱스입니다 ({index}).");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedWiiCommonKeyIndex(index));
 
         Span<byte> iv = stackalloc byte[16];
 

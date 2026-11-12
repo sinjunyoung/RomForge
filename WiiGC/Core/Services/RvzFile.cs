@@ -1,3 +1,4 @@
+using Common.Localization;
 using Microsoft.Win32.SafeHandles;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
@@ -59,14 +60,14 @@ internal sealed class RvzFile
         long fileLength = RandomAccess.GetLength(handle);
 
         if (fileLength < Header1Size + Header2MinSize)
-            throw new InvalidDataException("RVZ 파일이 너무 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzFileTooSmall);
 
         byte[] h1 = new byte[Header1Size];
 
         RvzIo.ReadExactly(handle, h1, 0);
 
         if (!RvzMagic.IsRvz(h1) && !RvzMagic.IsWia(h1))
-            throw new InvalidDataException("RVZ/WIA 파일이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotFormatFile("RVZ/WIA"));
 
         bool isRvz = RvzMagic.IsRvz(h1);
         int groupEntrySize = isRvz ? RvzGroupEntrySize : WiaGroupEntrySize;
@@ -76,25 +77,25 @@ internal sealed class RvzFile
         uint expectedVersionReadCompatible = isRvz ? RvzVersionReadCompatible : WiaVersionReadCompatible;
 
         if (expectedVersion < versionCompatible || expectedVersionReadCompatible > version)
-            throw new NotSupportedException($"지원하지 않는 {(isRvz ? "RVZ" : "WIA")} 버전입니다: 0x{version:X8}");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedFormatVersion(isRvz ? "RVZ" : "WIA", version.ToString("X8")));
 
         Span<byte> digest = stackalloc byte[20];
 
         SHA1.HashData(h1.AsSpan(0, Header1Size - 20), digest);
 
         if (!digest.SequenceEqual(h1.AsSpan(Header1Size - 20, 20)))
-            throw new InvalidDataException("RVZ 헤더 1 해시가 일치하지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzHeader1HashMismatch);
 
         long isoSize = (long)BinaryPrimitives.ReadUInt64BigEndian(h1.AsSpan(36));
         long declaredFileSize = (long)BinaryPrimitives.ReadUInt64BigEndian(h1.AsSpan(44));
 
         if (declaredFileSize != fileLength)
-            throw new InvalidDataException("RVZ 파일 크기가 헤더와 다릅니다. 파일이 잘렸을 수 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrFileSizeDiffersFromHeader("RVZ"));
 
         uint header2Size = BinaryPrimitives.ReadUInt32BigEndian(h1.AsSpan(12));
 
         if (header2Size < Header2MinSize || Header1Size + (long)header2Size > fileLength)
-            throw new InvalidDataException("RVZ 헤더 2 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzHeader2SizeInvalid);
 
         byte[] h2Raw = new byte[header2Size];
 
@@ -102,7 +103,7 @@ internal sealed class RvzFile
         SHA1.HashData(h2Raw, digest);
 
         if (!digest.SequenceEqual(h1.AsSpan(16, 20)))
-            throw new InvalidDataException("RVZ 헤더 2 해시가 일치하지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzHeader2HashMismatch);
 
         byte[] h2 = new byte[Header2FullSize];
 
@@ -125,27 +126,27 @@ internal sealed class RvzFile
         byte compressorDataSize = h2[212];
 
         if (compressorDataSize > 7 || header2Size < Header2MinSize + compressorDataSize)
-            throw new InvalidDataException("RVZ/WIA 압축기 데이터 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzCompressorDataSizeInvalid);
 
         byte[] compressorData = h2.AsSpan(213, compressorDataSize).ToArray();
         if (!IsValidChunkSize(chunkSize))
-            throw new InvalidDataException($"RVZ/WIA 청크 크기가 올바르지 않습니다: {chunkSize}");
+            throw new InvalidDataException(Loc.S.ErrRvzChunkSizeInvalidValue(chunkSize));
 
         if (compression > (uint)RvzCompressionType.Zstd || compression == (uint)RvzCompressionType.Purge)
-            throw new NotSupportedException($"지원하지 않는 RVZ/WIA 압축 방식입니다: {compression}");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedRvzCompression(compression));
 
         if (!isRvz && compression == (uint)RvzCompressionType.Zstd)
-            throw new InvalidDataException("WIA 파일에 zstd 압축이 지정되어 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiaZstdSpecified);
 
         var compressionType = (RvzCompressionType)compression;
 
         if (partitionEntrySize == 0 && partitionCount != 0)
-            throw new InvalidDataException("RVZ 파티션 엔트리 크기가 0입니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionEntrySizeZero);
 
         long partitionBytes = (long)partitionCount * partitionEntrySize;
 
         if (partitionOffset < 0 || partitionBytes > fileLength || partitionOffset + partitionBytes > fileLength)
-            throw new InvalidDataException("RVZ 파티션 테이블 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionTablePositionInvalid);
 
         byte[] partitionRaw = new byte[partitionBytes];
 
@@ -153,7 +154,7 @@ internal sealed class RvzFile
         SHA1.HashData(partitionRaw, digest);
 
         if (!digest.SequenceEqual(partitionHash))
-            throw new InvalidDataException("RVZ 파티션 테이블 해시가 일치하지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionTableHashMismatch);
 
         var partitions = new PartitionEntry[partitionCount];
         byte[] entryBuffer = new byte[PartitionEntrySize];
@@ -215,7 +216,7 @@ internal sealed class RvzFile
             return [];
 
         if (offset < 0 || compressedSize <= 0 || offset + compressedSize > fileLength)
-            throw new InvalidDataException("RVZ/WIA 테이블 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzTablePositionInvalid);
 
         byte[] compressed = new byte[compressedSize];
 
@@ -226,7 +227,7 @@ internal sealed class RvzFile
         int written = decompressor.Decompress(compressed, result);
 
         if (written != decompressedSize)
-            throw new InvalidDataException("RVZ/WIA 테이블 압축 해제 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzTableDecompressedSizeInvalid);
 
         return result;
     }

@@ -219,7 +219,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
         {
-            if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
+            if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmDiscardUnpacked))
                 return;
 
             Directory.Delete(unpackedPath, true);
@@ -240,11 +240,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 void progress(double value) => SetProgress(value, Loc.S.ProgressUnpackingFile(Path.GetFileName(source)), sw);
 
                 SetProgress(0, Loc.S.ProgressUnpackingFile(Path.GetFileName(source)), sw);
-                AppendLog($"언팩을 시작합니다. → {unpackedPath}", LogLevel.Highlight);
+                AppendLog(Loc.S.LogUnpackStartingTo(unpackedPath), LogLevel.Highlight);
 
                 int count = await Task.Run(() => IsoUnpacker.Unpack(source, unpackedPath, progress, ct), ct);
 
-                AppendLog($"파일 {count:N0}개를 풀었습니다.", LogLevel.Ok);
+                AppendLog(Loc.S.LogFilesUnpackedCount(count.ToString("N0")), LogLevel.Ok);
             }
             else
                 await ProduceAsync(mode, unpackedPath, sw, tempOutputs, ct);
@@ -253,19 +253,19 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             ProgressPercent = "100%";
             MainViewModel.SetTaskbarProgress(100);
 
-            AppendLog($"완료! 총 소요: {sw.Elapsed:mm\\:ss}", LogLevel.Ok);
+            AppendLog(Loc.S.LogDoneTotalTime(sw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             OutputPath.OpenFolder();
         }
         catch (OperationCanceledException)
         {
-            AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
-            AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
@@ -343,7 +343,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         
         if (fromFolder)
         {
-            AppendLog($"리팩 시작: {target}", LogLevel.Highlight);
+            AppendLog(Loc.S.LogRepackStartTarget(target), LogLevel.Highlight);
 
             result = await Task.Run(() =>
             {
@@ -357,7 +357,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         }
         else
         {
-            AppendLog($"스트리밍 기반 리팩 시작: {target}", LogLevel.Highlight);
+            AppendLog(Loc.S.LogStreamingRepackStartTarget(target), LogLevel.Highlight);
 
             string source = InputPath;
             IReadOnlyDictionary<string, string> replacements = overlay ?? new Dictionary<string, string>();
@@ -381,16 +381,16 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         if (_patch != null)
         {
             foreach (string warning in _patch.Warnings)
-                AppendLog($"경고: {warning}", LogLevel.Error);
+                AppendLog(Loc.S.LabelWarningValue(warning), LogLevel.Error);
         }
     }
 
     private void LogPatchEntry(PatchEntry entry)
     {
         if (entry.Applied)
-            AppendLog($"교체: {entry.Path}", LogLevel.Info);
+            AppendLog(Loc.S.LogReplaced(entry.Path), LogLevel.Info);
         else
-            AppendLog($"디스크에 없음: {entry.Path}", LogLevel.Error);
+            AppendLog(Loc.S.LogNotInDisc(entry.Path), LogLevel.Error);
     }
 
     private void LogPatchResult(PatchResult result)
@@ -400,7 +400,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         int failed = result.Total - result.Applied;
 
-        AppendLog($"패치 결과: 총 {result.Total:N0}개 중 {result.Applied:N0}개 완료, {failed:N0}개 실패", failed == 0 ? LogLevel.Ok : LogLevel.Highlight);
+        AppendLog(Loc.S.LogPatchResultSummary(result.Total.ToString("N0"), result.Applied.ToString("N0"), failed.ToString("N0")), failed == 0 ? LogLevel.Ok : LogLevel.Highlight);
     }
 
     private async Task RefreshDiscAsync()
@@ -418,7 +418,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             catch (Exception ex)
             {
                 if (version == _discVersion)
-                    AppendLog($"디스크 정보를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogDiscInfoReadFailed(ex.Message), LogLevel.Error);
             }
         }
 
@@ -486,9 +486,9 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (!RiivolutionWorkspace.IsSupported(path))
         {
-            PatchInfo = PatchDisplay.Failed("폴더, zip, 7z, xml만 지정할 수 있습니다.");
+            PatchInfo = PatchDisplay.Failed(Loc.S.MsgPatchPathMustBeFolderZip7zXml);
 
-            AppendLog($"'{Path.GetFileName(path)}'는 지원하지 않는 형식입니다 (폴더, zip, 7z, xml만 가능).", LogLevel.Error);
+            AppendLog(Loc.S.LogUnsupportedPatchFormatNamed(Path.GetFileName(path)), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
 
             return;
@@ -510,7 +510,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 if (workspace == null)
                 {
                     if (version == _patchVersion)
-                        PatchInfo = PatchDisplay.Failed("압축 파일을 열지 못했습니다.");
+                        PatchInfo = PatchDisplay.Failed(Loc.S.MsgArchiveOpenFailed);
 
                     return;
                 }
@@ -532,7 +532,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                 _patch = patch;
 
                 RebuildPatchDisplay();
-                AppendLog($"패치 정보를 읽었습니다: {patch.Replacements.Count}개 파일 교체, 경고 {patch.Warnings.Count}건", LogLevel.Info);
+                AppendLog(Loc.S.LogPatchInfoReadWii(patch.Replacements.Count, patch.Warnings.Count), LogLevel.Info);
             }
             catch (OperationCanceledException)
             {
@@ -542,7 +542,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
                     PatchInfo = PatchDisplay.Failed(Loc.S.MsgCancelled);
 
-                    AppendLog("패치 읽기가 취소되었습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogPatchReadCancelled, LogLevel.Error);
                     await SoundPlayer.PlayCancelAsync();
                 }
             }
@@ -555,7 +555,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                     PatchInfo = PatchDisplay.Failed(ex.Message);
 
                     MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
-                    AppendLog($"패치를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogPatchReadFailed(ex.Message), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                 }
             }
@@ -578,7 +578,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (opened == null)
         {
-            AppendLog("비밀번호 입력이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogPasswordInputCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             return null;
         }
@@ -625,7 +625,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (string.IsNullOrWhiteSpace(OutputPath))
         {
-            error = "작업 폴더를 선택하세요.";
+            error = Loc.S.ErrSelectWorkFolder;
             return false;
         }
 
@@ -637,7 +637,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (!Directory.Exists(unpackedPath))
             {
-                error = "언팩된 데이터가 없습니다.";
+                error = Loc.S.ErrNoUnpackedData;
                 return false;
             }
 
@@ -645,7 +645,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (folderInfo == null)
             {
-                error = "언팩 데이터가 이전 버전 형식이거나 손상됐습니다. 다시 언팩해 주세요.";
+                error = Loc.S.ErrUnpackDataOldOrCorrupt;
                 return false;
             }
 
@@ -655,13 +655,13 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (string.IsNullOrWhiteSpace(InputPath) || !File.Exists(InputPath))
             {
-                error = "원본 디스크 파일을 선택하세요.";
+                error = Loc.S.ErrSelectSourceDiscFile;
                 return false;
             }
 
             if (_disc == null)
             {
-                error = "Wii 디스크 정보를 읽지 못했습니다. 원본 디스크를 확인하세요.";
+                error = Loc.S.ErrWiiDiscInfoUnreadable;
                 return false;
             }
 
@@ -675,13 +675,13 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (_workspace == null || _patch == null)
             {
-                error = "패치 정보를 읽지 못했습니다. 패치 경로를 확인하세요.";
+                error = Loc.S.ErrPatchInfoUnreadable;
                 return false;
             }
 
             if (gameId != null && !_patch.MatchesDisc(gameId))
             {
-                error = $"패치 대상 게임 ID({string.Join(", ", _patch.GameIds)})와 디스크({gameId})가 맞지 않습니다.";
+                error = Loc.S.ErrPatchGameIdMismatch(string.Join(", ", _patch.GameIds), gameId);
                 return false;
             }
         }
@@ -718,7 +718,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (version == _discVersion)
             {
-                AppendLog($"언팩 폴더 정보를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogUnpackFolderInfoReadFailed(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -760,8 +760,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "원본 Wii 디스크 선택",
-            Filter = "Wii 디스크|*.iso;*.wbfs;*.rvz;*.wia"
+            Title = Loc.S.DialogSelectSourceWiiDisc,
+            Filter = $"{Loc.S.LabelWiiDisc}|*.iso;*.wbfs;*.rvz;*.wia"
         };
 
         if (dlg.ShowDialog() == true)
@@ -770,7 +770,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     private void BrowsePatchFolder()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "Riivolution 패치 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectRiivolutionPatchFolder };
 
         if (dlg.ShowDialog() == true)
             PatchPath = dlg.FolderName;
@@ -780,8 +780,8 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "Riivolution 패치 선택",
-            Filter = "Riivolution 패치|*.zip;*.7z;*.xml"
+            Title = Loc.S.DialogSelectRiivolutionPatch,
+            Filter = $"{Loc.S.FilterRiivolutionPatch}|*.zip;*.7z;*.xml"
         };
 
         if (dlg.ShowDialog() == true)
@@ -790,7 +790,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     private void BrowseOutput()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectWorkFolder };
 
         if (dlg.ShowDialog() == true)
             OutputPath = dlg.FolderName;

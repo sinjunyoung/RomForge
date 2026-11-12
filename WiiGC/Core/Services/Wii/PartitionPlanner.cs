@@ -1,4 +1,6 @@
-﻿using WiiGC.Core.Models.Wii;
+﻿using Common.Localization;
+
+using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -19,7 +21,7 @@ internal static class PartitionPlanner
         long fstMaxSize = LayoutBuilder.ReadOffset(boot, 0x42C);
 
         if (dolOffset < MinimumHeaderSize || dolOffset > LayoutBuilder.MaximumHeaderSize || fstSize < 12 || fstSize > MaximumFstSize || fstOffset + fstSize > original.Length)
-            throw new InvalidDataException("Wii 파티션 부트 정보가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiPartitionBootInfoInvalid);
 
         byte[] dolHeader = new byte[Dol.HeaderSize];
 
@@ -28,7 +30,7 @@ internal static class PartitionPlanner
         long dolSize = Dol.GetSize(dolHeader);
 
         if (dolOffset + dolSize > original.Length)
-            throw new InvalidDataException("DOL 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrDolSizeInvalid);
 
         byte[] fstBytes = new byte[fstSize];
 

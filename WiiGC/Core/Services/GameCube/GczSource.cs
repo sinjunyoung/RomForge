@@ -1,3 +1,4 @@
+using Common.Localization;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.IO.Compression;
@@ -34,7 +35,7 @@ internal sealed class GczSource : IRvzInputSource
         RvzIo.ReadExactly(handle, header, 0);
 
         if (BinaryPrimitives.ReadUInt32LittleEndian(header) != Magic)
-            throw new InvalidDataException("GCZ 파일이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotFormatFile("GCZ"));
 
         _compressedDataSize = (long)BinaryPrimitives.ReadUInt64LittleEndian(header.AsSpan(8));
         _discSize = (long)BinaryPrimitives.ReadUInt64LittleEndian(header.AsSpan(16));
@@ -42,18 +43,18 @@ internal sealed class GczSource : IRvzInputSource
         _blockCount = (int)BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(28));
 
         if (_blockCount <= 0 || _blockSize <= 0 || _blockSize > MaxBlockSize || _discSize <= 0 || _compressedDataSize < 0)
-            throw new InvalidDataException("GCZ 헤더가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrHeaderInvalid("GCZ"));
 
         if ((long)_blockCount * _blockSize < _discSize)
-            throw new InvalidDataException("GCZ 블록 수가 디스크 크기보다 부족합니다.");
+            throw new InvalidDataException(Loc.S.ErrGczBlockCountShort);
 
         long headerTotal = HeaderSize + (long)_blockCount * (sizeof(ulong) + sizeof(uint));
 
         if (headerTotal > fileLength)
-            throw new InvalidDataException("GCZ 헤더 크기가 파일 크기보다 큽니다.");
+            throw new InvalidDataException(Loc.S.ErrGczHeaderLargerThanFile);
 
         if (headerTotal + _compressedDataSize > fileLength)
-            throw new InvalidDataException("GCZ 데이터 크기가 파일 크기보다 큽니다. 파일이 잘렸을 수 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrGczDataLargerThanFile);
 
         _dataOffset = headerTotal;
 
@@ -92,7 +93,7 @@ internal sealed class GczSource : IRvzInputSource
     public void Read(long offset, Span<byte> destination)
     {
         if (offset < 0 || offset + destination.Length > _discSize)
-            throw new EndOfStreamException("GCZ 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrGczReadOutOfRange);
 
         if (destination.Length == 0)
             return;
@@ -116,7 +117,7 @@ internal sealed class GczSource : IRvzInputSource
                 var blockData = stored.AsSpan(relativeStart, size);
 
                 if (Adler32.Compute(blockData) != _hashes[block])
-                    throw new InvalidDataException($"GCZ 블록 {block}의 해시가 일치하지 않습니다. 파일이 손상되었습니다.");
+                    throw new InvalidDataException(Loc.S.ErrGczBlockHashMismatch(block));
 
                 long blockOffset = (long)block * _blockSize;
                 int from = (int)(Math.Max(offset, blockOffset) - blockOffset);
@@ -127,7 +128,7 @@ internal sealed class GczSource : IRvzInputSource
                 if (uncompressed)
                 {
                     if (size != _blockSize)
-                        throw new InvalidDataException($"GCZ 블록 {block}의 비압축 크기가 올바르지 않습니다.");
+                        throw new InvalidDataException(Loc.S.ErrGczBlockUncompressedSize(block));
 
                     blockData[from..to].CopyTo(target);
                     continue;
@@ -171,7 +172,7 @@ internal sealed class GczSource : IRvzInputSource
         }
 
         if (total != destination.Length)
-            throw new InvalidDataException($"GCZ 블록 {block}의 압축 해제 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrGczBlockDecompressedSize(block));
     }
 
     private long BlockStart(int block) => (long)(_pointers[block] & ~UncompressedFlag);
@@ -186,16 +187,16 @@ internal sealed class GczSource : IRvzInputSource
             long end = BlockEnd(i);
 
             if (end > _compressedDataSize || start > _compressedDataSize || end < start)
-                throw new InvalidDataException("GCZ 블록 포인터가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrGczBlockPointerInvalid);
 
             bool uncompressed = (_pointers[i] & UncompressedFlag) != 0;
             long size = end - start;
 
             if (uncompressed && size != _blockSize)
-                throw new InvalidDataException("GCZ 비압축 블록 크기가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrGczUncompressedBlockSizeInvalid);
 
             if (!uncompressed && size > _blockSize + 64)
-                throw new InvalidDataException("GCZ 압축 블록이 너무 큽니다.");
+                throw new InvalidDataException(Loc.S.ErrGczCompressedBlockTooLarge);
         }
     }
 

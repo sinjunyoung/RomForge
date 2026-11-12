@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models.Wii;
 
@@ -34,18 +35,18 @@ public static class IsoToWbfsConverter
             Span<byte> header = stackalloc byte[0x20];
 
             if (input is WbfsSource || input.Length < DiscHeaderSize)
-                throw new InvalidDataException("Wii ISO 파일이 아닙니다.");
+                throw new InvalidDataException(Loc.S.ErrNotFormatFile("Wii ISO"));
 
             input.Read(0, header);
 
             if (!DiscHeader.IsWii(header))
-                throw new InvalidDataException("Wii ISO 파일이 아닙니다. WBFS는 Wii 디스크만 지원합니다.");
+                throw new InvalidDataException(Loc.S.ErrWiiIsoOnlyForWbfs);
 
             long length = input.Length;
             long blockCount = (length + WbfsSectorSize - 1) / WbfsSectorSize;
 
             if (blockCount > BlocksPerDisc)
-                throw new InvalidDataException("Wii 디스크 최대 크기를 초과했습니다.");
+                throw new InvalidDataException(Loc.S.ErrWiiDiscMaxSizeExceeded);
 
             bool[]? usage = UsageScanner.Scan(input);
             using var output = File.OpenHandle(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, FileOptions.None);
@@ -74,7 +75,7 @@ public static class IsoToWbfsConverter
             }
 
             if (usedBlocks == 0)
-                throw new InvalidDataException("변환할 데이터가 없습니다.");
+                throw new InvalidDataException(Loc.S.ErrNoDataToConvert);
 
             long totalSize = (long)(usedBlocks + 1) * WbfsSectorSize;
 

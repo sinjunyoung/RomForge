@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace RomForge.Core.Services.Wii;
@@ -38,19 +39,19 @@ public sealed record GameDisplay(string Title, string Publisher, string GameId, 
         string gameId = info.GameId;
         string title = string.IsNullOrWhiteSpace(info.Title) ? gameId : info.Title;
         string makerCode = gameId.Length >= 6 ? gameId[4..6] : string.Empty;
-        string publisher = Publishers.TryGetValue(makerCode, out string? name) ? name : $"제작사 코드 {makerCode}";
+        string publisher = Publishers.TryGetValue(makerCode, out string? name) ? name : Loc.S.LabelMakerCode(makerCode);
         string titleId = gameId.Length >= 4 ? "00010000-" + Convert.ToHexString(Encoding.ASCII.GetBytes(gameId[..4])) : string.Empty;
         char regionChar = gameId.Length >= 4 ? gameId[3] : '?';
         string regionKey = gameId.Length >= 4 ? $"WII-P-{gameId[..4]}" : string.Empty;
 
         string region = regionChar switch
         {
-            'J' => "일본",
-            'E' => "북미",
-            'K' => "한국",
-            'W' => "대만",
-            'P' or 'X' or 'Y' or 'Z' or 'D' or 'F' or 'S' or 'I' or 'H' or 'U' => "유럽/PAL",
-            _ => "기타"
+            'J' => Loc.S.RegionJapan,
+            'E' => Loc.S.RegionNorthAmerica,
+            'K' => Loc.S.RegionKorea,
+            'W' => Loc.S.RegionTaiwan,
+            'P' or 'X' or 'Y' or 'Z' or 'D' or 'F' or 'S' or 'I' or 'H' or 'U' => Loc.S.RegionEuropePal,
+            _ => Loc.S.LabelOther
         };
 
         return new GameDisplay(title, publisher, gameId, titleId, region, regionKey);

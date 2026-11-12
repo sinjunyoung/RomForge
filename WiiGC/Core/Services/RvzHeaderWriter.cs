@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 using Microsoft.Win32.SafeHandles;
 using WiiGC.Core.Enums;
@@ -20,7 +21,7 @@ internal static class RvzHeaderWriter
     public static void ValidateCompressionLevel(int compressionLevel)
     {
         if (compressionLevel < ZstdSharp.Compressor.MinCompressionLevel || compressionLevel > ZstdSharp.Compressor.MaxCompressionLevel)
-            throw new ArgumentOutOfRangeException(nameof(compressionLevel), "zstd 압축 레벨이 범위를 벗어났습니다.");
+            throw new ArgumentOutOfRangeException(nameof(compressionLevel), Loc.S.ErrZstdLevelOutOfRange);
     }
 
     public static ZstdSharp.Compressor CreateCompressor(int compressionLevel)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 
 namespace WiiGC.Core.Services.Wii;
@@ -19,7 +20,7 @@ internal sealed class RepackedPartition : IWiiPartitionData, IDisposable
         foreach (var extent in _extents)
         {
             if (extent.Start < end || extent.Start + extent.Length > length)
-                throw new InvalidDataException("Wii 파티션 배치가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrWiiPartitionLayoutInvalid);
 
             end = extent.Start + extent.Length;
         }
@@ -30,7 +31,7 @@ internal sealed class RepackedPartition : IWiiPartitionData, IDisposable
     public void Read(long offset, Span<byte> destination)
     {
         if (offset < 0 || offset + destination.Length > Length)
-            throw new EndOfStreamException("파티션 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrPartitionReadOutOfRange);
 
         destination.Clear();
 

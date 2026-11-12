@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Microsoft.Win32;
 using RomForge.Core.Services.Wii;
 using RomForge.ViewModels.Wii;
@@ -62,7 +63,7 @@ public partial class RepackTab : UserControl
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "패치 폴더 선택"
+            Title = Loc.S.DialogSelectPatchFolder
         };
 
         if (dialog.ShowDialog() == true)
@@ -73,8 +74,8 @@ public partial class RepackTab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "패치 파일 (*.zip;*.7z;*.xml)|*.zip;*.7z;*.xml|ZIP 파일 (*.zip)|*.zip|7Z 파일 (*.7z)|*.7z|XML 파일 (*.xml)|*.xml|모든 파일 (*.*)|*.*",
-            Title = "패치 파일 선택"
+            Filter = $"{Loc.S.FilterPatchFiles} (*.zip;*.7z;*.xml)|*.zip;*.7z;*.xml|{Loc.S.FilterFilesOfType("ZIP")} (*.zip)|*.zip|{Loc.S.FilterFilesOfType("7Z")} (*.7z)|*.7z|{Loc.S.FilterFilesOfType("XML")} (*.xml)|*.xml|{Loc.S.FilterAllFiles} (*.*)|*.*",
+            Title = Loc.S.DialogSelectPatchFile
         };
 
         if (dialog.ShowDialog() == true)
@@ -85,8 +86,8 @@ public partial class RepackTab : UserControl
     {
         var dlg = new OpenFileDialog
         {
-            Filter = "Wii 디스크 파일|*.iso;*.wbfs;*.rvz;*.wia|모든 파일|*.*",
-            Title = "Wii 디스크 파일 선택"
+            Filter = $"{Loc.S.FilterWiiDiscFiles}|*.iso;*.wbfs;*.rvz;*.wia|{Loc.S.FilterAllFiles}|*.*",
+            Title = Loc.S.DialogSelectWiiDiscFile
         };
 
         if (dlg.ShowDialog() == true)

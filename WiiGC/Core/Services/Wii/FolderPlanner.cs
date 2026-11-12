@@ -1,4 +1,6 @@
-﻿using WiiGC.Core.Models.Wii;
+﻿using Common.Localization;
+
+using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -14,7 +16,7 @@ internal static class FolderPlanner
         string dolPath = Path.Combine(sys, FolderLayout.Dol);
 
         if (!Directory.Exists(filesRoot) || !File.Exists(bootPath) || !File.Exists(bi2Path) || !File.Exists(apploaderPath) || !File.Exists(dolPath))
-            throw new InvalidDataException("언팩 폴더가 올바르지 않습니다 (sys, files 폴더가 없음). 이 버전에서 다시 언팩해 주세요.");
+            throw new InvalidDataException(Loc.S.ErrUnpackFolderInvalid);
 
         byte[] boot = File.ReadAllBytes(bootPath);
         byte[] bi2 = File.ReadAllBytes(bi2Path);
@@ -22,23 +24,23 @@ internal static class FolderPlanner
         long dolSize = new FileInfo(dolPath).Length;
 
         if (boot.Length != FolderLayout.BootSize)
-            throw new InvalidDataException("boot.bin 크기가 올바르지 않습니다 (0x440바이트여야 합니다).");
+            throw new InvalidDataException(Loc.S.ErrBootBinSize);
 
         if (bi2.Length != FolderLayout.Bi2Size)
-            throw new InvalidDataException("bi2.bin 크기가 올바르지 않습니다 (0x2000바이트여야 합니다).");
+            throw new InvalidDataException(Loc.S.ErrBi2BinSize);
 
         if (apploader.Length < 0x20)
-            throw new InvalidDataException("apploader.img 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrApploaderSizeInvalid);
 
         if (dolSize < Dol.HeaderSize)
-            throw new InvalidDataException("main.dol 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrMainDolSizeInvalid);
 
         long dolOffset = LayoutBuilder.ReadOffset(boot, 0x420);
         long fstMaxSize = LayoutBuilder.ReadOffset(boot, 0x42C);
         long apploaderEnd = FolderLayout.ApploaderOffset + apploader.Length;
 
         if (dolOffset < apploaderEnd || dolOffset > LayoutBuilder.MaximumHeaderSize)
-            throw new InvalidDataException("apploader가 DOL 위치와 겹치거나 boot.bin의 DOL 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrApploaderOverlapsDol);
 
         var files = CollectFiles(filesRoot);
         var resolved = new List<(string Path, bool Found)>();
@@ -59,7 +61,7 @@ internal static class FolderPlanner
         }
 
         if (files.Count == 0)
-            throw new InvalidDataException("files 폴더에 파일이 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrFilesFolderEmpty);
 
         var tree = new WiiFstTree();
         var sources = new Dictionary<FstNode, string>();

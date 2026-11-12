@@ -1,4 +1,5 @@
 ﻿using Patch.Core.Interfaces;
+using Common.Localization;
 using RomForge.Core.Models.Wii;
 using System.IO;
 
@@ -56,7 +57,7 @@ public sealed class RiivolutionWorkspace : IDisposable
         if (File.Exists(path) && IsXml(Path.GetExtension(path)))
             return new RiivolutionWorkspace(path, Path.GetFullPath(path), RiivolutionSourceKind.Xml, null);
 
-        throw new InvalidDataException("지원하지 않는 패치 형식입니다 (폴더, zip, 7z, xml만 가능).");
+        throw new InvalidDataException(Loc.S.ErrUnsupportedPatchFormatWii);
     }
 
     public static async Task<RiivolutionWorkspace> ExtractAsync(string archivePath, IArchivePatchSource archive, Action<double>? progress, CancellationToken ct)
@@ -106,7 +107,7 @@ public sealed class RiivolutionWorkspace : IDisposable
             string destination = Path.GetFullPath(Path.Combine(tempRoot, entry.FullPath.Replace('/', Path.DirectorySeparatorChar)));
 
             if (!destination.StartsWith(boundary, StringComparison.OrdinalIgnoreCase))
-                throw new InvalidDataException($"압축 파일에 안전하지 않은 경로가 있습니다: {entry.FullPath}");
+                throw new InvalidDataException(Loc.S.ErrUnsafePathInArchive(entry.FullPath));
 
             Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
 

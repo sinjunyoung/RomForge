@@ -1,4 +1,5 @@
 ﻿using WiiGC.Core.Interfaces;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
@@ -31,7 +32,7 @@ internal sealed class RebuiltIsoSource : IRvzInputSource
     public static RebuiltIsoSource Create(IRvzInputSource input, IReadOnlyDictionary<string, string> replacements, Action<double>? progress, Action<PatchEntry>? entryLog, CancellationToken ct)
     {
         if (replacements.Count == 0)
-            throw new InvalidDataException("교체할 파일이 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrNoFilesToReplace);
 
         var source = new RebuiltIsoSource(input);
 

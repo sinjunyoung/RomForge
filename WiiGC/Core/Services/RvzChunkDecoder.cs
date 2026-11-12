@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Enums;
 using WiiGC.Core.Models;
 using WiiGC.Core.Models.Wii;
@@ -28,7 +29,7 @@ internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] com
             long maxSize = (long)exceptionLists * MaxExceptionListBytes + (rvzPackedSize != 0 ? rvzPackedSize : dataSize);
 
             if (maxSize > int.MaxValue)
-                throw new InvalidDataException("RVZ 청크 크기가 너무 큽니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzChunkTooLarge);
 
             if (_scratch.Length < maxSize)
                 _scratch = new byte[maxSize];
@@ -46,7 +47,7 @@ internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] com
         for (int i = 0; i < exceptionLists; i++)
         {
             if (stream.Length - position < sizeof(ushort))
-                throw new InvalidDataException("RVZ 해시 예외 목록이 잘못되었습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzHashExceptionListInvalid);
 
             int count = BinaryPrimitives.ReadUInt16BigEndian(stream[position..]);
             int listSize = sizeof(ushort) + count * HashExceptionSize;
@@ -56,7 +57,7 @@ internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] com
                 consumed = ((position + listSize + 3) & ~3) - position;
 
             if (stream.Length - position < consumed)
-                throw new InvalidDataException("RVZ 해시 예외 목록이 잘못되었습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzHashExceptionListInvalid);
 
             if (count == 0)
                 lists[i] = EmptyList;
@@ -91,14 +92,14 @@ internal sealed class RvzChunkDecoder(RvzCompressionType compression, byte[] com
         if (rvzPackedSize != 0)
         {
             if (payload.Length != rvzPackedSize)
-                throw new InvalidDataException("RVZ 패킹 데이터 크기가 헤더와 다릅니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzPackSizeMismatch);
 
             RvzPackDecoder.Unpack(payload, data, junkOffset, _generator);
         }
         else
         {
             if (payload.Length != dataSize)
-                throw new InvalidDataException("RVZ 청크 데이터 크기가 예상과 다릅니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzChunkSizeMismatch);
 
             payload.CopyTo(data);
         }

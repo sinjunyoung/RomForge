@@ -1,4 +1,6 @@
-﻿namespace WiiGC.Core.Services.Wii;
+﻿using Common.Localization;
+
+namespace WiiGC.Core.Services.Wii;
 
 public static class WbfsToIsoConverter
 {
@@ -11,7 +13,7 @@ public static class WbfsToIsoConverter
             using var input = RvzInputSource.Open(inputPath);
 
             if (input is not WbfsSource wbfs)
-                throw new InvalidDataException("WBFS 파일이 아닙니다.");
+                throw new InvalidDataException(Loc.S.ErrNotFormatFile("WBFS"));
 
             long length = wbfs.Length;
             int blockSize = wbfs.BlockSize;

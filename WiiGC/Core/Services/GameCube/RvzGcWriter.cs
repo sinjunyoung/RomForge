@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using Common.Localization;
 using static WiiGC.Core.Services.RvzHeaderWriter;
 using WiiGC.Core.Models;
 using WiiGC.Core.Services.Wii;
@@ -31,7 +32,7 @@ internal sealed class RvzGcWriter
         ValidateCompressionLevel(compressionLevel);
 
         if (!RvzFile.IsValidChunkSize(chunkSize))
-            throw new ArgumentOutOfRangeException(nameof(chunkSize), "RVZ 청크 크기가 올바르지 않습니다.");
+            throw new ArgumentOutOfRangeException(nameof(chunkSize), Loc.S.ErrRvzChunkSizeInvalid);
 
         _input = input;
         _output = output;
@@ -44,7 +45,7 @@ internal sealed class RvzGcWriter
         long isoSize = _input.Length;
 
         if (isoSize <= DiscHeaderSize)
-            throw new InvalidDataException("디스크 이미지가 너무 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrDiscImageTooSmall);
 
         byte[] discHeader = new byte[DiscHeaderSize];
 
@@ -54,7 +55,7 @@ internal sealed class RvzGcWriter
         long groupCount = (isoSize + _chunkSize - 1) / _chunkSize;
 
         if (groupCount > uint.MaxValue)
-            throw new InvalidDataException("그룹 수가 너무 많습니다.");
+            throw new InvalidDataException(Loc.S.ErrTooManyGroups);
 
         long rawSize = isoSize - DiscHeaderSize;
         long groupTableBytes = groupCount * 12;
@@ -93,7 +94,7 @@ internal sealed class RvzGcWriter
             else
             {
                 if (bytesWritten >> 2 > uint.MaxValue)
-                    throw new InvalidDataException("RVZ 파일이 너무 큽니다.");
+                    throw new InvalidDataException(Loc.S.ErrRvzFileTooLarge);
 
                 var entryValue = new GroupEntry((uint)(bytesWritten >> 2), result.DataSizeField, result.PackedSize);
 
@@ -182,9 +183,9 @@ internal sealed class RvzGcWriter
         var platform = DiscHeader.Detect(discHeader);
 
         if (platform == DiscPlatform.Wii)
-            throw new NotSupportedException("Wii 디스크 압축은 아직 지원하지 않습니다.");
+            throw new NotSupportedException(Loc.S.ErrWiiCompressionUnsupported);
 
         if (platform != DiscPlatform.GameCube)
-            throw new InvalidDataException("GameCube 디스크 이미지가 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotGameCubeDisc);
     }
 }

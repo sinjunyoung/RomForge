@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32.SafeHandles;
+﻿using Common.Localization;
+
+using Microsoft.Win32.SafeHandles;
 
 namespace WiiGC.Core.Services;
 
@@ -13,7 +15,7 @@ internal static class RvzIo
             int read = RandomAccess.Read(handle, buffer[total..], offset + total);
 
             if (read <= 0)
-                throw new EndOfStreamException("RVZ 파일이 예상보다 일찍 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrRvzFileEndedEarly);
 
             total += read;
         }

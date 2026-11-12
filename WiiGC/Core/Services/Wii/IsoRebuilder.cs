@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models.Wii;
@@ -73,7 +74,7 @@ public static class IsoRebuilder
         foreach (var spec in FindTargets(input, ReadSpecs(input)).OrderBy(s => s.DataStart))
         {
             if (spec.DataStart < cursor)
-                throw new InvalidDataException("Wii 파티션 데이터 영역이 겹칩니다.");
+                throw new InvalidDataException(Loc.S.ErrWiiPartitionDataOverlap);
 
             var reader = new PartitionReader(input, spec);
 
@@ -85,7 +86,7 @@ public static class IsoRebuilder
             {
                 plan.Data.Dispose();
 
-                throw new InvalidDataException("교체 후 파티션 크기가 원본 파티션 영역을 초과합니다.");
+                throw new InvalidDataException(Loc.S.ErrPartitionExceedsOriginalArea);
             }
 
             targets.Add(new WiiRebuildTarget(targets.Count, spec, plan));
@@ -94,7 +95,7 @@ public static class IsoRebuilder
         }
 
         if (targets.Count == 0)
-            throw new InvalidDataException("게임 파티션을 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrGamePartitionNotFound);
 
         ShareEntries(targets);
     }
@@ -127,7 +128,7 @@ public static class IsoRebuilder
         long groups = PartitionEncoder.GetGroupCount(data);
 
         if (groups * Layout.HashSize > PartitionHeader.H3TableSize)
-            throw new InvalidDataException("파티션이 H3 테이블 용량을 초과합니다.");
+            throw new InvalidDataException(Loc.S.ErrPartitionExceedsH3Capacity);
 
         byte[] h3 = new byte[PartitionHeader.H3TableSize];
         var logger = new PatchLogger(target.Plan.Entries, entryLog);
@@ -173,19 +174,19 @@ public static class IsoRebuilder
     internal static List<PartitionSpec> ReadSpecs(IRvzInputSource input)
     {
         if (input.Length < DiscHeader.Size)
-            throw new InvalidDataException("Wii 디스크가 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotWiiDisc);
 
         byte[] header = new byte[DiscHeader.Size];
 
         input.Read(0, header);
 
         if (!DiscHeader.IsWii(header))
-            throw new InvalidDataException("Wii 디스크가 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotWiiDisc);
 
         var specs = PartitionTable.Read(input, input.Length);
 
         if (specs.Count == 0)
-            throw new InvalidDataException("Wii 파티션을 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiPartitionNotFound);
 
         return specs;
     }

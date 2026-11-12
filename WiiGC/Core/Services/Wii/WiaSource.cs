@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using Common.Localization;
 using System.Collections.Concurrent;
 using WiiGC.Core.Enums;
 using WiiGC.Core.Interfaces;
@@ -88,7 +89,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
     public void Read(long offset, Span<byte> destination)
     {
         if (offset < 0 || offset > Length - destination.Length)
-            throw new EndOfStreamException("WIA 범위를 벗어난 읽기입니다.");
+            throw new EndOfStreamException(Loc.S.ErrWiaReadOutOfRange);
 
         if (destination.Length == 0)
             return;
@@ -118,7 +119,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
                 int lengthRead = region.PartitionIndex < 0 ? ReadRaw(context, region, current, destination[written..]) : ReadPartition(context, region, current, destination[written..]);
 
                 if (lengthRead <= 0)
-                    throw new InvalidDataException("WIA 읽기 진행에 실패했습니다.");
+                    throw new InvalidDataException(Loc.S.ErrWiaReadProgressFailed);
 
                 written += lengthRead;
             }
@@ -149,7 +150,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         }
 
         if (found < 0 || offset >= _regions[found].End)
-            throw new InvalidDataException("WIA 데이터 영역 사이에 빈 구간이 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzGapBetweenDataRegions);
 
         return _regions[found];
     }
@@ -168,7 +169,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         _groups.ReadFromGroups(context, ref readOffset, ref remaining, context.Output, ref position, _file.ChunkSize, Layout.BlockTotalSize, entry.DataOffset, entry.DataSize, entry.GroupIndex, entry.GroupCount, 0, null);
 
         if (remaining != 0)
-            throw new InvalidDataException("WIA 원본 데이터 그룹이 부족합니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzSourceGroupsMissing);
 
         context.Output.AsSpan(0, length).CopyTo(destination);
 
@@ -186,7 +187,7 @@ internal sealed class WiaSource : IRvzInputSource, IWiiPartitionSource
         int validSectors = (int)Math.Min(Layout.BlocksPerGroup, partition.TotalSectors - groupStartSector);
 
         if (validSectors <= 0)
-            throw new InvalidDataException("WIA 파티션 섹터 범위가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionSectorRangeInvalid);
 
         if (context.CachedPartitionIndex != region.PartitionIndex || context.CachedHashGroupStart != hashGroupStart)
         {

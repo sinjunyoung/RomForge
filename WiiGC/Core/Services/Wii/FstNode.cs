@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
@@ -13,12 +14,12 @@ internal sealed class WiiFstTree
     public static WiiFstTree Parse(byte[] fst)
     {
         if (fst.Length < 12)
-            throw new InvalidDataException("FST 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrFstSizeInvalid);
 
         uint entryCount = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(8));
 
         if (entryCount < 1 || (long)entryCount * 12 > fst.Length)
-            throw new InvalidDataException("FST 엔트리 수가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrFstEntryCountInvalid);
 
         var tree = new WiiFstTree();
         int index = 1;
@@ -69,7 +70,7 @@ internal sealed class WiiFstTree
             long nameStart = tableEnd + nameOffset;
 
             if (nameStart >= fst.Length)
-                throw new InvalidDataException("FST 이름 오프셋이 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrFstNameOffsetInvalid);
 
             int nameEnd = Array.IndexOf(fst, (byte)0, (int)nameStart);
 
@@ -85,15 +86,15 @@ internal sealed class WiiFstTree
             if (isDirectory)
             {
                 if (second <= current || second > end)
-                    throw new InvalidDataException("FST 디렉터리 범위가 올바르지 않습니다.");
+                    throw new InvalidDataException(Loc.S.ErrFstDirRangeInvalid);
 
                 if (depth >= MaximumDepth)
-                    throw new InvalidDataException("FST 디렉터리 중첩이 너무 깊습니다.");
+                    throw new InvalidDataException(Loc.S.ErrFstDirNestingTooDeep);
 
                 ParseChildren(fst, tableEnd, ref index, (int)second, node, depth + 1);
 
                 if (index != second)
-                    throw new InvalidDataException("FST 디렉터리 구조가 올바르지 않습니다.");
+                    throw new InvalidDataException(Loc.S.ErrFstDirStructureInvalid);
             }
             else
             {
@@ -147,7 +148,7 @@ internal sealed class WiiFstTree
             int entryOffset = current * 12;
 
             if (nameCursor > MaximumNameOffset)
-                throw new InvalidDataException("FST 이름 영역이 너무 큽니다.");
+                throw new InvalidDataException(Loc.S.ErrFstNameAreaTooLarge);
 
             fst[entryOffset] = child.IsDirectory ? (byte)1 : (byte)0;
             fst[entryOffset + 1] = (byte)(nameCursor >> 16);

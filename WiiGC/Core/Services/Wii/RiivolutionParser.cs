@@ -1,4 +1,6 @@
-﻿using System.Xml.Linq;
+﻿using Common.Localization;
+
+using System.Xml.Linq;
 
 namespace WiiGC.Core.Services.Wii;
 
@@ -11,7 +13,7 @@ public static class RiivolutionParser
         var root = XDocument.Load(xmlPath).Root;
 
         if (root == null || root.Name.LocalName != "wiidisc")
-            throw new InvalidDataException("Riivolution XML이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotRiivolutionXml);
 
         var warnings = new List<string>();
         var gameIds = new List<string>();
@@ -24,7 +26,7 @@ public static class RiivolutionParser
                 gameIds.Add(game);
 
             if (id.Attribute("region") != null)
-                warnings.Add("<id region> 조건은 검사하지 않습니다.");
+                warnings.Add(Loc.S.WarnIdRegionNotChecked);
         }
 
         var patches = new Dictionary<string, XElement>(StringComparer.OrdinalIgnoreCase);
@@ -45,10 +47,10 @@ public static class RiivolutionParser
             ApplyPatch(patch, sdRoot, replacements, unsupported, missing, warnings);
 
         if (missing.Count > 0)
-            throw new InvalidDataException($"패치가 가리키는 파일 {missing.Count}개를 찾을 수 없습니다: {string.Join(", ", missing.Take(5))}");
+            throw new InvalidDataException(Loc.S.ErrPatchReferencedFilesMissing(missing.Count, string.Join(", ", missing.Take(5))));
 
         foreach (var (name, count) in unsupported)
-            warnings.Add($"<{name}> {count}개는 지원하지 않아 적용되지 않습니다.");
+            warnings.Add(Loc.S.WarnUnsupportedElementCount(name, count));
 
         return new RiivolutionPatchSet(xmlPath, sdRoot, gameIds, replacements, warnings);
     }
@@ -59,7 +61,7 @@ public static class RiivolutionParser
             return Path.GetFullPath(path);
 
         if (!Directory.Exists(path))
-            throw new FileNotFoundException("Riivolution XML 또는 폴더를 찾을 수 없습니다.", path);
+            throw new FileNotFoundException(Loc.S.ErrRiivolutionXmlOrFolderNotFound, path);
 
         string directory = Path.Combine(path, "riivolution");
 
@@ -69,10 +71,10 @@ public static class RiivolutionParser
         string[] files = Directory.GetFiles(directory, "*.xml", SearchOption.TopDirectoryOnly);
 
         if (files.Length == 0)
-            throw new InvalidDataException("폴더에서 Riivolution XML을 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrRiivolutionXmlNotInFolder);
 
         if (files.Length > 1)
-            throw new InvalidDataException($"XML이 {files.Length}개 있습니다. 사용할 XML 파일을 직접 지정해 주세요: {string.Join(", ", files.Select(Path.GetFileName))}");
+            throw new InvalidDataException(Loc.S.ErrMultipleXmlSpecifyOne(files.Length, string.Join(", ", files.Select(Path.GetFileName))));
 
         return Path.GetFullPath(files[0]);
     }
@@ -106,7 +108,7 @@ public static class RiivolutionParser
 
             if (index > options.Count)
             {
-                warnings.Add($"옵션 '{name}'의 선택값 {index}이(가) 범위를 벗어나 건너뜁니다.");
+                warnings.Add(Loc.S.WarnOptionChoiceOutOfRange(name, index));
 
                 continue;
             }
@@ -116,7 +118,7 @@ public static class RiivolutionParser
                 string? id = (string?)reference.Attribute("id");
 
                 if (id == null || !patches.TryGetValue(id, out var patch))
-                    warnings.Add($"옵션 '{name}'이(가) 존재하지 않는 패치 '{id}'를 참조합니다.");
+                    warnings.Add(Loc.S.WarnOptionReferencesMissingPatch(name, id));
                 else if (!selected.Contains(patch))
                     selected.Add(patch);
             }
@@ -149,13 +151,13 @@ public static class RiivolutionParser
 
         if (string.IsNullOrEmpty(disc) || string.IsNullOrEmpty(external))
         {
-            warnings.Add("disc 또는 external이 없는 <file> 항목을 건너뜁니다.");
+            warnings.Add(Loc.S.WarnFileEntryMissingDiscOrExternal);
             return;
         }
 
         if (element.Attribute("offset") != null || element.Attribute("length") != null)
         {
-            warnings.Add($"일부 영역 덮어쓰기(offset/length)는 지원하지 않아 건너뜁니다: {disc}");
+            warnings.Add(Loc.S.WarnPartialOverwriteUnsupported(disc));
             return;
         }
 
@@ -177,7 +179,7 @@ public static class RiivolutionParser
 
         if (string.IsNullOrEmpty(disc) || string.IsNullOrEmpty(external))
         {
-            warnings.Add("disc 또는 external이 없는 <folder> 항목을 건너뜁니다.");
+            warnings.Add(Loc.S.WarnFolderEntryMissingDiscOrExternal);
             return;
         }
 
@@ -199,7 +201,7 @@ public static class RiivolutionParser
     private static void Add(Dictionary<string, string> replacements, List<string> warnings, string disc, string file)
     {
         if (replacements.TryGetValue(disc, out string? existing) && !string.Equals(existing, file, StringComparison.OrdinalIgnoreCase))
-            warnings.Add($"같은 디스크 경로가 중복되어 마지막 항목을 사용합니다: {disc}");
+            warnings.Add(Loc.S.WarnDuplicateDiscPathUsingLast(disc));
 
         replacements[disc] = file;
     }
@@ -211,7 +213,7 @@ public static class RiivolutionParser
         string boundary = Path.GetFullPath(sdRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
         if (!full.StartsWith(boundary, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException($"XML이 SD 루트 밖의 경로를 가리킵니다: {external}");
+            throw new InvalidDataException(Loc.S.ErrXmlPathOutsideSdRoot(external));
 
         return full;
     }

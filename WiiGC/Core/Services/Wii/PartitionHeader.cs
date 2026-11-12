@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 
 namespace WiiGC.Core.Services.Wii;
@@ -36,7 +37,7 @@ internal sealed record PartitionHeader(long TmdOffset, int TmdSize, long H3Offse
         long h3Offset = containerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(buffer[(H3OffsetField - TmdSizeField)..]) << 2);
 
         if (tmdSize < TmdMinimumSize || tmdOffset + tmdSize > input.Length || h3Offset + H3TableSize > input.Length)
-            throw new InvalidDataException("Wii 파티션 헤더(TMD/H3) 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiPartitionHeaderOffsetInvalid);
 
         return new PartitionHeader(tmdOffset, tmdSize, h3Offset);
     }

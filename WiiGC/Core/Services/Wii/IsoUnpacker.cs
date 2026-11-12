@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Text;
 using WiiGC.Core.Models.Wii;
 
@@ -12,10 +13,10 @@ public static class IsoUnpacker
     public static int Unpack(string inputPath, string outputFolder, Action<double>? progress = null, CancellationToken ct = default)
     {
         using var input = RvzInputSource.Open(inputPath);
-        var target = IsoRebuilder.FindTargets(input, IsoRebuilder.ReadSpecs(input)).FirstOrDefault() ?? throw new InvalidDataException("게임 파티션을 찾을 수 없습니다.");
+        var target = IsoRebuilder.FindTargets(input, IsoRebuilder.ReadSpecs(input)).FirstOrDefault() ?? throw new InvalidDataException(Loc.S.ErrGamePartitionNotFound);
 
         if (target.ContainerOffset < FolderLayout.DiscHeadSize)
-            throw new InvalidDataException("지원하지 않는 Wii 파티션 배치입니다.");
+            throw new InvalidDataException(Loc.S.ErrUnsupportedWiiPartitionLayout);
 
         using var reader = new PartitionReader(input, target);
         string root = Path.GetFullPath(outputFolder);
@@ -29,7 +30,7 @@ public static class IsoUnpacker
         long dolOffset = LayoutBuilder.ReadOffset(boot, 0x420);
 
         if (dolOffset < FolderLayout.ApploaderOffset + 0x20 || dolOffset > LayoutBuilder.MaximumHeaderSize || dolOffset + Dol.HeaderSize > reader.Length)
-            throw new InvalidDataException("Wii 파티션 부트 정보가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiPartitionBootInfoInvalid);
 
         byte[] bi2 = new byte[FolderLayout.Bi2Size];
 
@@ -42,7 +43,7 @@ public static class IsoUnpacker
         long apploaderSize = 0x20 + (long)BinaryPrimitives.ReadUInt32BigEndian(apploaderHeader.AsSpan(0x14)) + BinaryPrimitives.ReadUInt32BigEndian(apploaderHeader.AsSpan(0x18));
 
         if (FolderLayout.ApploaderOffset + apploaderSize > dolOffset)
-            throw new InvalidDataException("apploader 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrApploaderSizeInvalid);
 
         byte[] apploader = new byte[apploaderSize];
 
@@ -55,7 +56,7 @@ public static class IsoUnpacker
         long dolSize = Dol.GetSize(dolHeader);
 
         if (dolOffset + dolSize > reader.Length)
-            throw new InvalidDataException("DOL 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrDolSizeInvalid);
 
         var partitionHeader = PartitionHeader.Read(input, target.ContainerOffset);
         byte[] partition = new byte[FolderLayout.PartitionHeaderSize];
@@ -66,7 +67,7 @@ public static class IsoUnpacker
         long certOffset = target.ContainerOffset + ((long)BinaryPrimitives.ReadUInt32BigEndian(partition.AsSpan(0x2B0)) << 2);
 
         if (certSize < 0 || certSize > MaximumCertSize || certOffset + certSize > input.Length)
-            throw new InvalidDataException("Wii 파티션 인증서 위치가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrWiiPartitionCertOffsetInvalid);
 
         byte[] tmd = new byte[partitionHeader.TmdSize];
 
@@ -110,7 +111,7 @@ public static class IsoUnpacker
                 string destination = Path.GetFullPath(Path.Combine(filesFolder, file.Path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar)));
 
                 if (!destination.StartsWith(boundary, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException($"디스크에 안전하지 않은 경로가 있습니다: {file.Path}");
+                    throw new InvalidDataException(Loc.S.ErrUnsafePathInDisc(file.Path));
 
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
                 CopyRange(reader, file.Offset, file.Size, destination, buffer, reporter, ct);

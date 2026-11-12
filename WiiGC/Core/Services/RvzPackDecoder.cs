@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services;
@@ -13,7 +14,7 @@ internal static class RvzPackDecoder
         while (inputPosition < packed.Length)
         {
             if (packed.Length - inputPosition < sizeof(uint))
-                throw new InvalidDataException("RVZ 패킹 데이터가 잘못되었습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzPackDataInvalid);
 
             uint header = BinaryPrimitives.ReadUInt32BigEndian(packed[inputPosition..]);
 
@@ -23,12 +24,12 @@ internal static class RvzPackDecoder
             int size = (int)(header & 0x7FFFFFFFu);
 
             if (size > destination.Length - outputPosition)
-                throw new InvalidDataException("RVZ 패킹 해제 결과가 예상보다 큽니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzPackResultTooLarge);
 
             if (junk)
             {
                 if (packed.Length - inputPosition < LaggedFibonacciGenerator.SeedBytes)
-                    throw new InvalidDataException("RVZ 패킹 시드 데이터가 잘못되었습니다.");
+                    throw new InvalidDataException(Loc.S.ErrRvzPackSeedInvalid);
 
                 generator.SetSeed(packed.Slice(inputPosition, LaggedFibonacciGenerator.SeedBytes));
 
@@ -40,7 +41,7 @@ internal static class RvzPackDecoder
             else
             {
                 if (packed.Length - inputPosition < size)
-                    throw new InvalidDataException("RVZ 패킹 데이터가 잘못되었습니다.");
+                    throw new InvalidDataException(Loc.S.ErrRvzPackDataInvalid);
 
                 packed.Slice(inputPosition, size).CopyTo(destination[outputPosition..]);
 
@@ -51,6 +52,6 @@ internal static class RvzPackDecoder
         }
 
         if (outputPosition != destination.Length)
-            throw new InvalidDataException("RVZ 패킹 해제 결과가 예상보다 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPackResultTooSmall);
     }
 }

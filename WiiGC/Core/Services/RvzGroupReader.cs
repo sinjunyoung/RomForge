@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using Common.Localization;
 using WiiGC.Core.Models;
 using WiiGC.Core.Models.Wii;
 
@@ -64,7 +65,7 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
         int startEntry = FindPartitionDataEntry(partition, groupStartSector);
 
         if (startEntry < 0)
-            throw new InvalidDataException("RVZ/WIA 파티션 데이터 엔트리를 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionDataEntryNotFound);
 
         for (int i = startEntry; i < partition.DataEntries.Length && remaining > 0; i++)
         {
@@ -80,13 +81,13 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
                 continue;
 
             if (dataOffset > offset)
-                throw new InvalidDataException("RVZ/WIA 데이터 영역 사이에 빈 구간이 있습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzGapBetweenDataRegions);
 
             ReadFromGroups(context, ref offset, ref remaining, context.Decrypted, ref position, _partitionChunkSize, Layout.BlockDataSize, dataOffset, dataSize, entry.GroupIndex, entry.GroupCount, _partitionExceptionLists, context.Exceptions);
         }
 
         if (remaining != 0)
-            throw new InvalidDataException("RVZ/WIA 파티션 데이터 그룹이 부족합니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzPartitionDataGroupsMissing);
 
         if (position < context.Decrypted.Length)
             Array.Clear(context.Decrypted, position, context.Decrypted.Length - position);
@@ -126,7 +127,7 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
             return;
 
         if (offset < dataOffset)
-            throw new InvalidDataException("RVZ/WIA 데이터 영역 사이에 빈 구간이 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzGapBetweenDataRegions);
 
         long skipped = dataOffset % sectorSize;
 
@@ -140,7 +141,7 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
             long totalGroupIndex = groupIndex + i;
 
             if ((ulong)totalGroupIndex >= (ulong)_file.Groups.Length)
-                throw new InvalidDataException("RVZ/WIA 그룹 인덱스가 범위를 벗어났습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzGroupIndexOutOfRange);
 
             var group = _file.Groups[totalGroupIndex];
             long groupOffsetInData = i * chunkSize;
@@ -149,7 +150,7 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
             long bytesToRead = Math.Min(thisChunkSize - offsetInGroup, size);
 
             if (offsetInGroup < 0 || bytesToRead <= 0)
-                throw new InvalidDataException("RVZ/WIA 그룹 오프셋이 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrRvzGroupOffsetInvalid);
 
             if (group.DataSize == 0)
                 Array.Clear(destination, destinationPosition, (int)bytesToRead);
@@ -165,14 +166,14 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
                     int additional = (int)(groupOffsetInData % Layout.GroupDataSize / Layout.BlockDataSize * Layout.BlockHeaderSize);
 
                     if ((uint)listIndex >= (uint)chunk.ExceptionLists.Length)
-                        throw new InvalidDataException("RVZ/WIA 해시 예외 목록 인덱스가 올바르지 않습니다.");
+                        throw new InvalidDataException(Loc.S.ErrRvzHashExceptionIndexInvalid);
 
                     foreach (var exception in chunk.ExceptionLists[listIndex])
                     {
                         int adjusted = exception.Offset + additional;
 
                         if ((uint)adjusted > ushort.MaxValue)
-                            throw new InvalidDataException("RVZ/WIA 해시 예외 오프셋이 올바르지 않습니다.");
+                            throw new InvalidDataException(Loc.S.ErrRvzHashExceptionOffsetInvalid);
 
                         exceptions.Add(new HashException((ushort)adjusted, exception.Hash));
                     }
@@ -191,7 +192,7 @@ internal sealed class RvzGroupReader<TContext> where TContext : RvzWorkerContext
         int compressedSize = group.DataSize;
 
         if (fileOffset < 0 || compressedSize < 0 || fileOffset > _file.FileLength - compressedSize)
-            throw new InvalidDataException("RVZ/WIA 그룹 위치가 파일 범위를 벗어났습니다.");
+            throw new InvalidDataException(Loc.S.ErrRvzGroupPositionOutOfFile);
 
         context.EnsureInput(compressedSize);
         RvzIo.ReadExactly(_handle, context.Input.AsSpan(0, compressedSize), fileOffset);

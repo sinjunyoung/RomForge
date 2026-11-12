@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Models.Wii;
 
 namespace WiiGC.Core.Services.Wii;
@@ -30,13 +31,13 @@ internal sealed class LayoutBuilder
     public static void EnsureAnyApplied(IReadOnlyList<(string Path, bool Found)> resolved)
     {
         if (resolved.Count > 0 && resolved.All(r => !r.Found))
-            throw new InvalidDataException($"패치 파일이 이 디스크에 하나도 없습니다 (총 {resolved.Count}개). 다른 게임이거나 다른 버전용 패치일 수 있습니다: {string.Join(", ", resolved.Take(3).Select(r => r.Path))}");
+            throw new InvalidDataException(Loc.S.ErrPatchFilesNotOnDisc(resolved.Count, string.Join(", ", resolved.Take(3).Select(r => r.Path))));
     }
 
     public static void EnsureFileSize(long size, string path)
     {
         if (size > uint.MaxValue)
-            throw new InvalidDataException($"파일이 너무 큽니다 (4GB 미만이어야 합니다): {path}");
+            throw new InvalidDataException(Loc.S.ErrFileTooLargeUnder4Gb(path));
     }
 
     public void PlaceFile(FstNode node, long size, string path)

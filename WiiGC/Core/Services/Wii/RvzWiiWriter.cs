@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32.SafeHandles;
+using Common.Localization;
 using static WiiGC.Core.Services.RvzHeaderWriter;
 using System.Buffers.Binary;
 using System.Security.Cryptography;
@@ -47,7 +48,7 @@ internal sealed class RvzWiiWriter
         bool powerOfTwo = chunkSize > 0 && (chunkSize & (chunkSize - 1)) == 0;
 
         if (!powerOfTwo || chunkSize < Layout.BlockTotalSize || chunkSize > Layout.GroupTotalSize)
-            throw new ArgumentOutOfRangeException(nameof(chunkSize), "Wii 압축은 32KiB에서 2MiB 사이의 2의 거듭제곱 청크 크기만 지원합니다.");
+            throw new ArgumentOutOfRangeException(nameof(chunkSize), Loc.S.ErrWiiChunkSizeRange);
 
         _input = input;
         _output = output;
@@ -62,7 +63,7 @@ internal sealed class RvzWiiWriter
         long isoSize = _input.Length;
 
         if (isoSize <= DiscHeaderSize)
-            throw new InvalidDataException("디스크 이미지가 너무 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrDiscImageTooSmall);
 
         byte[] discHeader = new byte[DiscHeaderSize];
 
@@ -147,7 +148,7 @@ internal sealed class RvzWiiWriter
                 }
 
                 if (bytesWritten >> 2 > uint.MaxValue)
-                    throw new InvalidDataException("RVZ 파일이 너무 큽니다.");
+                    throw new InvalidDataException(Loc.S.ErrRvzFileTooLarge);
 
                 groups[index] = new GroupEntry((uint)(bytesWritten >> 2), result.DataSizeField, result.PackedSize);
 

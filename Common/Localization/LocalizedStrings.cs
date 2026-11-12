@@ -867,4 +867,186 @@ public abstract class LocalizedStrings
     public abstract string ErrFileNameTableExceeded { get; }
     public abstract string ErrIvfcLevelSizeMismatch(object arg0, object arg1, object arg2);
     public abstract string ErrRomfsDataLengthMismatch(object arg0, object arg1);
+
+    public abstract string RegionEuropePal { get; }
+    public abstract string LabelMakerCode(object arg0);
+    public abstract string MsgPatchSpecifyDiscToVerify { get; }
+    public abstract string MsgPatchDiscMatches { get; }
+    public abstract string MsgPatchDiscGameIdMismatch { get; }
+    public abstract string LabelWarningsCountShownInLog(object arg0);
+    public abstract string LabelTargetGameId(object arg0);
+    public abstract string LabelReplacementFiles(object arg0);
+    public abstract string LabelWarningValue(object arg0);
+    public abstract string ErrUnsupportedPatchFormatWii { get; }
+    public abstract string MsgPatchPathMustBeFolderZip7zXml { get; }
+    public abstract string LogUnsupportedPatchFormatNamed(object arg0);
+    public abstract string ErrUnsafePathInArchive(object arg0);
+    public abstract string ErrUnsafePathInDisc(object arg0);
+    public abstract string FilterWiiDiscFiles { get; }
+    public abstract string DialogSelectWiiDiscFile { get; }
+    public abstract string LabelWiiDisc { get; }
+    public abstract string DialogSelectSourceWiiDisc { get; }
+    public abstract string DialogSelectRiivolutionPatchFolder { get; }
+    public abstract string DialogSelectRiivolutionPatch { get; }
+    public abstract string FilterRiivolutionPatch { get; }
+    public abstract string LogUnpackStartingTo(object arg0);
+    public abstract string LogFilesUnpackedCount(object arg0);
+    public abstract string LogRepackStartTarget(object arg0);
+    public abstract string LogStreamingRepackStartTarget(object arg0);
+    public abstract string LogReplaced(object arg0);
+    public abstract string LogNotInDisc(object arg0);
+    public abstract string LogPatchResultSummary(object arg0, object arg1, object arg2);
+    public abstract string LogDiscInfoReadFailed(object arg0);
+    public abstract string MsgArchiveOpenFailed { get; }
+    public abstract string LogPatchInfoReadWii(object arg0, object arg1);
+    public abstract string LogPasswordInputCancelled { get; }
+    public abstract string ErrSelectSourceDiscFile { get; }
+    public abstract string ErrWiiDiscInfoUnreadable { get; }
+    public abstract string ErrPatchGameIdMismatch(object arg0, object arg1);
+    public abstract string ErrUnpackDataOldOrCorrupt { get; }
+    public abstract string LogUnpackFolderInfoReadFailed(object arg0);
+    public abstract string ErrUnpackFolderInfoUnreadable { get; }
+    public abstract string WorkTypeConvert { get; }
+    public abstract string WorkTypeDecompress { get; }
+    public abstract string WorkTypeRecompress { get; }
+    public abstract string LogSkipUnsupportedFormat(object arg0);
+    public abstract string LogWorkStart(object arg0, object arg1);
+    public abstract string LogWorkCancelled(object arg0, object arg1);
+    public abstract string LogWorkFailedCode(object arg0, object arg1);
+    public abstract string LogWorkDone(object arg0, object arg1);
+    public abstract string ErrLzmaPropsSize { get; }
+    public abstract string ErrLzmaPropsInvalid { get; }
+    public abstract string ErrLzmaStreamHeaderInvalid { get; }
+    public abstract string ErrLzmaDataInvalid { get; }
+    public abstract string ErrLzmaDistanceInvalid { get; }
+    public abstract string ErrLzmaDataTooShort { get; }
+    public abstract string ErrLzmaDataTruncated { get; }
+    public abstract string ErrDiscImageTooSmall { get; }
+    public abstract string ErrNotGcOrWiiDisc { get; }
+    public abstract string ErrNotGameCubeDisc { get; }
+    public abstract string ErrDecompressedLargerThanExpected { get; }
+    public abstract string ErrRvzChunkTooLarge { get; }
+    public abstract string ErrRvzHashExceptionListInvalid { get; }
+    public abstract string ErrRvzPackSizeMismatch { get; }
+    public abstract string ErrRvzChunkSizeMismatch { get; }
+    public abstract string ErrBzip2RvzUnsupported { get; }
+    public abstract string ErrLzma2RvzUnsupported { get; }
+    public abstract string ErrUnsupportedRvzCompression(object arg0);
+    public abstract string ErrRvzRegionsNotContiguous(object arg0, object arg1);
+    public abstract string ErrRvzDataNotFilled { get; }
+    public abstract string ErrRvzSourceGroupsMissing { get; }
+    public abstract string ErrRvzPartitionSectorRangeInvalid { get; }
+    public abstract string ErrRvzFileTooSmall { get; }
+    public abstract string ErrNotFormatFile(object arg0);
+    public abstract string ErrUnsupportedFormatVersion(object arg0, object arg1);
+    public abstract string ErrRvzHeader1HashMismatch { get; }
+    public abstract string ErrRvzHeader2HashMismatch { get; }
+    public abstract string ErrRvzPartitionTableHashMismatch { get; }
+    public abstract string ErrFileSizeDiffersFromHeader(object arg0);
+    public abstract string ErrRvzHeader2SizeInvalid { get; }
+    public abstract string ErrRvzCompressorDataSizeInvalid { get; }
+    public abstract string ErrRvzChunkSizeInvalidValue(object arg0);
+    public abstract string ErrWiaZstdSpecified { get; }
+    public abstract string ErrRvzPartitionEntrySizeZero { get; }
+    public abstract string ErrRvzPartitionTablePositionInvalid { get; }
+    public abstract string ErrRvzTablePositionInvalid { get; }
+    public abstract string ErrRvzTableDecompressedSizeInvalid { get; }
+    public abstract string ErrRvzPartitionDataEntryNotFound { get; }
+    public abstract string ErrRvzGapBetweenDataRegions { get; }
+    public abstract string ErrRvzPartitionDataGroupsMissing { get; }
+    public abstract string ErrRvzGroupIndexOutOfRange { get; }
+    public abstract string ErrRvzGroupOffsetInvalid { get; }
+    public abstract string ErrRvzHashExceptionIndexInvalid { get; }
+    public abstract string ErrRvzHashExceptionOffsetInvalid { get; }
+    public abstract string ErrRvzGroupPositionOutOfFile { get; }
+    public abstract string ErrZstdLevelOutOfRange { get; }
+    public abstract string ErrRvzFileEndedEarly { get; }
+    public abstract string ErrRvzPackDataInvalid { get; }
+    public abstract string ErrRvzPackResultTooLarge { get; }
+    public abstract string ErrRvzPackSeedInvalid { get; }
+    public abstract string ErrRvzPackResultTooSmall { get; }
+    public abstract string ErrRvzNotWiiForWbfs { get; }
+    public abstract string ErrHeaderInvalid(object arg0);
+    public abstract string ErrGczBlockCountShort { get; }
+    public abstract string ErrGczHeaderLargerThanFile { get; }
+    public abstract string ErrGczDataLargerThanFile { get; }
+    public abstract string ErrGczReadOutOfRange { get; }
+    public abstract string ErrGczBlockHashMismatch(object arg0);
+    public abstract string ErrGczBlockUncompressedSize(object arg0);
+    public abstract string ErrGczBlockDecompressedSize(object arg0);
+    public abstract string ErrGczBlockPointerInvalid { get; }
+    public abstract string ErrGczUncompressedBlockSizeInvalid { get; }
+    public abstract string ErrGczCompressedBlockTooLarge { get; }
+    public abstract string ErrRvzChunkSizeInvalid { get; }
+    public abstract string ErrTooManyGroups { get; }
+    public abstract string ErrRvzFileTooLarge { get; }
+    public abstract string ErrWiiCompressionUnsupported { get; }
+    public abstract string ErrWiiChunkSizeRange { get; }
+    public abstract string ErrDiscHeaderUnreadable { get; }
+    public abstract string ErrNotWiiDisc { get; }
+    public abstract string ErrFstPositionOrSizeInvalid { get; }
+    public abstract string ErrUnpackMetaMissing { get; }
+    public abstract string ErrMetaSizeInvalid { get; }
+    public abstract string ErrMetaTmdCertSizeMismatch { get; }
+    public abstract string ErrMetaPartitionHeaderOffsetInvalid { get; }
+    public abstract string ErrDiscReadOutOfRange { get; }
+    public abstract string ErrUnpackFolderInvalid { get; }
+    public abstract string ErrBootBinSize { get; }
+    public abstract string ErrBi2BinSize { get; }
+    public abstract string ErrApploaderSizeInvalid { get; }
+    public abstract string ErrMainDolSizeInvalid { get; }
+    public abstract string ErrDolSizeInvalid { get; }
+    public abstract string ErrApploaderOverlapsDol { get; }
+    public abstract string ErrFilesFolderEmpty { get; }
+    public abstract string ErrFstSizeInvalid { get; }
+    public abstract string ErrFstEntryCountInvalid { get; }
+    public abstract string ErrFstNameOffsetInvalid { get; }
+    public abstract string ErrFstDirRangeInvalid { get; }
+    public abstract string ErrFstDirNestingTooDeep { get; }
+    public abstract string ErrFstDirStructureInvalid { get; }
+    public abstract string ErrFstNameAreaTooLarge { get; }
+    public abstract string ErrWiiGroupBufferSizeInvalid { get; }
+    public abstract string ErrWiiPartitionDataOverlap { get; }
+    public abstract string ErrPartitionExceedsOriginalArea { get; }
+    public abstract string ErrGamePartitionNotFound { get; }
+    public abstract string ErrPartitionExceedsH3Capacity { get; }
+    public abstract string ErrWiiPartitionNotFound { get; }
+    public abstract string ErrWiiIsoOnlyForWbfs { get; }
+    public abstract string ErrWiiDiscMaxSizeExceeded { get; }
+    public abstract string ErrNoDataToConvert { get; }
+    public abstract string ErrUnsupportedWiiPartitionLayout { get; }
+    public abstract string ErrWiiPartitionBootInfoInvalid { get; }
+    public abstract string ErrWiiPartitionCertOffsetInvalid { get; }
+    public abstract string ErrPatchFilesNotOnDisc(object arg0, object arg1);
+    public abstract string ErrFileTooLargeUnder4Gb(object arg0);
+    public abstract string ErrWiiPartitionHeaderOffsetInvalid { get; }
+    public abstract string ErrPartitionReadOutOfRange { get; }
+    public abstract string ErrNoFilesToReplace { get; }
+    public abstract string ErrWiiPartitionLayoutInvalid { get; }
+    public abstract string ErrNotRiivolutionXml { get; }
+    public abstract string WarnIdRegionNotChecked { get; }
+    public abstract string ErrPatchReferencedFilesMissing(object arg0, object arg1);
+    public abstract string WarnUnsupportedElementCount(object arg0, object arg1);
+    public abstract string ErrRiivolutionXmlOrFolderNotFound { get; }
+    public abstract string ErrRiivolutionXmlNotInFolder { get; }
+    public abstract string ErrMultipleXmlSpecifyOne(object arg0, object arg1);
+    public abstract string WarnOptionChoiceOutOfRange(object arg0, object arg1);
+    public abstract string WarnOptionReferencesMissingPatch(object arg0, object arg1);
+    public abstract string WarnFileEntryMissingDiscOrExternal { get; }
+    public abstract string WarnFolderEntryMissingDiscOrExternal { get; }
+    public abstract string WarnPartialOverwriteUnsupported(object arg0);
+    public abstract string WarnDuplicateDiscPathUsingLast(object arg0);
+    public abstract string ErrXmlPathOutsideSdRoot(object arg0);
+    public abstract string ErrWiiTicketSizeInvalid { get; }
+    public abstract string ErrUnsupportedWiiCommonKeyIndex(object arg0);
+    public abstract string ErrTmdFakeSignFailed { get; }
+    public abstract string ErrWbfsSectorSizeInvalid { get; }
+    public abstract string ErrWbfsNoDisc { get; }
+    public abstract string ErrWbfsBlockCountInvalid { get; }
+    public abstract string ErrWbfsWlbaOutOfFile { get; }
+    public abstract string ErrWbfsReadOutOfRange { get; }
+    public abstract string ErrWbfsFileEndedEarly { get; }
+    public abstract string ErrWbfsClusterOutOfFile { get; }
+    public abstract string ErrWiaReadOutOfRange { get; }
+    public abstract string ErrWiaReadProgressFailed { get; }
 }

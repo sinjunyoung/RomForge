@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiGC.Core.Interfaces;
 using WiiGC.Core.Models.Wii;
 
@@ -136,7 +137,7 @@ internal static class UsageScanner
         }
 
         if (fstOffset4 > dolOffset4 && dolSize > ((long)fstOffset4 - dolOffset4) << 2)
-            throw new InvalidDataException("MAIN.DOL 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrMainDolSizeInvalid);
 
         MarkPart(used, spec, dolOffset4, dolSize);
 
