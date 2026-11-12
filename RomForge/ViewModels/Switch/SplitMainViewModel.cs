@@ -272,7 +272,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             await AnalyzeAsync(row);
 
             if (!row.Analyzed)
-                AppendLog($"{row.Name}: 타이틀 정보를 읽지 못해 건너뜁니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogSplitSkipNoTitleInfo(row.Name), LogLevel.Error);
         }
 
         var jobs = new List<(string FilePath, IReadOnlySet<string> TitleIds)>();
@@ -287,7 +287,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 
         if (jobs.Count == 0)
         {
-            AppendLog("분리할 타이틀을 선택하세요.", LogLevel.Error);
+            AppendLog(Loc.S.ErrSelectTitleToSplit, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -337,7 +337,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                AppendLog("분리가 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogSplitCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)

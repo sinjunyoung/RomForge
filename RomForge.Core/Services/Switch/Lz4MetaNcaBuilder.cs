@@ -1,4 +1,5 @@
 ﻿using LibHac;
+using Common.Localization;
 using LibHac.Common;
 using LibHac.Common.Keys;
 using LibHac.Fs;
@@ -31,7 +32,7 @@ internal static class Lz4MetaNcaBuilder
             return data;
         }
 
-        throw new InvalidOperationException("Meta NCA에서 cnmt 파일을 찾을 수 없습니다.");
+        throw new InvalidOperationException(Loc.S.ErrMetaNcaCnmtNotFound);
     }
 
     public static (byte[] NcaId, long Size) BuildInto(Stream output, Nca sourceMeta, byte[] cnmt, ulong titleId, LibHac.Ncm.ContentMetaType titleType, KeySet keySet, CancellationToken ct)
@@ -40,7 +41,7 @@ internal static class Lz4MetaNcaBuilder
         int keyGenerationIndex = keyGeneration - 1;
 
         if (keyGenerationIndex >= keySet.KeyAreaKeys.Length)
-            throw new InvalidOperationException($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+            throw new InvalidOperationException(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
         var settings = new NcaGenerationOptions
         {

@@ -694,4 +694,105 @@ public abstract class LocalizedStrings
     public abstract string ErrNoExtractableContent { get; }
     public abstract string ErrSeekTableMismatch(object arg0, object arg1);
     public abstract string ErrMetadataTooLarge(object arg0);
+
+    public abstract string LogNoProcessableFiles { get; }
+    public abstract string LogItemAlreadyDoneSkipped(object arg0, object arg1, object arg2);
+    public abstract string LogBaseLz4Header(object arg0, object arg1, object arg2, object arg3);
+    public abstract string LogLz4Composition(object arg0, object arg1);
+    public abstract string LogFailedWithMessage(object arg0);
+    public abstract string LogFailedCount(object arg0);
+    public abstract string LogSkipOldVersion { get; }
+    public abstract string LogSkipUpdateAlone { get; }
+    public abstract string ErrOnlyNspNszXciXczSupported { get; }
+    public abstract string ErrNoApplicationOrDlcMeta { get; }
+    public abstract string LogLz4CompressStart(object arg0);
+    public abstract string LogSkipBaseWithUpdate { get; }
+    public abstract string ErrNoRomfsForLz4 { get; }
+    public abstract string LogSkipAlreadyLz4 { get; }
+    public abstract string ProgressLz4CompressingName(object arg0);
+    public abstract string LogLz4CompressDone(object arg0);
+    public abstract string ErrMetaNcaNotFound(object arg0);
+    public abstract string LogEntryNcaMissingSkipped(object arg0);
+    public abstract string LogEntryNoRomfsSkipped(object arg0);
+    public abstract string LogEntrySparseUnsupportedSkipped(object arg0);
+    public abstract string LogEntryAlreadyCompressedSkipped(object arg0);
+    public abstract string LogLz4NcaCompressing(object arg0, object arg1, object arg2, object arg3);
+    public abstract string LogConvertStartTo(object arg0, object arg1);
+    public abstract string NoteAssignedByArchiveName { get; }
+    public abstract string NoteAssignedAsGenericPatch { get; }
+    public abstract string DetailNoMatchingFolder(object arg0, object arg1);
+    public abstract string DetailAssignFailedNothingFound { get; }
+    public abstract string DetailAssignWarnUnrelatedFolders(object arg0, object arg1);
+    public abstract string LogPatchCoverage(object arg0, object arg1, object arg2);
+    public abstract string Lz4StatusCompressed { get; }
+    public abstract string Lz4EstimateFailed { get; }
+    public abstract string LabelNone { get; }
+    public abstract string LogUnpackFolderLoaded(object arg0);
+    public abstract string LogUnpackFolderItemRemoved { get; }
+    public abstract string LogPatchAssigned(object arg0);
+    public abstract string LogSomeProgramsUnpatched { get; }
+    public abstract string MsgPatchAssignFailedNoMatch(object arg0, object arg1, object arg2);
+    public abstract string MsgPatchAssignFailedNotFound(object arg0);
+    public abstract string MsgTitlePatchAssignFailed { get; }
+    public abstract string LogPatchAssignWarnGeneric(object arg0);
+    public abstract string LogPatchAssignInfoGeneric(object arg0);
+    public abstract string MsgBulkAssignSummary(object arg0, object arg1);
+    public abstract string MsgBulkAssignDetails(object arg0);
+    public abstract string LogBulkAssignFailed(object arg0);
+    public abstract string MsgTitleBulkAssignResult { get; }
+    public abstract string LogBulkAssignDone(object arg0);
+    public abstract string ErrUnsupportedConversion(object arg0, object arg1);
+    public abstract string LogMergeCancelled { get; }
+    public abstract string LogSplitCancelled { get; }
+    public abstract string LogStreamingConvertStart { get; }
+    public abstract string LogLinkingChdStreaming { get; }
+    public abstract string LogLinkingBinCueStreaming { get; }
+    public abstract string ErrChdHeaderUnreadable { get; }
+    public abstract string ErrProgramRomfsNotFound { get; }
+    public abstract string ErrSelectSourceSwitchFile { get; }
+    public abstract string ErrSelectCueChd { get; }
+    public abstract string ErrOnlyCueChdSupported { get; }
+    public abstract string ErrEnterGameName { get; }
+    public abstract string ErrSaturnGameUnsupported { get; }
+    public abstract string ErrUnpackedFolderEntry { get; }
+    public abstract string ErrBaseNotInList { get; }
+    public abstract string ErrBaseUpdateTitleMismatch { get; }
+    public abstract string RenameSummary(object arg0, object arg1);
+    public abstract string RenameSummarySkipped(object arg0, object arg1, object arg2);
+    public abstract string LogNoFilesToRename { get; }
+    public abstract string LogSkippedCountReasons(object arg0);
+    public abstract string LogRenameDone(object arg0);
+    public abstract string LogRenameDoneWithFailures(object arg0, object arg1);
+    public abstract string LogSplitSkipNoTitleInfo(object arg0);
+    public abstract string ErrSelectTitleToSplit { get; }
+    public abstract string MsgNoProdKeysTitle { get; }
+    public abstract string DialogSelectFileToRename { get; }
+    public abstract string LogSparseNotAddedToList(object arg0);
+    public abstract string MsgForcedLanguageSet(object arg0);
+    public abstract string MsgForcedLanguageCancelled { get; }
+    public abstract string MsgImageLoadFailed(object arg0);
+    public abstract string DialogSelectKoreanPatchRootFolder { get; }
+    public abstract string DialogSelectKoreanPatchRootArchive { get; }
+    public abstract string FilterArchiveFiles { get; }
+    public abstract string LogArchiveOpenError(object arg0);
+    public abstract string LogNoTitleInfoItems { get; }
+    public abstract string DialogSelectKoreanPatchFolderFor(object arg0);
+    public abstract string DialogSelectKoreanPatchArchiveFor(object arg0);
+    public abstract string DialogSelectGameFolder { get; }
+    public abstract string ErrInvalidKeyGeneration(object arg0);
+    public abstract string ErrMainNpdmNotFound { get; }
+    public abstract string ErrSparseNcaNeedsUpdate { get; }
+    public abstract string ErrNoKeys { get; }
+    public abstract string ErrMetaNcaCnmtNotFound { get; }
+    public abstract string ErrNcaIdHashSize { get; }
+    public abstract string ErrCnmtContentRecordNotFound { get; }
+    public abstract string ErrCnmtContentRecordLimit { get; }
+    public abstract string ErrCnmtSizeInvalid { get; }
+    public abstract string ErrCnmtRecordAreaOutOfRange { get; }
+    public abstract string ErrResolvedNameTooLong(object arg0, object arg1);
+    public abstract string ErrCueNotFoundInRomfs { get; }
+    public abstract string ErrChdTrackInfoUnreadable { get; }
+    public abstract string ErrChdOpenFailed(object arg0);
+    public abstract string ErrCueReferencedBinNotFound { get; }
+    public abstract string ErrBinFileMissing(object arg0);
 }

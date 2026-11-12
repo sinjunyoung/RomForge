@@ -1,4 +1,5 @@
 ﻿using Common;
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using NSW.HacPack.Models;
@@ -141,7 +142,7 @@ public static class Pfs0Builder
                 int allocatedSize = Math.Max(placeholderBytes.Length, 64);
 
                 if (resolvedBytes.Length > allocatedSize)
-                    throw new InvalidOperationException($"확정된 파일명({resolvedName})이 예약된 공간({allocatedSize}바이트)보다 깁니다.");
+                    throw new InvalidOperationException(Loc.S.ErrResolvedNameTooLong(resolvedName, allocatedSize));
 
                 byte[] writeBuffer = new byte[allocatedSize];
 

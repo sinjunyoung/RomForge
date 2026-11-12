@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using Microsoft.Win32;
 using NSW.Core;
@@ -81,7 +82,7 @@ public partial class RepackListControl : SwitchListControlBase
 
         var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            Description = "한글패치 루트 폴더 선택 (titleId 이름의 폴더 또는 titleId.zip/titleId.7z 파일을 자동 매칭합니다)",
+            Description = Loc.S.DialogSelectKoreanPatchRootFolder,
             UseDescriptionForTitle = true
         };
 
@@ -102,8 +103,8 @@ public partial class RepackListControl : SwitchListControlBase
 
         var dlg = new OpenFileDialog
         {
-            Title = "한글패치 루트 압축파일 선택 (안에서 titleId 이름의 폴더를 자동 매칭합니다)",
-            Filter = "압축파일 (*.zip;*.7z)|*.zip;*.7z"
+            Title = Loc.S.DialogSelectKoreanPatchRootArchive,
+            Filter = $"{Loc.S.FilterArchiveFiles} (*.zip;*.7z)|*.zip;*.7z"
         };
 
         if (dlg.ShowDialog() != true)
@@ -123,7 +124,7 @@ public partial class RepackListControl : SwitchListControlBase
         }
         catch (Exception ex)
         {
-            _viewModel.AppendLog($"압축파일을 여는 중 오류가 발생했습니다: {ex.Message}", LogLevel.Error);
+            _viewModel.AppendLog(Loc.S.LogArchiveOpenError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -134,7 +135,7 @@ public partial class RepackListControl : SwitchListControlBase
 
         if (targets.Count == 0)
         {
-            _viewModel.AppendLog("타이틀 정보가 있는 항목이 없습니다.", LogLevel.Info);
+            _viewModel.AppendLog(Loc.S.LogNoTitleInfoItems, LogLevel.Info);
             return null;
         }
 
@@ -163,7 +164,7 @@ public partial class RepackListControl : SwitchListControlBase
 
         var dlg = new System.Windows.Forms.FolderBrowserDialog
         {
-            Description = $"{file.TitleName}에 적용할 한글패치 폴더 선택",
+            Description = Loc.S.DialogSelectKoreanPatchFolderFor(file.TitleName),
             UseDescriptionForTitle = true
         };
 
@@ -178,8 +179,8 @@ public partial class RepackListControl : SwitchListControlBase
 
         var dlg = new OpenFileDialog
         {
-            Title = $"{file.TitleName}에 적용할 한글패치 압축파일 선택",
-            Filter = "압축파일 (*.zip;*.7z)|*.zip;*.7z"
+            Title = Loc.S.DialogSelectKoreanPatchArchiveFor(file.TitleName),
+            Filter = $"{Loc.S.FilterArchiveFiles} (*.zip;*.7z)|*.zip;*.7z"
         };
 
         if (dlg.ShowDialog() != true)
@@ -232,7 +233,7 @@ public partial class RepackListControl : SwitchListControlBase
         }
         catch (Exception ex)
         {
-            _viewModel.AppendLog($"압축파일을 여는 중 오류가 발생했습니다: {ex.Message}", LogLevel.Error);
+            _viewModel.AppendLog(Loc.S.LogArchiveOpenError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return false;
         }

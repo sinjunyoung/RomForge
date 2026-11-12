@@ -47,7 +47,7 @@ public class SwitchListControlBase : UserControl
     {
         var dlg = new VistaFolderBrowserDialog
         {
-            Description = "게임 폴더 선택",
+            Description = Loc.S.DialogSelectGameFolder,
             UseDescriptionForTitle = true
         };
 

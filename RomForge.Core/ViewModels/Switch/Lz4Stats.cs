@@ -1,4 +1,6 @@
-﻿using RomForge.Core.Models.Switch;
+﻿using Common.Localization;
+
+using RomForge.Core.Models.Switch;
 
 namespace RomForge.Core.ViewModels.Switch;
 
@@ -15,7 +17,7 @@ public class Lz4Stats : ViewModelBase
     public void MarkAnalyzing()
     {
         EstimatedRatio = double.NegativeInfinity;
-        EstimatedRatioText = "분석 중...";
+        EstimatedRatioText = Loc.S.StatusAnalyzing;
     }
 
     public void ApplyEstimate(Lz4FileEstimate estimate)
@@ -24,7 +26,7 @@ public class Lz4Stats : ViewModelBase
         EstimatedRatioText = estimate.Kind switch
         {
             Lz4EstimateKind.Estimated => FormatRatio(estimate.SavedFraction),
-            Lz4EstimateKind.AlreadyCompressed => "압축됨",
+            Lz4EstimateKind.AlreadyCompressed => Loc.S.Lz4StatusCompressed,
             _ => "-"
         };
     }
@@ -32,7 +34,7 @@ public class Lz4Stats : ViewModelBase
     public void ApplyEstimateFailed()
     {
         EstimatedRatio = double.NegativeInfinity;
-        EstimatedRatioText = "추정 실패";
+        EstimatedRatioText = Loc.S.Lz4EstimateFailed;
     }
 
     public void ApplyActual(long inputBytes, long outputBytes, string compressedSizeText)

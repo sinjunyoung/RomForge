@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Interop;
+using Common.Localization;
 using CHD.Core.Interop.Enums;
 using CHD.Core.Models;
 using CHD.Core.Services;
@@ -22,7 +23,7 @@ public static partial class SaturnRomfsInjector
 
     public static void Inject(VirtualRomfs romfs, string discPath, bool wideScreen, double volume)
     {
-        string oldCue = romfs.EnumerateRelativeFiles().FirstOrDefault(p => p.EndsWith(".cue", StringComparison.OrdinalIgnoreCase)) ?? throw new FileNotFoundException("romfs 안에서 cue 파일을 찾을 수 없습니다.");
+        string oldCue = romfs.EnumerateRelativeFiles().FirstOrDefault(p => p.EndsWith(".cue", StringComparison.OrdinalIgnoreCase)) ?? throw new FileNotFoundException(Loc.S.ErrCueNotFoundInRomfs);
         string dir = GetDirectory(oldCue);
         string cueFileName = oldCue[dir.Length..];
         string baseName = Path.GetFileNameWithoutExtension(cueFileName);
@@ -62,7 +63,7 @@ public static partial class SaturnRomfsInjector
         var info = ChdInfoReader.ReadChdInfo(chdPath);
 
         if (info.Tracks == null || info.TrackCount <= 0)
-            throw new InvalidDataException("CHD에서 트랙 정보를 읽을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrChdTrackInfoUnreadable);
 
         long length = info.Tracks.Take(info.TrackCount).Sum(t => (long)t.Frames * RawSectorSize);
         string binName = baseName + ".bin";
@@ -98,7 +99,7 @@ public static partial class SaturnRomfsInjector
         if (error != ChdrError.CHDERR_NONE)
         {
             wrapper.Dispose();
-            throw new IOException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(error)}");
+            throw new IOException(Loc.S.ErrChdOpenFailed(LibChdrWrapper.GetErrorString(error)));
         }
 
         return new ChdReadStream(wrapper, length, info, true);
@@ -109,12 +110,12 @@ public static partial class SaturnRomfsInjector
         var bins = ConversionSource.ParseBinsFromCue(cuePath);
 
         if (bins.Count == 0)
-            throw new FileNotFoundException("입력한 CUE에서 참조하는 BIN 파일을 찾을 수 없습니다.");
+            throw new FileNotFoundException(Loc.S.ErrCueReferencedBinNotFound);
 
         foreach (string bin in bins)
         {
             if (!File.Exists(bin))
-                throw new FileNotFoundException($"BIN 파일이 존재하지 않습니다: {bin}");
+                throw new FileNotFoundException(Loc.S.ErrBinFileMissing(bin));
 
             string binPath = bin;
 

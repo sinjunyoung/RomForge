@@ -103,11 +103,11 @@ public class GameFile(string filePath) : FileItemBase(filePath, ItemStatus.Waiti
 
     public string? PatchPassword { get; set => SetProperty(ref field, value); }
 
-    public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
+    public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? $"({Loc.S.LabelNone})" : PatchPath;
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
-    public bool IsKeyMissing => FileType == "키 없음";
+    public bool IsKeyMissing => FileType == Loc.S.StatusNoKey;
 
     public Brush TypeBackground
     {

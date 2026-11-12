@@ -90,7 +90,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
             {
                 canceled = true;
 
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
 
                 foreach (var file in gameFiles.Where(f => f.State is not (ItemStatus.Done or ItemStatus.Failed or ItemStatus.Skipped)))
                 {
@@ -199,7 +199,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
                 if (rows.Count == 1)
                     row.Lz4.ApplyActual(row.FileSizeBytes, outputBytes, Utils.FormatFileSize(outputBytes));
                 else
-                    row.Lz4.ApplyActual(inputBytes, outputBytes, row == baseRow ? Utils.FormatFileSize(outputBytes) : "병합");
+                    row.Lz4.ApplyActual(inputBytes, outputBytes, row == baseRow ? Utils.FormatFileSize(outputBytes) : Loc.S.TabMerge);
             }
         });
     }

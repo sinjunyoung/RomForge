@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using Common.Localization;
+
+using System.IO;
 
 namespace RomForge.Core.Services.Switch;
 
@@ -38,7 +40,7 @@ internal static class CnmtRecordPatcher
     public static byte[] Replace(byte[] cnmt, byte[] oldNcaId, byte[] newNcaId, byte[] newHash, long newSize)
     {
         if (newNcaId.Length != 0x10 || newHash.Length != 0x20)
-            throw new ArgumentException("NcaId는 16바이트, Hash는 32바이트여야 합니다.");
+            throw new ArgumentException(Loc.S.ErrNcaIdHashSize);
 
         if (newSize < 0 || newSize > 0xFFFFFFFFFFFFL)
             throw new ArgumentOutOfRangeException(nameof(newSize));
@@ -62,13 +64,13 @@ internal static class CnmtRecordPatcher
             return result;
         }
 
-        throw new InvalidOperationException("cnmt에서 대상 Content 레코드를 찾을 수 없습니다.");
+        throw new InvalidOperationException(Loc.S.ErrCnmtContentRecordNotFound);
     }
 
     public static byte[] Add(byte[] cnmt, ContentRecord record)
     {
         if (record.NcaId.Length != 0x10 || record.Hash.Length != 0x20)
-            throw new ArgumentException("NcaId는 16바이트, Hash는 32바이트여야 합니다.");
+            throw new ArgumentException(Loc.S.ErrNcaIdHashSize);
 
         if (record.Size < 0 || record.Size > 0xFFFFFFFFFFFFL)
             throw new ArgumentOutOfRangeException(nameof(record));
@@ -76,7 +78,7 @@ internal static class CnmtRecordPatcher
         int start = GetRecordsStart(cnmt, out int count);
 
         if (count >= ushort.MaxValue)
-            throw new InvalidOperationException("cnmt Content 레코드 수가 한계를 넘었습니다.");
+            throw new InvalidOperationException(Loc.S.ErrCnmtContentRecordLimit);
 
         int insertIndex = count;
 
@@ -111,7 +113,7 @@ internal static class CnmtRecordPatcher
     private static int GetRecordsStart(byte[] cnmt, out int count)
     {
         if (cnmt.Length < HeaderSize)
-            throw new InvalidDataException("cnmt 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrCnmtSizeInvalid);
 
         int extendedHeaderSize = BitConverter.ToUInt16(cnmt, ExtendedHeaderSizeOffset);
 
@@ -120,7 +122,7 @@ internal static class CnmtRecordPatcher
         int start = HeaderSize + extendedHeaderSize;
 
         if (start + count * RecordSize > cnmt.Length)
-            throw new InvalidDataException("cnmt Content 레코드 영역이 파일 크기를 벗어납니다.");
+            throw new InvalidDataException(Loc.S.ErrCnmtRecordAreaOutOfRange);
 
         return start;
     }

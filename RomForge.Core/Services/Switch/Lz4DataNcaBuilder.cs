@@ -1,4 +1,5 @@
 ﻿using LibHac.Common.Keys;
+using Common.Localization;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.HacPack.Enums;
@@ -15,7 +16,7 @@ internal static class Lz4DataNcaBuilder
         int keyGenerationIndex = keyGeneration - 1;
 
         if (keyGenerationIndex >= keySet.KeyAreaKeys.Length)
-            throw new InvalidOperationException($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+            throw new InvalidOperationException(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
         var settings = new NcaGenerationOptions
         {

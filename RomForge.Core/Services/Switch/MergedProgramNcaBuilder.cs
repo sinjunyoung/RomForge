@@ -1,4 +1,5 @@
 ﻿using LibHac.Common.Keys;
+using Common.Localization;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.HacPack.Enums;
@@ -37,7 +38,7 @@ internal static class MergedProgramNcaBuilder
         int keyGenerationIndex = keyGeneration - 1;
 
         if (keyGenerationIndex >= keySet.KeyAreaKeys.Length)
-            throw new InvalidOperationException($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+            throw new InvalidOperationException(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
         var settings = new NcaGenerationOptions
         {
@@ -97,7 +98,7 @@ internal static class MergedProgramNcaBuilder
         for (int i = 0; i < 4; i++)
         {
             if (baseNca.SectionExists(i) && baseNca.GetFsHeader(i).ExistsSparseLayer())
-                throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
+                throw new InvalidOperationException(Loc.S.ErrSparseNcaNeedsUpdate);
         }
     }
 }

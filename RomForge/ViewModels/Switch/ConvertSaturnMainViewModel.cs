@@ -109,7 +109,7 @@ namespace RomForge.ViewModels.Switch
 
         private void BrowseCue()
         {
-            var dlg = new Microsoft.Win32.OpenFileDialog { Filter = "CUE/CHD 파일|*.cue;*.chd" };
+            var dlg = new Microsoft.Win32.OpenFileDialog { Filter = $"{Loc.S.FilterFilesOfType("CUE/CHD")}|*.cue;*.chd" };
 
             if (dlg.ShowDialog() == true)
                 CuePath = dlg.FileName;
@@ -117,7 +117,7 @@ namespace RomForge.ViewModels.Switch
 
         private void BrowseNsp()
         {
-            var dlg = new Microsoft.Win32.OpenFileDialog { Filter = "NSP/NSZ 파일|*.nsp;*.nsz" };
+            var dlg = new Microsoft.Win32.OpenFileDialog { Filter = $"{Loc.S.FilterFilesOfType("NSP/NSZ")}|*.nsp;*.nsz" };
 
             if (Path.GetDirectoryName(NspPath) is { Length: > 0 } directory && Directory.Exists(directory))
                 dlg.InitialDirectory = directory;
@@ -128,7 +128,7 @@ namespace RomForge.ViewModels.Switch
 
         private async Task BrowseWork()
         {
-            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
+            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectWorkFolder };
 
             if (dlg.ShowDialog() == true)
                 WorkPath = dlg.FolderName;
@@ -164,7 +164,7 @@ namespace RomForge.ViewModels.Switch
                 byte[] header;
 
                 if (string.Equals(Path.GetExtension(inputPath), ".chd", StringComparison.OrdinalIgnoreCase))
-                    header = await Task.Run(() => TryReadChdFirstSectorHeader(inputPath)) ?? throw new InvalidOperationException("CHD 헤더를 읽을 수 없습니다.");
+                    header = await Task.Run(() => TryReadChdFirstSectorHeader(inputPath)) ?? throw new InvalidOperationException(Loc.S.ErrChdHeaderUnreadable);
                 else
                 {
                     string cuePath = inputPath;
@@ -239,16 +239,16 @@ namespace RomForge.ViewModels.Switch
                 {
                     await RunConversionProcess(CancellationTokenSource.Token);
                     await SoundPlayer.PlayCompleteAsync();
-                    AppendLog($"완료! 총 소요: {_totalSw.Elapsed:mm\\:ss}", LogLevel.Ok);
+                    AppendLog(Loc.S.LogDoneTotalTime(_totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                 }
                 catch (OperationCanceledException)
                 {
-                    AppendLog($"작업이 취소되었습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                     await SoundPlayer.PlayCancelAsync();
                 }
                 catch (Exception ex)
                 {
-                    AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                     MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
@@ -300,7 +300,7 @@ namespace RomForge.ViewModels.Switch
                 if (!string.IsNullOrEmpty(SelectedSoundVolume) && double.TryParse(SelectedSoundVolume.TrimEnd('%'), out double parsedVal))
                     volumeMultiplier = parsedVal / 100.0;
 
-                Log("스트리밍 변환 시작...");
+                Log(Loc.S.LogStreamingConvertStart);
 
                 var request = new NSW.Core.Models.BuildRequest(NspPath, string.Empty, [], string.Empty, WorkPath)
                 {
@@ -321,11 +321,11 @@ namespace RomForge.ViewModels.Switch
         private NSW.HacPack.Models.GameMetadata? InjectSaturnDisc(NSW.Core.Models.UnpackResult unpackResult, double volumeMultiplier, Action<string> log)
         {
             if (unpackResult.VirtualRomfsPrograms.Count == 0)
-                throw new DirectoryNotFoundException("프로그램 romfs를 찾을 수 없습니다.");
+                throw new DirectoryNotFoundException(Loc.S.ErrProgramRomfsNotFound);
 
             byte idOffset = unpackResult.VirtualRomfsPrograms.Keys.Min();
 
-            log(string.Equals(Path.GetExtension(CuePath), ".chd", StringComparison.OrdinalIgnoreCase) ? "CHD를 스트리밍으로 연결 중..." : "BIN/CUE를 스트리밍으로 연결 중...");
+            log(string.Equals(Path.GetExtension(CuePath), ".chd", StringComparison.OrdinalIgnoreCase) ? Loc.S.LogLinkingChdStreaming : Loc.S.LogLinkingBinCueStreaming);
             SaturnRomfsInjector.Inject(unpackResult.VirtualRomfsPrograms[idOffset], CuePath, WideScreen, volumeMultiplier);
 
             if (!unpackResult.VirtualParts.TryGetValue(idOffset, out var parts) || parts.Control == null)
@@ -372,13 +372,13 @@ namespace RomForge.ViewModels.Switch
 
             if (string.IsNullOrEmpty(NspPath) || !File.Exists(NspPath))
             {
-                errorMsg = "원본 스위치 파일(NSP/NSZ)을 선택하세요.";
+                errorMsg = Loc.S.ErrSelectSourceSwitchFile;
                 return false;
             }
 
             if (string.IsNullOrEmpty(CuePath) || !File.Exists(CuePath))
             {
-                errorMsg = "CUE/CHD 파일을 선택하세요.";
+                errorMsg = Loc.S.ErrSelectCueChd;
                 return false;
             }
 
@@ -386,19 +386,19 @@ namespace RomForge.ViewModels.Switch
 
             if (ext != ".cue" && ext != ".chd")
             {
-                errorMsg = "CUE 또는 CHD 파일만 지원합니다.";
+                errorMsg = Loc.S.ErrOnlyCueChdSupported;
                 return false;
             }
 
             if (string.IsNullOrEmpty(GameTitle))
             {
-                errorMsg = "게임명을 입력하세요.";
+                errorMsg = Loc.S.ErrEnterGameName;
                 return false;
             }
 
             if (this.GameId == "T-1315G")
             {
-                errorMsg = "통곡 그리고...는 현재 버전에서는 지원하지 않습니다.";
+                errorMsg = Loc.S.ErrSaturnGameUnsupported;
                 return false;
             }
 

@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using LibHac.Tools.FsSystem;
 using LibHac.Tools.FsSystem.NcaUtils;
 using NSW.Core;
@@ -56,7 +57,7 @@ public sealed class Lz4RomEstimator : BaseRomEstimator
     {
         return Task.Run<(Stream Stream, long TotalSize, bool IsSeekable)>(() =>
         {
-            var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException("키가 없습니다.");
+            var keySet = KeySetProvider.Instance.KeySet ?? throw new InvalidOperationException(Loc.S.ErrNoKeys);
             var streams = new List<Stream>();
 
             foreach (var candidate in Lz4RomSources.Enumerate(keySet.Clone(), inputPath, _disposables))

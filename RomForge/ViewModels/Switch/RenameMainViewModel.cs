@@ -132,7 +132,7 @@ public class RenameMainViewModel : ToolTabViewModel
         int ready = plans.Count(p => p.State == RenameState.Ready);
         int skipped = CountSkipped(plans);
 
-        Summary = skipped == 0 ? $"변경 예정 {ready}개 / 전체 {plans.Count}개" : $"변경 예정 {ready}개 / 전체 {plans.Count}개 (건너뜀 {skipped}개)";
+        Summary = skipped == 0 ? Loc.S.RenameSummary(ready, plans.Count) : Loc.S.RenameSummarySkipped(ready, plans.Count, skipped);
     }
 
     public async Task RunAsync()
@@ -152,7 +152,7 @@ public class RenameMainViewModel : ToolTabViewModel
 
         if (ready.Count == 0)
         {
-            AppendLog("변경할 파일이 없습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogNoFilesToRename, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -160,7 +160,7 @@ public class RenameMainViewModel : ToolTabViewModel
         int skipped = CountSkipped(plans);
 
         if (skipped > 0)
-            AppendLog($"건너뜀 {skipped}개 (정보 없음 / 이름 오류 / 중복 / 대상 파일 존재)");
+            AppendLog(Loc.S.LogSkippedCountReasons(skipped));
 
         _cts.Dispose();
         _cts = new CancellationTokenSource();
@@ -192,17 +192,17 @@ public class RenameMainViewModel : ToolTabViewModel
 
                 if (token.IsCancellationRequested)
                 {
-                    AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                     await SoundPlayer.PlayCancelAsync();
                 }
                 else if (failed == 0)
                 {
-                    AppendLog($"파일명 변경 완료: {succeeded}개", LogLevel.Ok);
+                    AppendLog(Loc.S.LogRenameDone(succeeded), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                 }
                 else
                 {
-                    AppendLog($"파일명 변경 완료: 성공 {succeeded}개 / 실패 {failed}개", LogLevel.Error);
+                    AppendLog(Loc.S.LogRenameDoneWithFailures(succeeded, failed), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                 }
             }

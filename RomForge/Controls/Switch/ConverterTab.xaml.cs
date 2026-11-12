@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using Microsoft.Win32;
 using RomForge.Core;
 using RomForge.Core.Models.Switch;
@@ -70,9 +71,9 @@ public partial class ConverterTab : UserControl
 
         var dialog = new OpenFileDialog
         {
-            Title = "변환할 파일 선택",
+            Title = Loc.S.DialogSelectFileToConvert,
             Multiselect = true,
-            Filter = "Switch 파일 (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|모든 파일|*.*"
+            Filter = $"{Loc.S.FilterFilesOfType("Switch")} (*.nsp;*.xci;*.nsz;*.xcz)|*.nsp;*.xci;*.nsz;*.xcz|{Loc.S.FilterAllFiles}|*.*"
         };
 
         if (dialog.ShowDialog() != true) 
@@ -88,7 +89,7 @@ public partial class ConverterTab : UserControl
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

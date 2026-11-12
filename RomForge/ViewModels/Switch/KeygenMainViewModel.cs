@@ -51,7 +51,7 @@ public class KeygenMainViewModel : ProgressToolTabViewModel
             }
             catch (OperationCanceledException)
             {
-                AppendLog($"작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)

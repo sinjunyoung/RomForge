@@ -34,7 +34,7 @@ public class SwitchMainViewModel : MultiToolTabViewModel
     {
         var keyFiles = AppConfig.Instance.KeyFiles;
 
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", "prod.keys 파일이 없습니다", Loc.S.MainErrNoKeys, [KeyFileItems.SwitchProdKeys(keyFiles)], () => KeysAvailable);
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/Switch.png", Loc.S.MsgNoProdKeysTitle, Loc.S.MainErrNoKeys, [KeyFileItems.SwitchProdKeys(keyFiles)], () => KeysAvailable);
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();
 
         Tools.Add(RepackVM);

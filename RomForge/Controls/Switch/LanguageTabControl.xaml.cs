@@ -1,4 +1,5 @@
 ﻿using LibHac.Ns;
+using Common.Localization;
 using NSW.Core;
 using NSW.Core.Converters;
 using NSW.Core.Models;
@@ -202,14 +203,14 @@ public partial class LanguageTabControl : UserControl
 
         ForcedLanguage = selectedItem.Language;
 
-        MessageBoxHelper.ShowInfo($"강제 언어가 {selectedItem.Language}로 설정되었습니다.");
+        MessageBoxHelper.ShowInfo(Loc.S.MsgForcedLanguageSet(selectedItem.Language));
     }
 
     private void BtnForceLanguageCancel_Click(object sender, RoutedEventArgs e)
     {
         ForcedLanguage = ApplicationControlProperty.Language.None;
 
-        MessageBoxHelper.ShowInfo("강제 언어 설정이 취소되었습니다.");
+        MessageBoxHelper.ShowInfo(Loc.S.MsgForcedLanguageCancelled);
     }
 
     private void ImgGame_DragEnter(object sender, DragEventArgs e)
@@ -262,7 +263,7 @@ public partial class LanguageTabControl : UserControl
         }
         catch (Exception ex)
         {
-            MessageBoxHelper.ShowError($"이미지 로드 실패: {ex.Message}");
+            MessageBoxHelper.ShowError(Loc.S.MsgImageLoadFailed(ex.Message));
         }
     }
 

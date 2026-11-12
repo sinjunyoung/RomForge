@@ -54,7 +54,7 @@ public static class NspLz4Service
     internal static async Task<string?> ConvertAsync(KeySet keySet, string inputPath, string? outputDir, int lz4Level, NszSettings? nsz, IProgress<ProgressInfo>? progress, Action<string, LogLevel, string>? log, CancellationToken ct = default)
     {
         if (!SwitchFileTypes.Extensions.Contains(Path.GetExtension(inputPath)))
-            throw new NotSupportedException("NSP, NSZ, XCI, XCZ 파일만 지원합니다.");
+            throw new NotSupportedException(Loc.S.ErrOnlyNspNszXciXczSupported);
 
         var disposables = new List<IDisposable>();
         string? finalPath = null;
@@ -67,11 +67,11 @@ public static class NspLz4Service
             var metas = allMetas.Where(m => m.Type is ContentMetaType.Application or ContentMetaType.AddOnContent).ToList();
 
             if (metas.Count == 0)
-                throw new InvalidOperationException("Application(본편) 또는 DLC 메타데이터를 찾을 수 없습니다. 업데이트는 지원하지 않습니다.");
+                throw new InvalidOperationException(Loc.S.ErrNoApplicationOrDlcMeta);
 
             var primary = metas.FirstOrDefault(m => m.Type == ContentMetaType.Application) ?? metas[0];
 
-            log?.Invoke($"{Path.GetFileName(inputPath)} Lz4 압축 시작", LogLevel.Info, primary.TitleId);
+            log?.Invoke(Loc.S.LogLz4CompressStart(Path.GetFileName(inputPath)), LogLevel.Info, primary.TitleId);
 
             var source = new SourceSet([inputPath]);
             var sourceFs = source.Open(keySet, inputPath, disposables);
@@ -87,7 +87,7 @@ public static class NspLz4Service
             {
                 if (meta.Type == ContentMetaType.Application && hasPatch)
                 {
-                    log?.Invoke("업데이트가 함께 들어 있는 본편은 업데이트 패치가 깨질 수 있어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                    log?.Invoke(Loc.S.LogSkipBaseWithUpdate, LogLevel.Warning, meta.TitleId);
                     continue;
                 }
 
@@ -102,9 +102,9 @@ public static class NspLz4Service
             if (jobs.Count == 0)
             {
                 if (alreadyCompressed == 0)
-                    throw new InvalidOperationException("Lz4로 압축할 romfs가 없습니다.");
+                    throw new InvalidOperationException(Loc.S.ErrNoRomfsForLz4);
 
-                log?.Invoke("이미 Lz4 압축되어 있어 압축할 대상이 없습니다. 건너뜁니다.", LogLevel.Warning, primary.TitleId);
+                log?.Invoke(Loc.S.LogSkipAlreadyLz4, LogLevel.Warning, primary.TitleId);
 
                 return null;
             }
@@ -159,7 +159,7 @@ public static class NspLz4Service
 
             disposables.Add(fout);
 
-            string displayName = "Lz4 압축 중 " + NameBuilder.CompressDisplayNameBuild(primary.KrTitle, primary.TitleId, primary.DisplayVersion);
+            string displayName = Loc.S.ProgressLz4CompressingName(NameBuilder.CompressDisplayNameBuild(primary.KrTitle, primary.TitleId, primary.DisplayVersion));
 
             await Pfs0Builder.WriteAsync(displayName, primary.TitleId, fileEntries, fout, Pfs0Builder.GetAlignmentPadding(inputPath), true, deferredNames, progress, ct);
             await fout.FlushAsync(ct);
@@ -170,7 +170,7 @@ public static class NspLz4Service
 
             isCompleted = true;
 
-            log?.Invoke($"Lz4 압축 완료: {Path.GetFileName(finalPath)}", LogLevel.Ok, primary.TitleId);
+            log?.Invoke(Loc.S.LogLz4CompressDone(Path.GetFileName(finalPath)), LogLevel.Ok, primary.TitleId);
 
             return finalPath;
         }
@@ -193,7 +193,7 @@ public static class NspLz4Service
         alreadyCompressed = 0;
 
         if (!entryPaths.TryGetValue(NormalizeName(meta.FileName), out var metaEntryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, metaEntryPath, disposables) is not { } metaOpened)
-            throw new InvalidOperationException($"Meta NCA를 찾을 수 없습니다: {meta.FileName}");
+            throw new InvalidOperationException(Loc.S.ErrMetaNcaNotFound(meta.FileName));
 
         var metaNca = OpenNca(keySet, metaOpened.Storage, metaEntryPath);
         byte[] cnmt = Lz4MetaNcaBuilder.ReadCnmt(metaNca);
@@ -206,7 +206,7 @@ public static class NspLz4Service
 
             if (!entryPaths.TryGetValue(entryName, out var entryPath) || ContainerEntryBuilder.OpenStorage(sourceFs, entryPath, disposables) is not { } opened)
             {
-                log?.Invoke($"{entryName}: NCA 파일을 찾을 수 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                log?.Invoke(Loc.S.LogEntryNcaMissingSkipped(entryName), LogLevel.Warning, meta.TitleId);
                 continue;
             }
 
@@ -214,13 +214,13 @@ public static class NspLz4Service
 
             if (!nca.CanOpenSection(NcaSectionType.Data))
             {
-                log?.Invoke($"{entryName}: romfs 섹션이 없어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                log?.Invoke(Loc.S.LogEntryNoRomfsSkipped(entryName), LogLevel.Warning, meta.TitleId);
                 continue;
             }
 
             if (nca.HasSparseLayer())
             {
-                log?.Invoke($"{entryName}: Sparse 레이어가 있는 NCA는 지원하지 않아 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                log?.Invoke(Loc.S.LogEntrySparseUnsupportedSkipped(entryName), LogLevel.Warning, meta.TitleId);
                 continue;
             }
 
@@ -228,7 +228,7 @@ public static class NspLz4Service
             {
                 alreadyCompressed++;
 
-                log?.Invoke($"{entryName}: 이미 압축되어 있어 건너뜁니다.", LogLevel.Warning, meta.TitleId);
+                log?.Invoke(Loc.S.LogEntryAlreadyCompressedSkipped(entryName), LogLevel.Warning, meta.TitleId);
                 continue;
             }
 
@@ -258,7 +258,7 @@ public static class NspLz4Service
             {
                 ct.ThrowIfCancellationRequested();
 
-                log?.Invoke($"{kind} NCA Lz4 압축 중 ({number}/{total}, {job.Meta.TitleId})", LogLevel.Highlight, job.Meta.TitleId);
+                log?.Invoke(Loc.S.LogLz4NcaCompressing(kind, number, total, job.Meta.TitleId), LogLevel.Highlight, job.Meta.TitleId);
 
                 long entryStart = output.Position;
                 long ncaStart = nsz != null ? entryStart + NSW.HacPack.Services.NczInPlaceConverter.Gap : entryStart;

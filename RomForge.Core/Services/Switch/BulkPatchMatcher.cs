@@ -1,4 +1,5 @@
 ﻿using Patch.Core.Interfaces;
+using Common.Localization;
 using RomForge.Core.Models.Switch;
 using RomForge.Core.ViewModels.Switch;
 using System.IO;
@@ -57,19 +58,19 @@ public static class BulkPatchMatcher
             {
                 path = named;
                 pathPassword = null;
-                note = "타이틀 ID 이름의 압축파일로 지정";
+                note = Loc.S.NoteAssignedByArchiveName;
             }
 
             if (path == null && !source.HasIdDirs && source.HasGeneric && ReferenceEquals(file, baseRow))
             {
                 path = source.GenericPath;
-                note = "타이틀 ID 폴더가 없어 일반 패치(exefs/romfs)로 베이스에 지정";
+                note = Loc.S.NoteAssignedAsGenericPatch;
             }
 
             if (path == null)
             {
                 if (!isDlc && !isUpdate)
-                    details.AppendLine($"{name}: 일치하는 폴더 없음 (필요: {string.Join(", ", ids)})");
+                    details.AppendLine(Loc.S.DetailNoMatchingFolder(name, string.Join(", ", ids)));
 
                 continue;
             }
@@ -93,7 +94,7 @@ public static class BulkPatchMatcher
             {
                 var lines = ids.Select(id => $"{(match.Covered.Contains(id, StringComparer.OrdinalIgnoreCase) ? "✔" : "✘")} {id}");
 
-                details.AppendLine($"{name}: 프로그램 {match.Covered.Count}/{ids.Count} 패치 확인 ({string.Join(", ", lines)})");
+                details.AppendLine($"{name}: {Loc.S.LogPatchCoverage(match.Covered.Count, ids.Count, string.Join(", ", lines))}");
             }
         }
 
@@ -101,12 +102,12 @@ public static class BulkPatchMatcher
             details.AppendLine($"DLC {dlcMatched}/{dlcTotal}");
 
         if (!source.HasIdDirs && !source.HasGeneric)
-            details.AppendLine("[지정 실패] 타이틀 ID 폴더도 exefs/romfs/ips/xdelta도 찾지 못했습니다.");
+            details.AppendLine(Loc.S.DetailAssignFailedNothingFound);
 
         var unused = source.FoundIds.Where(id => !allIds.Contains(id)).ToList();
 
         if (unused.Count > 0)
-            details.AppendLine($"[지정 경고] 불러온 게임과 무관한 패치 폴더 {unused.Count}개: {string.Join(", ", unused.Take(5))}{(unused.Count > 5 ? " ..." : string.Empty)}");
+            details.AppendLine(Loc.S.DetailAssignWarnUnrelatedFolders(unused.Count, string.Join(", ", unused.Take(5)) + (unused.Count > 5 ? " ..." : string.Empty)));
 
         return new BulkPatchReport(targets.Count, matched, details.ToString().TrimEnd());
     }

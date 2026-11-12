@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using NSW.Core;
 using NSW.Core.Models;
 using RomForge.Converters;
@@ -184,7 +185,7 @@ public partial class GroupedSwitchCompressionListControl : CommonListControlBase
         }
     }
 
-    private static string SparseMessage(string path) => $"{Path.GetFileName(path)}: Sparse 레이어가 있는 NCA는 Lz4 압축할 수 없어 목록에 추가하지 않습니다.";
+    private static string SparseMessage(string path) => Loc.S.LogSparseNotAddedToList(Path.GetFileName(path));
 
     private void BtnExtra1_Click(object sender, RoutedEventArgs e) => ExtraButton1Clicked?.Invoke();
 

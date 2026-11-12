@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using LibHac.Ncm;
 using NSW.Core;
 using NSW.Core.Models;
@@ -48,7 +49,7 @@ public static class Lz4MergeService
 
         if (total == 0)
         {
-            log("처리할 수 있는 파일이 없습니다.", LogLevel.Error);
+            log(Loc.S.LogNoProcessableFiles, LogLevel.Error);
             return results;
         }
 
@@ -78,14 +79,14 @@ public static class Lz4MergeService
                 string name = job.Plan != null ? DisplayName(job.Plan.Base.Meta) : Path.GetFileName(job.File!);
 
                 jobFinished(jobPaths, Lz4JobResult.AlreadyDone);
-                log($"[{index}/{total}] {name}: 이미 완료되어 건너뜁니다.", LogLevel.Info);
+                log(Loc.S.LogItemAlreadyDoneSkipped(index, total, name), LogLevel.Info);
                 continue;
             }
 
             if (job.Plan != null)
             {
-                log($"━━ [{index}/{total}] {DisplayName(job.Plan.Base.Meta)} ({job.Plan.BaseTitleId}) 본편 Lz4 압축 ━━", LogLevel.Highlight);
-                log($"구성: 본편 1, 업데이트 {(job.Plan.Update != null ? 1 : 0)}, DLC {job.Plan.Dlcs.Count}", LogLevel.Ok);
+                log(Loc.S.LogBaseLz4Header(index, total, DisplayName(job.Plan.Base.Meta), job.Plan.BaseTitleId), LogLevel.Highlight);
+                log(Loc.S.LogLz4Composition(job.Plan.Update != null ? 1 : 0, job.Plan.Dlcs.Count), LogLevel.Ok);
             }
             else
                 log($"━━ [{index}/{total}] {Path.GetFileName(job.File!)} ━━", LogLevel.Highlight);
@@ -105,7 +106,7 @@ public static class Lz4MergeService
                 results.Add(path);
                 outputCreated(jobPaths, path);
                 jobFinished(jobPaths, Lz4JobResult.Done);
-                log($"완료: {Path.GetFileName(path)}", LogLevel.Ok);
+                log(Loc.S.LogDone(Path.GetFileName(path)), LogLevel.Ok);
             }
             catch (OperationCanceledException)
             {
@@ -116,12 +117,12 @@ public static class Lz4MergeService
                 failed++;
 
                 jobFinished(jobPaths, Lz4JobResult.Failed);
-                log($"실패: {ex.Message}", LogLevel.Error);
+                log(Loc.S.LogFailedWithMessage(ex.Message), LogLevel.Error);
             }
         }
 
         if (failed > 0)
-            log($"실패 {failed}개", LogLevel.Error);
+            log(Loc.S.LogFailedCount(failed), LogLevel.Error);
 
         return results;
     }
@@ -198,13 +199,13 @@ public static class Lz4MergeService
 
             if (metas.Any(m => plans.Any(p => p.BaseTitleId.Equals(LibHacHelper.GetBaseTitleId(m.TitleId), StringComparison.OrdinalIgnoreCase))))
             {
-                skipped.Add((path, "압축에 사용되지 않는 이전 버전 파일이라 건너뜁니다.", LogLevel.Info));
+                skipped.Add((path, Loc.S.LogSkipOldVersion, LogLevel.Info));
                 continue;
             }
 
             if (metas.Any(m => m.Type == ContentMetaType.Patch))
             {
-                skipped.Add((path, "업데이트는 단독으로 Lz4 압축할 수 없어 건너뜁니다. 본편 NSP를 함께 추가하면 본편과 함께 압축됩니다.", LogLevel.Warning));
+                skipped.Add((path, Loc.S.LogSkipUpdateAlone, LogLevel.Warning));
                 continue;
             }
 

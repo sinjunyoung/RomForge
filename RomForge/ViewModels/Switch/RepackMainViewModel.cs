@@ -79,7 +79,7 @@ namespace RomForge.ViewModels.Switch
 
             if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedPath))
             {
-                if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
+                if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmDiscardUnpacked))
                     return;
             }
 
@@ -154,13 +154,13 @@ namespace RomForge.ViewModels.Switch
 
                     string finalResult = await NspBuildService.Run(req, mode, AppConfig.Instance.Switch.Lz4CompressLevel, progress, (msg, lvl) => AppendLog(msg, lvl), token);
 
-                    AppendLog($"완료! 총 소요: {_totalSw.Elapsed:mm\\:ss}", LogLevel.Ok);
+                    AppendLog(Loc.S.LogDoneTotalTime(_totalSw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     req.OutputDir?.OpenFolder();
                 }
                 catch (OperationCanceledException)
                 {
-                    AppendLog($"작업이 취소되었습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
 
                     IsIndeterminate = false;
 
@@ -182,13 +182,13 @@ namespace RomForge.ViewModels.Switch
                 }
                 catch (UnpackMetadataNotFoundException bex)
                 {
-                    AppendLog($"실패: {bex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogFailedWithMessage(bex.Message), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                     MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
                 catch (Exception ex)
                 {
-                    AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                     MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 }
@@ -206,7 +206,7 @@ namespace RomForge.ViewModels.Switch
 
             if (string.IsNullOrEmpty(OutputPath))
             {
-                errorMsg = "작업 폴더를 설정하세요.";
+                errorMsg = Loc.S.ErrSelectWorkFolder;
                 return false;
             }
 
@@ -216,7 +216,7 @@ namespace RomForge.ViewModels.Switch
 
                 if (!Directory.Exists(unpackedPath))
                 {
-                    errorMsg = "언팩된 데이터가 없습니다.";
+                    errorMsg = Loc.S.ErrNoUnpackedData;
                     return false;
                 }
 
@@ -241,13 +241,13 @@ namespace RomForge.ViewModels.Switch
 
             if (gameFiles != null && gameFiles.Any(f => f.IsUnpacked))
             {
-                errorMsg = "언팩 폴더 항목입니다. 원본 파일(nsp/xci 등)을 다시 추가하세요.";
+                errorMsg = Loc.S.ErrUnpackedFolderEntry;
                 return false;
             }
 
             if (gameFiles == null || !gameFiles.Any(f => f.FileType.Contains('B')))
             {
-                errorMsg = "원본 파일(BASE)이 리스트에 없습니다.";
+                errorMsg = Loc.S.ErrBaseNotInList;
                 return false;
             }
 
@@ -267,7 +267,7 @@ namespace RomForge.ViewModels.Switch
 
                 if (!string.Equals(baseId13, updateId13, StringComparison.OrdinalIgnoreCase))
                 {
-                    errorMsg = "본편과 업데이트의 타이틀이 일치하지 않습니다.";
+                    errorMsg = Loc.S.ErrBaseUpdateTitleMismatch;
                     return false;
                 }
             }
@@ -309,7 +309,7 @@ namespace RomForge.ViewModels.Switch
 
         private async Task BrowseOutput()
         {
-            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
+            var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectWorkFolder };
 
             if (dlg.ShowDialog() == true)
                 OutputPath = dlg.FolderName;

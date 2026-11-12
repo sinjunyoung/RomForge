@@ -1,4 +1,5 @@
 ﻿using LibHac.Common;
+using Common.Localization;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.Fs.Fsa;
@@ -20,7 +21,7 @@ internal static class Lz4ProgramNcaBuilder
         int keyGenerationIndex = keyGeneration - 1;
 
         if (keyGenerationIndex >= keySet.KeyAreaKeys.Length)
-            throw new InvalidOperationException($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+            throw new InvalidOperationException(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
         var settings = new NcaGenerationOptions
         {
@@ -87,7 +88,7 @@ internal static class Lz4ProgramNcaBuilder
         int index = exefsFiles.FindIndex(f => f.Name == "main.npdm");
 
         if (index < 0)
-            throw new FileNotFoundException("ExeFS에서 main.npdm을 찾을 수 없습니다.");
+            throw new FileNotFoundException(Loc.S.ErrMainNpdmNotFound);
 
         using var stream = new MemoryStream(exefsFiles[index].Data);
 

@@ -16,7 +16,7 @@ internal sealed record ConvertProfile(string StartLog, string? CopyStatus, strin
 
     public static ConvertProfile ForConversion(string inputPath, OutputContainer output, bool useCompression)
     {
-        return new ConvertProfile($"{Path.GetFileName(inputPath)} → {output.Extension(useCompression).TrimStart('.').ToUpper()} 변환 시작", null, string.Empty, false, false,
-            Loc.S.ToolTipValidateCompress, "OK", (meta, entryName) => $"{meta.KrTitle ?? meta.EnTitle} [{entryName}]", finalPath => $"변환 완료: {Path.GetFileName(finalPath)}");
+        return new ConvertProfile(Loc.S.LogConvertStartTo(Path.GetFileName(inputPath), output.Extension(useCompression).TrimStart('.').ToUpper()), null, string.Empty, false, false,
+            Loc.S.ToolTipValidateCompress, "OK", (meta, entryName) => $"{meta.KrTitle ?? meta.EnTitle} [{entryName}]", finalPath => Loc.S.LogConvertDone(Path.GetFileName(finalPath)));
     }
 }
