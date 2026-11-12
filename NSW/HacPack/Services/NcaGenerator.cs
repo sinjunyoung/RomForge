@@ -333,7 +333,7 @@ public static class NcaGenerator
         NcaHeaderService.SetSectionHash(ref ncaHeader, 0, sectionHash);
 
         if (baseSettings.KeyAreaKey == null)
-            throw new Exception("KeyAreaKey가 설정되지 않았습니다.");
+            throw new Exception(Loc.S.ErrKeyAreaKeyNotSet);
 
         Array.Copy(baseSettings.KeyAreaKey, 0, ncaHeader.EncryptedKeys, 2 * 0x10, 0x10);
         ct.ThrowIfCancellationRequested();

@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.Buffers.Binary;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -37,7 +38,7 @@ public sealed class AesCtrCipher : IDisposable
     public void Transform(ReadOnlySpan<byte> source, Span<byte> destination, ulong offset)
     {
         if (destination.Length < source.Length)
-            throw new ArgumentException("대상 버퍼가 원본보다 작습니다.", nameof(destination));
+            throw new ArgumentException(Loc.S.ErrDestBufferTooSmall, nameof(destination));
 
         TransformSerial(_aes, source, destination, offset);
     }

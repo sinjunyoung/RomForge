@@ -52,7 +52,7 @@ public static class NspPatchApplier
         }
 
         if (matchedCount == 0)
-            log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
+            log(Loc.S.LogPatchTargetMissing, LogLevel.Error);
     }
 
     private static string GetProgramId(string exefsDir, string romfsDir)
@@ -128,7 +128,7 @@ public static class NspPatchApplier
         }
 
         if (matchedCount == 0)
-            log("패치 대상 파일이 존재하지 않습니다.", LogLevel.Error);
+            log(Loc.S.LogPatchTargetMissing, LogLevel.Error);
     }
 
     private static IArchivePatchSource OpenArchive(string patchPath, string? password, bool keepAlive, ICollection<IDisposable> owner)
@@ -182,7 +182,7 @@ public static class NspPatchApplier
                 continue;
 
             resolved.Value.Target.Overwrite(resolved.Value.Relative, file);
-            log($"{label} 교체: {key}", LogLevel.Info);
+            log(Loc.S.LogPatchFileReplaced(label, key), LogLevel.Info);
 
             replaced++;
         }
@@ -195,7 +195,7 @@ public static class NspPatchApplier
                 continue;
 
             resolved.Value.Target.Overwrite(resolved.Value.Relative, file);
-            log($"{label} 추가: {key}", LogLevel.Info);
+            log(Loc.S.LogPatchFileAdded(label, key), LogLevel.Info);
 
             added++;
         }
@@ -228,13 +228,13 @@ public static class NspPatchApplier
         }
 
         if (replaced > 0)
-            log($"{label} 교체 완료: {replaced}개 파일", LogLevel.Ok);
+            log(Loc.S.LogPatchReplacedCount(label, replaced), LogLevel.Ok);
 
         if (added > 0)
-            log($"{label} 추가 완료: {added}개 파일", LogLevel.Ok);
+            log(Loc.S.LogPatchAddedCount(label, added), LogLevel.Ok);
 
         if (attempted > 0)
-            log($"{label} 패치 완료 수: {succeeded}개 / {attempted}개", LogLevel.Ok);
+            log(Loc.S.LogPatchSucceededCount(label, succeeded, attempted), LogLevel.Ok);
 
         return replaced + added + attempted;
     }

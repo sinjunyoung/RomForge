@@ -1,4 +1,5 @@
 ﻿using NSW.Core.Models;
+using Common.Localization;
 using System.IO;
 using Path = System.IO.Path;
 
@@ -16,7 +17,7 @@ public static class UnpackedDirScanner
             .ToList();
 
         if (programDirs.Count == 0)
-            throw new Exception("언팩된 프로그램 폴더(titleId)를 찾을 수 없습니다.");
+            throw new Exception(Loc.S.ErrUnpackedProgramFolderNotFound);
 
         ulong baseTitleId = programDirs[0].Id;
         string nacpPath = Path.Combine(programDirs[0].Dir, "control", "control.nacp");

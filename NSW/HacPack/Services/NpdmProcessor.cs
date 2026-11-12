@@ -1,4 +1,5 @@
 ﻿using NSW.HacPack.Cryptography.Core;
+using Common.Localization;
 using NSW.HacPack.Cryptography.Keys;
 using NSW.HacPack.Models;
 using System.IO;
@@ -19,7 +20,7 @@ public static class NpdmProcessor
         const string npdmName = "main.npdm";
 
         if (!exefs.Exists(npdmName))
-            throw new FileNotFoundException("ExeFS에서 main.npdm을 찾을 수 없습니다.");
+            throw new FileNotFoundException(Loc.S.ErrMainNpdmNotFound);
 
         byte[] data = exefs.ReadAllBytes(npdmName);
 

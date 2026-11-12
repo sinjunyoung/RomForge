@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using NSW.Core.Models;
 using NSW.HacPack.Enums;
 using NSW.HacPack.Models;
@@ -47,7 +48,7 @@ public static class DlcNspBuilder
             bool hasRomfs = item.RomfsOpener != null || (Directory.Exists(romfsPath) && Directory.EnumerateFileSystemEntries(romfsPath).Any());
             bool compressRomfs = req.DlcCompressRomfs.TryGetValue(titleIdStr, out bool requested) ? requested : item.RomfsOpener != null ? item.SourceCompressed : File.Exists(Path.Combine(item.DlcDir, RomfsCompression.FlagFileName));
 
-            log($"DLC 빌드 시작: {titleIdStr}{(compressRomfs ? " (Lz4)" : string.Empty)}", LogLevel.Highlight);
+            log(Loc.S.LogDlcBuildStart(titleIdStr, compressRomfs ? " (Lz4)" : string.Empty), LogLevel.Highlight);
 
             var dlcSettings = new NcaGenerationOptions
             {
@@ -81,18 +82,18 @@ public static class DlcNspBuilder
                 byte[] cnmt = CnmtGenerator.Build(dlcSettings, contents);
 
                 package.AddNca(".cnmt.nca", output => NcaGenerator.GenerateMetaNcaInto(output, dlcSettings, cnmt, ct));
-                log($"DLC 완료: {titleIdStr}", LogLevel.Ok);
+                log(Loc.S.LogDlcDone(titleIdStr), LogLevel.Ok);
 
                 dlcCount++;
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 package.Rollback(checkpoint);
-                log($"DLC 실패: {titleIdStr} - {ex.Message}", LogLevel.Error);
+                log(Loc.S.LogDlcFailed(titleIdStr, ex.Message), LogLevel.Error);
             }
         }
 
-        log($"총 ({dlcCount})개의 DLC 빌드 완료 : ({sw.Elapsed.TotalSeconds:F2}s)", LogLevel.Ok);
+        log(Loc.S.LogDlcAllDone(dlcCount, sw.Elapsed.TotalSeconds.ToString("F2")), LogLevel.Ok);
     }
 
     private static List<DlcItem> CollectItems(BuildRequest req, UnpackResult unpackResult, WorkDirs dirs)

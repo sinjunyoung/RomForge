@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.IO;
 using NSW.HacPack.Cryptography.Core;
 using NSW.HacPack.Models;
@@ -49,7 +50,7 @@ public sealed class EncryptedSectionStream : Stream
 
     public void EndIvfc(Stream levelOutput, out ulong generatedSize)
     {
-        var builder = _ivfc ?? throw new InvalidOperationException("IVFC 해시 계산이 시작되지 않았습니다.");
+        var builder = _ivfc ?? throw new InvalidOperationException(Loc.S.ErrIvfcHashNotStarted);
 
         _ivfc = null;
 

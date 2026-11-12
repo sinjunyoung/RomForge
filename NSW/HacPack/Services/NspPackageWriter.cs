@@ -1,4 +1,5 @@
 ﻿using NSW.HacPack.Models;
+using Common.Localization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -26,7 +27,7 @@ public sealed class NspPackageWriter : IDisposable
     public NspPackageWriter(Stream output, int maxFiles)
     {
         if (!output.CanSeek || !output.CanRead || !output.CanWrite)
-            throw new ArgumentException("출력 스트림은 읽기/쓰기/탐색이 모두 가능해야 합니다.", nameof(output));
+            throw new ArgumentException(Loc.S.ErrOutputStreamNeedsRwSeek, nameof(output));
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxFiles, nameof(maxFiles));
 
@@ -47,10 +48,10 @@ public sealed class NspPackageWriter : IDisposable
     public (string Name, byte[] Hash, long Size) AddNca(string extension, Func<Stream, (byte[] Hash, long Size)> write, bool compress = false)
     {
         if (_completed)
-            throw new InvalidOperationException("이미 완료된 패키지입니다.");
+            throw new InvalidOperationException(Loc.S.ErrPackageAlreadyFinalized);
 
         if (_files.Count >= MaxFiles)
-            throw new InvalidOperationException($"패키지에 담을 수 있는 파일 수({MaxFiles})를 초과했습니다.");
+            throw new InvalidOperationException(Loc.S.ErrPackageFileLimit(MaxFiles));
 
         bool toNcz = compress && Ncz != null && extension == ".nca";
         long entryStart = _output.Length;
@@ -63,7 +64,7 @@ public sealed class NspPackageWriter : IDisposable
             var (hash, size) = write(_output);
 
             if (_output.Length != ncaStart + size)
-                throw new InvalidOperationException($"NCA 크기가 일치하지 않습니다. 기록된 크기={_output.Length - ncaStart}, 보고된 크기={size}");
+                throw new InvalidOperationException(Loc.S.ErrNcaSizeMismatch(_output.Length - ncaStart, size));
 
             long storedSize = size;
 
@@ -79,7 +80,7 @@ public sealed class NspPackageWriter : IDisposable
             string name = Convert.ToHexString(hash, 0, 16).ToLowerInvariant() + extension;
 
             if (name.Length >= NameSlotSize)
-                throw new InvalidOperationException($"파일명이 너무 깁니다: {name}");
+                throw new InvalidOperationException(Loc.S.ErrFileNameTooLong(name));
 
             _files.Add(new PackedFile(name, entryStart - _headerSize, storedSize));
 
@@ -99,7 +100,7 @@ public sealed class NspPackageWriter : IDisposable
     public void Rollback(Checkpoint checkpoint)
     {
         if (_completed)
-            throw new InvalidOperationException("이미 완료된 패키지입니다.");
+            throw new InvalidOperationException(Loc.S.ErrPackageAlreadyFinalized);
 
         _files.RemoveRange(checkpoint.FileCount, _files.Count - checkpoint.FileCount);
         Truncate(checkpoint.Length);
@@ -111,7 +112,7 @@ public sealed class NspPackageWriter : IDisposable
             return;
 
         if (_files.Count == 0)
-            throw new InvalidOperationException("NSP에 기록된 파일이 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNspHasNoFiles);
 
         using var stringTable = new MemoryStream();
         var stringOffsets = new uint[_files.Count];
@@ -130,7 +131,7 @@ public sealed class NspPackageWriter : IDisposable
         long stringTableSize = _headerSize - entriesEnd;
 
         if (stringTable.Length > stringTableSize)
-            throw new InvalidOperationException("파일명 테이블이 예약된 헤더 공간을 초과했습니다.");
+            throw new InvalidOperationException(Loc.S.ErrFileNameTableExceeded);
 
         long endPosition = _output.Length;
 

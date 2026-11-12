@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using Common.Localization;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -24,7 +25,7 @@ public static class IvfcGenerator
                 int read = inputStream.Read(buffer, 0, (int)Math.Min(readSize, remaining));
 
                 if (read <= 0)
-                    throw new EndOfStreamException("IVFC 입력 스트림이 예상보다 일찍 끝났습니다.");
+                    throw new EndOfStreamException(Loc.S.ErrIvfcInputEndedEarly);
 
                 builder.Add(buffer, 0, read);
 

@@ -1,4 +1,5 @@
 ﻿using NSW.HacPack.Models;
+using Common.Localization;
 using NSW.HacPack.Services;
 using System.IO;
 
@@ -143,7 +144,7 @@ internal sealed class RomfsImageStream : Stream, IUnpaddedLengthSource
             int read = _currentFile.Read(buffer[..toRead]);
 
             if (read <= 0)
-                throw new InvalidDataException($"romfs 파일 데이터가 예상보다 짧습니다: {file.SumPath}");
+                throw new InvalidDataException(Loc.S.ErrRomfsFileDataTooShort(file.SumPath));
 
             return read;
         }

@@ -50,7 +50,7 @@ public static class UncompressedRomfsSectionWriter
             for (int c = 0; c < 5; c++)
             {
                 if (ivfcStreams[c].Length != expectedSizes[c])
-                    throw new InvalidDataException($"IVFC 레벨 {c} 크기가 예상과 다릅니다: {ivfcStreams[c].Length} / {expectedSizes[c]}");
+                    throw new InvalidDataException(Loc.S.ErrIvfcLevelSizeMismatch(c, ivfcStreams[c].Length, expectedSizes[c]));
             }
 
             NcaHeaderService.SetIvfcLogicalOffsets(ref ncaHeader, sectionIndex);
@@ -142,6 +142,6 @@ public static class UncompressedRomfsSectionWriter
         }
 
         if (copied != expectedSize)
-            throw new InvalidDataException($"romfs 데이터 길이가 예상과 다릅니다: {copied} / {expectedSize}");
+            throw new InvalidDataException(Loc.S.ErrRomfsDataLengthMismatch(copied, expectedSize));
     }
 }

@@ -1,4 +1,5 @@
 ﻿using K4os.Compression.LZ4;
+using Common.Localization;
 using LibHac.Util;
 using System.IO;
 using System.Security.Cryptography;
@@ -56,7 +57,7 @@ public static class NsoTool
     public static byte[] DecompressToPlain(byte[] nso)
     {
         if (!IsNso(nso))
-            throw new InvalidDataException("유효한 NSO 파일이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrInvalidNsoFile);
 
         uint flags = BitConverter.ToUInt32(nso, 0x0C);
         var segData = new byte[3][];
@@ -131,7 +132,7 @@ public static class NsoTool
             int encodedLen = LZ4Codec.Encode(raw, 0, raw.Length, buffer, 0, maxLen, LZ4Level.L09_HC);
 
             if (encodedLen <= 0)
-                throw new InvalidOperationException($"세그먼트 {i} LZ4 압축 실패 (encodedLen={encodedLen})");
+                throw new InvalidOperationException(Loc.S.ErrNsoSegmentLz4Failed(i, encodedLen));
 
             byte[] compressed = new byte[encodedLen];
 

@@ -83,7 +83,7 @@ public sealed class NcaExtractor(KeySet keySet, Func<string, bool> shouldExtract
             }
         }
         if (hasSparse && updateProg == null)
-            throw new InvalidOperationException("SparseStorage NCA는 업데이트가 필요합니다.");
+            throw new InvalidOperationException(Loc.S.ErrSparseNcaNeedsUpdate);
     }
 
     public static VirtualRomfs OpenVirtualRomfs(Nca baseProg, Nca? updateProg, bool isCreateOnly = false)

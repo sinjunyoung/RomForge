@@ -1,4 +1,5 @@
 ﻿using NSW.HacPack.Models;
+using Common.Localization;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -105,14 +106,14 @@ public static class CnmtGenerator
         var context = new CnmtContext();
 
         if (contents.Count > context.ContentRecords.Length)
-            throw new InvalidOperationException($"콘텐츠 레코드가 너무 많습니다: {contents.Count}");
+            throw new InvalidOperationException(Loc.S.ErrTooManyContentRecords(contents.Count));
 
         Span<byte> sizeSpan = stackalloc byte[8];
 
         foreach (var content in contents)
         {
             if (content.Hash.Length != 0x20)
-                throw new ArgumentException("NCA 해시는 32바이트여야 합니다.");
+                throw new ArgumentException(Loc.S.ErrNcaHashMustBe32Bytes);
 
             ref var record = ref context.ContentRecords[context.ContentRecordsCount];
 

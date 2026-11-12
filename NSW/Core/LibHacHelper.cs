@@ -51,7 +51,7 @@ public static class LibHacHelper
             fs = nsp;
         }
         else
-            throw new NotSupportedException("지원하지 않는 ROM 형식입니다.");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedRomFormat);
 
         return fs;
     }
@@ -204,7 +204,7 @@ public static class LibHacHelper
     public static (byte KeyGeneration, uint SdkVersion) ReadControlNcaInfo(string ncaPath)
     {
         if (!File.Exists(ncaPath))
-            throw new FileNotFoundException("control.nca 파일이 없습니다.", ncaPath);
+            throw new FileNotFoundException(Loc.S.ErrControlNcaFileMissing, ncaPath);
 
         using var controlFs = new FileStream(ncaPath, FileMode.Open, FileAccess.Read);
         var storage = new StreamStorage(controlFs, false);
@@ -217,7 +217,7 @@ public static class LibHacHelper
     public static (string KrTitle, string EnTitle, string DisplayVersion, ulong TitleId) ReadNacpInfo(string nacpPath)
     {
         if (!File.Exists(nacpPath))
-            throw new FileNotFoundException("control.nacp 파일이 없습니다.", nacpPath);
+            throw new FileNotFoundException(Loc.S.ErrControlNacpFileMissing, nacpPath);
 
         byte[] nacpData = File.ReadAllBytes(nacpPath);
         var control = new ApplicationControlProperty();

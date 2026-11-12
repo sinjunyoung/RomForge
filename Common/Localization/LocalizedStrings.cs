@@ -795,4 +795,76 @@ public abstract class LocalizedStrings
     public abstract string ErrChdOpenFailed(object arg0);
     public abstract string ErrCueReferencedBinNotFound { get; }
     public abstract string ErrBinFileMissing(object arg0);
+
+    public abstract string SwitchLanguageAmericanEnglish { get; }
+    public abstract string SwitchLanguageBritishEnglish { get; }
+    public abstract string SwitchLanguageJapanese { get; }
+    public abstract string SwitchLanguageFrench { get; }
+    public abstract string SwitchLanguageGerman { get; }
+    public abstract string SwitchLanguageLatinAmericanSpanish { get; }
+    public abstract string SwitchLanguageSpanish { get; }
+    public abstract string SwitchLanguageItalian { get; }
+    public abstract string SwitchLanguageDutch { get; }
+    public abstract string SwitchLanguageCanadianFrench { get; }
+    public abstract string SwitchLanguagePortuguese { get; }
+    public abstract string SwitchLanguageRussian { get; }
+    public abstract string SwitchLanguageKorean { get; }
+    public abstract string SwitchLanguageTraditionalChinese { get; }
+    public abstract string SwitchLanguageSimplifiedChinese { get; }
+    public abstract string SwitchLanguageBrazilianPortuguese { get; }
+    public abstract string SwitchLanguagePolish { get; }
+    public abstract string SwitchLanguageThai { get; }
+    public abstract string LogUnpackDoneTime(object arg0);
+    public abstract string LogProgramBuildStart(object arg0);
+    public abstract string LogProgramBuildDone(object arg0, object arg1);
+    public abstract string LogOutputFile(object arg0);
+    public abstract string LogRomfsLz4On { get; }
+    public abstract string LogRomfsLz4Off { get; }
+    public abstract string LogTitleIdOverride(object arg0);
+    public abstract string LogDlcBuildStart(object arg0, object arg1);
+    public abstract string LogDlcDone(object arg0);
+    public abstract string LogDlcFailed(object arg0, object arg1);
+    public abstract string LogDlcAllDone(object arg0, object arg1);
+    public abstract string LogArchiveCannotOpenPasswordOrCorrupt(object arg0, object arg1);
+    public abstract string LogExefsIpsFound(object arg0);
+    public abstract string LogDuplicateIpsSkipped(object arg0);
+    public abstract string LogExefsTargetNsoNotFound(object arg0);
+    public abstract string LogExefsPatchAppliedTarget(object arg0, object arg1, object arg2);
+    public abstract string LogPatchFileReplaced(object arg0, object arg1);
+    public abstract string LogPatchFileAdded(object arg0, object arg1);
+    public abstract string LogPatchReplacedCount(object arg0, object arg1);
+    public abstract string LogPatchAddedCount(object arg0, object arg1);
+    public abstract string LogPatchSucceededCount(object arg0, object arg1, object arg2);
+    public abstract string ErrUnsupportedRomFormat { get; }
+    public abstract string ErrControlNcaFileMissing { get; }
+    public abstract string ErrControlNacpFileMissing { get; }
+    public abstract string ErrInvalidNsoFile { get; }
+    public abstract string ErrNsoSegmentLz4Failed(object arg0, object arg1);
+    public abstract string ErrNoTitleForIdOffset(object arg0);
+    public abstract string ErrBaseProgramNcaNotFound { get; }
+    public abstract string ErrSparseCannotUnpack { get; }
+    public abstract string ErrControlNcaNotFound { get; }
+    public abstract string ErrUnpackedProgramFolderNotFound { get; }
+    public abstract string ErrDestBufferTooSmall { get; }
+    public abstract string ErrIvfcHashNotStarted { get; }
+    public abstract string ErrRomfsFileDataTooShort(object arg0);
+    public abstract string ErrTooManyContentRecords(object arg0);
+    public abstract string ErrNcaHashMustBe32Bytes { get; }
+    public abstract string ErrIvfcInputEndedEarly { get; }
+    public abstract string ErrRecompressedExceedsTitleBlock(object arg0, object arg1);
+    public abstract string ErrUncompressedNacpLanguageLimit(object arg0, object arg1, object arg2);
+    public abstract string ErrLanguageIndexOutOfRange(object arg0, object arg1);
+    public abstract string ErrIconWriteFailed(object arg0);
+    public abstract string ErrCompressedTitleBlockEmpty { get; }
+    public abstract string ErrNoValidTitleInfoAfterNacpUpdate { get; }
+    public abstract string ErrKeyAreaKeyNotSet { get; }
+    public abstract string ErrOutputStreamNeedsRwSeek { get; }
+    public abstract string ErrPackageAlreadyFinalized { get; }
+    public abstract string ErrPackageFileLimit(object arg0);
+    public abstract string ErrNcaSizeMismatch(object arg0, object arg1);
+    public abstract string ErrFileNameTooLong(object arg0);
+    public abstract string ErrNspHasNoFiles { get; }
+    public abstract string ErrFileNameTableExceeded { get; }
+    public abstract string ErrIvfcLevelSizeMismatch(object arg0, object arg1, object arg2);
+    public abstract string ErrRomfsDataLengthMismatch(object arg0, object arg1);
 }

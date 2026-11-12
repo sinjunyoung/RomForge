@@ -1,4 +1,5 @@
 ﻿using LibHac.Ns;
+using Common.Localization;
 using System.Buffers.Binary;
 using System.IO;
 using System.IO.Compression;
@@ -55,7 +56,7 @@ public static class NacpProcessor
             }
 
             if (recompressed.Length + 2 > TitleBlockSize)
-                throw new InvalidDataException($"재압축 결과가 타이틀 블록을 초과합니다: {recompressed.Length + 2} > {TitleBlockSize}");
+                throw new InvalidDataException(Loc.S.ErrRecompressedExceedsTitleBlock(recompressed.Length + 2, TitleBlockSize));
 
             Array.Clear(nacpRawData, 0, TitleBlockSize);
             BinaryPrimitives.WriteUInt16LittleEndian(nacpRawData, (ushort)recompressed.Length);
@@ -80,7 +81,7 @@ public static class NacpProcessor
         foreach (var info in settings.UserMetadata.Languages)
         {
             if ((int)info.Language >= LegacyLanguageCount)
-                throw new NotSupportedException($"비압축 NACP는 index 0~{LegacyLanguageCount - 1} 언어만 지원합니다. 요청된 언어: {info.Language} (index {(int)info.Language})");
+                throw new NotSupportedException(Loc.S.ErrUncompressedNacpLanguageLimit(LegacyLanguageCount - 1, info.Language, (int)info.Language));
         }
     }
 
@@ -96,7 +97,7 @@ public static class NacpProcessor
             int langIndex = (int)info.Language;
 
             if (langIndex < 0 || langIndex >= maxSlot)
-                throw new ArgumentOutOfRangeException($"언어 index {langIndex}이 유효 범위(0~{maxSlot - 1})를 벗어납니다.");
+                throw new ArgumentOutOfRangeException(Loc.S.ErrLanguageIndexOutOfRange(langIndex, maxSlot - 1));
 
             int entryOffset = langIndex * LanguageEntrySize;
 
@@ -116,7 +117,7 @@ public static class NacpProcessor
                 }
                 catch (Exception ex)
                 {
-                    throw new IOException($"아이콘 파일 작성 실패: {iconFileName}", ex);
+                    throw new IOException(Loc.S.ErrIconWriteFailed(iconFileName), ex);
                 }
             }
         }
@@ -159,7 +160,7 @@ public static class NacpProcessor
             ushort compressedSize = BinaryPrimitives.ReadUInt16LittleEndian(data);
 
             if (compressedSize == 0)
-                throw new InvalidDataException("압축된 타이틀 블록 크기가 0입니다.");
+                throw new InvalidDataException(Loc.S.ErrCompressedTitleBlockEmpty);
 
             return;
         }
@@ -170,6 +171,6 @@ public static class NacpProcessor
                 return;
         }
 
-        throw new InvalidDataException("NACP 업데이트 후 유효한 타이틀 정보를 찾을 수 없습니다.");
+        throw new InvalidDataException(Loc.S.ErrNoValidTitleInfoAfterNacpUpdate);
     }
 }

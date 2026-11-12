@@ -66,7 +66,7 @@ public static class NspBuildService
     {
         var sw = Stopwatch.StartNew();
 
-        log("언팩 시작", LogLevel.Highlight);
+        log(Loc.S.LogUnpackStart, LogLevel.Highlight);
         progress.ReportStatus(Loc.S.StatusUnpacking, 0);
 
         var unpacker = new NspUnpacker(keySet);
@@ -75,10 +75,10 @@ public static class NspBuildService
         if (req.CompressRomfs.HasValue)
         {
             RomfsCompression.Apply(result, req.CompressRomfs.Value);
-            log(req.CompressRomfs.Value ? "RomFS Lz4 압축: 사용" : "RomFS Lz4 압축: 사용 안 함", LogLevel.Ok);
+            log(req.CompressRomfs.Value ? Loc.S.LogRomfsLz4On : Loc.S.LogRomfsLz4Off, LogLevel.Ok);
         }
 
-        log($"언팩 완료 ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        log(Loc.S.LogUnpackDoneTime(sw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
         progress.ReportStatus(Loc.S.StatusDone, 100);
         result.ReleaseResources();
 
@@ -118,7 +118,7 @@ public static class NspBuildService
 
                 unpackResult.TitleId = req.OverrideTitleId.Value;
 
-                log($"Title ID 오버라이드: {req.OverrideTitleId.Value:x16}", LogLevel.Ok);
+                log(Loc.S.LogTitleIdOverride(req.OverrideTitleId.Value.ToString("x16")), LogLevel.Ok);
             }
 
             if (req.TargetIdOffset.HasValue)
@@ -126,7 +126,7 @@ public static class NspBuildService
                 settingsList = [.. settingsList.Where(s => s.IdOffset == req.TargetIdOffset.Value)];
 
                 if (settingsList.Count == 0)
-                    throw new Exception($"IdOffset {req.TargetIdOffset.Value}에 해당하는 타이틀이 없습니다.");
+                    throw new Exception(Loc.S.ErrNoTitleForIdOffset(req.TargetIdOffset.Value));
 
                 var s = settingsList[0];
 
@@ -199,7 +199,7 @@ public static class NspBuildService
 
         var sw = Stopwatch.StartNew();
 
-        log($"프로그램 빌드 시작 (IdOffset={settings.IdOffset})", LogLevel.Highlight);
+        log(Loc.S.LogProgramBuildStart(settings.IdOffset), LogLevel.Highlight);
         progress.ReportStatus(Loc.S.ProgressBuildingProgram, 0);
 
         if (req.HasPatch)
@@ -216,7 +216,7 @@ public static class NspBuildService
         var (name, hash, size) = await Task.Run(() =>
             package.AddNca(".nca", output => NcaGenerator.GenerateProgramNcaInto(output, settings, compressLevel, null, progress, ct), compress: true), ct);
 
-        log($"프로그램 빌드 완료: {name} ({sw.Elapsed:mm\\:ss})", LogLevel.Ok);
+        log(Loc.S.LogProgramBuildDone(name, sw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
 
         return new CnmtContent(ContentTypeProgram, settings.IdOffset, hash, size);
     }
@@ -227,7 +227,7 @@ public static class NspBuildService
         int keygenIdx = keyGeneration - 1;
 
         if (keygenIdx < 0)
-            throw new Exception($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+            throw new Exception(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
         var settingsList = new List<NcaGenerationOptions>();
         var allIdOffsets = result.ExefsDirs.Keys
@@ -261,7 +261,7 @@ public static class NspBuildService
             };
 
             if (keygenIdx >= settings.KeySet.KeyAreaKeys.Length)
-                throw new Exception($"유효하지 않은 KeyGeneration입니다: {keyGeneration}");
+                throw new Exception(Loc.S.ErrInvalidKeyGeneration(keyGeneration));
 
             settings.KeyAreaKey = settings.KeySet.KeyAreaKeys[keygenIdx][0].DataRo.ToArray();
             settingsList.Add(settings);
@@ -374,7 +374,7 @@ public static class NspBuildService
 
         File.Move(tempNsp, finalNsp);
         progress.ReportStatus(Loc.S.StatusDone, 100);
-        log($"출력: {finalNsp}", LogLevel.Ok);
+        log(Loc.S.LogOutputFile(finalNsp), LogLevel.Ok);
 
         return finalNsp;
     }

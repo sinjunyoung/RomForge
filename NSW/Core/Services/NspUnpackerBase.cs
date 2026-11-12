@@ -61,10 +61,10 @@ public abstract class NspUnpackerBase(KeySet keySet)
             var ncas = collector.Collect(partitions, uniquePaths, req);
 
             if (!ncas.BaseProgs.TryGetValue(0, out Nca? value))
-                throw new Exception("Base Program NCA를 찾을 수 없습니다.");
+                throw new Exception(Loc.S.ErrBaseProgramNcaNotFound);
 
             if (value.HasSparseLayer())
-                throw new Exception("Sparse 파일/업데이트는 언팩할 수 없습니다.");
+                throw new Exception(Loc.S.ErrSparseCannotUnpack);
 
             var extractor = new NcaExtractor(_keySet, ShouldExtract);
             var progCtx = CreateProgressContext(uniquePaths, ncas);
@@ -246,7 +246,7 @@ public abstract class NspUnpackerBase(KeySet keySet)
     private static UnpackResult BuildBaseResult(CollectedNcas ncas)
     {
         if (!ncas.BaseControls.TryGetValue(0, out var mainControl))
-            throw new Exception("Control NCA를 찾을 수 없습니다.");
+            throw new Exception(Loc.S.ErrControlNcaNotFound);
 
         var result = new UnpackResult
         {
