@@ -1,4 +1,5 @@
 ﻿using CD.Core.Constants;
+using Common.Localization;
 using CD.Core.Interfaces;
 using CD.Core.Models;
 
@@ -38,7 +39,7 @@ public class MdfMdsReader : IDiscImageReader
         var tracks = ReadTracks(mdsBytes, trackBlocksOffset, totalDataBlocks, mdfPath, filePath);
 
         if (tracks.Count == 0)
-            throw new InvalidDataException($"MDS 파일에서 유효한 트랙을 찾지 못했습니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsNoValidTrack(filePath));
 
         return new DiscImage { Tracks = tracks };
     }
@@ -48,7 +49,7 @@ public class MdfMdsReader : IDiscImageReader
         var mdfPath = Path.ChangeExtension(mdsPath, ".mdf");
 
         if (!File.Exists(mdfPath))
-            throw new FileNotFoundException($"MDS와 짝을 이루는 MDF 파일을 찾을 수 없습니다: {mdfPath}");
+            throw new FileNotFoundException(Loc.S.ErrMdsPairedMdfNotFound(mdfPath));
 
         return mdfPath;
     }
@@ -56,12 +57,12 @@ public class MdfMdsReader : IDiscImageReader
     private static void ValidateSignature(byte[] mds, string filePath)
     {
         if (mds.Length < MinHeaderSize)
-            throw new InvalidDataException($"MDS 파일이 너무 작습니다(헤더 크기 미만): {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsFileTooSmall(filePath));
 
         var signature = System.Text.Encoding.ASCII.GetString(mds, 0, Signature.Length);
 
         if (signature != Signature)
-            throw new InvalidDataException($"MDS 시그니처가 일치하지 않습니다. 지원하지 않는 버전이거나 손상된 파일입니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsSignatureMismatch(filePath));
     }
 
     private static (uint TrackBlocksOffset, int TotalDataBlocks) ReadSessionInfo(byte[] mds, string filePath)
@@ -69,16 +70,16 @@ public class MdfMdsReader : IDiscImageReader
         var sessionBlockOffset = BitConverter.ToUInt32(mds, SessionOffsetFieldPosition);
 
         if (sessionBlockOffset == 0 || (long)sessionBlockOffset + SessionBlockSize > mds.Length)
-            throw new InvalidDataException($"MDS 세션 블록 오프셋이 비정상입니다(0x{sessionBlockOffset:X}). 헤더 구조가 예상과 다르거나 손상된 파일일 수 있습니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsSessionBlockOffsetInvalid(sessionBlockOffset.ToString("X"), filePath));
 
         var totalDataBlocks = mds[sessionBlockOffset + 0x0A];
         var offset = BitConverter.ToUInt32(mds, (int)sessionBlockOffset + 0x14);
 
         if (offset == 0 || offset >= mds.Length)
-            throw new InvalidDataException($"MDS 트랙 블록 오프셋이 비정상입니다(0x{offset:X}). 헤더 구조가 예상과 다를 수 있습니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsTrackBlockOffsetInvalid(offset.ToString("X"), filePath));
 
         if (totalDataBlocks == 0)
-            throw new InvalidDataException($"MDS 세션 블록의 데이터 블록 수가 0입니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsSessionZeroBlocks(filePath));
 
         return (offset, totalDataBlocks);
     }
@@ -90,7 +91,7 @@ public class MdfMdsReader : IDiscImageReader
         var blockAreaEnd = (int)trackBlocksOffset + totalDataBlocks * TrackBlockSize;
 
         if (blockAreaEnd > mds.Length)
-            throw new InvalidDataException($"MDS 트랙 블록 영역이 파일 범위를 벗어납니다(블록 수={totalDataBlocks}): {mdsFilePath}");
+            throw new InvalidDataException(Loc.S.ErrMdsTrackBlockAreaOutOfFile(totalDataBlocks, mdsFilePath));
 
         for (var pos = (int)trackBlocksOffset; pos < blockAreaEnd; pos += TrackBlockSize)
         {
@@ -113,7 +114,7 @@ public class MdfMdsReader : IDiscImageReader
         foreach (var (Point, Mode, SubchannelFlag, IndexBlockOffset, SectorSize, StartOffset) in rawTracks.OrderBy(t => t.Point))
         {
             if (IndexBlockOffset == 0 || IndexBlockOffset + 8 > mds.Length)
-                throw new InvalidDataException($"트랙 {Point}의 인덱스 블록 오프셋이 비정상입니다: {mdsFilePath}");
+                throw new InvalidDataException(Loc.S.ErrMdsIndexBlockOffsetInvalid(Point, mdsFilePath));
 
             var pregapSectors = (int)BitConverter.ToUInt32(mds, (int)IndexBlockOffset + 0);
             var lengthSectors = (int)BitConverter.ToUInt32(mds, (int)IndexBlockOffset + 4);
@@ -122,7 +123,7 @@ public class MdfMdsReader : IDiscImageReader
             var trackByteLength = (long)totalSectors * SectorSize;
 
             if (StartOffset < 0 || StartOffset + trackByteLength > mdfLength)
-                throw new InvalidDataException($"트랙 {Point}의 데이터 범위가 MDF 파일 크기를 벗어납니다 (offset=0x{StartOffset:X}, length={trackByteLength}, mdfSize={mdfLength}). MDS 오프셋 해석이 이 파일 버전과 맞지 않을 수 있습니다: {mdsFilePath}");
+                throw new InvalidDataException(Loc.S.ErrMdsTrackDataRangeOutOfMdf(Point, StartOffset.ToString("X"), trackByteLength, mdfLength, mdsFilePath));
 
             var startOffset = StartOffset;
             var sourceSectorSize = SectorSize;
@@ -161,7 +162,7 @@ public class MdfMdsReader : IDiscImageReader
         var blockAreaEnd = (int)trackBlocksOffset + totalDataBlocks * TrackBlockSize;
 
         if (blockAreaEnd > mds.Length)
-            throw new InvalidDataException($"MDS 트랙 블록 영역이 파일 범위를 벗어납니다(블록 수={totalDataBlocks}): {mdsPath}");
+            throw new InvalidDataException(Loc.S.ErrMdsTrackBlockAreaOutOfFile(totalDataBlocks, mdsPath));
 
         var names = new List<string>();
 

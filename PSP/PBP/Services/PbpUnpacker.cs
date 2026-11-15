@@ -1,4 +1,6 @@
-﻿namespace PSP.PBP.Services;
+﻿using Common.Localization;
+
+namespace PSP.PBP.Services;
 
 public class PbpUnpacker
 {
@@ -33,7 +35,7 @@ public class PbpUnpacker
                 var candidateBaseName = $"{baseName}{discSuffix}";
                 var (binPath, cuePath) = GetUniquePairedPaths(outputDir, candidateBaseName);
 
-                OnNotify?.Invoke($"언팩중 {binPath}...");
+                OnNotify?.Invoke(Loc.S.LogUnpackingPath(binPath));
                 createdFiles.Add(binPath);
 
                 await Task.Run(() =>
@@ -49,7 +51,7 @@ public class PbpUnpacker
 
                     createdFiles.Add(cuePath);
                     CueFileWriter.Write(cueFile, cuePath);
-                    OnNotify?.Invoke($"언팩중 {cuePath}...");
+                    OnNotify?.Invoke(Loc.S.LogUnpackingPath(cuePath));
                 }
 
                 baseSize += disc.IsoSize;
@@ -57,7 +59,7 @@ public class PbpUnpacker
         }
         catch (Exception)
         {
-            OnNotify?.Invoke("실패 - 생성된 파일 정리 중...");
+            OnNotify?.Invoke(Loc.S.LogFailedCleaningFiles);
 
             foreach (var path in createdFiles)
                 try 
@@ -69,7 +71,7 @@ public class PbpUnpacker
             throw;
         }
 
-        OnNotify?.Invoke("언팩 완료");
+        OnNotify?.Invoke(Loc.S.LogUnpackDone);
     }
 
     private static (string BinPath, string CuePath) GetUniquePairedPaths(string outputDir, string baseName)

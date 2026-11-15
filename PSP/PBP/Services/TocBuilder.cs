@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.Constants;
+using Common.Localization;
 using PSP.PBP.Models;
 
 namespace PSP.PBP.Services;
@@ -70,7 +71,7 @@ public static class TocBuilder
         CueFormatStrings.Mode2_2352 => 0x41,
         CueFormatStrings.Mode2_2336 => 0x41,
         CueFormatStrings.Audio => 0x01,
-        _ => throw new NotSupportedException($"지원하지 않는 트랙 형식입니다: {dataType}")
+        _ => throw new NotSupportedException(Loc.S.ErrUnsupportedTrackType(dataType))
     };
 
     public static byte ToBcd(int value) => (byte)((value / 10) * 0x10 + (value % 10));

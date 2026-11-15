@@ -529,7 +529,7 @@ public abstract class LocalizedStrings
     public abstract string ErrCiaNeedsKeys { get; }
     public abstract string LogExefsIconEntryNotFound { get; }
     public abstract string LogGameInfoChanged { get; }
-    public abstract string ErrUnsupportedFormat(object arg0);
+    public abstract string ErrUnsupportedFormat(object? arg0);
     public abstract string LogUnpackStart { get; }
     public abstract string LogPartitionUnpackDone(object arg0);
     public abstract string LogRepackStart { get; }
@@ -551,7 +551,7 @@ public abstract class LocalizedStrings
     public abstract string LogLoadFailed(object arg0);
     public abstract string LogRecoverFailed(object arg0);
     public abstract string LogExtractFailed(object arg0);
-    public abstract string LogExtractDone(object arg0);
+    public abstract string LogExtractDone(object? arg0);
     public abstract string DialogSelectSaveLocation(object arg0);
     public abstract string FilterFilesOfType(object arg0);
     public abstract string DialogSelectPatchFolder { get; }
@@ -583,12 +583,12 @@ public abstract class LocalizedStrings
     public abstract string LogRecoveryRegistered(object arg0);
     public abstract string LogRecoverySkipped(object arg0);
     public abstract string LogRecoveryCancelled { get; }
-    public abstract string LogExtractReady(object arg0, object arg1);
+    public abstract string LogExtractReady(object? arg0, object arg1);
     public abstract string LogOutputPathAndFormat(object arg0, object arg1);
-    public abstract string LogExtractStarted(object arg0);
+    public abstract string LogExtractStarted(object? arg0);
     public abstract string LogInvalidTitleIdConfigured { get; }
     public abstract string LogTitleAlreadyExists(object arg0);
-    public abstract string MsgConfirmReinstall(object arg0);
+    public abstract string MsgConfirmReinstall(object? arg0);
     public abstract string LogReinstallDeclined { get; }
     public abstract string LogDeletingInstalledTitleFolder { get; }
     public abstract string LogHomebrewFinalizeHint { get; }
@@ -606,7 +606,7 @@ public abstract class LocalizedStrings
     public abstract string ErrSelectWorkFolder { get; }
     public abstract string ErrNoUnpackedData { get; }
     public abstract string ErrPatchInfoUnreadable { get; }
-    public abstract string ErrPatchTargetMismatch(object arg0);
+    public abstract string ErrPatchTargetMismatch(object? arg0);
 
     public abstract string LogConvertDone(object arg0);
     public abstract string LogCompressDone(object arg0);
@@ -729,13 +729,13 @@ public abstract class LocalizedStrings
     public abstract string LabelNone { get; }
     public abstract string LogUnpackFolderLoaded(object arg0);
     public abstract string LogUnpackFolderItemRemoved { get; }
-    public abstract string LogPatchAssigned(object arg0);
+    public abstract string LogPatchAssigned(object? arg0);
     public abstract string LogSomeProgramsUnpatched { get; }
-    public abstract string MsgPatchAssignFailedNoMatch(object arg0, object arg1, object arg2);
-    public abstract string MsgPatchAssignFailedNotFound(object arg0);
+    public abstract string MsgPatchAssignFailedNoMatch(object? arg0, object arg1, object arg2);
+    public abstract string MsgPatchAssignFailedNotFound(object? arg0);
     public abstract string MsgTitlePatchAssignFailed { get; }
-    public abstract string LogPatchAssignWarnGeneric(object arg0);
-    public abstract string LogPatchAssignInfoGeneric(object arg0);
+    public abstract string LogPatchAssignWarnGeneric(object? arg0);
+    public abstract string LogPatchAssignInfoGeneric(object? arg0);
     public abstract string MsgBulkAssignSummary(object arg0, object arg1);
     public abstract string MsgBulkAssignDetails(object arg0);
     public abstract string LogBulkAssignFailed(object arg0);
@@ -776,8 +776,8 @@ public abstract class LocalizedStrings
     public abstract string FilterArchiveFiles { get; }
     public abstract string LogArchiveOpenError(object arg0);
     public abstract string LogNoTitleInfoItems { get; }
-    public abstract string DialogSelectKoreanPatchFolderFor(object arg0);
-    public abstract string DialogSelectKoreanPatchArchiveFor(object arg0);
+    public abstract string DialogSelectKoreanPatchFolderFor(object? arg0);
+    public abstract string DialogSelectKoreanPatchArchiveFor(object? arg0);
     public abstract string DialogSelectGameFolder { get; }
     public abstract string ErrInvalidKeyGeneration(object arg0);
     public abstract string ErrMainNpdmNotFound { get; }
@@ -1031,7 +1031,7 @@ public abstract class LocalizedStrings
     public abstract string ErrRiivolutionXmlNotInFolder { get; }
     public abstract string ErrMultipleXmlSpecifyOne(object arg0, object arg1);
     public abstract string WarnOptionChoiceOutOfRange(object arg0, object arg1);
-    public abstract string WarnOptionReferencesMissingPatch(object arg0, object arg1);
+    public abstract string WarnOptionReferencesMissingPatch(object arg0, object? arg1);
     public abstract string WarnFileEntryMissingDiscOrExternal { get; }
     public abstract string WarnFolderEntryMissingDiscOrExternal { get; }
     public abstract string WarnPartialOverwriteUnsupported(object arg0);
@@ -1049,4 +1049,150 @@ public abstract class LocalizedStrings
     public abstract string ErrWbfsClusterOutOfFile { get; }
     public abstract string ErrWiaReadOutOfRange { get; }
     public abstract string ErrWiaReadProgressFailed { get; }
+
+    public abstract string LogFolderReadFailed(object arg0, object arg1);
+    public abstract string LogReplacedArrow(object arg0, object arg1);
+    public abstract string LogUnpackingTitle(object arg0, object arg1, object arg2);
+    public abstract string ErrNoTitlesToPack { get; }
+    public abstract string LogPackagingToWup(object arg0, object arg1, object arg2);
+    public abstract string DialogSelectFolderToAddWupOrLoadiine { get; }
+    public abstract string LogUnpackFolderLoadedTitles(object arg0);
+    public abstract string LogReplacingExistingKind(object arg0);
+    public abstract string LogCannotAutoAddFolder(object arg0);
+    public abstract string LogUnsupportedWiiUInputFormat(object arg0);
+    public abstract string ErrWiiUKeysNotFound { get; }
+    public abstract string LogTitlesAdded(object arg0, object arg1);
+    public abstract string LogAddFailed(object arg0, object arg1);
+    public abstract string ErrAddAtLeastOneTitle { get; }
+    public abstract string ErrUnpackedFolderEntryWiiU { get; }
+    public abstract string MsgNoWiiUKeysTitle { get; }
+    public abstract string MsgNoWiiUKeysDesc { get; }
+    public abstract string ErrReadFailedDetail(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5);
+    public abstract string ErrDuplicatePathCaseSensitive(object arg0);
+    public abstract string ErrTitleTmdNotFound { get; }
+    public abstract string ErrTitleTikNotFound { get; }
+    public abstract string ErrTmdFstContentNotFound { get; }
+    public abstract string ErrContent0NotFst { get; }
+    public abstract string ErrFstClusterCountAbnormal { get; }
+    public abstract string ErrUpdateSameAsBase(object arg0);
+    public abstract string ErrFileNotFoundInWup(object arg0);
+    public abstract string ErrTmdContentIndexMissing(object arg0);
+    public abstract string ErrContentReadOutOfRange(object arg0);
+    public abstract string ErrContentFileNotFound(object arg0);
+    public abstract string ErrRawContentAbnormallyLarge(object arg0, object arg1);
+    public abstract string ErrHashTreeBlockHeaderUnreadable { get; }
+    public abstract string ErrUnsupportedTmdSignatureType(object arg0);
+
+    public abstract string ErrTrackStreamEndedEarly { get; }
+    public abstract string ErrImgSizeNotSectorMultiple(object arg0);
+    public abstract string ErrCcdNoValidTrackSection(object arg0);
+    public abstract string ErrCcdPairedFileNotFound(object arg0, object arg1);
+    public abstract string ErrCcdTrackMissingModeIndex { get; }
+    public abstract string ErrCcdTrackSectorRangeInvalid(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string ErrCcdEntryTrackSectorRangeInvalid(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string ErrUnknownCcdTrackMode(object arg0);
+    public abstract string ErrCueNoFileEntry(object arg0);
+    public abstract string ErrOnlyBinaryFileType(object arg0, object arg1);
+    public abstract string ErrCueFileNoTrack(object arg0, object arg1);
+    public abstract string ErrCueNoValidTrack(object arg0);
+    public abstract string ErrTrackNoIndex01(object arg0, object arg1);
+    public abstract string ErrCueTrackRangeInvalid(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string ErrCueReferencedBinFileNotFound(object arg0);
+    public abstract string ErrUnsupportedTrackType(object arg0);
+    public abstract string ErrUnsupportedSourceFormat(object arg0);
+    public abstract string ErrMdsNoValidTrack(object arg0);
+    public abstract string ErrMdsPairedMdfNotFound(object arg0);
+    public abstract string ErrMdsFileTooSmall(object arg0);
+    public abstract string ErrMdsSignatureMismatch(object arg0);
+    public abstract string ErrMdsSessionBlockOffsetInvalid(object arg0, object arg1);
+    public abstract string ErrMdsTrackBlockOffsetInvalid(object arg0, object arg1);
+    public abstract string ErrMdsSessionZeroBlocks(object arg0);
+    public abstract string ErrMdsTrackBlockAreaOutOfFile(object arg0, object arg1);
+    public abstract string ErrMdsIndexBlockOffsetInvalid(object arg0, object arg1);
+    public abstract string ErrMdsTrackDataRangeOutOfMdf(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string ErrIsoSingleDataTrackOnly(object arg0);
+    public abstract string ErrIsoUnsupportedTrackType(object arg0);
+    public abstract string ErrSectorSizeTooSmall(object arg0, object arg1);
+    public abstract string ErrChdFileNotFound { get; }
+    public abstract string ErrChdmanInfoFailed(object arg0);
+    public abstract string ErrChdInfoParseFailed { get; }
+    public abstract string ErrPathEmpty { get; }
+    public abstract string ErrFileNotFoundName(object? arg0);
+    public abstract string ErrCueFileNotFound(object? arg0);
+    public abstract string ErrCueNoBinReference(object arg0);
+    public abstract string ErrBinFileNotFoundName(object arg0);
+    public abstract string LogConvertStart(object? arg0);
+    public abstract string ErrIsoExtractFailed { get; }
+    public abstract string ResultExtractSuccessIso { get; }
+    public abstract string LogExtractingLabel(object arg0);
+    public abstract string ErrChdExtractFailed { get; }
+    public abstract string ErrLabelFileCreateFailed(object arg0);
+    public abstract string ErrTrackFileCreateFailed(object arg0);
+    public abstract string LogLabelExtractDone(object arg0, object arg1);
+    public abstract string ResultExtractSuccessTracks(object arg0, object arg1);
+    public abstract string LogExtractingBinCue { get; }
+    public abstract string ErrCueFileCreateFailed { get; }
+    public abstract string ErrBinFileCreateFailed(object arg0);
+    public abstract string LogBinCueExtractDone { get; }
+    public abstract string ResultConvertSuccessMultiTrack(object arg0);
+    public abstract string LogCancellingConversion { get; }
+    public abstract string ErrChdCreateFailed { get; }
+    public abstract string ResultCompressSuccess { get; }
+    public abstract string LogCancellingCompress { get; }
+    public abstract string LogTempFileDeleted(object arg0);
+    public abstract string LogFileDeleteFailed(object arg0, object arg1);
+    public abstract string ErrCsoMagicMismatch { get; }
+    public abstract string ErrBlockLz4DecodeFailed(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5, object arg6, object arg7);
+    public abstract string ErrBlockLz4DecodeFailedShort(object arg0, object arg1, object arg2, object arg3, object arg4, object arg5);
+    public abstract string ErrBlockDecompressFailed(object arg0);
+    public abstract string ErrIndexShiftBlockOffsetOverflow(object arg0, object arg1);
+    public abstract string ErrIndexShiftFinalOffsetOverflow(object arg0);
+    public abstract string ErrChdNotConvertibleToCso(object? arg0, object? arg1, object arg2);
+    public abstract string ErrChdNotExtractableToIso(object? arg0, object? arg1, object arg2);
+    public abstract string ErrInputDataEmpty { get; }
+    public abstract string ErrBitrateMustBeOneOf { get; }
+    public abstract string ErrUnsupportedFormatGeneric { get; }
+    public abstract string ErrMonoOrStereoOnly { get; }
+    public abstract string ErrFrameSizeInvalid { get; }
+    public abstract string ErrOutputBufferTooSmall { get; }
+    public abstract string ErrJointStereoUnitHeaderInvalid { get; }
+    public abstract string ErrSoundUnitHeaderInvalid { get; }
+    public abstract string ErrBitstreamTooShort { get; }
+    public abstract string ErrToneCodingModeInvalid { get; }
+    public abstract string ErrToneQuantIndexInvalid { get; }
+    public abstract string ErrTonePositionInvalid { get; }
+    public abstract string ErrFmtChunkInvalid { get; }
+    public abstract string ErrAt3StructureInvalid { get; }
+    public abstract string ErrUnsupportedSampleRate { get; }
+    public abstract string ErrAt3FrameSizeInvalid { get; }
+    public abstract string ErrAt3NoAudioData { get; }
+    public abstract string ErrHuffmanCodeInvalid { get; }
+    public abstract string ErrCueFileEntryNotFoundIn(object arg0);
+    public abstract string ErrPs1GamesOnly { get; }
+    public abstract string ErrDiscUnreadable { get; }
+    public abstract string LogUnpackingPath(object arg0);
+    public abstract string LogFailedCleaningFiles { get; }
+    public abstract string LogUnpackDone { get; }
+    public abstract string ErrUnsupportedExtension(object arg0);
+    public abstract string StatusRecognizing { get; }
+    public abstract string LogPreviewPlaybackError(object arg0);
+    public abstract string ActionLoad { get; }
+    public abstract string LogBgmActionStart(object arg0, object arg1);
+    public abstract string LogPreviewPrepareFailed(object arg0);
+    public abstract string LogBgmActionDone(object arg0, object arg1);
+    public abstract string LogBgmActionError(object arg0, object arg1);
+    public abstract string LogAddFilesError(object arg0);
+    public abstract string LogGameIdRecognizeFailed(object arg0, object arg1);
+    public abstract string LogMaxItemsExceeded(object arg0, object arg1);
+    public abstract string LogGameIdFailedExcluded(object arg0);
+    public abstract string LabelVerifiedOnManyGames { get; }
+    public abstract string LabelExperimental { get; }
+    public abstract string DialogSelectFile { get; }
+    public abstract string LogNoFilesAdded { get; }
+    public abstract string LogGameIdRecognizeError { get; }
+    public abstract string LogJobStartPacking(object arg0, object arg1, object arg2);
+    public abstract string LogJobDone(object? arg0);
+    public abstract string LogErrorWithTitle(object arg0, object arg1);
+    public abstract string LogCleanupException(object arg0);
+    public abstract string LogJobsStartingUnpack(object arg0);
 }

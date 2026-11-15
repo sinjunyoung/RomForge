@@ -46,7 +46,7 @@ public class FileConverter : IDisposable
             InputFormat.BinCue => await ConvertToChdAsync(source, outputDir, progress, ct),
             InputFormat.Gdi => await ConvertToChdAsync(source, outputDir, progress, ct),
 
-            _ => ConversionResult.Fail($"지원하지 않는 형식: {source.Format}")
+            _ => ConversionResult.Fail(Loc.S.ErrUnsupportedFormat(source.Format))
         };
     }
 
@@ -56,7 +56,7 @@ public class FileConverter : IDisposable
         var dir = outputDir ?? Path.GetDirectoryName(chdPath)!;
         var name = Path.GetFileNameWithoutExtension(chdPath);
 
-        Log($"{Path.GetFileName(chdPath)} 변환 시작", LogLevel.Highlight);
+        Log(Loc.S.LogConvertStart(Path.GetFileName(chdPath)), LogLevel.Highlight);
 
         try
         {
@@ -70,14 +70,14 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = isoPath;
 
-                Log("ISO 추출 중...");
+                Log(Loc.S.ProgressExtractingIso);
 
                 bool extracted = await _chdman.ExtractRawAsync(chdPath, isoPath, progress, ct);
 
                 if (!extracted || !File.Exists(isoPath))
-                    return ConversionResult.Fail("ISO 추출 실패");
+                    return ConversionResult.Fail(Loc.S.ErrIsoExtractFailed);
 
-                Log($"추출 완료: {isoPath}", LogLevel.Ok);
+                Log(Loc.S.LogExtractDone(isoPath), LogLevel.Ok);
 
                 CurrentOutputPath = null;
 
@@ -86,7 +86,7 @@ public class FileConverter : IDisposable
                 return new ConversionResult
                 {
                     Success = true,
-                    Message = "추출 성공 (ISO)",
+                    Message = Loc.S.ResultExtractSuccessIso,
                     OutputFile = isoPath,
                     OutputFiles = [isoPath],
                     VerificationPerformed = true
@@ -100,17 +100,17 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = tocPath;
 
-                Log($"{label} 추출 중...");
+                Log(Loc.S.LogExtractingLabel(label));
 
                 bool extracted = await _chdman.ExtractCdAsync(chdPath, tocPath, progress, ct);
 
                 if (!extracted)
-                    return ConversionResult.Fail("CHD 추출 실패");
+                    return ConversionResult.Fail(Loc.S.ErrChdExtractFailed);
 
                 ct.ThrowIfCancellationRequested();
 
                 if (!File.Exists(tocPath))
-                    return ConversionResult.Fail($"{label} 파일 생성 실패");
+                    return ConversionResult.Fail(Loc.S.ErrLabelFileCreateFailed(label));
 
                 var extractedTrackFiles = asCue ? [.. ConversionSource.ParseBinsFromCue(tocPath)] : ConversionSource.ParseFilesFromGdi(tocPath)
                         .Select(f => Path.IsPathRooted(f) ? f : Path.Combine(dir, f))
@@ -118,9 +118,9 @@ public class FileConverter : IDisposable
                 var missingTrackFile = extractedTrackFiles.FirstOrDefault(f => !File.Exists(f));
 
                 if (missingTrackFile != null)
-                    return ConversionResult.Fail($"트랙 파일 생성 실패: {Path.GetFileName(missingTrackFile)}");
+                    return ConversionResult.Fail(Loc.S.ErrTrackFileCreateFailed(Path.GetFileName(missingTrackFile)));
 
-                Log($"{label} 추출 완료 ({extractedTrackFiles.Count}개 트랙 파일)", LogLevel.Ok);
+                Log(Loc.S.LogLabelExtractDone(label, extractedTrackFiles.Count), LogLevel.Ok);
 
                 CurrentOutputPath = null;
 
@@ -129,7 +129,7 @@ public class FileConverter : IDisposable
                 return new ConversionResult
                 {
                     Success = true,
-                    Message = $"추출 성공 ({label}, {extractedTrackFiles.Count}개 트랙 파일)",
+                    Message = Loc.S.ResultExtractSuccessTracks(label, extractedTrackFiles.Count),
                     OutputFile = tocPath,
                     OutputFiles = [tocPath, .. extractedTrackFiles],
                     VerificationPerformed = false
@@ -141,25 +141,25 @@ public class FileConverter : IDisposable
 
                 CurrentOutputPath = cuePath;
 
-                Log("BIN/CUE 추출 중...");
+                Log(Loc.S.LogExtractingBinCue);
 
                 bool extracted = await _chdman.ExtractCdAsync(chdPath, cuePath, progress, ct);
 
                 if (!extracted)
-                    return ConversionResult.Fail("CHD 추출 실패");
+                    return ConversionResult.Fail(Loc.S.ErrChdExtractFailed);
 
                 ct.ThrowIfCancellationRequested();
 
                 if (!File.Exists(cuePath))
-                    return ConversionResult.Fail("CUE 파일 생성 실패");
+                    return ConversionResult.Fail(Loc.S.ErrCueFileCreateFailed);
 
                 var extractedBins = ConversionSource.ParseBinsFromCue(cuePath);
                 var missingBin = extractedBins.FirstOrDefault(b => !File.Exists(b));
 
                 if (missingBin != null)
-                    return ConversionResult.Fail($"BIN 파일 생성 실패: {Path.GetFileName(missingBin)}");
+                    return ConversionResult.Fail(Loc.S.ErrBinFileCreateFailed(Path.GetFileName(missingBin)));
 
-                Log("BIN/CUE 추출 완료", LogLevel.Ok);
+                Log(Loc.S.LogBinCueExtractDone, LogLevel.Ok);
 
                 CurrentOutputPath = null;
 
@@ -168,7 +168,7 @@ public class FileConverter : IDisposable
                 return new ConversionResult
                 {
                     Success = true,
-                    Message = $"변환 성공 (멀티 트랙 BIN/CUE, {extractedBins.Count}개 BIN)",
+                    Message = Loc.S.ResultConvertSuccessMultiTrack(extractedBins.Count),
                     OutputFile = cuePath,
                     OutputFiles = [cuePath, .. extractedBins],
                     VerificationPerformed = false
@@ -177,7 +177,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("변환 취소 중...", LogLevel.Error);
+            Log(Loc.S.LogCancellingConversion, LogLevel.Error);
             CleanupFiles(CurrentOutputPath);
 
             CurrentOutputPath = null;
@@ -190,7 +190,7 @@ public class FileConverter : IDisposable
 
             CurrentOutputPath = null;
 
-            return ConversionResult.Fail($"오류: {ex.Message}");
+            return ConversionResult.Fail(Loc.S.LogError(ex.Message));
         }
     }
 
@@ -201,7 +201,7 @@ public class FileConverter : IDisposable
 
         chdPath = Utils.GetUniqueFilePath(chdPath);
 
-        Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
+        Log(Loc.S.LogCompressStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
 
         CurrentOutputPath = chdPath;
 
@@ -214,7 +214,7 @@ public class FileConverter : IDisposable
             ct.ThrowIfCancellationRequested();
 
             if (!success || !File.Exists(chdPath))
-                return ConversionResult.Fail("CHD 생성 실패");
+                return ConversionResult.Fail(Loc.S.ErrChdCreateFailed);
 
             CurrentOutputPath = null;
 
@@ -258,13 +258,13 @@ public class FileConverter : IDisposable
 
             double ratio = originalSize > 0 ? (compressedSize * 100.0 / originalSize) : 0.0;
 
-            Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
-            Log($"압축 완료: {chdPath}", LogLevel.Ok);
+            Log($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
+            Log(Loc.S.LogCompressDone(chdPath), LogLevel.Ok);
 
             var result = new ConversionResult
             {
                 Success = true,
-                Message = "압축 성공",
+                Message = Loc.S.ResultCompressSuccess,
                 OutputFile = chdPath,
                 OutputFiles = [chdPath],
                 VerificationPerformed = true
@@ -276,7 +276,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("압축 취소 중...", LogLevel.Error);
+            Log(Loc.S.LogCancellingCompress, LogLevel.Error);
             CleanupFiles(chdPath);
 
             CurrentOutputPath = null;
@@ -289,7 +289,7 @@ public class FileConverter : IDisposable
 
             CurrentOutputPath = null;
 
-            return ConversionResult.Fail($"오류: {ex.Message}");
+            return ConversionResult.Fail(Loc.S.LogError(ex.Message));
         }
     }
 
@@ -298,7 +298,7 @@ public class FileConverter : IDisposable
         var inputPath = source.PrimaryFile ?? throw new NullReferenceException("inputPath");
         var chdPath = Utils.GetUniqueFilePath(Utils.ResolveOutputFilePath(inputPath, ".chd", outputDir)) ?? throw new NullReferenceException("chdPath");
 
-        Log($"{Path.GetFileName(inputPath)} 압축 시작", LogLevel.Highlight);
+        Log(Loc.S.LogCompressStart(Path.GetFileName(inputPath)), LogLevel.Highlight);
 
         CurrentOutputPath = chdPath;
 
@@ -313,7 +313,7 @@ public class FileConverter : IDisposable
             ct.ThrowIfCancellationRequested();
 
             if (!success || !File.Exists(chdPath))
-                return ConversionResult.Fail("CHD 생성 실패");
+                return ConversionResult.Fail(Loc.S.ErrChdCreateFailed);
 
             CurrentOutputPath = null;
 
@@ -321,15 +321,15 @@ public class FileConverter : IDisposable
             long compressedSize = new FileInfo(chdPath).Length;
             double ratio = originalSize > 0 ? (compressedSize * 100.0 / originalSize) : 0.0;
 
-            Log($"압축률: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
-            Log($"압축 완료: {chdPath}", LogLevel.Ok);
+            Log($"{Loc.S.LogCompressionRatio}: {Utils.FormatFileSize(originalSize)} → {Utils.FormatFileSize(compressedSize)} ({ratio:F1}%)", LogLevel.Highlight);
+            Log(Loc.S.LogCompressDone(chdPath), LogLevel.Ok);
 
             progress?.Report(new ProgressInfo { Label = Loc.S.ProgressCompressDone, Percent = 100 });
 
             return new ConversionResult
             {
                 Success = true,
-                Message = "압축 성공",
+                Message = Loc.S.ResultCompressSuccess,
                 OutputFile = chdPath,
                 OutputFiles = [chdPath],
                 VerificationPerformed = true
@@ -337,7 +337,7 @@ public class FileConverter : IDisposable
         }
         catch (OperationCanceledException)
         {
-            Log("압축 취소 중...", LogLevel.Error);
+            Log(Loc.S.LogCancellingCompress, LogLevel.Error);
             CleanupFiles(chdPath);
             CurrentOutputPath = null;
 
@@ -348,7 +348,7 @@ public class FileConverter : IDisposable
             CleanupFiles(chdPath);
 
             CurrentOutputPath = null;
-            return ConversionResult.Fail($"오류: {ex.Message}");
+            return ConversionResult.Fail(Loc.S.LogError(ex.Message));
         }
     }
 
@@ -365,11 +365,11 @@ public class FileConverter : IDisposable
             try
             {
                 File.Delete(path);
-                Log($"임시 파일 삭제: {Path.GetFileName(path)}");
+                Log(Loc.S.LogTempFileDeleted(Path.GetFileName(path)));
             }
             catch (Exception ex)
             {
-                Log($"파일 삭제 실패: {Path.GetFileName(path)} - {ex.Message}", LogLevel.Error);
+                Log(Loc.S.LogFileDeleteFailed(Path.GetFileName(path), ex.Message), LogLevel.Error);
             }
         }
     }

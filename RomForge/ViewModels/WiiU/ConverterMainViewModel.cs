@@ -227,7 +227,7 @@ public class ConverterMainViewModel : ToolTabViewModel
     {
         if (string.IsNullOrEmpty(OutputPath))
         {
-            AppendLog("출력 폴더를 선택하세요.", LogLevel.Error);
+            AppendLog(Loc.S.HintSelectOutput, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -250,7 +250,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                 {
                     int totalCount = FileItems.Count;
 
-                    AppendLog($"총 {totalCount}개의 WiiU 변환 작업을 시작합니다.", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogJobsStartingConvert(totalCount), LogLevel.Highlight);
 
                     int cnt = 0;
 
@@ -283,7 +283,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                         }
                         catch (Exception ex)
                         {
-                            AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
+                            AppendLog(Loc.S.LogConvertFailed(item.FileName, ex.Message), LogLevel.Error);
                             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                             item.State = ItemStatus.Failed;
                             item.Progress = 0;                            
@@ -292,18 +292,18 @@ public class ConverterMainViewModel : ToolTabViewModel
 
                     if (cnt > 0)
                     {
-                        AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                        AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                         await SoundPlayer.PlayCompleteAsync();
                         MainViewModel.SetTaskbarProgress(100);
                     }
                     else
-                        AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                        AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
 
                 }, _cts.Token);
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
@@ -311,7 +311,7 @@ public class ConverterMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -373,7 +373,7 @@ public class ConverterMainViewModel : ToolTabViewModel
                         }
 
                     default:
-                        throw new NotSupportedException($"지원하지 않는 출력 포맷입니다: {item.SelectedTargetFormat}");
+                        throw new NotSupportedException(Loc.S.ErrUnsupportedFormat(item.SelectedTargetFormat));
                 }
             }
         }
@@ -386,7 +386,7 @@ public class ConverterMainViewModel : ToolTabViewModel
 
     private async Task BrowseOutput()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "출력 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.ToolTipBrowseOutput };
 
         if (dlg.ShowDialog() == true)
             OutputPath = dlg.FolderName;

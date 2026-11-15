@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
@@ -30,7 +31,7 @@ public partial class RepackTab : UserControl
         if (sender is not FrameworkElement { DataContext: TitleInputEntry entry }) 
             return;
 
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = $"{entry.TitleName}에 적용할 한글패치 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectKoreanPatchFolderFor(entry.TitleName) };
 
         if (dlg.ShowDialog() == true)
             entry.PatchPath = dlg.FolderName;
@@ -43,8 +44,8 @@ public partial class RepackTab : UserControl
 
         var dlg = new Microsoft.Win32.OpenFileDialog
         {
-            Title = $"{entry.TitleName}에 적용할 한글패치 압축파일 선택",
-            Filter = "압축파일 (*.zip;*.7z)|*.zip;*.7z"
+            Title = Loc.S.DialogSelectKoreanPatchArchiveFor(entry.TitleName),
+            Filter = $"{Loc.S.FilterArchiveFiles} (*.zip;*.7z)|*.zip;*.7z"
         };
 
         if (dlg.ShowDialog() == true)

@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using PSP.PBP.AT3.Models;
 
 namespace PSP.PBP.AT3.Services;
@@ -11,7 +12,7 @@ public static class FileDecoder
     public static PcmData Decode(byte[] file, Action<double>? progress = null)
     {
         if (file == null || file.Length < 12 || !file.AsSpan(0, 4).SequenceEqual("RIFF"u8) || !file.AsSpan(8, 4).SequenceEqual("WAVE"u8))
-            throw new InvalidDataException("AT3 파일이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotFormatFile("AT3"));
 
         int channels = 0;
         int sampleRate = 0;
@@ -33,10 +34,10 @@ public static class FileDecoder
             if (id.SequenceEqual("fmt "u8))
             {
                 if (size < 18 || body + 18 > file.Length)
-                    throw new InvalidDataException("fmt 청크가 올바르지 않습니다.");
+                    throw new InvalidDataException(Loc.S.ErrFmtChunkInvalid);
 
                 if (BinaryPrimitives.ReadUInt16LittleEndian(file.AsSpan(body, 2)) != FormatTagAtrac3)
-                    throw new NotSupportedException("ATRAC3 포맷이 아닙니다.");
+                    throw new NotSupportedException(Loc.S.ErrNotFormatFile("ATRAC3"));
 
                 channels = BinaryPrimitives.ReadUInt16LittleEndian(file.AsSpan(body + 2, 2));
                 sampleRate = (int)BinaryPrimitives.ReadUInt32LittleEndian(file.AsSpan(body + 4, 4));
@@ -66,18 +67,18 @@ public static class FileDecoder
         }
 
         if (!hasFormat || dataStart < 0)
-            throw new InvalidDataException("AT3 파일 구조가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrAt3StructureInvalid);
 
         if (sampleRate != CodecInfo.SampleRateHz)
-            throw new NotSupportedException("지원하지 않는 샘플레이트입니다.");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedSampleRate);
 
         if (frameSize <= 0)
-            throw new InvalidDataException("AT3 프레임 크기가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrAt3FrameSizeInvalid);
 
         long frames = dataSize / frameSize;
 
         if (frames == 0)
-            throw new InvalidDataException("AT3에 오디오 데이터가 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrAt3NoAudioData);
 
         var decoder = new Decoder(channels, frameSize, jointStereo);
         var samples = new float[frames * CodecInfo.NumSamples * channels];

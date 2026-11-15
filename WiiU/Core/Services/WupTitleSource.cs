@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using System.Security.Cryptography;
 using System.Text;
 using WiiU.Core.IO;
@@ -35,10 +36,10 @@ public sealed class WupTitleSource : ITitleSource
         string tikPath = Path.Combine(folderPath, "title.tik");
 
         if (!File.Exists(tmdPath))
-            throw new FileNotFoundException("title.tmd를 찾을 수 없습니다.", tmdPath);
+            throw new FileNotFoundException(Loc.S.ErrTitleTmdNotFound, tmdPath);
 
         if (!File.Exists(tikPath))
-            throw new FileNotFoundException("title.tik를 찾을 수 없습니다.", tikPath);
+            throw new FileNotFoundException(Loc.S.ErrTitleTikNotFound, tikPath);
 
         var tmdBytes = File.ReadAllBytes(tmdPath);
         var (titleIdHex, titleVersion, contents) = WupTmd.Parse(tmdBytes);
@@ -52,7 +53,7 @@ public sealed class WupTitleSource : ITitleSource
 
         _titleKey = ticket.DecryptTitleKey();
 
-        var fstContent = _contents.FirstOrDefault(c => c.Index == 0) ?? throw new InvalidDataException("TMD에서 index 0(FST) 콘텐츠를 찾을 수 없습니다.");
+        var fstContent = _contents.FirstOrDefault(c => c.Index == 0) ?? throw new InvalidDataException(Loc.S.ErrTmdFstContentNotFound);
         byte[] fstData = DecryptRawContentFull(fstContent);
 
         _fstOffsetFactor = ParseFst(fstData);
@@ -69,13 +70,13 @@ public sealed class WupTitleSource : ITitleSource
         uint magic = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(0, 4));
 
         if (magic != 0x46535400)
-            throw new InvalidDataException("content 0이 FST가 아닙니다 (매직 불일치) — WUP 폴더 구조가 예상과 다릅니다.");
+            throw new InvalidDataException(Loc.S.ErrContent0NotFst);
 
         uint offsetFactor = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(4, 4));
         uint numCluster = BinaryPrimitives.ReadUInt32BigEndian(fst.AsSpan(8, 4));
 
         if (numCluster > 4096)
-            throw new InvalidDataException("FST 클러스터 개수가 비정상적으로 많습니다.");
+            throw new InvalidDataException(Loc.S.ErrFstClusterCountAbnormal);
 
         int clusterTableOffset = 0x20;
 
@@ -174,17 +175,17 @@ public sealed class WupTitleSource : ITitleSource
         var entry = FindEntry(path);
 
         if (entry is not null && entry.IsSharedWithBase)
-            throw new InvalidOperationException($"'{path}'는 본편과 동일해서 이 업데이트 안에는 실제 데이터가 없습니다. 본편 쪽에서 읽어야 합니다.");
+            throw new InvalidOperationException(Loc.S.ErrUpdateSameAsBase(path));
 
         return entry?.FileSize ?? 0;
     }
 
     public Stream OpenRead(string path)
     {
-        var entry = FindEntry(path) ?? throw new FileNotFoundException($"WUP 안에서 파일을 찾을 수 없습니다: {path}");
+        var entry = FindEntry(path) ?? throw new FileNotFoundException(Loc.S.ErrFileNotFoundInWup(path));
 
         if (entry.IsSharedWithBase)
-            throw new InvalidOperationException($"'{path}'는 본편과 동일해서 이 업데이트 안에는 실제 데이터가 없습니다. 본편 쪽에서 읽어야 합니다.");
+            throw new InvalidOperationException(Loc.S.ErrUpdateSameAsBase(path));
 
         return new FstEntryStream(this, entry, path);
     }
@@ -242,7 +243,7 @@ public sealed class WupTitleSource : ITitleSource
             ReadRawRange(clusterIndex, baseOffset, dest, destOffset, size);
     }
 
-    private WupContent FindContent(int index) => _contents.FirstOrDefault(c => c.Index == index) ?? throw new InvalidDataException($"TMD에 콘텐츠 인덱스 {index}가 없습니다.");
+    private WupContent FindContent(int index) => _contents.FirstOrDefault(c => c.Index == index) ?? throw new InvalidDataException(Loc.S.ErrTmdContentIndexMissing(index));
 
     private void ReadRawRange(int clusterIndex, long offset, byte[] dest, int destOffset, int size)
     {
@@ -255,7 +256,7 @@ public sealed class WupTitleSource : ITitleSource
         }
 
         if (offset + size > decrypted.Length)
-            throw new InvalidDataException($"콘텐츠 {clusterIndex}에서 범위를 벗어난 읽기 요청입니다.");
+            throw new InvalidDataException(Loc.S.ErrContentReadOutOfRange(clusterIndex));
 
         Array.Copy(decrypted, offset, dest, destOffset, size);
     }
@@ -265,12 +266,12 @@ public sealed class WupTitleSource : ITitleSource
         string appPath = Path.Combine(_folder, $"{content.CIDHex}.app");
 
         if (!File.Exists(appPath))
-            throw new FileNotFoundException($"콘텐츠 파일을 찾을 수 없습니다: {appPath}", appPath);
+            throw new FileNotFoundException(Loc.S.ErrContentFileNotFound(appPath), appPath);
 
         var fi = new FileInfo(appPath);
 
         if (fi.Length > RawFullDecryptSizeLimit)
-            throw new InvalidDataException($"콘텐츠 {content.CIDHex}.app가 raw 타입인데 비정상적으로 큽니다 ({fi.Length} bytes) — 해시트리 타입 판별이 잘못됐을 수 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrRawContentAbnormallyLarge(content.CIDHex, fi.Length));
 
         byte[] cipherData = File.ReadAllBytes(appPath);
         byte[] iv = new byte[16];
@@ -291,7 +292,7 @@ public sealed class WupTitleSource : ITitleSource
             string appPath = Path.Combine(_folder, $"{content.CIDHex}.app");
 
             if (!File.Exists(appPath))
-                throw new FileNotFoundException($"콘텐츠 파일을 찾을 수 없습니다: {appPath}", appPath);
+                throw new FileNotFoundException(Loc.S.ErrContentFileNotFound(appPath), appPath);
 
             stream = File.OpenRead(appPath);
             _hashedStreams[clusterIndex] = stream;
@@ -323,7 +324,7 @@ public sealed class WupTitleSource : ITitleSource
         int got = ReadFully(stream, block, HashedBlockSize);
 
         if (got < HashedHeaderSize)
-            throw new InvalidDataException("해시트리 콘텐츠 블록의 헤더(0x400바이트)조차 읽지 못했습니다 — 파일이 잘렸거나 오프셋 계산이 잘못됐을 수 있습니다.");
+            throw new InvalidDataException(Loc.S.ErrHashTreeBlockHeaderUnreadable);
 
         var hashPart = block.AsSpan(0, HashedHeaderSize).ToArray();
 

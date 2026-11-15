@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.Models;
+using Common.Localization;
 using PSP.PBP.Services;
 using RomForge.Core.Models.PSP;
 using System.IO;
@@ -143,6 +144,6 @@ public class DiscImportService
     {
         var wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
 
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
+        return $"{Loc.S.FilterSupportedFiles}|{wildcards}|{Loc.S.FilterAllFiles}|*.*";
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core.ViewModels;
 using System.IO;
 using System.Windows.Media;
@@ -30,10 +31,10 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 
     public string Kind => Role switch
     {
-        TitleRole.Base => "본편",
-        TitleRole.Update => "업데이트",
+        TitleRole.Base => Loc.S.ButtonFilterGame,
+        TitleRole.Update => Loc.S.ButtonFilterUpdate,
         TitleRole.Dlc => "DLC",
-        _ => "알수없음",
+        _ => Loc.S.LabelUnknown,
     };
 
     public string FilePath { get => field ?? filePath; set { SetProperty(ref field, value); OnPropertyChanged(nameof(DisplayName)); } }
@@ -44,7 +45,7 @@ public class TitleInputEntry(string filePath, string titleIdHex) : ViewModelBase
 
     public string TitleIdVersionDisplay => $"{TitleIdHex}_v{TitleVersion}";
 
-    public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? "(없음)" : PatchPath;
+    public string PatchDisplay => string.IsNullOrEmpty(PatchPath) ? $"({Loc.S.LabelNone})" : PatchPath;
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 

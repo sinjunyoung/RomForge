@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.AT3.IO;
+using Common.Localization;
 using PSP.PBP.AT3.Models;
 
 namespace PSP.PBP.AT3.Services;
@@ -61,7 +62,7 @@ internal static class MantissaReader
                 return symbol;
         }
 
-        throw new InvalidDataException("허프만 코드가 올바르지 않습니다.");
+        throw new InvalidDataException(Loc.S.ErrHuffmanCodeInvalid);
     }
 
     public static void Read(BitStreamReader br, int selector, bool constantLength, int count, Span<int> output)

@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core;
 using RomForge.Core.Models.PSP;
 using RomForge.ViewModels.PSP;
@@ -74,9 +75,9 @@ public partial class UnpackingTab : UserControl
 
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "파일 선택",
+            Title = Loc.S.DialogSelectFile,
             Multiselect = true,
-            Filter = "PBP 파일|*.pbp|모든 파일|*.*"
+            Filter = $"{Loc.S.FilterFilesOfType("PBP")}|*.pbp|{Loc.S.FilterAllFiles}|*.*"
         };
 
         if (dialog.ShowDialog() == true)
@@ -90,7 +91,7 @@ public partial class UnpackingTab : UserControl
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

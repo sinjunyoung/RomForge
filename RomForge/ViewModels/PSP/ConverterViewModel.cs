@@ -97,7 +97,7 @@ public class ConverterViewModel : ToolTabViewModel
             {
                 int totalCount = FileItems.Count;
 
-                AppendLog($"총 {totalCount}개의 변환 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobsStartingConvert(totalCount), LogLevel.Highlight);
 
                 int cnt = 0;
 
@@ -181,7 +181,7 @@ public class ConverterViewModel : ToolTabViewModel
                                 break;
 
                             default:
-                                throw new NotSupportedException($"{inputExt} → {outputExt} 변환은 지원하지 않습니다.");
+                                throw new NotSupportedException(Loc.S.ErrUnsupportedConversion(inputExt, outputExt));
                         }
 
                         item.Progress = 100;
@@ -204,7 +204,7 @@ public class ConverterViewModel : ToolTabViewModel
                             try { File.Delete(outPath); } catch { }
                         }
 
-                        AppendLog($"[{item.FileName}] 변환 실패: {ex.Message}", LogLevel.Error);
+                        AppendLog(Loc.S.LogConvertFailed(item.FileName, ex.Message), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         item.State = ItemStatus.Failed;
                         item.Progress = 0;
@@ -214,16 +214,16 @@ public class ConverterViewModel : ToolTabViewModel
 
                 if (cnt > 0)
                 {
-                    AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     MainViewModel.SetTaskbarProgress(100);
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
@@ -232,7 +232,7 @@ public class ConverterViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 

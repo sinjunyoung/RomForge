@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Models;
+using Common.Localization;
 using System.Text.RegularExpressions;
 
 namespace CHD.Core.Services;
@@ -23,7 +24,7 @@ public partial class ConversionSource
     public static ConversionSource FromPath(string? filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
-            throw new ArgumentException("경로가 비어있습니다.", nameof(filePath));
+            throw new ArgumentException(Loc.S.ErrPathEmpty, nameof(filePath));
 
         filePath = Path.GetFullPath(filePath);
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
@@ -214,24 +215,24 @@ public partial class ConversionSource
     {
         return Format switch
         {
-            InputFormat.Unknown => $"지원하지 않는 파일 형식: {Path.GetExtension(PrimaryFile)}",
+            InputFormat.Unknown => Loc.S.ErrUnsupportedFormat(Path.GetExtension(PrimaryFile)),
             InputFormat.BinCue => ValidateBinCue(),
-            _ => File.Exists(PrimaryFile) ? null : $"파일을 찾을 수 없습니다: {Path.GetFileName(PrimaryFile)}"
+            _ => File.Exists(PrimaryFile) ? null : Loc.S.ErrFileNotFoundName(Path.GetFileName(PrimaryFile))
         };
     }
 
     private string? ValidateBinCue()
     {
         if (!File.Exists(PrimaryFile))
-            return $"CUE 파일을 찾을 수 없습니다: {Path.GetFileName(PrimaryFile)}";
+            return Loc.S.ErrCueFileNotFound(Path.GetFileName(PrimaryFile));
 
         if (BinFiles.Count == 0)
-            return $"CUE 파일에 BIN 참조가 없습니다: {Path.GetFileName(PrimaryFile)}";
+            return Loc.S.ErrCueNoBinReference(Path.GetFileName(PrimaryFile));
 
         var missing = BinFiles.FirstOrDefault(b => !File.Exists(b));
 
         if (missing != null)
-            return $"BIN 파일을 찾을 수 없습니다: {Path.GetFileName(missing)}";
+            return Loc.S.ErrBinFileNotFoundName(Path.GetFileName(missing));
 
         return null;
     }

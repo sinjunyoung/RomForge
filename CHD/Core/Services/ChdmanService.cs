@@ -221,7 +221,7 @@ public sealed partial class ChdmanService : IDisposable
         chdPath = Path.GetFullPath(chdPath);
 
         if (!File.Exists(chdPath))
-            throw new FileNotFoundException("CHD 파일을 찾을 수 없습니다.", chdPath);
+            throw new FileNotFoundException(Loc.S.ErrChdFileNotFound, chdPath);
 
         try
         {
@@ -256,9 +256,9 @@ public sealed partial class ChdmanService : IDisposable
         GC.KeepAlive(logDelegate);
 
         if (result != 0)
-            throw new InvalidOperationException($"chdman info 실패 (code={result})");
+            throw new InvalidOperationException(Loc.S.ErrChdmanInfoFailed(result));
 
-        return ParseChdInfo(sb.ToString()) ?? throw new InvalidOperationException("CHD 정보 파싱 실패");
+        return ParseChdInfo(sb.ToString()) ?? throw new InvalidOperationException(Loc.S.ErrChdInfoParseFailed);
     }
 
     public static long CalculateOriginalSize(ChdInfo info)

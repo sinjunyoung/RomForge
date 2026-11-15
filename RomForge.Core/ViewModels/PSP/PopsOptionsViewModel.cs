@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.Services;
+using Common.Localization;
 using System.Collections.ObjectModel;
 
 namespace RomForge.Core.ViewModels.PSP;
@@ -9,7 +10,7 @@ public class PopsOptionsViewModel : ViewModelBase
 {
     public PopsOptionsViewModel() => SelectedFmvFix = FmvFixPresets[0];
 
-    public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [new("0x04 (다수 게임에서 검증됨)", 0x04), new("0x07 (실험적)", 0x07)];
+    public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [new($"0x04 ({Loc.S.LabelVerifiedOnManyGames})", 0x04), new($"0x07 ({Loc.S.LabelExperimental})", 0x07)];
 
     public FmvFixOption SelectedFmvFix { get; set => SetProperty(ref field, value); }
 

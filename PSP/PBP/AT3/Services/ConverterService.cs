@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.AT3.Enums;
+using Common.Localization;
 using PSP.PBP.AT3.Models;
 
 namespace PSP.PBP.AT3.Services
@@ -8,7 +9,7 @@ namespace PSP.PBP.AT3.Services
         public static byte[] Convert(byte[] inputBytes, bool isWav, ConverterOptions? options = null)
         {
             if (inputBytes == null || inputBytes.Length == 0)
-                throw new ArgumentException("입력 데이터가 비어있습니다.", nameof(inputBytes));
+                throw new ArgumentException(Loc.S.ErrInputDataEmpty, nameof(inputBytes));
 
             options ??= new ConverterOptions();
 
@@ -17,7 +18,7 @@ namespace PSP.PBP.AT3.Services
                 Bitrate.Kbps66 => 66150u,
                 Bitrate.Kbps105 => 104738u,
                 Bitrate.Kbps132 => 132300u,
-                _ => throw new ArgumentException("비트레이트는 66, 105, 132 중 하나여야 합니다.", nameof(options))
+                _ => throw new ArgumentException(Loc.S.ErrBitrateMustBeOneOf, nameof(options))
             };
 
             PcmData pcm = ReadInputFromMemory(inputBytes, isWav, options.MaxSeconds);
@@ -61,7 +62,7 @@ namespace PSP.PBP.AT3.Services
                 }
                 catch (InvalidDataException)
                 {
-                    throw new NotSupportedException("지원하지 않는 형식입니다.");
+                    throw new NotSupportedException(Loc.S.ErrUnsupportedFormatGeneric);
                 }
             }
         }

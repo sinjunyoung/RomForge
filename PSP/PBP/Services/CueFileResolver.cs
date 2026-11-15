@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using Common.Localization;
+
+using System.Text.RegularExpressions;
 
 namespace PSP.PBP.Services;
 
@@ -15,7 +17,7 @@ public static partial class CueFileResolver
         var referencedFiles = GetAllReferencedFiles(cuePath);
 
         if (referencedFiles.Count == 0)
-            throw new Exception($"{Path.GetFileName(cuePath)}에서 FILE 항목을 찾을 수 없습니다.");
+            throw new Exception(Loc.S.ErrCueFileEntryNotFoundIn(Path.GetFileName(cuePath)));
 
         return referencedFiles[0];
     }

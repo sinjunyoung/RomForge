@@ -1,4 +1,5 @@
 ﻿using RomForge.Core;
+using Common.Localization;
 using RomForge.Core.UI.Command;
 using System.IO;
 using System.Windows;
@@ -86,7 +87,7 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 
     private async Task UpdateCoverArtAsync()
     {
-        var title = await Images.UpdateFromGameIdAsync(Files.Primary?.GameId);
+        var title = await Images.UpdateFromGameIdAsync(Files.Primary is { IsGameIdResolved: true } primary ? primary.GameId : null);
 
         if (title != null)
             GameTitle = title;
@@ -99,14 +100,14 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 
         if (Files.FileItems.Count == 0)
         {
-            AppendLog("추가된 파일이 없습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogNoFilesAdded, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
 
-        if (Files.FileItems.Any(i => i.GameId is "인식 중..." or "인식실패"))
+        if (Files.FileItems.Any(i => !i.IsGameIdResolved))
         {
-            AppendLog("GameID 인식 오류", LogLevel.Error);
+            AppendLog(Loc.S.LogGameIdRecognizeError, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -122,25 +123,25 @@ public class PackingMainViewModel : ProgressToolTabViewModel
 
             try
             {
-                AppendLog($"작업 시작: {gameTitle} [{mainGameId}] ({orderedItems.Count}개 디스크)", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobStartPacking(gameTitle, mainGameId, orderedItems.Count), LogLevel.Highlight);
                 await PackingJobRunner.RunAsync(orderedItems, gameTitle, mainGameId, plan, AppConfig.Instance.PS1.CompressLevel, assets, popsConfig, BuildProgressReporter(), _cts.Token);
 
                 ProgressPct = 100;
 
-                AppendLog($"작업 완료: {plan.TargetOutputPath}", LogLevel.Ok);
+                AppendLog(Loc.S.LogJobDone(plan.TargetOutputPath), LogLevel.Ok);
                 await SoundPlayer.PlayCompleteAsync();
                 Path.GetDirectoryName(plan.TargetOutputPath)?.OpenFolder();
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
                 TryDeleteFileAndFolder(plan.TargetOutputPath, plan.GameDirectory);
             }
             catch (Exception ex)
             {
-                AppendLog($"오류: [{gameTitle}] {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogErrorWithTitle(gameTitle, ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
                 TryDeleteFileAndFolder(plan.TargetOutputPath, plan.GameDirectory);
@@ -160,7 +161,7 @@ public class PackingMainViewModel : ProgressToolTabViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"취소/실패 정리 작업 중 예외 발생: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogCleanupException(ex.Message), LogLevel.Error);
             _= SoundPlayer.PlayErrorAsync();
         }
     }

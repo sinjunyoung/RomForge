@@ -1,4 +1,5 @@
 ﻿using CD.Core.Constants;
+using Common.Localization;
 using CD.Core.Interfaces;
 using CD.Core.Models;
 using System.Text.RegularExpressions;
@@ -45,7 +46,7 @@ public partial class CcdImgSubReader : IDiscImageReader
         var imgLength = new FileInfo(imgPath).Length;
 
         if (imgLength % SectorSize != 0)
-            throw new InvalidDataException($"IMG 파일 크기가 섹터 크기(2352)의 배수가 아닙니다: {imgPath}");
+            throw new InvalidDataException(Loc.S.ErrImgSizeNotSectorMultiple(imgPath));
 
         var totalImgSectors = imgLength / SectorSize;
         var rawTracks = ParseTracks(lines);
@@ -58,7 +59,7 @@ public partial class CcdImgSubReader : IDiscImageReader
             var entries = ParseEntries(lines);
 
             if (entries.Count == 0)
-                throw new InvalidDataException($"CCD 파일에서 유효한 [TRACK] 또는 [Entry] 섹션을 찾지 못했습니다: {filePath}");
+                throw new InvalidDataException(Loc.S.ErrCcdNoValidTrackSection(filePath));
 
             tracks = BuildDiscTracksFromEntries(entries, imgPath, totalImgSectors, filePath);
         }
@@ -71,7 +72,7 @@ public partial class CcdImgSubReader : IDiscImageReader
         var siblingPath = Path.ChangeExtension(ccdPath, extension);
 
         if (!File.Exists(siblingPath))
-            throw new FileNotFoundException($"CCD와 짝을 이루는 {extension.ToUpperInvariant()} 파일을 찾을 수 없습니다: {siblingPath}");
+            throw new FileNotFoundException(Loc.S.ErrCcdPairedFileNotFound(extension.ToUpperInvariant(), siblingPath));
 
         return siblingPath;
     }
@@ -90,7 +91,7 @@ public partial class CcdImgSubReader : IDiscImageReader
                 return;
 
             if (mode < 0 || index1 is null)
-                throw new InvalidDataException("CCD 파일의 TRACK 섹션에 MODE 또는 INDEX 1이 누락되었습니다.");
+                throw new InvalidDataException(Loc.S.ErrCcdTrackMissingModeIndex);
 
             tracks.Add((mode, index0, index1.Value));
         }
@@ -155,7 +156,7 @@ public partial class CcdImgSubReader : IDiscImageReader
             var lengthSectors = nextStart - index1;
 
             if (trackStart < 0 || nextStart > totalImgSectors || lengthSectors <= 0)
-                throw new InvalidDataException($"트랙 {i + 1}의 섹터 범위가 IMG 파일 크기를 벗어나거나 비정상입니다 (start={trackStart}, length={lengthSectors}, imgSectors={totalImgSectors}): {ccdFilePath}");
+                throw new InvalidDataException(Loc.S.ErrCcdTrackSectorRangeInvalid(i + 1, trackStart, lengthSectors, totalImgSectors, ccdFilePath));
 
             var streamOffset = trackStart * SectorSize;
             var streamLength = (nextStart - trackStart) * SectorSize;
@@ -188,7 +189,7 @@ public partial class CcdImgSubReader : IDiscImageReader
             var lengthSectors = nextStart - trackStart;
 
             if (trackStart < 0 || nextStart > totalImgSectors || lengthSectors <= 0)
-                throw new InvalidDataException($"Entry 기반 트랙 {i + 1}의 섹터 범위가 IMG 파일 크기를 벗어나거나 비정상입니다 (start={trackStart}, length={lengthSectors}, imgSectors={totalImgSectors}): {ccdFilePath}");
+                throw new InvalidDataException(Loc.S.ErrCcdEntryTrackSectorRangeInvalid(i + 1, trackStart, lengthSectors, totalImgSectors, ccdFilePath));
 
             var isData = (control & 0x04) != 0;
             var dataType = isData ? MapTrackMode(DetectDataMode(imgPath, trackStart)) : CueFormatStrings.Audio;
@@ -299,6 +300,6 @@ public partial class CcdImgSubReader : IDiscImageReader
         0 => CueFormatStrings.Audio,
         1 => CueFormatStrings.Mode1_2352,
         2 => CueFormatStrings.Mode2_2352,
-        _ => throw new InvalidDataException($"알 수 없는 CCD 트랙 MODE 값입니다: {mode}")
+        _ => throw new InvalidDataException(Loc.S.ErrUnknownCcdTrackMode(mode))
     };
 }

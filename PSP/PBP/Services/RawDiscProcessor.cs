@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Interop;
+using Common.Localization;
 using CHD.Core.Interop.Enums;
 using CHD.Core.Services;
 
@@ -17,7 +18,7 @@ public static class RawDiscProcessor
             var wrapper = new LibChdrWrapper();
             var error = wrapper.Open(filePath);
             if (error != ChdrError.CHDERR_NONE)
-                throw new Exception($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(error)}");
+                throw new Exception(Loc.S.ErrChdOpenFailed(LibChdrWrapper.GetErrorString(error)));
 
             var info = ChdInfoReader.ReadChdInfo(filePath);
 
@@ -30,6 +31,6 @@ public static class RawDiscProcessor
             return ResolvedDisc.Create(stream, stream.Length, tocData);
         }
 
-        throw new NotSupportedException($"지원하지 않는 확장자: {ext}");
+        throw new NotSupportedException(Loc.S.ErrUnsupportedExtension(ext));
     }
 }

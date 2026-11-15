@@ -1,4 +1,5 @@
 ﻿using CHD.Core.Interop;
+using Common.Localization;
 using CHD.Core.Interop.Enums;
 using PSP.PBP.Enums;
 using PSP.PBP.Models;
@@ -69,8 +70,8 @@ public static partial class GameIdReader
         return extraction.Result switch
         {
             ExtractResult.Success => extraction.Id!,
-            ExtractResult.NotPs1Disc => throw new NotSupportedException("PS1 게임만 지원합니다."),
-            ExtractResult.InvalidDisc => throw new InvalidOperationException("디스크를 읽을 수 없습니다."),
+            ExtractResult.NotPs1Disc => throw new NotSupportedException(Loc.S.ErrPs1GamesOnly),
+            ExtractResult.InvalidDisc => throw new InvalidOperationException(Loc.S.ErrDiscUnreadable),
             _ => Fallback
         };
     }

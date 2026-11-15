@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.WiiU;
@@ -112,7 +113,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         EntryListOrganizer.Reorganize(Entries);
 
         if (scanned.Count > 0)
-            AppendLog($"언팩 폴더에서 {scanned.Count}개 타이틀을 불러왔습니다.", LogLevel.Info);
+            AppendLog(Loc.S.LogUnpackFolderLoadedTitles(scanned.Count), LogLevel.Info);
     }
 
     private void RemoveUnpackedEntries()
@@ -125,7 +126,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         foreach (var entry in unpackedEntries)
             Entries.Remove(entry);
 
-        AppendLog("언팩 폴더 항목을 목록에서 제거했습니다.", LogLevel.Info);
+        AppendLog(Loc.S.LogUnpackFolderItemRemoved, LogLevel.Info);
     }
 
     private bool IsDuplicate(string path) => Entries.Any(e => string.Equals(e.FilePath, path, StringComparison.OrdinalIgnoreCase));
@@ -139,7 +140,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             if (existing is not null)
             {
                 Entries.Remove(existing);
-                AppendLog($"기존 {row.Kind}을(를) 새 항목으로 교체합니다.", LogLevel.Info);
+                AppendLog(Loc.S.LogReplacingExistingKind(row.Kind), LogLevel.Info);
             }
         }
 
@@ -157,7 +158,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             {
                 if (!LooksLikeSupportedFolder(path))
                 {
-                    AppendLog($"'{Path.GetFileName(path)}'는 WUP 폴더나 로드라인(code/content/meta) 폴더가 아니라서 자동 추가할 수 없습니다. 언팩 → 패치 → 리팩 흐름을 이용해주세요.", LogLevel.Error);
+                    AppendLog(Loc.S.LogCannotAutoAddFolder(Path.GetFileName(path)), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                     return;
                 }
@@ -176,14 +177,14 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (!isWua && !isWudOrWux)
             {
-                AppendLog($"'{Path.GetFileName(path)}'는 지원하지 않는 형식입니다 (wud/wux/wua/WUP 폴더만 가능).", LogLevel.Error);
+                AppendLog(Loc.S.LogUnsupportedWiiUInputFormat(Path.GetFileName(path)), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 return;
             }
 
             if (!isWua && !File.Exists(KeysPath))
             {
-                AppendLog("keys.txt를 찾을 수 없습니다. exe와 같은 폴더에 넣거나 설정의 키 파일 탭에서 지정해주세요 (wud/wux 입력에는 필요합니다).", LogLevel.Error);
+                AppendLog(Loc.S.ErrWiiUKeysNotFound, LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 return;
             }
@@ -197,11 +198,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             EntryListOrganizer.Reorganize(Entries);
 
-            AppendLog($"{Path.GetFileName(path)} — {rows.Count}개 타이틀 추가됨.", LogLevel.Info);
+            AppendLog(Loc.S.LogTitlesAdded(Path.GetFileName(path), rows.Count), LogLevel.Info);
         }
         catch (Exception ex)
         {
-            AppendLog($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogAddFailed(path, ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -255,7 +256,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedRoot))
         {
-            if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
+            if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmDiscardUnpacked))
                 return;
 
             Directory.Delete(unpackedRoot, true);
@@ -267,7 +268,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (scanned.Count == 0)
             {
-                AppendLog("언팩된 데이터가 없습니다.", LogLevel.Error);
+                AppendLog(Loc.S.ErrNoUnpackedData, LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 return;
             }
@@ -309,19 +310,19 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             isCompleted = true;
             ProgressPercent = "100%";
 
-            AppendLog($"완료! 총 소요: {sw.Elapsed:mm\\:ss}", LogLevel.Ok);
+            AppendLog(Loc.S.LogDoneTotalTime(sw.Elapsed.ToString(@"mm\:ss")), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             OutputPath.OpenFolder();
         }
         catch (OperationCanceledException)
         {
-            AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
-            AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
@@ -346,25 +347,25 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (mode != BuildMode.RebuildOnly && Entries.Count == 0)
         {
-            error = "타이틀을 하나 이상 추가하세요.";
+            error = Loc.S.ErrAddAtLeastOneTitle;
             return false;
         }
 
         if (mode == BuildMode.UnpackOnly && Entries.Any(e => e.IsUnpacked))
         {
-            error = "언팩 폴더 항목입니다. 원본 파일(wud/wux/wua)이나 WUP 폴더를 다시 추가하세요.";
+            error = Loc.S.ErrUnpackedFolderEntryWiiU;
             return false;
         }
 
         if (mode != BuildMode.RebuildOnly && KeysPathRequired && !File.Exists(KeysPath))
         {
-            error = "keys.txt를 찾을 수 없습니다. exe와 같은 폴더에 넣거나 설정의 키 파일 탭에서 지정해주세요 (wud/wux 입력에는 필요합니다).";
+            error = Loc.S.ErrWiiUKeysNotFound;
             return false;
         }
 
         if (string.IsNullOrEmpty(OutputPath))
         {
-            error = "작업 폴더를 선택하세요.";
+            error = Loc.S.ErrSelectWorkFolder;
             return false;
         }
 
@@ -373,7 +374,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             string unpackedPath = Path.Combine(OutputPath, "unpacked");
             if (!Directory.Exists(unpackedPath))
             {
-                error = "언팩된 데이터가 없습니다.";
+                error = Loc.S.ErrNoUnpackedData;
                 return false;
             }
         }
@@ -396,7 +397,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
     private async Task BrowseOutput()
     {
-        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = "작업 폴더 선택" };
+        var dlg = new Microsoft.Win32.OpenFolderDialog { Title = Loc.S.DialogSelectWorkFolder };
 
         if (dlg.ShowDialog() != true)
             return;

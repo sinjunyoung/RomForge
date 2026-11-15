@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.Services;
 using RomForge.Core.Services.PSP;
@@ -38,7 +39,7 @@ public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
         }
         catch (Exception ex)
         {
-            log($"파일 추가 중 오류: {ex.Message}", LogLevel.Error);
+            log(Loc.S.LogAddFilesError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             IsValidating = false;
         }
@@ -88,7 +89,7 @@ public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
 
         foreach (var failure in result.Failures)
         {
-            log($"[{failure.FileName}] GameID 인식 실패: {failure.Reason}", LogLevel.Error);
+            log(Loc.S.LogGameIdRecognizeFailed(failure.FileName, failure.Reason), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
 
@@ -106,12 +107,12 @@ public class DiscListViewModel(Action<string, LogLevel> log) : ViewModelBase
 
         if (result.OverLimitSkipped > 0)
         {
-            log($"최대 {MaxItems}개까지만 등록할 수 있습니다. {result.OverLimitSkipped}개 파일이 제외되었습니다.", LogLevel.Error);
+            log(Loc.S.LogMaxItemsExceeded(MaxItems, result.OverLimitSkipped), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
 
         if (result.Failures.Count > 0)
-            log($"{result.Failures.Count}개 파일에서 GameID 인식에 실패해 제외되었습니다.", LogLevel.Error);
+            log(Loc.S.LogGameIdFailedExcluded(result.Failures.Count), LogLevel.Error);
 
         if (result.Imported.Count > 0)
         {

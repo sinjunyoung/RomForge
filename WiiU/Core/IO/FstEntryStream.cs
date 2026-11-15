@@ -1,4 +1,5 @@
 ﻿using WiiU.Core.Models;
+using Common.Localization;
 using WiiU.Core.Services;
 
 namespace WiiU.Core.IO;
@@ -35,7 +36,7 @@ internal sealed class FstEntryStream(WupTitleSource owner, FstEntry entry, strin
         }
         catch (Exception ex)
         {
-            throw new InvalidDataException($"'{path}' 읽기 실패 (clusterIndex={entry.ClusterIndex}, offsetField={entry.FileOffsetField}, " + $"byteOffset={(long)entry.FileOffsetField * owner.FstOffsetFactor}, size={entry.FileSize}): {ex.Message}", ex);
+            throw new InvalidDataException(Loc.S.ErrReadFailedDetail(path, entry.ClusterIndex, entry.FileOffsetField, (long)entry.FileOffsetField * owner.FstOffsetFactor, entry.FileSize, ex.Message), ex);
         }
 
         _position += toRead;

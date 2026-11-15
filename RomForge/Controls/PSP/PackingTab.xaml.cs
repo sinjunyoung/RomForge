@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core.Models.PSP;
 using RomForge.Core.ViewModels.PSP;
 using RomForge.ViewModels.PSP;
@@ -234,7 +235,7 @@ public partial class PackingTab : UserControl
     {
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

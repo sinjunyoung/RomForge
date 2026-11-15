@@ -66,7 +66,7 @@ public static class WupPacker
                 string relPath = file.RelativePath.Trim('/');
 
                 if (!seenFilePaths.Add(relPath))
-                    throw new InvalidOperationException($"같은 경로가 두 번 등장했습니다 (대소문자까지 포함해서 동일함): {relPath}");
+                    throw new InvalidOperationException(Loc.S.ErrDuplicatePathCaseSensitive(relPath));
 
                 if (string.Equals(relPath, "code/app.xml", StringComparison.Ordinal))
                 {

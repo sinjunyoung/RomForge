@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using NAudio.Wave;
 using RomForge.Core.UI.Command;
 using System.IO;
@@ -127,7 +128,7 @@ public class BgmPreviewViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _log($"미리듣기 재생 중 오류: {ex.Message}", LogLevel.Error);
+            _log(Loc.S.LogPreviewPlaybackError(ex.Message), LogLevel.Error);
             Release();
             return false;
         }
@@ -148,7 +149,7 @@ public class BgmPreviewViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _log($"미리듣기 재생 중 오류: {ex.Message}", LogLevel.Error);
+            _log(Loc.S.LogPreviewPlaybackError(ex.Message), LogLevel.Error);
             Release();
         }
     }
@@ -193,7 +194,7 @@ public class BgmPreviewViewModel : ViewModelBase
             return;
 
         if (e.Exception != null)
-            _log($"미리듣기 재생 중 오류: {e.Exception.Message}", LogLevel.Error);
+            _log(Loc.S.LogPreviewPlaybackError(e.Exception.Message), LogLevel.Error);
 
         Release();
         SetPosition(0);

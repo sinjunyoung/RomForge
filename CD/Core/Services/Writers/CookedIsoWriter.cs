@@ -18,7 +18,7 @@ public static class CookedIsoWriter
         var dataTracks = image.Tracks.Where(IsDataTrack).ToList();
 
         if (dataTracks.Count != 1)
-            throw new NotSupportedException($"ISO 변환은 데이터 트랙이 1개인 이미지에서만 가능합니다(현재 데이터 트랙 수: {dataTracks.Count}).");
+            throw new NotSupportedException(Loc.S.ErrIsoSingleDataTrackOnly(dataTracks.Count));
 
         var track = dataTracks[0];
         var userDataOffset = GetUserDataOffset(track);
@@ -88,7 +88,7 @@ public static class CookedIsoWriter
             var read = await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(bytes, buffer.Length)), ct);
 
             if (read == 0)
-                throw new EndOfStreamException("트랙 데이터를 읽는 도중 스트림이 예상보다 일찍 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrTrackStreamEndedEarly);
 
             bytes -= read;
         }
@@ -103,7 +103,7 @@ public static class CookedIsoWriter
             var n = await stream.ReadAsync(buffer.AsMemory(read, count - read), ct);
 
             if (n == 0)
-                throw new EndOfStreamException("트랙 데이터를 읽는 도중 스트림이 예상보다 일찍 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrTrackStreamEndedEarly);
 
             read += n;
         }
@@ -124,12 +124,12 @@ public static class CookedIsoWriter
                 CueFormatStrings.Mode1_2352 => 16,
                 CueFormatStrings.Mode2_2352 => 24,
                 CueFormatStrings.Cdi_2352 => 24,
-                _ => throw new NotSupportedException($"ISO 변환을 지원하지 않는 트랙 타입입니다: {track.DataType}")
+                _ => throw new NotSupportedException(Loc.S.ErrIsoUnsupportedTrackType(track.DataType))
             }
         };
 
         if (track.SourceSectorSize < offset + UserDataSize)
-            throw new InvalidDataException($"섹터 크기({track.SourceSectorSize})가 {track.DataType} 트랙의 사용자 데이터를 담기에 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrSectorSizeTooSmall(track.SourceSectorSize, track.DataType));
 
         return offset;
     }

@@ -1,4 +1,5 @@
 ﻿using Common.Services;
+using Common.Localization;
 using RomForge.Core.Models.WiiU;
 using RomForge.ViewModels.WiiU;
 using System.IO;
@@ -64,9 +65,9 @@ public partial class ConverterTab : UserControl
 
         var dialog = new Microsoft.Win32.OpenFileDialog
         {
-            Title = "변환할 파일 선택",
+            Title = Loc.S.DialogSelectFileToConvert,
             Multiselect = true,
-            Filter = "WiiU 파일 (*.wud;*.wux;*.wua)|*.wud;*.wux;*.wua|모든 파일 (*.*)|*.*",
+            Filter = $"{Loc.S.FilterFilesOfType("WiiU")} (*.wud;*.wux;*.wua)|*.wud;*.wux;*.wua|{Loc.S.FilterAllFiles} (*.*)|*.*",
         };
 
         if (dialog.ShowDialog() == true)
@@ -80,7 +81,7 @@ public partial class ConverterTab : UserControl
 
         var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요 (WUP 또는 Loadiine 폴더)",
+            Description = Loc.S.DialogSelectFolderToAddWupOrLoadiine,
             UseDescriptionForTitle = true,
         };
 

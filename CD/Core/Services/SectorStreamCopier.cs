@@ -1,3 +1,5 @@
+using Common.Localization;
+
 namespace CD.Core.Services;
 
 internal static class SectorStreamCopier
@@ -50,7 +52,7 @@ internal static class SectorStreamCopier
             var read = await source.ReadAsync(buffer.AsMemory(0, toRead), ct);
 
             if (read == 0)
-                throw new EndOfStreamException("트랙 데이터를 읽는 도중 스트림이 예상보다 일찍 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrTrackStreamEndedEarly);
 
             await destination.WriteAsync(buffer.AsMemory(0, read), ct);
 
@@ -69,7 +71,7 @@ internal static class SectorStreamCopier
             var n = await stream.ReadAsync(buffer.AsMemory(read, count - read), ct);
 
             if (n == 0)
-                throw new EndOfStreamException("트랙 데이터를 읽는 도중 스트림이 예상보다 일찍 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrTrackStreamEndedEarly);
 
             read += n;
         }

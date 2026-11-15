@@ -33,7 +33,7 @@ public class CsoService
             bool isZso = magic.SequenceEqual(CsoHeader.MagicZSO);
 
             if (!isZso && !magic.SequenceEqual(CsoHeader.MagicCSO))
-                throw new InvalidDataException("CSO/ZSO 매직 불일치");
+                throw new InvalidDataException(Loc.S.ErrCsoMagicMismatch);
 
             var headerBytes = new byte[HeaderSize - 4];
 
@@ -102,7 +102,7 @@ public class CsoService
                     }
 
                     if (decoded < 0)
-                        throw new InvalidDataException($"블록 {i}/{blockCount} LZ4 디코드 실패: blockLen={blockLen}, offset={offset}, nextOffset={nextOffset}, IndexShift={header.IndexShift}, UncompressedSize={header.UncompressedSize}, BlockSize={header.BlockSize}");
+                        throw new InvalidDataException(Loc.S.ErrBlockLz4DecodeFailed(i, blockCount, blockLen, offset, nextOffset, header.IndexShift, header.UncompressedSize, header.BlockSize));
 
                     bout.Write(blockBuf.AsSpan(0, decoded));
                 }
@@ -121,7 +121,7 @@ public class CsoService
                     }
 
                     if (status != OperationStatus.Done || owned is null)
-                        throw new InvalidDataException($"블록 {i} 압축 해제 실패");
+                        throw new InvalidDataException(Loc.S.ErrBlockDecompressFailed(i));
 
                     using (owned)
                         bout.Write(owned.Memory.Span);
@@ -181,7 +181,7 @@ public class CsoService
                 long shiftedOffset = blockOffset >> indexShift;
 
                 if (shiftedOffset > 0x7FFFFFFFL)
-                    throw new InvalidOperationException($"IndexShift 계산 오류: 블록 {i} 오프셋({blockOffset})이 31비트 범위를 초과함");
+                    throw new InvalidOperationException(Loc.S.ErrIndexShiftBlockOffsetOverflow(i, blockOffset));
 
                 indexTable[i] = (uint)shiftedOffset;
 
@@ -216,7 +216,7 @@ public class CsoService
                 long finalShifted = bout.Position >> indexShift;
 
                 if (finalShifted > 0x7FFFFFFFL)
-                    throw new InvalidOperationException($"IndexShift 계산 오류: 최종 오프셋({bout.Position})이 31비트 범위를 초과함");
+                    throw new InvalidOperationException(Loc.S.ErrIndexShiftFinalOffsetOverflow(bout.Position));
 
                 indexTable[blockCount] = (uint)finalShifted;
             }
@@ -244,7 +244,7 @@ public class CsoService
             bool isZso = magic.SequenceEqual(CsoHeader.MagicZSO);
 
             if (!isZso && !magic.SequenceEqual(CsoHeader.MagicCSO))
-                throw new InvalidDataException("CSO/ZSO 매직 불일치");
+                throw new InvalidDataException(Loc.S.ErrCsoMagicMismatch);
 
             var headerBytes = new byte[HeaderSize - 4];
 
@@ -349,8 +349,7 @@ public class CsoService
 
                     if (rawLen < 0)
                         throw new InvalidDataException(
-                            $"블록 {i}/{blockCount} LZ4 디코드 실패: blockLen={blockLen}, " +
-                            $"offset={offset}, nextOffset={nextOffset}, IndexShift={header.IndexShift}");
+                            Loc.S.ErrBlockLz4DecodeFailedShort(i, blockCount, blockLen, offset, nextOffset, header.IndexShift));
                 }
                 else
                 {
@@ -369,7 +368,7 @@ public class CsoService
                     }
 
                     if (status != OperationStatus.Done || owned is null)
-                        throw new InvalidDataException($"블록 {i} 압축 해제 실패");
+                        throw new InvalidDataException(Loc.S.ErrBlockDecompressFailed(i));
 
                     using (owned)
                     {
@@ -382,7 +381,7 @@ public class CsoService
                 long dstShiftedOffset = dstBlockOffset >> dstIndexShift;
 
                 if (dstShiftedOffset > 0x7FFFFFFFL)
-                    throw new InvalidOperationException($"IndexShift 계산 오류: 블록 {i} 오프셋({dstBlockOffset})이 31비트 범위를 초과함");
+                    throw new InvalidOperationException(Loc.S.ErrIndexShiftBlockOffsetOverflow(i, dstBlockOffset));
 
                 dstIndex[i] = (uint)dstShiftedOffset;
 
@@ -416,7 +415,7 @@ public class CsoService
             long finalShifted = bout.Position >> dstIndexShift;
 
             if (finalShifted > 0x7FFFFFFFL)
-                throw new InvalidOperationException($"IndexShift 계산 오류: 최종 오프셋({bout.Position})이 31비트 범위를 초과함");
+                throw new InvalidOperationException(Loc.S.ErrIndexShiftFinalOffsetOverflow(bout.Position));
 
             dstIndex[blockCount] = (uint)finalShifted;
 
@@ -467,7 +466,7 @@ public class CsoService
         var err = wrapper.Open(chdPath);
 
         if (err != ChdrError.CHDERR_NONE)
-            throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
+            throw new InvalidDataException(Loc.S.ErrChdOpenFailed(LibChdrWrapper.GetErrorString(err)));
 
         if (info.SourceType == ChdSourceType.DVD)
         {
@@ -485,9 +484,9 @@ public class CsoService
         }
         else
         {
-            string trackType = info?.Tracks?[0]?.TrackType ?? "알 수 없음";
+            string trackType = info?.Tracks?[0]?.TrackType ?? Loc.S.LabelUnknown;
 
-            throw new NotSupportedException($"이 CHD({info?.SourceType}, 트랙 {info?.TrackCount}개, 타입 {trackType})는 CSO/ZSO 변환을 지원하지 않습니다.");
+            throw new NotSupportedException(Loc.S.ErrChdNotConvertibleToCso(info?.SourceType, info?.TrackCount, trackType));
         }
     }
 
@@ -536,7 +535,7 @@ public class CsoService
             var err = wrapper.Open(chdPath);
 
             if (err != ChdrError.CHDERR_NONE)
-                throw new InvalidDataException($"CHD 열기 실패: {LibChdrWrapper.GetErrorString(err)}");
+                throw new InvalidDataException(Loc.S.ErrChdOpenFailed(LibChdrWrapper.GetErrorString(err)));
 
             long totalLength = (long)(info?.Tracks?[0]?.Frames ?? 0) * 2048;
             using var chdStream = new ChdCdReadStream(wrapper, totalLength, info?.Tracks?[0]?.TrackType ?? string.Empty);
@@ -558,8 +557,8 @@ public class CsoService
         }
         else
         {
-            string trackType = info?.Tracks?.FirstOrDefault()?.TrackType ?? "알 수 없음";
-            throw new NotSupportedException($"이 CHD({info?.SourceType}, 트랙 {info?.TrackCount}개, 타입 {trackType})는 단일 ISO로 추출할 수 없습니다.");
+            string trackType = info?.Tracks?.FirstOrDefault()?.TrackType ?? Loc.S.LabelUnknown;
+            throw new NotSupportedException(Loc.S.ErrChdNotExtractableToIso(info?.SourceType, info?.TrackCount, trackType));
         }
     }
 }

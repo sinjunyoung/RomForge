@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using Common.Localization;
 using WiiU.Core.Models;
 
 namespace WiiU.Core.Services;
@@ -14,7 +15,7 @@ internal static class WupTmd
             0x00010000 or 0x00010003 => 0x240,
             0x00010001 or 0x00010004 => 0x140,
             0x00010002 or 0x00010005 => 0x080,
-            _ => throw new InvalidDataException($"지원하지 않는 TMD 서명 타입: 0x{sigType:X8}"),
+            _ => throw new InvalidDataException(Loc.S.ErrUnsupportedTmdSignatureType(sigType.ToString("X8"))),
         };
 
         ulong titleId = BinaryPrimitives.ReadUInt64BigEndian(tmd.AsSpan(bodyStart + 0x4C, 8));

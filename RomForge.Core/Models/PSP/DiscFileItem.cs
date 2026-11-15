@@ -1,4 +1,5 @@
 ﻿using RomForge.Core.ViewModels;
+using Common.Localization;
 using System.IO;
 using System.Windows.Media;
 
@@ -12,7 +13,20 @@ public class DiscFileItem(string filePath) : ProcessableItemBase
 
     public string Extension => Path.GetExtension(FilePath).TrimStart('.').ToLowerInvariant();
 
-    public string GameId { get; set => SetProperty(ref field, value); } = "인식 중...";
+    private string _gameId = string.Empty;
+
+    public bool IsGameIdResolved { get; private set => SetProperty(ref field, value); }
+
+    public string GameId
+    {
+        get => IsGameIdResolved ? _gameId : Loc.S.StatusRecognizing;
+        set
+        {
+            _gameId = value;
+            IsGameIdResolved = !string.IsNullOrEmpty(value);
+            OnPropertyChanged();
+        }
+    }
 
     public long FileSizeBytes
     {

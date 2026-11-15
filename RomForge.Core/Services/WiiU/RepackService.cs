@@ -73,7 +73,7 @@ public sealed class RepackService()
             }
             catch (Exception ex)
             {
-                log?.Invoke($"'{dir}' 폴더를 읽지 못했습니다: {ex.Message}", LogLevel.Error); 
+                log?.Invoke(Loc.S.LogFolderReadFailed(dir, ex.Message), LogLevel.Error); 
             }
         }
 
@@ -187,7 +187,7 @@ public sealed class RepackService()
 
             if (patch is not null && patch.Plan.TryGetOverwrite(relPath, out var overwriteRef))
             {
-                log?.Invoke($"교체: {overwriteRef.DisplayName} → {relPath}", LogLevel.Ok);
+                log?.Invoke(Loc.S.LogReplacedArrow(overwriteRef.DisplayName, relPath), LogLevel.Ok);
                 result.Add(new WupFileEntry(relPath, overwriteRef.OpenRead, overwriteRef.Length));
                 continue;
             }
@@ -213,7 +213,7 @@ public sealed class RepackService()
             string unpackedRoot = Path.Combine(outputPath, "unpacked");
             var sw = Stopwatch.StartNew();
 
-            log?.Invoke("언팩 시작...", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogUnpackStart, LogLevel.Highlight);
 
             long grandTotal = entries.Sum(e => e.TotalBytes);
             long offset = 0;
@@ -224,7 +224,7 @@ public sealed class RepackService()
 
                 using var source = ReopenSource(entry, keysTxtPath);
 
-                log?.Invoke($"[{entry.Kind}] {source.TitleIdHex}_v{source.TitleVersion} 언팩 중...", LogLevel.Info);
+                log?.Invoke(Loc.S.LogUnpackingTitle(entry.Kind, source.TitleIdHex, source.TitleVersion), LogLevel.Info);
 
                 string roleSuffix = entry.Role switch
                 {
@@ -264,7 +264,7 @@ public sealed class RepackService()
     public static async Task RepackAsync(IReadOnlyList<TitleInputEntry> entries, string keysTxtPath, string outputPath, RepackOutputFormat format, IProgress<ProgressInfo>? progress = null, Action<string, LogLevel>? log = null, CancellationToken ct = default)
     {
         if (entries.Count == 0)
-            throw new InvalidOperationException("패킹할 타이틀이 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrNoTitlesToPack);
 
         await Task.Run(() =>
         {
@@ -272,7 +272,7 @@ public sealed class RepackService()
 
             var sources = entries.Select(e => ReopenSource(e, keysTxtPath)).ToList();
 
-            log?.Invoke("리팩 시작...", LogLevel.Highlight);
+            log?.Invoke(Loc.S.LogRepackStart, LogLevel.Highlight);
 
             try
             {
@@ -306,7 +306,7 @@ public sealed class RepackService()
                         },
                         log: log,
                         ct: ct);
-                    log?.Invoke($"완료: {outputWuaPath}", LogLevel.Ok);
+                    log?.Invoke(Loc.S.LogDone(outputWuaPath), LogLevel.Ok);
                 }
                 catch
                 {
@@ -376,7 +376,7 @@ public sealed class RepackService()
             var folderName = BuildWupFolderName(entries[i]);
             string wupFolder = Utils.GetUniqueFolderPath(Path.Combine(outputPath, $"{folderName}"));
 
-            log?.Invoke($"WUP로 패키징 중 ({i + 1}/{sources.Count}): {wupFolder}", LogLevel.Info);
+            log?.Invoke(Loc.S.LogPackagingToWup(i + 1, sources.Count, wupFolder), LogLevel.Info);
 
             try
             {
@@ -418,7 +418,7 @@ public sealed class RepackService()
                 TimeInfo = string.Empty,
                 Speed = string.Empty,
             });
-            log?.Invoke($"완료: {wupFolder}", LogLevel.Ok);
+            log?.Invoke(Loc.S.LogDone(wupFolder), LogLevel.Ok);
         }
     }
 

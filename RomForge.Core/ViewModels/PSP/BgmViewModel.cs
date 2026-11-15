@@ -1,4 +1,5 @@
 ﻿using Common.Models;
+using Common.Localization;
 using PSP.PBP.AT3.Enums;
 using PSP.PBP.AT3.Models;
 using RomForge.Core.Services.PSP;
@@ -69,11 +70,11 @@ public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
 
         Preview.Stop();
 
-        string actionName = isAt3 ? "로드" : "변환";
+        string actionName = isAt3 ? Loc.S.ActionLoad : Loc.S.WorkTypeConvert;
 
         try
         {
-            log($"배경음 {actionName} 시작: {Path.GetFileName(filePath)}", LogLevel.Highlight);
+            log(Loc.S.LogBgmActionStart(actionName, Path.GetFileName(filePath)), LogLevel.Highlight);
 
             var (bgm, wav) = await Task.Run(() =>
             {
@@ -87,7 +88,7 @@ public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
                 }
                 catch (Exception ex)
                 {
-                    log($"미리듣기 준비 실패: {ex.Message}", LogLevel.Error);
+                    log(Loc.S.LogPreviewPrepareFailed(ex.Message), LogLevel.Error);
                 }
 
                 return (converted, preview);
@@ -99,11 +100,11 @@ public class BgmViewModel(Action<string, LogLevel> log) : ViewModelBase
             
             FilePath = filePath;
 
-            log($"배경음 {actionName} 완료: {Path.GetFileName(filePath)}", LogLevel.Ok);
+            log(Loc.S.LogBgmActionDone(actionName, Path.GetFileName(filePath)), LogLevel.Ok);
         }
         catch (Exception ex)
         {
-            log($"배경음 {actionName} 중 오류 발생: {ex.Message}", LogLevel.Error);
+            log(Loc.S.LogBgmActionError(actionName, ex.Message), LogLevel.Error);
         }
         finally
         {

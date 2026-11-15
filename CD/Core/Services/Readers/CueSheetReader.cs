@@ -1,4 +1,5 @@
 ﻿using CD.Core.Constants;
+using Common.Localization;
 using CD.Core.Interfaces;
 using CD.Core.Models;
 
@@ -22,7 +23,7 @@ public class CueSheetReader : IDiscImageReader
         var cueFile = CueFileReader.Read(filePath);
 
         if (cueFile.Entries.Count == 0)
-            throw new InvalidDataException($"CUE 파일에서 FILE 항목을 찾지 못했습니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrCueNoFileEntry(filePath));
 
         var cueDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath)) ?? string.Empty;
         var tracks = new List<DiscTrack>();
@@ -30,16 +31,16 @@ public class CueSheetReader : IDiscImageReader
         foreach (var entry in cueFile.Entries)
         {
             if (!string.Equals(entry.FileType, "BINARY", StringComparison.OrdinalIgnoreCase))
-                throw new NotSupportedException($"BINARY 이외의 FILE 형식은 지원하지 않습니다 ({entry.FileType}): {entry.FileName}");
+                throw new NotSupportedException(Loc.S.ErrOnlyBinaryFileType(entry.FileType, entry.FileName));
 
             if (entry.Tracks.Count == 0)
-                throw new InvalidDataException($"FILE \"{entry.FileName}\"에 TRACK이 없습니다: {filePath}");
+                throw new InvalidDataException(Loc.S.ErrCueFileNoTrack(entry.FileName, filePath));
 
             tracks.AddRange(BuildTracks(entry, ResolveBinPath(cueDirectory, entry.FileName), filePath));
         }
 
         if (tracks.Count == 0)
-            throw new InvalidDataException($"CUE 파일에서 유효한 트랙을 찾지 못했습니다: {filePath}");
+            throw new InvalidDataException(Loc.S.ErrCueNoValidTrack(filePath));
 
         return new DiscImage { Tracks = tracks };
     }
@@ -55,7 +56,7 @@ public class CueSheetReader : IDiscImageReader
         foreach (var track in entry.Tracks)
         {
             var sectorSize = GetSectorSize(track.DataType);
-            var index1 = track.Indexes.FirstOrDefault(i => i.Number == 1) ?? throw new InvalidDataException($"트랙 {track.Number}에 INDEX 01이 없습니다: {cueFilePath}");
+            var index1 = track.Indexes.FirstOrDefault(i => i.Number == 1) ?? throw new InvalidDataException(Loc.S.ErrTrackNoIndex01(track.Number, cueFilePath));
             var index0 = track.Indexes.FirstOrDefault(i => i.Number == 0);
             var index1Frame = ToFrames(index1.Position);
             var startFrame = index0 is null ? index1Frame : ToFrames(index0.Position);
@@ -80,7 +81,7 @@ public class CueSheetReader : IDiscImageReader
             var lengthSectors = totalSectors - pregapSectors;
 
             if (startOffset < 0 || endOffset > binLength || pregapSectors < 0 || lengthSectors <= 0)
-                throw new InvalidDataException($"트랙 {track.Number}의 범위가 BIN 파일 크기를 벗어나거나 비정상입니다 (offset={startOffset}, length={byteLength}, binSize={binLength}): {cueFilePath}");
+                throw new InvalidDataException(Loc.S.ErrCueTrackRangeInvalid(track.Number, startOffset, byteLength, binLength, cueFilePath));
 
             var streamOffset = startOffset;
             var streamLength = totalSectors * sectorSize;
@@ -112,7 +113,7 @@ public class CueSheetReader : IDiscImageReader
         if (File.Exists(sibling))
             return sibling;
 
-        throw new FileNotFoundException($"CUE가 참조하는 BIN 파일을 찾을 수 없습니다: {fileName}");
+        throw new FileNotFoundException(Loc.S.ErrCueReferencedBinFileNotFound(fileName));
     }
 
     private static long ToFrames(MsfPosition position) => position.Minutes * (long)FramesPerMinute + position.Seconds * FramesPerSecond + position.Frames;
@@ -126,7 +127,7 @@ public class CueSheetReader : IDiscImageReader
         CueFormatStrings.Mode2_2352 => 2352,
         CueFormatStrings.Cdi_2336 => 2336,
         CueFormatStrings.Cdi_2352 => 2352,
-        _ => throw new NotSupportedException($"지원하지 않는 트랙 타입입니다: {dataType}")
+        _ => throw new NotSupportedException(Loc.S.ErrUnsupportedTrackType(dataType))
     };
 
     private static SubStream OpenTrackStream(string binPath, long startOffset, long length)

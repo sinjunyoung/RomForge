@@ -1,4 +1,5 @@
 ﻿using PSP.PBP.AT3.IO;
+using Common.Localization;
 using PSP.PBP.AT3.Models;
 
 namespace PSP.PBP.AT3.Services;
@@ -24,10 +25,10 @@ public sealed class Decoder
     public Decoder(int channels, int frameSize, bool jointStereo)
     {
         if (channels != 1 && channels != 2)
-            throw new ArgumentException("모노 또는 스테레오만 지원합니다.", nameof(channels));
+            throw new ArgumentException(Loc.S.ErrMonoOrStereoOnly, nameof(channels));
 
         if (frameSize < 8)
-            throw new ArgumentException("프레임 크기가 올바르지 않습니다.", nameof(frameSize));
+            throw new ArgumentException(Loc.S.ErrFrameSizeInvalid, nameof(frameSize));
 
         _channels = channels;
         _frameSize = frameSize;
@@ -53,7 +54,7 @@ public sealed class Decoder
     public void DecodeFrame(byte[] data, int offset, Span<float> output)
     {
         if (output.Length < CodecInfo.NumSamples * _channels)
-            throw new ArgumentException("출력 버퍼가 작습니다.", nameof(output));
+            throw new ArgumentException(Loc.S.ErrOutputBufferTooSmall, nameof(output));
 
         if (_channels == 1)
             ParseUnit(new BitStreamReader(data, offset, _frameSize), false, _units[0]);
@@ -121,10 +122,10 @@ public sealed class Decoder
                 br.Read(2);
 
             if (br.Read(2) != 3)
-                throw new InvalidDataException("조인트 스테레오 유닛 헤더가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrJointStereoUnitHeaderInvalid);
         }
         else if (br.Read(6) != 0x28)
-            throw new InvalidDataException("사운드 유닛 헤더가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrSoundUnitHeaderInvalid);
 
         unit.NumBands = (int)br.Read(2) + 1;
 
@@ -158,7 +159,7 @@ public sealed class Decoder
         }
 
         if (br.Overrun)
-            throw new InvalidDataException("비트스트림이 예상보다 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrBitstreamTooShort);
     }
 
     private void ParseTonalComponents(BitStreamReader br, ChannelUnit unit)
@@ -171,7 +172,7 @@ public sealed class Decoder
         int modeSelector = (int)br.Read(2);
 
         if (modeSelector == 2)
-            throw new InvalidDataException("톤 성분 코딩 모드가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrToneCodingModeInvalid);
 
         bool constantLength = (modeSelector & 1) != 0;
         Span<bool> bandFlags = stackalloc bool[Bands];
@@ -185,7 +186,7 @@ public sealed class Decoder
             int quant = (int)br.Read(3);
 
             if (quant <= 1)
-                throw new InvalidDataException("톤 성분 양자화 인덱스가 올바르지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrToneQuantIndexInvalid);
 
             if (modeSelector == 3)
                 constantLength = br.ReadBit() != 0;
@@ -204,7 +205,7 @@ public sealed class Decoder
                     int count = Math.Min(codedValues, CodecInfo.NumSpecs - pos);
 
                     if (count <= 0)
-                        throw new InvalidDataException("톤 성분 위치가 올바르지 않습니다.");
+                        throw new InvalidDataException(Loc.S.ErrTonePositionInvalid);
 
                     MantissaReader.Read(br, quant, constantLength, count, _mantissas);
 
