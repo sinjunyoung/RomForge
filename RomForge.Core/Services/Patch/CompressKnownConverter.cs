@@ -36,7 +36,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                         var chdResult = await converter.ConvertFileAsync(tempCuePath, null, progress, null, ct);
 
                         if (!chdResult.Success)
-                            throw new Exception($"CHD 변환 실패: {chdResult.Message}");
+                            throw new Exception(Loc.S.ErrChdConvertFailed(chdResult.Message));
 
                         File.Delete(outputPath);
                         File.Delete(outputCcdPath!);
@@ -68,7 +68,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                     var chdResult = await converter.ConvertFileAsync(outputCuePath!, null, progress, null, ct);
 
                     if (!chdResult.Success)
-                        throw new Exception($"CHD 변환 실패: {chdResult.Message}");
+                        throw new Exception(Loc.S.ErrChdConvertFailed(chdResult.Message));
 
                     File.Delete(outputPath);
                     File.Delete(outputCuePath!);
@@ -92,7 +92,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                     var chdResult = await converter.ConvertFileAsync(outputGdiPath!, null, progress, null, ct);
 
                     if (!chdResult.Success)
-                        throw new Exception($"CHD 변환 실패: {chdResult.Message}");
+                        throw new Exception(Loc.S.ErrChdConvertFailed(chdResult.Message));
 
                     File.Delete(outputPath);
                     File.Delete(outputGdiPath!);
@@ -116,7 +116,7 @@ public class CompressKnownConverter(Action<string, LogLevel>? log, IProgress<Pro
                     var chdResult = await converter.ConvertFileAsync(outputPath, null, progress, null, ct);
 
                     if (!chdResult.Success)
-                        throw new Exception($"CHD 변환 실패: {chdResult.Message}");
+                        throw new Exception(Loc.S.ErrChdConvertFailed(chdResult.Message));
 
                     File.Delete(outputPath);
 

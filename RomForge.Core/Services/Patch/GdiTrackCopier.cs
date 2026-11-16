@@ -31,7 +31,7 @@ public class GdiTrackCopier(Action<string, LogLevel>? log)
 
         if (gdi is null)
         {
-            log?.Invoke("GDI 파일을 찾을 수 없습니다. GD-ROM 이미지가 아니거나 GDI가 누락되었을 수 있습니다.", LogLevel.Error);
+            log?.Invoke(Loc.S.LogGdiNotFoundNotGdrom, LogLevel.Error);
             return null;
         }
 
@@ -49,7 +49,7 @@ public class GdiTrackCopier(Action<string, LogLevel>? log)
 
             if (!File.Exists(sourceTrackPath))
             {
-                log?.Invoke($"트랙 파일을 찾을 수 없습니다: {track.FileName}", LogLevel.Error);
+                log?.Invoke(Loc.S.LogTrackFileNotFound(track.FileName), LogLevel.Error);
                 return null;
             }
 
@@ -86,7 +86,7 @@ public class GdiTrackCopier(Action<string, LogLevel>? log)
         }
         catch (Exception ex)
         {
-            log?.Invoke($"GDI 파일 처리 중 오류 발생: {ex.Message}", LogLevel.Error);
+            log?.Invoke(Loc.S.LogGdiProcessError(ex.Message), LogLevel.Error);
             return null;
         }
     }

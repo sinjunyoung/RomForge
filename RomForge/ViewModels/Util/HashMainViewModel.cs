@@ -18,7 +18,7 @@ namespace RomForge.ViewModels.Util;
 
 public class HashMainViewModel : BatchToolTabViewModel
 {
-    public static string GetFileDialogFilter() => "모든 파일|*.*";
+    public static string GetFileDialogFilter() => $"{Loc.S.FilterAllFiles}|*.*";
 
     private CancellationTokenSource _cts = new();
     private HashFileItem? _pendingScrollItem;
@@ -76,7 +76,7 @@ public class HashMainViewModel : BatchToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogAddFailed(path, ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -114,7 +114,7 @@ public class HashMainViewModel : BatchToolTabViewModel
 
         var algoType = SelectedAlgorithm;
 
-        AppendLog($"총 {FileItems.Count}개의 파일 해시 계산을 시작합니다. (알고리즘: {algoType})", LogLevel.Highlight);
+        AppendLog(Loc.S.LogHashStart(FileItems.Count, algoType), LogLevel.Highlight);
 
         bool canceled = false;
         bool failed = false;
@@ -164,13 +164,13 @@ public class HashMainViewModel : BatchToolTabViewModel
 
                         Interlocked.Increment(ref successCount);
                         BatchItemCompleted(item);
-                        AppendLog($"[완료] {item.FileName} -> {result}");
+                        AppendLog(Loc.S.LogHashItemDone(item.FileName, result));
                     }
                     else
                     {
                         PostUi(() => item.State = ItemStatus.Failed);
 
-                        AppendLog($"[실패] {item.FileName} 해시 계산 오류", LogLevel.Error);
+                        AppendLog(Loc.S.LogHashItemFailed(item.FileName), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         BatchItemCompleted(item, false);
                     }
@@ -178,7 +178,7 @@ public class HashMainViewModel : BatchToolTabViewModel
 
                 FlushUiQueue();
 
-                AppendLog($"작업 완료 (성공: {successCount} / 전체: {FileItems.Count})", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobSummary(successCount, FileItems.Count), LogLevel.Highlight);
                 await SoundPlayer.PlayCompleteAsync();
             }
             catch (OperationCanceledException)
@@ -186,7 +186,7 @@ public class HashMainViewModel : BatchToolTabViewModel
                 FlushUiQueue();
                 canceled = true;
 
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Converting or ItemStatus.Waiting))
@@ -198,7 +198,7 @@ public class HashMainViewModel : BatchToolTabViewModel
             catch (Exception ex)
             {
                 FlushUiQueue();
-                AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
             }

@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Services;
@@ -110,7 +111,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         foreach (var title in titles)
             SourceRows.Add(SourceRowViewModel.FromUnpacked(title));
 
-        AppendLog($"언팩 폴더에서 {titles.Count}개 타이틀을 불러왔습니다.");
+        AppendLog(Loc.S.LogUnpackFolderLoadedTitles(titles.Count));
     }
 
     private async Task LogPatchInfoAsync(string? patchPath)
@@ -125,12 +126,12 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             var (total, patchFiles) = await Task.Run(() => PatchInspector.Inspect(patchPath));
 
             if (version == _patchLogVersion)
-                AppendLog($"패치 정보를 읽었습니다: {total}개 파일 (패치 {patchFiles}개, 교체 {total - patchFiles}개)");
+                AppendLog(Loc.S.LogVitaPatchInfoReadDetail(total, patchFiles, total - patchFiles));
         }
         catch (Exception ex)
         {
             if (version == _patchLogVersion)
-                AppendLog($"패치를 읽을 수 없습니다: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogPatchReadFailed(ex.Message), LogLevel.Error);
         }
     }
 
@@ -196,7 +197,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "출력 폴더 선택",
+            Description = Loc.S.ToolTipBrowseOutput,
             UseDescriptionForTitle = true
         };
 
@@ -230,7 +231,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Path.GetFileName(path)}: 분석 실패 - {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogFileAnalyzeFailed(Path.GetFileName(path), ex.Message), LogLevel.Error);
                 return;
             }
 
@@ -247,7 +248,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Path.GetFileName(path)}: 분석 실패 - {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogFileAnalyzeFailed(Path.GetFileName(path), ex.Message), LogLevel.Error);
                 return;
             }
 
@@ -321,7 +322,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (existing != null)
             {
-                AppendLog($"{existing.FileName} -> {newRow.FileName}(으)로 대체됨 (기존 {newRow.Category})");
+                AppendLog(Loc.S.LogVitaReplacedExisting(existing.FileName, newRow.FileName, newRow.Category));
                 SourceRows.Remove(existing);
             }
         }
@@ -331,7 +332,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (duplicate != null)
             {
-                AppendLog($"{duplicate.FileName} -> {newRow.FileName}(으)로 대체됨 (같은 DLC)");
+                AppendLog(Loc.S.LogVitaReplacedSameDlc(duplicate.FileName, newRow.FileName));
                 SourceRows.Remove(duplicate);
             }
         }
@@ -349,7 +350,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         foreach (var row in unpackedRows)
             SourceRows.Remove(row);
 
-        AppendLog("언팩 폴더 항목을 목록에서 제거했습니다.");
+        AppendLog(Loc.S.LogUnpackFolderItemRemoved);
     }
 
     private int ComputeInsertIndex(ContentCategory? category, string? contentIdSuffix)
@@ -450,7 +451,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (mode == BuildMode.UnpackOnly && Directory.Exists(unpackedRoot))
         {
-            if (!MessageBoxHelper.ShowQuestion("기존 언팩 데이터를 삭제하고 새로 진행할까요?"))
+            if (!MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmDiscardUnpacked))
                 return;
 
             Directory.Delete(unpackedRoot, true);
@@ -478,20 +479,20 @@ public class RepackMainViewModel : ProgressToolTabViewModel
                     break;
             }
 
-            AppendLog($"전체 완료 ({_totalSw.Elapsed:mm\\:ss})", LogLevel.Ok);
+            AppendLog(Loc.S.LogAllDoneElapsed(_totalSw.Elapsed.ToString("mm\\:ss")), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             OutputPath?.OpenFolder();
         }
         catch (OperationCanceledException)
         {
-            AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             MainViewModel.SetTaskbarProgress(0);
             DiscardPartialOutput(mode, unpackCompleted, unpackedRoot);
         }
         catch (Exception ex)
         {
-            AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             DiscardPartialOutput(mode, unpackCompleted, unpackedRoot);
@@ -520,11 +521,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         var entries = SourceRows.Select(r => r.ToBatchEntry()).ToList();
 
         Directory.CreateDirectory(unpackedRoot);
-        AppendLog("언팩 중...", LogLevel.Highlight);
+        AppendLog(Loc.S.LogStatusUnpacking, LogLevel.Highlight);
 
         int count = await UnpackService.UnpackAsync(entries, unpackedRoot, AppendLog, BuildProgressReporter(), ct);
 
-        AppendLog($"언팩 완료: {count}개 파일 -> {unpackedRoot}", LogLevel.Ok);
+        AppendLog(Loc.S.LogUnpackDoneFilesTo(count, unpackedRoot), LogLevel.Ok);
     }
 
     private bool LoadUnpackedRows(string unpackedRoot)
@@ -533,7 +534,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (titles.Count == 0)
         {
-            AppendLog("언팩된 데이터가 없습니다.", LogLevel.Error);
+            AppendLog(Loc.S.ErrNoUnpackedData, LogLevel.Error);
             return false;
         }
 
@@ -553,7 +554,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
     {
         bool isRebuild = mode == BuildMode.RebuildOnly;
         var target = BuildEmu ? OutputTarget.Emu : OutputTarget.Retail;
-        string label = target == OutputTarget.Emu ? "에뮬" : "실기";
+        string label = target == OutputTarget.Emu ? Loc.S.LabelOutputEmu : Loc.S.LabelOutputRetail;
         bool merge = MergePatchIntoGame;
         string? baseName = SourceRows.First(r => r.Category == ContentCategory.App).TitleId;
         string patchPath = GetPatchPath();
@@ -566,11 +567,11 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (isRebuild)
         {
-            AppendLog($"{label}용 폴더 기반 리팩 중...", LogLevel.Highlight);
+            AppendLog(Loc.S.LogVitaFolderRepacking(label), LogLevel.Highlight);
 
             var rebuilt = await RebuildService.RebuildAsync([.. SourceRows.Select(r => r.ToUnpackedTitle())], zipPath, target, merge, AppendLog, progress, ct);
 
-            AppendLog($"{label}용 완료: 총 {rebuilt.TotalFiles}개 파일 (패치 {rebuilt.PatchedSuccessfully}/{rebuilt.PatchCandidates}개 적용) -> {zipPath}", LogLevel.Ok);
+            AppendLog(Loc.S.LogVitaRepackDone(label, rebuilt.TotalFiles, rebuilt.PatchedSuccessfully, rebuilt.PatchCandidates, zipPath), LogLevel.Ok);
 
             return;
         }
@@ -579,19 +580,19 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (merge)
         {
-            AppendLog($"{label}용 게임+패치 병합 중...", LogLevel.Highlight);
+            AppendLog(Loc.S.LogVitaMergingGamePatch(label), LogLevel.Highlight);
 
             var result = await Task.Run(() => PatchOutputBuilder.BuildMergedFromEntriesAsync(entries, patchPath, zipPath, target, AppendLog, progress, ct), ct);
 
-            AppendLog($"{label}용 완료: 총 {result.TotalFiles}개 파일 (패치 {result.PatchedSuccessfully}/{result.PatchCandidates}개 적용) -> {zipPath}", LogLevel.Ok);
+            AppendLog(Loc.S.LogVitaRepackDone(label, result.TotalFiles, result.PatchedSuccessfully, result.PatchCandidates, zipPath), LogLevel.Ok);
         }
         else
         {
-            AppendLog($"{label}용 패치 생성 중...", LogLevel.Highlight);
+            AppendLog(Loc.S.LogVitaCreatingPatch(label), LogLevel.Highlight);
 
             var result = await Task.Run(() => PatchOnlyBuilder.BuildFromEntriesAsync(entries, patchPath, zipPath, target, AppendLog, progress, ct), ct);
 
-            AppendLog($"{label}용 완료: 매칭 {result.MatchedCandidates}개 중 {result.PatchedSuccessfully}개 성공 -> {zipPath}", LogLevel.Ok);
+            AppendLog(Loc.S.LogVitaPatchOnlyDone(label, result.MatchedCandidates, result.PatchedSuccessfully, zipPath), LogLevel.Ok);
         }
     }
 
@@ -601,7 +602,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (string.IsNullOrWhiteSpace(OutputPath))
         {
-            error = "작업 폴더를 선택하세요.";
+            error = Loc.S.ErrSelectWorkFolder;
             return false;
         }
 
@@ -609,7 +610,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (!Directory.Exists(UnpackedRoot))
             {
-                error = "언팩된 데이터가 없습니다.";
+                error = Loc.S.ErrNoUnpackedData;
                 return false;
             }
         }
@@ -617,13 +618,13 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (SourceRows.Count == 0)
             {
-                error = "PS Vita 파일(pkg, zip)/폴더를 하나 이상 추가하세요.";
+                error = Loc.S.ErrVitaAddSourceFiles;
                 return false;
             }
 
             if (SourceRows.Any(r => r.IsUnpacked))
             {
-                error = "언팩 폴더 항목입니다. PS Vita 파일(pkg, zip)/폴더를 다시 추가하세요.";
+                error = Loc.S.ErrVitaUnpackedEntryReaddSource;
                 return false;
             }
         }
@@ -633,7 +634,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
         if (!BuildEmu && !BuildRetail)
         {
-            error = "출력 포맷을 선택하세요.";
+            error = Loc.S.ErrSelectOutputFormat;
             return false;
         }
 
@@ -641,7 +642,7 @@ public class RepackMainViewModel : ProgressToolTabViewModel
         {
             if (SourceRows.Any(r => string.IsNullOrWhiteSpace(r.PatchPath)))
             {
-                error = "패치를 지정하세요.";
+                error = Loc.S.ErrSpecifyPatch;
                 return false;
             }
 
@@ -651,13 +652,13 @@ public class RepackMainViewModel : ProgressToolTabViewModel
 
             if (!everyTitleHasApp)
             {
-                error = "App이 없는 타이틀이 있습니다.";
+                error = Loc.S.ErrVitaTitleWithoutApp;
                 return false;
             }
         }
         else if (!(BuildEmu && MergePatchIntoGame) && string.IsNullOrWhiteSpace(GetPatchPath()))
         {
-            error = "패치를 지정하세요.";
+            error = Loc.S.ErrSpecifyPatch;
             return false;
         }
 

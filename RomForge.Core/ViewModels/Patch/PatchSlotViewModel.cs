@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Common.Localization;
+using System.IO;
 
 namespace RomForge.Core.ViewModels.Patch;
 
@@ -8,5 +9,5 @@ public class PatchSlotViewModel : ViewModelBase
 
     public string Title { get; set { SetProperty(ref field, value); } } = Common.Localization.Loc.Instance.Current.HeaderPatch;
 
-    public string Label => Path.GetFileName(FilePath) ?? "패치 파일을 드래그하거나 클릭하세요";
+    public string Label => Path.GetFileName(FilePath) ?? Loc.S.HintDragOrClickPatchFile;
 }

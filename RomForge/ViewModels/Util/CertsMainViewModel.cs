@@ -48,11 +48,11 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
     public static string OutputPath => Path.Combine(AppContext.BaseDirectory, OutputFileName);
 
-    public string ProgressStatus => SelectedFile == null ? "파일을 드래그&드롭하거나 선택하세요" : $"출력: {OutputPath}";
+    public string ProgressStatus => SelectedFile == null ? Loc.S.LabelCertsDropOrSelectFile : Loc.S.LogOutputFile(OutputPath);
 
     public string ProgressText => SelectedFile == null ? string.Empty : $"{SelectedFile.Progress}%";
 
-    public static string FileDialogFilter => "CIA 파일|*.cia|모든 파일|*.*";
+    public static string FileDialogFilter => $"{Loc.S.FilterFilesOfType("CIA")}|*.cia|{Loc.S.FilterAllFiles}|*.*";
 
     public ICommand RunCommand { get; }
 
@@ -69,14 +69,14 @@ public class CertsMainViewModel : BatchToolTabViewModel
     {
         if (!SupportedExtensions.Contains(Path.GetExtension(path)))
         {
-            AppendLog($"지원하지 않는 파일 형식입니다: {Path.GetExtension(path)}", LogLevel.Error);
+            AppendLog(Loc.S.ErrUnsupportedFileType(Path.GetExtension(path)), LogLevel.Error);
             _ = SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (!File.Exists(path))
         {
-            AppendLog($"파일을 찾을 수 없습니다: {path}", LogLevel.Error);
+            AppendLog(Loc.S.ErrFileNotFoundName(path), LogLevel.Error);
             _ = SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -84,7 +84,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
         SelectedFile = new CertsFileItem(path);
         RomInfo = null;
 
-        AppendLog($"파일 로드됨: {SelectedFile.FileName}");
+        AppendLog(Loc.S.LogFileLoaded(SelectedFile.FileName));
         _ = LoadRomInfoAsync(path);
     }
 
@@ -122,7 +122,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"게임 정보 로드 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogGameInfoLoadFailed(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
     }
@@ -152,9 +152,9 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
                 BeginBatch(1);
                 StartBatchItem();
-                AppendLog($"certs.bin 추출 시작: {SelectedFile.FileName}", LogLevel.Highlight);
-                AppendLog($"오프셋: 0x{CertOffset:X4} / 크기: 0x{CertSize:X3} bytes");
-                AppendLog($"출력 경로: {OutputPath}");
+                AppendLog(Loc.S.LogCertsExtractStart(SelectedFile.FileName), LogLevel.Highlight);
+                AppendLog(Loc.S.LogCertsOffsetSize(CertOffset.ToString("X4"), CertSize.ToString("X3")));
+                AppendLog(Loc.S.LogOutputPath(OutputPath));
 
                 bool success = await Task.Run(() => ExtractCerts(SelectedFile, _cts.Token));
 
@@ -166,7 +166,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
                     CompleteBatchItem();
                     await SoundPlayer.PlayCompleteAsync();
                     OnPropertyChanged(nameof(ProgressText));
-                    AppendLog($"추출 완료: {OutputFileName}", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogCertsExtractDone(OutputFileName), LogLevel.Highlight);
                 }
                 else
                 {
@@ -183,7 +183,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
             {
                 canceled = true;
 
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
 
                 if (SelectedFile.State is ItemStatus.Extracting)
                 {
@@ -193,7 +193,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
 
@@ -219,7 +219,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
             if (fs.Length < CertOffset + CertSize)
             {
-                AppendLog($"[실패] 파일 크기가 너무 작습니다. (필요: 0x{CertOffset + CertSize:X}바이트, 실제: 0x{fs.Length:X}바이트)", LogLevel.Error);
+                AppendLog(Loc.S.LogCertsFileTooSmall((CertOffset + CertSize).ToString("X"), fs.Length.ToString("X")), LogLevel.Error);
                 item.State = ItemStatus.Failed;
 
                 return false;
@@ -244,7 +244,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
 
             if (totalRead != CertSize)
             {
-                AppendLog($"[실패] 읽기 불완전: 예상 0x{CertSize:X}바이트, 실제 0x{totalRead:X}바이트", LogLevel.Error);
+                AppendLog(Loc.S.LogCertsIncompleteRead(CertSize.ToString("X"), totalRead.ToString("X")), LogLevel.Error);
                 item.State = ItemStatus.Failed;
 
                 return false;
@@ -253,7 +253,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
             ct.ThrowIfCancellationRequested();
 
             File.WriteAllBytes(OutputPath, buffer);
-            AppendLog($"[성공] {totalRead:N0} bytes → {OutputFileName}");
+            AppendLog(Loc.S.LogCertsSuccess(totalRead.ToString("N0"), OutputFileName));
             _ = SoundPlayer.PlayCompleteAsync();
 
             return true;
@@ -264,7 +264,7 @@ public class CertsMainViewModel : BatchToolTabViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"[실패] 추출 중 에러: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogCertsExtractError(ex.Message), LogLevel.Error);
             return false;
         }
     }

@@ -1,3 +1,4 @@
+using Common.Localization;
 using HtmlAgilityPack;
 using System.IO;
 using System.Net.Http;
@@ -134,7 +135,7 @@ public static partial class TistoryAttachmentService
             }
             catch (Exception ex)
             {
-                log?.Invoke($"URL 처리 실패 ({pageUrl}): {ex.Message}");
+                log?.Invoke(Loc.S.LogUrlProcessFailed(pageUrl, ex.Message));
             }
         }
 

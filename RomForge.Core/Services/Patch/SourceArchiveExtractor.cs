@@ -58,7 +58,7 @@ public static partial class SourceArchiveExtractor
             var entries = session.Entries.Where(e => !e.IsDirectory).ToList();
 
             if (entries.Count == 0)
-                throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
+                throw new InvalidOperationException(Loc.S.ErrArchiveEmpty);
 
             var cueEntries = entries.Where(e => string.Equals(Path.GetExtension(e.Key), ".cue", StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -102,7 +102,7 @@ public static partial class SourceArchiveExtractor
             var candidates = SelectCandidates(entries);
 
             if (candidates.Count == 0)
-                throw new InvalidOperationException("압축 안에서 패치 대상으로 볼 만한 파일을 찾을 수 없습니다.");
+                throw new InvalidOperationException(Loc.S.ErrArchiveNoPatchTarget);
 
             if (candidates.Count > 1)
             {
@@ -125,7 +125,7 @@ public static partial class SourceArchiveExtractor
             var entry = entries.FirstOrDefault(e => string.Equals(e.Key, entryKey, StringComparison.Ordinal));
 
             if (entry.Key is null)
-                throw new InvalidOperationException("선택한 파일을 압축 안에서 찾을 수 없습니다.");
+                throw new InvalidOperationException(Loc.S.ErrArchiveSelectedFileMissing);
 
             if (string.Equals(Path.GetExtension(entry.Key), ".cue", StringComparison.OrdinalIgnoreCase))
             {
@@ -182,7 +182,7 @@ public static partial class SourceArchiveExtractor
         var entries = session.Entries.Where(e => !e.IsDirectory).ToList();
 
         if (entries.Count == 0)
-            throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrArchiveEmpty);
 
         skipped = 0;
 
@@ -262,7 +262,7 @@ public static partial class SourceArchiveExtractor
         var pool = romLike.Count > 0 ? romLike : dataFiles;
 
         if (pool.Count == 0)
-            throw new InvalidOperationException("압축 안에서 해시를 계산할 파일을 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrArchiveNoHashTarget);
 
         var ordered = pool.OrderByDescending(e => e.Size).ToList();
 
@@ -373,7 +373,7 @@ public static partial class SourceArchiveExtractor
         }
 
         if (binEntries.Count == 0)
-            throw new InvalidOperationException("CUE 파일이 참조하는 BIN 파일을 압축 안에서 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrArchiveCueBinMissing);
 
         int mainIndex = ConversionSource.ResolveMainDataTrackIndex(cuePath);
         string? mainBinFileName = mainIndex >= 0 && mainIndex < referencedBins.Count ? Path.GetFileName(referencedBins[mainIndex]) : null;
@@ -406,7 +406,7 @@ public static partial class SourceArchiveExtractor
         }
 
         if (trackEntries.Count == 0)
-            throw new InvalidOperationException("GDI 파일이 참조하는 트랙 파일을 압축 안에서 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrArchiveGdiTrackMissing);
 
         string mainTrackFileName = gdi.DataTrack.FileName;
         var mainEntry = trackEntries.FirstOrDefault(e => string.Equals(Path.GetFileName(e.Key), mainTrackFileName, StringComparison.OrdinalIgnoreCase));
@@ -432,7 +432,7 @@ public static partial class SourceArchiveExtractor
         var imgEntry = companionEntries.FirstOrDefault(e => string.Equals(Path.GetExtension(e.Key), ".img", StringComparison.OrdinalIgnoreCase));
 
         if (imgEntry.Key is null)
-            throw new InvalidOperationException("CCD 파일과 짝을 이루는 IMG 파일을 압축 안에서 찾을 수 없습니다.");
+            throw new InvalidOperationException(Loc.S.ErrArchiveCcdImgMissing);
 
         return (companionEntries, imgEntry);
     }

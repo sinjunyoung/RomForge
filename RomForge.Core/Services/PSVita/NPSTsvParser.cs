@@ -1,4 +1,5 @@
-﻿using RomForge.Core.Models.PSVita;
+﻿using Common.Localization;
+using RomForge.Core.Models.PSVita;
 using System.IO;
 
 namespace RomForge.Core.Services.PSVita
@@ -40,7 +41,7 @@ namespace RomForge.Core.Services.PSVita
             int contentIdIdx = Array.IndexOf(headers, "Content ID");
 
             if (titleIdIdx == -1 || zRifIdx == -1 || contentIdIdx == -1)
-                throw new Exception($"필수 헤더를 {filePath}에서 찾을 수 없습니다.");
+                throw new Exception(Loc.S.ErrRequiredHeaderNotFound(filePath));
 
             string? line;
 

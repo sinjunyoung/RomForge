@@ -26,11 +26,11 @@ public static class CompressedSourceDecompressor
         }
 
         Directory.CreateDirectory(workDir);
-        log($"{Path.GetFileName(sourcePath)} 압축 해제 중...", LogLevel.Highlight);
+        log(Loc.S.LogDecompressingName(Path.GetFileName(sourcePath)), LogLevel.Highlight);
 
         var result = ext == ".chd" ? await DecompressChdAsync(sourcePath, workDir, progress, log, ct) : await DecompressRvzAsync(sourcePath, workDir, progress, log, ct);
 
-        log($"압축 해제 완료: {Path.GetFileName(result.ActualSourcePath)}", LogLevel.Ok);
+        log(Loc.S.LogDecompressDoneName(Path.GetFileName(result.ActualSourcePath)), LogLevel.Ok);
 
         return result;
     }
@@ -72,7 +72,7 @@ public static class CompressedSourceDecompressor
         var result = await converter.ConvertFileAsync(chdPath, outputDir, progress, null, ct);
 
         if (!result.Success)
-            throw new Exception($"CHD 압축 해제 실패: {result.Message}");
+            throw new Exception(Loc.S.ErrChdDecompressFailed(result.Message));
 
         var outExt = Path.GetExtension(result.OutputFile)?.ToLowerInvariant();
 
@@ -81,7 +81,7 @@ public static class CompressedSourceDecompressor
             var bins = ConversionSource.ParseBinsFromCue(result.OutputFile);
 
             if (bins.Count == 0)
-                throw new Exception("CUE 파일이 참조하는 BIN 파일을 찾을 수 없습니다.");
+                throw new Exception(Loc.S.ErrCueRefBinMissing);
 
             int mainIndex = ConversionSource.ResolveMainDataTrackIndex(result.OutputFile);
             string mainBinName = mainIndex >= 0 && mainIndex < bins.Count ? bins[mainIndex] : bins[0];
@@ -116,7 +116,7 @@ public static class CompressedSourceDecompressor
                 .GetFiles(outputDir, Path.GetFileNameWithoutExtension(rvzPath) + "*.iso")
                 .FirstOrDefault();
 
-            isoPath = candidate ?? throw new Exception("RVZ 압축 해제 결과 파일을 찾을 수 없습니다.");
+            isoPath = candidate ?? throw new Exception(Loc.S.ErrRvzDecompressResultNotFound);
         }
 
         return (isoPath, new DetectResult { Format = RomFormat.Gcm, Direction = ConvertDirection.Compress, OutputExtension = "rvz" });

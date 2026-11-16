@@ -34,7 +34,7 @@ public static class UnpackService
 
             string name = group.Category == ContentCategory.Addcont ? $"{group.TitleId}/{group.ContentIdSuffix}" : group.TitleId;
 
-            log($"[{group.Category}] {name}: {groupWritten}개 파일 언팩 완료", LogLevel.Ok);
+            log(Loc.S.LogVitaUnpackGroupDone(group.Category, name, groupWritten), LogLevel.Ok);
         }
 
         reporter.ForceReport();
@@ -67,7 +67,7 @@ public static class UnpackService
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    log($"[{owner.Item.Category}] {relativePath}: 원본 읽기 실패 - {ex.Message}", LogLevel.Error);
+                    log(Loc.S.LogVitaSourceReadFailed(owner.Item.Category, relativePath, ex.Message), LogLevel.Error);
                     reporter.AddProgress(size);
                     continue;
                 }
@@ -87,7 +87,7 @@ public static class UnpackService
         string fullPath = Path.GetFullPath(Path.Combine(unpackedRoot, entryPath.Replace('/', Path.DirectorySeparatorChar)));
 
         if (!fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidDataException($"허용되지 않는 경로입니다: {entryPath}");
+            throw new InvalidDataException(Loc.S.ErrPathNotAllowed(entryPath));
 
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 

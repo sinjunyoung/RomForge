@@ -1195,4 +1195,191 @@ public abstract class LocalizedStrings
     public abstract string LogErrorWithTitle(object arg0, object arg1);
     public abstract string LogCleanupException(object arg0);
     public abstract string LogJobsStartingUnpack(object arg0);
+    public abstract string LogVitaPkgGroupOutput(object arg0, object arg1, object arg2);
+    public abstract string ErrVitaPkgOnlyConvertible { get; }
+    public abstract string ErrVitaDuplicatePkgKind(object arg0, object arg1);
+    public abstract string ErrVitaKeyRequired(object arg0, object arg1);
+    public abstract string ErrVitaAppKeyNotFound(object arg0, object arg1);
+    public abstract string LogVitaSharingAppKey(object arg0, object arg1);
+    public abstract string ErrPathNotAllowed(object arg0);
+    public abstract string ErrVitaUnpackedFolderRepackOnly(object arg0);
+    public abstract string ErrVitaPkgProbeMissing(object arg0);
+    public abstract string LogVitaPatchSharesAppLicense(object arg0);
+    public abstract string ErrVitaItemCategoryMissing(object arg0);
+    public abstract string ErrVitaItemTitleIdMissing(object arg0);
+    public abstract string ErrVitaSourceAccessorMissing { get; }
+    public abstract string LogVitaWorkBinMissingSkipped(object arg0, object arg1);
+    public abstract string LogVitaFileListCheckFailed(object arg0, object arg1, object arg2);
+    public abstract string ErrVitaOverwriteFileInfoMissing { get; }
+    public abstract string ErrVitaPatchSourceInfoMissing { get; }
+    public abstract string ErrVitaTitleIdFromContentId(object arg0);
+    public abstract string ErrVitaUnsupportedPkgContentType(object arg0);
+    public abstract string LogVitaPatchOnlyDuplicateSkipped(object arg0, object arg1);
+    public abstract string LogVitaItemProcessFailed(object arg0, object arg1, object arg2);
+    public abstract string LogVitaPatchAllDone(object arg0, object arg1, object arg2, object arg3);
+    public abstract string LogVitaPatchPartial(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string LogVitaPatchFailedKeptOriginal(object arg0, object arg1, object arg2);
+    public abstract string LogVitaDecryptFailed(object arg0, object arg1, object arg2);
+    public abstract string LogVitaSourceReadFailed(object arg0, object arg1, object arg2);
+    public abstract string ErrUnicvDbMagicInvalid { get; }
+    public abstract string ErrUnicvDbEntryMagicInvalid(object arg0, object arg1, object arg2);
+    public abstract string ErrVitaPkgNoLicenseWorkBin { get; }
+    public abstract string ErrVitaUnsupportedSourceType(object arg0);
+    public abstract string ErrVitaLicenseContentIdMismatch(object arg0, object arg1);
+    public abstract string ErrVitaZrifContentIdMismatch(object arg0, object arg1);
+    public abstract string ErrWorkBinTooSmall(object arg0);
+    public abstract string ErrWorkBinNoKlicensee(object arg0);
+    public abstract string ErrFilesDbNotFound { get; }
+    public abstract string ErrUnicvDbNotFound { get; }
+    public abstract string ErrFilesDbMagicInvalid { get; }
+    public abstract string ErrFilesDbBadFileCount(object arg0);
+    public abstract string ErrDirStructureCyclic { get; }
+    public abstract string ErrParentDirIndexNotFound(object arg0);
+    public abstract string ErrDirIndexNotFound(object arg0);
+    public abstract string LogVitaUnpackGroupDone(object arg0, object arg1, object arg2);
+    public abstract string ErrSfoTooSmall { get; }
+    public abstract string ErrSfoMagicInvalid { get; }
+    public abstract string ErrVitaUnsupportedPkgKeyType(object arg0);
+    public abstract string LogVitaOnlyPkgAddable(object arg0);
+    public abstract string LogFileAnalyzeFailed(object arg0, object arg1);
+    public abstract string LogVitaReplacedDuplicate(object arg0, object arg1, object arg2, object arg3);
+    public abstract string LogVitaReplacedExisting(object arg0, object arg1, object arg2);
+    public abstract string LogVitaReplacedSameDlc(object arg0, object arg1);
+    public abstract string ErrSelectOutputFolder { get; }
+    public abstract string ErrVitaAddPkgFiles { get; }
+    public abstract string LogVitaConvertingNoNpDrm(object arg0);
+    public abstract string LogVitaAllDoneTitles(object arg0, object arg1);
+    public abstract string LogVitaPatchInfoReadDetail(object arg0, object arg1, object arg2);
+    public abstract string LogAllDoneElapsed(object arg0);
+    public abstract string LogUnpackDoneFilesTo(object arg0, object arg1);
+    public abstract string LogStatusUnpacking { get; }
+    public abstract string LabelOutputEmu { get; }
+    public abstract string LabelOutputRetail { get; }
+    public abstract string LogVitaFolderRepacking(object arg0);
+    public abstract string LogVitaRepackDone(object arg0, object arg1, object arg2, object arg3, object arg4);
+    public abstract string LogVitaMergingGamePatch(object arg0);
+    public abstract string LogVitaCreatingPatch(object arg0);
+    public abstract string LogVitaPatchOnlyDone(object arg0, object arg1, object arg2, object arg3);
+    public abstract string ErrVitaAddSourceFiles { get; }
+    public abstract string ErrVitaUnpackedEntryReaddSource { get; }
+    public abstract string ErrSelectOutputFormat { get; }
+    public abstract string ErrSpecifyPatch { get; }
+    public abstract string ErrVitaTitleWithoutApp { get; }
+    public abstract string DialogSelectKoreanPatchArchive { get; }
+    public abstract string LabelCalculating { get; }
+    public abstract string ErrVitaContainerFoldersNotFound { get; }
+    public abstract string ErrRequiredHeaderNotFound(object arg0);
+    public abstract string LabelCrcMatch { get; }
+    public abstract string LabelCrcMismatch { get; }
+    public abstract string LabelDatPatchNotRegistered(object arg0);
+    public abstract string LogArcadeCrcMismatchBlocked { get; }
+    public abstract string LogPatchStartName(object arg0);
+    public abstract string LogPatchDoneName(object arg0);
+    public abstract string LogPatchCancelledName(object arg0);
+    public abstract string LogPatchFailedMsg(object arg0);
+    public abstract string LogPatchDoneWithTime(object arg0, object arg1);
+    public abstract string LogStaleResultDeleteFailed(object arg0, object arg1);
+    public abstract string HintDragOrClickSourceZip { get; }
+    public abstract string HintDragOrClickPatchFolderIpsZip { get; }
+    public abstract string HintDragOrClickPatchFolderZip { get; }
+    public abstract string HintDragOrClickPatchFile { get; }
+    public abstract string HintDragOrClickSourceFile { get; }
+    public abstract string HintDragOrClickSourceHdi { get; }
+    public abstract string LabelPatchNumber(object arg0);
+    public abstract string LabelSourceBinFileName { get; }
+    public abstract string LabelSmallFilesHidden(object arg0);
+    public abstract string DialogSelectSourceZip { get; }
+    public abstract string DialogSelectSourceRomFile { get; }
+    public abstract string DialogSelectSourceHdi { get; }
+    public abstract string DialogSelectCiaFile { get; }
+    public abstract string DialogSelectDownloadFolder { get; }
+    public abstract string FilterPc98DiskImage { get; }
+    public abstract string ErrOnlyZipSelectable { get; }
+    public abstract string ErrOnlyFolderIpsZipRegistrable { get; }
+    public abstract string DialogSelectHashBasis { get; }
+    public abstract string MsgGdromChdSelectHashBasis { get; }
+    public abstract string MsgChdGdiCueBasisExplain { get; }
+    public abstract string MsgCloseDefaultsToGdi { get; }
+    public abstract string ButtonGdiBasis { get; }
+    public abstract string ButtonCueBasis { get; }
+    public abstract string MsgArchiveMultipleCandidatesSelect { get; }
+    public abstract string ButtonSelect { get; }
+    public abstract string LogCheckingSourceArchive(object arg0);
+    public abstract string LogArchiveMultipleCandidatesFound(object arg0);
+    public abstract string ErrArchiveCandidatesNoSelector { get; }
+    public abstract string LogSourceArchiveExtracted(object arg0);
+    public abstract string LogTryingPatchOnArchive { get; }
+    public abstract string LogArchiveMismatchRetry { get; }
+    public abstract string LogTempExtractCleaned { get; }
+    public abstract string LogTempExtractCleanupFailed(object arg0);
+    public abstract string LogPc98MissingFilesSkipped(object arg0);
+    public abstract string LogPc98PatchDone(object arg0, object arg1);
+    public abstract string LabelCertsDropOrSelectFile { get; }
+    public abstract string ErrUnsupportedFileType(object arg0);
+    public abstract string LogFileLoaded(object arg0);
+    public abstract string LogGameInfoLoadFailed(object arg0);
+    public abstract string LogCertsExtractStart(object arg0);
+    public abstract string LogCertsOffsetSize(object arg0, object arg1);
+    public abstract string LogCertsExtractDone(object arg0);
+    public abstract string LogCertsFileTooSmall(object arg0, object arg1);
+    public abstract string LogCertsIncompleteRead(object arg0, object arg1);
+    public abstract string LogCertsSuccess(object arg0, object arg1);
+    public abstract string LogCertsExtractError(object arg0);
+    public abstract string LogCueStart(object arg0);
+    public abstract string LogJobSummary(object arg0, object arg1);
+    public abstract string LogCueSkipExists(object arg0);
+    public abstract string LogCueAnalyzed(object arg0, object arg1);
+    public abstract string LogCueCreated(object arg0);
+    public abstract string LogCueItemFailed(object arg0, object arg1);
+    public abstract string LogHashStart(object arg0, object arg1);
+    public abstract string LogHashItemDone(object arg0, object arg1);
+    public abstract string LogHashItemFailed(object arg0);
+    public abstract string LogTistoryAnalyzeStart(object arg0);
+    public abstract string LogTistoryAnalyzeDone(object arg0);
+    public abstract string LogTistoryNoNewAttachments { get; }
+    public abstract string LogTistoryAnalyzeCancelled { get; }
+    public abstract string LogTistoryAnalyzeFailed(object arg0);
+    public abstract string LogTistoryDownloadStart(object arg0);
+    public abstract string LogDownloadSummary(object arg0, object arg1);
+    public abstract string LogTistoryUnzipStart { get; }
+    public abstract string LogTistoryUnzipSummary(object arg0, object arg1, object arg2);
+    public abstract string LogTistoryAllFinished { get; }
+    public abstract string LogTistoryUnzipSkippedPartial(object arg0);
+    public abstract string LogTistoryUnzipItemDone(object arg0);
+    public abstract string LogTistoryUnzipItemFailed(object arg0, object arg1);
+    public abstract string LogUrlProcessFailed(object arg0, object arg1);
+    public abstract string LogCueNotFoundNotCdImage { get; }
+    public abstract string LogMultiTrackFileNotFound(object arg0);
+    public abstract string LogCueProcessError(object arg0);
+    public abstract string LogCcdNotFoundNotCdImage { get; }
+    public abstract string LogCcdCompanionCopyError(object arg0);
+    public abstract string LogGdiNotFoundNotGdrom { get; }
+    public abstract string LogTrackFileNotFound(object arg0);
+    public abstract string LogGdiProcessError(object arg0);
+    public abstract string ErrDcpNoChain { get; }
+    public abstract string LogChainPatchApplying(object arg0, object arg1, object arg2);
+    public abstract string ErrChdParentRequiredNoHash { get; }
+    public abstract string ErrUnsupportedChdHunkSize { get; }
+    public abstract string ErrUnsupportedGdromTrackLayout { get; }
+    public abstract string ErrUnsupportedChdTrackType(object arg0);
+    public abstract string ErrChdConvertFailed(object arg0);
+    public abstract string LogDecompressingName(object arg0);
+    public abstract string LogDecompressDoneName(object arg0);
+    public abstract string ErrChdDecompressFailed(object arg0);
+    public abstract string ErrCueRefBinMissing { get; }
+    public abstract string ErrRvzDecompressResultNotFound { get; }
+    public abstract string ErrDcpGdiSourceOnly { get; }
+    public abstract string ErrDcpGdiNotFound { get; }
+    public abstract string LogChdConvertDone(object arg0);
+    public abstract string LogResultSaved(object arg0);
+    public abstract string LogCleanupFailed(object arg0);
+    public abstract string ErrZipEntryMissing(object arg0);
+    public abstract string ErrArchiveEmpty { get; }
+    public abstract string ErrArchiveNoPatchTarget { get; }
+    public abstract string ErrArchiveSelectedFileMissing { get; }
+    public abstract string ErrArchiveNoHashTarget { get; }
+    public abstract string ErrArchiveCueBinMissing { get; }
+    public abstract string ErrArchiveGdiTrackMissing { get; }
+    public abstract string ErrArchiveCcdImgMissing { get; }
+    public abstract string LogOutputPath(object arg0);
 }

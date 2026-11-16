@@ -57,7 +57,7 @@ public static class PatchOutputBuilder
             {
                 patchCandidates++;
 
-                log($"[{group.Category}] {patchTarget.RelativePath}: 패치 실패, 원본 유지 - {ex.Message}", LogLevel.Error);
+                log(Loc.S.LogVitaPatchFailedKeptOriginal(group.Category, patchTarget.RelativePath, ex.Message), LogLevel.Error);
 
                 return null;
             }
@@ -95,7 +95,7 @@ public static class PatchOutputBuilder
                             }
                             catch (Exception ex)
                             {
-                                log($"[{group.Category}] {relativePath}: 복호화 실패 - {ex.Message}", LogLevel.Error);
+                                log(Loc.S.LogVitaDecryptFailed(group.Category, relativePath, ex.Message), LogLevel.Error);
                                 continue;
                             }
                         }
@@ -171,7 +171,7 @@ public static class PatchOutputBuilder
         }
         catch (Exception ex)
         {
-            log($"[{owner.Item.Category}] {relativePath}: 원본 읽기 실패 - {ex.Message}", LogLevel.Error);
+            log(Loc.S.LogVitaSourceReadFailed(owner.Item.Category, relativePath, ex.Message), LogLevel.Error);
             return false;
         }
 

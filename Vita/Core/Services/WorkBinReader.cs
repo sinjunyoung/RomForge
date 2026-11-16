@@ -1,4 +1,5 @@
-﻿using Vita.Core.Models;
+﻿using Common.Localization;
+using Vita.Core.Models;
 
 namespace Vita.Core.Services;
 
@@ -11,7 +12,7 @@ public static class WorkBinReader
     private static WorkBinLicense Parse(byte[] data, string label)
     {
         if (data.Length < WorkBinLicense.MinSize)
-            throw new InvalidDataException($"work.bin 크기가 너무 작습니다: {label}");
+            throw new InvalidDataException(Loc.S.ErrWorkBinTooSmall(label));
 
         string contentId = System.Text.Encoding.ASCII
             .GetString(data, WorkBinLicense.ContentIdOffset, WorkBinLicense.ContentIdSize)
@@ -21,7 +22,7 @@ public static class WorkBinReader
             .ToArray();
 
         if (klicensee.All(b => b == 0))
-            throw new InvalidDataException($"work.bin에 유효한 klicensee가 없습니다: {label}");
+            throw new InvalidDataException(Loc.S.ErrWorkBinNoKlicensee(label));
 
         return new WorkBinLicense
         {

@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Common.Services;
 using Ookii.Dialogs.Wpf;
 using RomForge.Core.ViewModels.PSVita;
@@ -114,7 +115,7 @@ public partial class RepackTab : UserControl
         {
             var dlg = new VistaFolderBrowserDialog
             {
-                Description = "한글 패치 폴더 선택",
+                Description = Loc.S.DialogSelectKoreanPatchFolder,
                 UseDescriptionForTitle = true
             };
 
@@ -129,7 +130,7 @@ public partial class RepackTab : UserControl
         {
             var dlg = new Microsoft.Win32.OpenFileDialog
             {
-                Title = "한글 패치 압축파일 선택",
+                Title = Loc.S.DialogSelectKoreanPatchArchive,
                 Filter = "Archive Files (*.zip;*.7z)|*.zip;*.7z|All Files (*.*)|*.*"
             };
 

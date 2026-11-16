@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using Common.Localization;
+using System.Buffers.Binary;
 using System.Text;
 using Vita.Core.Cryptography;
 using Vita.Core.Models;
@@ -19,7 +20,7 @@ public static class PkgDecryptor
         pkgStream.ReadExactly(header);
 
         if (BinaryPrimitives.ReadUInt32BigEndian(header) != PkgMagic || BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(PkgHeader.HeaderSize)) != ExtMagic)
-            throw new InvalidDataException("PKG 파일이 아닙니다.");
+            throw new InvalidDataException(Loc.S.ErrNotFormatFile("PKG"));
 
         long metaOffset = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(8));
         int metaCount = (int)BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan(12));
@@ -56,7 +57,7 @@ public static class PkgDecryptor
         }
 
         if (contentType is not ((uint)ContentType.App or (uint)ContentType.Dlc or (uint)ContentType.Psm or (uint)ContentType.PsmUnk))
-            throw new NotSupportedException($"지원하지 않는 PKG content type: 0x{contentType:x}");
+            throw new NotSupportedException(Loc.S.ErrVitaUnsupportedPkgContentType(contentType.ToString("x")));
 
         string contentId = Encoding.ASCII
             .GetString(header, PkgHeader.ContentIdOffset, PkgHeader.ContentIdSize)

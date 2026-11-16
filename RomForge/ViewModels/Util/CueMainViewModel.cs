@@ -57,7 +57,7 @@ public class CueMainViewModel : BatchToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"'{path}' 추가 실패: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogAddFailed(path, ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
         }
@@ -86,7 +86,7 @@ public class CueMainViewModel : BatchToolTabViewModel
     public static string GetFileDialogFilter()
     {
         string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
+        return $"{Loc.S.FilterSupportedFiles}|{wildcards}|{Loc.S.FilterAllFiles}|*.*";
     }
 
     private async Task RunAsync()
@@ -109,7 +109,7 @@ public class CueMainViewModel : BatchToolTabViewModel
                 int totalCount = FileItems.Count;
                 int successCount = 0;
 
-                AppendLog($"총 {totalCount}개의 CUE 파일 검증 및 생성 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogCueStart(totalCount), LogLevel.Highlight);
 
                 var targets = FileItems.Where(i => i.State != ItemStatus.Done).ToList();
 
@@ -150,18 +150,18 @@ public class CueMainViewModel : BatchToolTabViewModel
 
                 if (successCount > 0)
                 {
-                    AppendLog($"작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogJobSummary(successCount, totalCount), LogLevel.Highlight);
                     await SoundPlayer.PlayCompleteAsync();
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
 
             }
             catch (OperationCanceledException)
             {
                 canceled = true;
 
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Converting))
@@ -172,7 +172,7 @@ public class CueMainViewModel : BatchToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"오류 발생: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
 
@@ -201,13 +201,13 @@ public class CueMainViewModel : BatchToolTabViewModel
             {
                 item.State = ItemStatus.Unsupported;
 
-                AppendLog($"[패스] 이미 {item.TargetName} 파일이 존재하므로 생성을 건너뜁니다. (덮어쓰기 방지)", LogLevel.Error);
+                AppendLog(Loc.S.LogCueSkipExists(item.TargetName), LogLevel.Error);
                 return false;
             }
 
             string trackMode = DetectBinTrackMode(item.FilePath);
 
-            AppendLog($"[{item.FileName}] 분석 완료 -> 포맷: {trackMode}");
+            AppendLog(Loc.S.LogCueAnalyzed(item.FileName, trackMode));
 
             string binFileNameWithExt = Path.GetFileName(item.FilePath);
             var sb = new StringBuilder();
@@ -217,13 +217,13 @@ public class CueMainViewModel : BatchToolTabViewModel
             sb.AppendLine("    INDEX 01 00:00:00");
             ct.ThrowIfCancellationRequested();
             File.WriteAllText(targetCuePath, sb.ToString(), Encoding.UTF8);
-            AppendLog($"[성공] CUE 파일 생성 완료: {item.TargetName}");
+            AppendLog(Loc.S.LogCueCreated(item.TargetName));
 
             return true;
         }
         catch (Exception ex)
         {
-            AppendLog($"[실패] {item.FileName} 처리 중 에러: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogCueItemFailed(item.FileName, ex.Message), LogLevel.Error);
             return false;
         }
     }

@@ -49,7 +49,7 @@ public class SourceHashViewModel : ViewModelBase
 
     public bool HasSkipped => SkippedCount > 0;
 
-    public string SkippedText => $"용량이 작은 {SkippedCount}개 파일은 표시하지 않았습니다";
+    public string SkippedText => Loc.S.LabelSmallFilesHidden(SkippedCount);
 
     public SourceHashViewModel() => Entries.CollectionChanged += (_, _) => OnPropertyChanged(nameof(HasEntries));
 

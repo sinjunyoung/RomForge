@@ -66,9 +66,9 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public string? MismatchReason { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(MismatchVisibility)); } }
 
-    public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 ZIP를 드래그하거나 클릭하세요";
+    public string SourceLabel => Path.GetFileName(SourcePath) ?? Loc.S.HintDragOrClickSourceZip;
 
-    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 폴더 또는 IPS/ZIP를 드래그하거나 클릭하세요";
+    public string PatchLabel => Path.GetFileName(PatchPath) ?? Loc.S.HintDragOrClickPatchFolderIpsZip;
 
     public Visibility HintVisibility => MatchItems.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -83,9 +83,9 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         if (matched.Count == 0 || SourcePath is null)
             return;
 
-        if (MatchItems.Any(x => x.MismatchReason == "CRC 불일치"))
+        if (MatchItems.Any(x => x.MatchKind == ArcadeMatchKind.CrcMismatch))
         {
-            AppendLog("CRC 불일치 항목이 있어 패치를 진행할 수 없습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogArcadeCrcMismatchBlocked, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -96,7 +96,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
         string outputZipPath = Path.Combine(outputDir, Path.GetFileName(SourcePath));
 
-        AppendLog($"패치 시작: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
+        AppendLog(Loc.S.LogPatchStartName(Path.GetFileName(SourcePath)), LogLevel.Highlight);
 
         var itemsByEntryName = new Dictionary<string, ArcadeMatchItem>();
         var patchesByEntryName = new Dictionary<string, Entry>();
@@ -136,21 +136,21 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         {
             await Service.ApplyPatchedZipAsync(SourcePath, outputZipPath, patchesByEntryName, progressReporter, ct);
             outputDir.OpenFolder();
-            AppendLog($"패치 완료: {SourcePath}", LogLevel.Ok);
+            AppendLog(Loc.S.LogPatchDoneName(SourcePath), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
         }
         catch (OperationCanceledException)
         {
             TryDeleteIncompleteOutput(outputZipPath);
             canceled = true;
-            AppendLog($"패치 취소: {Path.GetFileName(SourcePath)}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchCancelledName(Path.GetFileName(SourcePath)), LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
         }
         catch (Exception ex)
         {
             TryDeleteIncompleteOutput(outputZipPath);
             failed = true;
-            AppendLog($"패치 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchFailedMsg(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
         }
         finally
@@ -176,7 +176,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
             if (!AllPatchEntries.Any(p => ReferenceEquals(p, patch)))
                 AllPatchEntries.Add(patch);
 
-            item.MismatchReason = null;
+            item.MatchKind = ArcadeMatchKind.None;
         }
 
         item.PatchEntry = patch;
@@ -228,7 +228,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"중단된 결과 파일 삭제 실패: {ex.Message} (수동으로 확인해주세요: {outputZipPath})", LogLevel.Error);
+            AppendLog(Loc.S.LogStaleResultDeleteFailed(ex.Message, outputZipPath), LogLevel.Error);
         }
     }
 
@@ -325,7 +325,8 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
                     SourcePath = r.FullPath,
                     PatchEntry = r.PatchEntry,
                     PatchFileName = r.PatchFileName,
-                    MismatchReason = r.MismatchReason
+                    MatchKind = r.MatchKind,
+                    MatchDetail = r.MatchDetail
                 });
             }
 
@@ -358,7 +359,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
             UnmatchedPatches.Add(p);
     }
 
-    private sealed record PatchMatchResult(string SourceFileName, string FullPath, Entry? PatchEntry, string? PatchFileName, string? MismatchReason);
+    private sealed record PatchMatchResult(string SourceFileName, string FullPath, Entry? PatchEntry, string? PatchFileName, ArcadeMatchKind MatchKind, string? MatchDetail);
 
     private sealed record MatchPlan(List<Entry> PatchEntries, List<PatchMatchResult> Results);
 
@@ -410,7 +411,8 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
             ct.ThrowIfCancellationRequested();
 
             Entry? matched = null;
-            string? mismatchReason = null;
+            var matchKind = ArcadeMatchKind.None;
+            string? matchDetail = null;
             var datEntry = package?.Entries.FirstOrDefault(e => string.Equals(e.SourceFileName, fileName, StringComparison.OrdinalIgnoreCase));
 
             if (datEntry is not null)
@@ -418,10 +420,16 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
                 if (string.Equals(crc, datEntry.Crc, StringComparison.OrdinalIgnoreCase))
                 {
                     matched = FindAndRemoveDatMatch(datCandidates, usedPatches, datEntry.PatchBaseName);
-                    mismatchReason = matched is null ? $"마스터 데이터에 등록된 패치({datEntry.PatchBaseName}.ips)를 찾을 수 없습니다." : "CRC 일치";
+                    if (matched is null)
+                    {
+                        matchKind = ArcadeMatchKind.PatchNotRegistered;
+                        matchDetail = datEntry.PatchBaseName + ".ips";
+                    }
+                    else
+                        matchKind = ArcadeMatchKind.CrcMatched;
                 }
                 else
-                    mismatchReason = "CRC 불일치";
+                    matchKind = ArcadeMatchKind.CrcMismatch;
             }
             else
             {
@@ -433,7 +441,7 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
             if (matched is not null)
                 usedPatches.Add(matched);
 
-            results.Add(new PatchMatchResult(fileName, fullPath, matched, matched?.DisplayName, mismatchReason));
+            results.Add(new PatchMatchResult(fileName, fullPath, matched, matched?.DisplayName, matchKind, matchDetail));
         }
 
         return new MatchPlan(patchEntries, results);

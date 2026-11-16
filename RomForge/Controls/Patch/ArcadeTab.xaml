@@ -159,7 +159,7 @@
                                             <Style TargetType="TextBlock">
                                                 <Setter Property="Foreground" Value="#FFAAAA"/>
                                                 <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding MismatchReason}" Value="CRC 일치">
+                                                    <DataTrigger Binding="{Binding MatchKind}" Value="CrcMatched">
                                                         <Setter Property="Foreground" Value="Green"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>

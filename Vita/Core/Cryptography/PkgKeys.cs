@@ -1,4 +1,6 @@
-﻿namespace Vita.Core.Cryptography;
+﻿using Common.Localization;
+
+namespace Vita.Core.Cryptography;
 
 public static class PkgKeys
 {
@@ -15,7 +17,7 @@ public static class PkgKeys
             2 => PkgVita2,
             3 => PkgVita3,
             4 => PkgVita4,
-            _ => throw new NotSupportedException($"지원하지 않는 PKG key_type: {keyType}")
+            _ => throw new NotSupportedException(Loc.S.ErrVitaUnsupportedPkgKeyType(keyType))
         };
 
         return Aes128Ctr.EcbEncryptSingleBlock(masterKey, iv);

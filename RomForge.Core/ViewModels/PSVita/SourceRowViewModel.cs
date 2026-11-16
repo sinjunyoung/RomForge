@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Common.Localization;
+using System.IO;
 using System.Windows.Input;
 using System.Windows.Media;
 using Vita.Core.Models;
@@ -57,7 +58,7 @@ public class SourceRowViewModel : ViewModelBase
 
     public long SizeBytes { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(Size)); } } = -1;
 
-    public string Size => SizeBytes < 0 ? "계산 중..." : FormatBytes(SizeBytes);
+    public string Size => SizeBytes < 0 ? Loc.S.LabelCalculating : FormatBytes(SizeBytes);
 
     public byte[]? IconBytes { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(IconImageSource)); } }
 
@@ -112,7 +113,7 @@ public class SourceRowViewModel : ViewModelBase
         var items = SourcePreparer.DiscoverItems(accessor);
 
         if (items.Count == 0)
-            throw new InvalidDataException("app/patch/addcont 폴더를 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrVitaContainerFoldersNotFound);
 
         return [.. items.Select(item => FromZipItem(containerPath, item))];
     }

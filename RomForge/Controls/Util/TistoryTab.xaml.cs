@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Localization;
+using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models.Util;
 using RomForge.ViewModels.Util;
@@ -48,7 +49,7 @@ public partial class TistoryTab : UserControl
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "다운로드 파일을 저장할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectDownloadFolder,
             UseDescriptionForTitle = true,
             SelectedPath = ViewModel.SaveDirectory
         };

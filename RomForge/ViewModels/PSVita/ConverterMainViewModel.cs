@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using RomForge.Core;
@@ -74,7 +75,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "출력 폴더 선택",
+            Description = Loc.S.ToolTipBrowseOutput,
             UseDescriptionForTitle = true
         };
 
@@ -88,7 +89,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
         {
             if (!path.EndsWith(".pkg", StringComparison.OrdinalIgnoreCase))
             {
-                AppendLog($"{Path.GetFileName(path)}: PKG 파일만 추가할 수 있습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogVitaOnlyPkgAddable(Path.GetFileName(path)), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 continue;
             }
@@ -104,7 +105,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Path.GetFileName(path)}: 분석 실패 - {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogFileAnalyzeFailed(Path.GetFileName(path), ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 continue;
             }
@@ -172,7 +173,7 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
 
         if (duplicate != null)
         {
-            AppendLog($"{duplicate.FileName} -> {newRow.FileName}(으)로 대체됨 ({newRow.TitleId} {newRow.Category})");
+            AppendLog(Loc.S.LogVitaReplacedDuplicate(duplicate.FileName, newRow.FileName, newRow.TitleId, newRow.Category));
             SourceRows.Remove(duplicate);
         }
 
@@ -189,14 +190,14 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
     {
         if (string.IsNullOrWhiteSpace(OutputPath))
         {
-            AppendLog("출력 폴더를 선택하세요.", LogLevel.Error);
+            AppendLog(Loc.S.ErrSelectOutputFolder, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
 
         if (SourceRows.Count == 0)
         {
-            AppendLog("PKG 파일을 하나 이상 추가하세요.", LogLevel.Error);
+            AppendLog(Loc.S.ErrVitaAddPkgFiles, LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             return;
         }
@@ -225,23 +226,23 @@ public class ConverterMainViewModel : ProgressToolTabViewModel
             var output = OutputZip ? PkgConvertOutput.Zip : PkgConvertOutput.Folder;
             var entries = SourceRows.Select(r => r.ToBatchEntry()).ToList();
 
-            AppendLog($"NoNpDrm 포맷({(OutputZip ? "zip" : "폴더")})으로 변환 중...", LogLevel.Highlight);
+            AppendLog(Loc.S.LogVitaConvertingNoNpDrm(OutputZip ? "zip" : Loc.S.LabelFolder), LogLevel.Highlight);
 
             var outputs = await NoNpDrmConvertService.ConvertAsync(entries, OutputPath!, output, AppendLog, BuildProgressReporter(), ct);
 
-            AppendLog($"전체 완료: {outputs.Count}개 타이틀 ({_totalSw.Elapsed:mm\\:ss})", LogLevel.Ok);
+            AppendLog(Loc.S.LogVitaAllDoneTitles(outputs.Count, _totalSw.Elapsed.ToString("mm\\:ss")), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             OutputPath?.OpenFolder();
         }
         catch (OperationCanceledException)
         {
-            AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+            AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
-            AppendLog($"오류: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }

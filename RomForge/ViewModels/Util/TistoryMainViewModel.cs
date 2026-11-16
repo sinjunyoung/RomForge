@@ -108,7 +108,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     .Where(u => !string.IsNullOrEmpty(u))
                     .ToList();
 
-                AppendLog($"[분석 시작] 총 {urlsList.Count}개 URL", LogLevel.Highlight);
+                AppendLog(Loc.S.LogTistoryAnalyzeStart(urlsList.Count), LogLevel.Highlight);
 
                 var urls = await TistoryAttachmentService.ExtractAttachmentUrlsAsync(urlsList, msg => AppendLog(msg), _cts.Token);
                 var excludedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".png", ".jpg", ".jpeg", ".webp", ".gif" };
@@ -156,23 +156,23 @@ public class TistoryMainViewModel : BatchToolTabViewModel
 
                 if (addedCount > 0)
                 {
-                    AppendLog($"[분석 완료] 첨부파일 {addedCount}개를 추가했습니다.", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogTistoryAnalyzeDone(addedCount), LogLevel.Highlight);
                     await SoundPlayer.PlayCompleteAsync();
                     CompleteBatchItem();
                 }
                 else
-                    AppendLog("[분석 완료] 새로 추가된 첨부파일이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogTistoryNoNewAttachments, LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
                 canceled = true;
 
-                AppendLog("분석이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogTistoryAnalyzeCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
             }
             catch (Exception ex)
             {
-                AppendLog($"[분석 실패] {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogTistoryAnalyzeFailed(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 failed = true;
             }
@@ -208,7 +208,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                 int successCount = 0;
                 object lockObj = new();
 
-                AppendLog($"선택된 총 {totalCount}개의 첨부파일 다운로드를 시작합니다. (최대 5개 병렬)", LogLevel.Highlight);
+                AppendLog(Loc.S.LogTistoryDownloadStart(totalCount), LogLevel.Highlight);
 
                 BeginBatch(targetItems.Count(i => i.State != ItemStatus.Done));
 
@@ -264,19 +264,19 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     }
                 });
 
-                AppendLog($"다운로드 작업 완료 (성공: {successCount} / 전체: {totalCount})", LogLevel.Ok);
+                AppendLog(Loc.S.LogDownloadSummary(successCount, totalCount), LogLevel.Ok);
 
                 if (AutoExtractAfterDownload)
                 {
-                    AppendLog("압축해제를 시작합니다...", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogTistoryUnzipStart, LogLevel.Highlight);
 
                     var (success, total) = await ExtractCompletedArchivesAsync(targetItems, _cts.Token);
                     int failCount = total - success;
 
-                    AppendLog($"압축해제 완료 (성공: {success} / 실패: {failCount} / 전체 그룹: {total})", failCount == 0 ? LogLevel.Ok : LogLevel.Error);
+                    AppendLog(Loc.S.LogTistoryUnzipSummary(success, failCount, total), failCount == 0 ? LogLevel.Ok : LogLevel.Error);
                 }
 
-                AppendLog("모든 작업이 종료되었습니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogTistoryAllFinished, LogLevel.Highlight);
 
                 if (successCount > 0)
                 {
@@ -288,7 +288,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
             {
                 canceled = true;
 
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
 
                 foreach (var item in FileItems.Where(i => i.State is ItemStatus.Waiting or ItemStatus.Downloading))
@@ -333,7 +333,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
 
             if (isMultiVolume && !TistoryArchiveExtractor.HasContiguousParts(items.Select(i => i.FileName)))
             {
-                AppendLog($"[압축해제 건너뜀] {representative.FileName} 계열의 볼륨 파일이 일부만 선택되어 있습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogTistoryUnzipSkippedPartial(representative.FileName), LogLevel.Error);
 
                 foreach (var item in items)
                     item.State = ItemStatus.UnzipFailed;
@@ -380,7 +380,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
 
                 successCount++;
                 BatchItemCompleted(group);
-                AppendLog($"[압축해제] {displayName} 완료", LogLevel.Ok);
+                AppendLog(Loc.S.LogTistoryUnzipItemDone(displayName), LogLevel.Ok);
             }
             catch (Exception ex)
             {
@@ -390,7 +390,7 @@ public class TistoryMainViewModel : BatchToolTabViewModel
                     item.State = ItemStatus.UnzipFailed;
                 }
 
-                AppendLog($"[압축해제 실패] {representative.FileName}: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogTistoryUnzipItemFailed(representative.FileName, ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 BatchItemCompleted(group, false);
             }

@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Localization;
+using Common;
 using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
 using RomForge.Core.UI.Helpers;
@@ -22,7 +23,7 @@ public partial class NormalTab : UserControl
     {
         public static readonly string[] AllowedExtensions = [".ips", ".bps", ".ups", ".ppf", ".aps", ".xdelta", ".dcp"];
 
-        public static string FileFilter => $"패치 파일|{string.Join(";", AllowedExtensions.Select(ext => "*" + ext))}|모든 파일|*.*";
+        public static string FileFilter => $"{Loc.S.FilterPatchFiles}|{string.Join(";", AllowedExtensions.Select(ext => "*" + ext))}|{Loc.S.FilterAllFiles}|*.*";
     }
 
     public NormalTab()
@@ -50,7 +51,7 @@ public partial class NormalTab : UserControl
             var subBrush = new SolidColorBrush(Color.FromRgb(0x88, 0x88, 0x88));
             var window = new Window
             {
-                Title = "해시 계산 기준 선택",
+                Title = Loc.S.DialogSelectHashBasis,
                 Width = 520,
                 SizeToContent = SizeToContent.Height,
                 Owner = Application.Current?.MainWindow,
@@ -70,7 +71,7 @@ public partial class NormalTab : UserControl
 
             var header = new TextBlock
             {
-                Text = "드림캐스트(GD-ROM) CHD입니다. 해시를 계산할 기준을 선택하세요.",
+                Text = Loc.S.MsgGdromChdSelectHashBasis,
                 Margin = new Thickness(16, 16, 16, 8),
                 TextWrapping = TextWrapping.Wrap,
                 FontWeight = FontWeights.Bold,
@@ -78,14 +79,14 @@ public partial class NormalTab : UserControl
             };            
             var description = new TextBlock
             {
-                Text = "CHD에는 원본이 cue/bin이었는지 gdi였는지 기록되지 않습니다.\n\n• GDI 기준: 패치가 실제로 사용하는 파일 (TOSEC 배치)\n• CUE 기준: Redump cue/bin 원본과 비교할 때 (pregap을 원래 위치로 복원)",
+                Text = Loc.S.MsgChdGdiCueBasisExplain,
                 Margin = new Thickness(16, 0, 16, 16),
                 TextWrapping = TextWrapping.Wrap,
                 Foreground = textBrush
             };
             var hint = new TextBlock
             {
-                Text = "창을 닫으면 GDI 기준으로 계산합니다.",
+                Text = Loc.S.MsgCloseDefaultsToGdi,
                 Margin = new Thickness(16, 0, 16, 12),
                 Foreground = subBrush,
                 FontSize = 11
@@ -93,7 +94,7 @@ public partial class NormalTab : UserControl
             var chosen = GdRomHashLayout.Gdi;
             var gdiButton = new Button
             {
-                Content = "GDI 기준",
+                Content = Loc.S.ButtonGdiBasis,
                 Width = 100,
                 Margin = new Thickness(4, 0, 0, 0),
                 IsDefault = true,
@@ -101,7 +102,7 @@ public partial class NormalTab : UserControl
             };
             var cueButton = new Button
             {
-                Content = "CUE 기준",
+                Content = Loc.S.ButtonCueBasis,
                 Width = 100,
                 Margin = new Thickness(4, 0, 0, 0),
                 Style = (Style)Application.Current!.FindResource("GrayButton")
@@ -160,7 +161,7 @@ public partial class NormalTab : UserControl
             var selectedBrush = new SolidColorBrush(Color.FromRgb(0x00, 0x7A, 0xCC));
             var window = new Window
             {
-                Title = "원본 롬 파일 선택",
+                Title = Loc.S.DialogSelectSourceRomFile,
                 Width = 480,
                 Height = 380,
                 Owner = Application.Current?.MainWindow,
@@ -234,7 +235,7 @@ public partial class NormalTab : UserControl
 
             var header = new TextBlock
             {
-                Text = "압축 안에 패치 대상 후보가 여러 개입니다. 패치할 원본 파일을 선택하세요:",
+                Text = Loc.S.MsgArchiveMultipleCandidatesSelect,
                 Margin = new Thickness(12, 12, 12, 0),
                 TextWrapping = TextWrapping.Wrap,
                 FontWeight = FontWeights.Bold,
@@ -242,7 +243,7 @@ public partial class NormalTab : UserControl
             };
             var okButton = new Button
             {
-                Content = "선택",
+                Content = Loc.S.ButtonSelect,
                 Width = 80,
                 Margin = new Thickness(4, 0, 0, 0),
                 IsDefault = true,
@@ -250,7 +251,7 @@ public partial class NormalTab : UserControl
             };
             var cancelButton = new Button
             {
-                Content = "취소",
+                Content = Loc.S.ButtonCancel,
                 Width = 80,
                 Margin = new Thickness(4, 0, 0, 0),
                 IsCancel = true,
@@ -311,7 +312,7 @@ public partial class NormalTab : UserControl
 
     private void NormalSourceDrop_Click(object sender, MouseButtonEventArgs e)
     {
-        var dlg = new OpenFileDialog { Title = "원본 파일 선택" };
+        var dlg = new OpenFileDialog { Title = Loc.S.DialogSelectSourceFile };
 
         if (dlg.ShowDialog() == true)
             ViewModel.PatchVM.NormalVM.SourcePath = dlg.FileName;
@@ -341,7 +342,7 @@ public partial class NormalTab : UserControl
 
         var dlg = new OpenFileDialog
         {
-            Title = "패치 파일 선택",
+            Title = Loc.S.DialogSelectPatchFile,
             Filter = PatchExtensions.FileFilter
         };
 

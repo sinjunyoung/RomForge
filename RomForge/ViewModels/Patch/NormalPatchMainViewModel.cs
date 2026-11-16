@@ -1,4 +1,5 @@
-﻿using CHD.Core.Services;
+﻿using Common.Localization;
+using CHD.Core.Services;
 using Common.Models;
 using Common.Services;
 using Patch.Core.Formats;
@@ -107,7 +108,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
     public Func<IReadOnlyList<ArchiveCandidate>, Task<string?>>? RequestSourceSelectionAsync { get; set; }
 
-    public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 파일을 드래그하거나 클릭하세요";
+    public string SourceLabel => Path.GetFileName(SourcePath) ?? Loc.S.HintDragOrClickSourceFile;
 
     public override string? HelpPageKey => "patch-general";
 
@@ -160,7 +161,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         _patchAdded = true;
 
         for (int i = 0; i < PatchSlots.Count; i++)
-            PatchSlots[i].Title = $"패치 {i + 1}";
+            PatchSlots[i].Title = Loc.S.LabelPatchNumber(i + 1);
 
         OnPropertyChanged(nameof(CanAddPatch));
         OnPropertyChanged(nameof(HintsVisible));
@@ -245,7 +246,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
             if (SourceArchiveExtractor.IsArchivePath(SourcePath))
             {
-                AppendLog($"원본 압축 확인 중: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
+                AppendLog(Loc.S.LogCheckingSourceArchive(Path.GetFileName(SourcePath)), LogLevel.Highlight);
 
                 extractDir = Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(SourcePath)); Directory.CreateDirectory(extractDir);
 
@@ -253,10 +254,10 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
                 if (extractResult.NeedsSelection)
                 {
-                    AppendLog($"압축 안에 패치 대상 후보가 {extractResult.Candidates.Count}개 있습니다. 선택이 필요합니다.", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogArchiveMultipleCandidatesFound(extractResult.Candidates.Count), LogLevel.Highlight);
 
                     if (RequestSourceSelectionAsync is null)
-                        throw new InvalidOperationException("압축 안에 후보가 여러 개인데 선택 UI가 연결되어 있지 않습니다.");
+                        throw new InvalidOperationException(Loc.S.ErrArchiveCandidatesNoSelector);
 
                     string entryKey = await RequestSourceSelectionAsync(extractResult.Candidates) ?? throw new OperationCanceledException();
 
@@ -265,7 +266,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
                 else
                     actualSourcePath = extractResult.ResolvedPath!;
 
-                AppendLog($"원본 압축 해제 완료: {Path.GetFileName(actualSourcePath)}", LogLevel.Ok);
+                AppendLog(Loc.S.LogSourceArchiveExtracted(Path.GetFileName(actualSourcePath)), LogLevel.Ok);
             }
 
             extractDir ??= Path.Combine(outputDir, "_src_" + Path.GetFileNameWithoutExtension(actualSourcePath));
@@ -275,7 +276,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
                 string directOutputName = VersionInfoExtractor.ApplySuffix(Path.GetFileName(actualSourcePath), namingPatchPath, AppConfig.Instance.Patch.NamingEnabled, AppConfig.Instance.Patch.NamingFormat, Common.Localization.Loc.S.EnglishName);
                 string directOutputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, directOutputName));
 
-                AppendLog("압축된 원본에 바로 패치를 시도합니다...", LogLevel.Highlight);
+                AppendLog(Loc.S.LogTryingPatchOnArchive, LogLevel.Highlight);
 
                 try
                 {
@@ -284,7 +285,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
 
                     outputPath = directOutputPath;
 
-                    AppendLog($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
+                    AppendLog(Loc.S.LogPatchDoneWithTime(Path.GetFileName(outputPath), stopwatch.Elapsed.ToString("mm\\:ss")), LogLevel.Ok);
                     outputDir.OpenFolder();
 
                     return;
@@ -293,9 +294,9 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
                 {
                     throw;
                 }
-                catch (InvalidOperationException ex) when (ex.Message.Contains("XD3_INVALID_INPUT") || ex.Message.Contains("미스매치"))
+                catch (InvalidOperationException ex) when (ex.Message.Contains("XD3_INVALID_INPUT"))
                 {
-                    AppendLog("압축된 원본과 패치가 일치하지 않아 압축을 해제한 뒤 다시 시도합니다.", LogLevel.Highlight);
+                    AppendLog(Loc.S.LogArchiveMismatchRetry, LogLevel.Highlight);
 
                     if (File.Exists(directOutputPath))
                         File.Delete(directOutputPath);
@@ -313,16 +314,16 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
             outputPath = Path.Combine(outputDir, outputFileName);
             outputPath = Utils.GetUniqueFilePath(outputPath);
 
-            AppendLog($"패치 시작: {Path.GetFileName(actualSourcePath)}", LogLevel.Highlight);
+            AppendLog(Loc.S.LogPatchStartName(Path.GetFileName(actualSourcePath)), LogLevel.Highlight);
             await orchestrator.PatchAsync(actualSourcePath, patchPaths, detected, outputDir, outputPath, sourceIsTemporary, ct);
             stopwatch.Stop();
-            AppendLog($"패치 완료: {Path.GetFileName(outputPath)} ({stopwatch.Elapsed:mm\\:ss})", LogLevel.Ok);
+            AppendLog(Loc.S.LogPatchDoneWithTime(Path.GetFileName(outputPath), stopwatch.Elapsed.ToString("mm\\:ss")), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             outputDir.OpenFolder();
         }
         catch (OperationCanceledException)
         {
-            AppendLog($"패치 취소: {SourcePath}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchCancelledName(SourcePath), LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();            
 
             if (outputPath is not null)
@@ -330,7 +331,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         }
         catch (Exception ex)
         {
-            AppendLog($"패치 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchFailedMsg(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();            
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -346,11 +347,11 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
                 try
                 {
                     Directory.Delete(extractDir, true);
-                    AppendLog("원본 압축 해제 임시 파일 정리 완료", LogLevel.Ok);
+                    AppendLog(Loc.S.LogTempExtractCleaned, LogLevel.Ok);
                 }
                 catch (Exception ex)
                 {
-                    AppendLog($"압축 해제 임시 파일 정리 실패: {ex.Message}", LogLevel.Error);
+                    AppendLog(Loc.S.LogTempExtractCleanupFailed(ex.Message), LogLevel.Error);
                     await SoundPlayer.PlayErrorAsync();
                 }
             }
@@ -435,7 +436,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
     private string ResolvePreviewBaseFileName()
     {
         if (SourcePath is null)
-            return "원본.bin";
+            return Loc.S.LabelSourceBinFileName;
 
         if (!File.Exists(SourcePath) || SourceArchiveExtractor.IsArchivePath(SourcePath))
             return Path.GetFileName(SourcePath);

@@ -1,4 +1,5 @@
-﻿using Vita.Core.Cryptography;
+﻿using Common.Localization;
+using Vita.Core.Cryptography;
 using Vita.Core.Models;
 
 namespace Vita.Core.Services;
@@ -11,10 +12,10 @@ public static class NoNpDrmDecryptor
         string unicvDbRel = Combine(titleRelPath, "sce_pfs/unicv.db");
 
         if (!accessor.FileExists(filesDbRel))
-            throw new FileNotFoundException("files.db를 찾을 수 없습니다.", filesDbRel);
+            throw new FileNotFoundException(Loc.S.ErrFilesDbNotFound, filesDbRel);
 
         if (!accessor.FileExists(unicvDbRel))
-            throw new FileNotFoundException("unicv.db를 찾을 수 없습니다.", unicvDbRel);
+            throw new FileNotFoundException(Loc.S.ErrUnicvDbNotFound, unicvDbRel);
 
         using var filesDbStream = new MemoryStream(accessor.ReadAllBytes(filesDbRel));
         var flat = PfsFilesDbParser.Parse(filesDbStream, out uint filesSalt);

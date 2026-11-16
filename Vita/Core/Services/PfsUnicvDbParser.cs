@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Common.Localization;
+using System.Text;
 using Vita.Core.Models;
 
 namespace Vita.Core.Services;
@@ -15,7 +16,7 @@ public static class PfsUnicvDbParser
         var magic = reader.ReadBytes(8);
 
         if (Encoding.ASCII.GetString(magic) != "SCEIRODB")
-            throw new InvalidDataException("unicv.db magic가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrUnicvDbMagicInvalid);
 
         var entries = new List<PfsUnicvEntry>(entryCount);
         long page = 1;
@@ -76,7 +77,7 @@ public static class PfsUnicvDbParser
                 maxSignaturesPerTable = MaxSignaturesPerTableIftbl;
             }
             else
-                throw new InvalidDataException($"unicv.db 항목 {i}의 magic이 올바르지 않습니다 (page {entryPage}): {magicStr}");
+                throw new InvalidDataException(Loc.S.ErrUnicvDbEntryMagicInvalid(i, entryPage, magicStr));
 
             entries.Add(new PfsUnicvEntry
             {

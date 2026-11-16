@@ -1,4 +1,5 @@
-﻿using System.Buffers.Binary;
+﻿using Common.Localization;
+using System.Buffers.Binary;
 using System.Text;
 
 namespace Vita.Core.Services;
@@ -12,12 +13,12 @@ public static class SfoParser
     public static Dictionary<string, byte[]> Parse(byte[] data)
     {
         if (data.Length < 20)
-            throw new InvalidDataException("SFO 파일 크기가 너무 작습니다.");
+            throw new InvalidDataException(Loc.S.ErrSfoTooSmall);
 
         uint magic = BinaryPrimitives.ReadUInt32BigEndian(data);
 
         if (magic != Magic)
-            throw new InvalidDataException("SFO magic이 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrSfoMagicInvalid);
 
         uint keyTableStart = BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(8));
         uint dataTableStart = BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(12));

@@ -1,4 +1,5 @@
-﻿using CHD.Core.Interop;
+﻿using Common.Localization;
+using CHD.Core.Interop;
 using CHD.Core.Interop.Enums;
 using CHD.Core.Models;
 using CHD.Core.Services;
@@ -34,14 +35,14 @@ public static class ChdHasher
         var info = ChdInfoReader.ReadChdInfo(chdPath);
 
         if (info.HasParent)
-            throw new NotSupportedException("부모 CHD가 필요한 파일은 해시를 계산할 수 없습니다.");
+            throw new NotSupportedException(Loc.S.ErrChdParentRequiredNoHash);
 
         string baseName = Path.GetFileNameWithoutExtension(chdPath);
         using var chd = new LibChdrWrapper();
         var error = chd.Open(chdPath);
 
         if (error != ChdrError.CHDERR_NONE)
-            throw new InvalidOperationException($"CHD를 열 수 없습니다: {LibChdrWrapper.GetErrorString(error)}");
+            throw new InvalidOperationException(Loc.S.ErrChdOpenFailed(LibChdrWrapper.GetErrorString(error)));
 
         return info.SourceType switch
         {
@@ -110,7 +111,7 @@ public static class ChdHasher
         offsetInHunk = (int)(byteOffset % hunkBytes);
 
         if (offsetInHunk + dataSize > hunkBytes)
-            throw new NotSupportedException("지원하지 않는 CHD 헌크 크기입니다.");
+            throw new NotSupportedException(Loc.S.ErrUnsupportedChdHunkSize);
 
         if (hunkIndex != cachedHunk)
         {
@@ -245,7 +246,7 @@ public static class ChdHasher
             var source = layout[sourceIndex];
 
             if (frameOfs < 0 || frameOfs >= source.Frames)
-                throw new NotSupportedException("지원하지 않는 GD-ROM 트랙 배치입니다.");
+                throw new NotSupportedException(Loc.S.ErrUnsupportedGdromTrackLayout);
 
             ReadFrame(chd, source.ChdFrameOfs + frameOfs, source.DataSize, hunk, hunkBytes, ref cachedHunk, out int offsetInHunk);
 
@@ -308,6 +309,6 @@ public static class ChdHasher
         "MODE2" or "MODE2/2336" or "MODE2_FORM_MIX" => 2336,
         "MODE2_FORM2" or "MODE2/2324" => 2324,
         "MODE1_RAW" or "MODE1/2352" or "MODE2_RAW" or "MODE2/2352" or "CDI/2352" or "AUDIO" => 2352,
-        _ => throw new NotSupportedException($"지원하지 않는 CHD 트랙 타입입니다: {trackType}")
+        _ => throw new NotSupportedException(Loc.S.ErrUnsupportedChdTrackType(trackType))
     };
 }

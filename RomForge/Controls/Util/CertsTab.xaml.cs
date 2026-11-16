@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.Localization;
+using Microsoft.Win32;
 using RomForge.ViewModels.Util;
 using System.IO;
 using System.Windows;
@@ -31,7 +32,7 @@ public partial class CertsTab : UserControl
         var dlg = new OpenFileDialog
         {
             Filter = CertsMainViewModel.FileDialogFilter,
-            Title = "CIA 파일 선택"
+            Title = Loc.S.DialogSelectCiaFile
         };
 
         if (dlg.ShowDialog() == true)

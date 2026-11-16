@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Common.Localization;
+using System.Text;
 using Vita.Core.Models;
 
 namespace Vita.Core.Services;
@@ -15,7 +16,7 @@ public static class PfsFilesDbParser
         var magic = reader.ReadBytes(8);
 
         if (Encoding.ASCII.GetString(magic) != "SCENGPFS")
-            throw new InvalidDataException("files.db magic가 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrFilesDbMagicInvalid);
 
         reader.ReadUInt32();
         reader.ReadUInt16();
@@ -43,7 +44,7 @@ public static class PfsFilesDbParser
             reader.ReadUInt32();
 
             if (nFiles > MaxFilesInBlock)
-                throw new InvalidDataException($"files.db 블록의 파일 수가 올바르지 않습니다: {nFiles}");
+                throw new InvalidDataException(Loc.S.ErrFilesDbBadFileCount(nFiles));
 
             var names = new (uint ParentIndex, string Name)[MaxFilesInBlock];
 
@@ -132,13 +133,13 @@ public static class PfsFilesDbParser
             while (parentIndex != 0)
             {
                 if (++depth > flat.Count)
-                    throw new InvalidDataException("디렉토리 구조가 순환합니다.");
+                    throw new InvalidDataException(Loc.S.ErrDirStructureCyclic);
 
                 if (!dirMatrix.TryGetValue(parentIndex, out uint nextParent))
-                    throw new InvalidDataException($"부모 디렉토리 인덱스 {parentIndex}를 찾을 수 없습니다.");
+                    throw new InvalidDataException(Loc.S.ErrParentDirIndexNotFound(parentIndex));
 
                 if (!byIndexDir.TryGetValue(parentIndex, out var dirEntry))
-                    throw new InvalidDataException($"디렉토리 인덱스 {parentIndex}를 찾을 수 없습니다.");
+                    throw new InvalidDataException(Loc.S.ErrDirIndexNotFound(parentIndex));
 
                 dirChain.Add(dirEntry.Name);
 

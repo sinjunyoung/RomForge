@@ -41,7 +41,7 @@ public static class NoNpDrmConvertService
 
             outputs.Add(outputPath);
 
-            log($"[{group.TitleId}] PKG {group.Entries.Count}개 -> {outputPath}", LogLevel.Ok);
+            log(Loc.S.LogVitaPkgGroupOutput(group.TitleId, group.Entries.Count, outputPath), LogLevel.Ok);
         }
 
         reporter.ForceReport();
@@ -54,7 +54,7 @@ public static class NoNpDrmConvertService
     private static List<TitleGroup> BuildGroups(List<BatchSourceEntry> entries)
     {
         if (entries.Any(e => e.Kind != SourceKind.Pkg || e.Probe is null))
-            throw new InvalidOperationException("PKG 파일만 변환할 수 있습니다.");
+            throw new InvalidOperationException(Loc.S.ErrVitaPkgOnlyConvertible);
 
         return [.. entries
             .GroupBy(e => e.Probe!.TitleId, StringComparer.OrdinalIgnoreCase)
@@ -78,7 +78,7 @@ public static class NoNpDrmConvertService
                 .FirstOrDefault(g => g.Count() > 1);
 
             if (duplicate != null)
-                throw new InvalidOperationException($"[{group.TitleId}] 같은 종류의 PKG가 중복되었습니다: {string.Join(", ", duplicate.Select(e => Path.GetFileName(e.Path)))}");
+                throw new InvalidOperationException(Loc.S.ErrVitaDuplicatePkgKind(group.TitleId, string.Join(", ", duplicate.Select(e => Path.GetFileName(e.Path)))));
 
             bool appHasLicense = group.Entries.Any(e => e.Probe!.Category == ContentCategory.App && !string.IsNullOrWhiteSpace(e.License));
 
@@ -90,7 +90,7 @@ public static class NoNpDrmConvertService
                 if (entry.Probe!.Category == ContentCategory.Patch && appHasLicense)
                     continue;
 
-                throw new InvalidOperationException($"[{group.TitleId}] 키(work.bin, *.rif / zRIF)가 필요합니다: {Path.GetFileName(entry.Path)}");
+                throw new InvalidOperationException(Loc.S.ErrVitaKeyRequired(group.TitleId, Path.GetFileName(entry.Path)));
             }
         }
     }
@@ -109,9 +109,9 @@ public static class NoNpDrmConvertService
 
                 if (string.IsNullOrWhiteSpace(entry.License))
                 {
-                    accessor = new PkgSourceAccessor(entry.Path, appKlicensee ?? throw new InvalidOperationException($"[{group.TitleId}] App의 키를 찾을 수 없습니다: {Path.GetFileName(entry.Path)}"));
+                    accessor = new PkgSourceAccessor(entry.Path, appKlicensee ?? throw new InvalidOperationException(Loc.S.ErrVitaAppKeyNotFound(group.TitleId, Path.GetFileName(entry.Path))));
 
-                    log($"[{group.TitleId}] {Path.GetFileName(entry.Path)}: App의 키를 공유해서 변환합니다", LogLevel.Info);
+                    log(Loc.S.LogVitaSharingAppKey(group.TitleId, Path.GetFileName(entry.Path)), LogLevel.Info);
                 }
                 else
                     accessor = new PkgSourceAccessor(entry.Path, entry.License);
@@ -168,7 +168,7 @@ public static class NoNpDrmConvertService
                 string fullPath = Path.GetFullPath(Path.Combine(folderPath, BuildEntryPath(group, entry, rel).Replace('/', Path.DirectorySeparatorChar)));
 
                 if (!fullPath.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException($"허용되지 않는 경로입니다: {rel}");
+                    throw new InvalidDataException(Loc.S.ErrPathNotAllowed(rel));
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
 

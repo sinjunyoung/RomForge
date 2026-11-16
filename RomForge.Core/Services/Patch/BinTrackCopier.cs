@@ -35,7 +35,7 @@ public partial class BinTrackCopier(Action<string, LogLevel>? log)
 
         if (cuePath is null || referencedBins is null)
         {
-            log?.Invoke("CUE 파일을 찾을 수 없습니다. CD 이미지가 아니거나 CUE가 누락되었을 수 있습니다.", LogLevel.Error);
+            log?.Invoke(Loc.S.LogCueNotFoundNotCdImage, LogLevel.Error);
             return null;
         }
 
@@ -55,7 +55,7 @@ public partial class BinTrackCopier(Action<string, LogLevel>? log)
 
             if (!File.Exists(sourceBinPath))
             {
-                log?.Invoke($"멀티 트랙 파일을 찾을 수 없습니다: {Path.GetFileName(sourceBinPath)}", LogLevel.Error);
+                log?.Invoke(Loc.S.LogMultiTrackFileNotFound(Path.GetFileName(sourceBinPath)), LogLevel.Error);
                 return null;
             }
 
@@ -86,7 +86,7 @@ public partial class BinTrackCopier(Action<string, LogLevel>? log)
         }
         catch (Exception ex)
         {
-            log?.Invoke($"CUE 파일 처리 중 오류 발생: {ex.Message}", LogLevel.Error);
+            log?.Invoke(Loc.S.LogCueProcessError(ex.Message), LogLevel.Error);
             return null;
         }
     }

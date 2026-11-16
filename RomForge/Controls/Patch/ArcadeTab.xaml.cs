@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.Localization;
+using Microsoft.Win32;
 using RomForge.Core.Models.Patch;
 using RomForge.ViewModels;
 using System.IO;
@@ -21,7 +22,7 @@ public partial class ArcadeTab : UserControl
             if (Path.GetExtension(files[0]).Equals(".zip", StringComparison.OrdinalIgnoreCase))
                 ViewModel.PatchVM.ArcadeVM.SourcePath = files[0];
             else
-                MessageBox.Show("ZIP 파일만 선택 가능합니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Loc.S.ErrOnlyZipSelectable, Loc.S.MsgTitleError, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 
@@ -36,7 +37,7 @@ public partial class ArcadeTab : UserControl
         if (Directory.Exists(path) || ext.Equals(".ips", StringComparison.OrdinalIgnoreCase) || ext.Equals(".zip", StringComparison.OrdinalIgnoreCase))
             ViewModel.PatchVM.ArcadeVM.PatchPath = path;
         else
-            MessageBox.Show("폴더 또는 IPS/ZIP 파일만 등록할 수 있습니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(Loc.S.ErrOnlyFolderIpsZipRegistrable, Loc.S.MsgTitleError, MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
     private void ArcadePatchDrop_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -52,7 +53,7 @@ public partial class ArcadeTab : UserControl
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "패치 폴더 선택"
+            Title = Loc.S.DialogSelectPatchFolder
         };
 
         if (dialog.ShowDialog() == true)
@@ -63,8 +64,8 @@ public partial class ArcadeTab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "패치 파일 (*.ips;*.zip)|*.ips;*.zip|IPS 파일 (*.ips)|*.ips|ZIP 압축 파일 (*.zip)|*.zip|모든 파일 (*.*)|*.*",
-            Title = "패치 파일 선택"
+            Filter = $"{Loc.S.FilterPatchFiles} (*.ips;*.zip)|*.ips;*.zip|{Loc.S.FilterFilesOfType("IPS")} (*.ips)|*.ips|{Loc.S.FilterFilesOfType("ZIP")} (*.zip)|*.zip|{Loc.S.FilterAllFiles} (*.*)|*.*",
+            Title = Loc.S.DialogSelectPatchFile
         };
 
         if (dialog.ShowDialog() == true)
@@ -102,8 +103,8 @@ public partial class ArcadeTab : UserControl
     {
         var openFileDialog = new OpenFileDialog
         {
-            Filter = "ZIP 압축 파일 (*.zip)|*.zip",
-            Title = "원본 ZIP 파일 선택"
+            Filter = $"{Loc.S.FilterFilesOfType("ZIP")} (*.zip)|*.zip",
+            Title = Loc.S.DialogSelectSourceZip
         };
 
         if (openFileDialog.ShowDialog() == true)

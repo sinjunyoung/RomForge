@@ -1,3 +1,4 @@
+using Common.Localization;
 using Microsoft.Win32;
 using RomForge.ViewModels;
 using System.IO;
@@ -15,7 +16,7 @@ public partial class Pc98Tab : UserControl
 
     private void SourceDrop_Click(object sender, MouseButtonEventArgs e)
     {
-        var dlg = new OpenFileDialog { Title = "원본 HDI 선택", Filter = "PC98 디스크 이미지|*.hdi;*.nhd;*.thd|모든 파일|*.*" };
+        var dlg = new OpenFileDialog { Title = Loc.S.DialogSelectSourceHdi, Filter = $"{Loc.S.FilterPc98DiskImage}|*.hdi;*.nhd;*.thd|{Loc.S.FilterAllFiles}|*.*" };
 
         if (dlg.ShowDialog() == true)
             ViewModel.PatchVM.Pc98VM.SourcePath = dlg.FileName;
@@ -40,7 +41,7 @@ public partial class Pc98Tab : UserControl
     {
         var dialog = new OpenFolderDialog
         {
-            Title = "패치 폴더 선택"
+            Title = Loc.S.DialogSelectPatchFolder
         };
 
         if (dialog.ShowDialog() == true)
@@ -51,8 +52,8 @@ public partial class Pc98Tab : UserControl
     {
         var dialog = new OpenFileDialog
         {
-            Filter = "패치 파일 (*.ips;*.zip)|*.ips;*.zip|IPS 파일 (*.ips)|*.ips|ZIP 압축 파일 (*.zip)|*.zip|모든 파일 (*.*)|*.*",
-            Title = "패치 파일 선택"
+            Filter = $"{Loc.S.FilterPatchFiles} (*.ips;*.zip)|*.ips;*.zip|{Loc.S.FilterFilesOfType("IPS")} (*.ips)|*.ips|{Loc.S.FilterFilesOfType("ZIP")} (*.zip)|*.zip|{Loc.S.FilterAllFiles} (*.*)|*.*",
+            Title = Loc.S.DialogSelectPatchFile
         };
 
         if (dialog.ShowDialog() == true)
@@ -69,7 +70,7 @@ public partial class Pc98Tab : UserControl
             if (Directory.Exists(path) || ext.Equals(".ips", StringComparison.OrdinalIgnoreCase) || ext.Equals(".zip", StringComparison.OrdinalIgnoreCase))
                 ViewModel.PatchVM.Pc98VM.PatchPath = path;
             else
-                MessageBox.Show("폴더 또는 IPS/ZIP 파일만 등록할 수 있습니다.", "오류", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show(Loc.S.ErrOnlyFolderIpsZipRegistrable, Loc.S.MsgTitleError, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 }

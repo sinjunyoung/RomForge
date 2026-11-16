@@ -37,7 +37,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
         if (isDcpPatch)
         {
             if (detected.Format != RomFormat.Gdi)
-                throw new InvalidOperationException("DCP 패치는 드림캐스트 GDI 원본(또는 GDI로 변환되는 CHD)에만 적용할 수 있습니다.");
+                throw new InvalidOperationException(Loc.S.ErrDcpGdiSourceOnly);
 
             string? gdiPath = sourcePath;
 
@@ -45,7 +45,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
             {
                 var sourceDir = Path.GetDirectoryName(sourcePath)!;
 
-                gdiPath = Directory.GetFiles(sourceDir, "*.gdi").FirstOrDefault() ?? throw new InvalidOperationException("DCP 패치 대상 .gdi 파일을 찾을 수 없습니다.");
+                gdiPath = Directory.GetFiles(sourceDir, "*.gdi").FirstOrDefault() ?? throw new InvalidOperationException(Loc.S.ErrDcpGdiNotFound);
             }
 
             string workDir = Path.GetDirectoryName(gdiPath)!;
@@ -55,7 +55,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
             {
                 await GdRomApplier.ApplyAsync(gdiPath, patchPath, workDir, (p, msg) => progress?.Report(new ProgressInfo { Percent = (int)(p * 100), Label = msg }), msg => log?.Invoke(msg, LogLevel.Info), ct);
                 progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
-                log?.Invoke($"패치 완료: {gdiPath}", LogLevel.Ok);
+                log?.Invoke(Loc.S.LogPatchDoneName(gdiPath), LogLevel.Ok);
                 Directory.CreateDirectory(outputDir);
 
                 if (autoCompress)
@@ -69,19 +69,19 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
                     var chdResult = await converter.ConvertFileAsync(gdiPath, null, progress, null, ct);
 
                     if (!chdResult.Success)
-                        throw new Exception($"CHD 변환 실패: {chdResult.Message}");
+                        throw new Exception(Loc.S.ErrChdConvertFailed(chdResult.Message));
 
                     string finalChdPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, titleName + ".chd"));
 
                     File.Move(chdResult.OutputFile!, finalChdPath);
-                    log?.Invoke($"CHD 변환 완료: {finalChdPath}", LogLevel.Ok);
+                    log?.Invoke(Loc.S.LogChdConvertDone(finalChdPath), LogLevel.Ok);
                 }
                 else
                 {
                     string finalDir = Utils.GetUniqueFolderPath(Path.Combine(outputDir, titleName));
 
                     Directory.Move(workDir, finalDir);
-                    log?.Invoke($"결과물 저장 완료: {finalDir}", LogLevel.Ok);
+                    log?.Invoke(Loc.S.LogResultSaved(finalDir), LogLevel.Ok);
                 }
             }
             else
@@ -107,7 +107,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
                 }
 
                 progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
-                log?.Invoke($"패치 완료: {_outputGdiPath}", LogLevel.Ok);
+                log?.Invoke(Loc.S.LogPatchDoneName(_outputGdiPath), LogLevel.Ok);
 
                 if (autoCompress && File.Exists(_outputGdiPath))
                     await _compressKnownConverter.ConvertAsync(detected, outputPath, null, _copiedTrackPaths, null, _outputGdiPath, outputDir, ct);
@@ -118,7 +118,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
 
         await Chain.ApplyAsync(sourcePath, patchPaths, outputPath, outputDir, log, progress, ct);
         progress?.Report(new ProgressInfo { Label = Loc.S.ProgressPatchDone, Percent = 100 });
-        log?.Invoke($"패치 완료: {outputPath}", LogLevel.Ok);
+        log?.Invoke(Loc.S.LogPatchDoneName(outputPath), LogLevel.Ok);
 
         skipCompress = false;
 
@@ -172,7 +172,7 @@ public class Orchestrator(Action<string, LogLevel>? log, IProgress<ProgressInfo>
         }
         catch (Exception ex)
         {
-            log?.Invoke($"파일 정리 실패: {ex.Message}", LogLevel.Error);
+            log?.Invoke(Loc.S.LogCleanupFailed(ex.Message), LogLevel.Error);
         }
     }
 }

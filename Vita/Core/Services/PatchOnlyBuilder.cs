@@ -66,7 +66,7 @@ public static class PatchOnlyBuilder
 
                 if (!writtenEntries.Add(entryPath))
                 {
-                    log($"[{group.Category}] {t.RelativePath}: 이미 같은 경로로 추가된 항목이라 건너뜀 (중복)", LogLevel.Highlight);
+                    log(Loc.S.LogVitaPatchOnlyDuplicateSkipped(group.Category, t.RelativePath), LogLevel.Highlight);
                     continue;
                 }
 
@@ -95,7 +95,7 @@ public static class PatchOnlyBuilder
                     if (!strict)
                         groupMatched++;
 
-                    log($"[{group.Category}] {t.RelativePath}: 처리 실패 - {ex.Message}", LogLevel.Error);
+                    log(Loc.S.LogVitaItemProcessFailed(group.Category, t.RelativePath, ex.Message), LogLevel.Error);
                     reporter.AddProgress(t.EstimatedSize);
                 }
             }
@@ -125,8 +125,8 @@ public static class PatchOnlyBuilder
         string name = group.Category == ContentCategory.Addcont ? $"{group.TitleId}/{group.ContentIdSuffix}" : group.TitleId;
 
         if (success == matched)
-            log($"[{group.Category}] {name}: {matched}개 중 {success}개 패치 완료", LogLevel.Ok);
+            log(Loc.S.LogVitaPatchAllDone(group.Category, name, matched, success), LogLevel.Ok);
         else
-            log($"[{group.Category}] {name}: {matched}개 중 {success}개만 패치 성공 ({matched - success}개 실패)", LogLevel.Error);
+            log(Loc.S.LogVitaPatchPartial(group.Category, name, matched, success, matched - success), LogLevel.Error);
     }
 }

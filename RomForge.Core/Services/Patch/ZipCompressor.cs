@@ -10,7 +10,7 @@ public class ZipCompressor(Action<string, LogLevel>? log, IProgress<ProgressInfo
 {
     public async Task CompressFromFileAsync(string outputPath, string outputDir, CancellationToken ct)
     {
-        log?.Invoke($"압축 시작: {Path.GetFileName(outputPath)}", LogLevel.Highlight);
+        log?.Invoke(Loc.S.LogCompressStart(Path.GetFileName(outputPath)), LogLevel.Highlight);
 
         string zipPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(outputPath) + ".zip");
 
@@ -43,6 +43,6 @@ public class ZipCompressor(Action<string, LogLevel>? log, IProgress<ProgressInfo
             }
         }, ct);
 
-        log?.Invoke($"압축 완료: {zipPath}", LogLevel.Ok);
+        log?.Invoke(Loc.S.LogCompressDone(zipPath), LogLevel.Ok);
     }
 }

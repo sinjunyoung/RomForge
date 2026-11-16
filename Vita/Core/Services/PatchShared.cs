@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using Patch.Core.Enums;
@@ -60,12 +61,12 @@ internal static class PatchShared
             foreach (var entry in orderedEntries)
             {
                 if (entry.Kind == SourceKind.Unpacked)
-                    throw new NotSupportedException($"언팩된 폴더는 리팩(폴더 기반)에서만 사용할 수 있습니다: {entry.Path}");
+                    throw new NotSupportedException(Loc.S.ErrVitaUnpackedFolderRepackOnly(entry.Path));
 
                 if (entry.Kind == SourceKind.Pkg)
                 {
                     if (entry.Probe is null)
-                        throw new InvalidOperationException($"PKG 항목에 Probe 정보가 없습니다: {entry.Path}");
+                        throw new InvalidOperationException(Loc.S.ErrVitaPkgProbeMissing(entry.Path));
 
                     ISourceAccessor accessor;
 
@@ -76,7 +77,7 @@ internal static class PatchShared
 
                         accessor = new PkgSourceAccessor(entry.Path, appLicense.Klicensee);
 
-                        log($"[patch] {entry.Probe.TitleId}: app의 라이선스를 그대로 공유해서 적용함", LogLevel.Info);
+                        log(Loc.S.LogVitaPatchSharesAppLicense(entry.Probe.TitleId), LogLevel.Info);
                     }
                     else
                         accessor = new PkgSourceAccessor(entry.Path, entry.License);
@@ -92,8 +93,8 @@ internal static class PatchShared
 
                     if (entry.ItemSourcePath != null)
                     {
-                        var itemCategory = entry.ItemCategory ?? throw new InvalidOperationException($"항목 카테고리가 없습니다: {entry.Path}");
-                        var itemTitleId = entry.ItemTitleId ?? throw new InvalidOperationException($"항목 TitleId가 없습니다: {entry.Path}");
+                        var itemCategory = entry.ItemCategory ?? throw new InvalidOperationException(Loc.S.ErrVitaItemCategoryMissing(entry.Path));
+                        var itemTitleId = entry.ItemTitleId ?? throw new InvalidOperationException(Loc.S.ErrVitaItemTitleIdMissing(entry.Path));
 
                         AddItem(itemCategory, itemTitleId, entry.ItemContentIdSuffix, entry.ItemSourcePath, accessor, entry.PatchPath);
                     }
@@ -196,7 +197,7 @@ internal static class PatchShared
         string normalized = NormalizeZipPath(path);
 
         if (normalized.Split('/').Contains(".."))
-            throw new InvalidDataException($"허용되지 않는 경로입니다: {path}");
+            throw new InvalidDataException(Loc.S.ErrPathNotAllowed(path));
 
         return normalized;
     }
@@ -360,12 +361,12 @@ internal static class PatchShared
 
     public static OwnerContext? BuildOwnerContext(SourceItem item, (ISourceAccessor Accessor, string Rel)? fallbackWorkBin, Action<string, LogLevel> log)
     {
-        var accessor = item.Accessor ?? throw new InvalidOperationException("소스 accessor가 없습니다.");
+        var accessor = item.Accessor ?? throw new InvalidOperationException(Loc.S.ErrVitaSourceAccessorMissing);
         var workBin = ResolveWorkBin(accessor, item, fallbackWorkBin);
 
         if (workBin is null)
         {
-            log($"{item.Category} {item.TitleId}: work.bin 없음, 건너뜀", LogLevel.Error);
+            log(Loc.S.LogVitaWorkBinMissingSkipped(item.Category, item.TitleId), LogLevel.Error);
             return null;
         }
 
@@ -377,7 +378,7 @@ internal static class PatchShared
         }
         catch (Exception ex)
         {
-            log($"{item.Category} {item.TitleId}: 파일 목록 확인 실패 - {ex.Message}", LogLevel.Error);
+            log(Loc.S.LogVitaFileListCheckFailed(item.Category, item.TitleId, ex.Message), LogLevel.Error);
             return null;
         }
     }
@@ -485,9 +486,9 @@ internal static class PatchShared
     public static async Task<byte[]?> ResolveTargetBytesAsync(PatchTarget target, Action<string, LogLevel> log, CancellationToken ct)
     {
         if (target.Kind == PatchTargetKind.Overwrite)
-            return await (target.OverwriteFile ?? throw new InvalidOperationException("교체 대상에 파일 정보가 없습니다.")).ReadSmallFileBytesAsync(ct);
+            return await (target.OverwriteFile ?? throw new InvalidOperationException(Loc.S.ErrVitaOverwriteFileInfoMissing)).ReadSmallFileBytesAsync(ct);
 
-        var appEntry = target.Source ?? throw new InvalidOperationException("패치 대상에 원본 정보가 없습니다.");
+        var appEntry = target.Source ?? throw new InvalidOperationException(Loc.S.ErrVitaPatchSourceInfoMissing);
         var owner = appEntry.Owner;
         var entry = appEntry.FileEntry;
         byte[] sourceBytes = NoNpDrmDecryptor.DecryptEntry(owner.Item.Accessor!, owner.Item.SourcePath, owner.License.Klicensee, entry, owner.Table.UnicvEntries[appEntry.EntryIndex], owner.Table.FilesSalt);

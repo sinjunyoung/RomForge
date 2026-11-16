@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Common.Services;
 using RomForge.Core.Services;
@@ -13,9 +14,9 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 
     public string? PatchPath { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(PatchLabel)); CommandManager.InvalidateRequerySuggested(); } }
 
-    public string SourceLabel => Path.GetFileName(SourcePath) ?? "원본 HDI를 드래그하거나 클릭하세요";
+    public string SourceLabel => Path.GetFileName(SourcePath) ?? Loc.S.HintDragOrClickSourceHdi;
 
-    public string PatchLabel => Path.GetFileName(PatchPath) ?? "패치 폴더 또는 ZIP를 드래그하거나 클릭하세요";
+    public string PatchLabel => Path.GetFileName(PatchPath) ?? Loc.S.HintDragOrClickPatchFolderZip;
 
 
     public async Task RunAsync()
@@ -29,7 +30,7 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
         string outputDir = Path.Combine(Path.GetDirectoryName(SourcePath)!, "output");
         string outputPath = Utils.GetUniqueFilePath(Path.Combine(outputDir, Path.GetFileName(SourcePath)));
 
-        AppendLog($"패치 시작: {Path.GetFileName(SourcePath)}", LogLevel.Highlight);
+        AppendLog(Loc.S.LogPatchStartName(Path.GetFileName(SourcePath)), LogLevel.Highlight);
 
         try
         {
@@ -38,23 +39,23 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
             var result = await global::Patch.Core.Formats.PC98.PatchService.ApplyAsync(SourcePath, PatchPath, outputPath, AppendLog, BuildProgressReporter(), ct);
 
             if (result.MissingFiles.Count > 0)
-                AppendLog($"HDI에서 찾지 못한 파일 {result.MissingFiles.Count}개는 건너뛰었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogPc98MissingFilesSkipped(result.MissingFiles.Count), LogLevel.Error);
 
-            AppendLog($"패치 완료: {result.AppliedCount}개 파일 적용 → {Path.GetFileName(outputPath)}", LogLevel.Ok);
+            AppendLog(Loc.S.LogPc98PatchDone(result.AppliedCount, Path.GetFileName(outputPath)), LogLevel.Ok);
             await SoundPlayer.PlayCompleteAsync();
             outputDir.OpenFolder();
         }
         catch (OperationCanceledException)
         {
             TryDeleteIncompleteOutput(outputPath);
-            AppendLog($"패치 취소: {Path.GetFileName(SourcePath)}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchCancelledName(Path.GetFileName(SourcePath)), LogLevel.Error);
             await SoundPlayer.PlayCancelAsync();
             MainViewModel.SetTaskbarProgress(0);
         }
         catch (Exception ex)
         {
             TryDeleteIncompleteOutput(outputPath);
-            AppendLog($"패치 실패: {ex.Message}", LogLevel.Error);
+            AppendLog(Loc.S.LogPatchFailedMsg(ex.Message), LogLevel.Error);
             await SoundPlayer.PlayErrorAsync();
             MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
         }
@@ -86,7 +87,7 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
         }
         catch (Exception ex)
         {
-            AppendLog($"중단된 결과 파일 삭제 실패: {ex.Message} (수동으로 확인해주세요: {outputPath})", LogLevel.Error);
+            AppendLog(Loc.S.LogStaleResultDeleteFailed(ex.Message, outputPath), LogLevel.Error);
         }
     }
 }

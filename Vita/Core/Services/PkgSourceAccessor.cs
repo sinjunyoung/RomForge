@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using Common.Localization;
+using System.Buffers;
 using Vita.Core.Cryptography;
 using Vita.Core.Models;
 
@@ -147,7 +148,7 @@ public sealed class PkgSourceAccessor : ISourceAccessor
         string rel = Normalize(relativePath);
 
         if (rel.Equals(WorkBinRelativePath, StringComparison.OrdinalIgnoreCase))
-            return _workBinBytes ?? throw new InvalidOperationException("이 PkgSourceAccessor는 라이선스 없이 열려서 work.bin을 제공할 수 없습니다.");
+            return _workBinBytes ?? throw new InvalidOperationException(Loc.S.ErrVitaPkgNoLicenseWorkBin);
 
         if (rel.Equals(HeadBinRelativePath, StringComparison.OrdinalIgnoreCase))
             return _headBinBytes;

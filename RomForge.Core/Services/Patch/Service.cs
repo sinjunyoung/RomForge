@@ -1,3 +1,4 @@
+using Common.Localization;
 using Common.Models;
 using Patch.Core;
 using RomForge.Core.Models.Patch;
@@ -95,7 +96,7 @@ public static class Service
             openPatchZips[patchEntry.ZipPath!] = zip;
         }
 
-        var entry = zip.GetEntry(patchEntry.EntryPath) ?? throw new FileNotFoundException($"ZIP 없음: {patchEntry.EntryPath}");
+        var entry = zip.GetEntry(patchEntry.EntryPath) ?? throw new FileNotFoundException(Loc.S.ErrZipEntryMissing(patchEntry.EntryPath));
         using var stream = entry.Open();
         using var ms = new MemoryStream();
 
