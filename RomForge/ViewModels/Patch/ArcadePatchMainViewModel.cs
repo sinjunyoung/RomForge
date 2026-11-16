@@ -62,7 +62,25 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public string TotalProgressText => $"{TotalProgress}%";
 
-    public string ProgressSummary { get; set { SetProperty(ref field, value); } } = Loc.S.StatusWaiting;
+    private bool _isCleared;
+
+    public string ProgressSummary
+    {
+        get
+        {
+            if (_isCleared)
+                return string.Empty;
+
+            var matchedItems = MatchItems.Where(x => x.IsMatched).ToList();
+
+            if (matchedItems.Count == 0 && SourcePath is null && PatchPath is null)
+                return Loc.S.StatusWaiting;
+
+            int completedCount = matchedItems.Count(x => x.Progress >= 100);
+
+            return Loc.S.ProgressCompletedCount(completedCount, matchedItems.Count);
+        }
+    }
 
     public string? MismatchReason { get; set { SetProperty(ref field, value); OnPropertyChanged(nameof(MismatchVisibility)); } }
 
@@ -75,6 +93,19 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
     public Visibility MismatchVisibility => MismatchReason is not null ? Visibility.Visible : Visibility.Collapsed;
 
     public override string? HelpPageKey => "patch-arcade";
+
+    public ArcadePatchMainViewModel()
+    {
+        Loc.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Current))
+            {
+                OnPropertyChanged(nameof(SourceLabel));
+                OnPropertyChanged(nameof(PatchLabel));
+                OnPropertyChanged(nameof(ProgressSummary));
+            }
+        };
+    }
 
     public async Task RunAsync()
     {
@@ -188,10 +219,8 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
     public void UpdateSummary()
     {
-        var matchedItems = MatchItems.Where(x => x.IsMatched).ToList();
-        int completedCount = matchedItems.Count(x => x.Progress >= 100);
-
-        ProgressSummary = Loc.S.ProgressCompletedCount(completedCount, matchedItems.Count);
+        _isCleared = false;
+        OnPropertyChanged(nameof(ProgressSummary));
     }
 
     public void Clear()
@@ -211,8 +240,8 @@ public class ArcadePatchMainViewModel : BatchToolTabViewModel, IPatchViewModel
 
         SelectedPatchPackage = null;
         TotalProgress = 0;
-        ProgressSummary = string.Empty;
 
+        OnPropertyChanged(nameof(ProgressSummary));
         OnPropertyChanged(nameof(HintVisibility));
         OnPropertyChanged(nameof(HasPatchPackages));
     }

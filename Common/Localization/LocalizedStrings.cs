@@ -1195,21 +1195,21 @@ public abstract class LocalizedStrings
     public abstract string LogErrorWithTitle(object arg0, object arg1);
     public abstract string LogCleanupException(object arg0);
     public abstract string LogJobsStartingUnpack(object arg0);
-    public abstract string LogVitaPkgGroupOutput(object arg0, object arg1, object arg2);
+    public abstract string LogVitaPkgGroupOutput(object? arg0, object arg1, object arg2);
     public abstract string ErrVitaPkgOnlyConvertible { get; }
-    public abstract string ErrVitaDuplicatePkgKind(object arg0, object arg1);
-    public abstract string ErrVitaKeyRequired(object arg0, object arg1);
-    public abstract string ErrVitaAppKeyNotFound(object arg0, object arg1);
-    public abstract string LogVitaSharingAppKey(object arg0, object arg1);
+    public abstract string ErrVitaDuplicatePkgKind(object? arg0, object arg1);
+    public abstract string ErrVitaKeyRequired(object? arg0, object? arg1);
+    public abstract string ErrVitaAppKeyNotFound(object? arg0, object? arg1);
+    public abstract string LogVitaSharingAppKey(object? arg0, object? arg1);
     public abstract string ErrPathNotAllowed(object arg0);
-    public abstract string ErrVitaUnpackedFolderRepackOnly(object arg0);
-    public abstract string ErrVitaPkgProbeMissing(object arg0);
-    public abstract string LogVitaPatchSharesAppLicense(object arg0);
-    public abstract string ErrVitaItemCategoryMissing(object arg0);
-    public abstract string ErrVitaItemTitleIdMissing(object arg0);
+    public abstract string ErrVitaUnpackedFolderRepackOnly(object? arg0);
+    public abstract string ErrVitaPkgProbeMissing(object? arg0);
+    public abstract string LogVitaPatchSharesAppLicense(object? arg0);
+    public abstract string ErrVitaItemCategoryMissing(object? arg0);
+    public abstract string ErrVitaItemTitleIdMissing(object? arg0);
     public abstract string ErrVitaSourceAccessorMissing { get; }
-    public abstract string LogVitaWorkBinMissingSkipped(object arg0, object arg1);
-    public abstract string LogVitaFileListCheckFailed(object arg0, object arg1, object arg2);
+    public abstract string LogVitaWorkBinMissingSkipped(object? arg0, object arg1);
+    public abstract string LogVitaFileListCheckFailed(object? arg0, object arg1, object arg2);
     public abstract string ErrVitaOverwriteFileInfoMissing { get; }
     public abstract string ErrVitaPatchSourceInfoMissing { get; }
     public abstract string ErrVitaTitleIdFromContentId(object arg0);
@@ -1220,7 +1220,7 @@ public abstract class LocalizedStrings
     public abstract string LogVitaPatchPartial(object arg0, object arg1, object arg2, object arg3, object arg4);
     public abstract string LogVitaPatchFailedKeptOriginal(object arg0, object arg1, object arg2);
     public abstract string LogVitaDecryptFailed(object arg0, object arg1, object arg2);
-    public abstract string LogVitaSourceReadFailed(object arg0, object arg1, object arg2);
+    public abstract string LogVitaSourceReadFailed(object? arg0, object arg1, object arg2);
     public abstract string ErrUnicvDbMagicInvalid { get; }
     public abstract string ErrUnicvDbEntryMagicInvalid(object arg0, object arg1, object arg2);
     public abstract string ErrVitaPkgNoLicenseWorkBin { get; }
@@ -1242,9 +1242,9 @@ public abstract class LocalizedStrings
     public abstract string ErrVitaUnsupportedPkgKeyType(object arg0);
     public abstract string LogVitaOnlyPkgAddable(object arg0);
     public abstract string LogFileAnalyzeFailed(object arg0, object arg1);
-    public abstract string LogVitaReplacedDuplicate(object arg0, object arg1, object arg2, object arg3);
-    public abstract string LogVitaReplacedExisting(object arg0, object arg1, object arg2);
-    public abstract string LogVitaReplacedSameDlc(object arg0, object arg1);
+    public abstract string LogVitaReplacedDuplicate(object? arg0, object? arg1, object? arg2, object? arg3);
+    public abstract string LogVitaReplacedExisting(object? arg0, object? arg1, object arg2);
+    public abstract string LogVitaReplacedSameDlc(object? arg0, object? arg1);
     public abstract string ErrSelectOutputFolder { get; }
     public abstract string ErrVitaAddPkgFiles { get; }
     public abstract string LogVitaConvertingNoNpDrm(object arg0);
@@ -1273,8 +1273,8 @@ public abstract class LocalizedStrings
     public abstract string LabelCrcMismatch { get; }
     public abstract string LabelDatPatchNotRegistered(object arg0);
     public abstract string LogArcadeCrcMismatchBlocked { get; }
-    public abstract string LogPatchStartName(object arg0);
-    public abstract string LogPatchDoneName(object arg0);
+    public abstract string LogPatchStartName(object? arg0);
+    public abstract string LogPatchDoneName(object? arg0);
     public abstract string LogPatchCancelledName(object arg0);
     public abstract string LogPatchFailedMsg(object arg0);
     public abstract string LogPatchDoneWithTime(object arg0, object arg1);
@@ -1361,11 +1361,11 @@ public abstract class LocalizedStrings
     public abstract string ErrChdParentRequiredNoHash { get; }
     public abstract string ErrUnsupportedChdHunkSize { get; }
     public abstract string ErrUnsupportedGdromTrackLayout { get; }
-    public abstract string ErrUnsupportedChdTrackType(object arg0);
-    public abstract string ErrChdConvertFailed(object arg0);
+    public abstract string ErrUnsupportedChdTrackType(object? arg0);
+    public abstract string ErrChdConvertFailed(object? arg0);
     public abstract string LogDecompressingName(object arg0);
-    public abstract string LogDecompressDoneName(object arg0);
-    public abstract string ErrChdDecompressFailed(object arg0);
+    public abstract string LogDecompressDoneName(object? arg0);
+    public abstract string ErrChdDecompressFailed(object? arg0);
     public abstract string ErrCueRefBinMissing { get; }
     public abstract string ErrRvzDecompressResultNotFound { get; }
     public abstract string ErrDcpGdiSourceOnly { get; }

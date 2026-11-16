@@ -18,6 +18,17 @@ public class Pc98PatchMainViewModel : ProgressToolTabViewModel, IPatchViewModel
 
     public string PatchLabel => Path.GetFileName(PatchPath) ?? Loc.S.HintDragOrClickPatchFolderZip;
 
+    public Pc98PatchMainViewModel()
+    {
+        Loc.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Current))
+            {
+                OnPropertyChanged(nameof(SourceLabel));
+                OnPropertyChanged(nameof(PatchLabel));
+            }
+        };
+    }
 
     public async Task RunAsync()
     {

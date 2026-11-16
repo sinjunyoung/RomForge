@@ -6,13 +6,55 @@ namespace RomForge.ViewModels;
 
 public abstract class ProgressToolTabViewModel : ToolTabViewModel
 {
-    public int ProgressPct { get; set { SetProperty(ref field, value); MainViewModel.SetTaskbarProgress(field); } }
+    private bool _hasCustomProgressLabel;
+    private bool _hasCustomProgressTime;
 
-    public string ProgressLabel { get; set { SetProperty(ref field, value); } } = Loc.S.StatusWaiting;
+    protected ProgressToolTabViewModel()
+    {
+        Loc.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Current))
+            {
+                if (!_hasCustomProgressLabel)
+                    OnPropertyChanged(nameof(ProgressLabel));
+
+                if (!_hasCustomProgressTime)
+                    OnPropertyChanged(nameof(ProgressTime));
+            }
+        };
+    }
+
+    public int ProgressPct
+    {
+        get;
+        set
+        {
+            SetProperty(ref field, value);
+            MainViewModel.SetTaskbarProgress(field);
+        }
+    }
+
+    public string ProgressLabel
+    {
+        get => _hasCustomProgressLabel ? field : Loc.S.StatusWaiting;
+        set
+        {
+            _hasCustomProgressLabel = true;
+            SetProperty(ref field, value);
+        }
+    } = string.Empty;
 
     public string ProgressPercent { get; set { SetProperty(ref field, value); } } = string.Empty;
 
-    public string ProgressTime { get; set { SetProperty(ref field, value); } } = Loc.S.ProgressElapsed("00:00");
+    public string ProgressTime
+    {
+        get => _hasCustomProgressTime ? field : Loc.S.ProgressElapsed("00:00");
+        set
+        {
+            _hasCustomProgressTime = true;
+            SetProperty(ref field, value);
+        }
+    } = string.Empty;
 
     public string ProgressSpeed { get; set { SetProperty(ref field, value); } } = string.Empty;
 

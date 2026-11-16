@@ -148,6 +148,12 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
             }
         };
 
+        Loc.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Current))
+                OnPropertyChanged(nameof(SourceLabel));
+        };
+
         TriggerPreviewUpdate();
     }
 
