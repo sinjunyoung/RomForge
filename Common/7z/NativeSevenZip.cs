@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using Common.Localization;
+using System.Runtime.InteropServices;
 using System.Text;
 using SevenZip;
 
@@ -34,20 +35,20 @@ public static partial class NativeSevenZip
             }
             catch (DllNotFoundException ex)
             {
-                throw new FileNotFoundException("네이티브 7z.dll을 로드할 수 없습니다. (표준 DllImport 검색으로도 찾지 못함)", ex);
+                throw new FileNotFoundException(Loc.S.ErrNative7zLoadFailed, ex);
             }
             catch (EntryPointNotFoundException) { }
 
             IntPtr handle = GetModuleHandle("7z.dll");
 
             if (handle == IntPtr.Zero)
-                throw new FileNotFoundException("7z.dll이 로드된 것 같지만 모듈 핸들을 찾을 수 없습니다.");
+                throw new FileNotFoundException(Loc.S.Err7zModuleHandleNotFound);
 
             var sb = new StringBuilder(1024);
             int len = GetModuleFileName(handle, sb, sb.Capacity);
 
             if (len == 0)
-                throw new FileNotFoundException("7z.dll의 실제 로드 경로를 확인할 수 없습니다 (GetModuleFileName 실패).");
+                throw new FileNotFoundException(Loc.S.Err7zLoadPathUnknown);
 
             SevenZipExtractor.SetLibraryPath(sb.ToString());
 

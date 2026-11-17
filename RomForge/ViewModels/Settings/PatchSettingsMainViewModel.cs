@@ -1,4 +1,5 @@
-﻿using RomForge.Core;
+﻿using Common.Localization;
+using RomForge.Core;
 using RomForge.Core.UI.Command;
 using RomForge.Core.ViewModels;
 using System.IO;
@@ -57,7 +58,7 @@ public class PatchSettingsMainViewModel : ToolTabViewModel
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "출력 폴더 선택",
+            Description = Loc.S.ToolTipBrowseOutput,
             UseDescriptionForTitle = true
         };
 

@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 
 namespace Patch.Core.Formats;
 
@@ -22,12 +23,12 @@ public static class Bps
     private unsafe static byte[] Decode(byte[] source, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (patch.Length < 12)
-            throw new InvalidDataException("BPS 패치 파일이 너무 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrPatchFileTooShort("BPS"));
 
         fixed (byte* pSrc = source, pPat = patch)
         {
             if (pPat[0] != 'B' || pPat[1] != 'P' || pPat[2] != 'S' || pPat[3] != '1')
-                throw new InvalidDataException("유효하지 않은 BPS 헤더입니다.");
+                throw new InvalidDataException(Loc.S.ErrInvalidPatchHeader("BPS"));
 
             int pos = 4;
             long sourceSize = ReadVli(pPat, ref pos, patch.Length);
@@ -35,16 +36,16 @@ public static class Bps
             long metadataSize = ReadVli(pPat, ref pos, patch.Length);
 
             if (source.LongLength != sourceSize)
-                throw new InvalidDataException($"원본 파일 크기와 패치 파일 크기가 일치하지 않습니다. (패치가 기대하는 크기: {sourceSize:N0} bytes, 실제 파일 크기: {source.LongLength:N0} bytes)");
+                throw new InvalidDataException(Loc.S.ErrSourceSizeMismatch(sourceSize.ToString("N0"), source.LongLength.ToString("N0")));
 
             uint expectedSourceCrc = BitConverter.ToUInt32(patch, patch.Length - 12);
             uint actualSourceCrc = CalculateCrc32(source);
 
             if (actualSourceCrc != expectedSourceCrc)
-                throw new InvalidDataException($"원본 파일의 CRC32가 패치가 기대하는 값과 일치하지 않습니다. (패치가 기대하는 CRC32: {expectedSourceCrc:X8}, 실제 CRC32: {actualSourceCrc:X8})");
+                throw new InvalidDataException(Loc.S.ErrSourceCrc32Mismatch(expectedSourceCrc.ToString("X8"), actualSourceCrc.ToString("X8")));
 
             if (metadataSize < 0 || pos + metadataSize > patch.Length - 12)
-                throw new InvalidDataException("BPS 메타데이터 크기가 유효하지 않습니다.");
+                throw new InvalidDataException(Loc.S.ErrBpsMetadataSizeInvalid);
 
             pos += (int)metadataSize;
 
@@ -66,13 +67,13 @@ public static class Bps
                     int length = (int)((data >> 2) + 1);
 
                     if (length < 0 || outOffset + (long)length > targetSize)
-                        throw new InvalidDataException("패치 명령의 길이가 대상 파일 범위를 벗어납니다. 패치 파일이 손상되었거나 원본 파일이 일치하지 않습니다.");
+                        throw new InvalidDataException(Loc.S.ErrBpsCommandLengthOutOfRange);
 
                     switch (command)
                     {
                         case 0:
                             if (outOffset + (long)length > sourceSize)
-                                throw new InvalidDataException("SourceRead 명령이 원본 파일 범위를 벗어납니다. 원본 파일을 확인하세요.");
+                                throw new InvalidDataException(Loc.S.ErrBpsSourceReadOutOfRange);
 
                             Buffer.MemoryCopy(pSrc + outOffset, pTar + outOffset, targetSize - outOffset, length);
 
@@ -82,7 +83,7 @@ public static class Bps
 
                         case 1:
                             if (pos + (long)length > patchEnd)
-                                throw new InvalidDataException("TargetRead 명령이 패치 파일 범위를 벗어납니다. 패치 파일이 손상되었을 수 있습니다.");
+                                throw new InvalidDataException(Loc.S.ErrBpsTargetReadOutOfRange);
 
                             Buffer.MemoryCopy(pPat + pos, pTar + outOffset, targetSize - outOffset, length);
 
@@ -97,7 +98,7 @@ public static class Bps
                             srcRelOffset += (od2 & 1) == 1 ? -(int)(od2 >> 1) : (int)(od2 >> 1);
 
                             if (srcRelOffset < 0 || srcRelOffset + (long)length > sourceSize)
-                                throw new InvalidDataException("SourceCopy 명령이 원본 파일 범위를 벗어납니다. 원본 파일을 확인하세요.");
+                                throw new InvalidDataException(Loc.S.ErrBpsSourceCopyOutOfRange);
 
                             Buffer.MemoryCopy(pSrc + srcRelOffset, pTar + outOffset, targetSize - outOffset, length);
 
@@ -112,7 +113,7 @@ public static class Bps
                             tarRelOffset += (od3 & 1) == 1 ? -(int)(od3 >> 1) : (int)(od3 >> 1);
 
                             if (tarRelOffset < 0 || tarRelOffset >= outOffset)
-                                throw new InvalidDataException("TargetCopy 명령의 참조 위치가 유효하지 않습니다. 패치 파일이 손상되었을 수 있습니다.");
+                                throw new InvalidDataException(Loc.S.ErrBpsTargetCopyInvalid);
 
                             for (int i = 0; i < length; i++)
                                 pTar[outOffset + i] = pTar[tarRelOffset + i];
@@ -128,7 +129,7 @@ public static class Bps
                 }
 
                 if (outOffset != targetSize)
-                    throw new InvalidDataException("패치 적용 결과 크기가 예상 대상 파일 크기와 일치하지 않습니다. 패치가 손상되었을 수 있습니다.");
+                    throw new InvalidDataException(Loc.S.ErrBpsResultSizeMismatch);
             }
 
             return target;
@@ -190,6 +191,6 @@ public static class Bps
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 }

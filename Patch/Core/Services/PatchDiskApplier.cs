@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Patch.Core.Models;
 
 namespace Patch.Core.Services;
@@ -32,7 +33,7 @@ public static class PatchDiskApplier
 
             if (!File.Exists(tempOutPath))
             {
-                log?.Invoke($"❌ 패치 실패 ({name}): 출력 파일이 생성되지 않았습니다.", LogLevel.Error);
+                log?.Invoke($"❌ {Loc.S.LogPatchFailedNoOutput(name)}", LogLevel.Error);
                 return false;
             }
 

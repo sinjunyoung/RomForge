@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Localization;
+using Common;
 using Patch.Core.Interfaces;
 using Patch.Core.Models;
 using Patch.Core.Services;
@@ -22,7 +23,7 @@ public partial class PasswordPromptWindow : Window
 
         if (wrongPassword)
         {
-            txtMessage.Text = "비밀번호가 올바르지 않습니다. 다시 입력해 주세요.";
+            txtMessage.Text = Loc.S.MsgPasswordWrongRetry;
             txtError.Visibility = Visibility.Visible;
         }
 

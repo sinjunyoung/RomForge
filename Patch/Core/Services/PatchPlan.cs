@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Patch.Core.Enums;
 using Patch.Core.Models;
 using System.Diagnostics.CodeAnalysis;
@@ -106,18 +107,18 @@ public sealed class PatchPlan
 
         if (!HasAnyMatch)
         {
-            log($"패치 대상 파일이 존재하지 않습니다.{suffix}", LogLevel.Error);
+            log(Loc.S.LogPatchTargetMissing + suffix, LogLevel.Error);
             return;
         }
 
         if (OverwriteCount > 0)
-            log($"교체 완료: {OverwriteCount}개 파일{suffix}", LogLevel.Ok);
+            log(Loc.S.LogPlanReplaceDone(OverwriteCount, suffix), LogLevel.Ok);
 
         if (PatchedCount > 0)
-            log($"패치 적용 완료: {PatchedCount}개 파일{suffix}", LogLevel.Ok);
+            log(Loc.S.LogPlanPatchDone(PatchedCount, suffix), LogLevel.Ok);
 
         if (LooseCandidateCount > 0)
-            log($"포함 매칭 패치 후보: {LooseCandidateCount}개 파일, 원본이 맞는 파일에만 적용{suffix}", LogLevel.Info);
+            log(Loc.S.LogPlanLooseCandidates(LooseCandidateCount, suffix), LogLevel.Info);
     }
 
     private static PatchFormat DetectFormat(PatchFileRef file)

@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Localization;
+using Common.Services;
 using RomForge.Controls.Settings;
 using RomForge.Controls.Util;
 using RomForge.Core;
@@ -176,7 +177,7 @@ public class MainViewModel : ToolTabViewModel
 
         await UtilMainVM.HashVM.AddPaths([fileName]);
 
-        var window = new BaseToolWindow(UtilMainVM.HashVM, tab, "해시 계산");
+        var window = new BaseToolWindow(UtilMainVM.HashVM, tab, Loc.S.TabCalculateHash);
         window.Show();
 
         if (UtilMainVM.HashVM.RunCommand.CanExecute(null))
@@ -186,7 +187,7 @@ public class MainViewModel : ToolTabViewModel
     private void CompressVM_RunNavigatePackingSettings()
     {
         var tab = new CompressSettingsTab();
-        var window = new BaseToolWindow(Settings.Compress, tab, "압축 설정");
+        var window = new BaseToolWindow(Settings.Compress, tab, Loc.S.TitleCompressSettings);
 
         window.Show();
     }
@@ -202,7 +203,7 @@ public class MainViewModel : ToolTabViewModel
     private void PS1MainVM_RunNavigatePackingSettings(object? sender, EventArgs e)
     {
         var tab = new PSSettingsTab();
-        var window = new BaseToolWindow(Settings.PS1, tab, "PSP 설정");
+        var window = new BaseToolWindow(Settings.PS1, tab, Loc.S.TitlePspSettings);
 
         window.Show();
     }

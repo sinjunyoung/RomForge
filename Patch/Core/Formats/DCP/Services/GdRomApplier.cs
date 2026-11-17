@@ -51,7 +51,7 @@ public static class GdRomApplier
         var xdeltaEntries = replacedFiles.Where(x => x.Key.EndsWith(".xdelta", StringComparison.OrdinalIgnoreCase)).ToList();
         int xdeltaDone = 0;
 
-        onLog?.Invoke($"xdelta 대상 파일 {xdeltaEntries.Count}개 감지됨");
+        onLog?.Invoke(Loc.S.LogXdeltaTargetsDetected(xdeltaEntries.Count));
 
         foreach (var kv in xdeltaEntries)
         {
@@ -60,8 +60,8 @@ public static class GdRomApplier
 
             if (!byPath.TryGetValue(targetPath, out var originalEntry))
             {
-                onLog?.Invoke($"[실패] DCP가 참조하는 원본 파일을 찾을 수 없음: {targetPath}");
-                throw new InvalidOperationException($"DCP가 참조하는 원본 파일을 찾을 수 없습니다: {targetPath}");
+                onLog?.Invoke(Loc.S.LogDcpSourceMissing(targetPath));
+                throw new InvalidOperationException(Loc.S.ErrDcpSourceMissing(targetPath));
             }
 
             onProgress?.Invoke(0.05 + 0.15 * xdeltaDone / xdeltaEntries.Count, Loc.S.ProgressGdApplyingXdelta(fileName));
@@ -69,7 +69,7 @@ public static class GdRomApplier
             var originalData = Iso9660DirectoryReader.ReadFile(sourceFunc, originalEntry);
             var patched = await Task.Run(() => Xdelta3.ApplyPatch(originalData, kv.Value, null, ct), ct);
 
-            onLog?.Invoke($"xdelta 적용 완료: {targetPath} ({originalData.Length:N0} → {patched.Length:N0} bytes)");
+            onLog?.Invoke(Loc.S.LogXdeltaApplied(targetPath, originalData.Length.ToString("N0"), patched.Length.ToString("N0")));
 
             replacedFiles[targetPath] = patched;
 

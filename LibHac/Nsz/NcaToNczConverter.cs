@@ -1,4 +1,5 @@
-﻿using LibHac.Common.FixedArrays;
+﻿using Common.Localization;
+using LibHac.Common.FixedArrays;
 using LibHac.Common.Keys;
 using LibHac.Fs;
 using LibHac.FsSystem;
@@ -140,7 +141,7 @@ public class NcaToNczConverter(KeySet keySet)
                                 compressorStack.Push(compressor);
                             }
                         }
-                        throw new Exception("Compressor 획득 실패");
+                        throw new Exception(Loc.S.ErrCompressorAcquireFailed);
                     }
                     catch
                     {

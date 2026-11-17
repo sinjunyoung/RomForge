@@ -43,19 +43,19 @@ public static class Ppf
     private static void DecodeStreamInternal(Stream src, Stream pat, Stream outStream, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (pat.Length < 56)
-            throw new InvalidDataException("PPF 파일이 너무 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrPatchFileTooShort("PPF"));
 
         byte[] header = new byte[60];
 
         pat.ReadExactly(header, 0, 60);
 
         if (header[0] != 'P' || header[1] != 'P' || header[2] != 'F')
-            throw new InvalidDataException("유효하지 않은 PPF 헤더입니다.");
+            throw new InvalidDataException(Loc.S.ErrInvalidPatchHeader("PPF"));
 
         byte version = (byte)(header[3] - '0');
 
         if (version < 1 || version > 3)
-            throw new InvalidDataException($"지원하지 않는 PPF 버전입니다: PPF {version}.0");
+            throw new InvalidDataException(Loc.S.ErrUnsupportedPpfVersion(version));
 
         long dataEnd = pat.Length;
         bool isUndoAvailable = false;
@@ -211,7 +211,7 @@ public static class Ppf
         long sourceBlockStart = imagetype != 0 ? 0x80A0L : 0x9320L;
 
         if (src.Length < sourceBlockStart + 1024)
-            throw new InvalidDataException("소스 파일이 너무 짧아 blockcheck를 수행할 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrPpfSourceTooShortBlockcheck);
 
         byte[] patchBlock = new byte[1024];
 
@@ -227,13 +227,13 @@ public static class Ppf
 
         for (int i = 0; i < 1024; i++)
             if (patchBlock[i] != sourceBlock[i])
-                throw new InvalidDataException($"Blockcheck 실패 (PPF {version}.0)");
+                throw new InvalidDataException(Loc.S.ErrPpfBlockcheckFailed(version));
     }
 
     private static void ValidateInputFiles(params string[] paths)
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 }

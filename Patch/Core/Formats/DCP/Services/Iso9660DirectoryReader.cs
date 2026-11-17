@@ -1,4 +1,5 @@
-﻿using Patch.Core.Formats.DCP.Models;
+﻿using Common.Localization;
+using Patch.Core.Formats.DCP.Models;
 using System.Text;
 
 namespace Patch.Core.Formats.DCP.Services;
@@ -10,7 +11,7 @@ public static class Iso9660DirectoryReader
         var pvd = sectorReader(pvdLba);
 
         if (pvd[0] != 0x01 || pvd[1] != 'C' || pvd[2] != 'D' || pvd[3] != '0' || pvd[4] != '0' || pvd[5] != '1')
-            throw new InvalidDataException("유효한 ISO9660 PVD를 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrIsoPvdNotFound);
 
         var rootLba = BitConverter.ToUInt32(pvd, 156 + 2);
         var rootSize = BitConverter.ToUInt32(pvd, 156 + 10);
@@ -92,7 +93,7 @@ public static class Iso9660DirectoryReader
     public static byte[] ReadFile(Func<uint, byte[]> sectorReader, Iso9660Entry file)
     {
         if (file.IsDirectory)
-            throw new InvalidOperationException($"디렉토리는 ReadFile로 읽을 수 없습니다: {file.FullPath}");
+            throw new InvalidOperationException(Loc.S.ErrDirectoryNotReadableByReadFile(file.FullPath));
 
         var buffer = new byte[file.Size];
         int writtenOffset = 0;

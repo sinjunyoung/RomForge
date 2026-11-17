@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using Common.Localization;
+using NAudio.Wave;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -25,7 +26,7 @@ public static class SoundManager
             else
             {
                 var uri = new Uri(packUriString, UriKind.Absolute);
-                StreamResourceInfo resourceStreamInfo = Application.GetResourceStream(uri) ?? throw new FileNotFoundException($"WPF 리소스를 찾을 수 없습니다: {packUriString}");
+                StreamResourceInfo resourceStreamInfo = Application.GetResourceStream(uri) ?? throw new FileNotFoundException(Loc.S.ErrWpfResourceNotFound(packUriString));
                 var memoryStream = new MemoryStream();
 
                 resourceStreamInfo.Stream.CopyTo(memoryStream);
@@ -57,7 +58,7 @@ public static class SoundManager
                     else if (extension == ".mp3")
                         _audioFileReader = new Mp3FileReader(_audioStream);
                     else
-                        throw new NotSupportedException($"지원하지 않는 오디오 형식입니다: {extension}");
+                        throw new NotSupportedException(Loc.S.ErrUnsupportedAudioFormat(extension));
 
                     _waveOutDevice = new WaveOut
                     {

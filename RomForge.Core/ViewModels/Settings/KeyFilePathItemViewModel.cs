@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Common.Localization;
+using Microsoft.Win32;
 using RomForge.Core.UI.Command;
 using System.IO;
 using System.Windows;
@@ -18,7 +19,7 @@ public class KeyFilePathItemViewModel : ViewModelBase
 
     public string DefaultFileName { get; }
 
-    public string Hint => $"비워두면 exe 폴더의 {DefaultFileName}을(를) 사용합니다";
+    public string Hint => Loc.S.HintKeyFileEmptyUsesExeFolder(DefaultFileName);
 
     public string? FilePath
     {
@@ -47,14 +48,14 @@ public class KeyFilePathItemViewModel : ViewModelBase
         get
         {
             if (IsCustomFound)
-                return "지정한 파일 사용 중";
+                return Loc.S.LabelKeyFileUsingSpecified;
 
             bool defaultFound = File.Exists(DefaultPath);
 
             if (!string.IsNullOrWhiteSpace(FilePath))
-                return defaultFound ? "지정한 파일이 없어 exe 폴더의 파일 사용 중" : "지정한 파일을 찾을 수 없음";
+                return defaultFound ? Loc.S.LabelKeyFileMissingUsingExe : Loc.S.LabelKeyFileSpecifiedNotFound;
 
-            return defaultFound ? "exe 폴더에서 찾음" : "파일 없음";
+            return defaultFound ? Loc.S.LabelKeyFileFoundInExe : Loc.S.LabelKeyFileNone;
         }
     }
 
@@ -91,7 +92,7 @@ public class KeyFilePathItemViewModel : ViewModelBase
         if (newPath != null && _validate != null && !_validate())
         {
             _setPath(previousPath);
-            ErrorMessage = "선택한 파일을 키 파일로 사용할 수 없습니다. 올바른 파일인지 확인하세요.";
+            ErrorMessage = Loc.S.ErrKeyFileInvalid;
         }
         else
         {
@@ -114,7 +115,7 @@ public class KeyFilePathItemViewModel : ViewModelBase
     {
         var dialog = new OpenFileDialog
         {
-            Title = $"{DefaultFileName} 선택",
+            Title = Loc.S.DialogSelectKeyFile(DefaultFileName),
             Filter = _fileFilter
         };
 

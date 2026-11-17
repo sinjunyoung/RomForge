@@ -1,4 +1,5 @@
-﻿using Patch.Core.Enums;
+﻿using Common.Localization;
+using Patch.Core.Enums;
 using Patch.Core.Interfaces;
 using Patch.Core.Models;
 
@@ -56,7 +57,7 @@ public class PatchFileIndex
             string relDir = lastSlash < 0 ? string.Empty : rel[..lastSlash];
             string fileName = lastSlash < 0 ? rel : rel[(lastSlash + 1)..];
             string baseName = isPatch ? Path.GetFileNameWithoutExtension(fileName) : fileName;
-            var entry = archive.FindEntry(key) ?? throw new InvalidOperationException($"아카이브 엔트리를 다시 찾을 수 없습니다: {key}");
+            var entry = archive.FindEntry(key) ?? throw new InvalidOperationException(Loc.S.ErrArchiveEntryRefindFailed(key));
             var fileRef = PatchFileRef.FromArchiveEntry(entry);
 
             index.Entries.Add(new PatchFileEntry(fileRef, relDir, baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));
@@ -127,7 +128,7 @@ public class PatchFileIndex
             string ext = Path.GetExtension(rel);
             bool isPatch = PatchExtensions.Contains(ext, StringComparer.OrdinalIgnoreCase);
             string baseName = isPatch ? Path.GetFileNameWithoutExtension(rel) : rel;
-            var entry = archive.FindEntry(key) ?? throw new InvalidOperationException($"아카이브 엔트리를 다시 찾을 수 없습니다: {key}");
+            var entry = archive.FindEntry(key) ?? throw new InvalidOperationException(Loc.S.ErrArchiveEntryRefindFailed(key));
             var fileRef = PatchFileRef.FromArchiveEntry(entry);
 
             index.Entries.Add(new PatchFileEntry(fileRef, string.Empty, baseName, isPatch ? PatchFileKind.BinaryPatch : PatchFileKind.Overwrite));

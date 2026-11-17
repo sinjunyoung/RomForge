@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 
 namespace Patch.Core.Formats;
 
@@ -21,19 +22,19 @@ public static class Ups
 
     private unsafe static byte[] Decode(byte[] input, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        if (patch.Length < 12) throw new InvalidDataException("UPS 패치 파일이 너무 짧습니다.");
+        if (patch.Length < 12) throw new InvalidDataException(Loc.S.ErrPatchFileTooShort("UPS"));
 
         fixed (byte* pPat = patch)
         {
             if (pPat[0] != 'U' || pPat[1] != 'P' || pPat[2] != 'S' || pPat[3] != '1')
-                throw new InvalidDataException("유효하지 않은 UPS 헤더입니다.");
+                throw new InvalidDataException(Loc.S.ErrInvalidPatchHeader("UPS"));
 
             int pos = 4;
             long inputSize = ReadVli(pPat, ref pos, patch.Length);
             long outputSize = ReadVli(pPat, ref pos, patch.Length);
 
             if (input.LongLength != inputSize)
-                throw new InvalidDataException($"원본 파일 크기와 패치 파일 크기가 일치하지 않습니다. (패치가 기대하는 크기: {inputSize:N0} bytes, 실제 파일 크기: {input.LongLength:N0} bytes) ");
+                throw new InvalidDataException(Loc.S.ErrSourceSizeMismatch(inputSize.ToString("N0"), input.LongLength.ToString("N0")));
 
             byte[] output = new byte[outputSize];
 
@@ -79,13 +80,13 @@ public static class Ups
             uint patCrc = *(uint*)(pPat + patch.Length - 4);
 
             if (CalculateCrc32(input) != srcCrc)
-                throw new InvalidDataException("Input CRC32 불일치");
+                throw new InvalidDataException(Loc.S.ErrInputCrc32Mismatch);
 
             if (CalculateCrc32(output) != dstCrc)
-                throw new InvalidDataException("Output CRC32 불일치");
+                throw new InvalidDataException(Loc.S.ErrOutputCrc32Mismatch);
 
             if (CalculateCrc32(patch, patch.Length - 4) != patCrc)
-                throw new InvalidDataException("Patch CRC32 불일치");
+                throw new InvalidDataException(Loc.S.ErrPatchCrc32Mismatch);
 
             return output;
         }
@@ -154,6 +155,6 @@ public static class Ups
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 }

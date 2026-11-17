@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 
 namespace Patch.Core.Formats;
 
@@ -21,12 +22,12 @@ public static class Aps
 
     private unsafe static byte[] Decode(byte[] source, byte[] patch, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
-        if (patch.Length < 8) throw new InvalidDataException("APS 패치 파일이 너무 짧습니다.");
+        if (patch.Length < 8) throw new InvalidDataException(Loc.S.ErrPatchFileTooShort("APS"));
 
         fixed (byte* pPat = patch)
         {
             if (pPat[0] != 'A' || pPat[1] != 'P' || pPat[2] != 'S' || pPat[3] != '1')
-                throw new InvalidDataException("유효하지 않은 APS 헤더입니다.");
+                throw new InvalidDataException(Loc.S.ErrInvalidPatchHeader("APS"));
 
             byte[] output = new byte[source.Length];
             Buffer.BlockCopy(source, 0, output, 0, source.Length);
@@ -52,7 +53,7 @@ public static class Aps
                     long lengthLong = length;
 
                     if (offsetLong + lengthLong > output.Length)
-                        throw new InvalidDataException($"패치 레코드가 원본 파일 범위를 벗어납니다. (오프셋: {offsetLong:N0}, 길이: {lengthLong}, 원본 파일 크기: {output.Length:N0} bytes) ");
+                        throw new InvalidDataException(Loc.S.ErrPatchRecordOutOfSource(offsetLong.ToString("N0"), lengthLong, output.Length.ToString("N0")));
 
                     Buffer.MemoryCopy(pPat + pos, pOut + offsetLong, output.Length - offsetLong, length);
 
@@ -71,6 +72,6 @@ public static class Aps
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 }

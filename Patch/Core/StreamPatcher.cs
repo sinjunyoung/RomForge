@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Patch.Core.Enums;
 using Patch.Core.Formats;
 using Patch.Core.Models;
@@ -20,7 +21,7 @@ public static class StreamPatcher
         return format switch
         {
             PatchFormat.Xdelta => await PrepareXdeltaAsync(openSource, sourceLength, openPatch, patchLength, progress, inMemoryLimit, ct),
-            PatchFormat.Unknown => throw new NotSupportedException("지원되지 않거나 유효하지 않은 패치 포맷입니다."),
+            PatchFormat.Unknown => throw new NotSupportedException(Loc.S.ErrPatchFormatUnsupportedOrInvalid),
             _ => await PrepareBufferedAsync(openSource, sourceLength, openPatch, patchLength, progress, inMemoryLimit, ct)
         };
     }
@@ -78,7 +79,7 @@ public static class StreamPatcher
     private static byte[] ReadAll(Func<Stream> open, long length, CancellationToken ct)
     {
         if (length > Array.MaxLength)
-            throw new NotSupportedException("이 패치 포맷은 2GB를 넘는 파일을 스트리밍으로 처리할 수 없습니다.");
+            throw new NotSupportedException(Loc.S.ErrPatchStreamingOver2Gb);
 
         var data = new byte[length];
         using var stream = open();
@@ -91,7 +92,7 @@ public static class StreamPatcher
             int read = stream.Read(data, offset, data.Length - offset);
 
             if (read <= 0)
-                throw new InvalidDataException("파일을 읽는 중 예상보다 일찍 끝났습니다.");
+                throw new InvalidDataException(Loc.S.ErrUnexpectedEndOfRead);
 
             offset += read;
         }

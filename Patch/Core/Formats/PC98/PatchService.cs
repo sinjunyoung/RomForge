@@ -21,15 +21,15 @@ public static class PatchService
                 var image = new Fat16Image(hdiPath);
                 var tree = image.Walk();
 
-                log?.Invoke("HDI 볼륨 분석 완료", LogLevel.Info);
+                log?.Invoke(Loc.S.LogHdiVolumeAnalyzed, LogLevel.Info);
 
                 var (patchDir, mountPoint, patchFiles, score) = ResolveBestSource(searchRoot, tree);
 
                 if (score <= 0)
-                    throw new InvalidOperationException("HDI 안에서 이 패치와 일치하는 파일을 하나도 찾지 못했습니다. 원본 HDI와 패치가 서로 다른 게임/버전일 수 있습니다.");
+                    throw new InvalidOperationException(Loc.S.ErrHdiNoMatchingFiles);
 
-                log?.Invoke($"패치 소스 폴더 자동 감지: {Path.GetFileName(patchDir)} ({score}/{patchFiles.Count} 일치)", LogLevel.Info);
-                log?.Invoke(string.IsNullOrEmpty(mountPoint) ? "마운트 경로: 루트" : $"마운트 경로 자동 감지: {mountPoint}", LogLevel.Info);
+                log?.Invoke(Loc.S.LogPatchSourceFolderDetected(Path.GetFileName(patchDir), score, patchFiles.Count), LogLevel.Info);
+                log?.Invoke(string.IsNullOrEmpty(mountPoint) ? Loc.S.LogMountPathRoot : Loc.S.LogMountPathDetected(mountPoint), LogLevel.Info);
 
                 string prefixKey = mountPoint.Length > 0 ? mountPoint + "/" : string.Empty;
                 var lookup = new Dictionary<string, Fat16DirEntry>(StringComparer.OrdinalIgnoreCase);
@@ -64,12 +64,12 @@ public static class PatchService
 
                         applied++;
 
-                        log?.Invoke($"패치 완료: {rel}", LogLevel.Info);
+                        log?.Invoke(Loc.S.LogPatchDoneName(rel), LogLevel.Info);
                     }
                     else
                     {
                         missing.Add(rel);
-                        log?.Invoke($"HDI 안에서 찾을 수 없음: {rel}", LogLevel.Info);
+                        log?.Invoke(Loc.S.LogNotFoundInHdi(rel), LogLevel.Info);
                     }
 
                     done++;
@@ -105,7 +105,7 @@ public static class PatchService
             return tempDir;
         }
 
-        throw new FileNotFoundException("패치 폴더 또는 ZIP을 찾을 수 없습니다.", patchPath);
+        throw new FileNotFoundException(Loc.S.ErrPatchFolderOrZipNotFound, patchPath);
     }
 
     private static (string PatchDir, string MountPoint, List<string> RelativeFiles, int Score) ResolveBestSource(string searchRoot, Dictionary<string, Fat16DirEntry> tree)

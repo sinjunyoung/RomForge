@@ -1,4 +1,5 @@
-﻿using Common;
+﻿using Common.Localization;
+using Common;
 using Markdig;
 using RomForge.Core.Models;
 using System.Windows;
@@ -35,13 +36,13 @@ public partial class UpdateWindow : Window
             var pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
                 .Build();
-            var markdown = Markdown.ToHtml(_release.Body ?? "업데이트 내용이 없습니다.", pipeline);
+            var markdown = Markdown.ToHtml(_release.Body ?? Loc.S.NoUpdateNotes, pipeline);
 
             ReleaseNotesBrowser.NavigateToString(CreateHtml(markdown));
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"업데이트 내용을 표시할 수 없습니다.\n\n오류 내용: {ex.Message}");
+            MessageBox.Show(Loc.S.ErrUpdateNotesDisplayFailed(ex.Message));
         }
     }
 

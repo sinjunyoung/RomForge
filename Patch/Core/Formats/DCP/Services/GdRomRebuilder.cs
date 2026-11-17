@@ -44,7 +44,7 @@ public static class GdRomRebuilder
                 if (isReplaced)
                 {
                     replacedCount++;
-                    onLog?.Invoke($"파일 교체: {entry.FullPath} (원본 {entry.Size:N0} → 교체 {data.Length:N0} bytes)");
+                    onLog?.Invoke(Loc.S.LogFileReplacedDetail(entry.FullPath, entry.Size.ToString("N0"), data.Length.ToString("N0")));
                 }
 
                 builder.SetFileData(entry, data);
@@ -60,7 +60,7 @@ public static class GdRomRebuilder
             sourceReader.Dispose();
         }
 
-        onLog?.Invoke($"총 {replacedCount}개 파일 교체됨 (DCP 패키지 내 파일 {replacedFiles.Count}개 중)");
+        onLog?.Invoke(Loc.S.LogFilesReplacedTotal(replacedCount, replacedFiles.Count));
 
         var (_, _, totalSectors) = builder.Relayout((uint)firstDataTrack.StartLba + 17);
         var contentSectors = new List<(uint Lba, byte[] Data)>();

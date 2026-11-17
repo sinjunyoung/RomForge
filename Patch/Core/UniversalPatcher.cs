@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Patch.Core.Enums;
 using Patch.Core.Formats;
 
@@ -9,10 +10,10 @@ public static class UniversalPatcher
     public static async Task ApplyPatchAsync(string? sourcePath, string patchPath, string outputPath, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         if (!File.Exists(sourcePath))
-            throw new FileNotFoundException($"원본 파일을 찾을 수 없습니다: {sourcePath}");
+            throw new FileNotFoundException(Loc.S.ErrSourceFileNotFoundPath(sourcePath));
 
         if (!File.Exists(patchPath))
-            throw new FileNotFoundException($"패치 파일을 찾을 수 없습니다: {patchPath}");
+            throw new FileNotFoundException(Loc.S.ErrPatchFileNotFoundPath(patchPath));
 
         ct.ThrowIfCancellationRequested();
 
@@ -27,7 +28,7 @@ public static class UniversalPatcher
             case PatchFormat.Ups: await Ups.ApplyPatchAsync(sourcePath, patchPath, outputPath, progress, ct); break;
             case PatchFormat.Ppf: await Ppf.ApplyPatchAsync(sourcePath, patchPath, outputPath, progress, ct); break;
             case PatchFormat.Aps: await Aps.ApplyPatchAsync(sourcePath, patchPath, outputPath, progress, ct); break;
-            default: throw new NotSupportedException("지원되지 않거나 유효하지 않은 패치 포맷입니다.");
+            default: throw new NotSupportedException(Loc.S.ErrPatchFormatUnsupportedOrInvalid);
         }
     }
 
@@ -44,14 +45,14 @@ public static class UniversalPatcher
             PatchFormat.Ups => await Ups.ApplyPatchAsync(sourceData, patchData, progress, ct),
             PatchFormat.Ppf => await Ppf.ApplyPatchAsync(sourceData, patchData, progress, ct),
             PatchFormat.Aps => await Aps.ApplyPatchAsync(sourceData, patchData, progress, ct),
-            _ => throw new NotSupportedException("지원되지 않거나 유효하지 않은 패치 포맷입니다.")
+            _ => throw new NotSupportedException(Loc.S.ErrPatchFormatUnsupportedOrInvalid)
         };
     }
 
     public static async Task<PatchFormat> DetectFormatAsync(string patchPath, CancellationToken ct = default)
     {
         if (!File.Exists(patchPath))
-            throw new FileNotFoundException($"파일을 찾을 수 없습니다: {patchPath}");
+            throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(patchPath));
 
         byte[] header = new byte[8];
         using var fs = new FileStream(patchPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);

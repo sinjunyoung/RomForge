@@ -1,4 +1,5 @@
-﻿using RomForge.Core.Models.Naming;
+﻿using Common.Localization;
+using RomForge.Core.Models.Naming;
 using RomForge.Core.Services.Naming;
 using System.Windows;
 using System.Windows.Controls;
@@ -171,7 +172,7 @@ public partial class NamingFormatEditor : UserControl
             menu.Items.Add(new Separator());
         }
 
-        var remove = new MenuItem { Header = "삭제", Icon = new Image { Source = ClearIcon, Width = 20, Height = 20 } };
+        var remove = new MenuItem { Header = Loc.S.MenuDelete, Icon = new Image { Source = ClearIcon, Width = 20, Height = 20 } };
 
         remove.Click += (_, _) => RemoveBadge(badge);
 

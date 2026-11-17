@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Localization;
+using Common.Services;
 using RomForge.Core;
 using RomForge.Core.Models;
 using RomForge.Core.Services;
@@ -52,13 +53,13 @@ public partial class MainWindow : Window
                 }
                 catch (Exception ex)
                 {
-                    MessageBoxHelper.ShowError($"다운로드 페이지를 열 수 없습니다.\n\n오류 내용: {ex.Message}");
+                    MessageBoxHelper.ShowError(Loc.S.ErrOpenDownloadPageFailed(ex.Message));
                 }
             }
         }
         catch (Exception ex)
         {
-            MessageBoxHelper.ShowError($"업데이트 정보를 확인할 수 없습니다.\n\n오류 내용: {ex.Message}");
+            MessageBoxHelper.ShowError(Loc.S.ErrUpdateInfoCheckFailed(ex.Message));
         }
     }
 
@@ -117,7 +118,7 @@ public partial class MainWindow : Window
         if (!busy)
             return;
 
-        var result = MessageBoxHelper.ShowQuestion("작업이 진행 중입니다. 취소하고 종료할까요?");
+        var result = MessageBoxHelper.ShowQuestion(Loc.S.MsgConfirmCancelAndExit);
 
         if (result)
             ViewModel.CancelAll();

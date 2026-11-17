@@ -79,7 +79,7 @@ public class CompressMainViewModel : ToolTabViewModel
     public static string GetFileDialogFilter()
     {
         string wildcards = string.Join(";", SupportedExtensions.Select(ext => $"*{ext}"));
-        return $"지원 파일|{wildcards}|모든 파일|*.*";
+        return $"{Loc.S.FilterSupportedFiles}|{wildcards}|{Loc.S.FilterAllFiles}|*.*";
     }
 
     public void AddPaths(IEnumerable<string> paths)
@@ -129,7 +129,7 @@ public class CompressMainViewModel : ToolTabViewModel
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "출력 폴더 선택",
+            Description = Loc.S.ToolTipBrowseOutput,
             UseDescriptionForTitle = true
         };
 
@@ -163,7 +163,7 @@ public class CompressMainViewModel : ToolTabViewModel
             {
                 int totalCount = FileItems.Count;
 
-                AppendLog($"총 {totalCount}개의 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobsStarting(totalCount), LogLevel.Highlight);
 
                 int cnt = 0;
 
@@ -224,7 +224,7 @@ public class CompressMainViewModel : ToolTabViewModel
                                 break;
                             case RomFormat.Ccd:
                                 {
-                                    AppendLog($"[{item.FileName}] CCD → BIN+CUE 변환 중...", LogLevel.Info);
+                                    AppendLog(Loc.S.LogItemCcdToBinCue(item.FileName), LogLevel.Info);
 
                                     var discReader = DiscImageReaderFactory.Resolve(item.FilePath);
                                     var discImage = discReader.Read(item.FilePath);
@@ -233,7 +233,7 @@ public class CompressMainViewModel : ToolTabViewModel
 
                                     try
                                     {
-                                        AppendLog($"[{item.FileName}] BIN+CUE → CHD 압축 중...", LogLevel.Info);
+                                        AppendLog(Loc.S.LogItemBinCueToChd(item.FileName), LogLevel.Info);
 
                                         FileConverter chdFromCcd = new(AppConfig.Instance.Chdman.Compression);
 
@@ -288,7 +288,7 @@ public class CompressMainViewModel : ToolTabViewModel
                             default:
                                 item.State = ItemStatus.Unsupported;
 
-                                AppendLog($"[{item.FileName}] 지원하지 않는 포맷", LogLevel.Error);
+                                AppendLog(Loc.S.LogItemUnsupportedFormat(item.FileName), LogLevel.Error);
                                 await SoundPlayer.PlayErrorAsync();
                                 continue;
                         }
@@ -299,7 +299,7 @@ public class CompressMainViewModel : ToolTabViewModel
                     }
                     catch (OperationCanceledException)
                     {
-                        AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                        AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                         await SoundPlayer.PlayCancelAsync();
                         CancelRemainingItems();
 
@@ -307,7 +307,7 @@ public class CompressMainViewModel : ToolTabViewModel
                     }
                     catch (Exception ex)
                     {
-                        AppendLog($"오류 ([{item.FileName}]): {ex.Message}", LogLevel.Error);
+                        AppendLog(Loc.S.LogItemError(item.FileName, ex.Message), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -317,12 +317,12 @@ public class CompressMainViewModel : ToolTabViewModel
 
                 if (cnt > 0)
                 {
-                    AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     MainViewModel.SetTaskbarProgress(100);
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
             }
             finally
             {

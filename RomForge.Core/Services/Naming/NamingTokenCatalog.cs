@@ -1,36 +1,37 @@
-﻿using RomForge.Core.Models.Naming;
+﻿using Common.Localization;
+using RomForge.Core.Models.Naming;
 
 namespace RomForge.Core.Services.Naming;
 
 public static class NamingTokenCatalog
 {
-    private static readonly NamingTokenOption[] LanguageOptions = [
-        new("code1", "1자리", "1"),
-        new("code2", "2자리", "2"),
-        new("code3", "3자리", "3"),
-        new(null, "전체 이름", string.Empty)
+    private static NamingTokenOption[] LanguageOptions => [
+        new("code1", Loc.S.LabelNamingDigits(1), "1"),
+        new("code2", Loc.S.LabelNamingDigits(2), "2"),
+        new("code3", Loc.S.LabelNamingDigits(3), "3"),
+        new(null, Loc.S.LabelNamingFullName, string.Empty)
     ];
 
-    private static readonly NamingTokenOption[] DateOptions = [
-        new("yyMMdd", "6자리 (yyMMdd)", "6"),
-        new("yyyyMMdd", "8자리 (yyyyMMdd)", "8")
+    private static NamingTokenOption[] DateOptions => [
+        new("yyMMdd", $"{Loc.S.LabelNamingDigits(6)} (yyMMdd)", "6"),
+        new("yyyyMMdd", $"{Loc.S.LabelNamingDigits(8)} (yyyyMMdd)", "8")
     ];
 
-    public static IReadOnlyList<NamingTokenDefinition> Patch { get; } = [
-        new("fileName", "파일명", "원본 파일명 (언어 표기 제거)"),
-        new("Lan1", "원본언어", "원본 파일명에서 찾은 언어", LanguageOptions, ["Language"]),
-        new("Lan2", "패치언어", "패치 파일의 언어", LanguageOptions),
-        new("Version", "버전", "패치 파일명에서 읽은 버전"),
-        new("Date", "날짜", "패치 파일명에서 읽은 날짜", DateOptions)
+    public static IReadOnlyList<NamingTokenDefinition> Patch => [
+        new("fileName", Loc.S.HeaderFileName, Loc.S.NamingTokFileNameDesc),
+        new("Lan1", Loc.S.NamingTokSourceLangLabel, Loc.S.NamingTokSourceLangDesc, LanguageOptions, ["Language"]),
+        new("Lan2", Loc.S.NamingTokPatchLangLabel, Loc.S.NamingTokPatchLangDesc, LanguageOptions),
+        new("Version", Loc.S.HeaderVersion, Loc.S.NamingTokPatchVersionDesc),
+        new("Date", Loc.S.NamingTokDateLabel, Loc.S.NamingTokDateDesc, DateOptions)
     ];
 
-    public static IReadOnlyList<NamingTokenDefinition> Rename { get; } = [
-        new("Name", "한글+영어 타이틀", "한글 + 영어 게임명 (병합 파일명과 동일)"),
-        new("KTitleName", "한글 타이틀", "한글 게임명"),
-        new("TitleName", "타이틀", "한글 → 영어 → 첫 번째 게임명 순"),
-        new("TitleID", "타이틀ID", "타이틀 ID"),
-        new("Tag", "구성", "구성 (B+U+10D)"),
-        new("DisplayVersion", "표시버전", "표시 버전 (1.0.0)"),
-        new("Version", Common.Localization.Loc.Instance.Current.HeaderVersion, "버전 (65536)")
+    public static IReadOnlyList<NamingTokenDefinition> Rename => [
+        new("Name", Loc.S.NamingTokNameLabel, Loc.S.NamingTokNameDesc),
+        new("KTitleName", Loc.S.NamingTokKTitleLabel, Loc.S.NamingTokKTitleDesc),
+        new("TitleName", Loc.S.HeaderTitle, Loc.S.NamingTokTitleNameDesc),
+        new("TitleID", Loc.S.NamingTokTitleIdLabel, Loc.S.NamingTokTitleIdDesc),
+        new("Tag", Loc.S.NamingTokTagLabel, Loc.S.NamingTokTagDesc),
+        new("DisplayVersion", Loc.S.NamingTokDisplayVersionLabel, Loc.S.NamingTokDisplayVersionDesc),
+        new("Version", Loc.S.HeaderVersion, Loc.S.NamingTokRawVersionDesc)
     ];
 }

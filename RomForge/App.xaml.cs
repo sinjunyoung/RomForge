@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Common.Localization;
+using System.IO;
 using System.Windows;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
@@ -24,7 +25,7 @@ public partial class App : Application
     {
         WriteLog(e.Exception);
         e.Handled = true;
-        System.Windows.MessageBox.Show(e.Exception.Message, "오류");
+        System.Windows.MessageBox.Show(e.Exception.Message, Loc.S.MsgTitleError);
     }
 
     private static void WriteLog(Exception? ex)

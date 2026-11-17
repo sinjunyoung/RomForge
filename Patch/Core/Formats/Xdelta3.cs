@@ -84,7 +84,7 @@ public static partial class Xdelta3
     public static byte[] ApplyPatch(byte[] sourceData, byte[] patchData, IProgress<ProgressInfo>? progress = null, CancellationToken ct = default)
     {
         if (patchData.Length == 0)
-            throw new InvalidOperationException("패치 데이터가 비어 있습니다.");
+            throw new InvalidOperationException(Loc.S.ErrPatchDataEmpty);
 
         using var source = SourceBuffer.Pin(sourceData);
         using var decoder = new DecodeStream(source, false, () => new MemoryStream(patchData, false), patchData.Length, sourceData.Length, progress, ct);
@@ -135,7 +135,7 @@ public static partial class Xdelta3
                     int n = sourceStream.Read(chunk, 0, (int)Math.Min(chunk.Length, size - offset));
 
                     if (n <= 0)
-                        throw new InvalidOperationException("소스 파일을 읽는 중 오류가 발생했습니다.");
+                        throw new InvalidOperationException(Loc.S.ErrSourceFileReadError);
 
                     Marshal.Copy(chunk, 0, pointer + (nint)offset, n);
 
@@ -203,7 +203,7 @@ public static partial class Xdelta3
         public DecodeStream(SourceBuffer source, bool ownsSource, Func<Stream> openPatch, long patchLength, long sourceLength, IProgress<ProgressInfo>? progress, CancellationToken ct)
         {
             if (patchLength <= 0)
-                throw new InvalidOperationException("패치 파일이 비어 있습니다.");
+                throw new InvalidOperationException(Loc.S.ErrPatchFileEmpty);
 
             _source = source;
             _ownsSource = ownsSource;
@@ -213,7 +213,7 @@ public static partial class Xdelta3
             _handle = xd3_stream_open_decode_buf(source.Pointer, source.Size);
 
             if (_handle == IntPtr.Zero)
-                throw new InvalidOperationException($"소스 버퍼를 열지 못했습니다: {GetLastError()}");
+                throw new InvalidOperationException(Loc.S.ErrSourceBufferOpenFailed(GetLastError()));
 
             try
             {
@@ -363,7 +363,7 @@ public static partial class Xdelta3
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 
     private static void FinishStream(IntPtr handle)
@@ -372,7 +372,7 @@ public static partial class Xdelta3
             ThrowLastError();
     }
 
-    private static void ThrowLastError() => throw new InvalidOperationException($"패치 적용 중 오류: {DescribeError(xd3_get_last_error_code())}");
+    private static void ThrowLastError() => throw new InvalidOperationException(Loc.S.ErrPatchApplyError(DescribeError(xd3_get_last_error_code())));
 
     private static string DescribeError(int code)
     {
@@ -380,19 +380,19 @@ public static partial class Xdelta3
 
         return absCode switch
         {
-            17710 => $"내부 라이브러리 오류가 발생했습니다. (XD3_INTERNAL) {GetLastError()}",
-            17711 => "잘못된 설정 값입니다. (XD3_INVALID)",
-            17712 => "원본 파일이 패치 파일과 일치하지 않습니다. (미스매치 / XD3_INVALID_INPUT)",
-            17713 => "보조 압축(Secondary Compression) 효율이 없어 적용할 수 없습니다. (XD3_NOSECOND)",
-            17714 => "구현되지 않은 기능이 포함되어 있습니다. (XD3_UNIMPLEMENTED)",
+            17710 => Loc.S.ErrXd3Internal(GetLastError()),
+            17711 => Loc.S.ErrXd3Invalid,
+            17712 => Loc.S.ErrXd3InvalidInput,
+            17713 => Loc.S.ErrXd3NoSecond,
+            17714 => Loc.S.ErrXd3Unimplemented,
 
-            17703 => "입력 데이터가 더 필요합니다. (XD3_INPUT)",
-            17704 => "출력 버퍼가 가득 찼습니다. (XD3_OUTPUT)",
-            17705 => "소스 블록 데이터가 더 필요합니다. (XD3_GETSRCBLK)",
+            17703 => Loc.S.ErrXd3Input,
+            17704 => Loc.S.ErrXd3Output,
+            17705 => Loc.S.ErrXd3GetSrcBlk,
 
-            2 => "지정된 파일 또는 경로를 찾을 수 없습니다. (ENOENT)",
-            13 => "파일 접근 권한이 없습니다. (EACCES)",
-            28 => "디스크 공간이 부족합니다. (ENOSPC)",
+            2 => Loc.S.ErrErrnoEnoent,
+            13 => Loc.S.ErrErrnoEacces,
+            28 => Loc.S.ErrErrnoEnospc,
 
             _ => GetLastError()
         };

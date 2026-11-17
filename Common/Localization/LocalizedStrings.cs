@@ -1382,4 +1382,146 @@ public abstract class LocalizedStrings
     public abstract string ErrArchiveGdiTrackMissing { get; }
     public abstract string ErrArchiveCcdImgMissing { get; }
     public abstract string LogOutputPath(object arg0);
+    public abstract string ErrNative7zLoadFailed { get; }
+    public abstract string Err7zModuleHandleNotFound { get; }
+    public abstract string Err7zLoadPathUnknown { get; }
+    public abstract string ErrCompressorAcquireFailed { get; }
+    public abstract string ErrPatchFileTooShort(object arg0);
+    public abstract string ErrInvalidPatchHeader(object arg0);
+    public abstract string ErrPatchCorruptedRleTruncated(object arg0);
+    public abstract string ErrPatchCorruptedDataTruncated(object arg0);
+    public abstract string ErrPatchRecordOutOfSource(object arg0, object arg1, object arg2);
+    public abstract string ErrSourceSizeMismatch(object arg0, object arg1);
+    public abstract string ErrSourceCrc32Mismatch(object arg0, object arg1);
+    public abstract string ErrBpsMetadataSizeInvalid { get; }
+    public abstract string ErrBpsCommandLengthOutOfRange { get; }
+    public abstract string ErrBpsSourceReadOutOfRange { get; }
+    public abstract string ErrBpsTargetReadOutOfRange { get; }
+    public abstract string ErrBpsSourceCopyOutOfRange { get; }
+    public abstract string ErrBpsTargetCopyInvalid { get; }
+    public abstract string ErrBpsResultSizeMismatch { get; }
+    public abstract string LogXdeltaTargetsDetected(object arg0);
+    public abstract string LogDcpSourceMissing(object arg0);
+    public abstract string ErrDcpSourceMissing(object arg0);
+    public abstract string LogXdeltaApplied(object arg0, object arg1, object arg2);
+    public abstract string ErrHighDensityDataTrackNotFound { get; }
+    public abstract string ErrAbsoluteLbaDataTrackNotFound(object arg0);
+    public abstract string ErrAbsoluteLbaSectorEof(object arg0);
+    public abstract string LogFileReplacedDetail(object arg0, object arg1, object arg2);
+    public abstract string LogFilesReplacedTotal(object arg0, object arg1);
+    public abstract string ErrUserData2048Required { get; }
+    public abstract string ErrGdiNotFound(object arg0);
+    public abstract string ErrGdiFormatInvalid { get; }
+    public abstract string ErrGdiTrackCountUnreadable { get; }
+    public abstract string ErrGdiTrackLineInvalid(object arg0);
+    public abstract string ErrGdiTrackCountMismatch(object arg0, object arg1);
+    public abstract string ErrFileDataNotRegistered(object arg0);
+    public abstract string ErrIsoPvdNotFound { get; }
+    public abstract string ErrDirectoryNotReadableByReadFile(object arg0);
+    public abstract string ErrFat16VolumeNotFound { get; }
+    public abstract string ErrNoFreeClusters { get; }
+    public abstract string LogHdiVolumeAnalyzed { get; }
+    public abstract string ErrHdiNoMatchingFiles { get; }
+    public abstract string LogPatchSourceFolderDetected(object arg0, object arg1, object arg2);
+    public abstract string LogMountPathRoot { get; }
+    public abstract string LogMountPathDetected(object arg0);
+    public abstract string LogNotFoundInHdi(object arg0);
+    public abstract string ErrPatchFolderOrZipNotFound { get; }
+    public abstract string ErrUnsupportedPpfVersion(object arg0);
+    public abstract string ErrPpfSourceTooShortBlockcheck { get; }
+    public abstract string ErrPpfBlockcheckFailed(object arg0);
+    public abstract string ErrInputCrc32Mismatch { get; }
+    public abstract string ErrOutputCrc32Mismatch { get; }
+    public abstract string ErrPatchCrc32Mismatch { get; }
+    public abstract string ErrPatchDataEmpty { get; }
+    public abstract string ErrSourceFileReadError { get; }
+    public abstract string ErrPatchFileEmpty { get; }
+    public abstract string ErrSourceBufferOpenFailed(object arg0);
+    public abstract string ErrPatchApplyError(object arg0);
+    public abstract string ErrXd3Internal(object arg0);
+    public abstract string ErrXd3Invalid { get; }
+    public abstract string ErrXd3InvalidInput { get; }
+    public abstract string ErrXd3NoSecond { get; }
+    public abstract string ErrXd3Unimplemented { get; }
+    public abstract string ErrXd3Input { get; }
+    public abstract string ErrXd3Output { get; }
+    public abstract string ErrXd3GetSrcBlk { get; }
+    public abstract string ErrErrnoEnoent { get; }
+    public abstract string ErrErrnoEacces { get; }
+    public abstract string ErrErrnoEnospc { get; }
+    public abstract string ErrArchivePasswordRequired(object arg0);
+    public abstract string ErrUnsupportedArchiveType(object arg0);
+    public abstract string LogPatchOverwrite(object arg0, object arg1);
+    public abstract string LogPatchDoneDetail(object arg0, object arg1, object arg2, object arg3);
+    public abstract string LogPatchSourceMismatchSkipped(object arg0, object arg1, object arg2);
+    public abstract string LogPatchApplyingArrow(object arg0, object arg1);
+    public abstract string LogPatchFailedNamed(object arg0, object arg1);
+    public abstract string LogPatchFailedNoOutput(object arg0);
+    public abstract string ErrArchiveEntryRefindFailed(object arg0);
+    public abstract string LogPlanReplaceDone(object arg0, object arg1);
+    public abstract string LogPlanPatchDone(object arg0, object arg1);
+    public abstract string LogPlanLooseCandidates(object arg0, object arg1);
+    public abstract string ErrArchivePathNotFound(object arg0);
+    public abstract string ErrPatchFormatUnsupportedOrInvalid { get; }
+    public abstract string ErrPatchStreamingOver2Gb { get; }
+    public abstract string ErrUnexpectedEndOfRead { get; }
+    public abstract string ErrSourceFileNotFoundPath(object arg0);
+    public abstract string ErrPatchFileNotFoundPath(object arg0);
+    public abstract string LabelNamingDigits(object arg0);
+    public abstract string LabelNamingFullName { get; }
+    public abstract string NamingTokFileNameDesc { get; }
+    public abstract string NamingTokSourceLangLabel { get; }
+    public abstract string NamingTokSourceLangDesc { get; }
+    public abstract string NamingTokPatchLangLabel { get; }
+    public abstract string NamingTokPatchLangDesc { get; }
+    public abstract string NamingTokPatchVersionDesc { get; }
+    public abstract string NamingTokDateLabel { get; }
+    public abstract string NamingTokDateDesc { get; }
+    public abstract string NamingTokNameLabel { get; }
+    public abstract string NamingTokNameDesc { get; }
+    public abstract string NamingTokKTitleLabel { get; }
+    public abstract string NamingTokKTitleDesc { get; }
+    public abstract string NamingTokTitleNameDesc { get; }
+    public abstract string NamingTokTitleIdLabel { get; }
+    public abstract string NamingTokTitleIdDesc { get; }
+    public abstract string NamingTokTagLabel { get; }
+    public abstract string NamingTokTagDesc { get; }
+    public abstract string NamingTokDisplayVersionLabel { get; }
+    public abstract string NamingTokDisplayVersionDesc { get; }
+    public abstract string NamingTokRawVersionDesc { get; }
+    public abstract string LabelLocaleNone { get; }
+    public abstract string LabelLocaleEnglish { get; }
+    public abstract string LabelLocaleSpanish { get; }
+    public abstract string LabelLocalePortuguese { get; }
+    public abstract string MenuDelete { get; }
+    public abstract string LabelPlay { get; }
+    public abstract string LabelStop { get; }
+    public abstract string LogJobsStarting(object arg0);
+    public abstract string LogJobsStartingIntegratedConvert(object arg0);
+    public abstract string LogItemCcdToBinCue(object arg0);
+    public abstract string LogItemBinCueToChd(object arg0);
+    public abstract string LogItemUnsupportedFormat(object arg0);
+    public abstract string LogItemError(object arg0, object arg1);
+    public abstract string LogItemConvertFailed(object arg0, object arg1);
+    public abstract string ErrUnsupportedOutputFormat(object arg0);
+    public abstract string TitleCompressSettings { get; }
+    public abstract string TitlePspSettings { get; }
+    public abstract string OptionChdmanZlib { get; }
+    public abstract string OptionChdmanZstd { get; }
+    public abstract string OptionChdmanLzma { get; }
+    public abstract string ErrOpenDownloadPageFailed(object arg0);
+    public abstract string ErrUpdateInfoCheckFailed(object arg0);
+    public abstract string ErrUpdateNotesDisplayFailed(object arg0);
+    public abstract string MsgConfirmCancelAndExit { get; }
+    public abstract string MsgPasswordWrongRetry { get; }
+    public abstract string ErrWpfResourceNotFound(object arg0);
+    public abstract string ErrUnsupportedAudioFormat(object arg0);
+    public abstract string HintKeyFileEmptyUsesExeFolder(object arg0);
+    public abstract string LabelKeyFileUsingSpecified { get; }
+    public abstract string LabelKeyFileMissingUsingExe { get; }
+    public abstract string LabelKeyFileSpecifiedNotFound { get; }
+    public abstract string LabelKeyFileFoundInExe { get; }
+    public abstract string LabelKeyFileNone { get; }
+    public abstract string ErrKeyFileInvalid { get; }
+    public abstract string DialogSelectKeyFile(object arg0);
 }

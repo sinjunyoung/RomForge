@@ -95,7 +95,7 @@ public class ConvertMainViewModel : ToolTabViewModel
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "출력 폴더 선택",
+            Description = Loc.S.ToolTipBrowseOutput,
             UseDescriptionForTitle = true
         };
 
@@ -318,7 +318,7 @@ public class ConvertMainViewModel : ToolTabViewModel
             {
                 int cnt = 0;
 
-                AppendLog($"총 {FileItems.Count}개의 통합 변환 작업을 시작합니다.", LogLevel.Highlight);
+                AppendLog(Loc.S.LogJobsStartingIntegratedConvert(FileItems.Count), LogLevel.Highlight);
 
                 foreach (var item in FileItems.ToList())
                 {
@@ -359,7 +359,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                     }
                     catch (Exception ex)
                     {
-                        AppendLog($"[{GetDisplayName(item)}] 변환 실패: {ex.Message}", LogLevel.Error);
+                        AppendLog(Loc.S.LogItemConvertFailed(GetDisplayName(item), ex.Message), LogLevel.Error);
                         await SoundPlayer.PlayErrorAsync();
                         MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
 
@@ -370,16 +370,16 @@ public class ConvertMainViewModel : ToolTabViewModel
 
                 if (cnt > 0)
                 {
-                    AppendLog($"총 {cnt}개의 작업을 성공적으로 완료했습니다.", LogLevel.Ok);
+                    AppendLog(Loc.S.LogJobsCompleted(cnt), LogLevel.Ok);
                     await SoundPlayer.PlayCompleteAsync();
                     MainViewModel.SetTaskbarProgress(100);
                 }
                 else
-                    AppendLog("성공한 작업이 없습니다.", LogLevel.Error);
+                    AppendLog(Loc.S.LogNoSuccessfulJobs, LogLevel.Error);
             }
             catch (OperationCanceledException)
             {
-                AppendLog("작업이 취소되었습니다.", LogLevel.Error);
+                AppendLog(Loc.S.LogJobCancelled, LogLevel.Error);
                 await SoundPlayer.PlayCancelAsync();
                 MainViewModel.SetTaskbarProgress(0);
 
@@ -453,7 +453,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await NspXciConvertService.XczToNszAsync(sw.FilePath, _outputDir, switchConfig.CompressLevel, switchConfig.VerifyCompress, switchConfig.CompressionMode, progress, Log, _cts.Token);
                             break;
                         default:
-                            throw new NotSupportedException($"{sw.Extension} → {sw.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
+                            throw new NotSupportedException(Loc.S.ErrUnsupportedConversion(sw.Extension, sw.SelectedTargetFormat));
                     }
                 }
                 break;
@@ -482,7 +482,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                             await new CciToCiaConverter(key).ConvertAsync(ds.FilePath, _outputDir, progress, AppendLog, _cts.Token);
                             break;
                         default:
-                            throw new NotSupportedException($"{ds.Extension} → {ds.SelectedTargetFormat}: 지원하지 않는 변환입니다.");
+                            throw new NotSupportedException(Loc.S.ErrUnsupportedConversion(ds.Extension, ds.SelectedTargetFormat));
                     }
                 }
                 break;
@@ -598,7 +598,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                     await csoService.CompressCsoToChdAsync(item.FilePath, outPath, progress, AppConfig.Instance.Chdman.Compression, ct);
                     break;
                 default:
-                    throw new NotSupportedException($"{ext} → {target}: 지원하지 않는 변환입니다.");
+                    throw new NotSupportedException(Loc.S.ErrUnsupportedConversion(ext, target));
             }
 
             return;
@@ -687,7 +687,7 @@ public class ConvertMainViewModel : ToolTabViewModel
                         Converter.ConvertToWua(source, wuaFile, OnFileProgress, ct);
                         break;
                     default:
-                        throw new NotSupportedException($"지원하지 않는 출력 포맷입니다: {item.SelectedTargetFormat}");
+                        throw new NotSupportedException(Loc.S.ErrUnsupportedOutputFormat(item.SelectedTargetFormat));
                 }
             }
         }
@@ -702,7 +702,7 @@ public class ConvertMainViewModel : ToolTabViewModel
     private static string GetDisplayName(object item) => item switch
     {
         FileItemBase f => f.FileName,
-        _ => "알 수 없음"
+        _ => Loc.S.LabelUnknown
     };
 
     private static IEnumerable<string> ExpandPaths(IEnumerable<string> paths)

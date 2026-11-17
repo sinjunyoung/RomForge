@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 
 namespace Patch.Core.Formats;
 
@@ -23,12 +24,12 @@ public static class Ips
     private unsafe static byte[] Decode(byte[] rom, byte[] ips, IProgress<ProgressInfo>? progress, CancellationToken ct)
     {
         if (ips.Length < 8)
-            throw new InvalidDataException("IPS 파일이 너무 짧습니다.");
+            throw new InvalidDataException(Loc.S.ErrPatchFileTooShort("IPS"));
 
         fixed (byte* pIps = ips)
         {
             if (pIps[0] != 'P' || pIps[1] != 'A' || pIps[2] != 'T' || pIps[3] != 'C' || pIps[4] != 'H')
-                throw new InvalidDataException("유효하지 않은 IPS 헤더입니다.");
+                throw new InvalidDataException(Loc.S.ErrInvalidPatchHeader("IPS"));
 
             byte[] result = new byte[rom.Length];
 
@@ -58,7 +59,7 @@ public static class Ips
                 if (size == 0)
                 {
                     if (pos + 3 > ips.Length)
-                        throw new InvalidDataException("IPS 패치 파일이 손상되었습니다. (RLE 레코드가 파일 끝에서 잘려 있습니다.)");
+                        throw new InvalidDataException(Loc.S.ErrPatchCorruptedRleTruncated("IPS"));
 
                     int rleCount = (pIps[pos] << 8) | pIps[pos + 1];
                     byte rleValue = pIps[pos + 2];
@@ -77,7 +78,7 @@ public static class Ips
                 else
                 {
                     if (pos + size > ips.Length)
-                        throw new InvalidDataException("IPS 패치 파일이 손상되었습니다. (데이터 블록이 파일 끝에서 잘려 있습니다.)");
+                        throw new InvalidDataException(Loc.S.ErrPatchCorruptedDataTruncated("IPS"));
 
                     EnsureCapacity(ref result, offset + size);
 
@@ -113,6 +114,6 @@ public static class Ips
     {
         foreach (var path in paths)
             if (!File.Exists(path))
-                throw new FileNotFoundException($"파일을 찾을 수 없습니다: {path}");
+                throw new FileNotFoundException(Loc.S.ErrFileNotFoundName(path));
     }
 }

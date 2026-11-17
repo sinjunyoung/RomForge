@@ -88,7 +88,7 @@ public static class GdRomWriter
     public static byte[] BuildRawSector(uint absoluteLba, byte[] userData2048)
     {
         if (userData2048.Length != 2048)
-            throw new ArgumentException("유저데이터는 2048바이트여야 합니다.", nameof(userData2048));
+            throw new ArgumentException(Loc.S.ErrUserData2048Required, nameof(userData2048));
 
         var sector = new byte[2352];
 

@@ -12,13 +12,13 @@ internal static class PatchApplyLog
             progress.Report(p with { Label = string.IsNullOrEmpty(p.Label) ? Loc.S.ProgressApplyingPatchTo(name) : p.Label });
     });
 
-    public static void Start(Action<string, LogLevel>? log, string name, string displayPath) => log?.Invoke($"패치 적용: {name} ➡️ {displayPath}", LogLevel.Info);
+    public static void Start(Action<string, LogLevel>? log, string name, string displayPath) => log?.Invoke(Loc.S.LogPatchApplyingArrow(name, displayPath), LogLevel.Info);
 
     public static void Failure(Action<string, LogLevel>? log, bool strict, string name, string displayPath, Exception ex)
     {
         if (strict)
-            log?.Invoke($"❌ 패치 실패 ({name}): {ex.Message}", LogLevel.Error);
+            log?.Invoke($"❌ {Loc.S.LogPatchFailedNamed(name, ex.Message)}", LogLevel.Error);
         else
-            log?.Invoke($"⚠️ 원본이 맞지 않아 건너뜀: {name} ➡️ {displayPath} ({ex.Message})", LogLevel.Info);
+            log?.Invoke($"⚠️ {Loc.S.LogPatchSourceMismatchSkipped(name, displayPath, ex.Message)}", LogLevel.Info);
     }
 }

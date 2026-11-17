@@ -1,6 +1,8 @@
-﻿namespace Patch.Core.Models;
+﻿using Common.Localization;
 
-public sealed class ArchivePasswordRequiredException(string archivePath) : Exception($"비밀번호가 필요하거나 올바르지 않습니다: {archivePath}")
+namespace Patch.Core.Models;
+
+public sealed class ArchivePasswordRequiredException(string archivePath) : Exception(Loc.S.ErrArchivePasswordRequired(archivePath))
 {
     public string ArchivePath { get; } = archivePath;
 }

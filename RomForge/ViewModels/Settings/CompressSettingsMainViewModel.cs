@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using RomForge.Core;
 using RomForge.Core.ViewModels;
 
@@ -12,9 +13,9 @@ public class CompressSettingsMainViewModel : ToolTabViewModel
 
     public IReadOnlyList<ChdmanCompressionOption> ChdmanCompressionOptions { get; } =
         [
-        new("zlib", "호환 (zlib) - PS2 AetherSX2 등 에뮬 호환"),
-        new("zstd", "권장 (zstd) - 대부분 권장 압축/해제 최고 속도 준수한 압축율"),
-        new("lzma", "고압축 (lzma) - 최고 압축율"),
+        new("zlib", Loc.S.OptionChdmanZlib),
+        new("zstd", Loc.S.OptionChdmanZstd),
+        new("lzma", Loc.S.OptionChdmanLzma),
     ];
 
     public ChdmanCompressionOption ChdmanCompression

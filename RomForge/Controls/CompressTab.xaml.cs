@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Localization;
+using Common.Services;
 using Microsoft.Win32;
 using RomForge.Controls.Settings;
 using RomForge.Controls.Util;
@@ -76,7 +77,7 @@ public partial class CompressTab : UserControl
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

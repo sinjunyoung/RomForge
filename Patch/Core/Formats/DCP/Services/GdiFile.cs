@@ -1,4 +1,5 @@
-﻿using Patch.Core.Formats.DCP.Models;
+﻿using Common.Localization;
+using Patch.Core.Formats.DCP.Models;
 using System.Globalization;
 
 namespace Patch.Core.Formats.DCP.Services;
@@ -17,7 +18,7 @@ public class GdiFile
     public static GdiFile Parse(string? gdiPath)
     {
         if (!File.Exists(gdiPath))
-            throw new FileNotFoundException($".gdi 파일을 찾을 수 없습니다: {gdiPath}");
+            throw new FileNotFoundException(Loc.S.ErrGdiNotFound(gdiPath));
 
         var result = new GdiFile 
         { 
@@ -30,17 +31,17 @@ public class GdiFile
             .ToArray();
 
         if (lines.Length < 1)
-            throw new InvalidDataException(".gdi 파일 형식이 올바르지 않습니다.");
+            throw new InvalidDataException(Loc.S.ErrGdiFormatInvalid);
 
         if (!int.TryParse(lines[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out int trackCount))
-            throw new InvalidDataException(".gdi 트랙 개수를 읽을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrGdiTrackCountUnreadable);
 
         for (int i = 1; i <= trackCount && i < lines.Length; i++)
         {
             var tokens = SplitLine(lines[i]);
 
             if (tokens.Count < 5)
-                throw new InvalidDataException($".gdi 트랙 라인 형식이 올바르지 않습니다: {lines[i]}");
+                throw new InvalidDataException(Loc.S.ErrGdiTrackLineInvalid(lines[i]));
 
             result.Tracks.Add(new GdiTrack
             {
@@ -53,7 +54,7 @@ public class GdiFile
             });
         }
 
-        return result.Tracks.Count == trackCount ? result : throw new InvalidDataException($".gdi 선언된 트랙 수({trackCount})와 실제 파싱된 트랙 수({result.Tracks.Count})가 다릅니다.");
+        return result.Tracks.Count == trackCount ? result : throw new InvalidDataException(Loc.S.ErrGdiTrackCountMismatch(trackCount, result.Tracks.Count));
     }
 
     public string GetTrackFullPath(GdiTrack track) => Path.Combine(BasePath, track.FileName);

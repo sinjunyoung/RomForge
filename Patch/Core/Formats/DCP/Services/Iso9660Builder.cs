@@ -1,4 +1,5 @@
-﻿using Patch.Core.Formats.DCP.Models;
+﻿using Common.Localization;
+using Patch.Core.Formats.DCP.Models;
 using System.Text;
 
 namespace Patch.Core.Formats.DCP.Services;
@@ -198,7 +199,7 @@ public class Iso9660Builder(byte[] originalPvd, Iso9660Entry root)
 
         foreach (var child in dir.Children.Where(c => !c.IsDirectory))
         {
-            var data = _fileData.TryGetValue(child, out var d) ? d : throw new InvalidOperationException($"파일 데이터 미등록: {child.FullPath}");
+            var data = _fileData.TryGetValue(child, out var d) ? d : throw new InvalidOperationException(Loc.S.ErrFileDataNotRegistered(child.FullPath));
 
             child.LayoutLba = _nextLba;
             child.LayoutSize = (uint)data.Length;

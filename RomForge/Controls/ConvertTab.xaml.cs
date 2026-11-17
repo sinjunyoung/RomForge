@@ -1,4 +1,5 @@
-﻿using Common.Services;
+﻿using Common.Localization;
+using Common.Services;
 using Microsoft.Win32;
 using RomForge.Core;
 using RomForge.Core.ViewModels;
@@ -59,7 +60,7 @@ public partial class ConvertTab : UserControl
         var dlg = new OpenFileDialog
         {
             Multiselect = true,
-            Filter = "지원 파일|" + string.Join(";", ConvertMainViewModel.SupportedExtensions.Select(x => "*" + x)) + "|모든 파일|*.*"
+            Filter = Loc.S.FilterSupportedFiles + "|" + string.Join(";", ConvertMainViewModel.SupportedExtensions.Select(x => "*" + x)) + "|" + Loc.S.FilterAllFiles + "|*.*"
         };
 
         if (dlg.ShowDialog() == true)
@@ -70,7 +71,7 @@ public partial class ConvertTab : UserControl
     {
         var dlg = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
         {
-            Description = "추가할 폴더를 선택하세요",
+            Description = Loc.S.DialogSelectFolderToAdd,
             UseDescriptionForTitle = true
         };
 

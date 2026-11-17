@@ -1,3 +1,4 @@
+using Common.Localization;
 using Patch.Core.Formats.PC98.Models;
 using System.Text;
 
@@ -53,7 +54,7 @@ public sealed class Fat16Image
             return;
         }
 
-        throw new InvalidDataException("FAT16 볼륨을 찾을 수 없습니다.");
+        throw new InvalidDataException(Loc.S.ErrFat16VolumeNotFound);
     }
 
     private void ParseBpb(int bootOff)
@@ -288,7 +289,7 @@ public sealed class Fat16Image
         }
 
         if (found.Count < count)
-            throw new InvalidOperationException("빈 클러스터가 부족합니다.");
+            throw new InvalidOperationException(Loc.S.ErrNoFreeClusters);
 
         return found;
     }

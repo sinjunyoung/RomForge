@@ -1,4 +1,5 @@
-﻿using Patch.Core.Formats.DCP.Models;
+﻿using Common.Localization;
+using Patch.Core.Formats.DCP.Models;
 
 namespace Patch.Core.Formats.DCP.Services;
 
@@ -20,7 +21,7 @@ public class GdRomCompositeSectorReader : IDisposable
             })];
 
         if (_dataTracks.Count == 0)
-            throw new InvalidDataException("High-Density 영역에서 데이터트랙을 찾을 수 없습니다.");
+            throw new InvalidDataException(Loc.S.ErrHighDensityDataTrackNotFound);
     }
 
     public uint PvdAbsoluteLba => (uint)_dataTracks[0].Track.StartLba + 16;
@@ -30,7 +31,7 @@ public class GdRomCompositeSectorReader : IDisposable
         var entry = _dataTracks.LastOrDefault(t => t.Track.StartLba <= absoluteLba);
 
         if (entry.Stream == null)
-            throw new ArgumentOutOfRangeException(nameof(absoluteLba), $"절대 LBA {absoluteLba}를 포함하는 데이터트랙을 찾을 수 없습니다.");
+            throw new ArgumentOutOfRangeException(nameof(absoluteLba), Loc.S.ErrAbsoluteLbaDataTrackNotFound(absoluteLba));
 
         uint relativeLba = absoluteLba - (uint)entry.Track.StartLba;
         long byteOffset = entry.Track.FileOffset + (long)relativeLba * entry.Track.SectorSize + entry.HeaderOffset;
@@ -45,7 +46,7 @@ public class GdRomCompositeSectorReader : IDisposable
             int read = entry.Stream.Read(buffer, readTotal, 2048 - readTotal);
 
             if (read == 0)
-                throw new EndOfStreamException($"절대 LBA {absoluteLba} 섹터를 읽는 중 파일이 끝났습니다.");
+                throw new EndOfStreamException(Loc.S.ErrAbsoluteLbaSectorEof(absoluteLba));
 
             readTotal += read;
         }

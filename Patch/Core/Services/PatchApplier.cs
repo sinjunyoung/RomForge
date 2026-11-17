@@ -1,4 +1,5 @@
-﻿using Common.Models;
+﻿using Common.Localization;
+using Common.Models;
 using Patch.Core.Models;
 
 namespace Patch.Core.Services;
@@ -9,7 +10,7 @@ public static class PatchApplier
     {
         if (plan.TryGetOverwrite(path, out var overwrite))
         {
-            log?.Invoke($"교체: {overwrite.DisplayName} → {path}", LogLevel.Info);
+            log?.Invoke(Loc.S.LogPatchOverwrite(overwrite.DisplayName, path), LogLevel.Info);
             return overwrite.OpenRead();
         }
 
@@ -39,7 +40,7 @@ public static class PatchApplier
             {
                 byte[] patched = await UniversalPatcher.ApplyPatchAsync(original, patchData, null, ct);
 
-                log?.Invoke($"패치 완료: {patch.File.DisplayName} → {path} ({original.Length:N0} → {patched.Length:N0} bytes)", LogLevel.Info);
+                log?.Invoke(Loc.S.LogPatchDoneDetail(patch.File.DisplayName, path, original.Length.ToString("N0"), patched.Length.ToString("N0")), LogLevel.Info);
 
                 return (patched, true);
             }
@@ -48,7 +49,7 @@ public static class PatchApplier
             {
                 byte[] patched = await UniversalPatcher.ApplyPatchAsync(original, patchData, null, ct);
 
-                log?.Invoke($"패치 완료: {patch.File.DisplayName} → {path} ({original.Length:N0} → {patched.Length:N0} bytes)", LogLevel.Info);
+                log?.Invoke(Loc.S.LogPatchDoneDetail(patch.File.DisplayName, path, original.Length.ToString("N0"), patched.Length.ToString("N0")), LogLevel.Info);
 
                 return (patched, true);
             }
@@ -58,7 +59,7 @@ public static class PatchApplier
             }
             catch (Exception ex)
             {
-                log?.Invoke($"⚠️ 원본이 맞지 않아 건너뜀: {patch.File.DisplayName} → {path} ({ex.Message})", LogLevel.Info);
+                log?.Invoke($"⚠️ {Loc.S.LogPatchSourceMismatchSkipped(patch.File.DisplayName, path, ex.Message)}", LogLevel.Info);
             }
         }
 

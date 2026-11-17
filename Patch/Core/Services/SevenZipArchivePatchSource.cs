@@ -1,4 +1,5 @@
-﻿using Patch.Core.Interfaces;
+﻿using Common.Localization;
+using Patch.Core.Interfaces;
 using Patch.Core.Models;
 using SevenZip;
 
@@ -33,7 +34,7 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
             }
 
             if (_byKey.Count == 0)
-                throw new InvalidOperationException("압축 파일에 항목이 없습니다.");
+                throw new InvalidOperationException(Loc.S.ErrArchiveEmpty);
 
             Directory.CreateDirectory(_tempDir);
 
@@ -62,7 +63,7 @@ public sealed class SevenZipArchivePatchSource : IArchivePatchSource
         if (_extractedPaths.TryGetValue(key, out var cached))
             return cached;
 
-        throw new FileNotFoundException($"압축 파일 내에서 경로를 찾을 수 없습니다: {key}");
+        throw new FileNotFoundException(Loc.S.ErrArchivePathNotFound(key));
     }
 
     public IArchivePatchEntry? FindEntry(string path)
