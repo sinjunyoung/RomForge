@@ -102,7 +102,7 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         }
     }
 
-    public static IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Patch;
+    public IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Patch;
 
     public string? NamingPreview { get; private set { SetProperty(ref field, value); } }
 
@@ -151,8 +151,11 @@ public class NormalPatchMainViewModel : ProgressToolTabViewModel, IPatchViewMode
         Loc.Instance.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(Loc.Current))
+            {
                 OnPropertyChanged(nameof(SourceLabel));
-        };
+                OnPropertyChanged(nameof(NamingTokens));
+            }
+        };       
 
         TriggerPreviewUpdate();
     }

@@ -1,4 +1,7 @@
-﻿using RomForge.Core.Models.Naming;
+﻿using Common.Localization;
+using RomForge.Core.Models.Naming;
+using RomForge.Core.Services.Naming;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -31,6 +34,14 @@ public sealed class NamingBadge : Border
 
     public event MouseButtonEventHandler? MouseDoubleClick;
 
+    public static NamingBadge? DragSource { get; private set; }
+
+    public NamingTokenDefinition Definition { get; private set; }
+
+    public string? Option { get; set; }
+
+    internal InlineUIContainer? Host { get; set; }
+
     public NamingBadge(NamingTokenDefinition definition, string? option)
     {
         Definition = definition;
@@ -56,15 +67,28 @@ public sealed class NamingBadge : Border
         Child = _label;
 
         Refresh();
+
+        Loc.Instance.PropertyChanged += OnLanguageChanged;
+        this.Unloaded += (s, e) => Loc.Instance.PropertyChanged -= OnLanguageChanged;
     }
 
-    public static NamingBadge? DragSource { get; private set; }
+    private void OnLanguageChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(Loc.Instance.Current))
+        {
+            var updatedDefinition = FindUpdatedDefinition(Definition.Key);
 
-    public NamingTokenDefinition Definition { get; }
+            if (updatedDefinition != null)
+            {
+                Definition = updatedDefinition;
+                ToolTip = Definition.ToolTip;
+            }
 
-    public string? Option { get; set; }
+            Refresh();
+        }
+    }
 
-    internal InlineUIContainer? Host { get; set; }
+    private static NamingTokenDefinition? FindUpdatedDefinition(string key) => NamingTokenCatalog.Patch.FirstOrDefault(x => string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase)) ?? NamingTokenCatalog.Rename.FirstOrDefault(x => string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase));
 
     public NamingFormatSegment ToSegment() => NamingFormatSegment.ForToken(Definition, Option);
 

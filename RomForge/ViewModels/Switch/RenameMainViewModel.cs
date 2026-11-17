@@ -31,7 +31,7 @@ public class RenameMainViewModel : ToolTabViewModel
 
     public ObservableCollection<RenameFileItem> Items { get; } = [];
 
-    public static IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Rename;
+    public IReadOnlyList<NamingTokenDefinition> NamingTokens => NamingTokenCatalog.Rename;
 
     public Visibility HintVisibility => Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -58,6 +58,11 @@ public class RenameMainViewModel : ToolTabViewModel
         RunCommand = new RelayCommand(async _ => await RunAsync(), _ => !IsLocked && Items.Count > 0);
         CancelCommand = new RelayCommand(_ => _cts.Cancel(), _ => IsLocked);
         Items.CollectionChanged += Items_CollectionChanged;
+        Loc.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Loc.Current))
+                OnPropertyChanged(nameof(NamingTokens));
+        };
     }
 
     public async Task AddPathsAsync(IEnumerable<string> paths)
