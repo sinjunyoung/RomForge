@@ -271,7 +271,7 @@ internal static class ContainerMerger
 
             isCompleted = true;
 
-            log?.Invoke(string.Format($"{Loc.S.LogMergeComplete} ({index}/{groupCount})", finalFileName), LogLevel.Ok, req.TargetBaseTitleId);
+            log?.Invoke($"{Loc.S.LogMergeComplete(finalFileName)} ({index}/{groupCount})", LogLevel.Ok, req.TargetBaseTitleId);
 
             return finalPath;
         }
@@ -281,7 +281,7 @@ internal static class ContainerMerger
         }
         catch (Exception ex)
         {
-            log?.Invoke(string.Format($"{Loc.S.LogError} ({index}/{groupCount})", ex.Message), LogLevel.Error, req.TargetBaseTitleId);
+            log?.Invoke($"{Loc.S.LogError(ex.Message)} ({index}/{groupCount})", LogLevel.Error, req.TargetBaseTitleId);
 
             throw;
         }

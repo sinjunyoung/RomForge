@@ -83,7 +83,7 @@
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <Border Background="{Binding TypeBackground}" CornerRadius="4" Padding="8,3" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="2,0">
-                                                <TextBlock Text="{Binding TypeText}" Foreground="{Binding TypeForeground}" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TypeDisplayText}" Foreground="{Binding TypeForeground}" FontWeight="Bold" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>

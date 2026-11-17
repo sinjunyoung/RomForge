@@ -158,7 +158,7 @@ public sealed class GameFileImporter(ObservableCollection<GameFile> gameFiles, G
 
             var vm = new GameFile(path)
             {
-                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
+                TypeState = keySet == null ? FileTypeState.NoKey : FileTypeState.Analyzing,
                 CustomSizeBytes = fileLength,
                 TitleName = titleName,
                 Icon = icon

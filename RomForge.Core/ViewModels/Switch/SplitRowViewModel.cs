@@ -44,11 +44,36 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
         {
             if (SetProperty(ref field, value))
             {
+                if (value.Length > 0)
+                    TypeState = FileTypeState.Resolved;
+
+                OnPropertyChanged(nameof(TypeDisplayText));
                 OnPropertyChanged(nameof(TypeBackground));
                 OnPropertyChanged(nameof(TypeForeground));
             }
         }
     } = string.Empty;
+
+    public FileTypeState TypeState
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(TypeDisplayText));
+                OnPropertyChanged(nameof(TypeBackground));
+                OnPropertyChanged(nameof(TypeForeground));
+            }
+        }
+    }
+
+    public string TypeDisplayText => TypeState switch
+    {
+        FileTypeState.NoKey => Loc.S.StatusNoKey,
+        FileTypeState.Analyzing => Loc.S.StatusAnalyzing,
+        _ => TypeText
+    };
 
     public string TitleId { get; set => SetProperty(ref field, value); } = string.Empty;
 
@@ -161,7 +186,7 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (TypeText == Loc.S.StatusNoKey)
+            if (TypeState == FileTypeState.NoKey)
                 return new SolidColorBrush(Color.FromArgb(60, 220, 50, 50));
 
             if (TypeText == "?")
@@ -192,7 +217,7 @@ public class SplitRowViewModel(string filePath, SplitRowViewModel? parent = null
     {
         get
         {
-            if (TypeText == Loc.S.StatusNoKey)
+            if (TypeState == FileTypeState.NoKey)
                 return new SolidColorBrush(Color.FromRgb(255, 100, 100));
 
             if (TypeText == "?")

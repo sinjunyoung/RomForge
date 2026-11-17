@@ -25,7 +25,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Column="0">
-                    <ListView ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}" Background="Transparent" BorderThickness="0" Margin="5" AllowDrop="True" 
+                    <ListView ItemsSource="{Binding Entries}" SelectedItem="{Binding SelectedEntry}" Background="#1E1E1E" BorderThickness="0" Margin="5" AllowDrop="True" 
                               KeyUp="LvFiles_KeyUp" ContextMenuOpening="LvFiles_ContextMenuOpening" DragEnter="Root_DragEnter" DragOver="Root_DragEnter" Drop="Root_Drop">
                         <ListView.ContextMenu>
                             <ContextMenu>
@@ -130,12 +130,12 @@
                                     <GridViewColumn.Header>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <Image Source="/RomForge.Core;component/Assets/Images/AddFile.png" Width="24" Height="24" Margin="0,0,4,0"/>
-                                            <TextBlock Text="{Binding Path=Current.HeaderFilePath, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" ToolTip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding Path=Current.HeaderFilePath, Source={x:Static l:Loc.Instance}}" Foreground="#BBBBBB" FontSize="13" FontWeight="Bold" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </GridViewColumn.Header>
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding FilePath}" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding FilePath}" ToolTip="{Binding FilePath}" VerticalAlignment="Center"/>
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>

@@ -77,7 +77,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             var row = new SplitRowViewModel(path)
             {
                 SizeBytes = GetFileLength(path),
-                TypeText = hasKey ? Loc.S.StatusAnalyzing : Loc.S.StatusNoKey
+                TypeState = hasKey ? FileTypeState.Analyzing : FileTypeState.NoKey
             };
 
             _files.Add(row);
@@ -129,11 +129,11 @@ public class SplitMainViewModel : ProgressToolTabViewModel
 
         if (keySet == null)
         {
-            row.TypeText = Loc.S.StatusNoKey;
+            row.TypeState = FileTypeState.NoKey;
             return;
         }
 
-        row.TypeText = Loc.S.StatusAnalyzing;
+        row.TypeState = FileTypeState.Analyzing;
 
         var metas = await Task.Run(() =>
         {
@@ -342,7 +342,7 @@ public class SplitMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }

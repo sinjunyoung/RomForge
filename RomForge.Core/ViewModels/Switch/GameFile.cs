@@ -18,13 +18,41 @@ public class GameFile(string filePath) : FileItemBase(filePath, ItemStatus.Waiti
         {
             if (SetProperty(ref field, value))
             {
-                OnPropertyChanged(nameof(IsKeyMissing));
+                if (value.Length > 0)
+                    TypeState = FileTypeState.Resolved;
+
+                OnPropertyChanged(nameof(FileTypeText));
                 OnPropertyChanged(nameof(TypeBackground));
                 OnPropertyChanged(nameof(TypeForeground));
                 OnPropertyChanged(nameof(CanSetLz4));
             }
         }
     } = string.Empty;
+
+    public FileTypeState TypeState
+    {
+        get;
+        set
+        {
+            if (SetProperty(ref field, value))
+            {
+                OnPropertyChanged(nameof(IsKeyMissing));
+                OnPropertyChanged(nameof(IsAnalyzing));
+                OnPropertyChanged(nameof(FileTypeText));
+                OnPropertyChanged(nameof(TypeBackground));
+                OnPropertyChanged(nameof(TypeForeground));
+            }
+        }
+    }
+
+    public string FileTypeText => TypeState switch
+    {
+        FileTypeState.NoKey => Loc.S.StatusNoKey,
+        FileTypeState.Analyzing => Loc.S.StatusAnalyzing,
+        _ => FileType
+    };
+
+    protected override void OnLanguageRefreshed() => OnPropertyChanged(nameof(FileTypeText));
 
     public bool IsUnpacked { get; init; }
 
@@ -107,7 +135,9 @@ public class GameFile(string filePath) : FileItemBase(filePath, ItemStatus.Waiti
 
     public string PatchIconSource => string.IsNullOrEmpty(PatchPath) ? "/Assets/Images/NoPatch.png" : "/Assets/Images/Patch.png";
 
-    public bool IsKeyMissing => FileType == Loc.S.StatusNoKey;
+    public bool IsKeyMissing => TypeState == FileTypeState.NoKey;
+
+    public bool IsAnalyzing => TypeState == FileTypeState.Analyzing;
 
     public Brush TypeBackground
     {

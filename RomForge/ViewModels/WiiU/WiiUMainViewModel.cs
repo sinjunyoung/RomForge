@@ -18,7 +18,7 @@ public class WiiUMainViewModel : MultiToolTabViewModel
     {
         var keyFiles = AppConfig.Instance.KeyFiles;
 
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/WiiU.png", Loc.S.MsgNoWiiUKeysTitle, Loc.S.MsgNoWiiUKeysDesc, [KeyFileItems.WiiUKeys(keyFiles)], () => WiiUKeyLocator.Exists);
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/WiiU.png", () => Loc.S.MsgNoWiiUKeysTitle, () => Loc.S.MsgNoWiiUKeysDesc, [KeyFileItems.WiiUKeys(keyFiles)], () => WiiUKeyLocator.Exists);
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();
 
         Tools.Add(RepackVM);

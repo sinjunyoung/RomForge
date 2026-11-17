@@ -81,7 +81,7 @@ public class RenameMainViewModel : ToolTabViewModel
         {
             var item = new RenameFileItem(path)
             {
-                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
+                TypeState = keySet == null ? FileTypeState.NoKey : FileTypeState.Analyzing,
                 TitleName = Path.GetFileNameWithoutExtension(path)
             };
 
@@ -213,7 +213,7 @@ public class RenameMainViewModel : ToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
             finally
@@ -244,7 +244,7 @@ public class RenameMainViewModel : ToolTabViewModel
 
     private void Item_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(GameFile.FileType) or nameof(GameFile.TitleID) or nameof(GameFile.Version))
+        if (e.PropertyName is nameof(GameFile.FileType) or nameof(GameFile.TypeState) or nameof(GameFile.TitleID) or nameof(GameFile.Version))
             ScheduleRefresh();
     }
 
@@ -284,13 +284,12 @@ public class RenameMainViewModel : ToolTabViewModel
 
     private static string? GetStatusOverride(GameFile file)
     {
-        if (file.FileType == Loc.S.StatusAnalyzing)
-            return Loc.S.StatusAnalyzing;
-
-        if (file.FileType == Loc.S.StatusNoKey)
-            return Loc.S.StatusNoKey;
-
-        return null;
+        return file.TypeState switch
+        {
+            FileTypeState.Analyzing => Loc.S.StatusAnalyzing,
+            FileTypeState.NoKey => Loc.S.StatusNoKey,
+            _ => null
+        };
     }
 
     private List<RenamePlan> BuildPlans() => RenameService.BuildPlans(Items.Select(ToSource), FormatText);
@@ -304,7 +303,7 @@ public class RenameMainViewModel : ToolTabViewModel
         return new RenameSource(file.FilePath, name, naming?.KoreanTitle, naming?.DefaultTitle, file.TitleID, tag, naming?.DisplayVersion ?? file.Version, naming?.TitleVersion.ToString(), HasMetadata(file));
     }
 
-    private static bool HasMetadata(GameFile file) => file.Naming is not null && !string.IsNullOrEmpty(file.TitleID) && file.FileType != Loc.S.StatusNoKey && file.FileType != Loc.S.StatusAnalyzing && file.FileType != "?";
+    private static bool HasMetadata(GameFile file) => file.Naming is not null && !string.IsNullOrEmpty(file.TitleID) && file.TypeState == FileTypeState.Resolved && file.FileType != "?";
 
     private static int CountSkipped(IEnumerable<RenamePlan> plans) => plans.Count(p => p.State is not (RenameState.Ready or RenameState.Unchanged));
 
@@ -324,7 +323,8 @@ public class RenameMainViewModel : ToolTabViewModel
                 Version = old.Version,
                 Icon = old.Icon,
                 Naming = old.Naming,
-                FileType = old.FileType
+                FileType = old.FileType,
+                TypeState = old.TypeState
             };
 
             return;

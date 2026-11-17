@@ -46,7 +46,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border Background="{Binding TypeBackground}" CornerRadius="4" Padding="8,3" HorizontalAlignment="Center">
-                                            <TextBlock Text="{Binding FileType}" Foreground="{Binding TypeForeground}" FontWeight="Bold" FontSize="11"/>
+                                            <TextBlock Text="{Binding FileTypeText}" Foreground="{Binding TypeForeground}" FontWeight="Bold" FontSize="11"/>
                                         </Border>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>

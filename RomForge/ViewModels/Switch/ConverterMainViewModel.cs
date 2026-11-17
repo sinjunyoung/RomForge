@@ -49,7 +49,7 @@ public class ConverterMainViewModel : ToolTabViewModel
         {
             var item = new ConverterFileItem(path)
             {
-                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
+                TypeState = keySet == null ? RomForge.Core.ViewModels.Switch.FileTypeState.NoKey : RomForge.Core.ViewModels.Switch.FileTypeState.Analyzing,
             };
 
             FileItems.Add(item);

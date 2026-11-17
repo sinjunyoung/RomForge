@@ -59,7 +59,7 @@ public class CommonListControlBase : SwitchListControlBase
 
             var vm = new GameFile(path)
             {
-                FileType = keySet == null ? Loc.S.StatusNoKey : Loc.S.StatusAnalyzing,
+                TypeState = keySet == null ? FileTypeState.NoKey : FileTypeState.Analyzing,
                 TitleName = Path.GetFileNameWithoutExtension(path)
             };
 

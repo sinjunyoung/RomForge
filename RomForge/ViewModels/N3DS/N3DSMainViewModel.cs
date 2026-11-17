@@ -28,9 +28,7 @@ public class N3DSMainViewModel : MultiToolTabViewModel
         var keyFiles = AppConfig.Instance.KeyFiles;
 
         _keysWereAvailable = KeyStorePaths.HasUsableKeys;
-        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/3DS.png", Loc.S.MsgNo3dsKeyFilesTitle, Loc.S.MsgNo3dsKeyFilesDesc,
-                    [KeyFileItems.N3dsAesKeys(keyFiles), KeyFileItems.N3dsBoot9(keyFiles), KeyFileItems.N3dsSeedDb(keyFiles)], () => KeyStorePaths.HasUsableKeys);
-
+        KeyOverlay = new KeyOverlayViewModel("/Assets/Images/3DS.png", () => Loc.S.MsgNo3dsKeyFilesTitle, () => Loc.S.MsgNo3dsKeyFilesDesc, [KeyFileItems.N3dsAesKeys(keyFiles), KeyFileItems.N3dsBoot9(keyFiles), KeyFileItems.N3dsSeedDb(keyFiles)], () => KeyStorePaths.HasUsableKeys);
         keyFiles.PropertyChanged += (_, _) => RefreshKeysStatus();
         InstallerVM.RunNavigateCerts += (s, e) => RunNavigateCerts?.Invoke(s, e);
         ConverterVM.RunNavigateCerts += (s, e) => RunNavigateCerts?.Invoke(s, e);

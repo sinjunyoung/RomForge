@@ -45,7 +45,13 @@ public abstract class ProcessableItemBase : ViewModelBase, IProgressTrackable
         OnStatusChanged();
     }
 
-    internal void RefreshStatus() => OnPropertyChanged(nameof(Status));
+    internal void RefreshStatus()
+    {
+        OnPropertyChanged(nameof(Status));
+        OnLanguageRefreshed();
+    }
+
+    protected virtual void OnLanguageRefreshed() { }
 
     protected virtual void OnStatusChanged() { }
 }

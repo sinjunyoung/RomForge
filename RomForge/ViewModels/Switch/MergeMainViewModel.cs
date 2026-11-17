@@ -89,7 +89,7 @@ public class MergeMainViewModel : ProgressToolTabViewModel
             }
             catch (Exception ex)
             {
-                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
                 MainViewModel.SetTaskbarProgress(100, System.Windows.Shell.TaskbarItemProgressState.Error);
             }

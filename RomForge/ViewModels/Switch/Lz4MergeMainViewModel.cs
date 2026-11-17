@@ -104,7 +104,7 @@ public class Lz4MergeMainViewModel : BatchToolTabViewModel
             {
                 failed = true;
 
-                AppendLog($"{Loc.S.LogError}: {ex.Message}", LogLevel.Error);
+                AppendLog(Loc.S.LogError(ex.Message), LogLevel.Error);
                 await SoundPlayer.PlayErrorAsync();
             }
             finally
