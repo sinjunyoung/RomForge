@@ -108,7 +108,7 @@ RomForge also contains independent C# implementations of functionality and file 
 
 These projects were used as references for file formats, interoperability, algorithms, and/or expected behavior. Their source code is not incorporated into RomForge unless explicitly listed under `Third-Party Components` above.
 
-* [hacPack](https://github.com/The-4n/hacPack)
+* [hacPack](https://github.com/DarkMatterCore/hacPack)
 * [Cemu](https://github.com/cemu-project/Cemu)
 * [DolphinTool](https://github.com/dolphin-emu/dolphin)
 * [WIT (Wiimms ISO Tools)](https://github.com/Wiimm/wiimms-iso-tools)
