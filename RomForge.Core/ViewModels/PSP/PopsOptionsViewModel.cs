@@ -4,13 +4,11 @@ using System.Collections.ObjectModel;
 
 namespace RomForge.Core.ViewModels.PSP;
 
-public record FmvFixOption(string Label, uint Value);
-
 public class PopsOptionsViewModel : ViewModelBase
 {
     public PopsOptionsViewModel() => SelectedFmvFix = FmvFixPresets[0];
 
-    public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [new($"0x04 ({Loc.S.LabelVerifiedOnManyGames})", 0x04), new($"0x07 ({Loc.S.LabelExperimental})", 0x07)];
+    public ObservableCollection<FmvFixOption> FmvFixPresets { get; } = [new(0x04, () => Loc.S.LabelVerifiedOnManyGames), new(0x07, () => Loc.S.LabelExperimental)];
 
     public FmvFixOption SelectedFmvFix { get; set => SetProperty(ref field, value); }
 

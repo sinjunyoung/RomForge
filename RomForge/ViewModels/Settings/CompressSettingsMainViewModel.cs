@@ -9,13 +9,11 @@ public class CompressSettingsMainViewModel : ToolTabViewModel
 {
     public int SelectedTabIndex { get; set { SetProperty(ref field, value); } }
 
-    public record ChdmanCompressionOption(string Value, string Display);
-
     public IReadOnlyList<ChdmanCompressionOption> ChdmanCompressionOptions { get; } =
         [
-        new("zlib", Loc.S.OptionChdmanZlib),
-        new("zstd", Loc.S.OptionChdmanZstd),
-        new("lzma", Loc.S.OptionChdmanLzma),
+        new("zlib", () => Loc.S.OptionChdmanZlib),
+        new("zstd", () => Loc.S.OptionChdmanZstd),
+        new("lzma", () => Loc.S.OptionChdmanLzma),
     ];
 
     public ChdmanCompressionOption ChdmanCompression

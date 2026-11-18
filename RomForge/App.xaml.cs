@@ -1,4 +1,5 @@
 ﻿using Common.Localization;
+using RomForge.Core;
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
@@ -10,6 +11,9 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
+        if (!string.IsNullOrEmpty(AppConfig.Instance.Common.Language))
+            Loc.Instance.Set(AppConfig.Instance.Common.Language);
+
         base.OnStartup(e);
 
         DispatcherUnhandledException += OnDispatcherUnhandledException;
