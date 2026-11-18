@@ -4,6 +4,9 @@ Multi-Platform ROM Patching & Compression Utility
 
 RomForge is an all-in-one Windows desktop tool for managing, converting, patching and compressing title/ROM files across multiple console platforms.
 
+<img width="850" height="683" alt="image" src="https://github.com/user-attachments/assets/a7643baa-c7bb-4154-97a7-1fe7a9fa0fae" />
+
+
 ## User Guide
 
 https://sinjunyoung.github.io/RomForge/
